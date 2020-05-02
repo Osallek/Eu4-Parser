@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.changeprices.ChangePrices;
+import com.osallek.eu4parser.model.counters.IdCounters;
 import com.osallek.eu4parser.model.country.Country;
 import com.osallek.eu4parser.model.empire.CelestialEmpire;
 import com.osallek.eu4parser.model.empire.Hre;
@@ -30,6 +31,8 @@ public class Save {
 
     private GameplayOptions gameplayOptions;
 
+    private IdCounters idCounters;
+
     private Institutions institutions;
 
     private ChangePrices changePrices;
@@ -53,6 +56,29 @@ public class Save {
 
     public GameplayOptions getGameplayOptions() {
         return this.gameplayOptions;
+    }
+
+    public IdCounters getIdCounters() {
+        return idCounters;
+    }
+
+    public Integer getUnitIdCounter() {
+        return this.item.getVarAsInt("unit");
+    }
+
+    public Integer incrementUnitIdCounter() {
+        ClausewitzVariable var = this.item.getVar("unit");
+
+        if (var == null) {
+            this.item.addVariable("unit", 1);
+
+            return 1;
+        } else {
+            int value = var.getAsInt() + 1;
+            var.setValue(value);
+
+            return value;
+        }
     }
 
     public Institutions getInstitutions() {
@@ -153,12 +179,15 @@ public class Save {
         return pendingEvents;
     }
 
+    public Country getCountry(String tag) {
+        return this.countries.get(tag);
+    }
+
     public Map<String, Country> getCountries() {
         return countries;
     }
 
     private void refreshAttributes() {
-//        LOGGER.log(Level.INFO, "An error occurred while trying to read file {0}: {1} !", new Object[] {file.getAbsolutePath(), e.getMessage()});
         ClausewitzItem gameplaySettings = this.item.getChild("gameplaysettings");
 
         if (gameplaySettings != null) {
@@ -218,7 +247,7 @@ public class Save {
         if (countriesItem != null) {
             this.countries = countriesItem.getChildren()
                                           .stream()
-                                          .map(Country::new)
+                                          .map(countryItem -> new Country(countryItem, this))
                                           .collect(Collectors.toMap(Country::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
         }
     }

@@ -1,6 +1,6 @@
 package com.osallek.eu4parser.model.country;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
@@ -24,9 +24,9 @@ public class ActivePolicy {
 
         if (dateVar != null) {
             if (policyVar != null) {
-                policyVar.setValue(Utils.addQuotes(policy));
+                policyVar.setValue(ClausewitzUtils.addQuotes(policy));
             } else {
-                this.item.addVariable("policy", Utils.addQuotes(policy));
+                this.item.addVariable("policy", ClausewitzUtils.addQuotes(policy));
             }
         }
     }
@@ -47,7 +47,7 @@ public class ActivePolicy {
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String policy, Date date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "active_policy", parent.getOrder() + 1);
-        toItem.addVariable("policy", Utils.addQuotes(policy));
+        toItem.addVariable("policy", ClausewitzUtils.addQuotes(policy));
         toItem.addVariable("date", date);
 
         parent.addChild(toItem);

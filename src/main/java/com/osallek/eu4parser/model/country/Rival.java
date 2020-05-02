@@ -1,6 +1,6 @@
 package com.osallek.eu4parser.model.country;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
@@ -34,7 +34,7 @@ public class Rival {
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String country, Date date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "rival", parent.getOrder() + 1);
-        toItem.addVariable("country", Utils.addQuotes(country));
+        toItem.addVariable("country", ClausewitzUtils.addQuotes(country));
         toItem.addVariable("date", date);
 
         parent.addChild(toItem);

@@ -1,6 +1,6 @@
 package com.osallek.eu4parser.model.country;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
@@ -18,7 +18,7 @@ public class VictoryCard {
 
     public void setArea(String area) {
         ClausewitzVariable var = this.item.getVar("area");
-        area = Utils.addQuotes(area);
+        area = ClausewitzUtils.addQuotes(area);
 
         if (var != null) {
             var.setValue(area);
@@ -71,7 +71,7 @@ public class VictoryCard {
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String area, Integer level, Double score, boolean wasFulfilled) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "victory_card", parent.getOrder() + 1);
-        toItem.addVariable("area", Utils.addQuotes(area));
+        toItem.addVariable("area", ClausewitzUtils.addQuotes(area));
         toItem.addVariable("level", level);
         toItem.addVariable("score", score);
         toItem.addVariable("was_fulfilled", wasFulfilled);

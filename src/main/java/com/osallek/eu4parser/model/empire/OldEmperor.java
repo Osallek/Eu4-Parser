@@ -1,6 +1,6 @@
 package com.osallek.eu4parser.model.empire;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
@@ -48,7 +48,7 @@ public class OldEmperor {
         ClausewitzVariable countryVar = this.item.getVar("country");
 
         if (countryVar != null) {
-            countryVar.setValue(Utils.hasQuotes(tag) ? tag : "\"" + tag.toUpperCase() + "\"");
+            countryVar.setValue(ClausewitzUtils.hasQuotes(tag) ? tag : "\"" + tag.toUpperCase() + "\"");
         }
     }
 
@@ -63,7 +63,7 @@ public class OldEmperor {
     public static ClausewitzItem addToItem(ClausewitzItem parent, String id, String country, Date date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "old_emperor", parent.getOrder() + 1);
         toItem.addVariable("id", id);
-        toItem.addVariable("country", Utils.hasQuotes(country) ? country : "\"" + country.toUpperCase() + "\"");
+        toItem.addVariable("country", ClausewitzUtils.hasQuotes(country) ? country : "\"" + country.toUpperCase() + "\"");
         toItem.addVariable("date", date);
 
         parent.addChild(toItem);

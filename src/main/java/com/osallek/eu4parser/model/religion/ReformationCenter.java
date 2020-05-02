@@ -1,6 +1,6 @@
 package com.osallek.eu4parser.model.religion;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
@@ -68,7 +68,7 @@ public class ReformationCenter {
         ClausewitzItem toItem = new ClausewitzItem(parent, "reformation_center", parent.getOrder() + 1);
         toItem.addVariable("province_id", provinceId);
         toItem.addVariable("religion", religion);
-        toItem.addVariable("type", Utils.hasQuotes(type) ? type : Utils.addQuotes(type));
+        toItem.addVariable("type", ClausewitzUtils.hasQuotes(type) ? type : ClausewitzUtils.addQuotes(type));
 
         parent.addChild(toItem);
 

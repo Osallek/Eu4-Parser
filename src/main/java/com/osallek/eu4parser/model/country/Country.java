@@ -1,10 +1,11 @@
 package com.osallek.eu4parser.model.country;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Power;
+import com.osallek.eu4parser.model.Save;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,7 +27,12 @@ public class Country {
     //trade_embargoed_by, trade_embargoes, diplomacy(transfer_trade_power)
     //subjects, overlord, diplomacy(dependency)
 
+    //Todo with provinces
+    //advisor
+
     private final ClausewitzItem item;
+
+    private final Save save;
 
     private Technology tech;
 
@@ -42,11 +48,36 @@ public class Country {
 
     private Ledger ledger;
 
+    private IdeaGroups ideaGroups;
+
+    private Government government;
+
+    private List<Envoy> colonists;
+
+    private List<Envoy> merchants;
+
+    private List<Envoy> missionaries;
+
+    private List<Envoy> diplomats;
+
+    private List<Modifier> modifiers;
+
     private Map<Integer, Province> provinces;
 
-    public Country(ClausewitzItem item) {
+    private SubUnit subUnit;
+
+    private List<Army> armies;
+
+    private List<Navy> navies;
+
+    public Country(ClausewitzItem item, Save save) {
         this.item = item;
+        this.save = save;
         refreshAttributes();
+    }
+
+    public Save getSave() {
+        return save;
     }
 
     public String getTag() {
@@ -100,7 +131,7 @@ public class Country {
     }
 
     public void setGovernmentName(String governmentName) {
-        governmentName = Utils.addQuotes(governmentName);
+        governmentName = ClausewitzUtils.addQuotes(governmentName);
 
         ClausewitzVariable var = this.item.getVar("government_name");
 
@@ -191,7 +222,7 @@ public class Country {
         List<AgeAbility> list = new ArrayList<>();
 
         for (String ability : this.item.getVarsAsStrings("active_age_ability")) {
-            list.add(AgeAbility.valueOf(Utils.removeQuotes(ability).toUpperCase()));
+            list.add(AgeAbility.valueOf(ClausewitzUtils.removeQuotes(ability).toUpperCase()));
         }
 
         return list;
@@ -201,7 +232,7 @@ public class Country {
         List<String> abilities = this.item.getVarsAsStrings("active_age_ability");
 
         if (!abilities.contains(ageAbility.name().toLowerCase())) {
-            this.item.addVariable("active_age_ability", Utils.addQuotes(ageAbility.name().toLowerCase()));
+            this.item.addVariable("active_age_ability", ClausewitzUtils.addQuotes(ageAbility.name().toLowerCase()));
         }
     }
 
@@ -277,7 +308,7 @@ public class Country {
         List<String> ignoreDecisions = this.item.getVarsAsStrings("ignore_decision");
 
         if (!ignoreDecisions.contains(ignoreDecision)) {
-            this.item.addVariable("ignore_decision", Utils.addQuotes(ignoreDecision));
+            this.item.addVariable("ignore_decision", ClausewitzUtils.addQuotes(ignoreDecision));
         }
     }
 
@@ -1839,6 +1870,127 @@ public class Country {
         }
     }
 
+    public IdeaGroups getIdeaGroups() {
+        return ideaGroups;
+    }
+
+    public Government getGovernment() {
+        return government;
+    }
+
+    public List<Envoy> getColonists() {
+        return colonists;
+    }
+
+    public List<Envoy> getMerchants() {
+        return merchants;
+    }
+
+    public List<Envoy> getMissionaries() {
+        return missionaries;
+    }
+
+    public List<Envoy> getDiplomats() {
+        return diplomats;
+    }
+
+    public List<Modifier> getModifiers() {
+        return modifiers;
+    }
+
+    public void addModifier(String modifier, Date date) {
+        addModifier(modifier, date, null);
+    }
+
+    public void addModifier(String modifier, Date date, Boolean hidden) {
+        Modifier.addToItem(this.item, modifier, date, hidden);
+        refreshAttributes();
+    }
+
+    public void removeModifier(int index) {
+        this.item.removeChild("modifier", index);
+        refreshAttributes();
+    }
+
+    public void removeModifier(String modifier) {
+        Integer index = null;
+        modifier = ClausewitzUtils.addQuotes(modifier);
+
+        for (int i = 0; i < this.modifiers.size(); i++) {
+            if (this.modifiers.get(i).getModifier().equalsIgnoreCase(modifier)) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != null) {
+            this.item.removeChild("modifier", index);
+            refreshAttributes();
+        }
+    }
+
+    public Double getManpower() {
+        return this.item.getVarAsDouble("manpower");
+    }
+
+    public void setManpower(Double manpower) {
+        ClausewitzVariable var = this.item.getVar("manpower");
+
+        if (var != null) {
+            var.setValue(manpower);
+        } else {
+            this.item.addVariable("manpower", manpower);
+        }
+    }
+
+    public Double getMaxManpower() {
+        return this.item.getVarAsDouble("max_manpower");
+    }
+
+    public Double getSailors() {
+        return this.item.getVarAsDouble("sailors");
+    }
+
+    public void setSailors(Double sailors) {
+        ClausewitzVariable var = this.item.getVar("sailors");
+
+        if (var != null) {
+            var.setValue(sailors);
+        } else {
+            this.item.addVariable("sailors", sailors);
+        }
+    }
+
+    public Double getMaxSailors() {
+        return this.item.getVarAsDouble("max_sailors");
+    }
+
+    public SubUnit getSubUnit() {
+        return subUnit;
+    }
+
+    public Integer getNumOfCapturedShipsWithBoardingDoctrine() {
+        return this.item.getVarAsInt("num_of_captured_ships_with_boarding_doctrine");
+    }
+
+    public void setNumOfCapturedShipsWithBoardingDoctrine(Integer numOfCapturedShipsWithBoardingDoctrine) {
+        ClausewitzVariable var = this.item.getVar("num_of_captured_ships_with_boarding_doctrine");
+
+        if (var != null) {
+            var.setValue(numOfCapturedShipsWithBoardingDoctrine);
+        } else {
+            this.item.addVariable("num_of_captured_ships_with_boarding_doctrine", numOfCapturedShipsWithBoardingDoctrine);
+        }
+    }
+
+    public List<Army> getArmies() {
+        return armies;
+    }
+
+    public List<Navy> getNavies() {
+        return navies;
+    }
+
     public Map<Integer, Province> getProvinces() {
         return provinces;
     }
@@ -1907,5 +2059,76 @@ public class Country {
         if (ledgerItem != null) {
             this.ledger = new Ledger(ledgerItem);
         }
+
+        ClausewitzItem activeIdeaGroupsItem = this.item.getChild("active_idea_groups");
+
+        if (activeIdeaGroupsItem != null) {
+            this.ideaGroups = new IdeaGroups(activeIdeaGroupsItem);
+        }
+
+        ClausewitzItem governmentItem = this.item.getChild("government");
+
+        if (governmentItem != null) {
+            this.government = new Government(governmentItem);
+        }
+
+        ClausewitzItem colonistsItem = this.item.getChild("colonists");
+
+        if (colonistsItem != null) {
+            this.colonists = colonistsItem.getChildren("envoy")
+                                          .stream()
+                                          .map(Envoy::new)
+                                          .collect(Collectors.toList());
+        }
+
+        ClausewitzItem merchantsItem = this.item.getChild("merchants");
+
+        if (merchantsItem != null) {
+            this.merchants = merchantsItem.getChildren("envoy")
+                                          .stream()
+                                          .map(Envoy::new)
+                                          .collect(Collectors.toList());
+        }
+
+        ClausewitzItem missionariesItem = this.item.getChild("missionaries");
+
+        if (missionariesItem != null) {
+            this.missionaries = missionariesItem.getChildren("envoy")
+                                                .stream()
+                                                .map(Envoy::new)
+                                                .collect(Collectors.toList());
+        }
+
+        ClausewitzItem diplomatsItem = this.item.getChild("diplomats");
+
+        if (diplomatsItem != null) {
+            this.diplomats = diplomatsItem.getChildren("envoy")
+                                          .stream()
+                                          .map(Envoy::new)
+                                          .collect(Collectors.toList());
+        }
+
+        List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
+        this.modifiers = modifierItems.stream()
+                                      .map(Modifier::new)
+                                      .collect(Collectors.toList());
+
+
+        ClausewitzItem subUnitItem = this.item.getChild("sub_unit");
+
+        if (subUnitItem != null) {
+            this.subUnit = new SubUnit(subUnitItem);
+        }
+
+        List<ClausewitzItem> armiesItems = this.item.getChildren("army");
+        this.armies = armiesItems.stream()
+                                 .map(armyItem -> new Army(armyItem, this))
+                                 .collect(Collectors.toList());
+
+        List<ClausewitzItem> naviesItems = this.item.getChildren("navy");
+        this.navies = armiesItems.stream()
+                                 .map(navyItem -> new Navy(navyItem, this))
+                                 .collect(Collectors.toList());
+
     }
 }

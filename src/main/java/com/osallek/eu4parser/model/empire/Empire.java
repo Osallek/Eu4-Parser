@@ -1,6 +1,6 @@
 package com.osallek.eu4parser.model.empire;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
@@ -112,7 +112,7 @@ public abstract class Empire {
         }
 
         this.item.removeVariable("emperor");
-        this.item.addVariable("emperor", Utils.hasQuotes(tag) ? tag : "\"" + tag.toUpperCase() + "\"");
+        this.item.addVariable("emperor", ClausewitzUtils.hasQuotes(tag) ? tag : "\"" + tag.toUpperCase() + "\"");
 
         if (getImperialInfluence() == null) {
             this.item.addVariable("imperial_influence", 0d);

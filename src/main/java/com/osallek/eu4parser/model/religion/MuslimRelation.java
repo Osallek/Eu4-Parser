@@ -1,6 +1,6 @@
 package com.osallek.eu4parser.model.religion;
 
-import com.osallek.clausewitzparser.common.Utils;
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
@@ -19,7 +19,7 @@ public class MuslimRelation {
             return null;
         }
 
-        return MuslimRelationSchool.valueOf(Utils.removeQuotes(value).toUpperCase());
+        return MuslimRelationSchool.valueOf(ClausewitzUtils.removeQuotes(value).toUpperCase());
     }
 
     public MuslimRelationSchool getSecond() {
@@ -29,7 +29,7 @@ public class MuslimRelation {
             return null;
         }
 
-        return MuslimRelationSchool.valueOf(Utils.removeQuotes(value).toUpperCase());
+        return MuslimRelationSchool.valueOf(ClausewitzUtils.removeQuotes(value).toUpperCase());
     }
 
     public MuslimRelationValue getRelation() {

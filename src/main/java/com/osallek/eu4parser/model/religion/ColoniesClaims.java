@@ -1,5 +1,6 @@
 package com.osallek.eu4parser.model.religion;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
 
@@ -38,7 +39,7 @@ public class ColoniesClaims {
 
     public void setColonyClaim(Colony colony, String tag) {
         if (this.list != null) {
-            this.list.set(colony.ordinal(), com.osallek.clausewitzparser.common.Utils.isBlank(tag) ? Eu4Utils.DEFAULT_TAG : tag);
+            this.list.set(colony.ordinal(), ClausewitzUtils.isBlank(tag) ? Eu4Utils.DEFAULT_TAG : tag);
         }
     }
 
