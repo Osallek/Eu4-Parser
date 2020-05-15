@@ -205,11 +205,11 @@ public class Papacy {
         ClausewitzItem activeCardinalsItem = this.item.getChild("active_cardinals");
 
         if (activeCardinalsItem != null) {
-            Integer id = getCardinals().stream()
-                                        .map(Cardinal::getId)
-                                        .map(Id::getId)
-                                        .max(Integer::compareTo)
-                                        .orElse(new Random().nextInt(90000));
+            Long id = getCardinals().stream()
+                                    .map(Cardinal::getId)
+                                    .map(Id::getId)
+                                    .max(Long::compareTo)
+                                    .orElse((long) new Random().nextInt(90000));
             Cardinal.addToItem(activeCardinalsItem, id, provinceId);
         }
 

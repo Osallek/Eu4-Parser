@@ -27,4 +27,16 @@ public class IdCounters {
             this.list.set(counter.ordinal(), value + 1);
         }
     }
+
+    public Long getAndIncrement(Counter counter) {
+        Long value = getCounter(counter);
+
+        if (value == null) {
+            this.list.set(counter.ordinal(), 1);
+        } else {
+            this.list.set(counter.ordinal(), value + 1);
+        }
+
+        return value;
+    }
 }

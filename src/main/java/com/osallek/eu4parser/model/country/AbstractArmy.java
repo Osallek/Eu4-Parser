@@ -75,7 +75,7 @@ public abstract class AbstractArmy {
         return this.item.getVarAsInt("location");
     }
 
-    public void setLocation(Integer location) {
+    public void setLocation(int location) {
         ClausewitzVariable var = this.item.getVar("location");
 
         if (var != null) {
@@ -147,6 +147,17 @@ public abstract class AbstractArmy {
 
     public Boolean getAttrition() {
         return this.item.getVarAsBool("attrition");
+    }
+
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, String itemName, String name, int location, String graphicalCulture, long id) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, itemName, parent.getOrder() + 1);
+        Id.addToItem(toItem, id, 54);
+        toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
+        toItem.addVariable("location", location);
+        toItem.addVariable("graphical_culture", graphicalCulture);
+        parent.addChild(toItem);
+
+        return toItem;
     }
 
     protected void refreshAttributes() {

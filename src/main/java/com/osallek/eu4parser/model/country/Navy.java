@@ -33,7 +33,7 @@ public class Navy extends Army {
     }
 
     public void addShip(String name, Integer home, String type, Double morale) {
-        Ship.addToItem(this.item, this.country.getSave().incrementUnitIdCounter(), name, home, type, morale);
+        Ship.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale);
         refreshAttributes();
     }
 
@@ -83,6 +83,16 @@ public class Navy extends Army {
         return this.item.getVarAsDouble("active_fraction_last_month");
     }
 
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, long id, String name, int location,
+                                              String graphicalCulture, long shipId, String shipName,
+                                              int shipHome, String shipType, double shipMorale) {
+        ClausewitzItem toItem = AbstractArmy.addToItem(parent, "navy", name, location, graphicalCulture, id);
+        Ship.addToItem(toItem, shipId, shipName, shipHome, shipType, shipMorale);
+
+        return toItem;
+    }
+
+    @Override
     protected void refreshAttributes() {
         super.refreshAttributes();
 

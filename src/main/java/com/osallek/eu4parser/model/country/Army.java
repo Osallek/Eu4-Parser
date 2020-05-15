@@ -7,6 +7,11 @@ import java.util.stream.Collectors;
 
 public class Army extends AbstractArmy {
 
+    //Todo with provinces location -> 		unit={
+    //			id=6520
+    //			type=54
+    //		}
+
     private List<Regiment> regiments;
 
     public Army(ClausewitzItem item, Country country) {
@@ -32,8 +37,9 @@ public class Army extends AbstractArmy {
         addRegiment(name, home, type, morale, drill);
     }
 
-    public void addRegiment(String name, Integer home, String type, Double morale, Double drill) {
-        Regiment.addToItem(this.item, this.country.getSave().incrementUnitIdCounter(), name, home, type, morale, drill);
+    public void addRegiment(String name, int home, String type, double morale, double drill) {
+        Regiment.addToItem(this.item, this.country.getSave()
+                                                  .getAndIncrementUnitIdCounter(), name, home, type, morale, drill);
         refreshAttributes();
     }
 
@@ -57,8 +63,9 @@ public class Army extends AbstractArmy {
             return;
         }
 
+        ClausewitzItem child = this.item.getChild("mission");
+
         if (drilling) {
-            ClausewitzItem child = this.item.getChild("mission");
 
             if (child == null) {
                 child = this.item.addChild("mission");
@@ -66,7 +73,6 @@ public class Army extends AbstractArmy {
 
             child.addChild("drill_army_mission");
         } else {
-            ClausewitzItem child = this.item.getChild("mission");
 
             if (child != null) {
                 child.removeChild("drill_army_mission");
@@ -75,6 +81,17 @@ public class Army extends AbstractArmy {
         }
     }
 
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, long id, String name, int location,
+                                              String graphicalCulture, long regimentId, String regimentName,
+                                              int regimentHome, String regimentType, double regimentMorale,
+                                              double regimentDrill) {
+        ClausewitzItem toItem = AbstractArmy.addToItem(parent, "army", name, location, graphicalCulture, id);
+        Regiment.addToItem(toItem, regimentId, regimentName, regimentHome, regimentType, regimentMorale, regimentDrill);
+
+        return toItem;
+    }
+
+    @Override
     protected void refreshAttributes() {
         super.refreshAttributes();
 

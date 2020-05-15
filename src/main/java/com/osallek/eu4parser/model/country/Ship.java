@@ -88,8 +88,8 @@ public class Ship {
         return lastTarget;
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Integer id, String name, Integer home, String type, Double morale) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "regiment", parent.getOrder() + 1);
+    public static ClausewitzItem addToItem(ClausewitzItem parent, long id, String name, int home, String type, double morale) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, "ship", parent.getOrder() + 1);
         Id.addToItem(toItem, id, 54);
         toItem.addVariable("name", name);
         toItem.addVariable("home", home);

@@ -9,4 +9,8 @@ public class Province {
     public Province(ClausewitzItem item) {
         this.item = item;
     }
+
+    public String getOwner() {
+        return this.item.getVarAsString("owner");
+    }
 }

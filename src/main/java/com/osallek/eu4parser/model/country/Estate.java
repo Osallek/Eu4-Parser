@@ -64,7 +64,7 @@ public class Estate {
     }
 
     public void addProvince(Integer provinceId) {
-        if (this.country.getProvinces().containsKey(provinceId)) {
+        if (this.country.getSave().getProvince(provinceId).getOwner().equalsIgnoreCase(this.country.getTag())) {
             ClausewitzList list = this.item.getList("provinces");
 
             if (list != null) {
@@ -147,7 +147,7 @@ public class Estate {
                                           .collect(Collectors.toList());
         List<ClausewitzItem> influenceModifierItems = this.item.getChildren("influence_modifier");
         this.influenceModifiers = influenceModifierItems.stream()
-                                                    .map(EstateInfluenceModifier::new)
-                                                    .collect(Collectors.toList());
+                                                        .map(EstateInfluenceModifier::new)
+                                                        .collect(Collectors.toList());
     }
 }

@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class Id {
 
@@ -11,36 +10,20 @@ public class Id {
         this.item = item;
     }
 
-    public Integer getId() {
-        return this.item.getVarAsInt("id");
-    }
-
-    public void setId(Integer id) {
-        ClausewitzVariable var = this.item.getVar("id");
-
-        if (var != null) {
-            var.setValue(id);
-        } else {
-            this.item.addVariable("id", id);
-        }
+    public Long getId() {
+        return this.item.getVarAsLong("id");
     }
 
     public Integer getType() {
         return this.item.getVarAsInt("type");
     }
 
-    public void setType(Integer type) {
-        ClausewitzVariable typeVar = this.item.getVar("type");
-
-        if (typeVar != null) {
-            typeVar.setValue(type);
-        } else {
-            this.item.addVariable("type", type);
-        }
+    public static ClausewitzItem addToItem(ClausewitzItem parent, long id, int type) {
+        return addToItem(parent, "id", id, type);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Integer id, Integer type) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "id", parent.getOrder() + 1);
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, long id, int type) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, name, parent.getOrder() + 1);
         toItem.addVariable("id", id);
         toItem.addVariable("type", type);
 

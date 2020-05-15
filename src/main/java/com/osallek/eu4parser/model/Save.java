@@ -6,6 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.counters.IdCounters;
 import com.osallek.eu4parser.model.country.Country;
+import com.osallek.eu4parser.model.country.Province;
 import com.osallek.eu4parser.model.empire.CelestialEmpire;
 import com.osallek.eu4parser.model.empire.Hre;
 import com.osallek.eu4parser.model.empire.HreReligionStatus;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class Save {
 
     //Todo in countries: map_area_data, trade, rebel_faction(only edit, not remove(in provinces too)), great_power, provinces
+    //Todo Teams
 
     private static final Logger LOGGER = Logger.getLogger(Save.class.getName());
 
@@ -47,6 +49,8 @@ public class Save {
 
     private PendingEvents pendingEvents;
 
+    private Map<Integer, Province> provinces;
+
     private Map<String, Country> countries;
 
     public Save(ClausewitzItem item) {
@@ -66,16 +70,19 @@ public class Save {
         return this.item.getVarAsInt("unit");
     }
 
-    public Integer incrementUnitIdCounter() {
+    /**
+     * Used for units and armies
+     */
+    public int getAndIncrementUnitIdCounter() {
         ClausewitzVariable var = this.item.getVar("unit");
 
         if (var == null) {
-            this.item.addVariable("unit", 1);
+            this.item.addVariable("unit", 2);
 
             return 1;
         } else {
-            int value = var.getAsInt() + 1;
-            var.setValue(value);
+            int value = var.getAsInt();
+            var.setValue(value + 1);
 
             return value;
         }
@@ -179,12 +186,50 @@ public class Save {
         return pendingEvents;
     }
 
+    public Province getProvince(int id) {
+        return this.provinces.get(id);
+    }
+
+    public Map<Integer, Province> getProvinces() {
+        return provinces;
+    }
+
     public Country getCountry(String tag) {
         return this.countries.get(tag);
     }
 
     public Map<String, Country> getCountries() {
         return countries;
+    }
+
+    public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties,
+                                                  boolean quickPeace, boolean moveTraders, boolean takeDecisions,
+                                                  boolean embraceInstitutions, boolean developProvinces,
+                                                  boolean disbandUnits, boolean changeFleetMissions,
+                                                  boolean sendMissionaries, boolean convertCultures,
+                                                  boolean promoteCultures, boolean braindead) {
+        setAiPrefsForNotConfiguredPlayers(startWars, keepAlliances, keepTreaties, quickPeace, moveTraders,
+                                          takeDecisions, embraceInstitutions, developProvinces, disbandUnits,
+                                          changeFleetMissions, sendMissionaries, convertCultures, promoteCultures,
+                                          braindead, -1);
+    }
+
+    public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties,
+                                                  boolean quickPeace, boolean moveTraders, boolean takeDecisions,
+                                                  boolean embraceInstitutions, boolean developProvinces,
+                                                  boolean disbandUnits, boolean changeFleetMissions,
+                                                  boolean sendMissionaries, boolean convertCultures,
+                                                  boolean promoteCultures, boolean braindead, int timeout) {
+        this.countries.values()
+                      .stream()
+                      .filter(country -> country.getPlayerAiPrefsCommand() == null
+                                         && Boolean.TRUE.equals(country.isHuman()))
+                      .forEach(country -> country.setPlayerAiPrefsCommand(startWars, keepAlliances, keepTreaties,
+                                                                          quickPeace, moveTraders, takeDecisions,
+                                                                          embraceInstitutions, developProvinces,
+                                                                          disbandUnits, changeFleetMissions,
+                                                                          sendMissionaries, convertCultures,
+                                                                          promoteCultures, braindead, timeout));
     }
 
     private void refreshAttributes() {
@@ -196,6 +241,12 @@ public class Save {
             if (gameplayOptionsList != null && !gameplayOptionsList.isEmpty()) {
                 this.gameplayOptions = new GameplayOptions(gameplayOptionsList);
             }
+        }
+
+        ClausewitzList idCountersList = this.item.getList("id_counters");
+
+        if (idCountersList != null) {
+            this.idCounters = new IdCounters(idCountersList);
         }
 
         ClausewitzList institutionOrigins = this.item.getList("institution_origin");

@@ -4,12 +4,16 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.Id;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.Save;
+import com.osallek.eu4parser.model.counters.Counter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -21,18 +25,30 @@ import java.util.stream.Collectors;
 
 public class Country {
 
-    //Todo cooldowns, history, flags, hidden_flags, variables, colors, convert, fervor, parliament
-
     //Todo combined countries:
-    //trade_embargoed_by, trade_embargoes, diplomacy(transfer_trade_power)
+    //trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes, diplomacy(transfer_trade_power)
     //subjects, overlord, diplomacy(dependency)
 
     //Todo with provinces
-    //advisor
+    //advisor, seat_in_parliament (back=yes vs back=2)
 
     private final ClausewitzItem item;
 
     private final Save save;
+
+    private PlayerAiPrefsCommand playerAiPrefsCommand;
+
+    private ListOfDates cooldowns;
+
+    private History history;
+
+    private ListOfDates flags;
+
+    private ListOfDates hiddenFlags;
+
+    private ListOfDoubles variables;
+
+    private Colors colors;
 
     private Technology tech;
 
@@ -48,6 +64,8 @@ public class Country {
 
     private Ledger ledger;
 
+    private List<Loan> loans;
+
     private IdeaGroups ideaGroups;
 
     private Government government;
@@ -62,13 +80,33 @@ public class Country {
 
     private List<Modifier> modifiers;
 
-    private Map<Integer, Province> provinces;
-
     private SubUnit subUnit;
 
     private List<Army> armies;
 
     private List<Navy> navies;
+
+    private Map<String, ActiveRelation> activeRelations;
+
+    private List<Leader> leaders;
+
+    private List<Id> previousMonarchs;
+
+    private Monarch monarch;
+
+    private Heir heir;
+
+    private Queen queen;
+
+    private PowerSpentIndexed admPowerSpent;
+
+    private PowerSpentIndexed dipPowerSpent;
+
+    private PowerSpentIndexed milPowerSpent;
+
+    private HistoryStatsCache historyStatsCache;
+
+    private Missions countryMissions;
 
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
@@ -93,13 +131,23 @@ public class Country {
     }
 
     public void setWasPlayer(boolean wasPlayer) {
-        ClausewitzVariable var = this.item.getVar("was_player");
+        this.item.setVariable("was_player", wasPlayer);
+    }
 
-        if (var != null) {
-            var.setValue(wasPlayer);
-        } else {
-            this.item.addVariable("was_player", wasPlayer);
-        }
+    public PlayerAiPrefsCommand getPlayerAiPrefsCommand() {
+        return playerAiPrefsCommand;
+    }
+
+    public void setPlayerAiPrefsCommand(boolean startWars, boolean keepAlliances, boolean keepTreaties,
+                                        boolean quickPeace, boolean moveTraders, boolean takeDecisions,
+                                        boolean embraceInstitutions, boolean developProvinces, boolean disbandUnits,
+                                        boolean changeFleetMissions, boolean sendMissionaries, boolean convertCultures,
+                                        boolean promoteCultures, boolean braindead, int timeout) {
+        PlayerAiPrefsCommand.addToItem(this.item, startWars, keepAlliances, keepTreaties, quickPeace, moveTraders,
+                                       takeDecisions, embraceInstitutions, developProvinces, disbandUnits,
+                                       changeFleetMissions, sendMissionaries, convertCultures, promoteCultures,
+                                       braindead, timeout);
+        refreshAttributes();
     }
 
     public Boolean hasSetGovernmentName() {
@@ -117,13 +165,7 @@ public class Country {
     }
 
     public void setGovernmentRank(GovernmentRank governmentRank) {
-        ClausewitzVariable var = this.item.getVar("government_rank");
-
-        if (var != null) {
-            var.setValue(governmentRank.ordinal());
-        } else {
-            this.item.addVariable("government_rank", governmentRank.ordinal());
-        }
+        this.item.setVariable("government_rank", governmentRank.ordinal());
     }
 
     public String getGovernmentName() {
@@ -188,7 +230,9 @@ public class Country {
             this.item.addVariable("national_focus", power.name());
         }
 
-        //TODO Add to history: 1596.3.23={national_focus=MIL}
+        if (this.history != null) {
+            this.history.addEvent(date, "national_focus", power.name());
+        }
     }
 
     public List<Institution> getEmbracedInstitutions() {
@@ -300,6 +344,44 @@ public class Country {
         }
     }
 
+    public Date getLastConversionSecondary() {
+        return this.item.getVarAsDate("last_conversion_secondary");
+    }
+
+    public void setLastConversionSecondary(Date lastConversionSecondary) {
+        ClausewitzVariable var = this.item.getVar("last_conversion_secondary");
+
+        if (var != null) {
+            var.setValue(lastConversionSecondary);
+        } else {
+            this.item.addVariable("last_conversion_secondary", lastConversionSecondary);
+        }
+    }
+
+    public ListOfDates getCooldowns() {
+        return cooldowns;
+    }
+
+    public History getHistory() {
+        return history;
+    }
+
+    public ListOfDates getFlags() {
+        return flags;
+    }
+
+    public ListOfDates getHiddenFlags() {
+        return hiddenFlags;
+    }
+
+    public ListOfDoubles getVariables() {
+        return variables;
+    }
+
+    public Colors getColors() {
+        return colors;
+    }
+
     public List<String> getIgnoreDecision() {
         return this.item.getVarsAsStrings("ignore_decision");
     }
@@ -320,8 +402,8 @@ public class Country {
         return this.item.getVarAsInt("capital");
     }
 
-    public void setCapital(Integer provinceId) {
-        if (provinces.containsKey(provinceId)) {
+    public void setCapital(int provinceId) {
+        if (this.save.getProvince(provinceId).getOwner().equalsIgnoreCase(getTag())) {
             ClausewitzVariable var = this.item.getVar("capital");
 
             if (var != null) {
@@ -351,7 +433,7 @@ public class Country {
     }
 
     public void setTradePort(Integer provinceId) {
-        if (provinces.containsKey(provinceId)) {
+        if (this.save.getProvince(provinceId).getOwner().equalsIgnoreCase(getTag())) {
             ClausewitzVariable var = this.item.getVar("trade_port");
 
             if (var != null) {
@@ -465,17 +547,32 @@ public class Country {
     }
 
     public void setReligion(String religion) {
-        ClausewitzVariable var = this.item.getVar("religion");
-
-        if (var != null) {
-            var.setValue(religion);
-        } else {
-            this.item.addVariable("religion", religion);
-        }
+        this.item.setVariable("religion", religion);
     }
 
     public String getDominantReligion() {
         return this.item.getVarAsString("dominant_religion");
+    }
+
+    public Double getFervor() {
+        ClausewitzItem fervorItem = this.item.getChild("fervor");
+
+        if (fervorItem != null) {
+            return fervorItem.getVarAsDouble("value");
+        }
+
+        return null;
+    }
+
+    public void setFervor(double fervor) {
+        ClausewitzItem fervorItem = this.item.getChild("fervor");
+
+        if (fervorItem == null) {
+            fervorItem = new ClausewitzItem(this.item, "fervor", this.item.getOrder() + 1);
+            this.item.addChild(fervorItem);
+        }
+
+        fervorItem.setVariable("value", fervor);
     }
 
     public String getTechnologyGroup() {
@@ -613,6 +710,14 @@ public class Country {
         }
     }
 
+    public boolean getConvert() {
+        return this.item.getVarAsBool("convert");
+    }
+
+    public void setConvert(boolean convert) {
+        this.item.setVariable("convert", convert);
+    }
+
     public boolean newMonarch() {
         return this.item.getVarAsBool("new_monarch");
     }
@@ -626,13 +731,7 @@ public class Country {
     }
 
     public void setLastElection(Date lastElection) {
-        ClausewitzVariable var = this.item.getVar("last_election");
-
-        if (var != null) {
-            var.setValue(lastElection);
-        } else {
-            this.item.addVariable("last_election", lastElection);
-        }
+        this.item.setVariable("last_election", lastElection);
     }
 
     public Double getDelayedTreasure() {
@@ -675,14 +774,8 @@ public class Country {
         return this.item.getVarAsDouble("current_power_projection");
     }
 
-    private void setCurrentPowerProjection(Double currentPowerProjection) {
-        ClausewitzVariable var = this.item.getVar("current_power_projection");
-
-        if (var != null) {
-            var.setValue(currentPowerProjection);
-        } else {
-            this.item.addVariable("current_power_projection", currentPowerProjection);
-        }
+    private void setCurrentPowerProjection(double currentPowerProjection) {
+        this.item.setVariable("current_power_projection", currentPowerProjection);
     }
 
     public Double getGreatPowerScore() {
@@ -724,6 +817,14 @@ public class Country {
 
     public Double getNavyStrength() {
         return this.item.getVarAsDouble("navy_strength");
+    }
+
+    public Double getTariff() {
+        return this.item.getVarAsDouble("tariff");
+    }
+
+    public void setTariff(double tariff) {
+        this.item.setVariable("tariff", tariff);
     }
 
     public Integer getTotalWarWorth() {
@@ -1670,6 +1771,29 @@ public class Country {
         return this.item.getVarAsDouble("estimated_loan");
     }
 
+    public List<Loan> getLoans() {
+        return loans;
+    }
+
+    public void addLoan(double interest, int amount, Date expiryDate) {
+        Loan.addToItem(this.item, this.save.getCountries()
+                                           .values()
+                                           .stream()
+                                           .map(Country::getLoans)
+                                           .flatMap(Collection::stream)
+                                           .map(Loan::getAmount)
+                                           .max(Comparator.naturalOrder())
+                                           .map(i -> i + 1)
+                                           .orElse(1),
+                       interest, true, amount, expiryDate);
+        refreshAttributes();
+    }
+
+    public void removeLoan(int index) {
+        this.item.removeChild("loan", index);
+        refreshAttributes();
+    }
+
     public Double getReligiousUnity() {
         return this.item.getVarAsDouble("religious_unity");
     }
@@ -1987,15 +2111,367 @@ public class Country {
         return armies;
     }
 
+    public void addArmy(String name, int location, String graphicalCulture, String regimentName, String regimentType,
+                        double regimentMorale, double regimentDrill) {
+        //Todo location -> 		unit={
+        //    //			id=6520
+        //    //			type=54
+        //    //		}
+        Army.addToItem(this.item, this.save.getAndIncrementUnitIdCounter(), name, location, graphicalCulture,
+                       this.save.getAndIncrementUnitIdCounter(), regimentName, location, regimentType, regimentMorale,
+                       regimentDrill);
+        refreshAttributes();
+    }
+
     public List<Navy> getNavies() {
         return navies;
     }
 
-    public Map<Integer, Province> getProvinces() {
-        return provinces;
+    public void addNavy(String name, int location, String graphicalCulture, String shipName, String shipType, double shipMorale) {
+        //Todo location -> 		unit={
+        //    //			id=6520
+        //    //			type=54
+        //    //		}
+        Navy.addToItem(this.item, this.save.getAndIncrementUnitIdCounter(), name, location, graphicalCulture,
+                       this.save.getAndIncrementUnitIdCounter(), shipName, location, shipType, shipMorale);
+        refreshAttributes();
+    }
+
+    public Map<String, ActiveRelation> getActiveRelations() {
+        return activeRelations;
+    }
+
+    public ActiveRelation getActiveRelation(String tag) {
+        return activeRelations.get(tag);
+    }
+
+    public List<Leader> getLeaders() {
+        return leaders;
+    }
+
+    public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality) {
+        long leaderId = this.save.getIdCounters().getAndIncrement(Counter.LEADER);
+        Id.addToItem(this.item, "leader", leaderId, 49);
+        this.history.addLeader(date, name, type, manuever, fire, shock, siege, personality, leaderId);
+        refreshAttributes();
+    }
+
+    public Integer getDecisionSeed() {
+        return this.item.getVarAsInt("decision_seed");
+    }
+
+    public Monarch getMonarch() {
+        return monarch;
+    }
+
+    public Heir getHeir() {
+        return heir;
+    }
+
+    public Queen getQueen() {
+        return queen;
+    }
+
+    public String getOriginalDynasty() {
+        return this.item.getVarAsString("original_dynasty");
+    }
+
+    public void setOriginalDynasty(String originalDynasty) {
+        ClausewitzVariable var = this.item.getVar("original_dynasty");
+
+        if (var != null) {
+            var.setValue(originalDynasty);
+        } else {
+            this.item.addVariable("original_dynasty", originalDynasty);
+        }
+    }
+
+    public Integer getNumOfConsorts() {
+        return this.item.getVarAsInt("num_of_consorts");
+    }
+
+    public void setNumOfConsorts(int numOfConsorts) {
+        ClausewitzVariable var = this.item.getVar("num_of_consorts");
+
+        if (numOfConsorts < 0) {
+            numOfConsorts = 0;
+        }
+
+        if (var != null) {
+            var.setValue(numOfConsorts);
+        } else {
+            this.item.addVariable("num_of_consorts", numOfConsorts);
+        }
+    }
+
+    public boolean isGreatPower() {
+        return this.item.getVarAsBool("is_great_power");
+    }
+
+    public Date getInauguration() {
+        return this.item.getVarAsDate("inauguration");
+    }
+
+    public List<Id> getPreviousMonarchs() {
+        return previousMonarchs;
+    }
+
+    public boolean getAssignedEstates() {
+        return this.item.getVarAsBool("assigned_estates");
+    }
+
+    public List<Integer> getTradedBonus() {
+        ClausewitzList list = this.item.getList("traded_bonus");
+
+        if (list != null) {
+            return list.getValuesAsInt();
+        }
+
+        return new ArrayList<>();
+    }
+
+    public Map<Power, Integer> getPowers() {
+        ClausewitzList list = this.item.getList("powers");
+        Map<Power, Integer> powers = new EnumMap<>(Power.class);
+
+        if (list == null) {
+            return powers;
+        }
+
+        for (Power power : Power.values()) {
+            powers.put(power, list.getAsInt(power.ordinal()));
+        }
+
+        return powers;
+    }
+
+    public void setPower(Power power, Integer value) {
+        ClausewitzList list = this.item.getList("powers");
+
+        if (list != null) {
+            list.set(power.ordinal(), value);
+        }
+    }
+
+    public List<Integer> getInterestingCountries() {
+        ClausewitzList list = this.item.getList("interesting_countries");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValuesAsInt();
+    }
+
+    public void addInterestingCountries(int countryId) {
+        ClausewitzList list = this.item.getList("interesting_countries");
+
+        if (!list.contains(countryId)) {
+            list.add(countryId);
+        }
+    }
+
+    public void removeInterestingCountry(int countryId) {
+        ClausewitzList list = this.item.getList("interesting_countries");
+
+        list.remove(Integer.toString(countryId));
+    }
+
+    public Double getBlockadedPercent() {
+        return this.item.getVarAsDouble("blockaded_percent");
+    }
+
+    public Integer getNativePolicy() {
+        return this.item.getVarAsInt("native_policy");
+    }
+
+    public void setNativePolicy(int nativePolicy) {
+        ClausewitzVariable var = this.item.getVar("native_policy");
+
+        if (var != null) {
+            var.setValue(nativePolicy);
+        } else {
+            this.item.addVariable("native_policy", nativePolicy);
+        }
+    }
+
+    public Date getAntiNationRuiningEndDate() {
+        return this.item.getVarAsDate("anti_nation_ruining_end_date");
+    }
+
+    public void setAntiNationRuiningEndDate(Date antiNationRuiningEndDate) {
+        ClausewitzVariable var = this.item.getVar("anti_nation_ruining_end_date");
+
+        if (var != null) {
+            var.setValue(antiNationRuiningEndDate);
+        } else {
+            this.item.addVariable("anti_nation_ruining_end_date", antiNationRuiningEndDate);
+        }
+    }
+
+    public Double getSpyPropensity() {
+        return this.item.getVarAsDouble("spy_propensity");
+    }
+
+    public PowerSpentIndexed getAdmPowerSpent() {
+        return admPowerSpent;
+    }
+
+    public PowerSpentIndexed getDipPowerSpent() {
+        return dipPowerSpent;
+    }
+
+    public PowerSpentIndexed getMilPowerSpent() {
+        return milPowerSpent;
+    }
+
+    public List<Integer> getMothballedForts() {
+        ClausewitzList list = this.item.getList("mothballed_forts");
+
+        if (list != null) {
+            return list.getValuesAsInt();
+        }
+
+        return new ArrayList<>();
+    }
+
+    public Map<Losses, Integer> getLosses() {
+        Map<Losses, Integer> lossesMap = new EnumMap<>(Losses.class);
+        ClausewitzItem lossesItem = this.item.getChild("losses");
+
+        if (lossesItem != null) {
+            ClausewitzList list = this.item.getList("members");
+
+            if (list == null) {
+                return lossesMap;
+            }
+
+            for (Losses losses : Losses.values()) {
+                lossesMap.put(losses, list.getAsInt(losses.ordinal()));
+            }
+        }
+
+        return lossesMap;
+    }
+
+    public Double getInnovativeness() {
+        return this.item.getVarAsDouble("innovativeness");
+    }
+
+    public void setInnovativeness(Double innovativeness) {
+        ClausewitzVariable var = this.item.getVar("innovativeness");
+
+        if (var != null) {
+            var.setValue(innovativeness);
+        } else {
+            this.item.addVariable("innovativeness", innovativeness);
+        }
+    }
+
+    public List<String> getCompletedMissions() {
+        List<String> reforms = new ArrayList<>();
+        ClausewitzList list = this.item.getList("completed_missions");
+
+        if (list != null) {
+            return list.getValues();
+        }
+
+        return reforms;
+    }
+
+    public void addCompletedMission(String mission) {
+        ClausewitzList list = this.item.getList("completed_missions");
+
+        if (list != null) {
+            if (!list.getValues().contains(mission)) {
+                list.add(ClausewitzUtils.addQuotes(mission));
+            }
+        } else {
+            this.item.addList("completed_missions", mission);
+        }
+    }
+
+    public void removeCompletedMission(int index) {
+        ClausewitzList list = this.item.getList("completed_missions");
+
+        if (list != null) {
+            list.remove(index);
+        }
+    }
+
+    public void removeCompletedMission(String mission) {
+        ClausewitzList list = this.item.getList("completed_missions");
+
+        if (list != null) {
+            list.remove(mission);
+        }
+    }
+
+    public HistoryStatsCache getHistoryStatsCache() {
+        return historyStatsCache;
+    }
+
+    public Missions getCountryMissions() {
+        return countryMissions;
+    }
+
+    public Double getGovernmentReformProgress() {
+        return this.item.getVarAsDouble("government_reform_progress");
+    }
+
+    public void setGovernmentReformProgress(Double governmentReformProgress) {
+        ClausewitzVariable var = this.item.getVar("government_reform_progress");
+
+        if (var != null) {
+            var.setValue(governmentReformProgress);
+        } else {
+            this.item.addVariable("government_reform_progress", governmentReformProgress);
+        }
     }
 
     private void refreshAttributes() {
+        ClausewitzItem playerAiPrefsCommandItem = this.item.getChild("player_ai_prefs_command");
+
+        if (playerAiPrefsCommandItem != null) {
+            this.playerAiPrefsCommand = new PlayerAiPrefsCommand(playerAiPrefsCommandItem);
+        }
+
+        ClausewitzItem cooldownsItem = this.item.getChild("cooldowns");
+
+        if (cooldownsItem != null) {
+            this.cooldowns = new ListOfDates(cooldownsItem);
+        }
+
+        ClausewitzItem historyItem = this.item.getChild("history");
+
+        if (historyItem != null) {
+            this.history = new History(historyItem, this);
+        }
+
+        ClausewitzItem flagsItem = this.item.getChild("flags");
+
+        if (flagsItem != null) {
+            this.flags = new ListOfDates(flagsItem);
+        }
+
+        ClausewitzItem hiddenFlagsItem = this.item.getChild("hidden_flags");
+
+        if (hiddenFlagsItem != null) {
+            this.hiddenFlags = new ListOfDates(hiddenFlagsItem);
+        }
+
+        ClausewitzItem variablesItem = this.item.getChild("variables");
+
+        if (variablesItem != null) {
+            this.variables = new ListOfDoubles(variablesItem);
+        }
+
+        ClausewitzItem colorsItem = this.item.getChild("colors");
+
+        if (colorsItem != null) {
+            this.colors = new Colors(colorsItem);
+        }
+
         ClausewitzItem techItem = this.item.getChild("technology");
 
         if (techItem != null) {
@@ -2060,6 +2536,10 @@ public class Country {
             this.ledger = new Ledger(ledgerItem);
         }
 
+        this.loans = this.item.getChildren("loan").stream()
+                              .map(Loan::new)
+                              .collect(Collectors.toList());
+
         ClausewitzItem activeIdeaGroupsItem = this.item.getChild("active_idea_groups");
 
         if (activeIdeaGroupsItem != null) {
@@ -2113,7 +2593,6 @@ public class Country {
                                       .map(Modifier::new)
                                       .collect(Collectors.toList());
 
-
         ClausewitzItem subUnitItem = this.item.getChild("sub_unit");
 
         if (subUnitItem != null) {
@@ -2126,9 +2605,93 @@ public class Country {
                                  .collect(Collectors.toList());
 
         List<ClausewitzItem> naviesItems = this.item.getChildren("navy");
-        this.navies = armiesItems.stream()
+        this.navies = naviesItems.stream()
                                  .map(navyItem -> new Navy(navyItem, this))
                                  .collect(Collectors.toList());
 
+        ClausewitzItem activeRelationsItem = this.item.getChild("active_relations");
+
+        if (activeRelationsItem != null) {
+            this.activeRelations = activeRelationsItem.getChildren()
+                                                      .stream()
+                                                      .map(ActiveRelation::new)
+                                                      .collect(Collectors.toMap(ActiveRelation::getCountry, Function.identity()));
+        }
+
+        List<ClausewitzItem> previousMonarchsItems = this.item.getChildren("previous_monarch");
+        this.previousMonarchs = previousMonarchsItems.stream()
+                                                     .map(Id::new)
+                                                     .collect(Collectors.toList());
+
+        if (this.history != null) {
+            if (this.history.getMonarchs() != null) {
+                ClausewitzItem monarchItem = this.item.getChild("monarch");
+
+                if (monarchItem != null) {
+                    Id monarchId = new Id(monarchItem);
+                    this.monarch = this.history.getMonarch(monarchId.getId());
+                }
+            }
+
+            if (this.history.getHeirs() != null) {
+                ClausewitzItem heirItem = this.item.getChild("heir");
+
+                if (heirItem != null) {
+                    Id heirId = new Id(heirItem);
+                    this.heir = this.history.getHeir(heirId.getId());
+                }
+            }
+
+            if (this.history.getQueens() != null) {
+                ClausewitzItem queenItem = this.item.getChild("queen");
+
+                if (queenItem != null) {
+                    Id queenId = new Id(queenItem);
+                    this.queen = this.history.getQueen(queenId.getId());
+                }
+            }
+
+
+            if (this.history.getLeaders() != null) {
+                this.leaders = new ArrayList<>();
+                List<ClausewitzItem> leadersItems = this.item.getChildren("leader");
+                if (!leadersItems.isEmpty()) {
+                    leadersItems.forEach(leaderItem -> {
+                        Id leaderId = new Id(leaderItem);
+                        this.leaders.add(this.history.getLeader(leaderId.getId()));
+                    });
+                }
+            }
+        }
+
+        ClausewitzItem admPowerSpentItem = this.item.getChild("adm_spent_indexed");
+
+        if (admPowerSpentItem != null) {
+            this.admPowerSpent = new PowerSpentIndexed(admPowerSpentItem);
+        }
+
+        ClausewitzItem dipPowerSpentItem = this.item.getChild("dip_spent_indexed");
+
+        if (dipPowerSpentItem != null) {
+            this.dipPowerSpent = new PowerSpentIndexed(dipPowerSpentItem);
+        }
+
+        ClausewitzItem milPowerSpentItem = this.item.getChild("mil_spent_indexed");
+
+        if (milPowerSpentItem != null) {
+            this.milPowerSpent = new PowerSpentIndexed(milPowerSpentItem);
+        }
+
+        ClausewitzItem historicStatsCacheItem = this.item.getChild("historic_stats_cache");
+
+        if (historicStatsCacheItem != null) {
+            this.historyStatsCache = new HistoryStatsCache(historicStatsCacheItem);
+        }
+
+        ClausewitzItem countryMissionsItem = this.item.getChild("country_missions");
+
+        if (countryMissionsItem != null) {
+            this.countryMissions = new Missions(countryMissionsItem);
+        }
     }
 }
