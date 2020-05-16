@@ -2,6 +2,8 @@ package com.osallek.eu4parser.model;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Objects;
+
 public class Id {
 
     private final ClausewitzItem item;
@@ -30,5 +32,24 @@ public class Id {
         parent.addChild(toItem);
 
         return toItem;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Id)) {
+            return false;
+        }
+
+        Id id = (Id) o;
+        return Objects.equals(getId(), id.getId()) && Objects.equals(getType(), id.getType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getType());
     }
 }

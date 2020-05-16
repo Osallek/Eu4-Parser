@@ -5,8 +5,6 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Unit;
 
-import java.util.Date;
-
 public class SubUnit {
 
     private final ClausewitzItem item;

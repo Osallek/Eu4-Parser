@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.Id;
+import com.osallek.eu4parser.model.ListOfDates;
 
 import java.util.Date;
 
@@ -36,7 +37,7 @@ public class Monarch {
     }
 
     public void setName(String name) {
-        this.item.setVariable("lender", ClausewitzUtils.addQuotes(name));
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public String getCountry() {

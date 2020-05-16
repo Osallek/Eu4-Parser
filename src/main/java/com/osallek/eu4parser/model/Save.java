@@ -6,7 +6,6 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.counters.IdCounters;
 import com.osallek.eu4parser.model.country.Country;
-import com.osallek.eu4parser.model.country.Province;
 import com.osallek.eu4parser.model.empire.CelestialEmpire;
 import com.osallek.eu4parser.model.empire.Hre;
 import com.osallek.eu4parser.model.empire.HreReligionStatus;
@@ -14,8 +13,10 @@ import com.osallek.eu4parser.model.events.FiredEvents;
 import com.osallek.eu4parser.model.events.PendingEvents;
 import com.osallek.eu4parser.model.gameplayoptions.GameplayOptions;
 import com.osallek.eu4parser.model.institutions.Institutions;
+import com.osallek.eu4parser.model.province.Province;
 import com.osallek.eu4parser.model.religion.Religions;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -86,6 +87,14 @@ public class Save {
 
             return value;
         }
+    }
+
+    public Date getStartDate() {
+        return this.item.getVarAsDate("start_date");
+    }
+
+    public void setStartDate(Date startDate) {
+        this.item.setVariable("start_date", startDate);
     }
 
     public Institutions getInstitutions() {
@@ -300,6 +309,15 @@ public class Save {
                                           .stream()
                                           .map(countryItem -> new Country(countryItem, this))
                                           .collect(Collectors.toMap(Country::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
+        }
+
+        ClausewitzItem provincesItems = this.item.getChild("provinces");
+
+        if (provincesItems != null) {
+            this.provinces = provincesItems.getChildren()
+                                           .stream()
+                                           .map(provinceItem -> new Province(provinceItem, this))
+                                           .collect(Collectors.toMap(Province::getId, Function.identity(), (x, y) -> y, LinkedHashMap::new));
         }
     }
 }

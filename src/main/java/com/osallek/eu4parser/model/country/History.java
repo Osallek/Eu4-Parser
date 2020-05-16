@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.eu4parser.model.counters.Counter;
 
 import java.util.Collection;
 import java.util.Collections;

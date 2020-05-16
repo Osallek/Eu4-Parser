@@ -5,9 +5,12 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Id;
+import com.osallek.eu4parser.model.ListOfDates;
+import com.osallek.eu4parser.model.ListOfDoubles;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.Save;
 import com.osallek.eu4parser.model.counters.Counter;
+import com.osallek.eu4parser.model.province.Advisor;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,11 +29,11 @@ import java.util.stream.Collectors;
 public class Country {
 
     //Todo combined countries:
-    //trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes, diplomacy(transfer_trade_power)
-    //subjects, overlord, diplomacy(dependency)
+    // trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes, diplomacy(transfer_trade_power)
+    // subjects, overlord, diplomacy(dependency)
 
     //Todo with provinces
-    //advisor, seat_in_parliament (back=yes vs back=2)
+    // seat_in_parliament (back=yes vs back=2)
 
     private final ClausewitzItem item;
 
@@ -82,15 +85,19 @@ public class Country {
 
     private SubUnit subUnit;
 
-    private List<Army> armies;
+    private Map<Long, Army> armies;
 
-    private List<Navy> navies;
+    private Map<Long, Navy> navies;
 
     private Map<String, ActiveRelation> activeRelations;
 
     private List<Leader> leaders;
 
     private List<Id> previousMonarchs;
+
+    private List<Id> advisorsIds;
+
+    private Map<Long, Advisor> advisors = new HashMap<>();
 
     private Monarch monarch;
 
@@ -2107,7 +2114,11 @@ public class Country {
         }
     }
 
-    public List<Army> getArmies() {
+    public Army getArmy(long id) {
+        return this.armies.get(id);
+    }
+
+    public Map<Long, Army> getArmies() {
         return armies;
     }
 
@@ -2123,7 +2134,11 @@ public class Country {
         refreshAttributes();
     }
 
-    public List<Navy> getNavies() {
+    public Navy getNavy(long id) {
+        return this.navies.get(id);
+    }
+
+    public Map<Long, Navy> getNavies() {
         return navies;
     }
 
@@ -2214,6 +2229,14 @@ public class Country {
 
     public List<Id> getPreviousMonarchs() {
         return previousMonarchs;
+    }
+
+    public List<Id> getAdvisorsIds() {
+        return advisorsIds;
+    }
+
+    public Map<Long, Advisor> getAdvisors() {
+        return advisors;
     }
 
     public boolean getAssignedEstates() {
@@ -2602,12 +2625,12 @@ public class Country {
         List<ClausewitzItem> armiesItems = this.item.getChildren("army");
         this.armies = armiesItems.stream()
                                  .map(armyItem -> new Army(armyItem, this))
-                                 .collect(Collectors.toList());
+                                 .collect(Collectors.toMap(army -> army.getId().getId(), Function.identity()));
 
         List<ClausewitzItem> naviesItems = this.item.getChildren("navy");
         this.navies = naviesItems.stream()
                                  .map(navyItem -> new Navy(navyItem, this))
-                                 .collect(Collectors.toList());
+                                 .collect(Collectors.toMap(navy -> navy.getId().getId(), Function.identity()));
 
         ClausewitzItem activeRelationsItem = this.item.getChild("active_relations");
 
@@ -2622,6 +2645,11 @@ public class Country {
         this.previousMonarchs = previousMonarchsItems.stream()
                                                      .map(Id::new)
                                                      .collect(Collectors.toList());
+
+        List<ClausewitzItem> advisorsItems = this.item.getChildren("advisor");
+        this.advisorsIds = advisorsItems.stream()
+                                        .map(Id::new)
+                                        .collect(Collectors.toList());
 
         if (this.history != null) {
             if (this.history.getMonarchs() != null) {
