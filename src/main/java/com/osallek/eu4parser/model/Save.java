@@ -8,6 +8,7 @@ import com.osallek.eu4parser.model.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.combat.Combats;
 import com.osallek.eu4parser.model.counters.IdCounters;
 import com.osallek.eu4parser.model.country.Country;
+import com.osallek.eu4parser.model.country.TradeCompany;
 import com.osallek.eu4parser.model.empire.CelestialEmpire;
 import com.osallek.eu4parser.model.empire.Hre;
 import com.osallek.eu4parser.model.empire.HreReligionStatus;
@@ -21,6 +22,7 @@ import com.osallek.eu4parser.model.religion.Religions;
 import com.osallek.eu4parser.model.war.ActiveWar;
 import com.osallek.eu4parser.model.war.PreviousWar;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -415,16 +417,36 @@ public class Save {
         return previousWars;
     }
 
+    public boolean getAchievementOk() {
+        return this.item.getVarAsBool("achievement_ok");
+    }
+
+    public void addTradeCompany(String name, String owner, Integer... provinces) {
+        owner = ClausewitzUtils.addQuotes(owner);
+
+        String finalOwner = owner;
+        provinces = Arrays.stream(provinces)
+                          .filter(province -> getProvince(province).getOwner().equals(finalOwner))
+                          .toArray(Integer[]::new);
+
+        if (provinces.length > 0) {
+            ClausewitzItem tradeCompanyManagerItem = this.item.getChild("trade_company_manager");
+
+            if (tradeCompanyManagerItem == null) {
+                tradeCompanyManagerItem = this.item.addChild("trade_company_manager");
+            }
+
+            TradeCompany.addToItem(tradeCompanyManagerItem, name, owner, provinces);
+            refreshAttributes();
+        }
+    }
+
     public TechLevelDates getTechLevelDates() {
         return techLevelDates;
     }
 
     public ListOfDates getIdeaDates() {
         return ideaDates;
-    }
-
-    public boolean getAchievementOk() {
-        return this.item.getVarAsBool("achievement_ok");
     }
 
     public String getChecksum() {
@@ -568,6 +590,15 @@ public class Save {
         this.previousWars = previousWarsItems.stream()
                                              .map(PreviousWar::new)
                                              .collect(Collectors.toList());
+
+        ClausewitzItem tradeCompanyManagerItem = this.item.getChild("trade_company_manager");
+
+        if (tradeCompanyManagerItem != null) {
+            tradeCompanyManagerItem.getChildren("trade_company").forEach(child -> {
+                TradeCompany company = new TradeCompany(child);
+                this.getCountry(ClausewitzUtils.removeQuotes(company.getOwner())).getTradeCompanies().add(company);
+            });
+        }
 
         ClausewitzItem techLevelDatesItem = this.item.getChild("tech_level_dates");
 

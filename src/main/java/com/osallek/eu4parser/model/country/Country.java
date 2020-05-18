@@ -15,6 +15,7 @@ import com.osallek.eu4parser.model.province.Advisor;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -122,6 +123,8 @@ public class Country {
     private HistoryStatsCache historyStatsCache;
 
     private Missions countryMissions;
+
+    private List<TradeCompany> tradeCompanies = new ArrayList<>();
 
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
@@ -2482,6 +2485,10 @@ public class Country {
         } else {
             this.item.addVariable("government_reform_progress", governmentReformProgress);
         }
+    }
+
+    public List<TradeCompany> getTradeCompanies() {
+        return tradeCompanies;
     }
 
     private void refreshAttributes() {
