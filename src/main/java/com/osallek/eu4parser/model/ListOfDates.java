@@ -4,6 +4,8 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListOfDates {
 
@@ -11,6 +13,10 @@ public class ListOfDates {
 
     public ListOfDates(ClausewitzItem item) {
         this.item = item;
+    }
+
+    public List<String> getNames() {
+        return this.item.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
     }
 
     public Date get(String name) {

@@ -157,6 +157,13 @@ public class Province {
         this.item.setVariable("estate", estate);
     }
 
+    public void removeEstate() {
+        this.item.removeVariable("estate");
+        this.save.getCountry(ClausewitzUtils.removeQuotes(this.getOwner()))
+                 .getEstates()
+                 .forEach(estate -> estate.removeProvince(this.getId()));
+    }
+
     public Date lastEstateGrant() {
         return this.item.getVarAsDate("last_estate_grant");
     }

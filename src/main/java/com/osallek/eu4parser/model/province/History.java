@@ -111,18 +111,23 @@ public class History {
             this.advisors.put(advisor.getId().getId(), advisor);
         }
 
-        if (!this.advisors.isEmpty() && !this.owners.isEmpty()) {
-            this.advisors.values()
-                         .forEach(advisor -> this.owners.values()
-                                                        .stream()
-                                                        .map(owner -> this.province.getSave().getCountry(ClausewitzUtils.removeQuotes(owner)))
-                                                        .filter(country -> country.getAdvisorsIds() != null)
-                                                        .filter(country -> country.getAdvisorsIds()
-                                                                                  .contains(advisor.getId()))
-                                                        .findFirst()
-                                                        .ifPresent(country -> country.getAdvisors()
-                                                                                     .put(advisor.getId().getId(),
-                                                                                          advisor)));
+        if (!this.advisors.isEmpty()) {
+            if (!this.owners.isEmpty()) {
+                this.advisors.values()
+                             .forEach(advisor -> this.owners.values()
+                                                            .stream()
+                                                            .map(owner -> this.province.getSave()
+                                                                                       .getCountry(ClausewitzUtils.removeQuotes(owner)))
+                                                            .filter(country -> country.getAdvisorsIds() != null)
+                                                            .filter(country -> country.getAdvisorsIds()
+                                                                                      .contains(advisor.getId()))
+                                                            .findFirst()
+                                                            .ifPresent(country -> country.getAdvisors()
+                                                                                         .put(advisor.getId().getId(),
+                                                                                              advisor)));
+            }
+
+            this.province.getSave().getAdvisors().putAll(this.advisors);
         }
     }
 }

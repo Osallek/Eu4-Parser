@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 
 public class Country {
 
+    //Todo custom countries (colors, ideas, flag)
+
     //Todo combined countries:
     // trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes, diplomacy(transfer_trade_power)
     // subjects, overlord, diplomacy(dependency)
@@ -38,6 +40,10 @@ public class Country {
     private final ClausewitzItem item;
 
     private final Save save;
+
+    private String player;
+
+    private Integer greatPowerRank;
 
     private PlayerAiPrefsCommand playerAiPrefsCommand;
 
@@ -99,6 +105,8 @@ public class Country {
 
     private Map<Long, Advisor> advisors = new HashMap<>();
 
+    private Map<Long, Advisor> activeAdvisors = new HashMap<>();
+
     private Monarch monarch;
 
     private Heir heir;
@@ -139,6 +147,22 @@ public class Country {
 
     public void setWasPlayer(boolean wasPlayer) {
         this.item.setVariable("was_player", wasPlayer);
+    }
+
+    public String getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(String player) {
+        this.player = player;
+    }
+
+    public Integer getGreatPowerRank() {
+        return greatPowerRank;
+    }
+
+    public void setGreatPowerRank(Integer greatPowerRank) {
+        this.greatPowerRank = greatPowerRank;
     }
 
     public PlayerAiPrefsCommand getPlayerAiPrefsCommand() {
@@ -2239,6 +2263,14 @@ public class Country {
         return advisors;
     }
 
+    public Map<Long, Advisor> getActiveAdvisors() {
+        return activeAdvisors;
+    }
+
+    public void setActiveAdvisors(Map<Long, Advisor> activeAdvisors) {
+        this.activeAdvisors = activeAdvisors;
+    }
+
     public boolean getAssignedEstates() {
         return this.item.getVarAsBool("assigned_estates");
     }
@@ -2363,7 +2395,7 @@ public class Country {
         ClausewitzItem lossesItem = this.item.getChild("losses");
 
         if (lossesItem != null) {
-            ClausewitzList list = this.item.getList("members");
+            ClausewitzList list = lossesItem.getList("members");
 
             if (list == null) {
                 return lossesMap;

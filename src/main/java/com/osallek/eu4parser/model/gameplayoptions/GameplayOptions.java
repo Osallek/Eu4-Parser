@@ -2,9 +2,6 @@ package com.osallek.eu4parser.model.gameplayoptions;
 
 import com.osallek.clausewitzparser.model.ClausewitzList;
 
-/*
-** No setter means that the option can't be changed after the campaign started. Edit the values directly in the game.
- */
 public class GameplayOptions {
 
     private final ClausewitzList list;
@@ -61,6 +58,10 @@ public class GameplayOptions {
         return this.list.getAsInt(10) == 1;
     }
 
+    public void setLockedLedger(boolean lockedLedger) {
+        this.list.set(10, lockedLedger ? 1 : 0);
+    }
+
     public boolean getDynamicProvinceNames() {
         return this.list.getAsInt(11) == 1;
     }
@@ -71,6 +72,10 @@ public class GameplayOptions {
 
     public CustomNationDifficulty getCustomNationDifficulty() {
         return CustomNationDifficulty.values()[this.list.getAsInt(12)];
+    }
+
+    public void setCustomNationDifficulty(CustomNationDifficulty customNationDifficulty) {
+        this.list.set(12, customNationDifficulty.ordinal());
     }
 
     public NationSetup getNationSetup() {
@@ -141,6 +146,10 @@ public class GameplayOptions {
         return this.list.getAsInt(23) == 1;
     }
 
+    public void setLimitedLedger(boolean limitedLedger) {
+        this.list.set(23, limitedLedger ? 1 : 0);
+    }
+
     public boolean getUnlimitedIdeaGroups() {
         return this.list.getAsInt(24) == 1;
     }
@@ -159,6 +168,10 @@ public class GameplayOptions {
 
     public boolean getOnlyHostCanPause() {
         return this.list.getAsInt(26) == 1;
+    }
+
+    public void setOnlyHostCanPause(boolean onlyHostCanPause) {
+        this.list.set(23, onlyHostCanPause ? 1 : 0);
     }
 
     public boolean getShowLoadingScreen() {

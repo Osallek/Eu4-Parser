@@ -1,9 +1,11 @@
 package com.osallek.eu4parser.model;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.changeprices.ChangePrices;
+import com.osallek.eu4parser.model.combat.Combats;
 import com.osallek.eu4parser.model.counters.IdCounters;
 import com.osallek.eu4parser.model.country.Country;
 import com.osallek.eu4parser.model.empire.CelestialEmpire;
@@ -13,28 +15,39 @@ import com.osallek.eu4parser.model.events.FiredEvents;
 import com.osallek.eu4parser.model.events.PendingEvents;
 import com.osallek.eu4parser.model.gameplayoptions.GameplayOptions;
 import com.osallek.eu4parser.model.institutions.Institutions;
+import com.osallek.eu4parser.model.province.Advisor;
 import com.osallek.eu4parser.model.province.Province;
 import com.osallek.eu4parser.model.religion.Religions;
+import com.osallek.eu4parser.model.war.ActiveWar;
+import com.osallek.eu4parser.model.war.PreviousWar;
 
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Save {
 
-    //Todo in countries: map_area_data, trade, rebel_faction(only edit, not remove(in provinces too)), great_power, provinces
-    //Todo Teams
+    //Todo in countries: map_area_data, trade, custom countries
+    //Todo Teams, diplomacy, income_statistics, nation_size_statistics,
+    // score_statistics, inflation_statistics, trade_company_manager, tech_level_dates, idea_dates
 
     private static final Logger LOGGER = Logger.getLogger(Save.class.getName());
 
-    private final ClausewitzItem item;
+    public final ClausewitzItem item;
 
     private GameplayOptions gameplayOptions;
 
     private IdCounters idCounters;
+
+    private ListOfDates flags;
 
     private Institutions institutions;
 
@@ -43,6 +56,8 @@ public class Save {
     private Hre hre;
 
     private CelestialEmpire celestialEmpire;
+
+    private List<TradeLeague> tradeLeagues;
 
     private Religions religions;
 
@@ -54,6 +69,20 @@ public class Save {
 
     private Map<String, Country> countries;
 
+    private final SortedMap<Integer, Country> greatPowers = new TreeMap<>();
+
+    private final Map<Long, Advisor> advisors = new HashMap<>();
+
+    private Combats combats;
+
+    private List<ActiveWar> activeWars;
+
+    private List<PreviousWar> previousWars;
+
+    private TechLevelDates techLevelDates;
+
+    private ListOfDates ideaDates;
+
     public Save(ClausewitzItem item) {
         this.item = item;
         refreshAttributes();
@@ -63,12 +92,42 @@ public class Save {
         return this.gameplayOptions;
     }
 
+    public Integer getSpeed() {
+        return this.item.getVarAsInt("speed");
+    }
+
+    public void setSpeed(int speed) {
+        if (speed < 1) {
+            speed = 1;
+        } else if (speed > 5) {
+            speed = 5;
+        }
+
+        this.item.setVariable("speed", speed);
+    }
+
+    public Long getMultiplayerRandomSeed() {
+        return this.item.getVarAsLong("multiplayer_random_seed");
+    }
+
+    public Long getMultiplayerRandomCount() {
+        return this.item.getVarAsLong("multiplayer_random_count");
+    }
+
     public IdCounters getIdCounters() {
         return idCounters;
     }
 
     public Integer getUnitIdCounter() {
         return this.item.getVarAsInt("unit");
+    }
+
+    public String getCurrentAge() {
+        return this.item.getVarAsString("current_age");
+    }
+
+    public Double getNextAgeProgress() {
+        return this.item.getVarAsDouble("next_age_progress");
     }
 
     /**
@@ -89,6 +148,58 @@ public class Save {
         }
     }
 
+    public ListOfDates getFlags() {
+        return flags;
+    }
+
+    public String getRevolutionTarget() {
+        return this.item.getVarAsString("revolution_target");
+    }
+
+    public void setRevolutionTarget(String revolutionTarget) {
+        revolutionTarget = ClausewitzUtils.addQuotes(revolutionTarget);
+
+        if (revolutionTarget.length() == 5) {
+            Integer order = null;
+            ClausewitzItem orderItem = this.item.getChild("flags");
+
+            if (orderItem != null) {
+                order = orderItem.getOrder() + 1;
+            }
+
+            if (order == null) {
+                orderItem = this.item.getChild("provinces");
+
+                if (orderItem != null) {
+                    order = orderItem.getOrder() - 1;
+                }
+            }
+
+            if (order == null) {
+                order = this.item.getNbObjects();
+            }
+
+            this.item.setVariable("revolution_target", revolutionTarget, order);
+            setHasFirstRevolutionStarted(true, order + 1);
+        }
+    }
+
+    public String getRevolutionTargetOriginalName() {
+        return this.item.getVarAsString("revolution_target_original_name");
+    }
+
+    public void setRevolutionTargetOriginalName(String revolutionTargetOriginalName) {
+        this.item.setVariable("revolution_target_original_name", revolutionTargetOriginalName);
+    }
+
+    public Boolean hasFirstRevolutionStarted() {
+        return this.item.getVarAsBool("has_first_revolution_started");
+    }
+
+    void setHasFirstRevolutionStarted(boolean hasFirstRevolutionStarted, int order) {
+        this.item.setVariable("has_first_revolution_started", hasFirstRevolutionStarted, order);
+    }
+
     public Date getStartDate() {
         return this.item.getVarAsDate("start_date");
     }
@@ -97,8 +208,42 @@ public class Save {
         this.item.setVariable("start_date", startDate);
     }
 
+    public Double getTotalMilitaryPower() {
+        return this.item.getVarAsDouble("total_military_power");
+    }
+
+    public Double getAverageMilitaryPower() {
+        return this.item.getVarAsDouble("average_military_power");
+    }
+
     public Institutions getInstitutions() {
         return institutions;
+    }
+
+    public Map<Good, String> getProductionLeaders() {
+        Map<Good, String> productionLeaders = new EnumMap<>(Good.class);
+        ClausewitzList productionLeaderList = this.item.getList("production_leader_tag");
+
+        if (productionLeaderList != null) {
+            for (Good good : Good.values()) {
+                productionLeaders.put(good, productionLeaderList.get(good.ordinal()));
+            }
+        }
+
+        return productionLeaders;
+    }
+
+    public Map<Good, String> getGoodsTotalProduced() {
+        Map<Good, String> productionLeaders = new EnumMap<>(Good.class);
+        ClausewitzList totalProducedList = this.item.getList("tradegoods_total_produced");
+
+        if (totalProducedList != null) {
+            for (Good good : Good.values()) {
+                productionLeaders.put(good, totalProducedList.get(good.ordinal()));
+            }
+        }
+
+        return productionLeaders;
     }
 
     public ChangePrices getChangePrices() {
@@ -183,6 +328,15 @@ public class Save {
         }
     }
 
+    public List<TradeLeague> getTradeLeagues() {
+        return tradeLeagues;
+    }
+
+    public void addTradeLeague(String... members) {
+        TradeLeague.addToItem(this.item, members);
+        refreshAttributes();
+    }
+
     public Religions getReligions() {
         return religions;
     }
@@ -241,6 +395,42 @@ public class Save {
                                                                           promoteCultures, braindead, timeout));
     }
 
+    public SortedMap<Integer, Country> getGreatPowers() {
+        return greatPowers;
+    }
+
+    public Map<Long, Advisor> getAdvisors() {
+        return advisors;
+    }
+
+    public Combats getCombats() {
+        return combats;
+    }
+
+    public List<ActiveWar> getActiveWars() {
+        return activeWars;
+    }
+
+    public List<PreviousWar> getPreviousWars() {
+        return previousWars;
+    }
+
+    public TechLevelDates getTechLevelDates() {
+        return techLevelDates;
+    }
+
+    public ListOfDates getIdeaDates() {
+        return ideaDates;
+    }
+
+    public boolean getAchievementOk() {
+        return this.item.getVarAsBool("achievement_ok");
+    }
+
+    public String getChecksum() {
+        return this.item.getVarAsString("checksum");
+    }
+
     private void refreshAttributes() {
         ClausewitzItem gameplaySettings = this.item.getChild("gameplaysettings");
 
@@ -250,6 +440,12 @@ public class Save {
             if (gameplayOptionsList != null && !gameplayOptionsList.isEmpty()) {
                 this.gameplayOptions = new GameplayOptions(gameplayOptionsList);
             }
+        }
+
+        ClausewitzItem flagsItem = this.item.getChild("flags");
+
+        if (flagsItem != null) {
+            this.flags = new ListOfDates(flagsItem);
         }
 
         ClausewitzList idCountersList = this.item.getList("id_counters");
@@ -283,6 +479,11 @@ public class Save {
             this.celestialEmpire = new CelestialEmpire(celestialEmpireItem);
         }
 
+        List<ClausewitzItem> tradeLeaguesItems = this.item.getChildren("trade_league");
+        this.tradeLeagues = tradeLeaguesItems.stream()
+                                             .map(TradeLeague::new)
+                                             .collect(Collectors.toList());
+
         ClausewitzItem religionsItem = this.item.getChild("religions");
         ClausewitzItem religionInstantDateItem = this.item.getChild("religion_instance_data");
 
@@ -311,6 +512,26 @@ public class Save {
                                           .collect(Collectors.toMap(Country::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
         }
 
+        ClausewitzList playersCountriesList = this.item.getList("players_countries");
+
+        if (playersCountriesList != null) {
+            for (int i = playersCountriesList.getValues().size() - 1; i > 0; i -= 2) {
+                if (this.countries.containsKey(ClausewitzUtils.removeQuotes(playersCountriesList.get(i)))) {
+                    this.getCountry(ClausewitzUtils.removeQuotes(playersCountriesList.get(i)))
+                        .setPlayer(playersCountriesList.get(i - 1));
+                }
+            }
+        }
+
+        ClausewitzItem greatPowersItem = this.item.getChild("great_powers");
+
+        if (greatPowersItem != null) {
+            greatPowersItem.getChildren("original").forEach(child -> {
+                Country country = this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("country")));
+                this.greatPowers.put(child.getVarAsInt("rank"), country);
+            });
+        }
+
         ClausewitzItem provincesItems = this.item.getChild("provinces");
 
         if (provincesItems != null) {
@@ -318,6 +539,46 @@ public class Save {
                                            .stream()
                                            .map(provinceItem -> new Province(provinceItem, this))
                                            .collect(Collectors.toMap(Province::getId, Function.identity(), (x, y) -> y, LinkedHashMap::new));
+        }
+
+        ClausewitzItem activeAdvisorsItem = this.item.getChild("active_advisors");
+
+        if (activeAdvisorsItem != null) {
+            activeAdvisorsItem.getChildren().forEach(child -> {
+                Country country = this.getCountry(ClausewitzUtils.removeQuotes(child.getName()));
+                child.getChildren("advisor")
+                     .stream()
+                     .map(Id::new)
+                     .forEach(id -> country.getActiveAdvisors().put(id.getId(), this.advisors.get(id.getId())));
+            });
+        }
+
+        ClausewitzItem combatItem = this.item.getChild("combat");
+
+        if (combatItem != null) {
+            this.combats = new Combats(combatItem);
+        }
+
+        List<ClausewitzItem> activeWarsItems = this.item.getChildren("active_war");
+        this.activeWars = activeWarsItems.stream()
+                                         .map(ActiveWar::new)
+                                         .collect(Collectors.toList());
+
+        List<ClausewitzItem> previousWarsItems = this.item.getChildren("previous_war");
+        this.previousWars = previousWarsItems.stream()
+                                             .map(PreviousWar::new)
+                                             .collect(Collectors.toList());
+
+        ClausewitzItem techLevelDatesItem = this.item.getChild("tech_level_dates");
+
+        if (techLevelDatesItem != null) {
+            this.techLevelDates = new TechLevelDates(techLevelDatesItem);
+        }
+
+        ClausewitzItem ideaDatesItem = this.item.getChild("idea_dates");
+
+        if (ideaDatesItem != null) {
+            this.ideaDates = new ListOfDates(ideaDatesItem);
         }
     }
 }
