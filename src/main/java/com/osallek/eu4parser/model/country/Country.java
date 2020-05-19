@@ -15,7 +15,6 @@ import com.osallek.eu4parser.model.province.Advisor;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -24,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -123,6 +124,14 @@ public class Country {
     private HistoryStatsCache historyStatsCache;
 
     private Missions countryMissions;
+
+    private SortedMap<Integer, Integer> incomeStatistics = new TreeMap<>();
+
+    private SortedMap<Integer, Integer> nationSizeStatistics = new TreeMap<>();
+
+    private SortedMap<Integer, Integer> scoreStatistics = new TreeMap<>();
+
+    private SortedMap<Integer, Integer> inflationStatistics = new TreeMap<>();
 
     private List<TradeCompany> tradeCompanies = new ArrayList<>();
 
@@ -2485,6 +2494,22 @@ public class Country {
         } else {
             this.item.addVariable("government_reform_progress", governmentReformProgress);
         }
+    }
+
+    public SortedMap<Integer, Integer> getIncomeStatistics() {
+        return incomeStatistics;
+    }
+
+    public SortedMap<Integer, Integer> getNationSizeStatistics() {
+        return nationSizeStatistics;
+    }
+
+    public SortedMap<Integer, Integer> getScoreStatistics() {
+        return scoreStatistics;
+    }
+
+    public SortedMap<Integer, Integer> getInflationStatistics() {
+        return inflationStatistics;
     }
 
     public List<TradeCompany> getTradeCompanies() {

@@ -591,6 +591,66 @@ public class Save {
                                              .map(PreviousWar::new)
                                              .collect(Collectors.toList());
 
+        ClausewitzItem incomeStatisticsItem = this.item.getChild("income_statistics");
+
+        if (incomeStatisticsItem != null) {
+            incomeStatisticsItem.getChildren("ledger_data").forEach(child -> {
+                ClausewitzItem dataItem = child.getChild("data");
+                if (dataItem != null) {
+                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
+                        .getIncomeStatistics()
+                        .putAll(dataItem.getVariables()
+                                        .stream()
+                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                }
+            });
+        }
+
+        ClausewitzItem nationSizeStatisticsItem = this.item.getChild("nation_size_statistics");
+
+        if (nationSizeStatisticsItem != null) {
+            nationSizeStatisticsItem.getChildren("ledger_data").forEach(child -> {
+                ClausewitzItem dataItem = child.getChild("data");
+                if (dataItem != null) {
+                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
+                        .getNationSizeStatistics()
+                        .putAll(dataItem.getVariables()
+                                        .stream()
+                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                }
+            });
+        }
+
+        ClausewitzItem scoreStatisticsItem = this.item.getChild("score_statistics");
+
+        if (scoreStatisticsItem != null) {
+            scoreStatisticsItem.getChildren("ledger_data").forEach(child -> {
+                ClausewitzItem dataItem = child.getChild("data");
+                if (dataItem != null) {
+                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
+                        .getScoreStatistics()
+                        .putAll(dataItem.getVariables()
+                                        .stream()
+                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                }
+            });
+        }
+
+        ClausewitzItem inflationStatisticsItem = this.item.getChild("inflation_statistics");
+
+        if (inflationStatisticsItem != null) {
+            inflationStatisticsItem.getChildren("ledger_data").forEach(child -> {
+                ClausewitzItem dataItem = child.getChild("data");
+                if (dataItem != null) {
+                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
+                        .getInflationStatistics()
+                        .putAll(dataItem.getVariables()
+                                        .stream()
+                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                }
+            });
+        }
+
         ClausewitzItem tradeCompanyManagerItem = this.item.getChild("trade_company_manager");
 
         if (tradeCompanyManagerItem != null) {
