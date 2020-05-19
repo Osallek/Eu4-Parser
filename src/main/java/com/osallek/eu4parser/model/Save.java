@@ -20,6 +20,7 @@ import com.osallek.eu4parser.model.institutions.Institutions;
 import com.osallek.eu4parser.model.province.Advisor;
 import com.osallek.eu4parser.model.province.Province;
 import com.osallek.eu4parser.model.religion.Religions;
+import com.osallek.eu4parser.model.trade.TradeNode;
 import com.osallek.eu4parser.model.war.ActiveWar;
 import com.osallek.eu4parser.model.war.PreviousWar;
 
@@ -30,7 +31,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -56,6 +56,8 @@ public class Save {
     private Map<String, Area> areas;
 
     private Institutions institutions;
+
+    private Map<String, TradeNode> tradeNodes;
 
     private ChangePrices changePrices;
 
@@ -228,6 +230,10 @@ public class Save {
 
     public Institutions getInstitutions() {
         return institutions;
+    }
+
+    public Map<String, TradeNode> getTradeNodes() {
+        return tradeNodes;
     }
 
     public Map<Good, String> getProductionLeaders() {
@@ -491,6 +497,16 @@ public class Save {
             this.institutions = new Institutions(institutionOrigins, institutionAvailable);
         }
 
+        ClausewitzItem tradeItem = this.item.getChild("trade");
+
+        if (tradeItem != null) {
+            this.tradeNodes = tradeItem.getChildren("node")
+                                       .stream()
+                                       .map(TradeNode::new)
+                                       .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()),
+                                                                 Function.identity()));
+        }
+
         ClausewitzItem changePricesItem = this.item.getChild("change_price");
 
         if (changePricesItem != null) {
@@ -576,7 +592,8 @@ public class Save {
         if (mapAreaDataItem != null) {
             this.areas = mapAreaDataItem.getChildren()
                                         .stream()
-                                        .filter(child -> child.getChild("state") != null || child.getChild("investments") != null)
+                                        .filter(child -> child.getChild("state") != null
+                                                         || child.getChild("investments") != null)
                                         .map(child -> new Area(child, this))
                                         .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()),
                                                                   Function.identity()));

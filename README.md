@@ -45,7 +45,7 @@
 - [x] "start_date"
 - [x] "tech_level_dates"
 - [x] "total_military_power"
-- [ ] "trade"
+- [x] "trade"
 - [x] "trade_company_manager"
 - [x] "tradegoods_total_produced"
 - [x] "unit"
