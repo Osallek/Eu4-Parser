@@ -7,6 +7,7 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.combat.Combats;
 import com.osallek.eu4parser.model.counters.IdCounters;
+import com.osallek.eu4parser.model.country.Area;
 import com.osallek.eu4parser.model.country.Country;
 import com.osallek.eu4parser.model.country.TradeCompany;
 import com.osallek.eu4parser.model.empire.CelestialEmpire;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -50,6 +52,8 @@ public class Save {
     private IdCounters idCounters;
 
     private ListOfDates flags;
+
+    private Map<String, Area> areas;
 
     private Institutions institutions;
 
@@ -208,6 +212,10 @@ public class Save {
 
     public void setStartDate(Date startDate) {
         this.item.setVariable("start_date", startDate);
+    }
+
+    public Map<String, Area> getAreas() {
+        return areas;
     }
 
     public Double getTotalMilitaryPower() {
@@ -561,6 +569,17 @@ public class Save {
                                            .stream()
                                            .map(provinceItem -> new Province(provinceItem, this))
                                            .collect(Collectors.toMap(Province::getId, Function.identity(), (x, y) -> y, LinkedHashMap::new));
+        }
+
+        ClausewitzItem mapAreaDataItem = this.item.getChild("map_area_data");
+
+        if (mapAreaDataItem != null) {
+            this.areas = mapAreaDataItem.getChildren()
+                                        .stream()
+                                        .filter(child -> child.getChild("state") != null || child.getChild("investments") != null)
+                                        .map(child -> new Area(child, this))
+                                        .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()),
+                                                                  Function.identity()));
         }
 
         ClausewitzItem activeAdvisorsItem = this.item.getChild("active_advisors");

@@ -125,6 +125,8 @@ public class Country {
 
     private Missions countryMissions;
 
+    private Map<String, CountryState> states = new HashMap<>();
+
     private SortedMap<Integer, Integer> incomeStatistics = new TreeMap<>();
 
     private SortedMap<Integer, Integer> nationSizeStatistics = new TreeMap<>();
@@ -2494,6 +2496,10 @@ public class Country {
         } else {
             this.item.addVariable("government_reform_progress", governmentReformProgress);
         }
+    }
+
+    public Map<String, CountryState> getStates() {
+        return states;
     }
 
     public SortedMap<Integer, Integer> getIncomeStatistics() {

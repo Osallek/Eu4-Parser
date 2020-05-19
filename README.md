@@ -27,7 +27,7 @@
 - [x] "inflation_statistics"
 - [x] "institution_origin"
 - [x] "institutions"
-- [ ] "map_area_data"
+- [x] "map_area_data"
 - [x] "multiplayer_random_count"
 - [x] "multiplayer_random_seed"
 - [x] "nation_size_statistics"
