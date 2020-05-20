@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 public class Province {
 
+    //Todo ajouter/retirer batiments
+
     private final ClausewitzItem item;
 
     private final Save save;

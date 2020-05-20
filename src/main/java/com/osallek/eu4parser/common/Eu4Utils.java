@@ -10,6 +10,14 @@ public final class Eu4Utils {
 
     private Eu4Utils() {}
 
+    public static final String MAGIC_WORD = "EU4txt";
+
+    public static final String AI_FILE = "ai";
+
+    public static final String GAMESTATE_FILE = "gamestate";
+
+    public static final String META_FILE = "meta";
+
     public static final Date DEFAULT_DATE;
 
     public static final String DEFAULT_TAG = "---";

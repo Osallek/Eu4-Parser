@@ -29,16 +29,6 @@ public class Estate {
         return this.item.getVarAsString("type");
     }
 
-    public void setType(String type) {
-        ClausewitzVariable var = this.item.getVar("type");
-
-        if (var != null) {
-            var.setValue(type);
-        } else {
-            this.item.addVariable("type", type);
-        }
-    }
-
     public Double getLoyalty() {
         return this.item.getVarAsDouble("loyalty");
     }

@@ -30,10 +30,12 @@ import java.util.stream.Collectors;
 
 public class Country {
 
+    //Todo lassitude de guerre, retirer age d'or, retirer des généraux
+
     //Todo custom countries (colors, ideas, flag)
 
     //Todo combined countries:
-    // trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes, diplomacy(transfer_trade_power)
+    // trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes
     // subjects, overlord, diplomacy(dependency)
 
     //Todo with provinces
