@@ -11,7 +11,7 @@
 - [x] "combat"
 - [x] "countries"
 - [x] "current_age"
-- [ ] "diplomacy"
+- [x] "diplomacy"
 - [x] "empire"
 - [x] "fired_events"
 - [x] "flags"

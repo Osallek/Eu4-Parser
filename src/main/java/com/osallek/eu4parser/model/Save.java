@@ -10,6 +10,7 @@ import com.osallek.eu4parser.model.counters.IdCounters;
 import com.osallek.eu4parser.model.country.Area;
 import com.osallek.eu4parser.model.country.Country;
 import com.osallek.eu4parser.model.country.TradeCompany;
+import com.osallek.eu4parser.model.diplomacy.Diplomacy;
 import com.osallek.eu4parser.model.empire.CelestialEmpire;
 import com.osallek.eu4parser.model.empire.Hre;
 import com.osallek.eu4parser.model.empire.HreReligionStatus;
@@ -80,6 +81,8 @@ public class Save {
     private final SortedMap<Integer, Country> greatPowers = new TreeMap<>();
 
     private final Map<Long, Advisor> advisors = new HashMap<>();
+
+    private Diplomacy diplomacy;
 
     private Combats combats;
 
@@ -419,6 +422,10 @@ public class Save {
         return advisors;
     }
 
+    public Diplomacy getDiplomacy() {
+        return diplomacy;
+    }
+
     public Combats getCombats() {
         return combats;
     }
@@ -609,6 +616,12 @@ public class Save {
                      .map(Id::new)
                      .forEach(id -> country.getActiveAdvisors().put(id.getId(), this.advisors.get(id.getId())));
             });
+        }
+
+        ClausewitzItem diplomacyItem = this.item.getChild("diplomacy");
+
+        if (diplomacyItem != null) {
+            this.diplomacy = new Diplomacy(diplomacyItem, this);
         }
 
         ClausewitzItem combatItem = this.item.getChild("combat");
