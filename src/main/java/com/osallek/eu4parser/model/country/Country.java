@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 
 public class Country {
 
-    //Todo lassitude de guerre, retirer age d'or, retirer des généraux
-
     //Todo custom countries (colors, ideas, flag)
 
     //Todo combined countries:
@@ -101,7 +99,7 @@ public class Country {
 
     private Map<String, ActiveRelation> activeRelations;
 
-    private List<Leader> leaders;
+    private Map<Long, Leader> leaders;
 
     private List<Id> previousMonarchs;
 
@@ -361,6 +359,10 @@ public class Country {
         } else {
             this.item.addVariable("golden_era_date", goldenEraDate);
         }
+    }
+
+    public void removeGoldenEraDate() {
+        this.item.removeVariable("golden_era_date");
     }
 
     public Date getLastFocusMove() {
@@ -1926,6 +1928,34 @@ public class Country {
         return this.item.getVarAsBool("needs_rebel_unit_refresh");
     }
 
+    public Date lastBetrayedAlly() {
+        return this.item.getVarAsDate("last_betrayed_ally");
+    }
+
+    public void setLastBetrayedAlly(Date lastBetrayedAlly) {
+        this.item.setVariable("last_betrayed_ally", lastBetrayedAlly);
+    }
+
+    public Date lastBankrupt() {
+        return this.item.getVarAsDate("last_bankrupt");
+    }
+
+    public void setLastBankrupt(Date lastBankrupt) {
+        this.item.setVariable("last_bankrupt", lastBankrupt);
+    }
+
+    public Double getWarExhaustion() {
+        return this.item.getVarAsDouble("war_exhaustion");
+    }
+
+    public void setWarExhaustion(double warExhaustion) {
+        this.item.setVariable("war_exhaustion", warExhaustion);
+    }
+
+    public Double getMonthlyWarExhaustion() {
+        return this.item.getVarAsDouble("monthly_war_exhaustion");
+    }
+
     public Boolean canTakeWartaxes() {
         return this.item.getVarAsBool("can_take_wartaxes");
     }
@@ -2459,7 +2489,7 @@ public class Country {
         return activeRelations.get(tag);
     }
 
-    public List<Leader> getLeaders() {
+    public Map<Long, Leader> getLeaders() {
         return leaders;
     }
 
@@ -2468,6 +2498,26 @@ public class Country {
         Id.addToItem(this.item, "leader", leaderId, 49);
         this.history.addLeader(date, name, type, manuever, fire, shock, siege, personality, leaderId);
         refreshAttributes();
+    }
+
+    public void removeLeader(long id) {
+        Leader leader = this.leaders.get(id);
+
+        if (leader != null) {
+            this.armies.values()
+                       .stream()
+                       .filter(army -> army.getLeader().getId().equals(id))
+                       .findFirst().ifPresent(AbstractArmy::removeLeader);
+
+            List<Id> leadersIds = this.item.getChildren("leader").stream().map(Id::new).collect(Collectors.toList());
+
+            for (int i = 0; i < leadersIds.size(); i++) {
+                if (leadersIds.get(i).getId().equals(id)) {
+                    this.item.removeChild("leader", i);
+                    break;
+                }
+            }
+        }
     }
 
     public Integer getDecisionSeed() {
@@ -3012,12 +3062,12 @@ public class Country {
 
 
             if (this.history.getLeaders() != null) {
-                this.leaders = new ArrayList<>();
+                this.leaders = new HashMap<>();
                 List<ClausewitzItem> leadersItems = this.item.getChildren("leader");
                 if (!leadersItems.isEmpty()) {
                     leadersItems.forEach(leaderItem -> {
                         Id leaderId = new Id(leaderItem);
-                        this.leaders.add(this.history.getLeader(leaderId.getId()));
+                        this.leaders.put(leaderId.getId(), this.history.getLeader(leaderId.getId()));
                     });
                 }
             }

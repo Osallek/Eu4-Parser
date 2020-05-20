@@ -49,6 +49,10 @@ public abstract class AbstractArmy {
         return leader;
     }
 
+    public void removeLeader() {
+        this.item.removeChild("leader");
+    }
+
     public Integer getPrevious() {
         return this.item.getVarAsInt("previous");
     }

@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 
 public class Province {
 
-    //Todo ajouter/retirer batiments
-
     private final ClausewitzItem item;
 
     private final Save save;
@@ -492,6 +490,37 @@ public class Province {
 
     public List<Building> getBuildings() {
         return buildings;
+    }
+
+    public void addBuilding(String name, String builder) {
+        ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders");
+        ClausewitzItem buildingsItem = this.item.getChild("buildings");
+
+        if (buildingsBuildersItem == null) {
+            buildingsBuildersItem = this.item.addChild("building_builders");
+        }
+
+        if (buildingsItem == null) {
+            buildingsItem = this.item.addChild("buildings");
+        }
+
+        if (buildingsItem.getVar(name) == null) {
+            buildingsItem.addVariable(name, true);
+            buildingsBuildersItem.addVariable(name, ClausewitzUtils.addQuotes(builder));
+        }
+    }
+
+    public void removeBuilding(String name) {
+        ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders");
+        ClausewitzItem buildingsItem = this.item.getChild("buildings");
+
+        if (buildingsBuildersItem != null) {
+            buildingsBuildersItem.removeVariable(name);
+        }
+
+        if (buildingsItem != null) {
+            buildingsItem.removeVariable(name);
+        }
     }
 
     public History getHistory() {
