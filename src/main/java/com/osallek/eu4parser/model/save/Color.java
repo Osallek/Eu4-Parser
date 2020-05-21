@@ -19,23 +19,23 @@ public class Color {
         this.list.set(0, red);
     }
 
-    public int getBlue() {
+    public int getGreen() {
         return this.list.getAsInt(1);
     }
 
-    public void setBlue(int blue) {
-        this.list.set(1, blue);
+    public void setGreen(int green) {
+        this.list.set(1, green);
     }
 
-    public int getGreen() {
+    public int getBlue() {
         return this.list.getAsInt(2);
     }
 
-    public void setGreen(int green) {
-        this.list.set(2, green);
+    public void setBlue(int blue) {
+        this.list.set(2, blue);
     }
 
-    public static ClausewitzList addToItem(ClausewitzItem parent, String name, int red, int blue, int green) {
-        return parent.addList(name, red, blue, green);
+    public static ClausewitzList addToItem(ClausewitzItem parent, String name, int red, int green, int blue) {
+        return parent.addList(name, red, green, blue);
     }
 }

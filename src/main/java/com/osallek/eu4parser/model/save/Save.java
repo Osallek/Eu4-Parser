@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.save.combat.Combats;
 import com.osallek.eu4parser.model.save.counters.IdCounters;
@@ -48,6 +49,8 @@ public class Save {
     //Todo Teams
 
     private static final Logger LOGGER = Logger.getLogger(Save.class.getName());
+
+    private final Game game;
 
     private final ClausewitzItem aiItem;
 
@@ -103,20 +106,21 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    public Save(ClausewitzItem item) {
-        this(item, item, item, false);
+    public Save(String gameFolderPath, ClausewitzItem item) throws IOException {
+        this(gameFolderPath, item, item, item, false);
     }
 
-    public Save(ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem) {
-        this(gamestateItem, aiItem, metaItem, true);
+    public Save(String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem) throws IOException {
+        this(gameFolderPath, gamestateItem, aiItem, metaItem, true);
     }
 
-    private Save(ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed) {
+    private Save(String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed) throws IOException {
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
         refreshAttributes();
+        this.game = new Game(gameFolderPath, this);
     }
 
     public boolean isCompressed() {
