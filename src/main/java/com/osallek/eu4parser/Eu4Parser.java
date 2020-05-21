@@ -3,7 +3,7 @@ package com.osallek.eu4parser;
 import com.osallek.clausewitzparser.ClausewitzParser;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.common.Eu4Utils;
-import com.osallek.eu4parser.model.Save;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;

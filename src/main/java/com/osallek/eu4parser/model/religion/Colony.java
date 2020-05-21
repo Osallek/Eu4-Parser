@@ -1,6 +1,0 @@
-package com.osallek.eu4parser.model.religion;
-
-public enum Colony {
-    NOT_IN_COLONIAL_REGION, ALASKA, CANADA, EASTERN_AMERICA, LOUISIANA, CALIFORNIA, MEXICO, THE_CARRIBEAN, COLOMBIA,
-    PERU, LA_PLATA, BRAZIL, AUSTRALIA
-}
