@@ -13,8 +13,6 @@ import java.util.Map;
 
 public class Game {
 
-    File documents = new javax.swing.JFileChooser().getFileSystemView().getDefaultDirectory();
-
     private final String gameFolderPath;
 
     private final Save save;

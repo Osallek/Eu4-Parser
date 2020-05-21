@@ -11,7 +11,9 @@
   <name>Eu4 Parser</name>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>1.8</java.version>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <clausewitz-parser.version>1.0.0</clausewitz-parser.version>
@@ -24,19 +26,4 @@
       <version>${clausewitz-parser.version}</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
-          <configuration>
-            <release>${java.version}</release>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>

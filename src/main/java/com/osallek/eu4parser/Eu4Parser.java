@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -41,7 +42,7 @@ public class Eu4Parser {
 
     public static void writeSave(Save save, String path) throws IOException {
         if (save.isCompressed()) {
-            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Path.of(path))), ClausewitzUtils.CHARSET)) {
+            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))), ClausewitzUtils.CHARSET)) {
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.AI_FILE));
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, ClausewitzUtils.CHARSET));
                 save.writeAi(writer);
@@ -61,7 +62,7 @@ public class Eu4Parser {
                 outputStream.closeEntry();
             }
         } else {
-            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of(path), ClausewitzUtils.CHARSET)) {
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get(path), ClausewitzUtils.CHARSET)) {
                 save.writeAll(bufferedWriter);
             }
         }
