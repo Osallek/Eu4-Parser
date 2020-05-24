@@ -8,6 +8,7 @@ import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Army;
+import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Institution;
 import com.osallek.eu4parser.model.save.country.Modifier;
 import com.osallek.eu4parser.model.save.country.Navy;
@@ -25,6 +26,8 @@ public class Province {
     private final ClausewitzItem item;
 
     private final Save save;
+
+    private Country country;
 
     private ListOfDates flags;
 
@@ -46,14 +49,33 @@ public class Province {
 
     private Id rebelFaction;
 
+    private int red;
+
+    private int green;
+
+    private int blue;
+
+    private boolean isOcean;
+
+    private String climate;
+
+    private boolean impassable;
+
+    private String winter;
+
     public Province(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
+        this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(getOwner()));
         refreshAttributes();
     }
 
     public Save getSave() {
         return save;
+    }
+
+    public Country getCountry() {
+        return country;
     }
 
     public int getId() {
@@ -73,7 +95,7 @@ public class Province {
     }
 
     public String getTerritorialCore() {
-        return this.item.getVarAsString("territorial_core=");
+        return this.item.getVarAsString("territorial_core");
     }
 
     public String getOwner() {
@@ -85,17 +107,26 @@ public class Province {
 
         if (owner.length() == 5) {
             this.item.setVariable("owner", owner);
+            this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(owner));
         }
     }
 
-    public String getController() {
+    public String getControllerTag() {
         return this.item.getVarAsString("controller");
+    }
+
+    public Country getController() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
     }
 
     public void setController(String controller) {
         controller = ClausewitzUtils.addQuotes(controller);
 
         if (controller.length() == 5) {
+            if (getPreviousController() != null) {
+                setPreviousController(getPreviousController());
+            }
+
             this.item.setVariable("controller", controller);
         }
     }
@@ -180,7 +211,7 @@ public class Province {
         this.item.setVariable("exploit_date", exploitDate);
     }
 
-    public List<String> getCores() {
+    public List<String> getCoresTags() {
         ClausewitzList list = this.item.getList("cores");
 
         if (list == null) {
@@ -188,6 +219,10 @@ public class Province {
         }
 
         return list.getValues();
+    }
+
+    public List<Country> getCores() {
+        return getCoresTags().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public void addCore(String tag) {
@@ -307,7 +342,17 @@ public class Province {
     }
 
     public void setCapital(String capital) {
-        this.item.setVariable("capital", ClausewitzUtils.addQuotes(capital));
+        if (getCapital() != null) {
+            this.item.setVariable("capital", ClausewitzUtils.addQuotes(capital));
+        }
+    }
+
+    public boolean isColonizable() {
+        return !isOcean() && !isImpassable();
+    }
+
+    public boolean isOccupied() {
+        return getCountry() != null;
     }
 
     public boolean isCity() {
@@ -655,7 +700,7 @@ public class Province {
         this.item.setVariable("nationalism", nationalism);
     }
 
-    public Integer getWinter() {
+    public Integer getWinterLevel() {
         return this.item.getVarAsInt("winter");
     }
 
@@ -792,6 +837,34 @@ public class Province {
         return this.item.getVarAsInt("fort_flipper_prov");
     }
 
+    public int getRed() {
+        return red;
+    }
+
+    public int getGreen() {
+        return green;
+    }
+
+    public int getBlue() {
+        return blue;
+    }
+
+    public boolean isOcean() {
+        return isOcean;
+    }
+
+    public String getClimate() {
+        return climate;
+    }
+
+    public boolean isImpassable() {
+        return impassable;
+    }
+
+    public String getWinter() {
+        return winter;
+    }
+
     private void refreshAttributes() {
         ClausewitzItem flagsItem = this.item.getChild("flags");
 
@@ -875,6 +948,34 @@ public class Province {
                          .ifPresent(this.navies::add);
             });
         }
+    }
 
+    public void mergeWithGame(com.osallek.eu4parser.model.game.Province gameProvince) {
+        this.red = gameProvince.getRed();
+        this.green = gameProvince.getGreen();
+        this.blue = gameProvince.getBlue();
+        this.isOcean = gameProvince.isOcean();
+        this.climate = gameProvince.getClimate();
+        this.impassable = gameProvince.isImpassable();
+        this.winter = gameProvince.getWinter();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Province)) {
+            return false;
+        }
+
+        Province province = (Province) o;
+        return Objects.equals(getId(), province.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

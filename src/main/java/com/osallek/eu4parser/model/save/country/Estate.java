@@ -53,8 +53,8 @@ public class Estate {
         return list.getValues().stream().map(Integer::parseInt).collect(Collectors.toList());
     }
 
-    public void addProvince(Integer provinceId) {
-        if (this.country.getSave().getProvince(provinceId).getOwner().equalsIgnoreCase(this.country.getTag())) {
+    public void addProvince(int provinceId) {
+        if (this.country.getSave().getProvince(provinceId).getCountry().equals(this.country)) {
             ClausewitzList list = this.item.getList("provinces");
 
             if (list != null) {

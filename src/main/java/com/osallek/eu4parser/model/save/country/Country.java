@@ -43,6 +43,8 @@ public class Country {
 
     private final Save save;
 
+    private final boolean isPlayable;
+
     private String player;
 
     private Integer greatPowerRank;
@@ -140,6 +142,7 @@ public class Country {
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
+        this.isPlayable = !"---".equals(getTag()) && !"REB".equals(getTag()) && !"NAT".equals(getTag()) && !"PIR".equals(getTag());
         refreshAttributes();
     }
 
@@ -149,6 +152,10 @@ public class Country {
 
     public String getTag() {
         return this.item.getName();
+    }
+
+    public boolean isPlayable() {
+        return isPlayable;
     }
 
     public Boolean isHuman() {
@@ -452,7 +459,7 @@ public class Country {
     }
 
     public void setCapital(int provinceId) {
-        if (this.save.getProvince(provinceId).getOwner().equalsIgnoreCase(getTag())) {
+        if (this.save.getProvince(provinceId).getCountry().equals(this)) {
             ClausewitzVariable var = this.item.getVar("capital");
 
             if (var != null) {
@@ -482,7 +489,7 @@ public class Country {
     }
 
     public void setTradePort(Integer provinceId) {
-        if (this.save.getProvince(provinceId).getOwner().equalsIgnoreCase(getTag())) {
+        if (this.save.getProvince(provinceId).getCountry().equals(this)) {
             ClausewitzVariable var = this.item.getVar("trade_port");
 
             if (var != null) {
@@ -3102,5 +3109,24 @@ public class Country {
         if (countryMissionsItem != null) {
             this.countryMissions = new Missions(countryMissionsItem);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Country)) {
+            return false;
+        }
+
+        Country country = (Country) o;
+        return Objects.equals(getTag(), country.getTag());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTag());
     }
 }

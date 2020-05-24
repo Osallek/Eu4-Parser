@@ -31,6 +31,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -49,6 +50,8 @@ public class Save {
     //Todo Teams
 
     private static final Logger LOGGER = Logger.getLogger(Save.class.getName());
+
+    private final String name;
 
     private final Game game;
 
@@ -90,6 +93,8 @@ public class Save {
 
     private Map<String, Country> countries;
 
+    private List<Country> playableCountries;
+
     private final SortedMap<Integer, Country> greatPowers = new TreeMap<>();
 
     private final Map<Long, Advisor> advisors = new HashMap<>();
@@ -106,15 +111,18 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    public Save(String gameFolderPath, ClausewitzItem item) throws IOException {
-        this(gameFolderPath, item, item, item, false);
+    private Map<Integer, Map<Integer, Map<Integer, Province>>> provincesByColor;
+
+    public Save(String name, String gameFolderPath, ClausewitzItem item) throws IOException {
+        this(name, gameFolderPath, item, item, item, false);
     }
 
-    public Save(String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem) throws IOException {
-        this(gameFolderPath, gamestateItem, aiItem, metaItem, true);
+    public Save(String name, String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem) throws IOException {
+        this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true);
     }
 
-    private Save(String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed) throws IOException {
+    private Save(String name, String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed) throws IOException {
+        this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
@@ -123,8 +131,16 @@ public class Save {
         this.game = new Game(gameFolderPath, this);
     }
 
+    public String getName() {
+        return name;
+    }
+
     public boolean isCompressed() {
         return compressed;
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public Date getDate() {
@@ -470,6 +486,10 @@ public class Save {
         return countries;
     }
 
+    public List<Country> getPlayableCountries() {
+        return playableCountries;
+    }
+
     public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties,
                                                   boolean quickPeace, boolean moveTraders, boolean takeDecisions,
                                                   boolean embraceInstitutions, boolean developProvinces,
@@ -558,6 +578,12 @@ public class Save {
 
     public String getChecksum() {
         return this.gamestateItem.getVarAsString("checksum");
+    }
+
+    public Province getProvinceByColor(int red, int green, int blue) {
+        return provincesByColor.getOrDefault(red, new HashMap<>())
+                               .getOrDefault(green, new HashMap<>())
+                               .getOrDefault(blue, null);
     }
 
     public void writeAi(BufferedWriter bufferedWriter) throws IOException {
@@ -681,6 +707,11 @@ public class Save {
                                           .stream()
                                           .map(countryItem -> new Country(countryItem, this))
                                           .collect(Collectors.toMap(Country::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
+            this.playableCountries = this.countries.values()
+                                                   .stream()
+                                                   .filter(Country::isPlayable)
+                                                   .sorted(Comparator.comparing(Country::getTag))
+                                                   .collect(Collectors.toList());
         }
 
         ClausewitzList playersCountriesList = this.gamestateItem.getList("players_countries");
@@ -838,5 +869,24 @@ public class Save {
         if (ideaDatesItem != null) {
             this.ideaDates = new ListOfDates(ideaDatesItem);
         }
+    }
+
+    public void updateProvinceByColor() {
+        this.provincesByColor = new HashMap<>();
+
+        this.provinces.values().forEach(province -> {
+            if (!this.provincesByColor.containsKey(province.getRed())) {
+                this.provincesByColor.put(province.getRed(), new HashMap<>());
+            }
+
+            Map<Integer, Map<Integer, Province>> greenMap = this.provincesByColor.get(province.getRed());
+
+            if (!greenMap.containsKey(province.getGreen())) {
+                greenMap.put(province.getGreen(), new HashMap<>());
+            }
+
+            Map<Integer, Province> blueMap = greenMap.get(province.getGreen());
+            blueMap.put(province.getBlue(), province);
+        });
     }
 }

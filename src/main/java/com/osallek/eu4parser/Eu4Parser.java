@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -29,11 +28,11 @@ public class Eu4Parser {
         if (file.canRead()) {
             try {
                 ZipFile zipFile = new ZipFile(path);
-                save = new Save(gameFolderPath, ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1),
+                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1));
             } catch (ZipException e) {
-                save = new Save(gameFolderPath, ClausewitzParser.parse(file, 1));
+                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1));
             }
         }
 

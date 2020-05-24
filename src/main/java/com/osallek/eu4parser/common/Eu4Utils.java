@@ -24,6 +24,8 @@ public final class Eu4Utils {
 
     public static final String DEFAULT_TAG_QUOTES = "\"" + DEFAULT_TAG + "\"";
 
+    public static final String IMPASSABLE_CLIMATE = "impassable";
+
     static {
         Calendar calendar = Calendar.getInstance();
         calendar.set(1, Calendar.JANUARY, 1, 0, 0, 0);
