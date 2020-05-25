@@ -1,0 +1,53 @@
+package com.osallek.eu4parser.model.game.culture;
+
+import com.osallek.clausewitzparser.model.ClausewitzItem;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class CultureGroup extends AbstractCulture {
+
+    private List<Culture> cultures;
+
+    public CultureGroup(ClausewitzItem item) {
+        super(item);
+        refreshAttributes();
+    }
+
+    public String getGraphicalCulture() {
+        return this.item.getVarAsString("graphical_culture");
+    }
+
+    public void setGraphicalCulture(String graphicalCulture) {
+        this.item.setVariable("graphical_culture", graphicalCulture);
+    }
+
+    public List<Culture> getCultures() {
+        return cultures;
+    }
+
+    @Override
+    public List<String> getPossibleMaleNames() {
+        return getMaleNames();
+    }
+
+    @Override
+    public List<String> getPossibleFemaleNames() {
+        return getFemaleNames();
+    }
+
+    @Override
+    public List<String> getPossibleDynastyNames() {
+        return getDynastyNames();
+    }
+
+    private void refreshAttributes() {
+        this.cultures = this.item.getChildren()
+                                 .stream()
+                                 .filter(child -> !"male_names".equals(child.getName())
+                                                  && !"female_names".equals(child.getName())
+                                                  && !"dynasty_names".equals(child.getName()))
+                                 .map(child -> new Culture(child, this))
+                                 .collect(Collectors.toList());
+    }
+}

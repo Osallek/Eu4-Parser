@@ -287,26 +287,31 @@ public class Country {
         }
     }
 
-    public List<Institution> getEmbracedInstitutions() {
+    public List<Boolean> getEmbracedInstitutions() {
         ClausewitzList list = this.item.getList("institutions");
-        List<Institution> institutions = new ArrayList<>();
 
         if (list != null) {
-            for (int i = 0; i < Institution.values().length; i++) {
-                if (1 == list.getAsInt(i)) {
-                    institutions.add(Institution.values()[i]);
-                }
-            }
+            return list.getValuesAsInt().stream().map(value -> 1 == value).collect(Collectors.toList());
         }
 
-        return institutions;
+        return new ArrayList<>();
     }
 
-    public void embracedInstitution(Institution institution, boolean embraced) {
+    public boolean getEmbracedInstitution(int institution) {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            list.set(institution.ordinal(), embraced ? 1 : 0);
+            return 1 == list.getAsInt(institution);
+        }
+
+        return false;
+    }
+
+    public void embracedInstitution(int institution, boolean embraced) {
+        ClausewitzList list = this.item.getList("institutions");
+
+        if (list != null) {
+            list.set(institution, embraced ? 1 : 0);
         }
     }
 

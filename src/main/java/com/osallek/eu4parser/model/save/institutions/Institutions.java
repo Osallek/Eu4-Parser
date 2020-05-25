@@ -13,27 +13,27 @@ public class Institutions {
         this.available = available;
     }
 
-    public boolean isAvailable(Institution institution) {
-        return this.available.getAsInt(institution.ordinal()) == 1;
+    public boolean isAvailable(int institution) {
+        return this.available.getAsInt(institution) == 1;
     }
 
-    public int getOrigin(Institution institution) {
-        return this.origins.getAsInt(institution.ordinal());
+    public int getOrigin(int institution) {
+        return this.origins.getAsInt(institution);
     }
 
-    public void changeOrigin(Institution institution, int provinceId) {
+    public void changeOrigin(int institution, int provinceId) {
         if (isAvailable(institution)) {
-            this.origins.set(institution.ordinal(), provinceId);
+            this.origins.set(institution, provinceId);
         }
     }
 
-    public void availableIn(Institution institution, int provinceId) {
-        this.available.set(institution.ordinal(), 1);
-        this.origins.set(institution.ordinal(), provinceId);
+    public void availableIn(int institution, int provinceId) {
+        this.available.set(institution, 1);
+        this.origins.set(institution, provinceId);
     }
 
-    public void disable(Institution institution) {
-        this.available.set(institution.ordinal(), 0);
-        this.origins.set(institution.ordinal(), 0);
+    public void disable(int institution) {
+        this.available.set(institution, 0);
+        this.origins.set(institution, 0);
     }
 }

@@ -4,20 +4,19 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.culture.Culture;
+import com.osallek.eu4parser.model.game.religion.Religion;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Army;
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4parser.model.save.country.Institution;
 import com.osallek.eu4parser.model.save.country.Modifier;
 import com.osallek.eu4parser.model.save.country.Navy;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -159,24 +158,31 @@ public class Province {
         return occupyingRebelFaction;
     }
 
-    public Map<Institution, Double> getEmbracedInstitutions() {
+    public List<Double> getInstitutionsProgress() {
         ClausewitzList list = this.item.getList("institutions");
-        Map<Institution, Double> institutions = new EnumMap<>(Institution.class);
 
         if (list != null) {
-            for (int i = 0; i < Institution.values().length; i++) {
-                institutions.put(Institution.values()[i], list.getAsDouble(i));
-            }
+            return list.getValuesAsDouble();
         }
 
-        return institutions;
+        return new ArrayList<>();
     }
 
-    public void setInstitution(Institution institution, double progress) {
+    public Double getInstitutionsProgress(int institution) {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            list.set(institution.ordinal(), progress);
+            return list.getAsDouble(institution);
+        }
+
+        return null;
+    }
+
+    public void setInstitutionProgress(int institution, double progress) {
+        ClausewitzList list = this.item.getList("institutions");
+
+        if (list != null) {
+            list.set(institution, progress);
         }
     }
 
@@ -225,6 +231,13 @@ public class Province {
         return getCoresTags().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
+    public void setCores(List<String> tags) {
+        ClausewitzList list = this.item.getList("cores");
+        list.clear();
+
+        tags.stream().map(ClausewitzUtils::addQuotes).filter(tag -> tag.length() == 5).forEach(list::add);
+    }
+
     public void addCore(String tag) {
         ClausewitzList list = this.item.getList("cores");
 
@@ -243,7 +256,7 @@ public class Province {
         }
     }
 
-    public List<String> getClaims() {
+    public List<String> getClaimsTags() {
         ClausewitzList list = this.item.getList("claims");
 
         if (list == null) {
@@ -251,6 +264,17 @@ public class Province {
         }
 
         return list.getValues();
+    }
+
+    public List<Country> getClaims() {
+        return getClaimsTags().stream().map(this.save::getCountry).collect(Collectors.toList());
+    }
+
+    public void setClaims(List<String> tags) {
+        ClausewitzList list = this.item.getList("claims");
+        list.clear();
+
+        tags.stream().map(ClausewitzUtils::addQuotes).filter(tag -> tag.length() == 5).forEach(list::add);
     }
 
     public void addClaim(String tag) {
@@ -313,8 +337,12 @@ public class Province {
         this.item.setVariable("original_culture", originalCulture);
     }
 
-    public String getCulture() {
+    public String getCultureName() {
         return this.item.getVarAsString("culture");
+    }
+
+    public Culture getCulture() {
+        return this.save.getGame().getCulture(getCultureName());
     }
 
     public void setCulture(String culture) {
@@ -329,8 +357,12 @@ public class Province {
         this.item.setVariable("original_religion", originalReligion);
     }
 
-    public String getReligion() {
+    public String getReligionName() {
         return this.item.getVarAsString("religion");
+    }
+
+    public Religion getReligion() {
+        return this.save.getGame().getReligion(getReligionName());
     }
 
     public void setReligion(String religion) {

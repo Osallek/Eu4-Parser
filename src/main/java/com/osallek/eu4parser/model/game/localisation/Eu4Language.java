@@ -26,7 +26,7 @@ public enum Eu4Language {
         Arrays.stream(values()).forEach(eu4Language -> BY_LANGUAGE.put(eu4Language.locale.getLanguage(), eu4Language));
     }
 
-    public Eu4Language getByLocale(Locale locale) {
+    public static Eu4Language getByLocale(Locale locale) {
         return BY_LANGUAGE.getOrDefault(locale.getLanguage(), ENGLISH);
     }
 }
