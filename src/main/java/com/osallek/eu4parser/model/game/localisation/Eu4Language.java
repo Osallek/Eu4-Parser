@@ -1,4 +1,4 @@
-package com.osallek.eu4parser.model.game;
+package com.osallek.eu4parser.model.game.localisation;
 
 import java.util.Arrays;
 import java.util.HashMap;
