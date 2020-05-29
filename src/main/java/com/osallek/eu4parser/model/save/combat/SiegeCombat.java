@@ -78,6 +78,6 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
     }
 
     public boolean active() {
-        return this.item.getVarAsBool("active");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("active"));
     }
 }

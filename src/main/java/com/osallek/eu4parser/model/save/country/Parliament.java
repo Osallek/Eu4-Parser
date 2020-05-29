@@ -24,7 +24,7 @@ public class Parliament {
     }
 
     public boolean getRecalculateIssues() {
-        return this.item.getVarAsBool("recalculate_issues");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("recalculate_issues"));
     }
 
     public String getEnactedParliamentIssue() {

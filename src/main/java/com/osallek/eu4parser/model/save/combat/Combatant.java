@@ -29,7 +29,7 @@ public abstract class Combatant {
     }
 
     public boolean isAttacker() {
-        return this.item.getVarAsBool("is_attacker");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("is_attacker"));
     }
 
     public Id getUnit() {
@@ -45,7 +45,7 @@ public abstract class Combatant {
     }
 
     public boolean arranged() {
-        return this.item.getVarAsBool("arranged");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("arranged"));
     }
 
     private void refreshAttributes() {

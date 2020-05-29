@@ -1,10 +1,16 @@
 package com.osallek.eu4parser.common;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
+import com.osallek.eu4parser.model.game.Building;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 public final class Eu4Utils {
 
@@ -39,5 +45,35 @@ public final class Eu4Utils {
         } catch (ParseException e) {
             return null;
         }
+    }
+
+    public static List<List<Building>> buildingsTree(List<Building> buildings) {
+        List<List<Building>> tree = new ArrayList<>();
+
+        Iterator<Building> iterator = buildings.iterator();
+        while (iterator.hasNext()) {
+            Building building = iterator.next();
+            if (ClausewitzUtils.isBlank(building.getMakeObsolete())) {
+                List<Building> buildingList = new ArrayList<>();
+                buildingList.add(building);
+                tree.add(buildingList);
+                iterator.remove();
+            }
+        }
+
+        while (!buildings.isEmpty()) {
+            iterator = buildings.iterator();
+            while (iterator.hasNext()) {
+                Building building = iterator.next();
+                for (List<Building> buildingList : tree) {
+                    if (buildingList.get(buildingList.size() - 1).getName().equals(building.getMakeObsolete())) {
+                        buildingList.add(building);
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+
+        return tree;
     }
 }

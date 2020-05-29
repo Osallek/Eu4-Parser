@@ -16,7 +16,7 @@ public class History {
 
     private final ClausewitzItem item;
 
-    private final Province province;
+    private final SaveProvince province;
 
     private SortedMap<Date, String> owners;
 
@@ -28,7 +28,7 @@ public class History {
 
     private Map<Long, Advisor> advisors;
 
-    public History(ClausewitzItem item, Province province) {
+    public History(ClausewitzItem item, SaveProvince province) {
         this.item = item;
         this.province = province;
         refreshAttributes();

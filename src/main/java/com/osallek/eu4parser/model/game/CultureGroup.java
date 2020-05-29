@@ -1,4 +1,4 @@
-package com.osallek.eu4parser.model.game.culture;
+package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
@@ -9,9 +9,19 @@ public class CultureGroup extends AbstractCulture {
 
     private List<Culture> cultures;
 
+    private String localizedName;
+
     public CultureGroup(ClausewitzItem item) {
         super(item);
         refreshAttributes();
+    }
+
+    public String getLocalizedName() {
+        return localizedName;
+    }
+
+    void setLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
     }
 
     public String getGraphicalCulture() {

@@ -4,8 +4,11 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
-import com.osallek.eu4parser.model.game.culture.Culture;
-import com.osallek.eu4parser.model.game.religion.Religion;
+import com.osallek.eu4parser.model.game.Building;
+import com.osallek.eu4parser.model.game.Province;
+import com.osallek.eu4parser.model.game.TradeGood;
+import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.Save;
@@ -20,7 +23,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Province {
+public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
+
+    //TODO DECOLONIZE PROVINCE: REMOVE: IS_CITY, CLAIMS, CORES, CONTROLLER, OWNER (add natives), TRADE_GOODS = unknown
 
     private final ClausewitzItem item;
 
@@ -32,7 +37,9 @@ public class Province {
 
     private Id occupyingRebelFaction;
 
-    private List<Building> buildings;
+    private List<ProvinceBuilding> buildings = new ArrayList<>();
+
+    private boolean buildingsUpdated;
 
     private History history;
 
@@ -48,21 +55,8 @@ public class Province {
 
     private Id rebelFaction;
 
-    private int red;
-
-    private int green;
-
-    private int blue;
-
-    private boolean isOcean;
-
-    private String climate;
-
-    private boolean impassable;
-
-    private String winter;
-
-    public Province(ClausewitzItem item, Save save) {
+    public SaveProvince(ClausewitzItem item, Province province, Save save) {
+        super(province);
         this.item = item;
         this.save = save;
         this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(getOwner()));
@@ -77,10 +71,12 @@ public class Province {
         return country;
     }
 
+    //Not override because prefer using the parent when possible
     public int getId() {
         return Math.abs(Integer.parseInt(this.item.getName()));
     }
 
+    @Override
     public String getName() {
         return this.item.getVarAsString("name");
     }
@@ -379,16 +375,12 @@ public class Province {
         }
     }
 
-    public boolean isColonizable() {
-        return !isOcean() && !isImpassable();
-    }
-
     public boolean isOccupied() {
         return getCountry() != null;
     }
 
     public boolean isCity() {
-        return this.item.getVarAsBool("is_city");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("is_city"));
     }
 
     public Double getColonySize() {
@@ -499,6 +491,10 @@ public class Province {
         return this.item.getVarAsString("trade_goods");
     }
 
+    public TradeGood getTradeGood() {
+        return this.save.getGame().getTradeGood(getTradeGoods());
+    }
+
     public void setTradeGoods(String tradeGoods) {
         this.item.setVariable("trade_goods", tradeGoods);
     }
@@ -511,6 +507,10 @@ public class Province {
         } else {
             return null;
         }
+    }
+
+    public TradeGood getLatentTradeGood() {
+        return this.save.getGame().getTradeGood(getLatentTradeGoods());
     }
 
     public void setLatentTradeGoods(String latentTradeGoods) {
@@ -550,7 +550,7 @@ public class Province {
     }
 
     public boolean inHre() {
-        return this.item.getVarAsBool("hre");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("hre"));
     }
 
     public void setInHre(boolean inHre) {
@@ -558,32 +558,71 @@ public class Province {
     }
 
     public boolean blockade() {
-        return this.item.getVarAsBool("blockade");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("blockade"));
     }
 
     public Double getBlockadeEfficiency() {
         return this.item.getVarAsDouble("blockade_efficiency");
     }
 
-    public List<Building> getBuildings() {
-        return buildings;
+    public List<ProvinceBuilding> getBuildings() {
+        if (!this.buildingsUpdated) {
+            this.buildings = this.buildings.stream()
+                                           .map(building -> new ProvinceBuilding(building,
+                                                                                 this.save.getGame()
+                                                                                          .getBuilding(building.getName())))
+                                           .collect(Collectors.toList());
+            this.buildingsUpdated = true;
+        }
+
+        return this.buildings;
+    }
+
+    public List<Building> getAvailableBuildings() {
+        List<Building> availableBuildings = new ArrayList<>();
+
+        this.save.getGame().getBuildings().forEach(building -> {
+            if (building.onlyNative() && this.country != null && !"native".equals(this.country.getGovernment().getType())) {
+                return;
+            }
+
+            if (building.onlyInPort() && !isPort()) {
+                return;
+            }
+
+            if (!building.getManufactoryFor().isEmpty() && !building.getManufactoryFor().contains(getTradeGood())) {
+                return;
+            }
+
+            availableBuildings.add(building);
+        });
+
+        return availableBuildings;
+    }
+
+    public List<List<Building>> getAvailableBuildingsTree() {
+        return Eu4Utils.buildingsTree(getAvailableBuildings());
     }
 
     public void addBuilding(String name, String builder) {
-        ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders");
-        ClausewitzItem buildingsItem = this.item.getChild("buildings");
+        if (isColonizable()) {
+            ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders");
+            ClausewitzItem buildingsItem = this.item.getChild("buildings");
 
-        if (buildingsBuildersItem == null) {
-            buildingsBuildersItem = this.item.addChild("building_builders");
-        }
+            if (buildingsBuildersItem == null) {
+                buildingsBuildersItem = this.item.addChild("building_builders");
+            }
 
-        if (buildingsItem == null) {
-            buildingsItem = this.item.addChild("buildings");
-        }
+            if (buildingsItem == null) {
+                buildingsItem = this.item.addChild("buildings");
+            }
 
-        if (buildingsItem.getVar(name) == null) {
-            buildingsItem.addVariable(name, true);
-            buildingsBuildersItem.addVariable(name, ClausewitzUtils.addQuotes(builder));
+            if (buildingsItem.getVar(name) == null) {
+                buildingsItem.addVariable(name, true);
+                buildingsBuildersItem.addVariable(name, ClausewitzUtils.addQuotes(builder));
+            }
+
+            refreshAttributes();
         }
     }
 
@@ -598,6 +637,8 @@ public class Province {
         if (buildingsItem != null) {
             buildingsItem.removeVariable(name);
         }
+
+        refreshAttributes();
     }
 
     public History getHistory() {
@@ -780,7 +821,7 @@ public class Province {
     }
 
     public boolean fortMothballed() {
-        return this.item.getVarAsBool("mothball_command");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("mothball_command"));
     }
 
     public void setFortMothballed(boolean fortMothballed) {
@@ -796,11 +837,11 @@ public class Province {
     }
 
     public boolean userChangedName() {
-        return this.item.getVarAsBool("user_changed_name");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("user_changed_name"));
     }
 
     public boolean hreLiberated() {
-        return this.item.getVarAsBool("hre_liberated");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("hre_liberated"));
     }
 
     public void setHreLiberated(boolean hreLiberated) {
@@ -869,34 +910,6 @@ public class Province {
         return this.item.getVarAsInt("fort_flipper_prov");
     }
 
-    public int getRed() {
-        return red;
-    }
-
-    public int getGreen() {
-        return green;
-    }
-
-    public int getBlue() {
-        return blue;
-    }
-
-    public boolean isOcean() {
-        return isOcean;
-    }
-
-    public String getClimate() {
-        return climate;
-    }
-
-    public boolean isImpassable() {
-        return impassable;
-    }
-
-    public String getWinter() {
-        return winter;
-    }
-
     private void refreshAttributes() {
         ClausewitzItem flagsItem = this.item.getChild("flags");
 
@@ -919,20 +932,19 @@ public class Province {
         ClausewitzItem buildersItem = this.item.getChild("building_builders");
 
         if (buildersItem != null) {
-            this.buildings = new ArrayList<>();
             buildersItem.getVariables().forEach(var -> {
                 if (historyItem == null) {
-                    this.buildings.add(new Building(var.getName(), var.getValue(), null));
+                    this.buildings.add(new ProvinceBuilding(var.getName(), var.getValue(), null));
                 } else {
                     historyItem.getChildren()
                                .stream()
                                .filter(child -> child.getVar(var.getName()) != null)
                                .findFirst()
-                               .ifPresent(child -> this.buildings.add(new Building(var.getName(), var.getValue(),
-                                                                                   Eu4Utils.stringToDate(child.getName()))));
+                               .ifPresent(child -> this.buildings.add(new ProvinceBuilding(var.getName(), var.getValue(),
+                                                                                           Eu4Utils.stringToDate(child.getName()))));
                 }
             });
-            this.buildings.sort(Building::compareTo);
+            this.buildings.sort(ProvinceBuilding::compareTo);
         }
 
         ClausewitzItem discoveryDatesItem = this.item.getChild("discovery_dates2");
@@ -982,27 +994,17 @@ public class Province {
         }
     }
 
-    public void mergeWithGame(com.osallek.eu4parser.model.game.Province gameProvince) {
-        this.red = gameProvince.getRed();
-        this.green = gameProvince.getGreen();
-        this.blue = gameProvince.getBlue();
-        this.isOcean = gameProvince.isOcean();
-        this.climate = gameProvince.getClimate();
-        this.impassable = gameProvince.isImpassable();
-        this.winter = gameProvince.getWinter();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
 
-        if (!(o instanceof Province)) {
+        if (!(o instanceof SaveProvince)) {
             return false;
         }
 
-        Province province = (Province) o;
+        SaveProvince province = (SaveProvince) o;
         return Objects.equals(getId(), province.getId());
     }
 

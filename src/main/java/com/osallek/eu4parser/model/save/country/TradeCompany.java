@@ -58,11 +58,11 @@ public class TradeCompany {
     }
 
     public boolean strongCompany() {
-        return this.item.getVarAsBool("strong_company");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("strong_company"));
     }
 
     public boolean promoteInvestments() {
-        return this.item.getVarAsBool("promote_investments");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("promote_investments"));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String owner, Integer... provinces) {

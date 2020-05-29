@@ -21,8 +21,7 @@ public abstract class Empire {
     }
 
     public boolean dismantled() {
-        ClausewitzVariable dismantledVar = this.item.getVar("hre_dismantled");
-        return dismantledVar != null && dismantledVar.getAsBool();
+        return Boolean.TRUE.equals(this.item.getVarAsBool("hre_dismantled"));
     }
 
     public void dismantle() {

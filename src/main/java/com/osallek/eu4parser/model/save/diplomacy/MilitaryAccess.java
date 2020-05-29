@@ -11,7 +11,7 @@ public class MilitaryAccess extends DatableRelation {
     }
 
     public boolean enforcePeace() {
-        return this.item.getVarAsBool("enforce_peace");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("enforce_peace"));
     }
 
     public void setEnforcePeace(boolean enforcePeace) {

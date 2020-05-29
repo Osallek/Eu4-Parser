@@ -1,7 +1,5 @@
 package com.osallek.eu4parser.model.game;
 
-import com.osallek.eu4parser.common.Eu4Utils;
-
 public class Province {
 
     private final int id;
@@ -16,11 +14,15 @@ public class Province {
 
     private boolean isOcean = false;
 
+    private boolean isLake = false;
+
     private String climate;
 
     private boolean impassable;
 
     private String winter;
+
+    private boolean isPort;
 
     public Province(String[] csvLine) {
         this.id = Integer.parseInt(csvLine[0]);
@@ -28,6 +30,20 @@ public class Province {
         this.green = Integer.parseInt(csvLine[2]);
         this.blue = Integer.parseInt(csvLine[3]);
         this.name = csvLine[4];
+    }
+
+    public Province(Province other) {
+        this.id = other.id;
+        this.red = other.red;
+        this.green = other.green;
+        this.blue = other.blue;
+        this.name = other.name;
+        this.isOcean = other.isOcean;
+        this.isLake = other.isLake;
+        this.climate = other.climate;
+        this.impassable = other.impassable;
+        this.winter = other.winter;
+        this.isPort = other.isPort;
     }
 
     public int getId() {
@@ -54,8 +70,16 @@ public class Province {
         return isOcean;
     }
 
-    void setOcean(boolean ocean) {
-        isOcean = ocean;
+    void setOcean(boolean isOcean) {
+        this.isOcean = isOcean;
+    }
+
+    public boolean isLake() {
+        return isLake;
+    }
+
+    void setLake(boolean isLake) {
+        this.isLake = isLake;
     }
 
     public String getClimate() {
@@ -80,5 +104,17 @@ public class Province {
 
     void setWinter(String winter) {
         this.winter = winter;
+    }
+
+    public boolean isColonizable() {
+        return !isOcean() && !isLake() && !isImpassable();
+    }
+
+    public boolean isPort() {
+        return isPort;
+    }
+
+    void setPort(boolean isPort) {
+        this.isPort = isPort;
     }
 }

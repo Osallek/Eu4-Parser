@@ -1,4 +1,4 @@
-package com.osallek.eu4parser.model.game.religion;
+package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
@@ -14,6 +14,8 @@ public class ReligionGroup {
 
     private List<Religion> religions;
 
+    private String localizedName;
+
     public ReligionGroup(ClausewitzItem item) {
         this.item = item;
         refreshAttributes();
@@ -27,8 +29,16 @@ public class ReligionGroup {
         this.item.setName(name);
     }
 
+    public String getLocalizedName() {
+        return localizedName;
+    }
+
+    void setLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
+    }
+
     public boolean defenderOfFaith() {
-        return this.item.getVarAsBool("defender_of_faith");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("defender_of_faith"));
     }
 
     public void setDefenderOfFaith(boolean defenderOfFaith) {
@@ -36,7 +46,7 @@ public class ReligionGroup {
     }
 
     public boolean canFormPersonalUnions() {
-        return this.item.getVarAsBool("can_form_personal_unions");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("can_form_personal_unions"));
     }
 
     public void setCanFormPersonalUnions(boolean canFormPersonalUnions) {

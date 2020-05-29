@@ -77,11 +77,11 @@ public class TradeNodeCountry {
     }
 
     public boolean hasTrader() {
-        return this.item.getVarAsBool("has_trader");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("has_trader"));
     }
 
     public boolean hasCapital() {
-        return this.item.getVarAsBool("has_capital");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("has_capital"));
     }
 
     public List<TradeNodeModifier> getModifiers() {

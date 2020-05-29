@@ -36,7 +36,7 @@ public class Battle {
     }
 
     public boolean getResult() {
-        return this.item.getVarAsBool("result");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("result"));
     }
 
     public Double getWinnerAlliance() {

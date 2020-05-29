@@ -12,6 +12,8 @@ public class Institution {
 
     private final ClausewitzItem item;
 
+    private String localizedName;
+
     public Institution(ClausewitzItem item) {
         this.item = item;
     }
@@ -22,6 +24,14 @@ public class Institution {
 
     public void setName(String name) {
         this.item.setName(name);
+    }
+
+    public String getLocalizedName() {
+        return localizedName;
+    }
+
+    void setLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
     }
 
     public Double getPenalty() {

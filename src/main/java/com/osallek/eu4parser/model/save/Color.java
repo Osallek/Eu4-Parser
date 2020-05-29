@@ -35,6 +35,10 @@ public class Color {
         this.list.set(2, blue);
     }
 
+    public static ClausewitzList addToItem(ClausewitzItem parent, String name, Color color) {
+        return addToItem(parent, name, color.getRed(), color.getGreen(), color.getBlue());
+    }
+
     public static ClausewitzList addToItem(ClausewitzItem parent, String name, int red, int green, int blue) {
         return parent.addList(name, red, green, blue);
     }

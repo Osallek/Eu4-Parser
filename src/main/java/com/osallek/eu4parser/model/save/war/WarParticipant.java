@@ -28,7 +28,7 @@ public class WarParticipant {
     }
 
     public boolean getPromisedLand() {
-        return this.item.getVarAsBool("promised_land");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("promised_land"));
     }
 
     public void setPromisedLand(boolean promisedLand) {

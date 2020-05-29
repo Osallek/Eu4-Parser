@@ -11,7 +11,7 @@ public class KnowledgeSharing extends EndDatableRelation {
     }
 
     public boolean getSubjectInteractions() {
-        return this.item.getVarAsBool("subject_interactions");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("subject_interactions"));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, Date endDate, boolean subjectInteractions) {

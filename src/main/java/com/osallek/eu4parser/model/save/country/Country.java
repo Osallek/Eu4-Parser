@@ -45,6 +45,8 @@ public class Country {
 
     private final boolean isPlayable;
 
+    private String localizedName;
+
     private String player;
 
     private Integer greatPowerRank;
@@ -142,7 +144,8 @@ public class Country {
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
-        this.isPlayable = !"---".equals(getTag()) && !"REB".equals(getTag()) && !"NAT".equals(getTag()) && !"PIR".equals(getTag());
+        this.isPlayable = !"---".equals(getTag()) && !"REB".equals(getTag()) && !"NAT".equals(getTag())
+                          && !"PIR".equals(getTag()) && !getTag().matches("O[0-9]{2}");
         refreshAttributes();
     }
 
@@ -152,6 +155,16 @@ public class Country {
 
     public String getTag() {
         return this.item.getName();
+    }
+
+    public String getLocalizedName() {
+        return localizedName;
+    }
+
+    public void setLocalizedName(String localizedName) {
+        if (this.item.getVar("name") == null) {
+            this.localizedName = localizedName;
+        }
     }
 
     public boolean isPlayable() {
@@ -540,7 +553,7 @@ public class Country {
     }
 
     public boolean hasCircumnavigatedWorld() {
-        return this.item.getVarAsBool("has_circumnavigated_world");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("has_circumnavigated_world"));
     }
 
     public void setHasCircumnavigatedWorld(boolean hasCircumnavigatedWorld) {
@@ -554,15 +567,15 @@ public class Country {
     }
 
     public boolean initializedRivals() {
-        return this.item.getVarAsBool("initialized_rivals");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("initialized_rivals"));
     }
 
     public boolean recalculateStrategy() {
-        return this.item.getVarAsBool("recalculate_strategy");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("recalculate_strategy"));
     }
 
     public boolean dirtyColony() {
-        return this.item.getVarAsBool("dirty_colony");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("dirty_colony"));
     }
 
     public String getPrimaryCulture() {
@@ -804,7 +817,7 @@ public class Country {
     }
 
     public boolean getConvert() {
-        return this.item.getVarAsBool("convert");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("convert"));
     }
 
     public void setConvert(boolean convert) {
@@ -812,11 +825,11 @@ public class Country {
     }
 
     public boolean newMonarch() {
-        return this.item.getVarAsBool("new_monarch");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("new_monarch"));
     }
 
     public boolean isAtWar() {
-        return this.item.getVarAsBool("is_at_war");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("is_at_war"));
     }
 
     public Date lastElection() {
@@ -2581,7 +2594,7 @@ public class Country {
     }
 
     public boolean isGreatPower() {
-        return this.item.getVarAsBool("is_great_power");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("is_great_power"));
     }
 
     public Date getInauguration() {
@@ -2609,7 +2622,7 @@ public class Country {
     }
 
     public boolean getAssignedEstates() {
-        return this.item.getVarAsBool("assigned_estates");
+        return Boolean.TRUE.equals(this.item.getVarAsBool("assigned_estates"));
     }
 
     public List<Integer> getTradedBonus() {
@@ -2846,6 +2859,8 @@ public class Country {
     }
 
     private void refreshAttributes() {
+        this.localizedName = ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+
         ClausewitzItem playerAiPrefsCommandItem = this.item.getChild("player_ai_prefs_command");
 
         if (playerAiPrefsCommandItem != null) {

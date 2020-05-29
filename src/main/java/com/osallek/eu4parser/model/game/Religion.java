@@ -1,4 +1,4 @@
-package com.osallek.eu4parser.model.game.religion;
+package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
@@ -8,9 +8,19 @@ public class Religion {
 
     private final ReligionGroup religionGroup;
 
+    private String localizedName;
+
     public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
         this.item = item;
         this.religionGroup = religionGroup;
+    }
+
+    public String getLocalizedName() {
+        return localizedName;
+    }
+
+    void setLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
     }
 
     public String getName() {

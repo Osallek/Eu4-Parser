@@ -6,6 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.Province;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.save.combat.Combats;
 import com.osallek.eu4parser.model.save.counters.IdCounters;
@@ -21,12 +22,13 @@ import com.osallek.eu4parser.model.save.events.PendingEvents;
 import com.osallek.eu4parser.model.save.gameplayoptions.GameplayOptions;
 import com.osallek.eu4parser.model.save.institutions.Institutions;
 import com.osallek.eu4parser.model.save.province.Advisor;
-import com.osallek.eu4parser.model.save.province.Province;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.religion.Religions;
 import com.osallek.eu4parser.model.save.trade.TradeNode;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
 import com.osallek.eu4parser.model.save.war.PreviousWar;
 
+import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,7 +91,7 @@ public class Save {
 
     private PendingEvents pendingEvents;
 
-    private Map<Integer, Province> provinces;
+    private Map<Integer, SaveProvince> provinces;
 
     private Map<String, Country> countries;
 
@@ -111,8 +113,6 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    private Map<Integer, Map<Integer, Map<Integer, Province>>> provincesByColor;
-
     public Save(String name, String gameFolderPath, ClausewitzItem item) throws IOException {
         this(name, gameFolderPath, item, item, item, false);
     }
@@ -127,8 +127,8 @@ public class Save {
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
+        this.game = new Game(gameFolderPath);
         refreshAttributes();
-        this.game = new Game(gameFolderPath, this);
     }
 
     public String getName() {
@@ -198,7 +198,7 @@ public class Save {
     }
 
     public boolean isMultiPlayer() {
-        return this.metaItem.getVarAsBool("multi_player");
+        return Boolean.TRUE.equals(this.metaItem.getVarAsBool("multi_player"));
     }
 
     public GameplayOptions getGameplayOptions() {
@@ -470,11 +470,11 @@ public class Save {
         return pendingEvents;
     }
 
-    public Province getProvince(int id) {
+    public SaveProvince getProvince(int id) {
         return this.provinces.get(id);
     }
 
-    public Map<Integer, Province> getProvinces() {
+    public Map<Integer, SaveProvince> getProvinces() {
         return provinces;
     }
 
@@ -545,7 +545,7 @@ public class Save {
     }
 
     public boolean getAchievementOk() {
-        return this.gamestateItem.getVarAsBool("achievement_ok");
+        return Boolean.TRUE.equals(this.gamestateItem.getVarAsBool("achievement_ok"));
     }
 
     public void addTradeCompany(String name, String owner, Integer... provinces) {
@@ -580,10 +580,10 @@ public class Save {
         return this.gamestateItem.getVarAsString("checksum");
     }
 
-    public Province getProvinceByColor(int red, int green, int blue) {
-        return provincesByColor.getOrDefault(red, new HashMap<>())
-                               .getOrDefault(green, new HashMap<>())
-                               .getOrDefault(blue, null);
+    public SaveProvince getProvinceByColor(int red, int green, int blue) {
+        Province province = this.game.getProvinceByColor(red, green, blue);
+
+        return province == null ? null : (SaveProvince) province;
     }
 
     public void writeAi(BufferedWriter bufferedWriter) throws IOException {
@@ -710,7 +710,8 @@ public class Save {
             this.playableCountries = this.countries.values()
                                                    .stream()
                                                    .filter(Country::isPlayable)
-                                                   .sorted(Comparator.comparing(Country::getTag))
+                                                   .peek(country -> country.setLocalizedName(this.game.getLocalisation(country.getTag())))
+                                                   .sorted(Comparator.comparing(Country::getLocalizedName))
                                                    .collect(Collectors.toList());
         }
 
@@ -737,10 +738,20 @@ public class Save {
         ClausewitzItem provincesItems = this.gamestateItem.getChild("provinces");
 
         if (provincesItems != null) {
-            this.provinces = provincesItems.getChildren()
-                                           .stream()
-                                           .map(provinceItem -> new Province(provinceItem, this))
-                                           .collect(Collectors.toMap(Province::getId, Function.identity(), (x, y) -> y, LinkedHashMap::new));
+            this.provinces = new HashMap<>();
+            provincesItems.getChildren()
+                          .forEach(provinceItem -> {
+                              SaveProvince saveProvince = new SaveProvince(provinceItem,
+                                                                           this.game.getProvince(Math.abs(Integer.parseInt(provinceItem
+                                                                                                                                   .getName()))),
+                                                                           this);
+                              this.provinces.put(saveProvince.getId(), saveProvince);
+                              this.game.getProvinces()
+                                       .compute(saveProvince.getId(), (integer, province) -> province = saveProvince);
+                              this.game.getProvincesByColor()
+                                       .compute(new Color(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
+                                                (color, province) -> province = saveProvince);
+                          });
         }
 
         ClausewitzItem mapAreaDataItem = this.gamestateItem.getChild("map_area_data");
@@ -872,21 +883,6 @@ public class Save {
     }
 
     public void updateProvinceByColor() {
-        this.provincesByColor = new HashMap<>();
 
-        this.provinces.values().forEach(province -> {
-            if (!this.provincesByColor.containsKey(province.getRed())) {
-                this.provincesByColor.put(province.getRed(), new HashMap<>());
-            }
-
-            Map<Integer, Map<Integer, Province>> greenMap = this.provincesByColor.get(province.getRed());
-
-            if (!greenMap.containsKey(province.getGreen())) {
-                greenMap.put(province.getGreen(), new HashMap<>());
-            }
-
-            Map<Integer, Province> blueMap = greenMap.get(province.getGreen());
-            blueMap.put(province.getBlue(), province);
-        });
     }
 }

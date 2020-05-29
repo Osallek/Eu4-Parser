@@ -1,4 +1,4 @@
-package com.osallek.eu4parser.model.game.localisation;
+package com.osallek.eu4parser.model.game;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -6,10 +6,10 @@ import java.util.Locale;
 import java.util.Map;
 
 public enum Eu4Language {
-    ENGLISH("_l_english", Locale.ENGLISH),
-    FRENCH("_l_french", Locale.FRENCH),
-    GERMAN("_l_german", Locale.GERMAN),
-    SPANISH("_l_spanish", new Locale("es"));
+    ENGLISH("l_english", Locale.ENGLISH),
+    FRENCH("l_french", Locale.FRENCH),
+    GERMAN("l_german", Locale.GERMAN),
+    SPANISH("l_spanish", new Locale("es"));
 
     public final String fileEndWith;
 

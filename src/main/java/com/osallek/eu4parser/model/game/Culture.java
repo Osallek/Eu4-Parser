@@ -1,4 +1,4 @@
-package com.osallek.eu4parser.model.game.culture;
+package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
@@ -6,21 +6,26 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public abstract class AbstractCulture {
+public class Culture extends AbstractCulture {
 
-    protected final ClausewitzItem item;
+    private final CultureGroup cultureGroup;
 
-    public AbstractCulture(ClausewitzItem item) {
-        this.item = item;
+    private String localizedName;
+
+    public Culture(ClausewitzItem item, CultureGroup cultureGroup) {
+        super(item);
+        this.cultureGroup = cultureGroup;
     }
 
-    public String getName() {
-        return this.item.getName();
+    public String getLocalizedName() {
+        return localizedName;
     }
 
-    public void setName(String name) {
-        this.item.setName(name);
+    void setLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
     }
 
     public List<String> getMaleNames() {
@@ -33,7 +38,11 @@ public abstract class AbstractCulture {
         return list.getValues();
     }
 
-    public abstract List<String> getPossibleMaleNames();
+    @Override
+    public List<String> getPossibleMaleNames() {
+        return Stream.concat(getMaleNames().stream(), this.cultureGroup.getMaleNames().stream())
+                     .collect(Collectors.toList());
+    }
 
     public void setMaleNames(List<String> maleNames) {
         ClausewitzList list = this.item.getList("male_names");
@@ -70,7 +79,11 @@ public abstract class AbstractCulture {
         return list.getValues();
     }
 
-    public abstract List<String> getPossibleFemaleNames();
+    @Override
+    public List<String> getPossibleFemaleNames() {
+        return Stream.concat(getFemaleNames().stream(), this.cultureGroup.getFemaleNames().stream())
+                     .collect(Collectors.toList());
+    }
 
     public void setFemaleNames(List<String> femaleNames) {
         ClausewitzList list = this.item.getList("female_names");
@@ -107,7 +120,11 @@ public abstract class AbstractCulture {
         return list.getValues();
     }
 
-    public abstract List<String> getPossibleDynastyNames();
+    @Override
+    public List<String> getPossibleDynastyNames() {
+        return Stream.concat(getDynastyNames().stream(), this.cultureGroup.getDynastyNames().stream())
+                     .collect(Collectors.toList());
+    }
 
     public void setDynastyNames(List<String> dynastyNames) {
         ClausewitzList list = this.item.getList("dynasty_names");
