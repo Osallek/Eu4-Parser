@@ -13,6 +13,10 @@ public class Institutions {
         this.available = available;
     }
 
+    public int getNbInstitutions() {
+        return Math.min(this.origins.size(), this.available.size());
+    }
+
     public boolean isAvailable(int institution) {
         return this.available.getAsInt(institution) == 1;
     }

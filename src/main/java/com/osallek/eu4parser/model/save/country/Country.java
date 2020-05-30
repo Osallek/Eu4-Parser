@@ -162,8 +162,18 @@ public class Country {
     }
 
     public void setLocalizedName(String localizedName) {
-        if (this.item.getVar("name") == null) {
-            this.localizedName = localizedName;
+        String name = this.item.getVarAsString("name");
+
+        if (name != null) {
+            this.localizedName = ClausewitzUtils.removeQuotes(name);
+        } else {
+            name = this.item.getVarAsString("custom_name");
+
+            if (name != null) {
+                this.localizedName = ClausewitzUtils.removeQuotes(name);
+            } else {
+                this.localizedName = ClausewitzUtils.removeQuotes(localizedName);
+            }
         }
     }
 

@@ -19,6 +19,7 @@ import com.osallek.eu4parser.model.save.country.Navy;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
 
     private Id occupyingRebelFaction;
 
-    private List<ProvinceBuilding> buildings = new ArrayList<>();
+    private List<ProvinceBuilding> buildings;
 
     private boolean buildingsUpdated;
 
@@ -231,7 +232,7 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         ClausewitzList list = this.item.getList("cores");
         list.clear();
 
-        tags.stream().map(ClausewitzUtils::addQuotes).filter(tag -> tag.length() == 5).forEach(list::add);
+        tags.stream().map(ClausewitzUtils::removeQuotes).filter(tag -> tag.length() == 3).forEach(list::add);
     }
 
     public void addCore(String tag) {
@@ -381,6 +382,21 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
 
     public boolean isCity() {
         return Boolean.TRUE.equals(this.item.getVarAsBool("is_city"));
+    }
+
+    public void colonize(Country country) {
+        if (!isCity() && getColonySize() == null) {
+            setOwner(country.getTag());
+            setController(country.getTag());
+            setOriginalColoniser(country.getTag());
+            setOriginalCulture(country.getPrimaryCulture());
+            setCulture(country.getPrimaryCulture());
+            setReligion(country.getReligion());
+            setColonySize(1);
+            this.history.addEvent(this.save.getDate(), "owner", country.getTag());
+            this.history.addEvent(this.save.getDate(), "culture", country.getPrimaryCulture());
+            this.history.addEvent(this.save.getDate(), "religion", country.getReligion());
+        }
     }
 
     public Double getColonySize() {
@@ -581,27 +597,46 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
     public List<Building> getAvailableBuildings() {
         List<Building> availableBuildings = new ArrayList<>();
 
-        this.save.getGame().getBuildings().forEach(building -> {
-            if (building.onlyNative() && this.country != null && !"native".equals(this.country.getGovernment().getType())) {
-                return;
-            }
+        if (this.country != null) {
+            this.save.getGame().getBuildings().forEach(building -> {
+                if (building.onlyNative() && this.country != null && !"native".equals(this.country.getGovernment().getType())) {
+                    return;
+                }
 
-            if (building.onlyInPort() && !isPort()) {
-                return;
-            }
+                if (building.onlyInPort() && !isPort()) {
+                    return;
+                }
 
-            if (!building.getManufactoryFor().isEmpty() && !building.getManufactoryFor().contains(getTradeGood())) {
-                return;
-            }
+                if (!building.getManufactoryFor().isEmpty() && !building.getManufactoryFor().contains(getTradeGood())) {
+                    return;
+                }
 
-            availableBuildings.add(building);
-        });
+                availableBuildings.add(building);
+            });
+        }
 
         return availableBuildings;
     }
 
     public List<List<Building>> getAvailableBuildingsTree() {
         return Eu4Utils.buildingsTree(getAvailableBuildings());
+    }
+
+    public void setBuildings(List<Building> newBuildings) {
+        Iterator<ProvinceBuilding> iterator = this.buildings.iterator();
+
+        while (iterator.hasNext()) {
+            ProvinceBuilding provinceBuilding = iterator.next();
+
+            if (!newBuildings.contains(provinceBuilding)) {
+                removeBuildingNoRefresh(provinceBuilding.getName());
+                iterator.remove();
+            }
+
+            newBuildings.remove(provinceBuilding);
+        }
+
+        newBuildings.forEach(building -> addBuilding(building.getName(), getControllerTag()));
     }
 
     public void addBuilding(String name, String builder) {
@@ -620,13 +655,14 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
             if (buildingsItem.getVar(name) == null) {
                 buildingsItem.addVariable(name, true);
                 buildingsBuildersItem.addVariable(name, ClausewitzUtils.addQuotes(builder));
+                this.history.addEvent(this.save.getDate(), name, true);
             }
 
             refreshAttributes();
         }
     }
 
-    public void removeBuilding(String name) {
+    private void removeBuildingNoRefresh(String name) {
         ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders");
         ClausewitzItem buildingsItem = this.item.getChild("buildings");
 
@@ -637,7 +673,10 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         if (buildingsItem != null) {
             buildingsItem.removeVariable(name);
         }
+    }
 
+    public void removeBuilding(String name) {
+        removeBuildingNoRefresh(name);
         refreshAttributes();
     }
 
@@ -898,8 +937,12 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         return this.item.getVarAsInt("center_of_trade");
     }
 
-    public void setCenterOfTrade(int centerOfTrade) {
-        this.item.setVariable("center_of_trade", centerOfTrade);
+    public void setCenterOfTrade(Integer centerOfTrade) {
+        if (centerOfTrade == null || centerOfTrade == 0) {
+            this.item.removeVariable("center_of_trade");
+        } else {
+            this.item.setVariable("center_of_trade", centerOfTrade);
+        }
     }
 
     public Double getFortFlipProgress() {
@@ -930,6 +973,7 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         }
 
         ClausewitzItem buildersItem = this.item.getChild("building_builders");
+        this.buildings = new ArrayList<>();
 
         if (buildersItem != null) {
             buildersItem.getVariables().forEach(var -> {

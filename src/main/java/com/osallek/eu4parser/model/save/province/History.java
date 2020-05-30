@@ -54,6 +54,22 @@ public class History {
         return advisors;
     }
 
+    public void addEvent(Date date, String key, String value) {
+        if (date != null) {
+            ClausewitzItem eventItem = this.item.addChild(ClausewitzUtils.dateToString(date));
+            eventItem.addVariable(key, value);
+            refreshAttributes();
+        }
+    }
+
+    public void addEvent(Date date, String key, boolean value) {
+        if (date != null) {
+            ClausewitzItem eventItem = this.item.addChild(ClausewitzUtils.dateToString(date));
+            eventItem.addVariable(key, value);
+            refreshAttributes();
+        }
+    }
+
     private void refreshAttributes() {
         this.owners = this.item.getChildren()
                                .stream()

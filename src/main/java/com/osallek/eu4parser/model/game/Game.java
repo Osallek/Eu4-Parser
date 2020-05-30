@@ -115,6 +115,18 @@ public class Game {
         }
 
         int indexOf;
+        if ((indexOf = localisation.indexOf('§')) >= 0) {
+            if (ClausewitzUtils.hasAtLeast(localisation, '§', 2)) {
+                String[] splits = localisation.split("\\§");
+                localisation = "";
+                for (int i = 0; i < splits.length; i += 2) {
+                    localisation += splits[i] + " ";
+                }
+            } else {
+                localisation = localisation.substring(0, indexOf);
+            }
+        }
+
         if ((indexOf = localisation.indexOf('$')) >= 0) {
             if (ClausewitzUtils.hasAtLeast(localisation, '$', 2)) {
                 String[] splits = localisation.split("\\$");
@@ -129,7 +141,7 @@ public class Game {
 
         return localisation.replace("\\r\\n", "")
                            .replace("\\n", " ")
-                           .replaceAll("[^\\p{Alnum}\\p{Space}]", "")
+                           .replaceAll("[^\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
                            .trim();
     }
 
