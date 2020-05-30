@@ -1,9 +1,12 @@
 package com.osallek.eu4parser.model.game;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,6 +49,30 @@ public class Building {
 
     public void setName(String name) {
         this.item.setName(name);
+    }
+
+    public File getImageFile() {
+        SpriteType spriteType = this.game.getSpriteType("GFX_" + getName());
+
+        if (spriteType == null) {
+            return null;
+        }
+
+        File file = new File(this.game.getGameFolderPath() + File.separator
+                             + ClausewitzUtils.removeQuotes(spriteType.getTextureFile()));
+
+        if (file.exists()) {
+            return file;
+        }
+
+        //Fix some time files are not rightly registered (I don't know how the game loads them...)
+        if (file.toString().endsWith(".tga")) {
+            return new File(file.toString().replace(".tga", ".dds"));
+        } else if (file.toString().endsWith(".dds")) {
+            return new File(file.toString().replace(".dds", ".tga"));
+        }
+
+        return null;
     }
 
     public String getLocalizedName() {

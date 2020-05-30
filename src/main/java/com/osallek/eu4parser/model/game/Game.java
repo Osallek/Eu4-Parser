@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +44,8 @@ public class Game {
 
     private final String localisationFolderPath;
 
+    private final String interfaceFolderPath;
+
     private Map<Integer, Province> provinces;
 
     private Map<Color, Province> provincesByColor;
@@ -59,20 +62,48 @@ public class Game {
 
     private Map<String, String> localisations;
 
+    private Map<String, SpriteType> spriteTypes;
+
     public Game(String gameFolderPath) throws IOException {
         this.gameFolderPath = gameFolderPath;
         this.mapFolderPath = this.gameFolderPath + File.separator + "map";
         this.commonFolderPath = this.gameFolderPath + File.separator + "common";
         this.gfxFolderPath = this.gameFolderPath + File.separator + "gfx";
         this.localisationFolderPath = this.gameFolderPath + File.separator + "localisation";
+        this.interfaceFolderPath = this.gameFolderPath + File.separator + "interface";
 
         loadLocalisations();
+        readSpriteTypes();
         readProvinces();
         readCultures();
         readReligion();
         readInstitutions();
         readTradeGoods();
         readBuildings();
+    }
+
+    public String getGameFolderPath() {
+        return gameFolderPath;
+    }
+
+    public String getMapFolderPath() {
+        return mapFolderPath;
+    }
+
+    public String getCommonFolderPath() {
+        return commonFolderPath;
+    }
+
+    public String getGfxFolderPath() {
+        return gfxFolderPath;
+    }
+
+    public String getLocalisationFolderPath() {
+        return localisationFolderPath;
+    }
+
+    public String getInterfaceFolderPath() {
+        return interfaceFolderPath;
     }
 
     public File getProvincesImage() {
@@ -143,6 +174,10 @@ public class Game {
                            .replace("\\n", " ")
                            .replaceAll("[^\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
                            .trim();
+    }
+
+    public SpriteType getSpriteType(String key) {
+        return this.spriteTypes.get(key);
     }
 
     public Collection<CultureGroup> getCultureGroups() {
@@ -289,6 +324,36 @@ public class Game {
                 }
             }
         }
+    }
+
+    private void readSpriteTypes() {
+        File interfaceFolder = new File(this.interfaceFolderPath);
+
+        if (interfaceFolder.canRead()) {
+            try (Stream<Path> paths = Files.walk(interfaceFolder.toPath())) {
+                this.spriteTypes = new HashMap<>();
+
+                paths.filter(Files::isRegularFile)
+                     .filter(path -> path.toString().endsWith(".gfx"))
+                     .forEach(path -> {
+                         ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0);
+                         ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
+
+                         if (spriteTypesItem != null) {
+                             this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
+                                                                    .stream()
+                                                                    .map(SpriteType::new)
+                                                                    .collect(Collectors.toMap(spriteType -> ClausewitzUtils
+                                                                                                      .removeQuotes(spriteType
+                                                                                                                            .getName()),
+                                                                                              Function.identity(),
+                                                                                              (a, b) -> a)));
+                         }
+                     });
+            } catch (IOException e) {
+            }
+        }
+
     }
 
     private void readProvinces() throws IOException {
