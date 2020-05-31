@@ -792,16 +792,24 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         return this.item.getVarAsInt("native_hostileness");
     }
 
-    public void setNativeHostileness(int nativeHostileness) {
-        this.item.setVariable("native_hostileness", nativeHostileness);
+    public void setNativeHostileness(Integer nativeHostileness) {
+        if (nativeHostileness == null || nativeHostileness == 0) {
+            this.item.removeVariable("native_hostileness");
+        } else {
+            this.item.setVariable("native_hostileness", nativeHostileness);
+        }
     }
 
     public Integer getNativeFerocity() {
         return this.item.getVarAsInt("native_ferocity");
     }
 
-    public void setNativeFerocity(int nativeFerocity) {
-        this.item.setVariable("native_ferocity", nativeFerocity);
+    public void setNativeFerocity(Integer nativeFerocity) {
+        if (nativeFerocity == null || nativeFerocity == 0) {
+            this.item.removeVariable("native_ferocity");
+        } else {
+            this.item.setVariable("native_ferocity", nativeFerocity);
+        }
     }
 
     public Integer getNationalism() {
