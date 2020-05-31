@@ -788,6 +788,24 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         this.item.setVariable("former_native_size", ((double) formerNativeSize / 1000));
     }
 
+    public Integer getNativeSize() {
+        Double value = this.item.getVarAsDouble("native_size");
+
+        if (value != null) {
+            return (int) (value * 100);
+        }
+
+        return null;
+    }
+
+    public void setNativeSize(Integer nativeSize) {
+        if (nativeSize == null || nativeSize == 0) {
+            this.item.removeVariable("native_size");
+        } else {
+            this.item.setVariable("native_size", (Math.ceil((double) nativeSize / 100)));
+        }
+    }
+
     public Integer getNativeHostileness() {
         return this.item.getVarAsInt("native_hostileness");
     }
