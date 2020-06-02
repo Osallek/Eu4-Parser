@@ -6,7 +6,6 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,7 +26,7 @@ public class Building {
 
     private Integer internalTime;
 
-    private Map<String, Double> internalModifiers = new LinkedHashMap<>();
+    private Map<String, Double> internalModifiers;
 
     public Building(Building other) {
         this.item = other.item;
@@ -236,7 +235,7 @@ public class Building {
                                                           LinkedHashMap::new));
         }
 
-        return this.internalModifiers;
+        return this.internalModifiers == null ? new LinkedHashMap<>() : this.internalModifiers;
     }
 
     public void addModifier(String modifier, Double quantity) {

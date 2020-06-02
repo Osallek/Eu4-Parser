@@ -81,8 +81,8 @@ public class Army extends AbstractArmy {
         }
     }
 
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, long id, String name, int location,
-                                              String graphicalCulture, long regimentId, String regimentName,
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location,
+                                              String graphicalCulture, int regimentId, String regimentName,
                                               int regimentHome, String regimentType, double regimentMorale,
                                               double regimentDrill) {
         ClausewitzItem toItem = AbstractArmy.addToItem(parent, "army", name, location, graphicalCulture, id);

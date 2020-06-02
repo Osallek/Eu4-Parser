@@ -88,7 +88,7 @@ public class Ship {
         return lastTarget;
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, long id, String name, int home, String type, double morale) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "ship", parent.getOrder() + 1);
         Id.addToItem(toItem, id, 54);
         toItem.addVariable("name", name);

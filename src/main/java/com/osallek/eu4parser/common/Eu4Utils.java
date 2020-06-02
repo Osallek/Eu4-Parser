@@ -5,9 +5,7 @@ import com.osallek.eu4parser.model.game.Building;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -76,4 +74,8 @@ public final class Eu4Utils {
 
         return tree;
     }
+
+    public static int rgbToColor(int red, int green, int blue) {
+        return ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | ((blue & 0xFF));
+    };
 }

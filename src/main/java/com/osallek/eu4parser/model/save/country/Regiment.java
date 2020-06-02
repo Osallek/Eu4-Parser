@@ -31,7 +31,7 @@ public class Regiment extends Ship {
         }
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, long id, String name, int home, String type, double morale, double drill) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale, double drill) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "regiment", parent.getOrder() + 1);
         Id.addToItem(toItem, id, 54);
         toItem.addVariable("name", name);

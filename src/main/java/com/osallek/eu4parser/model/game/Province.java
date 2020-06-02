@@ -1,14 +1,12 @@
 package com.osallek.eu4parser.model.game;
 
+import com.osallek.eu4parser.common.Eu4Utils;
+
 public class Province {
 
     private final int id;
 
-    private final int red;
-
-    private final int green;
-
-    private final int blue;
+    private final int color;
 
     private final String name;
 
@@ -26,17 +24,13 @@ public class Province {
 
     public Province(String[] csvLine) {
         this.id = Integer.parseInt(csvLine[0]);
-        this.red = Integer.parseInt(csvLine[1]);
-        this.green = Integer.parseInt(csvLine[2]);
-        this.blue = Integer.parseInt(csvLine[3]);
+        this.color = Eu4Utils.rgbToColor(Integer.parseInt(csvLine[1]), Integer.parseInt(csvLine[2]), Integer.parseInt(csvLine[3]));
         this.name = csvLine[4];
     }
 
     public Province(Province other) {
         this.id = other.id;
-        this.red = other.red;
-        this.green = other.green;
-        this.blue = other.blue;
+        this.color = other.color;
         this.name = other.name;
         this.isOcean = other.isOcean;
         this.isLake = other.isLake;
@@ -51,15 +45,15 @@ public class Province {
     }
 
     public int getRed() {
-        return red;
+        return (this.color >> 16) & 0xFF;
     }
 
     public int getGreen() {
-        return green;
+        return (this.color >> 8) & 0xFF;
     }
 
     public int getBlue() {
-        return blue;
+        return (this.color) & 0xFF;
     }
 
     public String getName() {

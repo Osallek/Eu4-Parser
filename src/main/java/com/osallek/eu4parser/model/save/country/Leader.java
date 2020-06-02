@@ -111,7 +111,7 @@ public class Leader {
         if (idChild != null) {
             this.id = new Id(idChild);
         }
-        ClausewitzItem monarchIdChild = this.item.getChild("monarch_id");
+        ClausewitzItem monarchIdChild = this.item.getChild("monarch_id"); //10305
 
         if (monarchIdChild != null) {
             this.monarchId = new Id(monarchIdChild);
@@ -124,7 +124,7 @@ public class Leader {
                          leader.getId().getId());
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, Date activation, long id) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, Date activation, int id) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "leader", parent.getOrder() + 1);
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
         toItem.addVariable("type", type.name());
@@ -139,5 +139,10 @@ public class Leader {
         parent.addChild(toItem);
 
         return toItem;
+    }
+
+    @Override
+    public String toString() {
+        return "id=" + id.getId();
     }
 }

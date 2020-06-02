@@ -83,8 +83,8 @@ public class Navy extends Army {
         return this.item.getVarAsDouble("active_fraction_last_month");
     }
 
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, long id, String name, int location,
-                                              String graphicalCulture, long shipId, String shipName,
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location,
+                                              String graphicalCulture, int shipId, String shipName,
                                               int shipHome, String shipType, double shipMorale) {
         ClausewitzItem toItem = AbstractArmy.addToItem(parent, "navy", name, location, graphicalCulture, id);
         Ship.addToItem(toItem, shipId, shipName, shipHome, shipType, shipMorale);

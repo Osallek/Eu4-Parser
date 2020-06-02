@@ -26,7 +26,7 @@ public class History {
 
     private SortedMap<Date, String> cultures;
 
-    private Map<Long, Advisor> advisors;
+    private Map<Integer, Advisor> advisors;
 
     public History(ClausewitzItem item, SaveProvince province) {
         this.item = item;
@@ -50,7 +50,7 @@ public class History {
         return cultures;
     }
 
-    public Map<Long, Advisor> getAdvisors() {
+    public Map<Integer, Advisor> getAdvisors() {
         return advisors;
     }
 
@@ -138,12 +138,10 @@ public class History {
                                                             .filter(country -> country.getAdvisorsIds()
                                                                                       .contains(advisor.getId()))
                                                             .findFirst()
-                                                            .ifPresent(country -> country.getAdvisors()
-                                                                                         .put(advisor.getId().getId(),
-                                                                                              advisor)));
+                                                            .ifPresent(country -> country.addAdvisor(advisor)));
             }
 
-            this.province.getSave().getAdvisors().putAll(this.advisors);
+            this.province.getSave().putAllAdvisors(this.advisors);
         }
     }
 }

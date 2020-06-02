@@ -8,7 +8,6 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,7 +47,7 @@ public class Game {
 
     private Map<Integer, Province> provinces;
 
-    private Map<Color, Province> provincesByColor;
+    private Map<Integer, Province> provincesByColor;
 
     private Map<Path, List<CultureGroup>> cultureGroups;
 
@@ -126,12 +125,12 @@ public class Game {
         return this.provinces.get(i);
     }
 
-    public Map<Color, Province> getProvincesByColor() {
+    public Map<Integer, Province> getProvincesByColor() {
         return provincesByColor;
     }
 
     public Province getProvinceByColor(int red, int green, int blue) {
-        return this.provincesByColor.get(new Color(red, green, blue));
+        return this.provincesByColor.get(Eu4Utils.rgbToColor(red, green, blue));
     }
 
     public String getLocalisation(String key) {
@@ -148,7 +147,7 @@ public class Game {
         int indexOf;
         if ((indexOf = localisation.indexOf('§')) >= 0) {
             if (ClausewitzUtils.hasAtLeast(localisation, '§', 2)) {
-                String[] splits = localisation.split("\\§");
+                String[] splits = localisation.split("§");
                 localisation = "";
                 for (int i = 0; i < splits.length; i += 2) {
                     localisation += splits[i] + " ";
@@ -369,7 +368,7 @@ public class Game {
                 while ((line = reader.readLine()) != null) {
                     Province province = new Province(line.split(";"));
                     this.provinces.put(province.getId(), province);
-                    this.provincesByColor.put(new Color(province.getRed(), province.getGreen(), province.getBlue()), province);
+                    this.provincesByColor.put(Eu4Utils.rgbToColor(province.getRed(), province.getGreen(), province.getBlue()), province);
                 }
             }
 

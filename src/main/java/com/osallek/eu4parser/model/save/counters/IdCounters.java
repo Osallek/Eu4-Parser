@@ -10,16 +10,16 @@ public class IdCounters {
         this.list = list;
     }
 
-    public Long getCounter(Counter counter) {
-        return this.list.getAsLong(counter.ordinal());
+    public Integer getCounter(Counter counter) {
+        return this.list.getAsInt(counter.ordinal());
     }
 
-    public void setCounter(Counter counter, Long value) {
+    public void setCounter(Counter counter, Integer value) {
         this.list.set(counter.ordinal(), value);
     }
 
     public void incrementCounter(Counter counter) {
-        Long value = getCounter(counter);
+        Integer value = getCounter(counter);
 
         if (value == null) {
             this.list.set(counter.ordinal(), 1);
@@ -28,8 +28,8 @@ public class IdCounters {
         }
     }
 
-    public Long getAndIncrement(Counter counter) {
-        Long value = getCounter(counter);
+    public Integer getAndIncrement(Counter counter) {
+        Integer value = getCounter(counter);
 
         if (value == null) {
             this.list.set(counter.ordinal(), 1);

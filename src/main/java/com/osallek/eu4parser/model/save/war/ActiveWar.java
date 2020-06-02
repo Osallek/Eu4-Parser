@@ -23,9 +23,9 @@ public class ActiveWar {
 
     protected final ClausewitzItem item;
 
-    private final Map<String, WarParticipant> attackers = new HashMap<>();
+    private Map<String, WarParticipant> attackers;
 
-    private final Map<String, WarParticipant> defenders = new HashMap<>();
+    private Map<String, WarParticipant> defenders;
 
     private SortedMap<Date, Map<WarHistoryAction, List<String>>> actionsHistory;
 
@@ -53,43 +53,59 @@ public class ActiveWar {
     }
 
     public WarParticipant getAttacker(String attacker) {
-        return this.attackers.get(attacker);
+        if (this.attackers != null) {
+            return this.attackers.get(attacker);
+        }
+
+        return null;
     }
 
     public Map<String, WarParticipant> getAttackers() {
-        return attackers;
+        return this.attackers == null ? new HashMap<>() : this.attackers;
     }
 
     public Map<Losses, Integer> getAttackersLosses() {
-        return this.attackers.values()
-                             .stream()
-                             .map(WarParticipant::getLosses)
-                             .filter(Objects::nonNull)
-                             .flatMap(m -> m.entrySet().stream())
-                             .collect(Collectors.toMap(Map.Entry::getKey,
-                                                       Map.Entry::getValue,
-                                                       Integer::sum,
-                                                       () -> new EnumMap<>(Losses.class)));
+        if (this.attackers != null) {
+            return this.attackers.values()
+                                 .stream()
+                                 .map(WarParticipant::getLosses)
+                                 .filter(Objects::nonNull)
+                                 .flatMap(m -> m.entrySet().stream())
+                                 .collect(Collectors.toMap(Map.Entry::getKey,
+                                                           Map.Entry::getValue,
+                                                           Integer::sum,
+                                                           () -> new EnumMap<>(Losses.class)));
+        }
+
+        return new EnumMap<>(Losses.class);
     }
 
     public WarParticipant getDefender(String defender) {
-        return this.defenders.get(defender);
+        if (this.defenders != null) {
+            return this.defenders.get(defender);
+        }
+
+        return null;
     }
 
     public Map<String, WarParticipant> getDefenders() {
-        return defenders;
+        return this.defenders == null ? new HashMap<>() : this.defenders;
     }
 
     public Map<Losses, Integer> getDefendersLosses() {
-        return this.defenders.values()
-                             .stream()
-                             .map(WarParticipant::getLosses)
-                             .filter(Objects::nonNull)
-                             .flatMap(m -> m.entrySet().stream())
-                             .collect(Collectors.toMap(Map.Entry::getKey,
-                                                       Map.Entry::getValue,
-                                                       Integer::sum,
-                                                       () -> new EnumMap<>(Losses.class)));
+        if (this.defenders != null) {
+            return this.defenders.values()
+                                 .stream()
+                                 .map(WarParticipant::getLosses)
+                                 .filter(Objects::nonNull)
+                                 .flatMap(m -> m.entrySet().stream())
+                                 .collect(Collectors.toMap(Map.Entry::getKey,
+                                                           Map.Entry::getValue,
+                                                           Integer::sum,
+                                                           () -> new EnumMap<>(Losses.class)));
+        }
+
+        return new EnumMap<>(Losses.class);
     }
 
     public List<String> getPersistentAttackers() {
@@ -162,6 +178,8 @@ public class ActiveWar {
         ClausewitzList defendersList = this.item.getList("defenders");
 
         if (attackersList != null && defendersList != null) {
+            this.attackers = new HashMap<>();
+            this.defenders = new HashMap<>();
             participantsItems.forEach(participantsItem -> {
                 WarParticipant warParticipant = new WarParticipant(participantsItem);
 

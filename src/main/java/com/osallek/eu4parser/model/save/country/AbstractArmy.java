@@ -153,7 +153,7 @@ public abstract class AbstractArmy {
         return this.item.getVarAsBool("attrition");
     }
 
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, String itemName, String name, int location, String graphicalCulture, long id) {
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, String itemName, String name, int location, String graphicalCulture, int id) {
         ClausewitzItem toItem = new ClausewitzItem(parent, itemName, parent.getOrder() + 1);
         Id.addToItem(toItem, id, 54);
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));

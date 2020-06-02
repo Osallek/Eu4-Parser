@@ -12,19 +12,19 @@ public class Id {
         this.item = item;
     }
 
-    public Long getId() {
-        return this.item.getVarAsLong("id");
+    public Integer getId() {
+        return this.item.getVarAsInt("id");
     }
 
     public Integer getType() {
         return this.item.getVarAsInt("type");
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, long id, int type) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, int type) {
         return addToItem(parent, "id", id, type);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, long id, int type) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, int id, int type) {
         ClausewitzItem toItem = new ClausewitzItem(parent, name, parent.getOrder() + 1);
         toItem.addVariable("id", id);
         toItem.addVariable("type", type);

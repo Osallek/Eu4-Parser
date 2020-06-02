@@ -15,51 +15,48 @@ public class History {
 
     private final ClausewitzItem item;
 
-    private final Country country;
+    private Map<Integer, Monarch> monarchs;
 
-    private Map<Long, Monarch> monarchs;
+    private Map<Integer, Leader> leaders;
 
-    private Map<Long, Leader> leaders;
+    private Map<Integer, Heir> heirs;
 
-    private Map<Long, Heir> heirs;
+    private Map<Integer, Queen> queens;
 
-    private Map<Long, Queen> queens;
-
-    public History(ClausewitzItem item, Country country) {
+    public History(ClausewitzItem item) {
         this.item = item;
-        this.country = country;
         refreshAttributes();
     }
 
-    public Monarch getMonarch(long id) {
+    public Monarch getMonarch(int id) {
         return this.monarchs.get(id);
     }
 
-    public Map<Long, Monarch> getMonarchs() {
+    public Map<Integer, Monarch> getMonarchs() {
         return monarchs;
     }
 
-    public Leader getLeader(long id) {
+    public Leader getLeader(int id) {
         return this.leaders.get(id);
     }
 
-    public Map<Long, Leader> getLeaders() {
+    public Map<Integer, Leader> getLeaders() {
         return leaders;
     }
 
-    public Heir getHeir(long id) {
+    public Heir getHeir(int id) {
         return this.heirs.get(id);
     }
 
-    public Map<Long, Heir> getHeirs() {
+    public Map<Integer, Heir> getHeirs() {
         return heirs;
     }
 
-    public Queen getQueen(long id) {
+    public Queen getQueen(int id) {
         return this.queens.get(id);
     }
 
-    public Map<Long, Queen> getQueens() {
+    public Map<Integer, Queen> getQueens() {
         return queens;
     }
 
@@ -72,7 +69,7 @@ public class History {
         variables.forEach(child::addVariable);
     }
 
-    public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, long id) {
+    public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, int id) {
         ClausewitzItem child = this.item.addChild(ClausewitzUtils.dateToString(date));
         Leader.addToItem(child, name, type, manuever, fire, shock, siege, personality, date, id);
         refreshAttributes();

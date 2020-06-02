@@ -12,6 +12,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.Advisor;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -97,21 +98,21 @@ public class Country {
 
     private SubUnit subUnit;
 
-    private Map<Long, Army> armies;
+    private Map<Integer, Army> armies;
 
-    private Map<Long, Navy> navies;
+    private Map<Integer, Navy> navies;
 
     private Map<String, ActiveRelation> activeRelations;
 
-    private Map<Long, Leader> leaders;
+    private Map<Integer, Leader> leaders;
 
     private List<Id> previousMonarchs;
 
     private List<Id> advisorsIds;
 
-    private Map<Long, Advisor> advisors = new HashMap<>();
+    private Map<Integer, Advisor> advisors;
 
-    private Map<Long, Advisor> activeAdvisors = new HashMap<>();
+    private Map<Integer, Advisor> activeAdvisors;
 
     private Monarch monarch;
 
@@ -129,17 +130,17 @@ public class Country {
 
     private Missions countryMissions;
 
-    private Map<String, CountryState> states = new HashMap<>();
+    private Map<String, CountryState> states;
 
-    private SortedMap<Integer, Integer> incomeStatistics = new TreeMap<>();
+    private SortedMap<Integer, Integer> incomeStatistics;
 
-    private SortedMap<Integer, Integer> nationSizeStatistics = new TreeMap<>();
+    private SortedMap<Integer, Integer> nationSizeStatistics;
 
-    private SortedMap<Integer, Integer> scoreStatistics = new TreeMap<>();
+    private SortedMap<Integer, Integer> scoreStatistics;
 
-    private SortedMap<Integer, Integer> inflationStatistics = new TreeMap<>();
+    private SortedMap<Integer, Integer> inflationStatistics;
 
-    private List<TradeCompany> tradeCompanies = new ArrayList<>();
+    private List<TradeCompany> tradeCompanies;
 
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
@@ -179,6 +180,10 @@ public class Country {
 
     public boolean isPlayable() {
         return isPlayable;
+    }
+
+    public File getFlagFile() {
+        return this.save.getGame().getCountryFlagImage(this);
     }
 
     public Boolean isHuman() {
@@ -2478,11 +2483,11 @@ public class Country {
         }
     }
 
-    public Army getArmy(long id) {
+    public Army getArmy(int id) {
         return this.armies.get(id);
     }
 
-    public Map<Long, Army> getArmies() {
+    public Map<Integer, Army> getArmies() {
         return armies;
     }
 
@@ -2498,11 +2503,11 @@ public class Country {
         refreshAttributes();
     }
 
-    public Navy getNavy(long id) {
+    public Navy getNavy(int id) {
         return this.navies.get(id);
     }
 
-    public Map<Long, Navy> getNavies() {
+    public Map<Integer, Navy> getNavies() {
         return navies;
     }
 
@@ -2524,18 +2529,18 @@ public class Country {
         return activeRelations.get(tag);
     }
 
-    public Map<Long, Leader> getLeaders() {
+    public Map<Integer, Leader> getLeaders() {
         return leaders;
     }
 
     public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality) {
-        long leaderId = this.save.getIdCounters().getAndIncrement(Counter.LEADER);
+        int leaderId = this.save.getIdCounters().getAndIncrement(Counter.LEADER);
         Id.addToItem(this.item, "leader", leaderId, 49);
         this.history.addLeader(date, name, type, manuever, fire, shock, siege, personality, leaderId);
         refreshAttributes();
     }
 
-    public void removeLeader(long id) {
+    public void removeLeader(int id) {
         Leader leader = this.leaders.get(id);
 
         if (leader != null) {
@@ -2619,15 +2624,39 @@ public class Country {
         return advisorsIds;
     }
 
-    public Map<Long, Advisor> getAdvisors() {
-        return advisors;
+    public Map<Integer, Advisor> getInternalAdvisors() {
+        if (this.advisors == null) {
+            this.advisors = new HashMap<>();
+        }
+
+        return this.advisors;
     }
 
-    public Map<Long, Advisor> getActiveAdvisors() {
-        return activeAdvisors;
+    public Map<Integer, Advisor> getAdvisors() {
+        return this.advisors == null ? new HashMap<>() : this.advisors;
     }
 
-    public void setActiveAdvisors(Map<Long, Advisor> activeAdvisors) {
+    public void addAdvisor(Advisor advisor) {
+        getInternalAdvisors().put(advisor.getId().getId(), advisor);
+    }
+
+    public Map<Integer, Advisor> getInternalActiveAdvisors() {
+        if (this.activeAdvisors == null) {
+            this.activeAdvisors = new HashMap<>();
+        }
+
+        return this.activeAdvisors;
+    }
+
+    public Map<Integer, Advisor> getActiveAdvisors() {
+        return this.activeAdvisors == null ? new HashMap<>() : this.activeAdvisors;
+    }
+
+    public void addActiveAdvisor(Advisor advisor) {
+        getInternalActiveAdvisors().put(advisor.getId().getId(), advisor);
+    }
+
+    public void setActiveAdvisors(Map<Integer, Advisor> activeAdvisors) {
         this.activeAdvisors = activeAdvisors;
     }
 
@@ -2845,27 +2874,67 @@ public class Country {
     }
 
     public Map<String, CountryState> getStates() {
-        return states;
+        return this.states == null ? new HashMap<>() : this.states;
     }
 
     public SortedMap<Integer, Integer> getIncomeStatistics() {
-        return incomeStatistics;
+        return incomeStatistics == null ? new TreeMap<>() : this.incomeStatistics;
+    }
+
+    public void putAllIncomeStatistics(Map<Integer, Integer> incomeStatistics) {
+        if (this.incomeStatistics == null) {
+            this.incomeStatistics = new TreeMap<>();
+        }
+
+        this.incomeStatistics.putAll(incomeStatistics);
     }
 
     public SortedMap<Integer, Integer> getNationSizeStatistics() {
-        return nationSizeStatistics;
+        return nationSizeStatistics == null ? new TreeMap<>() : this.nationSizeStatistics;
+    }
+
+    public void putAllNationSizeStatistics(Map<Integer, Integer> nationSizeStatistics) {
+        if (this.nationSizeStatistics == null) {
+            this.nationSizeStatistics = new TreeMap<>();
+        }
+
+        this.nationSizeStatistics.putAll(nationSizeStatistics);
     }
 
     public SortedMap<Integer, Integer> getScoreStatistics() {
-        return scoreStatistics;
+        return scoreStatistics == null ? new TreeMap<>() : this.scoreStatistics;
+    }
+
+    public void putAllScoreStatistics(Map<Integer, Integer> scoreStatistics) {
+        if (this.scoreStatistics == null) {
+            this.scoreStatistics = new TreeMap<>();
+        }
+
+        this.scoreStatistics.putAll(scoreStatistics);
     }
 
     public SortedMap<Integer, Integer> getInflationStatistics() {
-        return inflationStatistics;
+        return inflationStatistics == null ? new TreeMap<>() : this.inflationStatistics;
+    }
+
+    public void putAllInflationStatistics(Map<Integer, Integer> inflationStatistics) {
+        if (this.inflationStatistics == null) {
+            this.inflationStatistics = new TreeMap<>();
+        }
+
+        this.inflationStatistics.putAll(inflationStatistics);
     }
 
     public List<TradeCompany> getTradeCompanies() {
-        return tradeCompanies;
+        return tradeCompanies == null ? new ArrayList<>() : this.tradeCompanies;
+    }
+
+    public void addTradeCompany(TradeCompany tradeCompany) {
+        if (this.tradeCompanies == null) {
+            this.tradeCompanies = new ArrayList<>(0);
+        }
+
+        this.tradeCompanies.add(tradeCompany);
     }
 
     private void refreshAttributes() {
@@ -2886,7 +2955,7 @@ public class Country {
         ClausewitzItem historyItem = this.item.getChild("history");
 
         if (historyItem != null) {
-            this.history = new History(historyItem, this);
+            this.history = new History(historyItem);
         }
 
         ClausewitzItem flagsItem = this.item.getChild("flags");

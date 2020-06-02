@@ -28,7 +28,6 @@ import com.osallek.eu4parser.model.save.trade.TradeNode;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
 import com.osallek.eu4parser.model.save.war.PreviousWar;
 
-import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -97,9 +96,9 @@ public class Save {
 
     private List<Country> playableCountries;
 
-    private final SortedMap<Integer, Country> greatPowers = new TreeMap<>();
+    private SortedMap<Integer, Country> greatPowers;
 
-    private final Map<Long, Advisor> advisors = new HashMap<>();
+    private Map<Integer, Advisor> advisors;
 
     private Diplomacy diplomacy;
 
@@ -217,14 +216,6 @@ public class Save {
         }
 
         this.gamestateItem.setVariable("speed", speed);
-    }
-
-    public Long getMultiplayerRandomSeed() {
-        return this.gamestateItem.getVarAsLong("multiplayer_random_seed");
-    }
-
-    public Long getMultiplayerRandomCount() {
-        return this.gamestateItem.getVarAsLong("multiplayer_random_count");
     }
 
     public IdCounters getIdCounters() {
@@ -520,12 +511,31 @@ public class Save {
                                                                           promoteCultures, braindead, timeout));
     }
 
+    private SortedMap<Integer, Country> getInternalGreatPowers() {
+        if (this.greatPowers == null) {
+            this.greatPowers = new TreeMap<>();
+        }
+
+        return this.greatPowers;
+    }
     public SortedMap<Integer, Country> getGreatPowers() {
-        return greatPowers;
+        return this.greatPowers == null ? new TreeMap<>() : this.greatPowers;
     }
 
-    public Map<Long, Advisor> getAdvisors() {
-        return advisors;
+    private Map<Integer, Advisor> getInternalAdvisors() {
+        if (this.advisors == null) {
+            this.advisors = new HashMap<>();
+        }
+
+        return this.advisors;
+    }
+
+    public Map<Integer, Advisor> getAdvisors() {
+        return this.advisors == null ? new HashMap<>() : this.advisors;
+    }
+
+    public void putAllAdvisors(Map<Integer, Advisor> advisors) {
+        getInternalAdvisors().putAll(advisors);
     }
 
     public Diplomacy getDiplomacy() {
@@ -731,7 +741,7 @@ public class Save {
         if (greatPowersItem != null) {
             greatPowersItem.getChildren("original").forEach(child -> {
                 Country country = this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("country")));
-                this.greatPowers.put(child.getVarAsInt("rank"), country);
+                getInternalGreatPowers().put(child.getVarAsInt("rank"), country);
             });
         }
 
@@ -749,7 +759,7 @@ public class Save {
                               this.game.getProvinces()
                                        .compute(saveProvince.getId(), (integer, province) -> province = saveProvince);
                               this.game.getProvincesByColor()
-                                       .compute(new Color(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
+                                       .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
                                                 (color, province) -> province = saveProvince);
                           });
         }
@@ -774,7 +784,7 @@ public class Save {
                 child.getChildren("advisor")
                      .stream()
                      .map(Id::new)
-                     .forEach(id -> country.getActiveAdvisors().put(id.getId(), this.advisors.get(id.getId())));
+                     .forEach(id -> country.getActiveAdvisors().put(id.getId(), getInternalAdvisors().get(id.getId())));
             });
         }
 
@@ -807,10 +817,9 @@ public class Save {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
                     this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .getIncomeStatistics()
-                        .putAll(dataItem.getVariables()
-                                        .stream()
-                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                        .putAllIncomeStatistics(dataItem.getVariables()
+                                                        .stream()
+                                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
                 }
             });
         }
@@ -822,10 +831,9 @@ public class Save {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
                     this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .getNationSizeStatistics()
-                        .putAll(dataItem.getVariables()
-                                        .stream()
-                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                        .putAllNationSizeStatistics(dataItem.getVariables()
+                                                            .stream()
+                                                            .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
                 }
             });
         }
@@ -837,10 +845,9 @@ public class Save {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
                     this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .getScoreStatistics()
-                        .putAll(dataItem.getVariables()
-                                        .stream()
-                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                        .putAllScoreStatistics(dataItem.getVariables()
+                                                       .stream()
+                                                       .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
                 }
             });
         }
@@ -852,10 +859,9 @@ public class Save {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
                     this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .getInflationStatistics()
-                        .putAll(dataItem.getVariables()
-                                        .stream()
-                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
+                        .putAllInflationStatistics(dataItem.getVariables()
+                                                           .stream()
+                                                           .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
                 }
             });
         }
@@ -865,7 +871,7 @@ public class Save {
         if (tradeCompanyManagerItem != null) {
             tradeCompanyManagerItem.getChildren("trade_company").forEach(child -> {
                 TradeCompany company = new TradeCompany(child);
-                this.getCountry(ClausewitzUtils.removeQuotes(company.getOwner())).getTradeCompanies().add(company);
+                this.getCountry(ClausewitzUtils.removeQuotes(company.getOwner())).addTradeCompany(company);
             });
         }
 
@@ -880,9 +886,5 @@ public class Save {
         if (ideaDatesItem != null) {
             this.ideaDates = new ListOfDates(ideaDatesItem);
         }
-    }
-
-    public void updateProvinceByColor() {
-
     }
 }

@@ -5,10 +5,10 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Building;
-import com.osallek.eu4parser.model.game.Province;
-import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.Province;
 import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.Save;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
+public class SaveProvince extends Province {
 
     //TODO DECOLONIZE PROVINCE: REMOVE: IS_CITY, CLAIMS, CORES, CONTROLLER, OWNER (add natives), TRADE_GOODS = unknown
 
@@ -999,7 +999,8 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         }
 
         ClausewitzItem buildersItem = this.item.getChild("building_builders");
-        this.buildings = new ArrayList<>();
+        this.buildings = new ArrayList<>(0);
+        this.buildings = new ArrayList<>(0);
 
         if (buildersItem != null) {
             buildersItem.getVariables().forEach(var -> {
@@ -1043,8 +1044,8 @@ public class SaveProvince extends com.osallek.eu4parser.model.game.Province {
         List<ClausewitzItem> unitsItems = this.item.getChildren("unit");
 
         if (!unitsItems.isEmpty()) {
-            this.armies = new ArrayList<>();
-            this.navies = new ArrayList<>();
+            this.armies = new ArrayList<>(0);
+            this.navies = new ArrayList<>(0);
             unitsItems.stream().map(Id::new).map(Id::getId).forEach(unitId -> {
                 this.save.getCountries()
                          .values()

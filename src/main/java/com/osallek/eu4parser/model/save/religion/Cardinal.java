@@ -41,7 +41,7 @@ public class Cardinal {
         }
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, long id, int location) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, int location) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "cardinal", parent.getOrder() + 1);
         toItem.addVariable("location", location);
         Id.addToItem(toItem, id, 4713);
