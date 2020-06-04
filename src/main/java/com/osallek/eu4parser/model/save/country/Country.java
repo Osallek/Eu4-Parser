@@ -11,6 +11,7 @@ import com.osallek.eu4parser.model.save.Power;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.Advisor;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -487,8 +488,16 @@ public class Country {
         this.item.removeVariable("ignore_decision", index);
     }
 
-    public Integer getCapital() {
+    public Integer getCapitalId() {
         return this.item.getVarAsInt("capital");
+    }
+
+    public SaveProvince getCapital() {
+        if (getCapitalId() == null) {
+            return null;
+        }
+
+        return this.save.getProvince(getCapitalId());
     }
 
     public void setCapital(int provinceId) {

@@ -6,6 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -115,6 +116,10 @@ public class Game {
 
     public File getSelectedCursorImage() {
         return new File(this.gfxFolderPath + File.separator + "cursors" + File.separator + "selected.png");
+    }
+
+    public File getCountryFlagImage(Country country) {
+        return new File(this.gfxFolderPath + File.separator + "flags" + File.separator + country.getTag() + ".tga");
     }
 
     public Map<Integer, Province> getProvinces() {

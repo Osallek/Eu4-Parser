@@ -89,7 +89,7 @@ public class History {
                                  })
                                  .filter(Objects::nonNull)
                                  .map(Monarch::new)
-                                 .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity()));
+                                 .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity(), (monarch, monarch2) -> monarch2));
 
         this.leaders = this.item.getChildren()
                                 .stream()
@@ -97,21 +97,21 @@ public class History {
                                 .flatMap(Collection::stream)
                                 .filter(Objects::nonNull)
                                 .map(Leader::new)
-                                .collect(Collectors.toMap(leader -> leader.getId().getId(), Function.identity()));
+                                .collect(Collectors.toMap(leader -> leader.getId().getId(), Function.identity(), (leader, leader2) -> leader2));
 
         this.heirs = this.item.getChildren()
                               .stream()
                               .map(child -> child.getChild("heir"))
                               .filter(Objects::nonNull)
                               .map(Heir::new)
-                              .collect(Collectors.toMap(heir -> heir.getId().getId(), Function.identity()));
+                              .collect(Collectors.toMap(heir -> heir.getId().getId(), Function.identity(), (heir, heir2) -> heir2));
 
         this.queens = this.item.getChildren()
                                .stream()
                                .map(child -> child.getChild("queen"))
                                .filter(Objects::nonNull)
                                .map(Queen::new)
-                               .collect(Collectors.toMap(queen -> queen.getId().getId(), Function.identity()));
+                               .collect(Collectors.toMap(queen -> queen.getId().getId(), Function.identity(), (queen, queen2) -> queen2));
 
         this.leaders.putAll(this.monarchs.values()
                                          .stream()

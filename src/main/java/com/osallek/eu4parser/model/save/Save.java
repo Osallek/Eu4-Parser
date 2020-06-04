@@ -162,6 +162,10 @@ public class Save {
         }
     }
 
+    public Country getPlayedCountry() {
+        return getCountry(ClausewitzUtils.removeQuotes(getPlayer()));
+    }
+
     public String getDisplayedCountryName() {
         return this.metaItem.getVarAsString("displayed_country_name");
     }
