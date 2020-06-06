@@ -143,40 +143,41 @@ public class Game {
     }
 
     public String getLocalisationClean(String key) {
-        String localisation = this.localisations.get(key);
+        StringBuilder localisation = new StringBuilder(this.localisations.get(key));
 
-        if (localisation == null) {
+        if (localisation.length() == 0) {
             return key;
         }
 
         int indexOf;
-        if ((indexOf = localisation.indexOf('§')) >= 0) {
-            if (ClausewitzUtils.hasAtLeast(localisation, '§', 2)) {
-                String[] splits = localisation.split("§");
-                localisation = "";
-                for (int i = 0; i < splits.length; i += 2) {
-                    localisation += splits[i] + " ";
+        while (localisation.toString().indexOf('§') >= 0) {
+            for (int i = 0; i < localisation.length(); i++) {
+                if (localisation.charAt(i) == '§') {
+                    localisation.deleteCharAt(i);//Remove char
+                    localisation.deleteCharAt(i);//Remove color code
+                    indexOf = localisation.indexOf("§", i);
+                    localisation.deleteCharAt(indexOf);//Remove closing char
+                    localisation.deleteCharAt(indexOf);//Remove closing code
+                    break;
                 }
-            } else {
-                localisation = localisation.substring(0, indexOf);
             }
         }
 
-        if ((indexOf = localisation.indexOf('$')) >= 0) {
-            if (ClausewitzUtils.hasAtLeast(localisation, '$', 2)) {
-                String[] splits = localisation.split("\\$");
-                localisation = "";
+        if ((indexOf = localisation.toString().indexOf('$')) >= 0) {
+            if (ClausewitzUtils.hasAtLeast(localisation.toString(), '$', 2)) {
+                String[] splits = localisation.toString().split("\\$");
+                localisation = new StringBuilder();
                 for (int i = 0; i < splits.length; i += 2) {
-                    localisation += splits[i] + " ";
+                    localisation.append(splits[i]).append(" ");
                 }
             } else {
-                localisation = localisation.substring(0, indexOf);
+                localisation = new StringBuilder(localisation.substring(0, indexOf));
             }
         }
 
-        return localisation.replace("\\r\\n", "")
+        return localisation.toString().replace("\\r\\n", "")
                            .replace("\\n", " ")
-                           .replaceAll("[^\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
+                           .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
                            .trim();
     }
 

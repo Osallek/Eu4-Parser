@@ -34,8 +34,8 @@ public class GameplayOptions {
         return this.list.getAsInt(4) == 1;
     }
 
-    public void setAllowCoop(boolean terraIncognita) {
-        this.list.set(4, terraIncognita ? 1 : 0);
+    public void setAllowCoop(boolean allowCoop) {
+        this.list.set(4, allowCoop ? 1 : 0);
     }
 
     public boolean getTerraIncognita() {
@@ -50,8 +50,16 @@ public class GameplayOptions {
         return this.list.getAsInt(8) == 1;
     }
 
+    public void setOnlyHostAndObserversCanSave(boolean onlyHostAndObserversCanSave) {
+        this.list.set(8, onlyHostAndObserversCanSave ? 1 : 0);
+    }
+
     public boolean getSaveEditable() {
         return this.list.getAsInt(9) == 1;
+    }
+
+    public void setSaveEditable(boolean saveEditable) {
+        this.list.set(9, saveEditable ? 1 : 0);
     }
 
     public boolean getLockedLedger() {
@@ -138,10 +146,6 @@ public class GameplayOptions {
         return FantasyRandomNewWorld.values()[this.list.getAsInt(22)];
     }
 
-    public void setFantasyRandomNewWorld(FantasyRandomNewWorld fantasyRandomNewWorld) {
-        this.list.set(22, fantasyRandomNewWorld.ordinal());
-    }
-
     public boolean getLimitedLedger() {
         return this.list.getAsInt(23) == 1;
     }
@@ -178,16 +182,16 @@ public class GameplayOptions {
         return this.list.getAsInt(27) == 1;
     }
 
-    public void setShowLoadingScreen(boolean showLoadingScreen) {
-        this.list.set(27, showLoadingScreen ? 1 : 0);
-    }
-
     public boolean getUseAgeScoring() {
         return this.list.getAsInt(28) == 1;
     }
 
     public boolean getAllowTeams() {
         return this.list.getAsInt(29) == 1;
+    }
+
+    public void setAllowTeams(boolean allowTeams) {
+        this.list.set(29, allowTeams ? 1 : 0);
     }
 
     public boolean getAllowFreeTeamCreation() {
