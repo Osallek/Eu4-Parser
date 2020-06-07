@@ -1,10 +1,9 @@
 package com.osallek.eu4parser.model.save.changeprices;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.eu4parser.model.save.Good;
 
 import java.util.Date;
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,18 +12,26 @@ public class ChangePrices {
 
     private final ClausewitzItem item;
 
-    private Map<Good, ChangePriceGood> goods;
+    private Map<String, ChangePriceGood> goods;
 
     public ChangePrices(ClausewitzItem item) {
         this.item = item;
         refreshAttributes();
     }
 
-    public ChangePriceGood getGood(Good good) {
+    public Map<String, ChangePriceGood> getGoods() {
+        return goods;
+    }
+
+    public ChangePriceGood getGood(String good) {
         return this.goods.get(good);
     }
 
-    public Double getCurrentPrice(Good good) {
+    public ChangePriceGood getGood(int index) {
+        return this.goods.values().toArray(new ChangePriceGood[] {})[index];
+    }
+
+    public Double getCurrentPrice(String good) {
         ChangePriceGood changePriceGood = this.goods.get(good);
 
         if (changePriceGood != null) {
@@ -34,11 +41,7 @@ public class ChangePrices {
         return null;
     }
 
-    public Map<Good, ChangePriceGood> getGoods() {
-        return goods;
-    }
-
-    public void setCurrentPrice(Good good, double newPrice) {
+    public void setCurrentPrice(String good, double newPrice) {
         ChangePriceGood changePriceGood = this.goods.get(good);
 
         if (changePriceGood != null) {
@@ -46,7 +49,7 @@ public class ChangePrices {
         }
     }
 
-    public void addChangePrice(Good good, String key, int percent, Date expiryDate) {
+    public void addChangePrice(String good, String key, int percent, Date expiryDate) {
         ChangePriceGood changePriceGood = this.goods.get(good);
 
         if (changePriceGood != null) {
@@ -54,7 +57,7 @@ public class ChangePrices {
         }
     }
 
-    public void removeChangePrince(Good good, int id) {
+    public void removeChangePrince(String good, int id) {
         ChangePriceGood changePriceGood = this.goods.get(good);
 
         if (changePriceGood != null) {
@@ -67,10 +70,9 @@ public class ChangePrices {
         this.goods = this.item.getChildren()
                               .stream()
                               .map(ChangePriceGood::new)
-                              .collect(Collectors.toMap(changePriceGood -> Good.valueOf(changePriceGood.getName()
-                                                                                                       .toUpperCase()),
+                              .collect(Collectors.toMap(ChangePriceGood::getName,
                                                         Function.identity(),
-                                                        (e1, e2) -> e1,
-                                                        () -> new EnumMap<>(Good.class)));
+                                                        (changePriceGood, changePriceGood2) -> changePriceGood,
+                                                        LinkedHashMap::new));
     }
 }

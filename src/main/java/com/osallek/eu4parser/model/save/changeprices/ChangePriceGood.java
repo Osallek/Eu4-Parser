@@ -18,6 +18,10 @@ public class ChangePriceGood {
         refreshAttributes();
     }
 
+    public String getName() {
+        return this.item.getName();
+    }
+
     public Double getCurrentPrice() {
         return this.item.getVarAsDouble("current_price");
     }
@@ -38,10 +42,6 @@ public class ChangePriceGood {
     public void addChangePrice(String key, int percent, Date expiryDate) {
         ChangePrice.addToItem(this.item, key, percent, expiryDate);
         refreshAttributes();
-    }
-
-    public String getName() {
-        return this.item.getName();
     }
 
     public List<ChangePrice> getChangePrices() {

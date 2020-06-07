@@ -1,6 +1,8 @@
 package com.osallek.eu4parser.model.save.institutions;
 
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 public class Institutions {
 
@@ -8,9 +10,12 @@ public class Institutions {
 
     private final ClausewitzList available;
 
-    public Institutions(ClausewitzList origins, ClausewitzList available) {
+    private final Save save;
+
+    public Institutions(ClausewitzList origins, ClausewitzList available, Save save) {
         this.origins = origins;
         this.available = available;
+        this.save = save;
     }
 
     public int getNbInstitutions() {
@@ -21,19 +26,19 @@ public class Institutions {
         return this.available.getAsInt(institution) == 1;
     }
 
-    public int getOrigin(int institution) {
-        return this.origins.getAsInt(institution);
+    public SaveProvince getOrigin(int institution) {
+        return this.save.getProvince(this.origins.getAsInt(institution));
     }
 
-    public void changeOrigin(int institution, int provinceId) {
+    public void changeOrigin(int institution, SaveProvince province) {
         if (isAvailable(institution)) {
-            this.origins.set(institution, provinceId);
+            this.origins.set(institution, province.getId());
         }
     }
 
-    public void availableIn(int institution, int provinceId) {
+    public void availableIn(int institution, SaveProvince province) {
         this.available.set(institution, 1);
-        this.origins.set(institution, provinceId);
+        this.origins.set(institution, province == null ? 0 : province.getId());
     }
 
     public void disable(int institution) {

@@ -92,6 +92,8 @@ public class Save {
 
     private Map<Integer, SaveProvince> provinces;
 
+    private List<SaveProvince> cities;
+
     private Map<String, Country> countries;
 
     private List<Country> playableCountries;
@@ -473,6 +475,10 @@ public class Save {
         return provinces;
     }
 
+    public List<SaveProvince> getCities() {
+        return cities;
+    }
+
     public Country getCountry(String tag) {
         return this.countries.get(tag);
     }
@@ -522,6 +528,7 @@ public class Save {
 
         return this.greatPowers;
     }
+
     public SortedMap<Integer, Country> getGreatPowers() {
         return this.greatPowers == null ? new TreeMap<>() : this.greatPowers;
     }
@@ -659,7 +666,7 @@ public class Save {
         ClausewitzList institutionAvailable = this.gamestateItem.getList("institutions");
 
         if (institutionOrigins != null && institutionAvailable != null) {
-            this.institutions = new Institutions(institutionOrigins, institutionAvailable);
+            this.institutions = new Institutions(institutionOrigins, institutionAvailable, this);
         }
 
         ClausewitzItem tradeItem = this.gamestateItem.getChild("trade");
@@ -763,9 +770,15 @@ public class Save {
                               this.game.getProvinces()
                                        .compute(saveProvince.getId(), (integer, province) -> province = saveProvince);
                               this.game.getProvincesByColor()
-                                       .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
+                                       .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince
+                                                        .getBlue()),
                                                 (color, province) -> province = saveProvince);
                           });
+            this.cities = this.provinces.values()
+                                        .stream()
+                                        .filter(SaveProvince::isCity)
+                                        .sorted((o1, o2) -> this.game.getCollator().compare(o1.getName(), o2.getName()))
+                                        .collect(Collectors.toList());
         }
 
         ClausewitzItem mapAreaDataItem = this.gamestateItem.getChild("map_area_data");

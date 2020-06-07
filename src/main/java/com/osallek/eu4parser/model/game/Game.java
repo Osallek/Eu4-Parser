@@ -65,6 +65,9 @@ public class Game {
     private Map<String, SpriteType> spriteTypes;
 
     public Game(String gameFolderPath) throws IOException {
+        this.collator = Collator.getInstance();
+        this.collator.setStrength(Collator.NO_DECOMPOSITION);
+
         this.gameFolderPath = gameFolderPath;
         this.mapFolderPath = this.gameFolderPath + File.separator + "map";
         this.commonFolderPath = this.gameFolderPath + File.separator + "common";
@@ -80,6 +83,10 @@ public class Game {
         readInstitutions();
         readTradeGoods();
         readBuildings();
+    }
+
+    public Collator getCollator() {
+        return collator;
     }
 
     public String getGameFolderPath() {
@@ -281,8 +288,6 @@ public class Game {
                     eu4Language.fileEndWith + ".yml"));
             if (files != null) {
                 this.localisations = new HashMap<>();
-                this.collator = Collator.getInstance(eu4Language.locale);
-                this.collator.setStrength(Collator.NO_DECOMPOSITION);
 
                 for (File file : files) {
                     if (Files.isRegularFile(file.toPath())) {
