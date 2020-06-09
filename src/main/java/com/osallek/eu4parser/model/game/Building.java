@@ -265,7 +265,7 @@ public class Building {
     }
 
     public boolean onlyNative() {
-        ClausewitzItem clausewitzItem = this.item.getChild("trigger");
+        ClausewitzItem clausewitzItem = this.item.getChild("build_trigger");
 
         if (clausewitzItem != null) {
             ClausewitzItem ownerChild = clausewitzItem.getChild("owner");
