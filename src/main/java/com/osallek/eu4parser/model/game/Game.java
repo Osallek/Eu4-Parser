@@ -150,7 +150,13 @@ public class Game {
     }
 
     public String getLocalisationClean(String key) {
-        StringBuilder localisation = new StringBuilder(this.localisations.get(key));
+        String localisationString = this.localisations.get(key);
+
+        if (localisationString == null) {
+            return key;
+        }
+
+        StringBuilder localisation = new StringBuilder(localisationString);
 
         if (localisation.length() == 0) {
             return key;
@@ -186,6 +192,10 @@ public class Game {
                            .replace("\\n", " ")
                            .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
                            .trim();
+    }
+
+    public String getLocalisationCleanNoPunctuation(String key) {
+        return getLocalisationClean(key).replaceAll("[\\p{P}]", "").trim();
     }
 
     public SpriteType getSpriteType(String key) {

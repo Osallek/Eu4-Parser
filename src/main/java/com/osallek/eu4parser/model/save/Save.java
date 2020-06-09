@@ -682,7 +682,7 @@ public class Save {
         ClausewitzItem changePricesItem = this.gamestateItem.getChild("change_price");
 
         if (changePricesItem != null) {
-            this.changePrices = new ChangePrices(changePricesItem);
+            this.changePrices = new ChangePrices(changePricesItem, this.game);
         }
 
         ClausewitzItem hreItem = this.gamestateItem.getChild("empire");

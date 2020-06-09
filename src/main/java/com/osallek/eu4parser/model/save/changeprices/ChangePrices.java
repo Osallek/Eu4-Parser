@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.changeprices;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Game;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -12,10 +13,13 @@ public class ChangePrices {
 
     private final ClausewitzItem item;
 
+    private final Game game;
+
     private Map<String, ChangePriceGood> goods;
 
-    public ChangePrices(ClausewitzItem item) {
+    public ChangePrices(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
         refreshAttributes();
     }
 
@@ -69,7 +73,7 @@ public class ChangePrices {
     private void refreshAttributes() {
         this.goods = this.item.getChildren()
                               .stream()
-                              .map(ChangePriceGood::new)
+                              .map(goodItem -> new ChangePriceGood(goodItem, this.game))
                               .collect(Collectors.toMap(ChangePriceGood::getName,
                                                         Function.identity(),
                                                         (changePriceGood, changePriceGood2) -> changePriceGood,
