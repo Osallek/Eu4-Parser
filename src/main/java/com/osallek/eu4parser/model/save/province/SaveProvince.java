@@ -183,29 +183,6 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Integer getEstate() {
-        return this.item.getVarAsInt("estate");
-    }
-
-    public void setEstate(int estate) {
-        this.item.setVariable("estate", estate);
-    }
-
-    public void removeEstate() {
-        this.item.removeVariable("estate");
-        this.save.getCountry(ClausewitzUtils.removeQuotes(this.getOwner()))
-                 .getEstates()
-                 .forEach(estate -> estate.removeProvince(this.getId()));
-    }
-
-    public Date lastEstateGrant() {
-        return this.item.getVarAsDate("last_estate_grant");
-    }
-
-    public void setLastEstateGrant(Date lastEstateGrant) {
-        this.item.setVariable("last_estate_grant", lastEstateGrant);
-    }
-
     public Date getExploitDate() {
         return this.item.getVarAsDate("exploit_date");
     }
@@ -599,7 +576,8 @@ public class SaveProvince extends Province {
 
         if (this.country != null) {
             this.save.getGame().getBuildings().forEach(building -> {
-                if (building.onlyNative() && this.country != null && !"native".equals(this.country.getGovernment().getType())) {
+                if (building.onlyNative() && this.country != null
+                    && !"native".equals(this.country.getGovernment().getType())) {
                     return;
                 }
 
@@ -607,7 +585,8 @@ public class SaveProvince extends Province {
                     return;
                 }
 
-                if (!building.getManufactoryFor().isEmpty() && !building.getManufactoryFor().contains(getTradeGood())) {
+                if (!building.getManufactoryFor().isEmpty() && !building.getManufactoryFor().contains(null) //Null = all goods
+                    && !building.getManufactoryFor().contains(getTradeGood())) {
                     return;
                 }
 

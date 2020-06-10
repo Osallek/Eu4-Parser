@@ -47,11 +47,15 @@ public final class Eu4Utils {
 
     public static List<List<Building>> buildingsTree(List<Building> buildings) {
         List<List<Building>> tree = new ArrayList<>();
+        List<Building> manufactories = new ArrayList<>();
 
         Iterator<Building> iterator = buildings.iterator();
         while (iterator.hasNext()) {
             Building building = iterator.next();
-            if (ClausewitzUtils.isBlank(building.getMakeObsolete())) {
+            if (!building.getManufactoryFor().isEmpty()) {
+                manufactories.add(building);
+                iterator.remove();
+            } else if (ClausewitzUtils.isBlank(building.getMakeObsolete())) {
                 List<Building> buildingList = new ArrayList<>();
                 buildingList.add(building);
                 tree.add(buildingList);
@@ -72,10 +76,12 @@ public final class Eu4Utils {
             }
         }
 
+        tree.add(manufactories);
+
         return tree;
     }
 
     public static int rgbToColor(int red, int green, int blue) {
         return ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | ((blue & 0xFF));
-    };
+    }
 }

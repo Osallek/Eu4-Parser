@@ -101,6 +101,22 @@ public class Leader {
         this.item.setVariable("activation", activation);
     }
 
+    public Date getBirthDate() {
+        return this.item.getVarAsDate("birth_date");
+    }
+
+    public void setBirthDate(Date birthDate) {
+        this.item.setVariable("birth_date", birthDate);
+    }
+
+    public Date getDeathDate() {
+        return this.item.getVarAsDate("death_date");
+    }
+
+    public void setDeathDate(Date deathDate) {
+        this.item.setVariable("death_date", deathDate);
+    }
+    
     public Id getMonarchId() {
         return monarchId;
     }

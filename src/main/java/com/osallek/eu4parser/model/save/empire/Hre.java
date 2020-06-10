@@ -9,6 +9,15 @@ import java.util.List;
 
 public class Hre extends Empire {
 
+    //Todo 	passed_reform="emperor_reichsreform"
+    //	passed_reform="emperor_reichsregiment"
+    // 	emperor_previous_rank=1
+    //	imperial_realm_war=no
+    //	active_incident={
+    //		incident="incident_shadow_kingdom"
+    //		expiry_date=1461.3.27
+    //		option=1
+
     public Hre(ClausewitzItem item) {
         super(item);
     }

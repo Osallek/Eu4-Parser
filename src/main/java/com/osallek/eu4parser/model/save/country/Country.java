@@ -71,6 +71,8 @@ public class Country {
 
     private List<Estate> estates;
 
+    private List<EstateInteraction> interactionsLastUsed;
+
     private Map<String, Rival> rivals;
 
     private List<VictoryCard> victoryCards;
@@ -707,6 +709,10 @@ public class Country {
 
     public List<Estate> getEstates() {
         return estates;
+    }
+
+    public List<EstateInteraction> getInteractionsLastUsed() {
+        return interactionsLastUsed;
     }
 
     public Map<String, Rival> getRivals() {
@@ -2999,8 +3005,16 @@ public class Country {
 
         List<ClausewitzItem> estateItems = this.item.getChildren("estate");
         this.estates = estateItems.stream()
-                                  .map(clausewitzItem -> new Estate(clausewitzItem, this))
+                                  .map(clausewitzItem -> new Estate(clausewitzItem))
                                   .collect(Collectors.toList());
+
+        ClausewitzItem interactionsLastUsedItem = this.item.getChild("interactions_last_used");
+
+        if (interactionsLastUsedItem != null) {
+            this.interactionsLastUsed = interactionsLastUsedItem.getLists().stream()
+                                                          .map(EstateInteraction::new)
+                                                          .collect(Collectors.toList());
+        }
 
         List<ClausewitzItem> rivalItems = this.item.getChildren("rival");
         this.rivals = rivalItems.stream()

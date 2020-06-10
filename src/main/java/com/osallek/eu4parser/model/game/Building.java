@@ -207,6 +207,39 @@ public class Building {
         }
     }
 
+    public List<TradeGood> getBonusManufactory() {
+        ClausewitzList list = this.item.getList("bonus_manufactory");
+
+        if (list != null) {
+            return list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
+        }
+
+        return new ArrayList<>();
+    }
+
+    public void addBonusManufactory(TradeGood tradeGood) {
+        ClausewitzList list = this.item.getList("bonus_manufactory");
+
+        if (list != null) {
+            for (Building building : this.game.getBuildings()) {
+                if (!building.equals(this) && building.getBonusManufactory().contains(tradeGood)) {
+                    building.removeBonusManufactory(tradeGood);
+                    break; //Each trade good can only have one bonus
+                }
+            }
+
+            list.add(tradeGood.getName());
+        }
+    }
+
+    public void removeBonusManufactory(TradeGood tradeGood) {
+        ClausewitzList list = this.item.getList("bonus_manufactory");
+
+        if (list != null) {
+            list.remove(tradeGood.getName());
+        }
+    }
+
     public boolean governmentSpecific() {
         return Boolean.TRUE.equals(this.item.getVarAsBool("government_specific"));
     }

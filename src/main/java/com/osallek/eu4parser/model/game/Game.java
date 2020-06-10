@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -270,10 +271,7 @@ public class Game {
     }
 
     public List<Building> getBuildings() {
-        return this.buildings.keySet()
-                             .stream()
-                             .sorted(Comparator.comparing(Building::getLocalizedName, collator))
-                             .collect(Collectors.toList());
+        return new ArrayList<>(this.buildings.keySet());
     }
 
     public Building getBuilding(String name) {

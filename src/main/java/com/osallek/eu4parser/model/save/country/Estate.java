@@ -13,15 +13,12 @@ public class Estate {
 
     private final ClausewitzItem item;
 
-    private final Country country;
-
-    private List<EstateInteraction> interactions;
+    private List<EstateInteraction> grantedPrivileges;
 
     private List<EstateInfluenceModifier> influenceModifiers;
 
-    public Estate(ClausewitzItem item, Country country) {
+    public Estate(ClausewitzItem item) {
         this.item = item;
-        this.country = country;
         refreshAttributes();
     }
 
@@ -43,43 +40,28 @@ public class Estate {
         }
     }
 
-    public List<Integer> getProvinces() {
-        ClausewitzList list = this.item.getList("provinces");
+    public Double getTerritory() {
+        return this.item.getVarAsDouble("territory");
+    }
 
-        if (list == null) {
-            return new ArrayList<>();
+    public List<EstateInteraction> getGrantedPrivileges() {
+        return grantedPrivileges;
+    }
+
+    public void addGrantedPrivilege(String name, Date date) {
+        ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
+
+        if (grantedPrivilegesItem == null) {
+            grantedPrivilegesItem = this.item.addChild("granted_privileges");
         }
 
-        return list.getValues().stream().map(Integer::parseInt).collect(Collectors.toList());
+        EstateInteraction.addToItem(grantedPrivilegesItem, name, date);
+        refreshAttributes();
     }
 
-    public void addProvince(int provinceId) {
-        if (this.country.getSave().getProvince(provinceId).getCountry().equals(this.country)) {
-            ClausewitzList list = this.item.getList("provinces");
-
-            if (list != null) {
-                list.add(provinceId);
-            } else {
-                this.item.addList("provinces", provinceId);
-            }
-        }
-    }
-
-    public void removeProvince(Integer provinceId) {
-        ClausewitzList list = this.item.getList("provinces");
-
-        if (list != null) {
-            list.remove(String.valueOf(provinceId));
-        }
-    }
-
-    public List<EstateInteraction> getInteractions() {
-        return interactions;
-    }
-
-    public void addInteraction(Integer interaction, Date date) {
+    public void addInteraction(String name, Date date) {
         if (this.item != null) {
-            EstateInteraction.addToItem(this.item, interaction, date);
+            EstateInteraction.addToItem(this.item, name, date);
             refreshAttributes();
         }
     }
@@ -131,13 +113,17 @@ public class Estate {
 
 
     private void refreshAttributes() {
-        List<ClausewitzItem> interactionUse = this.item.getChildren("interaction_use");
-        this.interactions = interactionUse.stream()
-                                          .map(EstateInteraction::new)
-                                          .collect(Collectors.toList());
         List<ClausewitzItem> influenceModifierItems = this.item.getChildren("influence_modifier");
         this.influenceModifiers = influenceModifierItems.stream()
                                                         .map(EstateInfluenceModifier::new)
                                                         .collect(Collectors.toList());
+
+        ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
+
+        if (grantedPrivilegesItem != null) {
+            this.grantedPrivileges = grantedPrivilegesItem.getLists().stream()
+                                                          .map(EstateInteraction::new)
+                                                          .collect(Collectors.toList());
+        }
     }
 }

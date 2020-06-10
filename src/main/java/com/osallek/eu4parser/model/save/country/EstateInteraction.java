@@ -1,43 +1,32 @@
 package com.osallek.eu4parser.model.save.country;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.clausewitzparser.model.ClausewitzList;
 
 import java.util.Date;
 
 public class EstateInteraction {
 
-    private final ClausewitzItem item;
+    private final ClausewitzList list;
 
-    public EstateInteraction(ClausewitzItem item) {
-        this.item = item;
+    public EstateInteraction(ClausewitzList list) {
+        this.list = list;
     }
 
-    public Integer getInteraction() {
-        return this.item.getVarAsInt("interaction");
+    public String getName() {
+        return this.list.get(0);
     }
 
     public Date getDate() {
-        return this.item.getVarAsDate("date");
+        return this.list.getAsDate(1);
     }
 
     public void setDate(Date date) {
-        ClausewitzVariable var = this.item.getVar("date");
-
-        if (var != null) {
-            var.setValue(date);
-        } else {
-            this.item.addVariable("date", date);
-        }
+        this.list.set(1, date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Integer interaction, Date date) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "interaction_use", parent.getOrder() + 1);
-        toItem.addVariable("province_id", interaction);
-        toItem.addVariable("date", date);
-
-        parent.addChild(toItem);
-
-        return toItem;
+    public static ClausewitzList addToItem(ClausewitzItem parent, String name, Date date) {
+        return parent.addList(null, name, ClausewitzUtils.dateToString(date));
     }
 }

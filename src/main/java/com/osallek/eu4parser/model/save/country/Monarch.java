@@ -104,6 +104,14 @@ public class Monarch {
         this.item.setVariable("birth_date", birthDate);
     }
 
+    public Date getDeathDate() {
+        return this.item.getVarAsDate("death_date");
+    }
+
+    public void setDeathDate(Date deathDate) {
+        this.item.setVariable("death_date", deathDate);
+    }
+
     public String getMonarchName() {
         return this.item.getVarAsString("monarch_name");
     }
