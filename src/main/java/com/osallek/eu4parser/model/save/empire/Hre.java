@@ -1,39 +1,76 @@
 package com.osallek.eu4parser.model.save.empire;
 
-import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.game.ImperialReform;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Hre extends Empire {
 
-    //	active_incident={
-    //		incident="incident_shadow_kingdom"
-    //		expiry_date=1461.3.27
-    //		option=1
-
     private HreIncident activeIncident;
 
-    public Hre(ClausewitzItem item) {
-        super(item);
+    public Hre(ClausewitzItem item, Save save) {
+        super(item, save);
+    }
+
+    @Override
+    protected String getId() {
+        return "hre";
     }
 
     @Override
     public void dismantle() {
         super.dismantle();
         this.item.removeList("electors");
+        this.item.removeList("active_incident");
     }
 
     @Override
-    public void setReformLevel(int reformLevel) {
-        super.setReformLevel(reformLevel);
+    public void addPassedReform(ImperialReform reform) {
+        super.addPassedReform(reform);
 
-        this.setImperialBanAllowed(reformLevel >= 1);
-        this.setInternalHreCb(reformLevel < 5);
-        this.setHreInheritable(reformLevel >= 6);
+        if (reform.enableImperialBanAllowed()) {
+            this.setImperialBanAllowed(true);
+        }
+
+        if (reform.enableInternalHreCb()) {
+            this.setInternalHreCb(true);
+        }
+
+        if (reform.enableHreInheritable()) {
+            this.setHreInheritable(true);
+        }
+
+        if (reform.enableEnableImperialRealmWar()) {
+            this.setImperialBanAllowed(true);
+        }
+    }
+
+    @Override
+    public void removePassedReform(ImperialReform reform) {
+        super.removePassedReform(reform);
+
+        if (reform.disableImperialBanAllowed()) {
+            this.setImperialBanAllowed(false);
+        }
+
+        if (reform.disableInternalHreCb()) {
+            this.setInternalHreCb(false);
+        }
+
+        if (reform.disableHreInheritable()) {
+            this.setHreInheritable(false);
+        }
+
+        if (reform.disableEnableImperialRealmWar()) {
+            this.setImperialBanAllowed(false);
+        }
     }
 
     public Integer getContinent() {
@@ -116,19 +153,34 @@ public class Hre extends Empire {
         ClausewitzVariable var = this.item.setVariable("allows_female_emperor", allowsFemaleEmperor);
     }
 
-    public List<String> getElectors() {
+    public List<Country> getElectors() {
         if (dismantled()) {
             return new ArrayList<>();
         }
 
-        return this.item.getList("electors").getValues();
+        return this.item.getList("electors")
+                        .getValues()
+                        .stream()
+                        .map(this.save::getCountry)
+                        .collect(Collectors.toList());
     }
 
-    public void addElector(String tag) {
+    public void setElectors(List<Country> electors) {
+        ClausewitzList list = this.item.getList("electors");
+
+        if (list != null) {
+            list.clear();
+        }
+
+        electors.forEach(this::addElector);
+    }
+
+    public void addElector(Country country) {
         if (dismantled()) {
             return;
         }
 
+        String tag = country.getTag();
         ClausewitzList list = this.item.getList("electors");
 
         if (list != null) {
@@ -140,65 +192,17 @@ public class Hre extends Empire {
         }
     }
 
-    public void removeElector(String tag) {
+    public void removeElector(Country country) {
         if (dismantled()) {
             return;
         }
 
+        String tag = country.getTag();
         ClausewitzList list = this.item.getList("electors");
 
         if (list != null) {
             list.remove(tag);
         }
-    }
-
-    public void removeElector(int id) {
-        if (dismantled()) {
-            return;
-        }
-
-        ClausewitzList list = this.item.getList("electors");
-
-        if (list != null) {
-            list.remove(id);
-        }
-    }
-
-    public List<String> getPassedReforms() {
-        if (dismantled()) {
-            return new ArrayList<>();
-        }
-
-        return this.item.getVarsAsStrings("passed_reform");
-    }
-
-    public void addPassedReform(String reform) {
-        if (dismantled()) {
-            return;
-        }
-
-        reform = ClausewitzUtils.addQuotes(reform);
-        List<String> passedReform = this.item.getVarsAsStrings("passed_reform");
-
-        if (!passedReform.contains(reform)) {
-            this.item.addVariable("passed_reform", reform);
-        }
-    }
-
-    public void removePassedReform(int index) {
-        if (dismantled()) {
-            return;
-        }
-
-        this.item.removeVariable("passed_reform", index);
-    }
-
-    public void removePassedReform(String reform) {
-        if (dismantled()) {
-            return;
-        }
-
-        this.item.removeVariable("passed_reform", reform);
     }
 
     public Integer getEmperorPreviousRank() {
@@ -237,7 +241,7 @@ public class Hre extends Empire {
         return activeIncident;
     }
 
-    public void removeIncident() {
+    public void removeActiveIncident() {
         this.item.removeChild("active_incident");
         refreshAttributes();
     }

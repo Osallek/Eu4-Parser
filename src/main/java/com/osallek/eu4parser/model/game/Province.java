@@ -22,6 +22,8 @@ public class Province {
 
     private boolean isPort;
 
+    private int continent;
+
     public Province(String[] csvLine) {
         this.id = Integer.parseInt(csvLine[0]);
         this.color = Eu4Utils.rgbToColor(Integer.parseInt(csvLine[1]), Integer.parseInt(csvLine[2]), Integer.parseInt(csvLine[3]));
@@ -38,6 +40,7 @@ public class Province {
         this.impassable = other.impassable;
         this.winter = other.winter;
         this.isPort = other.isPort;
+        this.continent = other.continent;
     }
 
     public int getId() {
@@ -110,5 +113,13 @@ public class Province {
 
     void setPort(boolean isPort) {
         this.isPort = isPort;
+    }
+
+    public int getContinent() {
+        return continent;
+    }
+
+    public void setContinent(int continent) {
+        this.continent = continent;
     }
 }

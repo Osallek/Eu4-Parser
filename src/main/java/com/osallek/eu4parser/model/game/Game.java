@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 public class Game {
 
-    private Collator collator;
+    private final Collator collator;
 
     private final String gameFolderPath;
 
@@ -65,6 +65,8 @@ public class Game {
 
     private Map<String, SpriteType> spriteTypes;
 
+    private Map<ImperialReform, Path> imperialReforms;
+
     public Game(String gameFolderPath) throws IOException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -84,6 +86,7 @@ public class Game {
         readInstitutions();
         readTradeGoods();
         readBuildings();
+        readImperialReforms();
     }
 
     public Collator getCollator() {
@@ -284,6 +287,20 @@ public class Game {
         return null;
     }
 
+    public List<ImperialReform> getImperialReforms() {
+        return new ArrayList<>(this.imperialReforms.keySet());
+    }
+
+    public ImperialReform getImperialReform(String name) {
+        for (ImperialReform imperialReform : getImperialReforms()) {
+            if (imperialReform.getName().equals(name)) {
+                return imperialReform;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -424,6 +441,19 @@ public class Game {
                                        .forEach(id -> this.provinces.get(id).setClimate(list.getName()));
                                }
                            });
+            }
+
+            File continentFile = new File(this.mapFolderPath + File.separator + "continent.txt");
+
+            if (continentFile.canRead()) {
+                ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile, 0, StandardCharsets.UTF_8);
+                List<ClausewitzList> lists = continentsItem.getListsNot("island_check_provinces");
+                for (int i = 0; i < lists.size(); i++) {
+                    int finalI = i;
+                    lists.get(i)
+                         .getValuesAsInt()
+                         .forEach(provinceId -> this.getProvince(provinceId).setContinent(finalI));
+                }
             }
 
             if (getProvincesImage().canRead()) {
@@ -601,6 +631,26 @@ public class Game {
             this.buildings.keySet()
                           .forEach(building -> building.setLocalizedName(this.getLocalisation(
                                   "building_" + building.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readImperialReforms() {
+        File imperialReformsFolder = new File(this.commonFolderPath + File.separator + "imperial_reforms");
+
+        try (Stream<Path> paths = Files.walk(imperialReformsFolder.toPath())) {
+            this.imperialReforms = new HashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     imperialReformsItem.getChildren()
+                                        .forEach(item -> this.imperialReforms.put(new ImperialReform(item, this), path));
+                 });
+
+            this.imperialReforms.keySet()
+                                .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(
+                                        imperialReform.getName() + "_title")));
         } catch (IOException e) {
         }
     }

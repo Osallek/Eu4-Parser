@@ -688,13 +688,13 @@ public class Save {
         ClausewitzItem hreItem = this.gamestateItem.getChild("empire");
 
         if (hreItem != null) {
-            this.hre = new Hre(hreItem);
+            this.hre = new Hre(hreItem, this);
         }
 
         ClausewitzItem celestialEmpireItem = this.gamestateItem.getChild("celestial_empire");
 
         if (celestialEmpireItem != null) {
-            this.celestialEmpire = new CelestialEmpire(celestialEmpireItem);
+            this.celestialEmpire = new CelestialEmpire(celestialEmpireItem, this);
         }
 
         List<ClausewitzItem> tradeLeaguesItems = this.gamestateItem.getChildren("trade_league");
@@ -732,7 +732,7 @@ public class Save {
                                                    .stream()
                                                    .filter(Country::isPlayable)
                                                    .peek(country -> country.setLocalizedName(this.game.getLocalisation(country.getTag())))
-                                                   .sorted(Comparator.comparing(Country::getLocalizedName))
+                                                   .sorted(Comparator.comparing(Country::getLocalizedName, this.game.getCollator()))
                                                    .collect(Collectors.toList());
         }
 

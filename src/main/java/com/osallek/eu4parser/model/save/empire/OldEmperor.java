@@ -63,7 +63,7 @@ public class OldEmperor {
     public static ClausewitzItem addToItem(ClausewitzItem parent, String id, String country, Date date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "old_emperor", parent.getOrder() + 1);
         toItem.addVariable("id", id);
-        toItem.addVariable("country", ClausewitzUtils.hasQuotes(country) ? country : "\"" + country.toUpperCase() + "\"");
+        toItem.addVariable("country", ClausewitzUtils.addQuotes(country));
         toItem.addVariable("date", date);
 
         parent.addChild(toItem);

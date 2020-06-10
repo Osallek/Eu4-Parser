@@ -185,6 +185,10 @@ public class Country {
         return isPlayable;
     }
 
+    public boolean isAlive() {
+        return getCapital() != null && getDevelopment() != null && getDevelopment() > 0;
+    }
+
     public File getFlagFile() {
         return this.save.getGame().getCountryFlagImage(this);
     }

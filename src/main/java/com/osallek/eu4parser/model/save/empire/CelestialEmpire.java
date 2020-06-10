@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.empire;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 
@@ -8,9 +9,14 @@ public class CelestialEmpire extends Empire {
 
     private Decree decree;
 
-    public CelestialEmpire(ClausewitzItem item) {
-        super(item);
+    public CelestialEmpire(ClausewitzItem item, Save save) {
+        super(item, save);
         refreshAttributes();
+    }
+
+    @Override
+    protected String getId() {
+        return "celestial_empire";
     }
 
     @Override

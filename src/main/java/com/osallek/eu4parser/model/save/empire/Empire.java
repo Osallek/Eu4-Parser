@@ -3,22 +3,45 @@ package com.osallek.eu4parser.model.save.empire;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.game.ImperialReform;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class Empire {
 
     protected final ClausewitzItem item;
 
+    protected final Save save;
+
     protected List<OldEmperor> oldEmperors;
 
-    public Empire(ClausewitzItem item) {
+    protected Map<String, ImperialReform> imperialReforms;
+
+    public Empire(ClausewitzItem item, Save save) {
         this.item = item;
+        this.save = save;
+        this.imperialReforms = this.save.getGame()
+                                        .getImperialReforms()
+                                        .stream()
+                                        .filter(imperialReform -> getId().equals(imperialReform.getEmpire()))
+                                        .filter(imperialReform -> this.save.getDlcEnabled()
+                                                                           .containsAll(imperialReform.dlcRequired()))
+                                        .filter(imperialReform -> Collections.disjoint(this.save.getDlcEnabled(),
+                                                                                       imperialReform.dlcRequiredNot()))
+                                        .collect(Collectors.toMap(ImperialReform::getName, Function.identity()));
         refreshAttributes();
     }
+
+    protected abstract String getId();
 
     public boolean dismantled() {
         return Boolean.TRUE.equals(this.item.getVarAsBool("hre_dismantled"));
@@ -28,10 +51,10 @@ public abstract class Empire {
         this.item.addVariable("hre_dismantled", true);
         this.item.removeVariable("emperor");
         this.item.removeVariable("imperial_influence");
-        this.item.removeVariable("reform_level");
+        this.item.removeVariables("passed_reform");
     }
 
-    public String getEmperor() {
+    public Country getEmperor() {
         if (dismantled()) {
             return null;
         }
@@ -39,9 +62,32 @@ public abstract class Empire {
         ClausewitzVariable emperorVar = this.item.getVar("emperor");
 
         if (emperorVar != null) {
-            return emperorVar.getValue();
+            return this.save.getCountry(ClausewitzUtils.removeQuotes(emperorVar.getValue()));
         } else {
             return null;
+        }
+    }
+
+    public void setEmperor(Country country) {
+        if (dismantled()) {
+            this.item.removeVariable("hre_dismantled");
+        }
+
+        if (country == null) {
+            dismantle();
+            return;
+        }
+
+        ClausewitzVariable emperorVar = this.item.getVar("emperor");
+
+        if (!ClausewitzUtils.removeQuotes(emperorVar.getValue()).equals(country.getTag())) {
+            emperorVar.setValue(ClausewitzUtils.addQuotes(country.getTag()));
+
+            if (getImperialInfluence() == null) {
+                this.item.addVariable("imperial_influence", 0d);
+            }
+
+            addOldEmperor(country);
         }
     }
 
@@ -73,63 +119,88 @@ public abstract class Empire {
         }
     }
 
-    public Integer getReformLevel() {
-        if (dismantled()) {
-            return null;
-        }
-
-        ClausewitzVariable reformLevelVar = this.item.getVar("reform_level");
-
-        if (reformLevelVar != null) {
-            return reformLevelVar.getAsInt();
-        } else {
-            return null;
-        }
+    public List<ImperialReform> getMainLineReforms() {
+        return this.imperialReforms.values()
+                                   .stream()
+                                   .filter(ImperialReform::isMainLine)
+                                   .collect(Collectors.toList());
     }
 
-    public void setReformLevel(int reformLevel) {
+    public List<ImperialReform> getLeftBranchReforms() {
+        return this.imperialReforms.values()
+                                   .stream()
+                                   .filter(ImperialReform::isLeftBranch)
+                                   .collect(Collectors.toList());
+    }
+
+    public List<ImperialReform> getRightBranchReforms() {
+        return this.imperialReforms.values()
+                                   .stream()
+                                   .filter(ImperialReform::isRightBranch)
+                                   .collect(Collectors.toList());
+    }
+
+    public List<ImperialReform> getPassedReforms() {
+        if (dismantled()) {
+            return new ArrayList<>();
+        }
+
+        return this.item.getVarsAsStrings("passed_reform")
+                        .stream()
+                        .map(ClausewitzUtils::removeQuotes)
+                        .map(this.imperialReforms::get)
+                        .collect(Collectors.toList());
+    }
+
+    public void addPassedReform(ImperialReform reform) {
         if (dismantled()) {
             return;
         }
 
-        ClausewitzVariable var = this.item.getVar("reform_level");
+        List<String> passedReform = this.item.getVarsAsStrings("passed_reform");
 
-        if (var != null) {
-            var.setValue(reformLevel);
-        } else {
-            this.item.addVariable("reform_level", reformLevel);
+        if (reform.isMainLine()) {
+            getPassedReforms().stream()
+                              .filter(imperialReform -> !imperialReform.isMainLine())
+                              .forEach(this::removePassedReform);
+        } else if (reform.isLeftBranch()) {
+            getPassedReforms().stream()
+                              .filter(imperialReform -> !imperialReform.isLeftBranch())
+                              .forEach(this::removePassedReform);
+        } else if (reform.isRightBranch()) {
+            getPassedReforms().stream()
+                              .filter(imperialReform -> !imperialReform.isRightBranch())
+                              .forEach(this::removePassedReform);
         }
+
+        do {
+
+            if (!passedReform.contains(ClausewitzUtils.addQuotes(reform.getName()))) {
+                this.item.addVariable("passed_reform", ClausewitzUtils.addQuotes(reform.getName()));
+            }
+
+            reform = reform.getRequiredReform();
+        } while (reform != null);
+    }
+
+    public void removePassedReform(ImperialReform reform) {
+        if (dismantled()) {
+            return;
+        }
+
+        this.item.removeVariable("passed_reform", ClausewitzUtils.addQuotes(reform.getName()));
     }
 
     public List<OldEmperor> getOldEmperors() {
         return oldEmperors;
     }
 
-    public void setEmperor(String tag, Date currentDate) {
-        if (dismantled()) {
-            this.item.removeVariable("hre_dismantled");
-        }
-
-        this.item.removeVariable("emperor");
-        this.item.addVariable("emperor", ClausewitzUtils.hasQuotes(tag) ? tag : "\"" + tag.toUpperCase() + "\"");
-
-        if (getImperialInfluence() == null) {
-            this.item.addVariable("imperial_influence", 0d);
-        }
-
-        if (getReformLevel() == null) {
-            this.item.addVariable("reform_level", 0);
-        }
-
-        addOldEmperor(tag, currentDate);
-    }
-
-    public void addOldEmperor(String country, Date date) {
+    public void addOldEmperor(Country country) {
         String id = Integer.toString(getOldEmperors().stream()
                                                      .map(OldEmperor::getId)
                                                      .max(Integer::compareTo)
                                                      .orElse(new Random().nextInt(9000)));
-        OldEmperor.addToItem(this.item, id, country, date);
+        OldEmperor.addToItem(this.item, id, country.getTag(), this.save.getDate());
         refreshAttributes();
     }
 
