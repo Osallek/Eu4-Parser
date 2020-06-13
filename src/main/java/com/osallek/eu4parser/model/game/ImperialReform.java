@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ImperialReform {
+public class ImperialReform implements Comparable<ImperialReform> {
 
     private final ClausewitzItem item;
 
@@ -53,7 +53,7 @@ public class ImperialReform {
         ClausewitzItem potentialItem = this.item.getChild("potential");
 
         if (potentialItem != null) {
-            List<ClausewitzItem> notItems = this.item.getChildren("NOT");
+            List<ClausewitzItem> notItems = potentialItem.getChildren("NOT");
 
             if (!notItems.isEmpty()) {
                 return notItems.stream()
@@ -386,5 +386,22 @@ public class ImperialReform {
         }
 
         return false;
+    }
+
+    private Integer getDepth() {
+        int i = 0;
+        ImperialReform reform = this;
+
+        while (reform.getRequiredReform() != null) {
+            i++;
+            reform = reform.getRequiredReform();
+        }
+
+        return i;
+    }
+
+    @Override
+    public int compareTo(ImperialReform o) {
+        return this.getDepth().compareTo(o.getDepth());
     }
 }
