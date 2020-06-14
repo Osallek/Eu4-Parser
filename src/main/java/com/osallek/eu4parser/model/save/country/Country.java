@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
@@ -646,12 +647,16 @@ public class Country {
         this.item.removeVariable("accepted_culture", culture);
     }
 
-    public String getReligion() {
+    public String getReligionName() {
         return this.item.getVarAsString("religion");
     }
 
-    public void setReligion(String religion) {
-        this.item.setVariable("religion", religion);
+    public Religion getReligion() {
+        return this.save.getGame().getReligion(getReligionName());
+    }
+
+    public void setReligion(Religion religion) {
+        this.item.setVariable("religion", religion.getName());
     }
 
     public String getDominantReligion() {

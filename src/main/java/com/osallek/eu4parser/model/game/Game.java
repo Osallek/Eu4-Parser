@@ -67,6 +67,8 @@ public class Game {
 
     private Map<ImperialReform, Path> imperialReforms;
 
+    private Map<Decree, Path> decrees;
+
     public Game(String gameFolderPath) throws IOException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -87,6 +89,7 @@ public class Game {
         readTradeGoods();
         readBuildings();
         readImperialReforms();
+        readDecrees();
     }
 
     public Collator getCollator() {
@@ -295,6 +298,20 @@ public class Game {
         for (ImperialReform imperialReform : getImperialReforms()) {
             if (imperialReform.getName().equals(name)) {
                 return imperialReform;
+            }
+        }
+
+        return null;
+    }
+
+    public List<Decree> getDecrees() {
+        return new ArrayList<>(this.decrees.keySet());
+    }
+
+    public Decree getDecree(String name) {
+        for (Decree saveDecree : getDecrees()) {
+            if (saveDecree.getName().equals(name)) {
+                return saveDecree;
             }
         }
 
@@ -651,6 +668,26 @@ public class Game {
             this.imperialReforms.keySet()
                                 .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(
                                         imperialReform.getName() + "_title")));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readDecrees() {
+        File decreesFolder = new File(this.commonFolderPath + File.separator + "decrees");
+
+        try (Stream<Path> paths = Files.walk(decreesFolder.toPath())) {
+            this.decrees = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0);
+                     decreesItem.getChildren()
+                                .forEach(item -> this.decrees.put(new Decree(item), path));
+                 });
+
+            this.decrees.keySet()
+                        .forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(
+                                saveDecree.getName() + "_title")));
         } catch (IOException e) {
         }
     }

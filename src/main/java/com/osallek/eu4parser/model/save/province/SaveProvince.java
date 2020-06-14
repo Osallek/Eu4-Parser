@@ -339,8 +339,8 @@ public class SaveProvince extends Province {
         return this.save.getGame().getReligion(getReligionName());
     }
 
-    public void setReligion(String religion) {
-        this.item.setVariable("religion", religion);
+    public void setReligion(Religion religion) {
+        this.item.setVariable("religion", religion.getName());
     }
 
     public String getCapital() {
@@ -372,7 +372,7 @@ public class SaveProvince extends Province {
             setColonySize(1);
             this.history.addEvent(this.save.getDate(), "owner", country.getTag());
             this.history.addEvent(this.save.getDate(), "culture", country.getPrimaryCulture());
-            this.history.addEvent(this.save.getDate(), "religion", country.getReligion());
+            this.history.addEvent(this.save.getDate(), "religion", country.getReligion().getName());
         }
     }
 

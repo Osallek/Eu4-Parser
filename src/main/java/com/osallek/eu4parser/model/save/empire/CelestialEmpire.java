@@ -1,13 +1,14 @@
 package com.osallek.eu4parser.model.save.empire;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Decree;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 
 public class CelestialEmpire extends Empire {
 
-    private Decree decree;
+    private SaveDecree decree;
 
     public CelestialEmpire(ClausewitzItem item, Save save) {
         super(item, save);
@@ -22,24 +23,26 @@ public class CelestialEmpire extends Empire {
     @Override
     public void dismantle() {
         super.dismantle();
-        this.item.getChild("decree").removeAll();
+        ClausewitzItem decreeItem = this.item.getChild("decree");
+
+        if (decreeItem != null) {
+            decreeItem.removeAll();
+        }
+
         refreshAttributes();
     }
 
-    public Decree getDecree() {
+    public SaveDecree getDecree() {
         return decree;
     }
 
-    public void setDecreeType(DecreeType decreeType) {
-        this.decree.setType(decreeType);
-    }
-
-    public void setDecreeDate(Date decreeDate) {
-        this.decree.setDate(decreeDate);
-    }
-
-    public void setDecree(DecreeType decreeType, Date decreeDate) {
-        this.decree.setDecree(decreeType, decreeDate);
+    public void setDecree(Decree decree) {
+        if (this.decree != null) {
+            this.decree.setDecree(decree);
+        } else {
+            SaveDecree.addToItem(this.item, decree.getName(), this.save.getDate());
+            refreshAttributes();
+        }
     }
 
     @Override
@@ -48,7 +51,7 @@ public class CelestialEmpire extends Empire {
         ClausewitzItem decreeItem = this.item.getChild("decree");
 
         if (decreeItem != null) {
-            this.decree = new Decree(decreeItem);
+            this.decree = new SaveDecree(decreeItem, this.save);
         }
     }
 }
