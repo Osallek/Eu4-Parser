@@ -4,12 +4,12 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
 import com.osallek.eu4parser.model.save.Power;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.Advisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
@@ -44,9 +44,9 @@ public class Country {
 
     private final ClausewitzItem item;
 
-    private final Save save;
+    private Save save;
 
-    private final boolean isPlayable;
+    private boolean isPlayable;
 
     private String localizedName;
 
@@ -152,6 +152,10 @@ public class Country {
         this.isPlayable = !"---".equals(getTag()) && !"REB".equals(getTag()) && !"NAT".equals(getTag())
                           && !"PIR".equals(getTag()) && !getTag().matches("O[0-9]{2}");
         refreshAttributes();
+    }
+
+    public Country(String tag) {
+        this.item = new ClausewitzItem(null, tag, 0);
     }
 
     public Save getSave() {
@@ -651,11 +655,11 @@ public class Country {
         return this.item.getVarAsString("religion");
     }
 
-    public Religion getReligion() {
-        return this.save.getGame().getReligion(getReligionName());
+    public SaveReligion getReligion() {
+        return this.save.getReligions().getReligion(getReligionName());
     }
 
-    public void setReligion(Religion religion) {
+    public void setReligion(SaveReligion religion) {
         this.item.setVariable("religion", religion.getName());
     }
 
@@ -793,12 +797,26 @@ public class Country {
         this.item.setVariable("num_of_war_reparations", nbWarReparations - 1);
     }
 
-    public String getOverlord() {
-        return this.item.getVarAsString("overlord");
+    public Country getOverlord() {
+        String overlordTag = this.item.getVarAsString("overlord");
+
+        return overlordTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(overlordTag));
     }
 
-    public void setOverlord(String country) {
-        this.item.setVariable("overlord", ClausewitzUtils.removeQuotes(country));
+    public void setOverlord(String countryTag) {
+        if (countryTag == null) {
+            this.item.removeVariable("overlord");
+        } else {
+            this.item.setVariable("overlord", ClausewitzUtils.addQuotes(countryTag));
+        }
+    }
+
+    public void setOverlord(Country country) {
+        if (country == null) {
+            this.item.removeVariable("overlord");
+        } else {
+            this.item.setVariable("overlord", ClausewitzUtils.addQuotes(country.getTag()));
+        }
     }
 
     public void removeOverlord() {

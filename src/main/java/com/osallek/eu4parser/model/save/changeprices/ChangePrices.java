@@ -45,14 +45,6 @@ public class ChangePrices {
         return null;
     }
 
-    public void setCurrentPrice(String good, double newPrice) {
-        ChangePriceGood changePriceGood = this.goods.get(good);
-
-        if (changePriceGood != null) {
-            changePriceGood.setCurrentPrice(newPrice);
-        }
-    }
-
     public void addChangePrice(String good, String key, int percent, Date expiryDate) {
         ChangePriceGood changePriceGood = this.goods.get(good);
 
@@ -74,6 +66,7 @@ public class ChangePrices {
         this.goods = this.item.getChildren()
                               .stream()
                               .map(goodItem -> new ChangePriceGood(goodItem, this.game))
+                              .filter(ChangePriceGood::isValid)
                               .collect(Collectors.toMap(ChangePriceGood::getName,
                                                         Function.identity(),
                                                         (changePriceGood, changePriceGood2) -> changePriceGood,

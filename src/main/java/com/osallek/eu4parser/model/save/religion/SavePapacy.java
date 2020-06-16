@@ -1,11 +1,17 @@
 package com.osallek.eu4parser.model.save.religion;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.GoldenBull;
+import com.osallek.eu4parser.model.game.PapacyConcession;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Religion;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,12 +24,18 @@ public class Papacy {
 
     private final ClausewitzItem item;
 
+    private final Religion religion;
+
+    private final Game game;
+
     private List<Cardinal> cardinals;
 
     private ColoniesClaims coloniesClaims;
 
-    public Papacy(ClausewitzItem item) {
+    public Papacy(ClausewitzItem item, Religion religion, Game game) {
         this.item = item;
+        this.religion = religion;
+        this.game = game;
         refreshAttributes();
     }
 
@@ -146,26 +158,64 @@ public class Papacy {
     }
 
     public void setPapacyActive(boolean papacyActive) {
-        ClausewitzVariable papacyActiveVar = this.item.getVar("papacy_active");
+        this.item.setVariable("papacy_active", papacyActive);
+    }
 
-        if (papacyActiveVar != null) {
-            papacyActiveVar.setValue(papacyActive);
-        } else {
-            this.item.addVariable("papacy_active", papacyActive);
-        }
+    public Boolean getCouncilActive() {
+        return this.item.getVarAsBool("council_active");
+    }
+
+    public void setCouncilActive(boolean councilActive) {
+        this.item.setVariable("council_active", councilActive);
+    }
+
+    public Boolean getCouncilFinished() {
+        return this.item.getVarAsBool("council_finished");
+    }
+
+    public void setCouncilFinished(boolean councilFinished) {
+        this.item.setVariable("council_finished", councilFinished);
     }
 
     public Double getPapalInvestment() {
         return this.item.getVarAsDouble("papal_investment");
     }
 
-    public void setPapalInvestment(Double papalInvestment) {
-        ClausewitzVariable papalInvestmentVar = this.item.getVar("papal_investment");
+    public void setPapalInvestment(double papalInvestment) {
+        if (papalInvestment < 0) {
+            papalInvestment = 0;
+        }
 
-        if (papalInvestmentVar != null) {
-            papalInvestmentVar.setValue(papalInvestment);
+        this.item.setVariable("papal_investment", papalInvestment);
+    }
+
+    public Double getCuriaTreasury() {
+        return this.item.getVarAsDouble("curia_treasury");
+    }
+
+    public void setCuriaTreasury(double curiaTreasury) {
+        if (curiaTreasury < 0) {
+            curiaTreasury = 0;
+        }
+
+        this.item.setVariable("curia_treasury", curiaTreasury);
+    }
+
+    public GoldenBull getGoldenBull() {
+        String bull = this.item.getVarAsString("golden_bull");
+
+        if (bull == null) {
+            return null;
         } else {
-            this.item.addVariable("papal_investment", papalInvestment);
+            return this.game.getGoldenBull(ClausewitzUtils.removeQuotes(bull));
+        }
+    }
+
+    public void setGoldenBull(GoldenBull goldenBull) {
+        if (goldenBull == null) {
+            this.item.removeVariable("golden_bull");
+        } else {
+            this.item.setVariable("golden_bull", ClausewitzUtils.addQuotes(goldenBull.getName()));
         }
     }
 
@@ -251,6 +301,33 @@ public class Papacy {
     public void removeColonyClaim(Colony colony) {
         if (this.coloniesClaims != null) {
             this.coloniesClaims.removeColonyClaim(colony);
+        }
+    }
+
+    public List<PapacyConcession> getConcessions() {
+        List<PapacyConcession> concessions = new ArrayList<>();
+
+        if (getCouncilActive() == null || !getCouncilActive()) {
+            return concessions;
+        }
+
+        ClausewitzList list = this.item.getList("concessions");
+
+        if (list == null) {
+            return concessions;
+        }
+
+        return list.getValuesAsInt();
+    }
+
+    public void setConcessions(List<Integer> concessions) {
+        ClausewitzList list = this.item.getList("concessions");
+
+        if (list == null) {
+            this.item.addList("concessions", concessions.toArray(new Integer[0]));
+        } else {
+            list.clear();
+            list.addAll(concessions.toArray(new Integer[0]));
         }
     }
 

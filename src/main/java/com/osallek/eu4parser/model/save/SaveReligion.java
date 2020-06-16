@@ -1,37 +1,77 @@
 package com.osallek.eu4parser.model.save;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.game.ReligionGroup;
+import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.religion.MuslimRelation;
 import com.osallek.eu4parser.model.save.religion.MuslimRelationSchool;
 import com.osallek.eu4parser.model.save.religion.MuslimRelationValue;
-import com.osallek.eu4parser.model.save.religion.Papacy;
 import com.osallek.eu4parser.model.save.religion.ReformationCenter;
+import com.osallek.eu4parser.model.save.religion.SavePapacy;
 
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Religion {
+public class SaveReligion {
 
     private final ClausewitzItem religionsItem;
 
     private final ClausewitzItem religionInstanceDataItem;
 
+    private final Save save;
+
+    private final Religion gameReligion;
+
     private List<MuslimRelation> relations;
 
-    private Papacy papacy;
+    private SavePapacy papacy;
 
     private List<ReformationCenter> reformationCenters;
 
-    public Religion(ClausewitzItem religionsItem, ClausewitzItem religionInstanceDataItem) {
+    public SaveReligion(ClausewitzItem religionsItem, ClausewitzItem religionInstanceDataItem, Save save) {
         this.religionsItem = religionsItem;
         this.religionInstanceDataItem = religionInstanceDataItem;
+        this.save = save;
+        this.gameReligion = this.save.getGame().getReligion(getName());
         refreshAttributes();
     }
 
     public String getName() {
-        return this.religionsItem.getName();
+        return this.religionsItem == null ? this.religionInstanceDataItem.getName() : this.religionsItem.getName();
+    }
+
+    public String getLocalizedName() {
+        return this.gameReligion != null ? this.gameReligion.getLocalizedName() : getName();
+    }
+
+    public boolean hasSpecialAttribute() {
+        return hasDate() || hasDefenderOfFaith() || hasPapacy() || hasRelations();
+    }
+
+    public boolean hasDate() {
+        return this.gameReligion != null && this.gameReligion.getDate() != null;
+    }
+
+    public boolean hasDefenderOfFaith() {
+        return this.gameReligion != null && this.gameReligion.getReligionGroup().defenderOfFaith();
+    }
+
+    public boolean hasPapacy() {
+        return this.papacy != null;
+    }
+
+    public boolean hasRelations() {
+        return this.relations != null;
+    }
+
+    public ReligionGroup getReligionGroup() {
+        return this.gameReligion == null ? null : this.gameReligion.getReligionGroup();
     }
 
     public Integer getAmountOfProvinces() {
@@ -88,23 +128,30 @@ public class Religion {
         return this.religionsItem.getVarAsBool("original_hre_heretic_religion");
     }
 
-    public String getDefender() {
-        return this.religionInstanceDataItem.getVarAsString("defender");
+    public Country getDefender() {
+        String defenderTag = this.religionInstanceDataItem.getVarAsString("defender");
+
+        return defenderTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(defenderTag));
     }
 
     public Date getDefenderDate() {
         return this.religionInstanceDataItem.getVarAsDate("defender_date");
     }
 
-    public void setDefender(String defender) {
-        ClausewitzVariable defenderVar = this.religionInstanceDataItem.getVar("defender");
-        ClausewitzVariable defenderDateVar = this.religionInstanceDataItem.getVar("defender_date");
+    public void setDefender(Country defender) {
+        if (defender == null || Eu4Utils.DEFAULT_TAG.equals(defender.getTag())) {
+            this.religionInstanceDataItem.removeVariable("defender");
+            this.religionInstanceDataItem.removeVariable("defender_date");
+        } else {
+            ClausewitzVariable defenderVar = this.religionInstanceDataItem.getVar("defender");
+            ClausewitzVariable defenderDateVar = this.religionInstanceDataItem.getVar("defender_date");
 
-        if (defenderDateVar != null) {
-            if (defenderVar != null) {
-                defenderVar.setValue(defender);
-            } else {
-                this.religionInstanceDataItem.addVariable("defender", defender);
+            if (defenderDateVar != null) {
+                if (defenderVar != null) {
+                    defenderVar.setValue(ClausewitzUtils.addQuotes(defender.getTag()));
+                } else {
+                    this.religionInstanceDataItem.addVariable("defender", ClausewitzUtils.addQuotes(defender.getTag()));
+                }
             }
         }
     }
@@ -122,20 +169,25 @@ public class Religion {
         }
     }
 
-    public void setDefender(String defender, Date defenderDate) {
-        ClausewitzVariable defenderVar = this.religionInstanceDataItem.getVar("defender");
-        ClausewitzVariable defenderDateVar = this.religionInstanceDataItem.getVar("defender_date");
-
-        if (defenderVar != null) {
-            defenderVar.setValue(defender);
+    public void setDefender(Country defender, Date defenderDate) {
+        if (defender == null || Eu4Utils.DEFAULT_TAG.equals(defender.getTag())) {
+            this.religionInstanceDataItem.removeVariable("defender");
+            this.religionInstanceDataItem.removeVariable("defender_date");
         } else {
-            this.religionInstanceDataItem.addVariable("defender", defender);
-        }
+            ClausewitzVariable defenderVar = this.religionInstanceDataItem.getVar("defender");
+            ClausewitzVariable defenderDateVar = this.religionInstanceDataItem.getVar("defender_date");
 
-        if (defenderDateVar != null) {
-            defenderDateVar.setValue(defenderDate);
-        } else {
-            this.religionInstanceDataItem.addVariable("defender_date", defenderDate);
+            if (defenderVar != null) {
+                defenderVar.setValue( ClausewitzUtils.addQuotes(defender.getTag()));
+            } else {
+                this.religionInstanceDataItem.addVariable("defender",  ClausewitzUtils.addQuotes(defender.getTag()));
+            }
+
+            if (defenderDateVar != null) {
+                defenderDateVar.setValue(defenderDate);
+            } else {
+                this.religionInstanceDataItem.addVariable("defender_date", defenderDate);
+            }
         }
     }
 
@@ -155,7 +207,7 @@ public class Religion {
                       .ifPresent(muslimRelation -> muslimRelation.setRelation(relation));
     }
 
-    public Papacy getPapacy() {
+    public SavePapacy getPapacy() {
         return this.papacy;
     }
 
@@ -186,7 +238,7 @@ public class Religion {
             ClausewitzItem papacyItem = this.religionInstanceDataItem.getChild("papacy");
 
             if (papacyItem != null) {
-                this.papacy = new Papacy(papacyItem);
+                this.papacy = new SavePapacy(papacyItem, this, this.save.getGame());
             }
 
             List<ClausewitzItem> reformationCentersItems = this.religionInstanceDataItem.getChildren("reformation_center");

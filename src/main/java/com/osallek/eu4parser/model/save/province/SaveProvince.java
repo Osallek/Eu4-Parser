@@ -12,6 +12,7 @@ import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Army;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Modifier;
@@ -248,15 +249,15 @@ public class SaveProvince extends Province {
         ClausewitzList list = this.item.getList("claims");
         list.clear();
 
-        tags.stream().map(ClausewitzUtils::addQuotes).filter(tag -> tag.length() == 5).forEach(list::add);
+        tags.stream().map(ClausewitzUtils::removeQuotes).filter(tag -> tag.length() == 3).forEach(list::add);
     }
 
     public void addClaim(String tag) {
         ClausewitzList list = this.item.getList("claims");
 
-        tag = ClausewitzUtils.addQuotes(tag);
+        tag = ClausewitzUtils.removeQuotes(tag);
 
-        if (tag.length() == 5 && !list.contains(tag)) {
+        if (tag.length() == 3 && !list.contains(tag)) {
             list.add(tag);
         }
     }
@@ -265,7 +266,7 @@ public class SaveProvince extends Province {
         ClausewitzList list = this.item.getList("claims");
 
         if (list != null) {
-            list.remove(tag);
+            list.remove(ClausewitzUtils.removeQuotes(tag));
         }
     }
 
@@ -335,11 +336,11 @@ public class SaveProvince extends Province {
         return this.item.getVarAsString("religion");
     }
 
-    public Religion getReligion() {
-        return this.save.getGame().getReligion(getReligionName());
+    public SaveReligion getReligion() {
+        return this.save.getReligions().getReligion(getReligionName());
     }
 
-    public void setReligion(Religion religion) {
+    public void setReligion(SaveReligion religion) {
         this.item.setVariable("religion", religion.getName());
     }
 

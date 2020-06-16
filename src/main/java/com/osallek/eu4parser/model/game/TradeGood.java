@@ -14,9 +14,9 @@ public class TradeGood {
 
     private final ClausewitzItem item;
 
-    ClausewitzItem priceItem;
+    private ClausewitzItem priceItem;
 
-    String localizedName;
+    private String localizedName;
 
     public TradeGood(ClausewitzItem item) {
         this.item = item;

@@ -5,10 +5,10 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
-import com.osallek.eu4parser.model.save.Good;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.TradeGood;
 
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +19,17 @@ public class TradeNode {
 
     private final ClausewitzItem item;
 
+    private final Game game;
+
     private Map<String, TradeNodeCountry> countries;
 
     private Map<String, Double> topProvinces;
 
     private Map<String, Double> topPower;
 
-    public TradeNode(ClausewitzItem item) {
+    public TradeNode(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
         refreshAttributes();
     }
 
@@ -97,13 +100,13 @@ public class TradeNode {
         return this.item.getVarAsDouble("highest_power");
     }
 
-    public Map<Good, Double> getTradeGoodsSize() {
-        Map<Good, Double> productionLeaders = new EnumMap<>(Good.class);
+    public Map<TradeGood, Double> getTradeGoodsSize() {
+        Map<TradeGood, Double> productionLeaders = new LinkedHashMap<>();
         ClausewitzList tradeGoodsSizeList = this.item.getList("trade_goods_size");
 
         if (tradeGoodsSizeList != null) {
-            for (Good good : Good.values()) {
-                productionLeaders.put(good, tradeGoodsSizeList.getAsDouble(good.ordinal()));
+            for (int i = 0; i < tradeGoodsSizeList.size(); i++) {
+                productionLeaders.put(this.game.getTradeGood(i), tradeGoodsSizeList.getAsDouble(i));
             }
         }
 

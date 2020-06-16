@@ -7,6 +7,7 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.Province;
+import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.save.combat.Combats;
 import com.osallek.eu4parser.model.save.counters.IdCounters;
@@ -338,26 +339,26 @@ public class Save {
         return tradeNodes;
     }
 
-    public Map<Good, String> getProductionLeaders() {
-        Map<Good, String> productionLeaders = new EnumMap<>(Good.class);
+    public Map<TradeGood, String> getProductionLeaders() {
+        Map<TradeGood, String> productionLeaders = new LinkedHashMap<>();
         ClausewitzList productionLeaderList = this.gamestateItem.getList("production_leader_tag");
 
         if (productionLeaderList != null) {
-            for (Good good : Good.values()) {
-                productionLeaders.put(good, productionLeaderList.get(good.ordinal()));
+            for (int i = 0; i < productionLeaderList.size(); i++) {
+                productionLeaders.put(this.game.getTradeGood(i), productionLeaderList.get(i));
             }
         }
 
         return productionLeaders;
     }
 
-    public Map<Good, String> getGoodsTotalProduced() {
-        Map<Good, String> productionLeaders = new EnumMap<>(Good.class);
+    public Map<TradeGood, String> getGoodsTotalProduced() {
+        Map<TradeGood, String> productionLeaders = new LinkedHashMap<>();
         ClausewitzList totalProducedList = this.gamestateItem.getList("tradegoods_total_produced");
 
         if (totalProducedList != null) {
-            for (Good good : Good.values()) {
-                productionLeaders.put(good, totalProducedList.get(good.ordinal()));
+            for (int i = 0; i < totalProducedList.size(); i++) {
+                productionLeaders.put(this.game.getTradeGood(i), totalProducedList.get(i));
             }
         }
 
@@ -417,13 +418,13 @@ public class Save {
 
         if (hreReligionStatus == HreReligionStatus.CATHOLIC) {
             if (this.religions != null) {
-                Religion catholic = this.religions.getReligion("catholic");
+                SaveReligion catholic = this.religions.getReligion("catholic");
                 if (catholic != null) {
                     catholic.setHreHereticReligion(false);
                     catholic.setHreReligion(true);
                 }
 
-                Religion protestant = this.religions.getReligion("protestant");
+                SaveReligion protestant = this.religions.getReligion("protestant");
                 if (protestant != null && protestant.getEnable() != null) {
                     protestant.setHreHereticReligion(true);
                     protestant.setHreReligion(false);
@@ -431,13 +432,13 @@ public class Save {
             }
         } else if (hreReligionStatus == HreReligionStatus.PROTESTANT) {
             if (this.religions != null) {
-                Religion catholic = this.religions.getReligion("catholic");
+                SaveReligion catholic = this.religions.getReligion("catholic");
                 if (catholic != null) {
                     catholic.setHreHereticReligion(true);
                     catholic.setHreReligion(false);
                 }
 
-                Religion protestant = this.religions.getReligion("protestant");
+                SaveReligion protestant = this.religions.getReligion("protestant");
                 if (protestant != null && protestant.getEnable() != null) {
                     protestant.setHreHereticReligion(false);
                     protestant.setHreReligion(true);
@@ -674,7 +675,7 @@ public class Save {
         if (tradeItem != null) {
             this.tradeNodes = tradeItem.getChildren("node")
                                        .stream()
-                                       .map(TradeNode::new)
+                                       .map(item -> new TradeNode(item, this.game))
                                        .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()),
                                                                  Function.identity()));
         }
@@ -706,7 +707,7 @@ public class Save {
         ClausewitzItem religionInstantDateItem = this.gamestateItem.getChild("religion_instance_data");
 
         if (religionsItem != null || religionInstantDateItem != null) {
-            this.religions = new Religions(religionsItem, religionInstantDateItem);
+            this.religions = new Religions(religionsItem, religionInstantDateItem, this);
         }
 
         ClausewitzItem firedEventsItem = this.gamestateItem.getChild("fired_events");
