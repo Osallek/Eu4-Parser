@@ -7,11 +7,11 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.GoldenBull;
-import com.osallek.eu4parser.model.game.PapacyConcession;
+import com.osallek.eu4parser.model.game.Papacy;
 import com.osallek.eu4parser.model.save.Id;
-import com.osallek.eu4parser.model.save.Religion;
+import com.osallek.eu4parser.model.save.SaveReligion;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -20,11 +20,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class Papacy {
+public class SavePapacy {
 
     private final ClausewitzItem item;
 
-    private final Religion religion;
+    private final SaveReligion religion;
 
     private final Game game;
 
@@ -32,7 +32,7 @@ public class Papacy {
 
     private ColoniesClaims coloniesClaims;
 
-    public Papacy(ClausewitzItem item, Religion religion, Game game) {
+    public SavePapacy(ClausewitzItem item, SaveReligion religion, Game game) {
         this.item = item;
         this.religion = religion;
         this.game = game;
@@ -256,10 +256,10 @@ public class Papacy {
 
         if (activeCardinalsItem != null) {
             Integer id = getCardinals().stream()
-                                    .map(Cardinal::getId)
-                                    .map(Id::getId)
-                                    .max(Integer::compareTo)
-                                    .orElse(new Random().nextInt(90000));
+                                       .map(Cardinal::getId)
+                                       .map(Id::getId)
+                                       .max(Integer::compareTo)
+                                       .orElse(new Random().nextInt(90000));
             Cardinal.addToItem(activeCardinalsItem, id, provinceId);
         }
 
@@ -304,8 +304,8 @@ public class Papacy {
         }
     }
 
-    public List<PapacyConcession> getConcessions() {
-        List<PapacyConcession> concessions = new ArrayList<>();
+    public Map<String, List<String>> getConcessions() {
+        Map<String, List<String>> concessions = new LinkedHashMap<>();
 
         if (getCouncilActive() == null || !getCouncilActive()) {
             return concessions;
@@ -317,17 +317,30 @@ public class Papacy {
             return concessions;
         }
 
-        return list.getValuesAsInt();
+        Papacy gamePapacy = this.game.getReligion(this.religion.getName()).getPapacy();
+        for (int i = 0; i < list.size(); i++) {
+            String choose = gamePapacy.getConcession(i).getName() + (list.getAsInt(i) == 1 ? "_harsh" :
+                                                                      "_concilatory");
+
+            concessions.put(choose,
+                            Arrays.asList(gamePapacy.getConcession(i).getName() + "_harsh",
+                                          gamePapacy.getConcession(i).getName() + "_concilatory"));
+        }
+
+        return concessions;
     }
 
-    public void setConcessions(List<Integer> concessions) {
+    public void setConcessions(List<String> concessions) {
         ClausewitzList list = this.item.getList("concessions");
+        List<Integer> concessionsIds = concessions.stream()
+                                                  .map(concession -> concession.endsWith("harsh") ? 1 : 2)
+                                                  .collect(Collectors.toList());
 
         if (list == null) {
-            this.item.addList("concessions", concessions.toArray(new Integer[0]));
+            this.item.addList("concessions", concessionsIds.toArray(new Integer[0]));
         } else {
             list.clear();
-            list.addAll(concessions.toArray(new Integer[0]));
+            list.addAll(concessionsIds.toArray(new Integer[0]));
         }
     }
 
