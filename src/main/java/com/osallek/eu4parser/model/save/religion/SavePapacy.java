@@ -5,11 +5,12 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
-import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.GoldenBull;
 import com.osallek.eu4parser.model.game.Papacy;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -26,27 +27,27 @@ public class SavePapacy {
 
     private final SaveReligion religion;
 
-    private final Game game;
+    private final Save save;
 
     private List<Cardinal> cardinals;
 
     private ColoniesClaims coloniesClaims;
 
-    public SavePapacy(ClausewitzItem item, SaveReligion religion, Game game) {
+    public SavePapacy(ClausewitzItem item, SaveReligion religion, Save save) {
         this.item = item;
         this.religion = religion;
-        this.game = game;
+        this.save = save;
         refreshAttributes();
     }
 
-    public String getCrusadeTarget() {
+    public Country getCrusadeTarget() {
         String target = this.item.getVarAsString("crusade_target");
 
         if (target == null || Eu4Utils.DEFAULT_TAG_QUOTES.equals(target)) {
             return null;
         }
 
-        return target;
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(target));
     }
 
     public Date getCrusadeStart() {
@@ -59,21 +60,14 @@ public class SavePapacy {
         return date;
     }
 
-    public void setCrusade(String target, Date date) {
-        ClausewitzVariable targetVar = this.item.getVar("crusade_target");
-
-        if (targetVar != null) {
-            targetVar.setValue(target);
-        } else {
-            this.item.addVariable("crusade_target", target);
-        }
-
-        ClausewitzVariable dateVar = this.item.getVar("crusade_start");
-
-        if (dateVar != null) {
-            dateVar.setValue(date);
-        } else {
-            this.item.addVariable("crusade_start", date);
+    public void setCrusadeTarget(Country target) {
+        if (target != getCrusadeTarget()) {
+            if (target == null) {
+                removeCrusade();
+            } else {
+                this.item.setVariable("crusade_target", ClausewitzUtils.addQuotes(target.getTag()));
+                this.item.setVariable("crusade_start", this.save.getDate());
+            }
         }
     }
 
@@ -105,18 +99,17 @@ public class SavePapacy {
         }
     }
 
-    public String getController() {
+    public String getControllerTag() {
         return this.item.getVarAsString("controller");
     }
 
-    public void setController(String controller) {
-        ClausewitzVariable controllerVar = this.item.getVar("controller");
+    public Country getController() {
+        return getControllerTag() == null ? null :
+               this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
+    }
 
-        if (controllerVar != null) {
-            controllerVar.setValue(controller);
-        } else {
-            this.item.addVariable("controller", controller);
-        }
+    public void setController(Country controller) {
+        this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
     public String getPreviousController() {
@@ -207,12 +200,12 @@ public class SavePapacy {
         if (bull == null) {
             return null;
         } else {
-            return this.game.getGoldenBull(ClausewitzUtils.removeQuotes(bull));
+            return this.save.getGame().getGoldenBull(ClausewitzUtils.removeQuotes(bull));
         }
     }
 
     public void setGoldenBull(GoldenBull goldenBull) {
-        if (goldenBull == null) {
+        if (goldenBull == null || goldenBull.getName() == null) {
             this.item.removeVariable("golden_bull");
         } else {
             this.item.setVariable("golden_bull", ClausewitzUtils.addQuotes(goldenBull.getName()));
@@ -228,7 +221,8 @@ public class SavePapacy {
 
         return investItem.getVariables()
                          .stream()
-                         .collect(Collectors.toMap(var -> Integer.parseInt(var.getName()), ClausewitzVariable::getAsInt));
+                         .collect(Collectors.toMap(var -> Integer.parseInt(var.getName()),
+                                                   ClausewitzVariable::getAsInt));
     }
 
     public void investInCardinals(Integer id, Integer value) {
@@ -317,10 +311,10 @@ public class SavePapacy {
             return concessions;
         }
 
-        Papacy gamePapacy = this.game.getReligion(this.religion.getName()).getPapacy();
+        Papacy gamePapacy = this.save.getGame().getReligion(this.religion.getName()).getPapacy();
         for (int i = 0; i < list.size(); i++) {
             String choose = gamePapacy.getConcession(i).getName() + (list.getAsInt(i) == 1 ? "_harsh" :
-                                                                      "_concilatory");
+                                                                     "_concilatory");
 
             concessions.put(choose,
                             Arrays.asList(gamePapacy.getConcession(i).getName() + "_harsh",

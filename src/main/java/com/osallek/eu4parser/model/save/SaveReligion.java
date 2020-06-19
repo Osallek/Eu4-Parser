@@ -238,7 +238,7 @@ public class SaveReligion {
             ClausewitzItem papacyItem = this.religionInstanceDataItem.getChild("papacy");
 
             if (papacyItem != null) {
-                this.papacy = new SavePapacy(papacyItem, this, this.save.getGame());
+                this.papacy = new SavePapacy(papacyItem, this, this.save);
             }
 
             List<ClausewitzItem> reformationCentersItems = this.religionInstanceDataItem.getChildren("reformation_center");

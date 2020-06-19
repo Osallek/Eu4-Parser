@@ -6,6 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ReligionGroup {
@@ -121,5 +122,22 @@ public class ReligionGroup {
                                   .stream()
                                   .map(child -> new Religion(child, this))
                                   .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ReligionGroup)) {
+            return false;
+        }
+        ReligionGroup that = (ReligionGroup) o;
+        return Objects.equals(getName(), that.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
     }
 }
