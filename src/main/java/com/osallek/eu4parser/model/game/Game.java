@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,6 +72,8 @@ public class Game {
 
     private Map<GoldenBull, Path> goldenBulls;
 
+    private Map<Event, Path> events;
+
     public Game(String gameFolderPath) throws IOException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -93,6 +96,7 @@ public class Game {
         readImperialReforms();
         readDecrees();
         readGoldenBulls();
+        readEvents();
     }
 
     public Collator getCollator() {
@@ -245,7 +249,8 @@ public class Game {
     }
 
     public List<Culture> getCultures() {
-        return getCultureGroups().stream()
+        return this.cultureGroups.values().stream()
+                                 .flatMap(Collection::stream)
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
                                  .sorted(Comparator.comparing(Culture::getLocalizedName, collator))
@@ -253,7 +258,8 @@ public class Game {
     }
 
     public Culture getCulture(String name) {
-        return getCultureGroups().stream()
+        return this.cultureGroups.values().stream()
+                                 .flatMap(Collection::stream)
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
                                  .filter(culture -> culture.getName().equals(name))
@@ -298,7 +304,7 @@ public class Game {
     }
 
     public TradeGood getTradeGood(String name) {
-        for (TradeGood tradeGood : getTradeGoods()) {
+        for (TradeGood tradeGood : this.tradeGoods.keySet()) {
             if (tradeGood.getName().equals(name)) {
                 return tradeGood;
             }
@@ -316,7 +322,7 @@ public class Game {
     }
 
     public Building getBuilding(String name) {
-        for (Building building : getBuildings()) {
+        for (Building building : this.buildings.keySet()) {
             if (building.getName().equals(name)) {
                 return building;
             }
@@ -330,7 +336,7 @@ public class Game {
     }
 
     public ImperialReform getImperialReform(String name) {
-        for (ImperialReform imperialReform : getImperialReforms()) {
+        for (ImperialReform imperialReform : this.imperialReforms.keySet()) {
             if (imperialReform.getName().equals(name)) {
                 return imperialReform;
             }
@@ -344,7 +350,7 @@ public class Game {
     }
 
     public Decree getDecree(String name) {
-        for (Decree saveDecree : getDecrees()) {
+        for (Decree saveDecree : this.decrees.keySet()) {
             if (saveDecree.getName().equals(name)) {
                 return saveDecree;
             }
@@ -358,9 +364,34 @@ public class Game {
     }
 
     public GoldenBull getGoldenBull(String name) {
-        for (GoldenBull saveGoldenBull : getGoldenBulls()) {
+        for (GoldenBull saveGoldenBull : this.goldenBulls.keySet()) {
             if (saveGoldenBull.getName().equals(name)) {
                 return saveGoldenBull;
+            }
+        }
+
+        return null;
+    }
+
+    public List<Event> getEvents() {
+        return this.events.keySet()
+                          .stream()
+                          .sorted(Comparator.comparing(Event::getLocalizedName, collator))
+                          .collect(Collectors.toList());
+    }
+
+    public List<Event> getFireOnlyOnceEvents() {
+        return this.events.keySet()
+                          .stream()
+                          .filter(Event::fireOnlyOnce)
+                          .sorted(Comparator.comparing(Event::getLocalizedName, collator))
+                          .collect(Collectors.toList());
+    }
+
+    public Event getEvent(String id) {
+        for (Event event : this.events.keySet()) {
+            if (event.getId().equals(id)) {
+                return event;
             }
         }
 
@@ -437,7 +468,7 @@ public class Game {
                 paths.filter(Files::isRegularFile)
                      .filter(path -> path.toString().endsWith(".gfx"))
                      .forEach(path -> {
-                         ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0);
+                         ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
                          ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
 
                          if (spriteTypesItem != null) {
@@ -580,7 +611,7 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
                      this.cultureGroups.put(path, cultureGroupsItem.getChildren()
                                                                    .stream()
                                                                    .map(CultureGroup::new)
@@ -603,7 +634,7 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      this.religionGroups.put(path, religionGroupsItem.getChildren()
                                                                      .stream()
                                                                      .map(ReligionGroup::new)
@@ -626,7 +657,7 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      this.institutions.put(path, institutionsItem.getChildren()
                                                                  .stream()
                                                                  .map(Institution::new)
@@ -648,7 +679,7 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      tradeGoodsItem.getChildren()
                                    .forEach(tradeGoodItem -> this.tradeGoods.put(new TradeGood(tradeGoodItem),
                                                                                  new AbstractMap.SimpleEntry<>(path,
@@ -660,7 +691,7 @@ public class Game {
         try (Stream<Path> paths = Files.walk(pricesFolder.toPath())) {
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      pricesItem.getChildren().forEach(priceItem -> {
                          for (Map.Entry<TradeGood, Map.Entry<Path, Path>> entry : this.tradeGoods.entrySet()) {
                              if (entry.getKey().getName().equals(priceItem.getName())) {
@@ -685,7 +716,7 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      buildingsItem.getChildrenNot("manufactory")
                                   .forEach(
                                           tradeGoodItem -> this.buildings.put(new Building(tradeGoodItem, this), path));
@@ -715,7 +746,7 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      imperialReformsItem.getChildren()
                                         .forEach(
                                                 item -> this.imperialReforms.put(new ImperialReform(item, this), path));
@@ -736,7 +767,7 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      decreesItem.getChildren()
                                 .forEach(item -> this.decrees.put(new Decree(item), path));
                  });
@@ -756,13 +787,34 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      goldenBullsItem.getChildren()
                                     .forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
                  });
 
             this.goldenBulls.keySet()
                             .forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readEvents() {
+        File eventsFolder = new File(this.gameFolderPath + File.separator + "events");
+
+        try (Stream<Path> paths = Files.walk(eventsFolder.toPath())) {
+            this.events = new ConcurrentHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .parallel()
+                 .forEach(path -> {
+                     ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     eventsItem.getChildren()
+                               .forEach(item -> this.events.put(new Event(item), path));
+                 });
+
+            this.events.keySet()
+                       .parallelStream()
+                       .forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
         } catch (IOException e) {
         }
     }

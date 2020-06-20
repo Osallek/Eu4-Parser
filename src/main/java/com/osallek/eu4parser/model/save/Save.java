@@ -713,7 +713,7 @@ public class Save {
         ClausewitzItem firedEventsItem = this.gamestateItem.getChild("fired_events");
 
         if (firedEventsItem != null) {
-            this.firedEvents = new FiredEvents(firedEventsItem);
+            this.firedEvents = new FiredEvents(firedEventsItem, this.game);
         }
 
         ClausewitzItem pendingEventsItem = this.gamestateItem.getChild("pending_events");

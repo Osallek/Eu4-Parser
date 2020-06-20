@@ -28,11 +28,11 @@ public class Eu4Parser {
         if (file.canRead()) {
             try {
                 ZipFile zipFile = new ZipFile(path);
-                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1));
+                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, ClausewitzUtils.CHARSET),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, ClausewitzUtils.CHARSET),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET));
             } catch (ZipException e) {
-                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1));
+                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, ClausewitzUtils.CHARSET));
             }
         }
 

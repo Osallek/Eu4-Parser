@@ -1,18 +1,25 @@
 package com.osallek.eu4parser.model.save.events;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.game.Event;
+import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.save.Id;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FiredEvents {
 
     private final ClausewitzItem item;
 
-    public FiredEvents(ClausewitzItem item) {
+    private final Game game;
+
+    public FiredEvents(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
     }
 
     public List<String> getFiredEvents() {
@@ -28,8 +35,19 @@ public class FiredEvents {
         return events;
     }
 
+    public List<Event> getEvents() {
+        return this.item.getVariables()
+                        .stream()
+                        .map(var -> this.game.getEvent(ClausewitzUtils.removeQuotes(var.getValue())))
+                        .collect(Collectors.toList());
+    }
+
+    public void addFiredEvent(Event firedEvent) {
+        addFiredEvent(firedEvent.getId());
+    }
+
     public void addFiredEvent(String firedEvent) {
-        this.item.addVariable("id", firedEvent);
+        this.item.addVariable("id", ClausewitzUtils.addQuotes(firedEvent));
     }
 
     public void addFiredEvent(int id) {
@@ -42,5 +60,13 @@ public class FiredEvents {
 
     public void removeFiredEvent(int index) {
         this.item.removeByOrder(index);
+    }
+
+    public void setEvents(List<Event> events) {
+        List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
+
+        this.item.getVariables().removeIf(var -> !eventIds.contains(var.getValue()));
+        events.removeIf(event -> this.item.getVar(event.getId()) != null);
+        events.forEach(this::addFiredEvent);
     }
 }
