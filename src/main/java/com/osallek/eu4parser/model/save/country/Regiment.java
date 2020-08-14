@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.save.Id;
 
 public class Regiment extends Ship {
@@ -16,19 +15,13 @@ public class Regiment extends Ship {
     }
 
     public void setDrill(Double drill) {
-        ClausewitzVariable var = this.item.getVar("drill");
-
         if (drill < 0d) {
             drill = 0d;
         } else if (drill > 100d) {
             drill = 100d;
         }
 
-        if (var != null) {
-            var.setValue(drill);
-        } else {
-            this.item.addVariable("drill", drill);
-        }
+        this.item.setVariable("drill", drill);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale, double drill) {

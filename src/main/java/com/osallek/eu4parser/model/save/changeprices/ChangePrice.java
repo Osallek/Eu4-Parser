@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.changeprices;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.game.Game;
 
 import java.util.Date;
@@ -37,11 +36,7 @@ public class ChangePrice {
     }
 
     public void setValue(int percent) {
-        ClausewitzVariable currentPriceVar = this.item.getVar("value");
-
-        if (currentPriceVar != null) {
-            currentPriceVar.setValue((double) percent / 100);
-        }
+        this.item.setVariable("value", (double) percent / 100);
     }
 
     public Date getExpiryDate() {
@@ -49,11 +44,7 @@ public class ChangePrice {
     }
 
     public void setExpiryDate(Date expiryDate) {
-        ClausewitzVariable currentPriceVar = this.item.getVar("expiry_date");
-
-        if (currentPriceVar != null) {
-            currentPriceVar.setValue(expiryDate);
-        }
+        this.item.setVariable("expiry_date", expiryDate);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String key, int percent, Date expiryDate) {

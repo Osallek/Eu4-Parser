@@ -1,27 +1,36 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import com.osallek.eu4parser.model.save.Color;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Event {
 
-    private final ClausewitzItem item;
+    private final String id;
 
     private String localizedName;
 
+    private final String title;
+
+    private final String desc;
+
+    private final String picture;
+
+    private final EventType type;
+
+    private final boolean fireOnlyOnce;
+
     public Event(ClausewitzItem item) {
-        this.item = item;
+        this.id = item.getVarAsString("id");
+        this.title = item.getVarAsString("title");
+        this.desc = item.getVarAsString("desc");
+        this.picture = item.getVarAsString("picture");
+        this.type = EventType.getByType(item.getName());
+        this.fireOnlyOnce = Boolean.TRUE.equals(item.getVarAsBool("fire_only_once"));
     }
 
     public String getId() {
-        return this.item.getVarAsString("id");
+        return this.id;
     }
 
     public String getLocalizedName() {
@@ -33,23 +42,23 @@ public class Event {
     }
 
     public String getTitle() {
-        return this.item.getVarAsString("title");
+        return this.title;
     }
 
     public String getDesc() {
-        return this.item.getVarAsString("desc");
+        return this.desc;
     }
 
     public String getPicture() {
-        return this.item.getVarAsString("picture");
+        return this.picture;
     }
 
     public EventType getType() {
-        return EventType.getByType(this.item.getName());
+        return this.type;
     }
 
     public boolean fireOnlyOnce() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("fire_only_once"));
+        return this.fireOnlyOnce;
     }
 
     @Override

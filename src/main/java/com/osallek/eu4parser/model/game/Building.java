@@ -1,6 +1,5 @@
 package com.osallek.eu4parser.model.game;
 
-import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
@@ -15,39 +14,120 @@ import java.util.stream.Collectors;
 
 public class Building {
 
-    private final ClausewitzItem item;
-
     private final Game game;
 
+    private String name;
+
     private String localizedName;
+
+    private Integer cost;
+
+    private Integer time;
 
     //Do this because manufactories cost/time/modifier are in another object, so we still want them but not written in the object
     private Integer internalCost;
 
     private Integer internalTime;
 
+    private String makeObsolete;
+
+    private boolean oncePerCountry;
+
+    private boolean allowInGoldProvince;
+
+    private boolean indestructible;
+
+    private boolean onMap;
+
+    private boolean influencingFort;
+
+    private final List<TradeGood> manufactoryFor;
+
+    private final List<TradeGood> bonusManufactory;
+
+    private boolean governmentSpecific;
+
+    private boolean showSeparate;
+
+    private final Map<String, Double> modifiers;
+
     private Map<String, Double> internalModifiers;
 
+    private final boolean onlyInPort;
+
+    private final boolean onlyNatives;
+
     public Building(Building other) {
-        this.item = other.item;
         this.game = other.game;
+        this.name = other.name;
         this.localizedName = other.localizedName;
+        this.cost = other.cost;
+        this.time = other.time;
         this.internalCost = other.internalCost;
         this.internalTime = other.internalTime;
+        this.makeObsolete = other.makeObsolete;
+        this.oncePerCountry = other.oncePerCountry;
+        this.allowInGoldProvince = other.allowInGoldProvince;
+        this.indestructible = other.indestructible;
+        this.onMap = other.onMap;
+        this.influencingFort = other.influencingFort;
+        this.manufactoryFor = other.manufactoryFor;
+        this.bonusManufactory = other.bonusManufactory;
+        this.governmentSpecific = other.governmentSpecific;
+        this.showSeparate = other.showSeparate;
+        this.modifiers = other.modifiers;
         this.internalModifiers = other.internalModifiers;
+        this.onlyInPort = other.onlyInPort;
+        this.onlyNatives = other.onlyNatives;
     }
 
     public Building(ClausewitzItem item, Game game) {
-        this.item = item;
         this.game = game;
+        this.name = item.getName();
+        this.cost = item.getVarAsInt("cost");
+        this.time = item.getVarAsInt("time");
+        this.makeObsolete = item.getVarAsString("make_obsolete");
+        this.oncePerCountry = Boolean.TRUE.equals(item.getVarAsBool("one_per_country"));
+        this.allowInGoldProvince = Boolean.TRUE.equals(item.getVarAsBool("allow_in_gold_provinces"));
+        this.indestructible = Boolean.TRUE.equals(item.getVarAsBool("indestructible"));
+        this.onMap = Boolean.TRUE.equals(item.getVarAsBool("onmap"));
+        this.influencingFort = Boolean.TRUE.equals(item.getVarAsBool("influencing_fort"));
+
+        ClausewitzList list = item.getList("manufactory");
+        this.manufactoryFor = list == null ? new ArrayList<>() :
+                              list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
+
+        list = item.getList("bonus_manufactory");
+        this.bonusManufactory = list == null ? new ArrayList<>() :
+                                list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
+        this.governmentSpecific = Boolean.TRUE.equals(item.getVarAsBool("government_specific"));
+        this.showSeparate = Boolean.TRUE.equals(item.getVarAsBool("show_separate"));
+
+        ClausewitzItem child = item.getChild("modifier");
+
+        this.modifiers = child == null ? new LinkedHashMap<>()
+                                       : child.getVariables()
+                                              .stream()
+                                              .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                        ClausewitzVariable::getAsDouble,
+                                                                        (a, b) -> b,
+                                                                        LinkedHashMap::new));
+
+        child = item.getChild("trigger");
+        this.onlyInPort = child != null && Boolean.TRUE.equals(child.getVarAsBool("has_port"));
+
+        child = item.getChild("build_trigger");
+        this.onlyNatives = child != null
+                           && (child = child.getChild("owner")) != null
+                           && "native".equals(child.getVarAsString("government"));
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
     public File getImageFile() {
@@ -63,17 +143,11 @@ public class Building {
     }
 
     public Integer getCost() {
-        Integer cost = this.item.getVarAsInt("cost");
-
-        if (cost == null) {
-            return this.internalCost;
-        }
-
-        return cost;
+        return this.cost == null ? this.internalCost : this.cost;
     }
 
     public void setCost(int cost) {
-        this.item.setVariable("cost", cost);
+        this.cost = cost;
     }
 
     void setInternalCost(int cost) {
@@ -81,17 +155,11 @@ public class Building {
     }
 
     public Integer getTime() {
-        Integer time = this.item.getVarAsInt("time");
-
-        if (time == null) {
-            return this.internalTime;
-        }
-
-        return time;
+        return this.time == null ? this.internalTime : this.time;
     }
 
     public void setTime(int time) {
-        this.item.setVariable("time", time);
+        this.time = time;
     }
 
     void setInternalTime(int time) {
@@ -99,7 +167,7 @@ public class Building {
     }
 
     public String getMakeObsolete() {
-        return this.item.getVarAsString("make_obsolete");
+        return this.makeObsolete;
     }
 
     public boolean makeObsolete() {
@@ -110,153 +178,113 @@ public class Building {
         return getMakeObsolete() == null ? null : this.game.getBuilding(getMakeObsolete());
     }
 
-    public void setMakeObsolete(int makeObsolete) {
-        this.item.setVariable("make_obsolete", makeObsolete);
+    public void setMakeObsolete(String makeObsolete) {
+        this.makeObsolete = makeObsolete;
     }
 
     public boolean onePerCountry() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("one_per_country"));
+        return this.oncePerCountry;
     }
 
     public void setOnePerCountry(boolean onePerCountry) {
-        this.item.setVariable("one_per_country", onePerCountry);
+        this.oncePerCountry = onePerCountry;
     }
 
     public boolean allowInGoldProvinces() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("allow_in_gold_provinces"));
+        return this.allowInGoldProvince;
     }
 
     public void setAllowInGoldProvinces(boolean allowInGoldProvinces) {
-        this.item.setVariable("allow_in_gold_provinces", allowInGoldProvinces);
+        this.allowInGoldProvince = allowInGoldProvinces;
     }
 
     public boolean indestructible() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("indestructible"));
+        return this.indestructible;
     }
 
     public void setIndestructible(boolean indestructible) {
-        this.item.setVariable("indestructible", indestructible);
+        this.indestructible = indestructible;
     }
 
     public boolean onMap() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("onmap"));
+        return this.onMap;
     }
 
     public void setOnMap(boolean onMap) {
-        this.item.setVariable("onmap", onMap);
+        this.onMap = onMap;
     }
 
     public boolean influencingFort() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("influencing_fort"));
+        return this.influencingFort;
     }
 
     public void setInfluencingFort(boolean influencingFort) {
-        this.item.setVariable("influencing_fort", influencingFort);
+        this.influencingFort = influencingFort;
     }
 
     public List<TradeGood> getManufactoryFor() {
-        ClausewitzList list = this.item.getList("manufactory");
-
-        if (list != null) {
-            return list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
-        }
-
-        return new ArrayList<>();
+        return this.manufactoryFor;
     }
 
     public void addManufactoryFor(TradeGood tradeGood) {
-        ClausewitzList list = this.item.getList("manufactory");
-
-        if (list != null) {
-            for (Building building : this.game.getBuildings()) {
-                if (!building.equals(this) && building.getManufactoryFor().contains(tradeGood)) {
-                    building.removeManufactoryFor(tradeGood);
-                    break; //Each trade good can only have one manufactory
-                }
+        for (Building building : this.game.getBuildings()) {
+            if (!building.equals(this) && building.getManufactoryFor().contains(tradeGood)) {
+                building.removeManufactoryFor(tradeGood);
+                break; //Each trade good can only have one manufactory
             }
-
-            list.add(tradeGood.getName());
         }
+
+        this.manufactoryFor.add(tradeGood);
     }
 
     public void removeManufactoryFor(TradeGood tradeGood) {
-        ClausewitzList list = this.item.getList("manufactory");
-
-        if (list != null) {
-            list.remove(tradeGood.getName());
-        }
+        this.manufactoryFor.remove(tradeGood);
     }
 
     public List<TradeGood> getBonusManufactory() {
-        ClausewitzList list = this.item.getList("bonus_manufactory");
-
-        if (list != null) {
-            return list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
-        }
-
-        return new ArrayList<>();
+        return this.bonusManufactory;
     }
 
     public void addBonusManufactory(TradeGood tradeGood) {
-        ClausewitzList list = this.item.getList("bonus_manufactory");
-
-        if (list != null) {
-            for (Building building : this.game.getBuildings()) {
-                if (!building.equals(this) && building.getBonusManufactory().contains(tradeGood)) {
-                    building.removeBonusManufactory(tradeGood);
-                    break; //Each trade good can only have one bonus
-                }
+        for (Building building : this.game.getBuildings()) {
+            if (!building.equals(this) && building.getBonusManufactory().contains(tradeGood)) {
+                building.removeBonusManufactory(tradeGood);
+                break; //Each trade good can only have one bonus
             }
-
-            list.add(tradeGood.getName());
         }
+
+        this.bonusManufactory.add(tradeGood);
     }
 
     public void removeBonusManufactory(TradeGood tradeGood) {
-        ClausewitzList list = this.item.getList("bonus_manufactory");
-
-        if (list != null) {
-            list.remove(tradeGood.getName());
-        }
+        this.bonusManufactory.remove(tradeGood);
     }
 
     public boolean governmentSpecific() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("government_specific"));
+        return this.governmentSpecific;
     }
 
     public void setGovernmentSpecific(boolean governmentSpecific) {
-        this.item.setVariable("government_specific", governmentSpecific);
+        this.governmentSpecific = governmentSpecific;
     }
 
     public boolean showSeparate() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("show_separate"));
+        return this.showSeparate;
     }
 
     public void setShowSeparate(boolean showSeparate) {
-        this.item.setVariable("show_separate", showSeparate);
+        this.showSeparate = showSeparate;
     }
 
     public Map<String, Double> getModifiers() {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            return modifiersItem.getVariables()
-                                .stream()
-                                .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                          ClausewitzVariable::getAsDouble,
-                                                          (a, b) -> b,
-                                                          LinkedHashMap::new));
-        }
-
-        return this.internalModifiers == null ? new LinkedHashMap<>() : this.internalModifiers;
+        Map<String, Double> map = this.internalModifiers == null ? new LinkedHashMap<>()
+                                                                 : new LinkedHashMap<>(this.internalModifiers);
+        map.putAll(this.modifiers);
+        return map;
     }
 
     public void addModifier(String modifier, Double quantity) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.setVariable(modifier, quantity);
-        }
+        this.modifiers.put(modifier, quantity);
     }
 
     public void setInternalModifiers(Map<String, Double> internalModifiers) {
@@ -264,31 +292,15 @@ public class Building {
     }
 
     public void removeModifier(String modifier) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.removeVariable(modifier);
-        }
+        this.modifiers.remove(modifier);
     }
 
     public boolean onlyInPort() {
-        ClausewitzItem clausewitzItem = this.item.getChild("trigger");
-
-        return clausewitzItem != null && Boolean.TRUE.equals(clausewitzItem.getVarAsBool("has_port"));
+        return this.onlyInPort;
     }
 
     public boolean onlyNative() {
-        ClausewitzItem clausewitzItem = this.item.getChild("build_trigger");
-
-        if (clausewitzItem != null) {
-            ClausewitzItem ownerChild = clausewitzItem.getChild("owner");
-
-            if (ownerChild != null) {
-                return "native".equals(ownerChild.getVarAsString("government"));
-            }
-        }
-
-        return false;
+        return this.onlyNatives;
     }
 
     @Override

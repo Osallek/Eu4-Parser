@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.empire;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
 
@@ -15,49 +14,23 @@ public class OldEmperor {
     }
 
     public Integer getId() {
-        ClausewitzVariable idVar = this.item.getVar("id");
-
-        if (idVar != null) {
-            return idVar.getAsInt();
-        } else {
-            return null;
-        }
+        return this.item.getVarAsInt("id");
     }
 
     public String getCountry() {
-        ClausewitzVariable countryVar = this.item.getVar("country");
-
-        if (countryVar != null) {
-            return countryVar.getValue();
-        } else {
-            return null;
-        }
+        return this.item.getVarAsString("country");
     }
 
     public Date getDate() {
-        ClausewitzVariable dateVar = this.item.getVar("date");
-
-        if (dateVar != null) {
-            return dateVar.getAsDate();
-        } else {
-            return null;
-        }
+        return this.item.getVarAsDate("date");
     }
 
     public void setCountry(String tag) {
-        ClausewitzVariable countryVar = this.item.getVar("country");
-
-        if (countryVar != null) {
-            countryVar.setValue(ClausewitzUtils.hasQuotes(tag) ? tag : "\"" + tag.toUpperCase() + "\"");
-        }
+        this.item.setVariable("country", ClausewitzUtils.addQuotes(tag.toUpperCase()));
     }
 
     public void setDate(Date date) {
-        ClausewitzVariable dateVar = this.item.getVar("date");
-
-        if (dateVar != null) {
-            dateVar.setValue(date);
-        }
+        this.item.setVariable("date", date);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String id, String country, Date date) {

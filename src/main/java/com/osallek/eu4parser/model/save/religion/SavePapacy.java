@@ -72,17 +72,8 @@ public class SavePapacy {
     }
 
     public void removeCrusade() {
-        ClausewitzVariable targetVar = this.item.getVar("crusade_target");
-
-        if (targetVar != null) {
-            targetVar.setValue(Eu4Utils.DEFAULT_TAG_QUOTES);
-        }
-
-        ClausewitzVariable dateVar = this.item.getVar("crusade_start");
-
-        if (dateVar != null) {
-            dateVar.setValue(Eu4Utils.DEFAULT_DATE);
-        }
+        this.item.setVariable("crusade_target", Eu4Utils.DEFAULT_TAG_QUOTES);
+        this.item.setVariable("crusade_start", Eu4Utils.DEFAULT_DATE);
     }
 
     public Double getReformDesire() {
@@ -90,13 +81,7 @@ public class SavePapacy {
     }
 
     public void setReformDesire(Double reformDesire) {
-        ClausewitzVariable reformDesireVar = this.item.getVar("reform_desire");
-
-        if (reformDesireVar != null) {
-            reformDesireVar.setValue(reformDesire);
-        } else {
-            this.item.addVariable("reform_desire", reformDesire);
-        }
+        this.item.setVariable("reform_desire", reformDesire);
     }
 
     public String getControllerTag() {
@@ -117,13 +102,7 @@ public class SavePapacy {
     }
 
     public void setPreviousController(String previousController) {
-        ClausewitzVariable previousControllerVar = this.item.getVar("previous_controller");
-
-        if (previousControllerVar != null) {
-            previousControllerVar.setValue(previousController);
-        } else {
-            this.item.addVariable("previous_controller", previousController);
-        }
+        this.item.setVariable("previous_controller", previousController);
     }
 
     public Date getLastExcommunication() {
@@ -137,13 +116,7 @@ public class SavePapacy {
     }
 
     public void setLastExcommunication(Date lastExcommunication) {
-        ClausewitzVariable lastExcommunicationVar = this.item.getVar("last_excom");
-
-        if (lastExcommunicationVar != null) {
-            lastExcommunicationVar.setValue(lastExcommunication);
-        } else {
-            this.item.addVariable("last_excom", lastExcommunication);
-        }
+        this.item.setVariable("last_excom", lastExcommunication);
     }
 
     public Boolean getPapacyActive() {
@@ -232,13 +205,7 @@ public class SavePapacy {
             investItem = this.item.addChild("papal_investment");
         }
 
-        ClausewitzVariable var = investItem.getVar(id);
-
-        if (var != null) {
-            var.setValue(value);
-        } else {
-            investItem.addVariable(id.toString(), value);
-        }
+        investItem.setVariable(id.toString(), value);
     }
 
     public List<Cardinal> getCardinals() {

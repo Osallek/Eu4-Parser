@@ -2,25 +2,38 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.save.Color;
 
 import java.util.Date;
 
 public class Religion {
 
-    private final ClausewitzItem item;
-
     private final ReligionGroup religionGroup;
 
-    private Papacy papacy;
+    private final Papacy papacy;
+
+    private String name;
 
     private String localizedName;
 
-    public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
-        this.item = item;
-        this.religionGroup = religionGroup;
+    private final Color color;
 
-        refreshAttributes();
+    private final boolean hreReligion;
+
+    private final boolean hreHereticReligion;
+
+    private final Date date;
+
+    public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
+        this.religionGroup = religionGroup;
+        this.name = item.getName();
+        ClausewitzList list = item.getList("color");
+        this.color = list == null ? null : new Color(list);
+        this.hreReligion = Boolean.TRUE.equals(item.getVarAsBool("hre_religion"));
+        this.hreHereticReligion = Boolean.TRUE.equals(item.getVarAsBool("hre_heretic_religion"));
+        this.date = item.getVarAsDate("date");
+        ClausewitzItem child = item.getChild("papacy");
+        this.papacy = child == null ? null : new Papacy(child);
     }
 
     public String getLocalizedName() {
@@ -32,29 +45,27 @@ public class Religion {
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
-    public int getColor() {
-        ClausewitzList colorList = this.item.getList("color");
-
-        return Eu4Utils.rgbToColor(colorList.getAsInt(0), colorList.getAsInt(1), colorList.getAsInt(2));
+    public Color getColor() {
+        return this.color;
     }
 
     public boolean hreReligion() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("hre_religion"));
+        return this.hreReligion;
     }
 
     public boolean hreHereticReligion() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("hre_heretic_religion"));
+        return this.hreHereticReligion;
     }
 
     public Date getDate() {
-        return this.item.getVarAsDate("date");
+        return this.date;
     }
 
     public Papacy getPapacy() {
@@ -63,13 +74,5 @@ public class Religion {
 
     public ReligionGroup getReligionGroup() {
         return religionGroup;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem papacyItem = this.item.getChild("papacy");
-
-        if (papacyItem != null) {
-            this.papacy = new Papacy(papacyItem);
-        }
     }
 }

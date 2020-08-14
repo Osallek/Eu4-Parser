@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
 
@@ -30,20 +29,10 @@ public class Modifier {
      * @param date If null set to never expires
      */
     public void setDate(Date date) {
-        ClausewitzVariable var = this.item.getVar("date");
-
         if (date == null) {
-            if (var != null) {
-                var.setValue("-1.1.1");
-            } else {
-                this.item.addVariable("date", "-1.1.1");
-            }
+            this.item.setVariable("date", "-1.1.1");
         } else {
-            if (var != null) {
-                var.setValue(date);
-            } else {
-                this.item.addVariable("date", date);
-            }
+            this.item.setVariable("date", date);
         }
     }
 

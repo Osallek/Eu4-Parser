@@ -9,26 +9,45 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Decree {
-
-    private final ClausewitzItem item;
+    
+    private final String name;
 
     private String localizedName;
 
+    private Integer cost;
+
+    private Integer duration;
+
+    private Map<String, Double> modifiers;
+
     public Decree(ClausewitzItem item) {
-        this.item = item;
+        this.name = item.getName();
+        this.cost = item.getVarAsInt("cost");
+        this.duration = item.getVarAsInt("time");
+
+        ClausewitzItem child = item.getChild("modifier");
+        this.modifiers = child == null ? null : child.getVariables()
+                                                     .stream()
+                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                               ClausewitzVariable::getAsDouble,
+                                                                               (a, b) -> b,
+                                                                               LinkedHashMap::new));
     }
 
     public Decree(Decree other) {
-        this.item = other.item;
+        this.name = other.name;
         this.localizedName = other.localizedName;
+        this.cost = other.cost;
+        this.duration = other.duration;
+        this.modifiers = other.modifiers;
     }
 
     public Decree(String name) {
-        this.item = new ClausewitzItem(null, name, 0);
+        this.name = name;
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public String getLocalizedName() {
@@ -40,50 +59,36 @@ public class Decree {
     }
 
     public Integer getCost() {
-        return this.item.getVarAsInt("cost");
+        return this.cost;
     }
 
     public void setCost(int cost) {
-        this.item.setVariable("cost", cost);
+        this.cost = cost;
     }
 
     public Integer getDuration() {
-        return this.item.getVarAsInt("duration");
+        return this.duration;
     }
 
     public void setDuration(int duration) {
-        this.item.setVariable("duration", duration);
+        this.duration = duration;
     }
 
-
     public Map<String, Double> getModifiers() {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            return modifiersItem.getVariables()
-                                .stream()
-                                .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                          ClausewitzVariable::getAsDouble,
-                                                          (a, b) -> b,
-                                                          LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
     }
 
     public void addModifier(String modifier, Double quantity) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.setVariable(modifier, quantity);
+        if (this.modifiers == null) {
+            this.modifiers = new LinkedHashMap<>();
         }
+
+        this.modifiers.put(modifier, quantity);
     }
 
     public void removeModifier(String modifier) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.removeVariable(modifier);
+        if (this.modifiers != null) {
+            this.modifiers.remove(modifier);
         }
     }
 

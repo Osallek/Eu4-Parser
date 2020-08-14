@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.save.Id;
 
 public class Ship {
@@ -27,14 +26,7 @@ public class Ship {
     }
 
     public void setName(String name) {
-        ClausewitzVariable var = this.item.getVar("name");
-        name = ClausewitzUtils.addQuotes(name);
-
-        if (var != null) {
-            var.setValue(name);
-        } else {
-            this.item.addVariable("name", name);
-        }
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public Integer getHome() {
@@ -42,13 +34,7 @@ public class Ship {
     }
 
     public void setHome(Integer home) {
-        ClausewitzVariable var = this.item.getVar("home");
-
-        if (var != null) {
-            var.setValue(home);
-        } else {
-            this.item.addVariable("home", home);
-        }
+        this.item.setVariable("home", home);
     }
 
     public String getType() {
@@ -56,14 +42,7 @@ public class Ship {
     }
 
     public void setType(String type) {
-        ClausewitzVariable var = this.item.getVar("type");
-        type = ClausewitzUtils.addQuotes(type);
-
-        if (var != null) {
-            var.setValue(type);
-        } else {
-            this.item.addVariable("type", type);
-        }
+        this.item.setVariable("type", ClausewitzUtils.addQuotes(type));
     }
 
     public Double getMorale() {
@@ -71,17 +50,11 @@ public class Ship {
     }
 
     public void setMorale(Double morale) {
-        ClausewitzVariable var = this.item.getVar("morale");
-
         if (morale < 0d) {
             morale = 0d;
         }
 
-        if (var != null) {
-            var.setValue(morale);
-        } else {
-            this.item.addVariable("morale", morale);
-        }
+        this.item.setVariable("morale", morale);
     }
 
     public Id getLastTarget() {

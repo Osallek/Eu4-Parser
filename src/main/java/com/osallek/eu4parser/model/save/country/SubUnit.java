@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.save.Unit;
 
 public class SubUnit {
@@ -18,13 +17,6 @@ public class SubUnit {
     }
 
     public void setSubUnit(Unit unit, String subUnit) {
-        ClausewitzVariable var = this.item.getVar(unit.name().toLowerCase());
-        subUnit = ClausewitzUtils.addQuotes(subUnit);
-
-        if (var != null) {
-            var.setValue(subUnit);
-        } else {
-            this.item.addVariable(unit.name().toLowerCase(), subUnit);
-        }
+        this.item.setVariable(unit.name().toLowerCase(), ClausewitzUtils.addQuotes(subUnit));
     }
 }

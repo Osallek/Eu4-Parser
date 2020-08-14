@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.religion;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class ReformationCenter {
 
@@ -17,11 +16,7 @@ public class ReformationCenter {
     }
 
     public void setProvinceId(Integer provinceId) {
-        ClausewitzVariable provinceVar = this.item.getVar("province_id");
-
-        if (provinceVar != null) {
-            provinceVar.setValue(provinceId);
-        }
+        this.item.setVariable("province_id", provinceId);
     }
 
     public Integer getCurrentlyConverting() {
@@ -29,13 +24,7 @@ public class ReformationCenter {
     }
 
     public void setCurrentlyConverting(Integer provinceId) {
-        ClausewitzVariable provinceVar = this.item.getVar("any_target_province");
-
-        if (provinceVar != null) {
-            provinceVar.setValue(provinceId);
-        } else {
-            this.item.addVariable("any_target_province", provinceId);
-        }
+        this.item.setVariable("any_target_province", provinceId);
     }
 
     public Double getConversionProgress() {
@@ -43,13 +32,7 @@ public class ReformationCenter {
     }
 
     public void setConversionProgress(Double conversionProgress) {
-        ClausewitzVariable provinceVar = this.item.getVar("missionary_progress");
-
-        if (provinceVar != null) {
-            provinceVar.setValue(conversionProgress);
-        } else {
-            this.item.addVariable("missionary_progress", conversionProgress);
-        }
+        this.item.setVariable("missionary_progress", conversionProgress);
     }
 
     public String getReligion() {

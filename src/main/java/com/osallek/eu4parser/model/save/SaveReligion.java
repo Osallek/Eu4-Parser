@@ -2,9 +2,7 @@ package com.osallek.eu4parser.model.save;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
-import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.ReligionGroup;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -83,33 +81,15 @@ public class SaveReligion {
     }
 
     public void setEnable(Date enable) {
-        ClausewitzVariable hreHereticReligionVar = this.religionsItem.getVar("enable");
-
-        if (hreHereticReligionVar != null) {
-            hreHereticReligionVar.setValue(enable);
-        } else {
-            this.religionsItem.addVariable("enable", enable);
-        }
+        this.religionsItem.setVariable("enable", enable);
     }
 
     void setHreHereticReligion(boolean hreHereticReligion) {
-        ClausewitzVariable hreHereticReligionVar = this.religionsItem.getVar("hre_heretic_religion");
-
-        if (hreHereticReligionVar != null) {
-            hreHereticReligionVar.setValue(hreHereticReligion);
-        } else {
-            this.religionsItem.addVariable("hre_heretic_religion", hreHereticReligion);
-        }
+        this.religionsItem.setVariable("hre_heretic_religion", hreHereticReligion);
     }
 
     void setHreReligion(boolean hreReligion) {
-        ClausewitzVariable hreHereticReligionVar = this.religionsItem.getVar("hre_religion");
-
-        if (hreHereticReligionVar != null) {
-            hreHereticReligionVar.setValue(hreReligion);
-        } else {
-            this.religionsItem.addVariable("hre_religion", hreReligion);
-        }
+        this.religionsItem.setVariable("hre_religion", hreReligion);
     }
 
     public Boolean getHreHereticReligion() {
@@ -143,29 +123,19 @@ public class SaveReligion {
             this.religionInstanceDataItem.removeVariable("defender");
             this.religionInstanceDataItem.removeVariable("defender_date");
         } else {
-            ClausewitzVariable defenderVar = this.religionInstanceDataItem.getVar("defender");
-            ClausewitzVariable defenderDateVar = this.religionInstanceDataItem.getVar("defender_date");
+            Date defenderDate = this.religionInstanceDataItem.getVarAsDate("defender_date");
 
-            if (defenderDateVar != null) {
-                if (defenderVar != null) {
-                    defenderVar.setValue(ClausewitzUtils.addQuotes(defender.getTag()));
-                } else {
-                    this.religionInstanceDataItem.addVariable("defender", ClausewitzUtils.addQuotes(defender.getTag()));
-                }
+            if (defenderDate != null) {
+                this.religionInstanceDataItem.setVariable("defender", ClausewitzUtils.addQuotes(defender.getTag()));
             }
         }
     }
 
     public void setDefenderDate(Date defenderDate) {
-        ClausewitzVariable defenderVar = this.religionInstanceDataItem.getVar("defender");
-        ClausewitzVariable defenderDateVar = this.religionInstanceDataItem.getVar("defender_date");
+        String defender = this.religionInstanceDataItem.getVarAsString("defender");
 
-        if (defenderVar != null) {
-            if (defenderDateVar != null) {
-                defenderDateVar.setValue(defenderDate);
-            } else {
-                this.religionInstanceDataItem.addVariable("defender_date", defenderDate);
-            }
+        if (defender != null) {
+            this.religionInstanceDataItem.setVariable("defender_date", defenderDate);
         }
     }
 
@@ -174,20 +144,8 @@ public class SaveReligion {
             this.religionInstanceDataItem.removeVariable("defender");
             this.religionInstanceDataItem.removeVariable("defender_date");
         } else {
-            ClausewitzVariable defenderVar = this.religionInstanceDataItem.getVar("defender");
-            ClausewitzVariable defenderDateVar = this.religionInstanceDataItem.getVar("defender_date");
-
-            if (defenderVar != null) {
-                defenderVar.setValue( ClausewitzUtils.addQuotes(defender.getTag()));
-            } else {
-                this.religionInstanceDataItem.addVariable("defender",  ClausewitzUtils.addQuotes(defender.getTag()));
-            }
-
-            if (defenderDateVar != null) {
-                defenderDateVar.setValue(defenderDate);
-            } else {
-                this.religionInstanceDataItem.addVariable("defender_date", defenderDate);
-            }
+            this.religionInstanceDataItem.setVariable("defender", ClausewitzUtils.addQuotes(defender.getTag()));
+            this.religionInstanceDataItem.setVariable("defender_date", defenderDate);
         }
     }
 

@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
 
@@ -23,13 +22,7 @@ public class Rival {
     }
 
     public void setDate(Date date) {
-        ClausewitzVariable var = this.item.getVar("date");
-
-        if (var != null) {
-            var.setValue(date);
-        } else {
-            this.item.addVariable("date", date);
-        }
+        this.item.setVariable("date", date);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String country, Date date) {

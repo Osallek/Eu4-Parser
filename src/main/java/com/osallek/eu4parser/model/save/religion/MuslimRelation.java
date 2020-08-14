@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.religion;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class MuslimRelation {
 
@@ -43,12 +42,6 @@ public class MuslimRelation {
     }
 
     public void setRelation(MuslimRelationValue relation) {
-        ClausewitzVariable var = this.item.getVar("value");
-
-        if (var != null) {
-            var.setValue(relation.name().toLowerCase());
-        } else {
-            this.item.addVariable("value", relation.name().toLowerCase());
-        }
+        this.item.setVariable("value", relation.name().toLowerCase());
     }
 }

@@ -12,23 +12,134 @@ import java.util.stream.Collectors;
 
 public class ImperialReform implements Comparable<ImperialReform> {
 
-    private final ClausewitzItem item;
-
     private final Game game;
+
+    private String name;
 
     private String localizedName;
 
+    private final List<String> dlcRequired;
+
+    private final List<String> dlcRequiredNot;
+
+    private String empire;
+
+    private Map<String, Double> provinceModifiers;
+
+    private Map<String, Double> emperorModifiers;
+
+    private Map<String, Double> allModifiers;
+
+    private Map<String, Double> memberModifiers;
+
+    private Map<String, Double> emperorPerPrinceModifiers;
+
+    private Map<String, Double> electorPerPrinceModifiers;
+
+    private String disabledBy;
+
+    private String requiredReform;
+
+    private String guiContainer;
+
+    private boolean enableImperialBanAllowed;
+
+    private boolean disableImperialBanAllowed;
+
+    private boolean enableInternalHreCb;
+
+    private boolean disableInternalHreCb;
+
+    private boolean enableEnableImperialRealmWar;
+
+    private boolean disableEnableImperialRealmWar;
+
+    private boolean enableHreInheritable;
+
+    private boolean disableHreInheritable;
+
     public ImperialReform(ClausewitzItem item, Game game) {
-        this.item = item;
         this.game = game;
+        this.name = item.getName();
+        ClausewitzItem child = item.getChild("potential");
+        this.dlcRequired = child == null ? null : child.getVarsAsStrings("has_dlc");
+
+        if (child != null) {
+            List<ClausewitzItem> children = child.getChildren("NOT");
+            this.dlcRequiredNot = children.isEmpty() ? null : children.stream()
+                                                                      .map(notItem -> notItem.getVarsAsStrings("has_dlc"))
+                                                                      .flatMap(Collection::stream)
+                                                                      .collect(Collectors.toList());
+        } else {
+            this.dlcRequiredNot = new ArrayList<>();
+        }
+        this.empire = item.getVarAsString("empire");
+        child = item.getChild("province");
+        this.provinceModifiers = child == null ? null : child.getVariables()
+                                                             .stream()
+                                                             .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                       ClausewitzVariable::getAsDouble,
+                                                                                       (a, b) -> b,
+                                                                                       LinkedHashMap::new));
+        child = item.getChild("emperor");
+        this.emperorModifiers = child == null ? null : child.getVariables()
+                                                            .stream()
+                                                            .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                      ClausewitzVariable::getAsDouble,
+                                                                                      (a, b) -> b,
+                                                                                      LinkedHashMap::new));
+        child = item.getChild("all");
+        this.allModifiers = child == null ? null : child.getVariables()
+                                                        .stream()
+                                                        .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                  ClausewitzVariable::getAsDouble,
+                                                                                  (a, b) -> b,
+                                                                                  LinkedHashMap::new));
+        child = item.getChild("member");
+        this.memberModifiers = child == null ? null : child.getVariables()
+                                                           .stream()
+                                                           .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                     ClausewitzVariable::getAsDouble,
+                                                                                     (a, b) -> b,
+                                                                                     LinkedHashMap::new));
+        child = item.getChild("emperor_per_prince");
+        this.emperorPerPrinceModifiers = child == null ? null : child.getVariables()
+                                                                     .stream()
+                                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                               ClausewitzVariable::getAsDouble,
+                                                                                               (a, b) -> b,
+                                                                                               LinkedHashMap::new));
+        child = item.getChild("elector_per_prince");
+        this.electorPerPrinceModifiers = child == null ? null : child.getVariables()
+                                                                     .stream()
+                                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                               ClausewitzVariable::getAsDouble,
+                                                                                               (a, b) -> b,
+                                                                                               LinkedHashMap::new));
+        this.disabledBy = item.getVarAsString("disabled_by");
+        this.requiredReform = item.getVarAsString("required_reform");
+        this.guiContainer = item.getVarAsString("gui_container");
+
+        child = item.getChild("on_effect");
+
+        if (child != null) {
+            this.enableImperialBanAllowed = Boolean.TRUE.equals(child.getVarAsBool("imperial_ban_allowed"));
+            this.disableImperialBanAllowed = Boolean.FALSE.equals(child.getVarAsBool("imperial_ban_allowed"));
+            this.enableInternalHreCb = Boolean.TRUE.equals(child.getVarAsBool("internal_hre_cb"));
+            this.disableInternalHreCb = Boolean.FALSE.equals(child.getVarAsBool("internal_hre_cb"));
+            this.enableEnableImperialRealmWar = Boolean.TRUE.equals(child.getVarAsBool("enable_imperial_realm_war"));
+            this.disableEnableImperialRealmWar = Boolean.FALSE.equals(child.getVarAsBool("enable_imperial_realm_war"));
+            this.enableHreInheritable = Boolean.TRUE.equals(child.getVarAsBool("hre_inheritable"));
+            this.disableHreInheritable = Boolean.FALSE.equals(child.getVarAsBool("hre_inheritable"));
+        }
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
     public String getLocalizedName() {
@@ -40,260 +151,151 @@ public class ImperialReform implements Comparable<ImperialReform> {
     }
 
     public List<String> dlcRequired() {
-        ClausewitzItem potentialItem = this.item.getChild("potential");
-
-        if (potentialItem != null) {
-            return potentialItem.getVarsAsStrings("has_dlc");
-        }
-
-        return new ArrayList<>();
+        return this.dlcRequired == null ? new ArrayList<>() : this.dlcRequired;
     }
 
     public List<String> dlcRequiredNot() {
-        ClausewitzItem potentialItem = this.item.getChild("potential");
-
-        if (potentialItem != null) {
-            List<ClausewitzItem> notItems = potentialItem.getChildren("NOT");
-
-            if (!notItems.isEmpty()) {
-                return notItems.stream()
-                               .map(notItem -> notItem.getVarsAsStrings("has_dlc"))
-                               .flatMap(Collection::stream)
-                               .collect(Collectors.toList());
-            }
-        }
-
-        return new ArrayList<>();
+        return this.dlcRequiredNot == null ? new ArrayList<>() : this.dlcRequiredNot;
     }
 
     public String getEmpire() {
-        return this.item.getVarAsString("empire");
+        return this.empire;
     }
 
     public void setEmpire(String empire) {
-        this.item.setVariable("empire", empire);
+        this.empire = empire;
     }
 
     public Map<String, Double> getProvinceModifiers() {
-        ClausewitzItem provincesItem = this.item.getChild("province");
-
-        if (provincesItem != null) {
-            return provincesItem.getVariables()
-                                .stream()
-                                .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                          ClausewitzVariable::getAsDouble,
-                                                          (a, b) -> b,
-                                                          LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.provinceModifiers == null ? new LinkedHashMap<>() : this.provinceModifiers;
     }
 
     public void addProvinceModifier(String modifier, Double quantity) {
-        ClausewitzItem provincesItem = this.item.getChild("province");
-
-        if (provincesItem != null) {
-            provincesItem.setVariable(modifier, quantity);
+        if (this.provinceModifiers == null) {
+            this.provinceModifiers = new LinkedHashMap<>();
         }
+
+        this.provinceModifiers.put(modifier, quantity);
     }
 
     public void removeProvinceModifier(String modifier) {
-        ClausewitzItem provincesItem = this.item.getChild("province");
-
-        if (provincesItem != null) {
-            provincesItem.removeVariable(modifier);
+        if (this.provinceModifiers != null) {
+            this.provinceModifiers.remove(modifier);
         }
     }
 
     public Map<String, Double> getEmperorModifiers() {
-        ClausewitzItem emperorsItem = this.item.getChild("emperor");
-
-        if (emperorsItem != null) {
-            return emperorsItem.getVariables()
-                               .stream()
-                               .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                         ClausewitzVariable::getAsDouble,
-                                                         (a, b) -> b,
-                                                         LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.emperorModifiers == null ? new LinkedHashMap<>() : this.emperorModifiers;
     }
 
     public void addEmperorModifier(String modifier, Double quantity) {
-        ClausewitzItem emperorsItem = this.item.getChild("emperor");
-
-        if (emperorsItem != null) {
-            emperorsItem.setVariable(modifier, quantity);
+        if (this.emperorModifiers == null) {
+            this.emperorModifiers = new LinkedHashMap<>();
         }
+
+        this.emperorModifiers.put(modifier, quantity);
     }
 
     public void removeEmperorModifier(String modifier) {
-        ClausewitzItem emperorsItem = this.item.getChild("emperor");
-
-        if (emperorsItem != null) {
-            emperorsItem.removeVariable(modifier);
+        if (this.emperorModifiers != null) {
+            this.emperorModifiers.remove(modifier);
         }
     }
 
     public Map<String, Double> getAllModifiers() {
-        ClausewitzItem allsItem = this.item.getChild("all");
-
-        if (allsItem != null) {
-            return allsItem.getVariables()
-                           .stream()
-                           .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                     ClausewitzVariable::getAsDouble,
-                                                     (a, b) -> b,
-                                                     LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.allModifiers == null ? new LinkedHashMap<>() : this.allModifiers;
     }
 
     public void addAllModifier(String modifier, Double quantity) {
-        ClausewitzItem allsItem = this.item.getChild("all");
-
-        if (allsItem != null) {
-            allsItem.setVariable(modifier, quantity);
+        if (this.allModifiers == null) {
+            this.allModifiers = new LinkedHashMap<>();
         }
+
+        this.allModifiers.put(modifier, quantity);
     }
 
     public void removeAllModifier(String modifier) {
-        ClausewitzItem allsItem = this.item.getChild("all");
-
-        if (allsItem != null) {
-            allsItem.removeVariable(modifier);
+        if (this.allModifiers != null) {
+            this.allModifiers.remove(modifier);
         }
     }
 
     public Map<String, Double> getMemberModifiers() {
-        ClausewitzItem membersItem = this.item.getChild("member");
-
-        if (membersItem != null) {
-            return membersItem.getVariables()
-                              .stream()
-                              .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                        ClausewitzVariable::getAsDouble,
-                                                        (a, b) -> b,
-                                                        LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.memberModifiers == null ? new LinkedHashMap<>() : this.memberModifiers;
     }
 
     public void addMemberModifier(String modifier, Double quantity) {
-        ClausewitzItem membersItem = this.item.getChild("member");
-
-        if (membersItem != null) {
-            membersItem.setVariable(modifier, quantity);
+        if (this.memberModifiers == null) {
+            this.memberModifiers = new LinkedHashMap<>();
         }
+
+        this.memberModifiers.put(modifier, quantity);
     }
 
     public void removeMemberModifier(String modifier) {
-        ClausewitzItem membersItem = this.item.getChild("member");
-
-        if (membersItem != null) {
-            membersItem.removeVariable(modifier);
+        if (this.memberModifiers != null) {
+            this.memberModifiers.remove(modifier);
         }
     }
 
     public Map<String, Double> getEmperorPerPrinceModifiers() {
-        ClausewitzItem emperorPerPrincesItem = this.item.getChild("emperor_per_prince");
-
-        if (emperorPerPrincesItem != null) {
-            return emperorPerPrincesItem.getVariables()
-                                        .stream()
-                                        .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                  ClausewitzVariable::getAsDouble,
-                                                                  (a, b) -> b,
-                                                                  LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.emperorPerPrinceModifiers == null ? new LinkedHashMap<>() : this.emperorPerPrinceModifiers;
     }
 
     public void addEmperorPerPrinceModifier(String modifier, Double quantity) {
-        ClausewitzItem emperorPerPrincesItem = this.item.getChild("emperor_per_prince");
-
-        if (emperorPerPrincesItem != null) {
-            emperorPerPrincesItem.setVariable(modifier, quantity);
+        if (this.emperorPerPrinceModifiers == null) {
+            this.emperorPerPrinceModifiers = new LinkedHashMap<>();
         }
+
+        this.emperorPerPrinceModifiers.put(modifier, quantity);
     }
 
     public void removeEmperorPerPrinceModifier(String modifier) {
-        ClausewitzItem emperorPerPrincesItem = this.item.getChild("emperor_per_prince");
-
-        if (emperorPerPrincesItem != null) {
-            emperorPerPrincesItem.removeVariable(modifier);
+        if (this.emperorPerPrinceModifiers != null) {
+            this.emperorPerPrinceModifiers.remove(modifier);
         }
     }
 
     public Map<String, Double> getElectorPerPrinceModifiers() {
-        ClausewitzItem electorPerPrincesItem = this.item.getChild("elector_per_prince");
-
-        if (electorPerPrincesItem != null) {
-            return electorPerPrincesItem.getVariables()
-                                        .stream()
-                                        .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                  ClausewitzVariable::getAsDouble,
-                                                                  (a, b) -> b,
-                                                                  LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.electorPerPrinceModifiers == null ? new LinkedHashMap<>() : this.electorPerPrinceModifiers;
     }
 
     public void addElectorPerPrinceModifier(String modifier, Double quantity) {
-        ClausewitzItem electorPerPrincesItem = this.item.getChild("elector_per_prince");
-
-        if (electorPerPrincesItem != null) {
-            electorPerPrincesItem.setVariable(modifier, quantity);
+        if (this.electorPerPrinceModifiers == null) {
+            this.electorPerPrinceModifiers = new LinkedHashMap<>();
         }
+
+        this.electorPerPrinceModifiers.put(modifier, quantity);
     }
 
     public void removeElectorPerPrinceModifier(String modifier) {
-        ClausewitzItem electorPerPrincesItem = this.item.getChild("elector_per_prince");
-
-        if (electorPerPrincesItem != null) {
-            electorPerPrincesItem.removeVariable(modifier);
+        if (this.electorPerPrinceModifiers != null) {
+            this.electorPerPrinceModifiers.remove(modifier);
         }
     }
 
     public ImperialReform getDisabledBy() {
-        ClausewitzVariable disabledByVar = this.item.getVar("disabled_by");
-
-        if (disabledByVar != null) {
-            return this.game.getImperialReform(disabledByVar.getValue());
-        }
-
-        return null;
+        return this.game.getImperialReform(this.disabledBy);
     }
 
     public void setDisabledBy(ImperialReform imperialReform) {
-        this.item.setVariable("disabled_by", imperialReform.getName());
+        this.disabledBy = imperialReform.getName();
     }
 
     public ImperialReform getRequiredReform() {
-        ClausewitzVariable requiredReformVar = this.item.getVar("required_reform");
-
-        if (requiredReformVar != null) {
-            return this.game.getImperialReform(requiredReformVar.getValue());
-        }
-
-        return null;
+        return this.game.getImperialReform(this.requiredReform);
     }
 
     public void setRequiredReform(ImperialReform imperialReform) {
-        this.item.setVariable("required_reform", imperialReform.getName());
+        this.requiredReform = imperialReform.getName();
     }
 
     public String getGuiContainer() {
-        return this.item.getVarAsString("gui_container");
+        return this.guiContainer;
     }
 
     public void setGuiContainer(String guiContainer) {
-        this.item.setVariable("gui_container", guiContainer);
+        this.guiContainer = guiContainer;
     }
 
     public boolean isMainLine() {
@@ -309,83 +311,35 @@ public class ImperialReform implements Comparable<ImperialReform> {
     }
 
     public boolean enableImperialBanAllowed() {
-        ClausewitzItem onEffectItem = this.item.getChild("on_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.TRUE.equals(onEffectItem.getVarAsBool("imperial_ban_allowed"));
-        }
-
-        return false;
+        return this.enableImperialBanAllowed;
     }
 
     public boolean disableImperialBanAllowed() {
-        ClausewitzItem onEffectItem = this.item.getChild("off_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.FALSE.equals(onEffectItem.getVarAsBool("imperial_ban_allowed"));
-        }
-
-        return false;
+        return this.disableImperialBanAllowed;
     }
 
     public boolean enableInternalHreCb() {
-        ClausewitzItem onEffectItem = this.item.getChild("on_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.TRUE.equals(onEffectItem.getVarAsBool("internal_hre_cb"));
-        }
-
-        return false;
+        return this.enableInternalHreCb;
     }
 
     public boolean disableInternalHreCb() {
-        ClausewitzItem onEffectItem = this.item.getChild("off_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.FALSE.equals(onEffectItem.getVarAsBool("internal_hre_cb"));
-        }
-
-        return false;
+        return this.disableInternalHreCb;
     }
 
     public boolean enableEnableImperialRealmWar() {
-        ClausewitzItem onEffectItem = this.item.getChild("on_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.TRUE.equals(onEffectItem.getVarAsBool("enable_imperial_realm_war"));
-        }
-
-        return false;
+        return this.enableEnableImperialRealmWar;
     }
 
     public boolean disableEnableImperialRealmWar() {
-        ClausewitzItem onEffectItem = this.item.getChild("off_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.FALSE.equals(onEffectItem.getVarAsBool("enable_imperial_realm_war"));
-        }
-
-        return false;
+        return this.disableEnableImperialRealmWar;
     }
 
     public boolean enableHreInheritable() {
-        ClausewitzItem onEffectItem = this.item.getChild("on_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.TRUE.equals(onEffectItem.getVarAsBool("hre_inheritable"));
-        }
-
-        return false;
+        return this.enableHreInheritable;
     }
 
     public boolean disableHreInheritable() {
-        ClausewitzItem onEffectItem = this.item.getChild("off_effect");
-
-        if (onEffectItem != null) {
-            return Boolean.FALSE.equals(onEffectItem.getVarAsBool("hre_inheritable"));
-        }
-
-        return false;
+        return this.disableHreInheritable;
     }
 
     private Integer getDepth() {

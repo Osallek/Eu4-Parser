@@ -144,6 +144,10 @@ public class Game {
     }
 
     public File getCountryFlagImage(Country country) {
+        if (country == null) {
+            return null;
+        }
+
         return new File(this.gfxFolderPath + File.separator + "flags" + File.separator + country.getTag() + ".tga");
     }
 
@@ -168,6 +172,10 @@ public class Game {
     }
 
     public String getLocalisationClean(String key) {
+        if (key == null) {
+            return null;
+        }
+
         String localisationString = this.localisations.get(key);
 
         if (localisationString == null) {
@@ -217,6 +225,10 @@ public class Game {
     }
 
     public SpriteType getSpriteType(String key) {
+        if (key == null) {
+            return null;
+        }
+
         return this.spriteTypes.get(key);
     }
 
@@ -258,6 +270,10 @@ public class Game {
     }
 
     public Culture getCulture(String name) {
+        if (name == null) {
+            return null;
+        }
+
         return this.cultureGroups.values().stream()
                                  .flatMap(Collection::stream)
                                  .map(CultureGroup::getCultures)
@@ -280,6 +296,10 @@ public class Game {
     }
 
     public Religion getReligion(String name) {
+        if (name == null) {
+            return null;
+        }
+
         return getReligionGroups().stream()
                                   .map(ReligionGroup::getReligions)
                                   .flatMap(Collection::stream)
@@ -304,6 +324,10 @@ public class Game {
     }
 
     public TradeGood getTradeGood(String name) {
+        if (name == null) {
+            return null;
+        }
+
         for (TradeGood tradeGood : this.tradeGoods.keySet()) {
             if (tradeGood.getName().equals(name)) {
                 return tradeGood;
@@ -322,6 +346,10 @@ public class Game {
     }
 
     public Building getBuilding(String name) {
+        if (name == null) {
+            return null;
+        }
+
         for (Building building : this.buildings.keySet()) {
             if (building.getName().equals(name)) {
                 return building;
@@ -336,6 +364,10 @@ public class Game {
     }
 
     public ImperialReform getImperialReform(String name) {
+        if (name == null) {
+            return null;
+        }
+
         for (ImperialReform imperialReform : this.imperialReforms.keySet()) {
             if (imperialReform.getName().equals(name)) {
                 return imperialReform;
@@ -350,6 +382,10 @@ public class Game {
     }
 
     public Decree getDecree(String name) {
+        if (name == null) {
+            return null;
+        }
+
         for (Decree saveDecree : this.decrees.keySet()) {
             if (saveDecree.getName().equals(name)) {
                 return saveDecree;
@@ -364,6 +400,10 @@ public class Game {
     }
 
     public GoldenBull getGoldenBull(String name) {
+        if (name == null) {
+            return null;
+        }
+
         for (GoldenBull saveGoldenBull : this.goldenBulls.keySet()) {
             if (saveGoldenBull.getName().equals(name)) {
                 return saveGoldenBull;
@@ -389,6 +429,10 @@ public class Game {
     }
 
     public Event getEvent(String id) {
+        if (id == null) {
+            return null;
+        }
+
         for (Event event : this.events.keySet()) {
             if (event.getId().equals(id)) {
                 return event;
@@ -475,12 +519,9 @@ public class Game {
                              this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
                                                                     .stream()
                                                                     .map(SpriteType::new)
-                                                                    .collect(Collectors.toMap(
-                                                                            spriteType -> ClausewitzUtils
-                                                                                    .removeQuotes(spriteType
-                                                                                                          .getName()),
-                                                                            Function.identity(),
-                                                                            (a, b) -> a)));
+                                                                    .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
+                                                                                              Function.identity(),
+                                                                                              (a, b) -> a)));
                          }
                      });
             } catch (IOException e) {
@@ -496,15 +537,13 @@ public class Game {
         if (provincesDefinitionFile.canRead()) {
             this.provinces = new HashMap<>();
             this.provincesByColor = new HashMap<>();
-            try (BufferedReader reader = Files.newBufferedReader(provincesDefinitionFile.toPath(),
-                                                                 ClausewitzUtils.CHARSET)) {
+            try (BufferedReader reader = Files.newBufferedReader(provincesDefinitionFile.toPath(), ClausewitzUtils.CHARSET)) {
                 String line;
                 reader.readLine(); //Skip csv headers
                 while ((line = reader.readLine()) != null) {
                     Province province = new Province(line.split(";"));
                     this.provinces.put(province.getId(), province);
-                    this.provincesByColor.put(
-                            Eu4Utils.rgbToColor(province.getRed(), province.getGreen(), province.getBlue()), province);
+                    this.provincesByColor.put(Eu4Utils.rgbToColor(province.getRed(), province.getGreen(), province.getBlue()), province);
                 }
             }
 
@@ -532,13 +571,11 @@ public class Game {
                 climateItem.getLists()
                            .forEach(list -> {
                                if (list.getName().endsWith("_winter")) {
-                                   list.getValuesAsInt()
-                                       .forEach(id -> this.provinces.get(id).setWinter(list.getName()));
+                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
                                } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
                                    list.getValuesAsInt().forEach(id -> this.provinces.get(id).setImpassable(true));
                                } else {
-                                   list.getValuesAsInt()
-                                       .forEach(id -> this.provinces.get(id).setClimate(list.getName()));
+                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
                                }
                            });
             }
@@ -567,32 +604,28 @@ public class Game {
                         if (province.isColonizable() && !province.isPort()) {
                             if (x > 0) {
                                 int[] leftRgb = provinceImage.getRaster().getPixel(x - 1, y, (int[]) null);
-                                if (!Arrays.equals(leftRgb, rgb)
-                                    && getProvinceByColor(leftRgb[0], leftRgb[1], leftRgb[2]).isOcean()) {
+                                if (!Arrays.equals(leftRgb, rgb) && getProvinceByColor(leftRgb[0], leftRgb[1], leftRgb[2]).isOcean()) {
                                     province.setPort(true);
                                 }
                             }
 
                             if (x < provinceImage.getWidth() - 1) {
                                 int[] rightRgb = provinceImage.getRaster().getPixel(x + 1, y, (int[]) null);
-                                if (!Arrays.equals(rightRgb, rgb)
-                                    && getProvinceByColor(rightRgb[0], rightRgb[1], rightRgb[2]).isOcean()) {
+                                if (!Arrays.equals(rightRgb, rgb) && getProvinceByColor(rightRgb[0], rightRgb[1], rightRgb[2]).isOcean()) {
                                     province.setPort(true);
                                 }
                             }
 
                             if (y > 0) {
                                 int[] topRgb = provinceImage.getRaster().getPixel(x, y - 1, (int[]) null);
-                                if (!Arrays.equals(topRgb, rgb)
-                                    && getProvinceByColor(topRgb[0], topRgb[1], topRgb[2]).isOcean()) {
+                                if (!Arrays.equals(topRgb, rgb) && getProvinceByColor(topRgb[0], topRgb[1], topRgb[2]).isOcean()) {
                                     province.setPort(true);
                                 }
                             }
 
                             if (y < provinceImage.getHeight() - 1) {
                                 int[] bottomRgb = provinceImage.getRaster().getPixel(x, y + 1, (int[]) null);
-                                if (!Arrays.equals(bottomRgb, rgb)
-                                    && getProvinceByColor(bottomRgb[0], bottomRgb[1], bottomRgb[2]).isOcean()) {
+                                if (!Arrays.equals(bottomRgb, rgb) && getProvinceByColor(bottomRgb[0], bottomRgb[1], bottomRgb[2]).isOcean()) {
                                     province.setPort(true);
                                 }
                             }

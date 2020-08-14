@@ -7,32 +7,52 @@ public class Color {
 
     private final ClausewitzList list;
 
+    private final boolean isDouble;
+
     public Color(ClausewitzList list) {
         this.list = list;
+        this.isDouble = false;
+    }
+
+    public Color(ClausewitzList list, boolean isDouble) {
+        this.list = list;
+        this.isDouble = isDouble;
     }
 
     public int getRed() {
-        return this.list.getAsInt(0);
+        return isDouble ? (int) (list.getAsDouble(0) * 255) : this.list.getAsInt(0);
     }
 
     public void setRed(int red) {
-        this.list.set(0, red);
+        if (isDouble) {
+            this.list.set(0, (double) red / 255);
+        } else {
+            this.list.set(0, red);
+        }
     }
 
     public int getGreen() {
-        return this.list.getAsInt(1);
+        return isDouble ? (int) (list.getAsDouble(1) * 255) : this.list.getAsInt(1);
     }
 
     public void setGreen(int green) {
-        this.list.set(1, green);
+        if (isDouble) {
+            this.list.set(1, (double) green / 255);
+        } else {
+            this.list.set(1, green);
+        }
     }
 
     public int getBlue() {
-        return this.list.getAsInt(2);
+        return isDouble ? (int) (list.getAsDouble(2) * 255) : this.list.getAsInt(2);
     }
 
     public void setBlue(int blue) {
-        this.list.set(2, blue);
+        if (isDouble) {
+            this.list.set(2, (double) blue / 255);
+        } else {
+            this.list.set(2, blue);
+        }
     }
 
     public static ClausewitzList addToItem(ClausewitzItem parent, String name, Color color) {

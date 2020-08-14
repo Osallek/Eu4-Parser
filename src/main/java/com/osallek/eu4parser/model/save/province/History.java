@@ -73,7 +73,7 @@ public class History {
     private void refreshAttributes() {
         this.owners = this.item.getChildren()
                                .stream()
-                               .filter(child -> child.getVar("owner") != null)
+                               .filter(child -> child.hasVar("owner"))
                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
                                                          child -> child.getVarAsString("owner"),
                                                          (a, b) -> b,
@@ -82,8 +82,8 @@ public class History {
 
         this.controllers = this.item.getChildren()
                                     .stream()
-                                    .filter(child -> child.getChild("controller") != null)
-                                    .filter(child -> child.getChild("controller").getVar("tag") != null)
+                                    .filter(child -> child.hasChild("controller"))
+                                    .filter(child -> child.getChild("controller").hasVar("tag"))
                                     .collect(Collectors.toMap(var -> Eu4Utils.stringToDate(var.getName()),
                                                               child -> child.getChild("controller")
                                                                             .getVarAsString("tag"),
@@ -97,7 +97,7 @@ public class History {
 
         this.religions = this.item.getChildrenNot("advisor")
                                   .stream()
-                                  .filter(child -> child.getVar("religion") != null)
+                                  .filter(child -> child.hasVar("religion"))
                                   .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
                                                             child -> child.getVarAsString("religion"),
                                                             (a, b) -> b,
@@ -106,7 +106,7 @@ public class History {
 
         this.cultures = this.item.getChildrenNot("advisor")
                                  .stream()
-                                 .filter(child -> child.getVar("culture") != null)
+                                 .filter(child -> child.hasVar("culture"))
                                  .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
                                                            child -> child.getVarAsString("culture"),
                                                            (a, b) -> b,

@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
 import java.util.List;
@@ -27,19 +26,13 @@ public class ActiveRelation {
     }
 
     public void setTrustValue(Integer trustValue) {
-        ClausewitzVariable nameVar = this.item.getVar("trust_value");
-
         if (trustValue < 0) {
             trustValue = 0;
         } else if (trustValue > 100) {
             trustValue = 100;
         }
 
-        if (nameVar != null) {
-            nameVar.setValue(trustValue);
-        } else {
-            this.item.addVariable("trust_value", trustValue);
-        }
+        this.item.setVariable("trust_value", trustValue);
     }
 
     public Integer getCachedSum() {
@@ -51,13 +44,7 @@ public class ActiveRelation {
     }
 
     public void setLastSendDiplomat(Date lastSendDiplomat) {
-        ClausewitzVariable nameVar = this.item.getVar("last_send_diplomat");
-
-        if (nameVar != null) {
-            nameVar.setValue(lastSendDiplomat);
-        } else {
-            this.item.addVariable("last_send_diplomat", lastSendDiplomat);
-        }
+        this.item.setVariable("last_send_diplomat", lastSendDiplomat);
     }
 
     public Date getLastSpyDiscovery() {
@@ -65,13 +52,7 @@ public class ActiveRelation {
     }
 
     public void setLastSpyDiscovery(Date lastSpyDiscovery) {
-        ClausewitzVariable nameVar = this.item.getVar("last_spy_discovery");
-
-        if (nameVar != null) {
-            nameVar.setValue(lastSpyDiscovery);
-        } else {
-            this.item.addVariable("last_spy_discovery", lastSpyDiscovery);
-        }
+        this.item.setVariable("last_spy_discovery", lastSpyDiscovery);
     }
 
     /**
@@ -82,19 +63,13 @@ public class ActiveRelation {
     }
 
     public void setSpyNetwork(Integer spyNetwork) {
-        ClausewitzVariable nameVar = this.item.getVar("spy_network");
-
         if (spyNetwork < 0) {
             spyNetwork = 0;
         } else if (spyNetwork > 10000) {
             spyNetwork = 10000;
         }
 
-        if (nameVar != null) {
-            nameVar.setValue(spyNetwork);
-        } else {
-            this.item.addVariable("spy_network", spyNetwork);
-        }
+        this.item.setVariable("spy_network", spyNetwork);
     }
 
     public Date getLastWar() {
@@ -102,13 +77,7 @@ public class ActiveRelation {
     }
 
     public void setLastWar(Date lastWar) {
-        ClausewitzVariable nameVar = this.item.getVar("last_war");
-
-        if (nameVar != null) {
-            nameVar.setValue(lastWar);
-        } else {
-            this.item.addVariable("last_war", lastWar);
-        }
+        this.item.setVariable("last_war", lastWar);
     }
 
     public Integer getLastWarScore() {
@@ -116,19 +85,13 @@ public class ActiveRelation {
     }
 
     public void setLastWarScore(Integer lastWarScore) {
-        ClausewitzVariable nameVar = this.item.getVar("last_warscore");
-
         if (lastWarScore < 0) {
             lastWarScore = 0;
         } else if (lastWarScore > 100) {
             lastWarScore = 100;
         }
 
-        if (nameVar != null) {
-            nameVar.setValue(lastWarScore);
-        } else {
-            this.item.addVariable("last_warscore", lastWarScore);
-        }
+        this.item.setVariable("last_warscore", lastWarScore);
     }
 
     public String getAttitude() {
@@ -140,13 +103,7 @@ public class ActiveRelation {
     }
 
     void setEmbargoing(boolean embargoing) {
-        ClausewitzVariable nameVar = this.item.getVar("is_embargoing");
-
-        if (nameVar != null) {
-            this.item.removeVariable("is_embargoing");
-        } else {
-            this.item.addVariable("is_embargoing", embargoing);
-        }
+        this.item.setVariable("is_embargoing", embargoing);
     }
 
     public Boolean isBuildingSpyNetwork() {

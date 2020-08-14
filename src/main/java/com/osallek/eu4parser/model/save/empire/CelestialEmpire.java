@@ -4,8 +4,6 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Decree;
 import com.osallek.eu4parser.model.save.Save;
 
-import java.util.Date;
-
 public class CelestialEmpire extends Empire {
 
     private SaveDecree decree;

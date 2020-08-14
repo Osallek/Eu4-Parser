@@ -24,12 +24,6 @@ public class ListOfDates {
     }
 
     public void set(String name, Date date) {
-        ClausewitzVariable var = this.item.getVar(name);
-
-        if (var != null) {
-            var.setValue(date);
-        } else {
-            this.item.addVariable(name, date);
-        }
+        this.item.setVariable(name, date);
     }
 }

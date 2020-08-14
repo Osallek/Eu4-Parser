@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
@@ -247,13 +248,9 @@ public class Country {
     }
 
     public GovernmentRank getGovernmentRank() {
-        ClausewitzVariable var = this.item.getVar("government_rank");
+        Integer var = this.item.getVarAsInt("government_rank");
 
-        if (var != null) {
-            return GovernmentRank.values()[var.getAsInt()];
-        } else {
-            return null;
-        }
+        return var == null ? null : GovernmentRank.values()[var];
     }
 
     public void setGovernmentRank(GovernmentRank governmentRank) {
@@ -267,13 +264,7 @@ public class Country {
     public void setGovernmentName(String governmentName) {
         governmentName = ClausewitzUtils.addQuotes(governmentName);
 
-        ClausewitzVariable var = this.item.getVar("government_name");
-
-        if (var != null) {
-            var.setValue(governmentName);
-        } else {
-            this.item.addVariable("government_name", governmentName);
-        }
+        this.item.setVariable("government_name", governmentName);
     }
 
     public Integer getSubjectFocus() {
@@ -304,23 +295,13 @@ public class Country {
     }
 
     public Power getNationalFocus() {
-        ClausewitzVariable var = this.item.getVar("national_focus");
+        String var = this.item.getVarAsString("national_focus");
 
-        if (var != null) {
-            return Power.valueOf(var.getValue().toUpperCase());
-        }
-
-        return null;
+        return var == null ? null : Power.valueOf(var.toUpperCase());
     }
 
     public void setNationalFocus(Power power, Date date) {
-        ClausewitzVariable var = this.item.getVar("national_focus");
-
-        if (var != null) {
-            var.setValue(power.name());
-        } else {
-            this.item.addVariable("national_focus", power.name());
-        }
+        this.item.setVariable("national_focus", power.name());
 
         if (this.history != null) {
             this.history.addEvent(date, "national_focus", power.name());
@@ -390,13 +371,7 @@ public class Country {
     }
 
     public void setLastSoldProvince(Date lastSoldProvince) {
-        ClausewitzVariable var = this.item.getVar("last_sold_province");
-
-        if (var != null) {
-            var.setValue(lastSoldProvince);
-        } else {
-            this.item.addVariable("last_sold_province", lastSoldProvince);
-        }
+        this.item.setVariable("last_sold_province", lastSoldProvince);
     }
 
     public Date getGoldenEraDate() {
@@ -404,13 +379,7 @@ public class Country {
     }
 
     public void setGoldenEraDate(Date goldenEraDate) {
-        ClausewitzVariable var = this.item.getVar("golden_era_date");
-
-        if (var != null) {
-            var.setValue(goldenEraDate);
-        } else {
-            this.item.addVariable("golden_era_date", goldenEraDate);
-        }
+        this.item.setVariable("golden_era_date", goldenEraDate);
     }
 
     public void removeGoldenEraDate() {
@@ -422,13 +391,7 @@ public class Country {
     }
 
     public void setLastFocusMove(Date lastFocusMove) {
-        ClausewitzVariable var = this.item.getVar("last_focus_move");
-
-        if (var != null) {
-            var.setValue(lastFocusMove);
-        } else {
-            this.item.addVariable("last_focus_move", lastFocusMove);
-        }
+        this.item.setVariable("last_focus_move", lastFocusMove);
     }
 
     public Date getLastSentAllianceOffer() {
@@ -436,13 +399,7 @@ public class Country {
     }
 
     public void setLastSentAllianceOffer(Date lastSentAllianceOffer) {
-        ClausewitzVariable var = this.item.getVar("last_sent_alliance_offer");
-
-        if (var != null) {
-            var.setValue(lastSentAllianceOffer);
-        } else {
-            this.item.addVariable("last_sent_alliance_offer", lastSentAllianceOffer);
-        }
+        this.item.setVariable("last_sent_alliance_offer", lastSentAllianceOffer);
     }
 
     public Date getLastConversionSecondary() {
@@ -450,13 +407,7 @@ public class Country {
     }
 
     public void setLastConversionSecondary(Date lastConversionSecondary) {
-        ClausewitzVariable var = this.item.getVar("last_conversion_secondary");
-
-        if (var != null) {
-            var.setValue(lastConversionSecondary);
-        } else {
-            this.item.addVariable("last_conversion_secondary", lastConversionSecondary);
-        }
+        this.item.setVariable("last_conversion_secondary", lastConversionSecondary);
     }
 
     public ListOfDates getCooldowns() {
@@ -504,52 +455,30 @@ public class Country {
     }
 
     public SaveProvince getCapital() {
-        if (getCapitalId() == null) {
-            return null;
-        }
-
         return this.save.getProvince(getCapitalId());
     }
 
     public void setCapital(int provinceId) {
-        if (this.save.getProvince(provinceId).getCountry().equals(this)) {
-            ClausewitzVariable var = this.item.getVar("capital");
-
-            if (var != null) {
-                var.setValue(provinceId);
-            } else {
-                this.item.addVariable("capital", provinceId);
-            }
+        if (this.save.getProvince(provinceId).getOwner().equals(this)) {
+            this.item.setVariable("capital", provinceId);
         }
     }
 
-    public Integer getOriginalCapital() {
-        return this.item.getVarAsInt("original_capital");
+    public SaveProvince getOriginalCapital() {
+        return this.save.getProvince(this.item.getVarAsInt("original_capital"));
     }
 
     public void setOriginalCapital(Integer provinceId) {
-        ClausewitzVariable var = this.item.getVar("original_capital");
-
-        if (var != null) {
-            var.setValue(provinceId);
-        } else {
-            this.item.addVariable("capital", provinceId);
-        }
+        this.item.setVariable("original_capital", provinceId);
     }
 
-    public Integer getTradePort() {
-        return this.item.getVarAsInt("trade_port");
+    public SaveProvince getTradePort() {
+        return this.save.getProvince(this.item.getVarAsInt("trade_port"));
     }
 
     public void setTradePort(Integer provinceId) {
-        if (this.save.getProvince(provinceId).getCountry().equals(this)) {
-            ClausewitzVariable var = this.item.getVar("trade_port");
-
-            if (var != null) {
-                var.setValue(provinceId);
-            } else {
-                this.item.addVariable("trade_port", provinceId);
-            }
+        if (this.save.getProvince(provinceId).getOwner().equals(this)) {
+            this.item.setVariable("trade_port", provinceId);
         }
     }
 
@@ -578,13 +507,7 @@ public class Country {
     }
 
     public void setIsolationism(Integer isolationism) {
-        ClausewitzVariable var = this.item.getVar("isolationism");
-
-        if (var != null) {
-            var.setValue(isolationism);
-        } else {
-            this.item.addVariable("isolationism", isolationism);
-        }
+        this.item.setVariable("isolationism", isolationism);
     }
 
     public boolean hasCircumnavigatedWorld() {
@@ -592,13 +515,7 @@ public class Country {
     }
 
     public void setHasCircumnavigatedWorld(boolean hasCircumnavigatedWorld) {
-        ClausewitzVariable var = this.item.getVar("has_circumnavigated_world");
-
-        if (var != null) {
-            var.setValue(hasCircumnavigatedWorld);
-        } else {
-            this.item.addVariable("has_circumnavigated_world", hasCircumnavigatedWorld);
-        }
+        this.item.setVariable("has_circumnavigated_world", hasCircumnavigatedWorld);
     }
 
     public boolean initializedRivals() {
@@ -613,22 +530,16 @@ public class Country {
         return Boolean.TRUE.equals(this.item.getVarAsBool("dirty_colony"));
     }
 
-    public String getPrimaryCulture() {
-        return this.item.getVarAsString("primary_culture");
+    public Culture getPrimaryCulture() {
+        return this.save.getGame().getCulture(this.item.getVarAsString("primary_culture"));
     }
 
     public void setPrimaryCulture(String primaryCulture) {
-        ClausewitzVariable var = this.item.getVar("primary_culture");
-
-        if (var != null) {
-            var.setValue(primaryCulture);
-        } else {
-            this.item.addVariable("primary_culture", primaryCulture);
-        }
+        this.item.setVariable("primary_culture", primaryCulture);
     }
 
-    public String getDominantCulture() {
-        return this.item.getVarAsString("dominant_culture");
+    public Culture getDominantCulture() {
+        return this.save.getGame().getCulture(this.item.getVarAsString("dominant_culture"));
     }
 
     public List<String> getAcceptedCultures() {
@@ -693,13 +604,7 @@ public class Country {
     }
 
     public void setTechnologyGroup(String technologyGroup) {
-        ClausewitzVariable var = this.item.getVar("technology_group");
-
-        if (var != null) {
-            var.setValue(technologyGroup);
-        } else {
-            this.item.addVariable("technology_group", technologyGroup);
-        }
+        this.item.setVariable("technology_group", technologyGroup);
     }
 
     public String getUnitType() {
@@ -707,13 +612,7 @@ public class Country {
     }
 
     public void setUnitType(String unitType) {
-        ClausewitzVariable var = this.item.getVar("unit_type");
-
-        if (var != null) {
-            var.setValue(unitType);
-        } else {
-            this.item.addVariable("unit_type", unitType);
-        }
+        this.item.setVariable("unit_type", unitType);
     }
 
     public Technology getTech() {
@@ -1704,19 +1603,13 @@ public class Country {
     }
 
     public void setPrestige(Double prestige) {
-        ClausewitzVariable var = this.item.getVar("prestige");
-
         if (prestige < -100d) {
             prestige = -100d;
         } else if (prestige > 100d) {
             prestige = 100d;
         }
 
-        if (var != null) {
-            var.setValue(prestige);
-        } else {
-            this.item.addVariable("prestige", prestige);
-        }
+        this.item.setVariable("prestige", prestige);
     }
 
     public Integer getStability() {
@@ -1730,19 +1623,13 @@ public class Country {
     }
 
     public void setStability(Integer stability) {
-        ClausewitzVariable var = this.item.getVar("stability");
-
         if (stability < -3) {
             stability = -3;
         } else if (stability > 3) {
             stability = 3;
         }
 
-        if (var != null) {
-            var.setValue((double) stability);
-        } else {
-            this.item.addVariable("stability", (double) stability);
-        }
+        this.item.setVariable("stability", (double) stability);
     }
 
     public Double getTreasury() {
@@ -1750,17 +1637,11 @@ public class Country {
     }
 
     public void setTreasury(Double treasury) {
-        ClausewitzVariable var = this.item.getVar("treasury");
-
         if (treasury > 1000000d) {
             treasury = 1000000d;
         }
 
-        if (var != null) {
-            var.setValue(treasury);
-        } else {
-            this.item.addVariable("treasury", treasury);
-        }
+        this.item.setVariable("treasury", treasury);
     }
 
     public Double getEstimatedMonthlyIncome() {
@@ -1772,19 +1653,13 @@ public class Country {
     }
 
     public void setInflation(Double inflation) {
-        ClausewitzVariable var = this.item.getVar("inflation");
-
         if (inflation < 0d) {
             inflation = 0d;
         } else if (inflation.intValue() >= Integer.MAX_VALUE) {
             inflation = (double) Integer.MAX_VALUE;
         }
 
-        if (var != null) {
-            var.setValue(inflation);
-        } else {
-            this.item.addVariable("inflation", inflation);
-        }
+        this.item.setVariable("inflation", inflation);
     }
 
     public List<Double> getInflationHistory() {
@@ -2047,19 +1922,13 @@ public class Country {
     }
 
     public void setLandMaintenance(Double landMaintenance) {
-        ClausewitzVariable var = this.item.getVar("land_maintenance");
-
         if (landMaintenance < 0d) {
             landMaintenance = 0d;
         } else if (landMaintenance > 1d) {
             landMaintenance = 1d;
         }
 
-        if (var != null) {
-            var.setValue(landMaintenance);
-        } else {
-            this.item.addVariable("land_maintenance", landMaintenance);
-        }
+        this.item.setVariable("land_maintenance", landMaintenance);
     }
 
     public Double getNavalMaintenance() {
@@ -2067,19 +1936,13 @@ public class Country {
     }
 
     public void setNavalMaintenance(Double navalMaintenance) {
-        ClausewitzVariable var = this.item.getVar("naval_maintenance");
-
         if (navalMaintenance < 0d) {
             navalMaintenance = 0d;
         } else if (navalMaintenance > 1d) {
             navalMaintenance = 1d;
         }
 
-        if (var != null) {
-            var.setValue(navalMaintenance);
-        } else {
-            this.item.addVariable("naval_maintenance", navalMaintenance);
-        }
+        this.item.setVariable("naval_maintenance", navalMaintenance);
     }
 
     public Double getColonialMaintenance() {
@@ -2087,19 +1950,13 @@ public class Country {
     }
 
     public void setColonialMaintenance(Double colonialMaintenance) {
-        ClausewitzVariable var = this.item.getVar("colonial_maintenance");
-
         if (colonialMaintenance < 0d) {
             colonialMaintenance = 0d;
         } else if (colonialMaintenance > 1d) {
             colonialMaintenance = 1d;
         }
 
-        if (var != null) {
-            var.setValue(colonialMaintenance);
-        } else {
-            this.item.addVariable("colonial_maintenance", colonialMaintenance);
-        }
+        this.item.setVariable("colonial_maintenance", colonialMaintenance);
     }
 
     public Double getMissionaryMaintenance() {
@@ -2107,19 +1964,13 @@ public class Country {
     }
 
     public void setMissionaryMaintenance(Double missionaryMaintenance) {
-        ClausewitzVariable var = this.item.getVar("missionary_maintenance");
-
         if (missionaryMaintenance < 0d) {
             missionaryMaintenance = 0d;
         } else if (missionaryMaintenance > 1d) {
             missionaryMaintenance = 1d;
         }
 
-        if (var != null) {
-            var.setValue(missionaryMaintenance);
-        } else {
-            this.item.addVariable("missionary_maintenance", missionaryMaintenance);
-        }
+        this.item.setVariable("missionary_maintenance", missionaryMaintenance);
     }
 
     public Double getArmyTradition() {
@@ -2127,19 +1978,13 @@ public class Country {
     }
 
     public void setArmyTradition(Double armyTradition) {
-        ClausewitzVariable var = this.item.getVar("army_tradition");
-
         if (armyTradition < 0d) {
             armyTradition = 0d;
         } else if (armyTradition > 100d) {
             armyTradition = 100d;
         }
 
-        if (var != null) {
-            var.setValue(armyTradition);
-        } else {
-            this.item.addVariable("army_tradition", armyTradition);
-        }
+        this.item.setVariable("army_tradition", armyTradition);
     }
 
     public Double getNavyTradition() {
@@ -2147,19 +1992,13 @@ public class Country {
     }
 
     public void setNavyTradition(Double navyTradition) {
-        ClausewitzVariable var = this.item.getVar("navy_tradition");
-
         if (navyTradition < 0d) {
             navyTradition = 0d;
         } else if (navyTradition > 100d) {
             navyTradition = 100d;
         }
 
-        if (var != null) {
-            var.setValue(navyTradition);
-        } else {
-            this.item.addVariable("navy_tradition", navyTradition);
-        }
+        this.item.setVariable("navy_tradition", navyTradition);
     }
 
     public Date getLastWarEnded() {
@@ -2221,19 +2060,13 @@ public class Country {
     }
 
     public void setMeritocracy(Double meritocracy) {
-        ClausewitzVariable var = this.item.getVar("meritocracy");
-
         if (meritocracy < 0d) {
             meritocracy = 0d;
         } else if (meritocracy > 100d) {
             meritocracy = 100d;
         }
 
-        if (var != null) {
-            var.setValue(meritocracy);
-        } else {
-            this.item.addVariable("meritocracy", meritocracy);
-        }
+        this.item.setVariable("meritocracy", meritocracy);
     }
 
     public Double getPapalInfluence() {
@@ -2241,19 +2074,13 @@ public class Country {
     }
 
     public void setPapalInfluence(Double papalInfluence) {
-        ClausewitzVariable var = this.item.getVar("papal_influence");
-
         if (papalInfluence < 0d) {
             papalInfluence = 0d;
         } else if (papalInfluence > 100d) {
             papalInfluence = 100d;
         }
 
-        if (var != null) {
-            var.setValue(papalInfluence);
-        } else {
-            this.item.addVariable("papal_influence", papalInfluence);
-        }
+        this.item.setVariable("papal_influence", papalInfluence);
     }
 
     public Double getCorruption() {
@@ -2261,19 +2088,13 @@ public class Country {
     }
 
     public void setCorruption(Double corruption) {
-        ClausewitzVariable var = this.item.getVar("corruption");
-
         if (corruption < 0d) {
             corruption = 0d;
         } else if (corruption > 100d) {
             corruption = 100d;
         }
 
-        if (var != null) {
-            var.setValue(corruption);
-        } else {
-            this.item.addVariable("corruption", corruption);
-        }
+        this.item.setVariable("corruption", corruption);
     }
 
     public Double getLegitimacy() {
@@ -2281,19 +2102,13 @@ public class Country {
     }
 
     public void setLegitimacy(Double legitimacy) {
-        ClausewitzVariable var = this.item.getVar("legitimacy");
-
         if (legitimacy < 0d) {
             legitimacy = 0d;
         } else if (legitimacy > 100d) {
             legitimacy = 100d;
         }
 
-        if (var != null) {
-            var.setValue(legitimacy);
-        } else {
-            this.item.addVariable("legitimacy", legitimacy);
-        }
+        this.item.setVariable("legitimacy", legitimacy);
     }
 
     public Integer getMercantilism() {
@@ -2307,19 +2122,13 @@ public class Country {
     }
 
     public void setMercantilism(Integer mercantilism) {
-        ClausewitzVariable var = this.item.getVar("mercantilism");
-
         if (mercantilism < 0) {
             mercantilism = 0;
         } else if (mercantilism > 100) {
             mercantilism = 100;
         }
 
-        if (var != null) {
-            var.setValue((double) mercantilism);
-        } else {
-            this.item.addVariable("mercantilism", (double) mercantilism);
-        }
+        this.item.setVariable("mercantilism", (double) mercantilism);
     }
 
     public Integer getSplendor() {
@@ -2333,17 +2142,11 @@ public class Country {
     }
 
     public void setSplendor(Integer splendor) {
-        ClausewitzVariable var = this.item.getVar("splendor");
-
         if (splendor < 0) {
             splendor = 0;
         }
 
-        if (var != null) {
-            var.setValue((double) splendor);
-        } else {
-            this.item.addVariable("splendor", (double) splendor);
-        }
+        this.item.setVariable("splendor", (double) splendor);
     }
 
     public Integer getAbsolutism() {
@@ -2357,19 +2160,13 @@ public class Country {
     }
 
     public void setAbsolutism(Integer absolutism) {
-        ClausewitzVariable var = this.item.getVar("absolutism");
-
         if (absolutism < 0) {
             absolutism = 0;
         } else if (absolutism > 100) {
             absolutism = 100;
         }
 
-        if (var != null) {
-            var.setValue((double) absolutism);
-        } else {
-            this.item.addVariable("absolutism", (double) absolutism);
-        }
+        this.item.setVariable("absolutism", absolutism);
     }
 
     public Double getArmyProfessionalism() {
@@ -2377,19 +2174,13 @@ public class Country {
     }
 
     public void setArmyProfessionalism(Double armyProfessionalism) {
-        ClausewitzVariable var = this.item.getVar("army_professionalism");
-
         if (armyProfessionalism < 0d) {
             armyProfessionalism = 0d;
         } else if (armyProfessionalism > 100d) {
             armyProfessionalism = 100d;
         }
 
-        if (var != null) {
-            var.setValue(armyProfessionalism);
-        } else {
-            this.item.addVariable("army_professionalism", armyProfessionalism);
-        }
+        this.item.setVariable("army_professionalism", armyProfessionalism);
     }
 
     public Double getMaxHistoryArmyProfessionalism() {
@@ -2397,19 +2188,13 @@ public class Country {
     }
 
     public void setMaxHistoryArmyProfessionalism(Double armyProfessionalism) {
-        ClausewitzVariable var = this.item.getVar("max_historic_army_professionalism");
-
         if (armyProfessionalism < 0d) {
             armyProfessionalism = 0d;
         } else if (armyProfessionalism > 100d) {
             armyProfessionalism = 100d;
         }
 
-        if (var != null) {
-            var.setValue(armyProfessionalism);
-        } else {
-            this.item.addVariable("max_historic_army_professionalism", armyProfessionalism);
-        }
+        this.item.setVariable("max_historic_army_professionalism", armyProfessionalism);
     }
 
     public IdeaGroups getIdeaGroups() {
@@ -2476,13 +2261,7 @@ public class Country {
     }
 
     public void setManpower(Double manpower) {
-        ClausewitzVariable var = this.item.getVar("manpower");
-
-        if (var != null) {
-            var.setValue(manpower);
-        } else {
-            this.item.addVariable("manpower", manpower);
-        }
+        this.item.setVariable("manpower", manpower);
     }
 
     public Double getMaxManpower() {
@@ -2494,13 +2273,7 @@ public class Country {
     }
 
     public void setSailors(Double sailors) {
-        ClausewitzVariable var = this.item.getVar("sailors");
-
-        if (var != null) {
-            var.setValue(sailors);
-        } else {
-            this.item.addVariable("sailors", sailors);
-        }
+        this.item.setVariable("sailors", sailors);
     }
 
     public Double getMaxSailors() {
@@ -2516,13 +2289,7 @@ public class Country {
     }
 
     public void setNumOfCapturedShipsWithBoardingDoctrine(Integer numOfCapturedShipsWithBoardingDoctrine) {
-        ClausewitzVariable var = this.item.getVar("num_of_captured_ships_with_boarding_doctrine");
-
-        if (var != null) {
-            var.setValue(numOfCapturedShipsWithBoardingDoctrine);
-        } else {
-            this.item.addVariable("num_of_captured_ships_with_boarding_doctrine", numOfCapturedShipsWithBoardingDoctrine);
-        }
+        this.item.setVariable("num_of_captured_ships_with_boarding_doctrine", numOfCapturedShipsWithBoardingDoctrine);
     }
 
     public Army getArmy(int id) {
@@ -2623,13 +2390,7 @@ public class Country {
     }
 
     public void setOriginalDynasty(String originalDynasty) {
-        ClausewitzVariable var = this.item.getVar("original_dynasty");
-
-        if (var != null) {
-            var.setValue(originalDynasty);
-        } else {
-            this.item.addVariable("original_dynasty", originalDynasty);
-        }
+        this.item.setVariable("original_dynasty", originalDynasty);
     }
 
     public Integer getNumOfConsorts() {
@@ -2637,17 +2398,11 @@ public class Country {
     }
 
     public void setNumOfConsorts(int numOfConsorts) {
-        ClausewitzVariable var = this.item.getVar("num_of_consorts");
-
         if (numOfConsorts < 0) {
             numOfConsorts = 0;
         }
 
-        if (var != null) {
-            var.setValue(numOfConsorts);
-        } else {
-            this.item.addVariable("num_of_consorts", numOfConsorts);
-        }
+        this.item.setVariable("num_of_consorts", numOfConsorts);
     }
 
     public boolean isGreatPower() {
@@ -2772,13 +2527,7 @@ public class Country {
     }
 
     public void setNativePolicy(int nativePolicy) {
-        ClausewitzVariable var = this.item.getVar("native_policy");
-
-        if (var != null) {
-            var.setValue(nativePolicy);
-        } else {
-            this.item.addVariable("native_policy", nativePolicy);
-        }
+        this.item.setVariable("native_policy", nativePolicy);
     }
 
     public Date getAntiNationRuiningEndDate() {
@@ -2786,13 +2535,7 @@ public class Country {
     }
 
     public void setAntiNationRuiningEndDate(Date antiNationRuiningEndDate) {
-        ClausewitzVariable var = this.item.getVar("anti_nation_ruining_end_date");
-
-        if (var != null) {
-            var.setValue(antiNationRuiningEndDate);
-        } else {
-            this.item.addVariable("anti_nation_ruining_end_date", antiNationRuiningEndDate);
-        }
+        this.item.setVariable("anti_nation_ruining_end_date", antiNationRuiningEndDate);
     }
 
     public Double getSpyPropensity() {
@@ -2845,13 +2588,7 @@ public class Country {
     }
 
     public void setInnovativeness(Double innovativeness) {
-        ClausewitzVariable var = this.item.getVar("innovativeness");
-
-        if (var != null) {
-            var.setValue(innovativeness);
-        } else {
-            this.item.addVariable("innovativeness", innovativeness);
-        }
+        this.item.setVariable("innovativeness", innovativeness);
     }
 
     public List<String> getCompletedMissions() {
@@ -2906,13 +2643,7 @@ public class Country {
     }
 
     public void setGovernmentReformProgress(Double governmentReformProgress) {
-        ClausewitzVariable var = this.item.getVar("government_reform_progress");
-
-        if (var != null) {
-            var.setValue(governmentReformProgress);
-        } else {
-            this.item.addVariable("government_reform_progress", governmentReformProgress);
-        }
+        this.item.setVariable("government_reform_progress", governmentReformProgress);
     }
 
     public Map<String, CountryState> getStates() {
@@ -3039,8 +2770,8 @@ public class Country {
 
         if (interactionsLastUsedItem != null) {
             this.interactionsLastUsed = interactionsLastUsedItem.getLists().stream()
-                                                          .map(EstateInteraction::new)
-                                                          .collect(Collectors.toList());
+                                                                .map(EstateInteraction::new)
+                                                                .collect(Collectors.toList());
         }
 
         List<ClausewitzItem> rivalItems = this.item.getChildren("rival");

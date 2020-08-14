@@ -52,7 +52,7 @@ public class Army extends AbstractArmy {
         ClausewitzItem item = this.item.getChild("mission");
 
         if (item != null) {
-            return item.getVar("drill_army_mission") != null;
+            return item.hasVar("drill_army_mission");
         }
 
         return false;

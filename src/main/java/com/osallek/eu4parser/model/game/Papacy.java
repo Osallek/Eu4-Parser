@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,140 +11,130 @@ import java.util.stream.Collectors;
 
 public class Papacy {
 
-    private final ClausewitzItem item;
+    private String papalTag;
+
+    private Integer electionCost;
+
+    private Map<String, Double> harshModifiers;
+
+    private Map<String, Double> neutralModifiers;
+
+    private Map<String, Double> concilatoryModifiers;
 
     private List<PapacyConcession> concessions;
 
     public Papacy(ClausewitzItem item) {
-        this.item = item;
-        refreshAttributes();
+        this.papalTag = item.getVarAsString("papal_tag");
+        this.electionCost = item.getVarAsInt("election_cost");
+        ClausewitzItem child = item.getChild("harsh");
+        this.harshModifiers = child == null ? null : child.getVariables()
+                                                          .stream()
+                                                          .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                    ClausewitzVariable::getAsDouble,
+                                                                                    (a, b) -> b,
+                                                                                    LinkedHashMap::new));
+        child = item.getChild("neutral");
+        this.neutralModifiers = child == null ? null : child.getVariables()
+                                                            .stream()
+                                                            .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                      ClausewitzVariable::getAsDouble,
+                                                                                      (a, b) -> b,
+                                                                                      LinkedHashMap::new));
+        child = item.getChild("concilatory");
+        this.concilatoryModifiers = child == null ? null : child.getVariables()
+                                                                .stream()
+                                                                .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                          ClausewitzVariable::getAsDouble,
+                                                                                          (a, b) -> b,
+                                                                                          LinkedHashMap::new));
+
+
+        child = item.getChild("concessions");
+        this.concessions = child == null ? null : child.getChildren()
+                                                       .stream()
+                                                       .map(PapacyConcession::new)
+                                                       .collect(Collectors.toList());
     }
 
     public List<PapacyConcession> getConcessions() {
-        return concessions;
+        return this.concessions == null ? new ArrayList<>() : this.concessions;
     }
 
     public PapacyConcession getConcession(int i) {
+        if (this.concessions == null) {
+            return null;
+        }
+
         return this.concessions.get(i);
     }
 
     public String getPapacyTag() {
-        return this.item.getVarAsString("papal_tag");
+        return this.papalTag;
     }
 
     public void setPapacyTag(String tag) {
-        this.item.setVariable("papal_tag", tag);
+        this.papalTag = tag;
     }
 
     public Integer getElectionCost() {
-        return this.item.getVarAsInt("election_cost");
+        return this.electionCost;
     }
 
     public void setElectionCost(int electionCost) {
-        this.item.setVariable("election_cost", electionCost);
+        this.electionCost = electionCost;
     }
 
     public Map<String, Double> getHarshModifiers() {
-        ClausewitzItem harshModifiersItem = this.item.getChild("harsh");
-
-        if (harshModifiersItem != null) {
-            return harshModifiersItem.getVariables()
-                                     .stream()
-                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                               ClausewitzVariable::getAsDouble,
-                                                               (a, b) -> b,
-                                                               LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.harshModifiers == null ? new LinkedHashMap<>() : this.harshModifiers;
     }
 
     public void addHarshModifier(String modifier, Double quantity) {
-        ClausewitzItem harshModifiersItem = this.item.getChild("harsh");
-
-        if (harshModifiersItem != null) {
-            harshModifiersItem.setVariable(modifier, quantity);
+        if (this.harshModifiers == null) {
+            this.harshModifiers = new LinkedHashMap<>();
         }
+
+        this.harshModifiers.put(modifier, quantity);
     }
 
     public void removeHarshModifier(String modifier) {
-        ClausewitzItem harshModifiersItem = this.item.getChild("harsh");
-
-        if (harshModifiersItem != null) {
-            harshModifiersItem.removeVariable(modifier);
+        if (this.harshModifiers != null) {
+            this.harshModifiers.remove(modifier);
         }
     }
 
     public Map<String, Double> getNeutralModifiers() {
-        ClausewitzItem neutralModifiersItem = this.item.getChild("neutral");
-
-        if (neutralModifiersItem != null) {
-            return neutralModifiersItem.getVariables()
-                                       .stream()
-                                       .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                 ClausewitzVariable::getAsDouble,
-                                                                 (a, b) -> b,
-                                                                 LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.neutralModifiers == null ? new LinkedHashMap<>() : this.neutralModifiers;
     }
 
     public void addNeutralModifier(String modifier, Double quantity) {
-        ClausewitzItem neutralModifiersItem = this.item.getChild("neutral");
-
-        if (neutralModifiersItem != null) {
-            neutralModifiersItem.setVariable(modifier, quantity);
+        if (this.neutralModifiers == null) {
+            this.neutralModifiers = new LinkedHashMap<>();
         }
+
+        this.neutralModifiers.put(modifier, quantity);
     }
 
     public void removeNeutralModifier(String modifier) {
-        ClausewitzItem neutralModifiersItem = this.item.getChild("neutral");
-
-        if (neutralModifiersItem != null) {
-            neutralModifiersItem.removeVariable(modifier);
+        if (this.neutralModifiers != null) {
+            this.neutralModifiers.remove(modifier);
         }
     }
 
     public Map<String, Double> getConcilatoryModifiers() {
-        ClausewitzItem concilatoryModifiersItem = this.item.getChild("concilatory");
-
-        if (concilatoryModifiersItem != null) {
-            return concilatoryModifiersItem.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                     ClausewitzVariable::getAsDouble,
-                                                                     (a, b) -> b,
-                                                                     LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.concilatoryModifiers == null ? new LinkedHashMap<>() : this.concilatoryModifiers;
     }
 
     public void addConcilatoryModifier(String modifier, Double quantity) {
-        ClausewitzItem concilatoryModifiersItem = this.item.getChild("concilatory");
-
-        if (concilatoryModifiersItem != null) {
-            concilatoryModifiersItem.setVariable(modifier, quantity);
+        if (this.concilatoryModifiers == null) {
+            this.concilatoryModifiers = new LinkedHashMap<>();
         }
+
+        this.concilatoryModifiers.put(modifier, quantity);
     }
 
     public void removeConcilatoryModifier(String modifier) {
-        ClausewitzItem concilatoryModifiersItem = this.item.getChild("concilatory");
-
-        if (concilatoryModifiersItem != null) {
-            concilatoryModifiersItem.removeVariable(modifier);
-        }
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem concessionsItem = this.item.getChild("concessions");
-
-        if (concessionsItem != null) {
-            this.concessions = concessionsItem.getChildren()
-                                              .stream()
-                                              .map(PapacyConcession::new)
-                                              .collect(Collectors.toList());
+        if (this.concilatoryModifiers != null) {
+            this.concilatoryModifiers.remove(modifier);
         }
     }
 }

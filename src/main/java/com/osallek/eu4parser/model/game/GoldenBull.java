@@ -13,25 +13,41 @@ import java.util.stream.Collectors;
 
 public class GoldenBull {
 
-    private final ClausewitzItem item;
+    private final String name;
 
     private String localizedName;
 
+    private List<String> mechanics;
+
+    private Map<String, Double> modifiers;
+
     public GoldenBull(ClausewitzItem item) {
-        this.item = item;
+        this.name = item.getName();
+
+        ClausewitzItem child = item.getChild("modifier");
+        this.modifiers = child == null ? null : child.getVariables()
+                                                     .stream()
+                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                               ClausewitzVariable::getAsDouble,
+                                                                               (a, b) -> b,
+                                                                               LinkedHashMap::new));
+        ClausewitzList list = item.getList("mechanics");
+        this.mechanics = list == null ? null : list.getValues();
     }
 
     public GoldenBull(GoldenBull other) {
-        this.item = other.item;
+        this.name = other.name;
         this.localizedName = other.localizedName;
+        this.mechanics = other.mechanics;
+        this.modifiers = other.modifiers;
     }
 
     public GoldenBull(String name) {
-        this.item = new ClausewitzItem(null, name, 0);
+        this.name = name;
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public String getLocalizedName() {
@@ -43,54 +59,28 @@ public class GoldenBull {
     }
 
     public List<String> getMechanics() {
-        ClausewitzList list = this.item.getList("mechanics");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues();
+        return this.mechanics == null ? new ArrayList<>() : this.mechanics;
     }
 
     public void setMechanics(List<String> mechanics) {
-        ClausewitzList list = this.item.getList("mechanics");
-
-        if (mechanics == null) {
-            list = this.item.addList("mechanics", mechanics);
-        } else {
-            list.clear();
-            list.addAll(mechanics);
-        }
+        this.mechanics = mechanics;
     }
 
     public Map<String, Double> getModifiers() {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            return modifiersItem.getVariables()
-                                .stream()
-                                .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                          ClausewitzVariable::getAsDouble,
-                                                          (a, b) -> b,
-                                                          LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
     }
 
     public void addModifier(String modifier, Double quantity) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.setVariable(modifier, quantity);
+        if (modifier == null) {
+            this.modifiers = new LinkedHashMap<>();
         }
+
+        this.modifiers.put(modifier, quantity);
     }
 
     public void removeModifier(String modifier) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.removeVariable(modifier);
+        if (this.modifiers != null) {
+            this.modifiers.remove(modifier);
         }
     }
 

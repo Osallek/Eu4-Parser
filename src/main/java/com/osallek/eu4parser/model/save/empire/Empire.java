@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.empire;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -58,13 +57,9 @@ public abstract class Empire {
             return null;
         }
 
-        ClausewitzVariable emperorVar = this.item.getVar("emperor");
+        String emperor = this.item.getVarAsString("emperor");
 
-        if (emperorVar != null) {
-            return this.save.getCountry(ClausewitzUtils.removeQuotes(emperorVar.getValue()));
-        } else {
-            return null;
-        }
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(emperor));
     }
 
     public void setEmperor(Country country) {
@@ -77,10 +72,8 @@ public abstract class Empire {
             return;
         }
 
-        ClausewitzVariable emperorVar = this.item.getVar("emperor");
-
-        if (!ClausewitzUtils.removeQuotes(emperorVar.getValue()).equals(country.getTag())) {
-            emperorVar.setValue(ClausewitzUtils.addQuotes(country.getTag()));
+        if (!ClausewitzUtils.removeQuotes(this.item.getVarAsString("emperor")).equals(country.getTag())) {
+            this.item.setVariable("emperor", ClausewitzUtils.addQuotes(country.getTag()));
 
             if (getImperialInfluence() == null) {
                 this.item.addVariable("imperial_influence", 0d);
@@ -95,13 +88,7 @@ public abstract class Empire {
             return null;
         }
 
-        ClausewitzVariable imperialInfluenceVar = this.item.getVar("imperial_influence");
-
-        if (imperialInfluenceVar != null) {
-            return imperialInfluenceVar.getAsDouble();
-        } else {
-            return null;
-        }
+        return this.item.getVarAsDouble("imperial_influence");
     }
 
     public void setImperialInfluence(double imperialInfluence) {
@@ -109,13 +96,7 @@ public abstract class Empire {
             return;
         }
 
-        ClausewitzVariable var = this.item.getVar("imperial_influence");
-
-        if (var != null) {
-            var.setValue(imperialInfluence);
-        } else {
-            this.item.addVariable("imperial_influence", imperialInfluence);
-        }
+        this.item.setVariable("imperial_influence", imperialInfluence);
     }
 
     public List<ImperialReform> getMainLineReforms() {

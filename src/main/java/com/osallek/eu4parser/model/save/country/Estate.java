@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,13 +30,7 @@ public class Estate {
     }
 
     public void setLoyalty(Double loyalty) {
-        ClausewitzVariable var = this.item.getVar("loyalty");
-
-        if (var != null) {
-            var.setValue(loyalty);
-        } else {
-            this.item.addVariable("loyalty", loyalty);
-        }
+        this.item.setVariable("loyalty", loyalty);
     }
 
     public Double getTerritory() {

@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
 
@@ -26,13 +25,7 @@ public class EstateInfluenceModifier {
     }
 
     public void setDate(Date date) {
-        ClausewitzVariable var = this.item.getVar("date");
-
-        if (var != null) {
-            var.setValue(date);
-        } else {
-            this.item.addVariable("date", date);
-        }
+        this.item.setVariable("date", date);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, Double value, String desc, Date date) {

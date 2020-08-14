@@ -65,8 +65,8 @@ public class FiredEvents {
     public void setEvents(List<Event> events) {
         List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
 
-        this.item.getVariables().removeIf(var -> !eventIds.contains(var.getValue()));
-        events.removeIf(event -> this.item.getVar(event.getId()) != null);
+        this.item.removeVariableIf(var -> !eventIds.contains(var.getValue()));
+        events.removeIf(event -> this.item.hasVar(event.getId()));
         events.forEach(this::addFiredEvent);
     }
 }

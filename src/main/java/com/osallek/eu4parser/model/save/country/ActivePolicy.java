@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
 
@@ -19,15 +18,10 @@ public class ActivePolicy {
     }
 
     public void setPolicy(String policy) {
-        ClausewitzVariable policyVar = this.item.getVar("policy");
-        ClausewitzVariable dateVar = this.item.getVar("date");
+        Date date = this.item.getVarAsDate("date");
 
-        if (dateVar != null) {
-            if (policyVar != null) {
-                policyVar.setValue(ClausewitzUtils.addQuotes(policy));
-            } else {
-                this.item.addVariable("policy", ClausewitzUtils.addQuotes(policy));
-            }
+        if (date != null) {
+            this.item.setVariable("policy", ClausewitzUtils.addQuotes(policy));
         }
     }
 
@@ -36,13 +30,7 @@ public class ActivePolicy {
     }
 
     public void setDate(Date date) {
-        ClausewitzVariable var = this.item.getVar("date");
-
-        if (var != null) {
-            var.setValue(date);
-        } else {
-            this.item.addVariable("date", date);
-        }
+        this.item.setVariable("date", date);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String policy, Date date) {

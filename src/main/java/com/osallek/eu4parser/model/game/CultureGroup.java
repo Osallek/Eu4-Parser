@@ -7,13 +7,22 @@ import java.util.stream.Collectors;
 
 public class CultureGroup extends AbstractCulture {
 
-    private List<Culture> cultures;
+    private final List<Culture> cultures;
 
     private String localizedName;
 
+    private String graphicalCulture;
+
     public CultureGroup(ClausewitzItem item) {
         super(item);
-        refreshAttributes();
+        this.graphicalCulture = item.getVarAsString("graphical_culture");
+        this.cultures = item.getChildren()
+                            .stream()
+                            .filter(child -> !"male_names".equals(child.getName())
+                                             && !"female_names".equals(child.getName())
+                                             && !"dynasty_names".equals(child.getName()))
+                            .map(child -> new Culture(child, this))
+                            .collect(Collectors.toList());
     }
 
     public String getLocalizedName() {
@@ -25,11 +34,11 @@ public class CultureGroup extends AbstractCulture {
     }
 
     public String getGraphicalCulture() {
-        return this.item.getVarAsString("graphical_culture");
+        return this.graphicalCulture;
     }
 
     public void setGraphicalCulture(String graphicalCulture) {
-        this.item.setVariable("graphical_culture", graphicalCulture);
+        this.graphicalCulture = graphicalCulture;
     }
 
     public List<Culture> getCultures() {
@@ -49,15 +58,5 @@ public class CultureGroup extends AbstractCulture {
     @Override
     public List<String> getPossibleDynastyNames() {
         return getDynastyNames();
-    }
-
-    private void refreshAttributes() {
-        this.cultures = this.item.getChildren()
-                                 .stream()
-                                 .filter(child -> !"male_names".equals(child.getName())
-                                                  && !"female_names".equals(child.getName())
-                                                  && !"dynasty_names".equals(child.getName()))
-                                 .map(child -> new Culture(child, this))
-                                 .collect(Collectors.toList());
     }
 }

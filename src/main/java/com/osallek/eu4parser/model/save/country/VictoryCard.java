@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class VictoryCard {
 
@@ -17,14 +16,7 @@ public class VictoryCard {
     }
 
     public void setArea(String area) {
-        ClausewitzVariable var = this.item.getVar("area");
-        area = ClausewitzUtils.addQuotes(area);
-
-        if (var != null) {
-            var.setValue(area);
-        } else {
-            this.item.addVariable("area", area);
-        }
+        this.item.setVariable("area", ClausewitzUtils.addQuotes(area));
     }
 
     public Integer getLevel() {
@@ -32,13 +24,7 @@ public class VictoryCard {
     }
 
     public void setLevel(Integer level) {
-        ClausewitzVariable var = this.item.getVar("level");
-
-        if (var != null) {
-            var.setValue(level);
-        } else {
-            this.item.addVariable("level", level);
-        }
+        this.item.setVariable("level", level);
     }
 
     public Double getScore() {
@@ -46,13 +32,7 @@ public class VictoryCard {
     }
 
     public void setScore(Double score) {
-        ClausewitzVariable var = this.item.getVar("score");
-
-        if (var != null) {
-            var.setValue(score);
-        } else {
-            this.item.addVariable("score", score);
-        }
+        this.item.setVariable("score", score);
     }
 
     public Boolean wasFulfilled() {
@@ -60,13 +40,7 @@ public class VictoryCard {
     }
 
     public void setWasFulfilled(boolean wasFulfilled) {
-        ClausewitzVariable var = this.item.getVar("was_fulfilled");
-
-        if (var != null) {
-            var.setValue(wasFulfilled);
-        } else {
-            this.item.addVariable("was_fulfilled", wasFulfilled);
-        }
+        this.item.setVariable("was_fulfilled", wasFulfilled);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String area, Integer level, Double score, boolean wasFulfilled) {

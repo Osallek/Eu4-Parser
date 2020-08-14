@@ -1,6 +1,5 @@
 package com.osallek.eu4parser.model.game;
 
-import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 
@@ -9,128 +8,86 @@ import java.util.List;
 
 public abstract class AbstractCulture {
 
-    protected final ClausewitzItem item;
+    private String name;
+
+    private List<String> maleNames;
+
+    private List<String> femaleNames;
+
+    private List<String> dynastyNames;
 
     public AbstractCulture(ClausewitzItem item) {
-        this.item = item;
+        this.name = item.getName();
+
+        ClausewitzList list = item.getList("male_names");
+        this.maleNames = list == null ? null : list.getValues();
+
+        list = item.getList("female_names");
+        this.femaleNames = list == null ? null : list.getValues();
+
+        list = item.getList("dynasty_names");
+        this.dynastyNames = list == null ? null : list.getValues();
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
     public List<String> getMaleNames() {
-        ClausewitzList list = this.item.getList("male_names");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues();
+        return this.maleNames == null ? new ArrayList<>() : this.maleNames;
     }
 
     public abstract List<String> getPossibleMaleNames();
 
     public void setMaleNames(List<String> maleNames) {
-        ClausewitzList list = this.item.getList("male_names");
-        list.clear();
-
-        maleNames.stream().map(ClausewitzUtils::addQuotes).filter(tag -> tag.length() == 5).forEach(list::add);
+        this.maleNames = maleNames;
     }
 
     public void addMaleName(String maleName) {
-        ClausewitzList list = this.item.getList("male_names");
-
-        maleName = ClausewitzUtils.addQuotes(maleName);
-
-        if (maleName.length() == 5 && !list.contains(maleName)) {
-            list.add(maleName);
-        }
+        this.maleNames.add(maleName);
     }
 
     public void removeMaleName(String maleName) {
-        ClausewitzList list = this.item.getList("male_names");
-
-        if (list != null) {
-            list.remove(maleName);
-        }
+        this.maleNames.remove(maleName);
     }
 
     public List<String> getFemaleNames() {
-        ClausewitzList list = this.item.getList("female_names");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues();
+        return this.femaleNames == null ? new ArrayList<>() : this.femaleNames;
     }
 
     public abstract List<String> getPossibleFemaleNames();
 
     public void setFemaleNames(List<String> femaleNames) {
-        ClausewitzList list = this.item.getList("female_names");
-        list.clear();
-
-        femaleNames.stream().map(ClausewitzUtils::addQuotes).filter(tag -> tag.length() == 5).forEach(list::add);
+        this.femaleNames = femaleNames;
     }
 
     public void addFemaleName(String femaleName) {
-        ClausewitzList list = this.item.getList("female_names");
-
-        femaleName = ClausewitzUtils.addQuotes(femaleName);
-
-        if (femaleName.length() == 5 && !list.contains(femaleName)) {
-            list.add(femaleName);
-        }
+        this.femaleNames.add(femaleName);
     }
 
     public void removeFemaleName(String femaleName) {
-        ClausewitzList list = this.item.getList("female_names");
-
-        if (list != null) {
-            list.remove(femaleName);
-        }
+        this.femaleNames.remove(femaleName);
     }
 
     public List<String> getDynastyNames() {
-        ClausewitzList list = this.item.getList("dynasty_names");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues();
+        return this.dynastyNames == null ? new ArrayList<>() : this.dynastyNames;
     }
 
     public abstract List<String> getPossibleDynastyNames();
 
     public void setDynastyNames(List<String> dynastyNames) {
-        ClausewitzList list = this.item.getList("dynasty_names");
-        list.clear();
-
-        dynastyNames.stream().map(ClausewitzUtils::addQuotes).filter(tag -> tag.length() == 5).forEach(list::add);
+        this.dynastyNames = dynastyNames;
     }
 
     public void addDynastyName(String dynastyName) {
-        ClausewitzList list = this.item.getList("dynasty_names");
-
-        dynastyName = ClausewitzUtils.addQuotes(dynastyName);
-
-        if (dynastyName.length() == 5 && !list.contains(dynastyName)) {
-            list.add(dynastyName);
-        }
+        this.dynastyNames.add(dynastyName);
     }
 
     public void removeDynastyName(String dynastyName) {
-        ClausewitzList list = this.item.getList("dynasty_names");
-
-        if (list != null) {
-            list.remove(dynastyName);
-        }
+        this.dynastyNames.remove(dynastyName);
     }
 }

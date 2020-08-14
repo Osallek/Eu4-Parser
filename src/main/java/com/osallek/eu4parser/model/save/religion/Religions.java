@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.save.religion;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 

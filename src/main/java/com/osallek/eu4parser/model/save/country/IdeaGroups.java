@@ -23,19 +23,13 @@ public class IdeaGroups {
     }
 
     public void addIdeaGroup(String name, int level) {
-        ClausewitzVariable var = this.item.getVar(name);
-
         if (level < 0) {
             level = 0;
         } else if (level > 7) {
             level = 7;
         }
 
-        if (var != null) {
-            var.setValue(level);
-        } else {
-            this.item.addVariable(name, level);
-        }
+        this.item.setVariable(name, level);
     }
 
     public void removeIdeaGroup(int index) {

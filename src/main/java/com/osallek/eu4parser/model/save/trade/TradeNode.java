@@ -138,7 +138,7 @@ public class TradeNode {
     private void refreshAttributes() {
         this.countries = this.item.getChildren()
                                   .stream()
-                                  .filter(child -> child.getVar("max_demand") != null)
+                                  .filter(child -> child.hasVar("max_demand"))
                                   .map(TradeNodeCountry::new)
                                   .collect(Collectors.toMap(TradeNodeCountry::getCountry, Function.identity()));
 

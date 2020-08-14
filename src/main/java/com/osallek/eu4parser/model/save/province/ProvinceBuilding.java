@@ -20,8 +20,8 @@ public class ProvinceBuilding extends Building implements Comparable<ProvinceBui
         this.date = other.date;
     }
 
-    public ProvinceBuilding(String name, String builder, Date date) {
-        super(null, null);
+    public ProvinceBuilding(String name, String builder, Date date, Building building) {
+        super(building);
         this.name = name;
         this.builder = builder;
         this.date = date;

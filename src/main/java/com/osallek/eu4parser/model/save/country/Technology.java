@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class Technology {
 
@@ -16,13 +15,7 @@ public class Technology {
     }
 
     public void setAdm(Integer adm) {
-        ClausewitzVariable var = this.item.getVar("adm_tech");
-
-        if (var != null) {
-            var.setValue(adm);
-        } else {
-            this.item.addVariable("adm_tech", adm);
-        }
+        this.item.setVariable("adm_tech", adm);
     }
 
     public Integer getDip() {
@@ -30,13 +23,7 @@ public class Technology {
     }
 
     public void setDip(Integer dip) {
-        ClausewitzVariable var = this.item.getVar("dip_tech");
-
-        if (var != null) {
-            var.setValue(dip);
-        } else {
-            this.item.addVariable("dip_tech", dip);
-        }
+        this.item.setVariable("dip_tech", dip);
     }
 
     public Integer getMil() {
@@ -44,12 +31,6 @@ public class Technology {
     }
 
     public void setMil(Integer mil) {
-        ClausewitzVariable var = this.item.getVar("mil_tech");
-
-        if (var != null) {
-            var.setValue(mil);
-        } else {
-            this.item.addVariable("mil_tech", mil);
-        }
+        this.item.setVariable("mil_tech", mil);
     }
 }

@@ -10,20 +10,41 @@ import java.util.stream.Collectors;
 
 public class Institution {
 
-    private final ClausewitzItem item;
+    private String name;
 
     private String localizedName;
 
+    private Double penalty;
+
+    private Map<String, Double> bonus;
+
+    private Double tradeCompanyEfficiency;
+
+    private Date historicalStartDate;
+
+    private Integer historicalStartProvince;
+
     public Institution(ClausewitzItem item) {
-        this.item = item;
+        this.name = item.getName();
+        this.penalty = item.getVarAsDouble("penalty");
+        this.tradeCompanyEfficiency = item.getVarAsDouble("trade_company_efficiency");
+        ClausewitzItem child = item.getChild("bonus");
+        this.bonus = child == null ? null : child.getVariables()
+                                                 .stream()
+                                                 .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                           ClausewitzVariable::getAsDouble,
+                                                                           (a, b) -> b,
+                                                                           LinkedHashMap::new));
+        this.historicalStartDate = item.getVarAsDate("historical_start_date");
+        this.historicalStartProvince = item.getVarAsInt("historical_start_province");
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
     public String getLocalizedName() {
@@ -35,65 +56,52 @@ public class Institution {
     }
 
     public Double getPenalty() {
-        return this.item.getVarAsDouble("penalty");
+        return this.penalty;
     }
 
     public void setPenalty(double penalty) {
-        this.item.setVariable("penalty", penalty);
+        this.penalty = penalty;
     }
 
     public Map<String, Double> getBonuses() {
-        ClausewitzItem bonusesItem = this.item.getChild("bonus");
-
-        if (bonusesItem != null) {
-            return bonusesItem.getVariables()
-                              .stream()
-                              .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                        ClausewitzVariable::getAsDouble,
-                                                        (a, b) -> b,
-                                                        LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.bonus == null ? new LinkedHashMap<>() : this.bonus;
     }
 
     public void addBonus(String bonus, Double quantity) {
-        ClausewitzItem bonusesItem = this.item.getChild("bonus");
-
-        if (bonusesItem != null) {
-            bonusesItem.setVariable(bonus, quantity);
+        if (this.bonus == null) {
+            this.bonus = new LinkedHashMap<>();
         }
+
+        this.bonus.put(bonus, quantity);
     }
 
     public void removeBonus(String bonus) {
-        ClausewitzItem bonusesItem = this.item.getChild("bonus");
-
-        if (bonusesItem != null) {
-            bonusesItem.removeVariable(bonus);
+        if (this.bonus != null) {
+            this.bonus.remove(bonus);
         }
     }
 
     public Double getTradeCompanyEfficiency() {
-        return this.item.getVarAsDouble("trade_company_efficiency");
+        return this.tradeCompanyEfficiency;
     }
 
     public void setTradeCompanyEfficiency(double tradeCompanyEfficiency) {
-        this.item.setVariable("trade_company_efficiency", tradeCompanyEfficiency);
+        this.tradeCompanyEfficiency = tradeCompanyEfficiency;
     }
 
     public Date getHistoricalStartDate() {
-        return this.item.getVarAsDate("historical_start_date");
+        return this.historicalStartDate;
     }
 
     public void setHistoricalStartDate(Date historicalStartDate) {
-        this.item.setVariable("historical_start_date", historicalStartDate);
+        this.historicalStartDate = historicalStartDate;
     }
 
     public Integer getHistoricalStartProvince() {
-        return this.item.getVarAsInt("historical_start_province");
+        return this.historicalStartProvince;
     }
 
     public void setHistoricalStartProvince(int historicalStartProvince) {
-        this.item.setVariable("historical_start_province", historicalStartProvince);
+        this.historicalStartProvince = historicalStartProvince;
     }
 }

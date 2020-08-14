@@ -7,7 +7,6 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.Province;
-import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
@@ -61,7 +60,7 @@ public class SaveProvince extends Province {
         super(province);
         this.item = item;
         this.save = save;
-        this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(getOwner()));
+        this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(getOwnerTag()));
         refreshAttributes();
     }
 
@@ -69,7 +68,7 @@ public class SaveProvince extends Province {
         return save;
     }
 
-    public Country getCountry() {
+    public Country getOwner() {
         return country;
     }
 
@@ -95,17 +94,13 @@ public class SaveProvince extends Province {
         return this.item.getVarAsString("territorial_core");
     }
 
-    public String getOwner() {
+    public String getOwnerTag() {
         return this.item.getVarAsString("owner");
     }
 
-    public void setOwner(String owner) {
-        owner = ClausewitzUtils.addQuotes(owner);
-
-        if (owner.length() == 5) {
-            this.item.setVariable("owner", owner);
-            this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(owner));
-        }
+    public void setOwner(Country owner) {
+        this.item.setVariable("owner", ClausewitzUtils.addQuotes(owner.getTag()));
+        this.country = owner;
     }
 
     public String getControllerTag() {
@@ -116,40 +111,36 @@ public class SaveProvince extends Province {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
     }
 
-    public void setController(String controller) {
-        controller = ClausewitzUtils.addQuotes(controller);
-
-        if (controller.length() == 5) {
-            if (getPreviousController() != null) {
-                setPreviousController(getPreviousController());
-            }
-
-            this.item.setVariable("controller", controller);
+    public void setController(Country controller) {
+        if (getPreviousController() != null) {
+            setPreviousController(controller);
         }
+
+        this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
-    public String getPreviousController() {
+    public String getPreviousControllerTag() {
         return this.item.getVarAsString("previous_controller");
     }
 
-    public void setPreviousController(String previousController) {
-        previousController = ClausewitzUtils.addQuotes(previousController);
-
-        if (previousController.length() == 5) {
-            this.item.setVariable("previous_controller", previousController);
-        }
+    public Country getPreviousController() {
+        return this.save.getCountry(getPreviousControllerTag());
     }
 
-    public String getOriginalColoniser() {
+    public void setPreviousController(Country previousController) {
+        this.item.setVariable("previous_controller", ClausewitzUtils.addQuotes(previousController.getTag()));
+    }
+
+    public String getOriginalColoniserTag() {
         return this.item.getVarAsString("original_coloniser");
     }
 
-    public void setOriginalColoniser(String originalColoniser) {
-        originalColoniser = ClausewitzUtils.addQuotes(originalColoniser);
+    public Country getOriginalColoniser() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(getOriginalColoniserTag()));
+    }
 
-        if (originalColoniser.length() == 5) {
-            this.item.setVariable("original_coloniser", originalColoniser);
-        }
+    public void setOriginalColoniser(Country originalColoniser) {
+        this.item.setVariable("original_coloniser", ClausewitzUtils.addQuotes(originalColoniser.getTag()));
     }
 
     public Id getOccupyingRebelFaction() {
@@ -304,12 +295,16 @@ public class SaveProvince extends Province {
         this.item.setVariable("center_of_religion", centerOfReligion);
     }
 
-    public String getOriginalCulture() {
+    public String getOriginalCultureName() {
         return this.item.getVarAsString("original_culture");
     }
 
-    public void setOriginalCulture(String originalCulture) {
-        this.item.setVariable("original_culture", originalCulture);
+    public Culture getOriginalCulture() {
+        return this.save.getGame().getCulture(getOriginalCultureName());
+    }
+
+    public void setOriginalCulture(Culture originalCulture) {
+        this.item.setVariable("original_culture", originalCulture.getName());
     }
 
     public String getCultureName() {
@@ -320,16 +315,20 @@ public class SaveProvince extends Province {
         return this.save.getGame().getCulture(getCultureName());
     }
 
-    public void setCulture(String culture) {
-        this.item.setVariable("culture", culture);
+    public void setCulture(Culture culture) {
+        this.item.setVariable("culture", culture.getName());
     }
 
-    public String getOriginalReligion() {
+    public String getOriginalReligionName() {
         return this.item.getVarAsString("original_religion");
     }
 
-    public void setOriginalReligion(String originalReligion) {
-        this.item.setVariable("original_religion", originalReligion);
+    public SaveReligion getOriginalReligion() {
+        return this.save.getReligions().getReligion(getOriginalReligionName());
+    }
+
+    public void setOriginalReligion(SaveReligion originalReligion) {
+        this.item.setVariable("original_religion", originalReligion.getName());
     }
 
     public String getReligionName() {
@@ -355,7 +354,7 @@ public class SaveProvince extends Province {
     }
 
     public boolean isOccupied() {
-        return getCountry() != null;
+        return getOwner() != null;
     }
 
     public boolean isCity() {
@@ -364,15 +363,15 @@ public class SaveProvince extends Province {
 
     public void colonize(Country country) {
         if (!isCity() && getColonySize() == null) {
-            setOwner(country.getTag());
-            setController(country.getTag());
-            setOriginalColoniser(country.getTag());
+            setOwner(country);
+            setController(country);
+            setOriginalColoniser(country);
             setOriginalCulture(country.getPrimaryCulture());
             setCulture(country.getPrimaryCulture());
             setReligion(country.getReligion());
             setColonySize(1);
             this.history.addEvent(this.save.getDate(), "owner", country.getTag());
-            this.history.addEvent(this.save.getDate(), "culture", country.getPrimaryCulture());
+            this.history.addEvent(this.save.getDate(), "culture", country.getPrimaryCulture().getName());
             this.history.addEvent(this.save.getDate(), "religion", country.getReligion().getName());
         }
     }
@@ -632,7 +631,7 @@ public class SaveProvince extends Province {
                 buildingsItem = this.item.addChild("buildings");
             }
 
-            if (buildingsItem.getVar(name) == null) {
+            if (!buildingsItem.hasVar(name)) {
                 buildingsItem.addVariable(name, true);
                 buildingsBuildersItem.addVariable(name, ClausewitzUtils.addQuotes(builder));
                 this.history.addEvent(this.save.getDate(), name, true);
@@ -686,14 +685,14 @@ public class SaveProvince extends Province {
         return discoveryReligionDates;
     }
 
-    public List<String> getDiscoveredBy() {
+    public List<Country> getDiscoveredBy() {
         ClausewitzList list = this.item.getList("discovered_by");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public void addDiscoveredBy(String countryId) {
@@ -923,12 +922,12 @@ public class SaveProvince extends Province {
         this.item.setVariable("last_razed", lastRazed);
     }
 
-    public String getLastRazedBy() {
-        return this.item.getVarAsString("last_razed_by");
+    public Country getLastRazedBy() {
+        return this.save.getCountry(this.item.getVarAsString("last_razed_by"));
     }
 
-    public void setLastRazedBy(String lastRazedBy) {
-        this.item.setVariable("last_razed_by", ClausewitzUtils.addQuotes(lastRazedBy));
+    public void setLastRazedBy(Country lastRazedBy) {
+        this.item.setVariable("last_razed_by", ClausewitzUtils.addQuotes(lastRazedBy.getTag()));
     }
 
     public String getLastNativeUprising() {
@@ -980,19 +979,20 @@ public class SaveProvince extends Province {
 
         ClausewitzItem buildersItem = this.item.getChild("building_builders");
         this.buildings = new ArrayList<>(0);
-        this.buildings = new ArrayList<>(0);
 
         if (buildersItem != null) {
             buildersItem.getVariables().forEach(var -> {
                 if (historyItem == null) {
-                    this.buildings.add(new ProvinceBuilding(var.getName(), var.getValue(), null));
+                    this.buildings.add(new ProvinceBuilding(var.getName(), var.getValue(), null, this.save.getGame().getBuilding(var.getName())));
                 } else {
                     historyItem.getChildren()
                                .stream()
-                               .filter(child -> child.getVar(var.getName()) != null)
+                               .filter(child -> child.hasVar(var.getName()))
                                .findFirst()
-                               .ifPresent(child -> this.buildings.add(new ProvinceBuilding(var.getName(), var.getValue(),
-                                                                                           Eu4Utils.stringToDate(child.getName()))));
+                               .ifPresent(child -> this.buildings.add(new ProvinceBuilding(var.getName(),
+                                                                                           var.getValue(),
+                                                                                           Eu4Utils.stringToDate(child.getName()),
+                                                                                           this.save.getGame().getBuilding(var.getName()))));
                 }
             });
             this.buildings.sort(ProvinceBuilding::compareTo);

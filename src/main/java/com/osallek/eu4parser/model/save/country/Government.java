@@ -3,7 +3,6 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +20,7 @@ public class Government {
     }
 
     public void setType(String type) {
-        ClausewitzVariable var = this.item.getVar("government");
-
-        if (var != null) {
-            var.setValue(type);
-        } else {
-            this.item.addVariable("government", type);
-        }
+        this.item.setVariable("government", type);
     }
 
     public List<String> getReforms() {

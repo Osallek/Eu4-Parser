@@ -9,22 +9,40 @@ import java.util.stream.Collectors;
 
 public class PapacyConcession {
 
-    private final ClausewitzItem item;
+    private String name;
 
     private String harshLocalizedName;
 
     private String concilatoryLocalizedName;
 
+    private Map<String, Double> harshModifiers;
+
+    private Map<String, Double> concilatoryModifiers;
+
     public PapacyConcession(ClausewitzItem item) {
-        this.item = item;
+        this.name = item.getName();
+        ClausewitzItem child = item.getChild("harsh");
+        this.harshModifiers = child == null ? null : child.getVariables()
+                                                          .stream()
+                                                          .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                    ClausewitzVariable::getAsDouble,
+                                                                                    (a, b) -> b,
+                                                                                    LinkedHashMap::new));
+        child = item.getChild("concilatory");
+        this.concilatoryModifiers = child == null ? null : child.getVariables()
+                                                                .stream()
+                                                                .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                          ClausewitzVariable::getAsDouble,
+                                                                                          (a, b) -> b,
+                                                                                          LinkedHashMap::new));
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
     public String getHarshLocalizedName() {
@@ -44,64 +62,38 @@ public class PapacyConcession {
     }
 
     public Map<String, Double> getHarshModifiers() {
-        ClausewitzItem harshModifiersItem = this.item.getChild("harsh");
-
-        if (harshModifiersItem != null) {
-            return harshModifiersItem.getVariables()
-                                     .stream()
-                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                               ClausewitzVariable::getAsDouble,
-                                                               (a, b) -> b,
-                                                               LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.harshModifiers == null ? new LinkedHashMap<>() : this.harshModifiers;
     }
 
     public void addHarshModifier(String modifier, Double quantity) {
-        ClausewitzItem harshModifiersItem = this.item.getChild("harsh");
-
-        if (harshModifiersItem != null) {
-            harshModifiersItem.setVariable(modifier, quantity);
+        if (this.harshModifiers == null) {
+            this.harshModifiers = new LinkedHashMap<>();
         }
+
+        this.harshModifiers.put(modifier, quantity);
     }
 
     public void removeHarshModifier(String modifier) {
-        ClausewitzItem harshModifiersItem = this.item.getChild("harsh");
-
-        if (harshModifiersItem != null) {
-            harshModifiersItem.removeVariable(modifier);
+        if (this.harshModifiers != null) {
+            this.harshModifiers.remove(modifier);
         }
     }
 
-    public Map<String, Double> getNeutralModifiers() {
-        ClausewitzItem neutralModifiersItem = this.item.getChild("neutral");
-
-        if (neutralModifiersItem != null) {
-            return neutralModifiersItem.getVariables()
-                                     .stream()
-                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                               ClausewitzVariable::getAsDouble,
-                                                               (a, b) -> b,
-                                                               LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+    public Map<String, Double> getConcilatoryModifiers() {
+        return this.concilatoryModifiers == null ? new LinkedHashMap<>() : this.concilatoryModifiers;
     }
 
     public void addConcilatoryModifier(String modifier, Double quantity) {
-        ClausewitzItem concilatoryModifiersItem = this.item.getChild("concilatory");
-
-        if (concilatoryModifiersItem != null) {
-            concilatoryModifiersItem.setVariable(modifier, quantity);
+        if (this.concilatoryModifiers == null) {
+            this.concilatoryModifiers = new LinkedHashMap<>();
         }
+
+        this.concilatoryModifiers.put(modifier, quantity);
     }
 
     public void removeConcilatoryModifier(String modifier) {
-        ClausewitzItem concilatoryModifiersItem = this.item.getChild("concilatory");
-
-        if (concilatoryModifiersItem != null) {
-            concilatoryModifiersItem.removeVariable(modifier);
+        if (this.concilatoryModifiers != null) {
+            this.concilatoryModifiers.remove(modifier);
         }
     }
 }

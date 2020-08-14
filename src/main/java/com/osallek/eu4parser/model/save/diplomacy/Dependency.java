@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.Date;
 
@@ -13,10 +12,10 @@ public class Dependency extends DatableRelation {
     }
 
     public SubjectType getSubjectType() {
-        ClausewitzVariable subjectTypeVar = this.item.getVar("subject_type");
+        String subjectType = this.item.getVarAsString("subject_type");
 
-        if (subjectTypeVar != null) {
-            return SubjectType.valueOf(ClausewitzUtils.removeQuotes(subjectTypeVar.getValue()).toUpperCase());
+        if (subjectType != null) {
+            return SubjectType.valueOf(ClausewitzUtils.removeQuotes(subjectType).toUpperCase());
         }
 
         return null;

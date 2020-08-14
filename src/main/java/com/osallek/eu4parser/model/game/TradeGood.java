@@ -12,26 +12,48 @@ import java.util.stream.Collectors;
 
 public class TradeGood {
 
-    private final ClausewitzItem item;
-
-    private ClausewitzItem priceItem;
+    private String name;
 
     private String localizedName;
 
+    private Color color;
+
+    private Map<String, Double> modifiers;
+
+    private Map<String, Double> provinceModifiers;
+
+    private Double basePrice;
+
     public TradeGood(ClausewitzItem item) {
-        this.item = item;
+        this.name = item.getName();
+        ClausewitzList list = item.getList("color");
+        this.color = list == null ? null : new Color(list, true);
+        ClausewitzItem child = item.getChild("modifier");
+        this.modifiers = child == null ? null : child.getVariables()
+                                                     .stream()
+                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                               ClausewitzVariable::getAsDouble,
+                                                                               (a, b) -> b,
+                                                                               LinkedHashMap::new));
+        child = item.getChild("province");
+        this.provinceModifiers = child == null ? null : child.getVariables()
+                                                             .stream()
+                                                             .collect(Collectors.toMap(ClausewitzVariable::getName,
+                                                                                       ClausewitzVariable::getAsDouble,
+                                                                                       (a, b) -> b,
+                                                                                       LinkedHashMap::new));
     }
 
     void setPriceItem(ClausewitzItem priceItem) {
-        this.priceItem = priceItem;
+        this.basePrice = priceItem.getVarAsDouble("base_price");
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
     public String getLocalizedName() {
@@ -43,95 +65,55 @@ public class TradeGood {
     }
 
     public Color getColor() {
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
-            return new Color(list);
-        }
-
-        return null;
+        return this.color;
     }
 
     public void setColor(Color color) {
-        ClausewitzList list = this.item.getList("color");
-
-        if (list == null) {
-            Color.addToItem(this.item, "color", color);
-        } else {
-            list.set(0, color.getRed());
-            list.set(1, color.getGreen());
-            list.set(2, color.getBlue());
-        }
+        this.color = color;
     }
 
     public Map<String, Double> getModifiers() {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            return modifiersItem.getVariables()
-                              .stream()
-                              .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                        ClausewitzVariable::getAsDouble,
-                                                        (a, b) -> b,
-                                                        LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
     }
 
     public void addModifier(String modifier, Double quantity) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.setVariable(modifier, quantity);
+        if (this.modifiers == null) {
+            this.modifiers = new LinkedHashMap<>();
         }
+
+        this.modifiers.put(modifier, quantity);
     }
 
     public void removeModifier(String modifier) {
-        ClausewitzItem modifiersItem = this.item.getChild("modifier");
-
-        if (modifiersItem != null) {
-            modifiersItem.removeVariable(modifier);
+        if (this.modifiers != null) {
+            this.modifiers.remove(modifier);
         }
     }
-    
+
     public Map<String, Double> getProvinceModifiers() {
-        ClausewitzItem provincesItem = this.item.getChild("province");
-
-        if (provincesItem != null) {
-            return provincesItem.getVariables()
-                              .stream()
-                              .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                        ClausewitzVariable::getAsDouble,
-                                                        (a, b) -> b,
-                                                        LinkedHashMap::new));
-        }
-
-        return new LinkedHashMap<>();
+        return this.provinceModifiers == null ? new LinkedHashMap<>() : this.provinceModifiers;
     }
 
     public void addProvinceModifier(String modifier, Double quantity) {
-        ClausewitzItem provincesItem = this.item.getChild("province");
-
-        if (provincesItem != null) {
-            provincesItem.setVariable(modifier, quantity);
+        if (this.provinceModifiers == null) {
+            this.provinceModifiers = new LinkedHashMap<>();
         }
+
+        this.provinceModifiers.put(modifier, quantity);
     }
 
     public void removeProvinceModifier(String modifier) {
-        ClausewitzItem provincesItem = this.item.getChild("province");
-
-        if (provincesItem != null) {
-            provincesItem.removeVariable(modifier);
+        if (this.provinceModifiers != null) {
+            this.provinceModifiers.remove(modifier);
         }
     }
 
     public Double getBasePrice() {
-        return this.priceItem.getVarAsDouble("base_price");
+        return this.basePrice;
     }
 
     public void setBasePrice(double basePrice) {
-        this.priceItem.setVariable("base_price", basePrice);
+        this.basePrice = basePrice;
     }
 
     @Override

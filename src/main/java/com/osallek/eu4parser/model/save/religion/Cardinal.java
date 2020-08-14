@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.save.religion;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.save.Id;
 
 public class Cardinal {
@@ -20,13 +19,7 @@ public class Cardinal {
     }
 
     public void setLocation(Integer provinceId) {
-        ClausewitzVariable locationVar = this.item.getVar("location");
-
-        if (locationVar != null) {
-            locationVar.setValue(provinceId);
-        } else {
-            this.item.addVariable("location", provinceId);
-        }
+        this.item.setVariable("location", provinceId);
     }
 
     public Id getId() {

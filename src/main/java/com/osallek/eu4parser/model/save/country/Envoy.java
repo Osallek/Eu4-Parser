@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class Envoy {
 
@@ -25,14 +24,7 @@ public class Envoy {
     }
 
     public void setName(String name) {
-        ClausewitzVariable nameVar = this.item.getVar("name");
-        name = ClausewitzUtils.addQuotes(name);
-
-        if (nameVar != null) {
-            nameVar.setValue(name);
-        } else {
-            this.item.addVariable("name", name);
-        }
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public Integer getId() {

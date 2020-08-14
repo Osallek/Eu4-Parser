@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,7 +122,8 @@ public class Save {
         this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true);
     }
 
-    private Save(String name, String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed) throws IOException {
+    private Save(String name, String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
+                 boolean compressed) throws IOException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
@@ -245,17 +245,16 @@ public class Save {
      * Used for units and armies
      */
     public int getAndIncrementUnitIdCounter() {
-        ClausewitzVariable var = this.gamestateItem.getVar("unit");
+        Integer var = this.gamestateItem.getVarAsInt("unit");
 
         if (var == null) {
             this.gamestateItem.addVariable("unit", 2);
 
             return 1;
         } else {
-            int value = var.getAsInt();
-            var.setValue(value + 1);
+            this.gamestateItem.setVariable("unit", var + 1);
 
-            return value;
+            return var;
         }
     }
 
@@ -378,43 +377,23 @@ public class Save {
     }
 
     public Boolean getHreLeaguesActive() {
-        ClausewitzVariable hreLeaguesStatus = this.gamestateItem.getVar("hre_leagues_status");
+        Integer hreLeaguesStatus = this.gamestateItem.getVarAsInt("hre_leagues_status");
 
-        if (hreLeaguesStatus != null) {
-            return hreLeaguesStatus.getAsInt() == 1;
-        }
-
-        return null;
+        return hreLeaguesStatus == null ? null : hreLeaguesStatus == 1;
     }
 
     public void setHreLeaguesActive(boolean hreLeaguesActive) {
-        ClausewitzVariable hreLeaguesStatus = this.gamestateItem.getVar("hre_leagues_status");
-
-        if (hreLeaguesStatus != null) {
-            hreLeaguesStatus.setValue(hreLeaguesActive ? 1 : 0);
-        } else {
-            this.gamestateItem.addVariable("hre_leagues_status", hreLeaguesActive ? 1 : 0);
-        }
+        this.gamestateItem.setVariable("hre_leagues_status", hreLeaguesActive ? 1 : 0);
     }
 
     public HreReligionStatus getHreReligionStatus() {
-        ClausewitzVariable hreLeaguesStatus = this.gamestateItem.getVar("hre_religion_status");
+        Integer hreLeaguesStatus = this.gamestateItem.getVarAsInt("hre_religion_status");
 
-        if (hreLeaguesStatus != null) {
-            return HreReligionStatus.values()[hreLeaguesStatus.getAsInt()];
-        }
-
-        return null;
+        return hreLeaguesStatus == null ? null : HreReligionStatus.values()[hreLeaguesStatus];
     }
 
     public void setHreReligionStatus(HreReligionStatus hreReligionStatus) {
-        ClausewitzVariable hreReligionStatusVar = this.gamestateItem.getVar("hre_religion_status");
-
-        if (hreReligionStatusVar != null) {
-            hreReligionStatusVar.setValue(hreReligionStatus.ordinal());
-        } else {
-            this.gamestateItem.addVariable("hre_religion_status", hreReligionStatus.ordinal());
-        }
+        this.gamestateItem.setVariable("hre_religion_status", hreReligionStatus.ordinal());
 
         if (hreReligionStatus == HreReligionStatus.CATHOLIC) {
             if (this.religions != null) {
@@ -468,7 +447,11 @@ public class Save {
         return pendingEvents;
     }
 
-    public SaveProvince getProvince(int id) {
+    public SaveProvince getProvince(Integer id) {
+        if (id == null) {
+            return null;
+        }
+
         return this.provinces.get(id);
     }
 
@@ -481,6 +464,10 @@ public class Save {
     }
 
     public Country getCountry(String tag) {
+        if (tag == null) {
+            return null;
+        }
+
         return this.countries.get(tag);
     }
 

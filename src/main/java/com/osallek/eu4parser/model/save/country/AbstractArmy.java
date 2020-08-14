@@ -3,7 +3,6 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.save.Id;
 
 import java.util.ArrayList;
@@ -35,14 +34,7 @@ public abstract class AbstractArmy {
     }
 
     public void setName(String name) {
-        ClausewitzVariable var = this.item.getVar("name");
-        name = ClausewitzUtils.addQuotes(name);
-
-        if (var != null) {
-            var.setValue(name);
-        } else {
-            this.item.addVariable("name", name);
-        }
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public Id getLeader() {
@@ -80,13 +72,7 @@ public abstract class AbstractArmy {
     }
 
     public void setLocation(int location) {
-        ClausewitzVariable var = this.item.getVar("location");
-
-        if (var != null) {
-            var.setValue(location);
-        } else {
-            this.item.addVariable("location", location);
-        }
+        this.item.setVariable("location", location);
     }
 
     public Date getMovementProgressLastUpdated() {
@@ -98,14 +84,7 @@ public abstract class AbstractArmy {
     }
 
     public void setGraphicalCulture(String graphicalCulture) {
-        ClausewitzVariable var = this.item.getVar("graphical_culture");
-        graphicalCulture = ClausewitzUtils.addQuotes(graphicalCulture);
-
-        if (var != null) {
-            var.setValue(graphicalCulture);
-        } else {
-            this.item.addVariable("graphical_culture", graphicalCulture);
-        }
+        this.item.setVariable("graphical_culture", ClausewitzUtils.addQuotes(graphicalCulture));
     }
 
     public Boolean getMainArmy() {
@@ -113,10 +92,9 @@ public abstract class AbstractArmy {
     }
 
     /**
-     * The AI can also reserve some of its forces to act as "Hunter-Killer" armies. In EUIII, AI armies often settled
-     * into a siege and refused to move, even if there was (to a human eye), urgent events taking place nearby. Now,
-     * Hunter-Killer armies will seek out enemy armies and attempt to engage them in direct battle. They will also
-     * protect their own besieging forces, intercepting enemies and acting as defensive screen.
+     * The AI can also reserve some of its forces to act as "Hunter-Killer" armies. In EUIII, AI armies often settled into a siege and refused to move, even if
+     * there was (to a human eye), urgent events taking place nearby. Now, Hunter-Killer armies will seek out enemy armies and attempt to engage them in direct
+     * battle. They will also protect their own besieging forces, intercepting enemies and acting as defensive screen.
      * https://eu4.paradoxwikis.com/Artificial_intelligence#Improvements_over_EUIII
      */
     public Boolean getHunterKiller() {
@@ -135,14 +113,8 @@ public abstract class AbstractArmy {
         return this.item.getVarAsBool("can_attach");
     }
 
-    public void setCanAttach(Boolean canAttach) {
-        ClausewitzVariable var = this.item.getVar("can_attach");
-
-        if (var != null) {
-            var.setValue(canAttach);
-        } else {
-            this.item.addVariable("can_attach", canAttach);
-        }
+    public void setCanAttach(boolean canAttach) {
+        this.item.setVariable("can_attach", canAttach);
     }
 
     public Boolean getMovementLocked() {

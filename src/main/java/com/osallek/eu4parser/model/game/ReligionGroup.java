@@ -11,23 +11,49 @@ import java.util.stream.Collectors;
 
 public class ReligionGroup {
 
-    private final ClausewitzItem item;
-
-    private List<Religion> religions;
+    private String name;
 
     private String localizedName;
 
+    private final List<Religion> religions;
+
+    private boolean defenderOfFaith;
+
+    private boolean canFormPersonalUnions;
+
+    private Integer centerOfReligion;
+
+    private Integer flagsWithEmblemPercentage;
+
+    private Map.Entry<Integer, Integer> flagEmblemIndexRange;
+
+    private String harmonizedModifier;
+
+    private String crusadeName;
+
     public ReligionGroup(ClausewitzItem item) {
-        this.item = item;
-        refreshAttributes();
+        this.name = item.getName();
+        this.religions = item.getChildren()
+                             .stream()
+                             .map(child -> new Religion(child, this))
+                             .collect(Collectors.toList());
+        this.defenderOfFaith = Boolean.TRUE.equals(item.getVarAsBool("defender_of_faith"));
+        this.canFormPersonalUnions = Boolean.TRUE.equals(item.getVarAsBool("can_form_personal_unions"));
+        this.centerOfReligion = item.getVarAsInt("center_of_religion");
+        this.flagsWithEmblemPercentage = item.getVarAsInt("flags_with_emblem_percentage");
+        ClausewitzList list = item.getList("flag_emblem_index_range");
+        this.flagEmblemIndexRange = list == null ? null :
+                                    new AbstractMap.SimpleEntry<>(list.getAsInt(0), list.getAsInt(1));
+        this.harmonizedModifier = item.getVarAsString("harmonized_modifier");
+        this.crusadeName = item.getVarAsString("crusade_name");
     }
 
     public String getName() {
-        return this.item.getName();
+        return this.name;
     }
 
     public void setName(String name) {
-        this.item.setName(name);
+        this.name = name;
     }
 
     public String getLocalizedName() {
@@ -39,31 +65,31 @@ public class ReligionGroup {
     }
 
     public boolean defenderOfFaith() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("defender_of_faith"));
+        return this.defenderOfFaith;
     }
 
     public void setDefenderOfFaith(boolean defenderOfFaith) {
-        this.item.setVariable("defender_of_faith ", defenderOfFaith);
+        this.defenderOfFaith = defenderOfFaith;
     }
 
     public boolean canFormPersonalUnions() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("can_form_personal_unions"));
+        return this.canFormPersonalUnions;
     }
 
     public void setCanFormPersonalUnions(boolean canFormPersonalUnions) {
-        this.item.setVariable("can_form_personal_unions", canFormPersonalUnions);
+        this.canFormPersonalUnions = canFormPersonalUnions;
     }
 
     public Integer centerOfReligion() {
-        return this.item.getVarAsInt("center_of_religion");
+        return this.centerOfReligion;
     }
 
     public void setCenterOfReligion(int centerOfReligion) {
-        this.item.setVariable("center_of_religion", centerOfReligion);
+        this.centerOfReligion = centerOfReligion;
     }
 
     public Integer getFlagsWithEmblemPercentage() {
-        return this.item.getVarAsInt("flags_with_emblem_percentage");
+        return this.flagsWithEmblemPercentage;
     }
 
     public void setFlagsWithEmblemPercentage(int flagsWithEmblemPercentage) {
@@ -73,55 +99,35 @@ public class ReligionGroup {
             flagsWithEmblemPercentage = 100;
         }
 
-        this.item.setVariable("flags_with_emblem_percentage", flagsWithEmblemPercentage);
+        this.flagsWithEmblemPercentage = flagsWithEmblemPercentage;
     }
 
     public Map.Entry<Integer, Integer> getFlagEmblemIndexRange() {
-        ClausewitzList list = this.item.getList("flag_emblem_index_range");
-
-        if (list != null) {
-            return new AbstractMap.SimpleEntry<>(list.getAsInt(0), list.getAsInt(1));
-        }
-
-        return null;
+        return this.flagEmblemIndexRange;
     }
 
     public void setFlagEmblemIndexRange(int flagEmblemIndexRangeMin, int flagEmblemIndexRangeMax) {
-        ClausewitzList list = this.item.getList("flag_emblem_index_range");
-
-        if (list != null) {
-            list.set(0, flagEmblemIndexRangeMin);
-            list.set(1, flagEmblemIndexRangeMax);
-        } else {
-            this.item.addList("flag_emblem_index_range", flagEmblemIndexRangeMin, flagEmblemIndexRangeMax);
-        }
+        this.flagEmblemIndexRange = new AbstractMap.SimpleEntry<>(flagEmblemIndexRangeMin, flagEmblemIndexRangeMax);
     }
 
     public String harmonizedModifier() {
-        return this.item.getVarAsString("harmonized_modifier");
+        return this.harmonizedModifier;
     }
 
     public void setHarmonizedModifier(String harmonizedModifier) {
-        this.item.setVariable("harmonized_modifier", harmonizedModifier);
+        this.harmonizedModifier = harmonizedModifier;
     }
 
     public String crusadeName() {
-        return this.item.getVarAsString("crusade_name");
+        return this.crusadeName;
     }
 
     public void setCrusadeName(String crusadeName) {
-        this.item.setVariable("crusade_name", crusadeName);
+        this.crusadeName = crusadeName;
     }
 
     public List<Religion> getReligions() {
         return religions;
-    }
-
-    private void refreshAttributes() {
-        this.religions = this.item.getChildren()
-                                  .stream()
-                                  .map(child -> new Religion(child, this))
-                                  .collect(Collectors.toList());
     }
 
     @Override

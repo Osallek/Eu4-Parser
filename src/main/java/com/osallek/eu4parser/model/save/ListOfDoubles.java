@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.save;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class ListOfDoubles {
 
@@ -16,12 +15,6 @@ public class ListOfDoubles {
     }
 
     public void set(String name, Double aDouble) {
-        ClausewitzVariable var = this.item.getVar(name);
-
-        if (var != null) {
-            var.setValue(aDouble);
-        } else {
-            this.item.addVariable(name, aDouble);
-        }
+        this.item.setVariable(name, aDouble);
     }
 }

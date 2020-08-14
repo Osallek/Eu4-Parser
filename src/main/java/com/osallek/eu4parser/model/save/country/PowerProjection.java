@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 public class PowerProjection {
 
@@ -24,13 +23,7 @@ public class PowerProjection {
     }
 
     public void setCurrent(Double current) {
-        ClausewitzVariable var = this.item.getVar("current");
-
-        if (var != null) {
-            var.setValue(current);
-        } else {
-            this.item.addVariable("current", current);
-        }
+        this.item.setVariable("current", current);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String target, String modifier, Double current) {

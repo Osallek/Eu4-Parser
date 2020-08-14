@@ -203,7 +203,7 @@ public class ActiveWar {
 
                            value.forEach(child -> {
                                for (WarHistoryAction action : WarHistoryAction.values()) {
-                                   if (child.getVar(action.name().toLowerCase()) != null) {
+                                   if (child.hasVar(action.name().toLowerCase())) {
                                        actions.merge(action,
                                                      Collections.singletonList(child.getVarAsString(action.name()
                                                                                                           .toLowerCase())),

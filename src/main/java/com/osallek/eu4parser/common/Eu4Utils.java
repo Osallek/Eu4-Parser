@@ -46,10 +46,11 @@ public final class Eu4Utils {
     }
 
     public static List<List<Building>> buildingsTree(List<Building> buildings) {
+        List<Building> queue = new ArrayList<>(buildings);
         List<List<Building>> tree = new ArrayList<>();
         List<Building> manufactories = new ArrayList<>();
 
-        Iterator<Building> iterator = buildings.iterator();
+        Iterator<Building> iterator = queue.iterator();
         while (iterator.hasNext()) {
             Building building = iterator.next();
             if (!building.getManufactoryFor().isEmpty()) {
@@ -63,8 +64,8 @@ public final class Eu4Utils {
             }
         }
 
-        while (!buildings.isEmpty()) {
-            iterator = buildings.iterator();
+        while (!queue.isEmpty()) {
+            iterator = queue.iterator();
             while (iterator.hasNext()) {
                 Building building = iterator.next();
                 for (List<Building> buildingList : tree) {
