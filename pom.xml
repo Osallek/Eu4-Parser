@@ -25,5 +25,10 @@
       <artifactId>clausewitz-parser</artifactId>
       <version>${clausewitz-parser.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.luaj</groupId>
+      <artifactId>luaj-jse</artifactId>
+      <version>3.0.1</version>
+    </dependency>
   </dependencies>
 </project>

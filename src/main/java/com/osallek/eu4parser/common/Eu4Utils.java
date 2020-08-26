@@ -30,6 +30,36 @@ public final class Eu4Utils {
 
     public static final String IMPASSABLE_CLIMATE = "impassable";
 
+    public static final String DEFINE_GAME_KEY = "NGame";
+
+    public static final String DEFINE_DIPLOMACY_KEY = "NDiplomacy";
+
+    public static final String DEFINE_COUNTRY_KEY = "NCountry";
+
+    public static final String DEFINE_ECONOMY_KEY = "NEconomy";
+
+    public static final String DEFINE_MILITARY_KEY = "NMilitary";
+
+    public static final String DEFINE_AI_KEY = "NAI";
+
+    public static final String DEFINE_AI_ECONOMY_KEY = "NAIEconomy";
+
+    public static final String DEFINE_GRAPHICS_KEY = "NGraphics";
+
+    public static final String DEFINE_GUI_KEY = "NGui";
+
+    public static final String DEFINE_ENGINE_KEY = "NEngine";
+
+    public static final String DEFINE_MACRO_BUILD_COLORS_KEY = "NMacroBuildColors";
+
+    public static final String DEFINE_FRONTEND_KEY = "NFrontend";
+
+    public static final String DEFINE_RELIGION_KEY = "NReligion";
+
+    public static final String DEFINE_NATION_DESIGNER_KEY = "NNationDesigner";
+
+    public static final String DEFINE_GOVERNMENT_KEY = "NGovernment";
+
     static {
         Calendar calendar = Calendar.getInstance();
         calendar.set(1, Calendar.JANUARY, 1, 0, 0, 0);

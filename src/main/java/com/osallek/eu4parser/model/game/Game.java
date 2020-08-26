@@ -5,13 +5,26 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.LuaUtils;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4parser.model.save.country.Country;
+import org.luaj.vm2.LuaDouble;
+import org.luaj.vm2.LuaInteger;
+import org.luaj.vm2.LuaNumber;
+import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.ast.Chunk;
+import org.luaj.vm2.ast.Exp;
+import org.luaj.vm2.ast.Stat;
+import org.luaj.vm2.ast.TableConstructor;
+import org.luaj.vm2.ast.TableField;
+import org.luaj.vm2.parser.LuaParser;
+import org.luaj.vm2.parser.ParseException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -74,7 +87,9 @@ public class Game {
 
     private Map<Event, Path> events;
 
-    public Game(String gameFolderPath) throws IOException {
+    private final Map<String, Map<String, Exp.Constant>> defines;
+
+    public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
 
@@ -84,6 +99,7 @@ public class Game {
         this.gfxFolderPath = this.gameFolderPath + File.separator + "gfx";
         this.localisationFolderPath = this.gameFolderPath + File.separator + "localisation";
         this.interfaceFolderPath = this.gameFolderPath + File.separator + "interface";
+        this.defines = LuaUtils.luaFileToMap(this.commonFolderPath + File.separator + "defines.lua");
 
         loadLocalisations();
         readSpriteTypes();
@@ -440,6 +456,10 @@ public class Game {
         }
 
         return null;
+    }
+
+    public int getMaxGovRank() {
+        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_GOV_RANK").value).v;
     }
 
     public void loadLocalisations() throws IOException {

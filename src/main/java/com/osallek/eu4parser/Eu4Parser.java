@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.ClausewitzParser;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Save;
+import org.luaj.vm2.parser.ParseException;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -21,7 +22,7 @@ public class Eu4Parser {
 
     private Eu4Parser() {}
 
-    public static Save loadSave(String gameFolderPath, String path) throws IOException {
+    public static Save loadSave(String gameFolderPath, String path) throws IOException, ParseException {
         File file = new File(path);
         Save save = null;
 

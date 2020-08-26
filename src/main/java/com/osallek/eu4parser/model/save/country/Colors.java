@@ -8,6 +8,8 @@ public class Colors {
 
     private final ClausewitzItem item;
 
+    private CustomColors customColors;
+
     private Color revolutionaryColors;
 
     private Color mapColor;
@@ -17,6 +19,10 @@ public class Colors {
     public Colors(ClausewitzItem item) {
         this.item = item;
         refreshAttributes();
+    }
+
+    public CustomColors getCustomColors() {
+        return customColors;
     }
 
     public Color getRevolutionaryColors() {
@@ -32,6 +38,12 @@ public class Colors {
     }
 
     private void refreshAttributes() {
+        ClausewitzItem customColorsItem = this.item.getChild("custom_colors");
+
+        if (customColorsItem != null) {
+            this.customColors = new CustomColors(customColorsItem);
+        }
+
         ClausewitzList revolutionaryColorsList = this.item.getList("revolutionary_colors");
 
         if (revolutionaryColorsList != null) {

@@ -30,11 +30,12 @@ import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Country {
 
-    //Todo custom countries (colors, ideas, flag)
+    //Todo custom countries (ideas, flag)
 
     //Todo combined countries:
     // trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes
@@ -42,6 +43,14 @@ public class Country {
 
     //Todo with provinces
     // seat_in_parliament (back=yes vs back=2)
+
+    //Todo
+    // Political rank max/min from define.lua
+
+    public static final Pattern CUSTOM_COUNTRY_PATTERN = Pattern.compile("D[0-9]{2}");
+    public static final Pattern COLONY_PATTERN = Pattern.compile("C[0-9]{2}");
+    public static final Pattern TRADING_CITY_PATTERN = Pattern.compile("T[0-9]{2}");
+    public static final Pattern CLIENT_STATE_PATTERN = Pattern.compile("K[0-9]{2}");
 
     private final ClausewitzItem item;
 
@@ -187,12 +196,40 @@ public class Country {
         }
     }
 
+    public void setName(String name) {
+        if (this.item.hasVar("custom_name")) {
+            this.item.setVariable("custom_name", name);
+        } else {
+            this.item.setVariable("name", name);
+        }
+    }
+
     public boolean isPlayable() {
         return isPlayable;
     }
 
     public boolean isAlive() {
         return getCapital() != null && getDevelopment() != null && getDevelopment() > 0;
+    }
+
+    public boolean isCustom() {
+        return CUSTOM_COUNTRY_PATTERN.matcher(getTag()).matches();
+    }
+
+    public boolean isColony() {
+        return COLONY_PATTERN.matcher(getTag()).matches();
+    }
+
+    public boolean isTradeCity() {
+        return TRADING_CITY_PATTERN.matcher(getTag()).matches();
+    }
+
+    public boolean isClientState() {
+        return CLIENT_STATE_PATTERN.matcher(getTag()).matches();
+    }
+
+    public boolean isNameEditable() {
+        return isCustom() || isColony() || isTradeCity() || isClientState();
     }
 
     public File getFlagFile() {
@@ -247,14 +284,16 @@ public class Country {
         return this.item.getVarAsBool("has_set_government_name");
     }
 
-    public GovernmentRank getGovernmentRank() {
-        Integer var = this.item.getVarAsInt("government_rank");
-
-        return var == null ? null : GovernmentRank.values()[var];
+    public Integer getGovernmentRank() {
+        return this.item.getVarAsInt("government_rank");
     }
 
-    public void setGovernmentRank(GovernmentRank governmentRank) {
-        this.item.setVariable("government_rank", governmentRank.ordinal());
+    public void setGovernmentRank(int governmentRank) {
+        if (governmentRank <= 0) {
+            governmentRank = 1;
+        }
+
+        this.item.setVariable("government_rank", governmentRank);
     }
 
     public String getGovernmentName() {
