@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.save.Id;
 
 public class Ship {
@@ -37,8 +38,8 @@ public class Ship {
         this.item.setVariable("home", home);
     }
 
-    public String getType() {
-        return this.item.getVarAsString("type");
+    public UnitType getType() {
+        return UnitType.value(this.item.getVarAsString("type"));
     }
 
     public void setType(String type) {

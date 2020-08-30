@@ -2,23 +2,28 @@ package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import java.util.Date;
 
 public class DatableRelation {
 
+    protected final Save save;
+
     protected final ClausewitzItem item;
 
-    public DatableRelation(ClausewitzItem item) {
+    public DatableRelation(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
     }
 
-    public String getFirst() {
-        return this.item.getVarAsString("first");
+    public Country getFirst() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("first")));
     }
 
-    public String getSecond() {
-        return this.item.getVarAsString("second");
+    public Country getSecond() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("second")));
     }
 
     public Date getStartDate() {

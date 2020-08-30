@@ -4,6 +4,8 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Losses;
 
 import java.util.ArrayList;
@@ -21,17 +23,20 @@ import java.util.stream.Stream;
 
 public class ActiveWar {
 
+    protected final Save save;
+
     protected final ClausewitzItem item;
 
-    private Map<String, WarParticipant> attackers;
+    private Map<Country, WarParticipant> attackers;
 
-    private Map<String, WarParticipant> defenders;
+    private Map<Country, WarParticipant> defenders;
 
     private SortedMap<Date, Map<WarHistoryAction, List<String>>> actionsHistory;
 
     private SortedMap<Date, List<Battle>> battles;
 
-    public ActiveWar(ClausewitzItem item) {
+    public ActiveWar(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
         refreshAttributes();
     }
@@ -44,6 +49,10 @@ public class ActiveWar {
         this.item.setVariable("name", name);
     }
 
+    public Date getStartDate() {
+        return this.actionsHistory.firstKey();
+    }
+
     public SortedMap<Date, Map<WarHistoryAction, List<String>>> getActionsHistory() {
         return actionsHistory;
     }
@@ -52,7 +61,7 @@ public class ActiveWar {
         return battles;
     }
 
-    public WarParticipant getAttacker(String attacker) {
+    public WarParticipant getAttacker(Country attacker) {
         if (this.attackers != null) {
             return this.attackers.get(attacker);
         }
@@ -60,7 +69,7 @@ public class ActiveWar {
         return null;
     }
 
-    public Map<String, WarParticipant> getAttackers() {
+    public Map<Country, WarParticipant> getAttackers() {
         return this.attackers == null ? new HashMap<>() : this.attackers;
     }
 
@@ -80,7 +89,7 @@ public class ActiveWar {
         return new EnumMap<>(Losses.class);
     }
 
-    public WarParticipant getDefender(String defender) {
+    public WarParticipant getDefender(Country defender) {
         if (this.defenders != null) {
             return this.defenders.get(defender);
         }
@@ -88,7 +97,7 @@ public class ActiveWar {
         return null;
     }
 
-    public Map<String, WarParticipant> getDefenders() {
+    public Map<Country, WarParticipant> getDefenders() {
         return this.defenders == null ? new HashMap<>() : this.defenders;
     }
 
@@ -172,6 +181,30 @@ public class ActiveWar {
         return this.item.getVarAsInt("stalled_years");
     }
 
+    public boolean isFinished() {
+        return false;
+    }
+
+    public Map<Country, WarParticipant> getSide(Country country) {
+        if (getAttacker(country) != null) {
+            return this.attackers;
+        } else if (getDefender(country) != null) {
+            return this.defenders;
+        } else {
+            return new HashMap<>();
+        }
+    }
+
+    public Map<Country, WarParticipant> getOtherSide(Country country) {
+        if (getAttacker(country) != null) {
+            return this.defenders;
+        } else if (getDefender(country) != null) {
+            return this.attackers;
+        } else {
+            return new HashMap<>();
+        }
+    }
+
     private void refreshAttributes() {
         List<ClausewitzItem> participantsItems = this.item.getChildren("participants");
         ClausewitzList attackersList = this.item.getList("attackers");
@@ -182,11 +215,13 @@ public class ActiveWar {
             this.defenders = new HashMap<>();
             participantsItems.forEach(participantsItem -> {
                 WarParticipant warParticipant = new WarParticipant(participantsItem);
+                Country country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
+                country.addWar(this);
 
                 if (attackersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
-                    this.attackers.put(ClausewitzUtils.removeQuotes(warParticipant.getTag()), warParticipant);
+                    this.attackers.put(country, warParticipant);
                 } else if (defendersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
-                    this.defenders.put(ClausewitzUtils.removeQuotes(warParticipant.getTag()), warParticipant);
+                    this.defenders.put(country, warParticipant);
                 }
             });
         }
@@ -205,10 +240,8 @@ public class ActiveWar {
                                for (WarHistoryAction action : WarHistoryAction.values()) {
                                    if (child.hasVar(action.name().toLowerCase())) {
                                        actions.merge(action,
-                                                     Collections.singletonList(child.getVarAsString(action.name()
-                                                                                                          .toLowerCase())),
-                                                     (strings, strings2) -> Stream.concat(strings.stream(), strings2.stream())
-                                                                                  .collect(Collectors.toList()));
+                                                     Collections.singletonList(child.getVarAsString(action.name().toLowerCase())),
+                                                     (strings, strings2) -> Stream.concat(strings.stream(), strings2.stream()).collect(Collectors.toList()));
                                    }
                                }
                            });
@@ -222,8 +255,7 @@ public class ActiveWar {
                                       .filter(child -> child.getChild("battle") != null)
                                       .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
                                                                 child -> Collections.singletonList(new Battle(child.getChild("battle"))),
-                                                                (a, b) -> Stream.concat(a.stream(), b.stream())
-                                                                                .collect(Collectors.toList()),
+                                                                (a, b) -> Stream.concat(a.stream(), b.stream()).collect(Collectors.toList()),
                                                                 TreeMap::new));
         }
     }

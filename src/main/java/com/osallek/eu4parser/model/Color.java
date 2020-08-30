@@ -1,4 +1,4 @@
-package com.osallek.eu4parser.model.save;
+package com.osallek.eu4parser.model;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;

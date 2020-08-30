@@ -3,7 +3,7 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import com.osallek.eu4parser.model.save.Color;
+import com.osallek.eu4parser.model.Color;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

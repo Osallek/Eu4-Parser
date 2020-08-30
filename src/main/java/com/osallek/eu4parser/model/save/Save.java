@@ -809,12 +809,12 @@ public class Save {
 
         List<ClausewitzItem> activeWarsItems = this.gamestateItem.getChildren("active_war");
         this.activeWars = activeWarsItems.stream()
-                                         .map(ActiveWar::new)
+                                         .map(item -> new ActiveWar(item, this))
                                          .collect(Collectors.toList());
 
         List<ClausewitzItem> previousWarsItems = this.gamestateItem.getChildren("previous_war");
         this.previousWars = previousWarsItems.stream()
-                                             .map(PreviousWar::new)
+                                             .map(item -> new PreviousWar(item, this))
                                              .collect(Collectors.toList());
 
         ClausewitzItem incomeStatisticsItem = this.gamestateItem.getChild("income_statistics");

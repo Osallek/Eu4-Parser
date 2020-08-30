@@ -8,23 +8,16 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.LuaUtils;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4parser.model.save.country.Country;
-import org.luaj.vm2.LuaDouble;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.luaj.vm2.LuaInteger;
-import org.luaj.vm2.LuaNumber;
-import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.ast.Chunk;
 import org.luaj.vm2.ast.Exp;
-import org.luaj.vm2.ast.Stat;
-import org.luaj.vm2.ast.TableConstructor;
-import org.luaj.vm2.ast.TableField;
-import org.luaj.vm2.parser.LuaParser;
 import org.luaj.vm2.parser.ParseException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -40,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -87,6 +81,12 @@ public class Game {
 
     private Map<Event, Path> events;
 
+    private Map<Government, Path> governments;
+
+    private Map<GovernmentName, Path> governmentNames;
+
+    private Map<Unit, Path> units;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -113,6 +113,8 @@ public class Game {
         readDecrees();
         readGoldenBulls();
         readEvents();
+        readGovernments();
+        readGovernmentNames();
     }
 
     public Collator getCollator() {
@@ -307,7 +309,7 @@ public class Game {
         return getReligionGroups().stream()
                                   .map(ReligionGroup::getReligions)
                                   .flatMap(Collection::stream)
-                                  .sorted(Comparator.comparing(Religion::getLocalizedName, collator))
+                                  .sorted(Comparator.comparing(Religion::getLocalizedName, this.collator))
                                   .collect(Collectors.toList());
     }
 
@@ -335,7 +337,7 @@ public class Game {
     public List<TradeGood> getTradeGoods() {
         return this.tradeGoods.keySet()
                               .stream()
-                              .sorted(Comparator.comparing(TradeGood::getLocalizedName, collator))
+                              .sorted(Comparator.comparing(TradeGood::getLocalizedName, this.collator))
                               .collect(Collectors.toList());
     }
 
@@ -432,7 +434,7 @@ public class Game {
     public List<Event> getEvents() {
         return this.events.keySet()
                           .stream()
-                          .sorted(Comparator.comparing(Event::getLocalizedName, collator))
+                          .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
                           .collect(Collectors.toList());
     }
 
@@ -440,7 +442,7 @@ public class Game {
         return this.events.keySet()
                           .stream()
                           .filter(Event::fireOnlyOnce)
-                          .sorted(Comparator.comparing(Event::getLocalizedName, collator))
+                          .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
                           .collect(Collectors.toList());
     }
 
@@ -462,6 +464,45 @@ public class Game {
         return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_GOV_RANK").value).v;
     }
 
+    public List<Government> getGovernments() {
+        return this.governments.keySet()
+                               .stream()
+                               .sorted(Comparator.comparing(Government::getLocalizedName, this.collator))
+                               .collect(Collectors.toList());
+    }
+
+    public Government getGovernment(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Government government : this.governments.keySet()) {
+            if (government.getName().equals(name)) {
+                return government;
+            }
+        }
+
+        return null;
+    }
+
+    public Set<GovernmentName> getGovernmentNames() {
+        return this.governmentNames.keySet();
+    }
+
+    public GovernmentName getGovernmentName(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        for (GovernmentName governmentName : this.governmentNames.keySet()) {
+            if (governmentName.getName().equals(name)) {
+                return governmentName;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -470,8 +511,7 @@ public class Game {
         File localisationFolder = new File(this.localisationFolderPath);
 
         if (localisationFolder.canRead()) {
-            File[] files = localisationFolder.listFiles((dir, fileName) -> fileName.endsWith(
-                    eu4Language.fileEndWith + ".yml"));
+            File[] files = localisationFolder.listFiles((dir, fileName) -> fileName.endsWith(eu4Language.fileEndWith + ".yml"));
             if (files != null) {
                 this.localisations = new HashMap<>();
 
@@ -607,9 +647,7 @@ public class Game {
                 List<ClausewitzList> lists = continentsItem.getListsNot("island_check_provinces");
                 for (int i = 0; i < lists.size(); i++) {
                     int finalI = i;
-                    lists.get(i)
-                         .getValuesAsInt()
-                         .forEach(provinceId -> this.getProvince(provinceId).setContinent(finalI));
+                    lists.get(i).getValuesAsInt().forEach(provinceId -> this.getProvince(provinceId).setContinent(finalI));
                 }
             }
 
@@ -672,8 +710,7 @@ public class Game {
                  });
             this.cultureGroups.values().forEach(groups -> groups.forEach(cultureGroup -> {
                 cultureGroup.setLocalizedName(this.getLocalisation(cultureGroup.getName()));
-                cultureGroup.getCultures()
-                            .forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
+                cultureGroup.getCultures().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
             }));
         } catch (IOException e) {
         }
@@ -695,8 +732,7 @@ public class Game {
                  });
             this.religionGroups.values().forEach(groups -> groups.forEach(religionGroup -> {
                 religionGroup.setLocalizedName(this.getLocalisation(religionGroup.getName()));
-                religionGroup.getReligions()
-                             .forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
+                religionGroup.getReligions().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
             }));
         } catch (IOException e) {
         }
@@ -735,8 +771,7 @@ public class Game {
                      ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      tradeGoodsItem.getChildren()
                                    .forEach(tradeGoodItem -> this.tradeGoods.put(new TradeGood(tradeGoodItem),
-                                                                                 new AbstractMap.SimpleEntry<>(path,
-                                                                                                               null)));
+                                                                                 new AbstractMap.SimpleEntry<>(path, null)));
                  });
         } catch (IOException e) {
         }
@@ -800,14 +835,11 @@ public class Game {
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
                      ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     imperialReformsItem.getChildren()
-                                        .forEach(
-                                                item -> this.imperialReforms.put(new ImperialReform(item, this), path));
+                     imperialReformsItem.getChildren().forEach(item -> this.imperialReforms.put(new ImperialReform(item, this), path));
                  });
 
             this.imperialReforms.keySet()
-                                .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(
-                                        imperialReform.getName() + "_title")));
+                                .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
         } catch (IOException e) {
         }
     }
@@ -821,13 +853,10 @@ public class Game {
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
                      ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     decreesItem.getChildren()
-                                .forEach(item -> this.decrees.put(new Decree(item), path));
+                     decreesItem.getChildren().forEach(item -> this.decrees.put(new Decree(item), path));
                  });
 
-            this.decrees.keySet()
-                        .forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(
-                                saveDecree.getName() + "_title")));
+            this.decrees.keySet().forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(saveDecree.getName() + "_title")));
         } catch (IOException e) {
         }
     }
@@ -841,8 +870,7 @@ public class Game {
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
                      ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     goldenBullsItem.getChildren()
-                                    .forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
+                     goldenBullsItem.getChildren().forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
                  });
 
             this.goldenBulls.keySet()
@@ -861,13 +889,60 @@ public class Game {
                  .parallel()
                  .forEach(path -> {
                      ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     eventsItem.getChildren()
-                               .forEach(item -> this.events.put(new Event(item), path));
+                     eventsItem.getChildren().forEach(item -> this.events.put(new Event(item), path));
                  });
 
             this.events.keySet()
                        .parallelStream()
                        .forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readGovernments() {
+        File eventsFolder = new File(this.commonFolderPath + File.separator + "governments");
+
+        try (Stream<Path> paths = Files.walk(eventsFolder.toPath())) {
+            this.governments = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item), path));
+                 });
+
+            this.governments.keySet().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readGovernmentNames() {
+        File govnmentNamesFolder = new File(this.commonFolderPath + File.separator + "government_names");
+
+        try (Stream<Path> paths = Files.walk(govnmentNamesFolder.toPath())) {
+            this.governmentNames = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     governmentsItem.getChildren().forEach(item -> this.governmentNames.put(new GovernmentName(item, this), path));
+                 });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readUnits() {
+        File unitsFolder = new File(this.commonFolderPath + File.separator + "units");
+
+        try (Stream<Path> paths = Files.walk(unitsFolder.toPath())) {
+            this.units = new HashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
+                     unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
+                     unitItem.getChildren().forEach(item -> this.units.put(new Unit(item, this::getLocalisation), path));
+                 });
         } catch (IOException e) {
         }
     }

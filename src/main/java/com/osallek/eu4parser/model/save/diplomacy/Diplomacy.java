@@ -1,10 +1,10 @@
 package com.osallek.eu4parser.model.save.diplomacy;
 
-import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
+import org.apache.commons.lang3.time.DateUtils;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,23 +51,21 @@ public class Diplomacy {
         return dependencies;
     }
 
-    public void addDependency(String first, String second, Date startDate, SubjectType subjectType) {
-        if (this.save.getCountry(ClausewitzUtils.removeQuotes(second)).getOverlord() == null) {
-            Dependency.addToItem(this.item, first, second, startDate, subjectType);
-            this.save.getCountry(ClausewitzUtils.removeQuotes(first)).addSubject(ClausewitzUtils.removeQuotes(second));
-            this.save.getCountry(ClausewitzUtils.removeQuotes(second)).setOverlord(ClausewitzUtils.removeQuotes(first));
+    public void addDependency(Country first, Country second, Date startDate, SubjectType subjectType) {
+        if (second.getOverlord() == null) {
+            Dependency.addToItem(this.item, first.getTag(), second.getTag(), startDate, subjectType);
+            first.addSubject(second);
+            second.setOverlord(first);
             refreshAttributes();
         }
     }
 
-    public void removeDependency(String first, String second) {
+    public void removeDependency(Country first, Country second) {
         for (int i = 0; i < this.dependencies.size(); i++) {
             Dependency dependency = this.dependencies.get(i);
-            if (dependency.getFirst().equals(ClausewitzUtils.addQuotes(first)) && dependency.getSecond()
-                                                                                            .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                         .removeSubject(ClausewitzUtils.removeQuotes(second));
-                this.save.getCountry(ClausewitzUtils.removeQuotes(second)).removeOverlord();
+            if (dependency.getFirst().equals(first) && dependency.getSecond().equals(second)) {
+                first.removeSubject(second);
+                second.removeOverlord();
                 this.item.removeChild("dependency", i);
                 break;
             }
@@ -80,22 +78,20 @@ public class Diplomacy {
         return alliances;
     }
 
-    public void addAlliance(String first, String second, Date startDate) {
-        DatableRelation.addToItem(this.item, "alliance", first, second, startDate);
-        this.save.getCountry(ClausewitzUtils.removeQuotes(first)).addAlly(ClausewitzUtils.removeQuotes(second));
-        this.save.getCountry(ClausewitzUtils.removeQuotes(second)).addAlly(ClausewitzUtils.removeQuotes(first));
+    public void addAlliance(Country first, Country second, Date startDate) {
+        DatableRelation.addToItem(this.item, "alliance", first.getTag(), second.getTag(), startDate);
+        first.addAlly(second);
+        second.addAlly(first);
         refreshAttributes();
     }
 
-    public void removeAlliance(String first, String second) {
+    public void removeAlliance(Country first, Country second) {
         for (int i = 0; i < this.alliances.size(); i++) {
             DatableRelation alliance = this.alliances.get(i);
-            if (alliance.getFirst().equals(ClausewitzUtils.addQuotes(first)) && alliance.getSecond()
-                                                                                        .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                         .removeAlly(ClausewitzUtils.removeQuotes(second));
-                this.save.getCountry(ClausewitzUtils.removeQuotes(second))
-                         .removeAlly(ClausewitzUtils.removeQuotes(first));
+            if ((alliance.getFirst().equals(first) && alliance.getSecond().equals(second))
+                || (alliance.getFirst().equals(second) && alliance.getSecond().equals(first))) {
+                first.removeAlly(second);
+                second.removeAlly(first);
                 this.item.removeChild("alliance", i);
                 break;
             }
@@ -108,19 +104,17 @@ public class Diplomacy {
         return guarantees;
     }
 
-    public void addGuarantee(String first, String second, Date startDate) {
-        DatableRelation.addToItem(this.item, "guarantee", first, second, startDate);
-        this.save.getCountry(ClausewitzUtils.removeQuotes(first)).addGuarantee(ClausewitzUtils.removeQuotes(second));
+    public void addGuarantee(Country first, Country second, Date startDate) {
+        DatableRelation.addToItem(this.item, "guarantee", first.getTag(), second.getTag(), startDate);
+        first.addGuarantee(second);
         refreshAttributes();
     }
 
-    public void removeGuarantee(String first, String second) {
+    public void removeGuarantee(Country first, Country second) {
         for (int i = 0; i < this.guarantees.size(); i++) {
             DatableRelation guarantee = this.guarantees.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                         .removeGuarantee(ClausewitzUtils.removeQuotes(second));
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+                first.removeGuarantee(second);
                 this.item.removeChild("guarantee", i);
                 break;
             }
@@ -133,19 +127,15 @@ public class Diplomacy {
         return knowledgeSharing;
     }
 
-    public void addKnowledgeSharing(String first, String second, Date startDate) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startDate);
-        calendar.add(Calendar.YEAR, 10);
-        KnowledgeSharing.addToItem(this.item, first, second, startDate, calendar.getTime(), false);
+    public void addKnowledgeSharing(Country first, Country second, Date startDate) {
+        KnowledgeSharing.addToItem(this.item, first.getTag(), second.getTag(), startDate, DateUtils.addYears(startDate, 10), false);
         refreshAttributes();
     }
 
-    public void removeKnowledgeSharing(String first, String second) {
+    public void removeKnowledgeSharing(Country first, Country second) {
         for (int i = 0; i < this.knowledgeSharing.size(); i++) {
             DatableRelation guarantee = this.knowledgeSharing.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("knowledge_sharing", i);
                 break;
             }
@@ -158,16 +148,15 @@ public class Diplomacy {
         return subsidies;
     }
 
-    public void addSubsidies(String first, String second, Date startDate, double amount, int duration) {
-        Subsidies.addToItem(this.item, first, second, startDate, amount, duration);
+    public void addSubsidies(Country first, Country second, Date startDate, double amount, int duration) {
+        Subsidies.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, duration);
         refreshAttributes();
     }
 
-    public void removeSubsidies(String first, String second) {
+    public void removeSubsidies(Country first, Country second) {
         for (int i = 0; i < this.subsidies.size(); i++) {
             DatableRelation guarantee = this.subsidies.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("subsidies", i);
                 break;
             }
@@ -180,20 +169,20 @@ public class Diplomacy {
         return royalMarriage;
     }
 
-    public void addRoyalMarriage(String first, String second, Date startDate) {
-        DatableRelation.addToItem(this.item, "royal_marriage", first, second, startDate);
-        this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                 .addRoyalMarriage(ClausewitzUtils.removeQuotes(second));
+    public void addRoyalMarriage(Country first, Country second, Date startDate) {
+        DatableRelation.addToItem(this.item, "royal_marriage", first.getTag(), second.getTag(), startDate);
+        first.addRoyalMarriage(second);
+        second.addRoyalMarriage(first);
         refreshAttributes();
     }
 
-    public void removeRoyalMarriage(String first, String second) {
+    public void removeRoyalMarriage(Country first, Country second) {
         for (int i = 0; i < this.royalMarriage.size(); i++) {
             DatableRelation guarantee = this.royalMarriage.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                         .removeRoyalMarriage(ClausewitzUtils.removeQuotes(second));
+            if ((guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second))
+                || (guarantee.getFirst().equals(second) && guarantee.getSecond().equals(first))) {
+                first.removeRoyalMarriage(second);
+                second.removeRoyalMarriage(first);
                 this.item.removeChild("royal_marriage", i);
                 break;
             }
@@ -206,16 +195,15 @@ public class Diplomacy {
         return militaryAccesses;
     }
 
-    public void addMilitaryAccess(String first, String second, Date startDate, boolean enforcePeace) {
-        MilitaryAccess.addToItem(this.item, "military_access", first, second, startDate, enforcePeace);
+    public void addMilitaryAccess(Country first, Country second, Date startDate, boolean enforcePeace) {
+        MilitaryAccess.addToItem(this.item, "military_access", first.getTag(), second.getTag(), startDate, enforcePeace);
         refreshAttributes();
     }
 
-    public void removeMilitaryAccess(String first, String second) {
+    public void removeMilitaryAccess(Country first, Country second) {
         for (int i = 0; i < this.militaryAccesses.size(); i++) {
             DatableRelation guarantee = this.militaryAccesses.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("military_access", i);
                 break;
             }
@@ -228,16 +216,15 @@ public class Diplomacy {
         return fleetAccesses;
     }
 
-    public void addFleetAccess(String first, String second, Date startDate, boolean enforcePeace) {
-        MilitaryAccess.addToItem(this.item, "fleet_access", first, second, startDate, enforcePeace);
+    public void addFleetAccess(Country first, Country second, Date startDate, boolean enforcePeace) {
+        MilitaryAccess.addToItem(this.item, "fleet_access", first.getTag(), second.getTag(), startDate, enforcePeace);
         refreshAttributes();
     }
 
-    public void removeFleetAccess(String first, String second) {
+    public void removeFleetAccess(Country first, Country second) {
         for (int i = 0; i < this.fleetAccesses.size(); i++) {
             DatableRelation guarantee = this.fleetAccesses.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("fleet_access", i);
                 break;
             }
@@ -250,17 +237,15 @@ public class Diplomacy {
         return casusBellis;
     }
 
-    public void addCasusBelli(String first, String second, Date startDate, Date endDate, String type) {
-        CasusBelli.addToItem(this.item, first, second, startDate, endDate, type);
+    public void addCasusBelli(Country first, Country second, Date startDate, Date endDate, String type) {
+        CasusBelli.addToItem(this.item, first.getTag(), second.getTag(), startDate, endDate, type);
         refreshAttributes();
     }
 
-    public void removeCasusBelli(String first, String second, String type) {
+    public void removeCasusBelli(Country first, Country second, String type) {
         for (int i = 0; i < this.casusBellis.size(); i++) {
             CasusBelli casusBelli = this.casusBellis.get(i);
-            if (casusBelli.getFirst().equals(ClausewitzUtils.addQuotes(first))
-                && casusBelli.getSecond().equals(ClausewitzUtils.addQuotes(second))
-                && casusBelli.getType().equalsIgnoreCase(type)) {
+            if (casusBelli.getFirst().equals(first) && casusBelli.getSecond().equals(second) && casusBelli.getType().equalsIgnoreCase(type)) {
                 this.item.removeChild("casus_belli", i);
                 break;
             }
@@ -273,20 +258,17 @@ public class Diplomacy {
         return supportIndependence;
     }
 
-    public void addSupportIndependence(String first, String second, Date startDate) {
-        DatableRelation.addToItem(this.item, "support_independence", first, second, startDate);
-        this.save.getCountry(ClausewitzUtils.removeQuotes(second))
-                 .addIndependenceSupportedBy(ClausewitzUtils.removeQuotes(first));
+    public void addSupportIndependence(Country first, Country second, Date startDate) {
+        DatableRelation.addToItem(this.item, "support_independence", first.getTag(), second.getTag(), startDate);
+        second.addIndependenceSupportedBy(first);
         refreshAttributes();
     }
 
-    public void removeSupportIndependence(String first, String second) {
+    public void removeSupportIndependence(Country first, Country second) {
         for (int i = 0; i < this.supportIndependence.size(); i++) {
             DatableRelation guarantee = this.supportIndependence.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(second))
-                         .removeIndependenceSupportedBy(ClausewitzUtils.removeQuotes(first));
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+                second.removeIndependenceSupportedBy(first);
                 this.item.removeChild("support_independence", i);
                 break;
             }
@@ -299,26 +281,21 @@ public class Diplomacy {
         return transferTradePowers;
     }
 
-    public void addTransferTradePower(String first, String second, Date startDate, double amount, boolean isEnforced) {
-        if (this.save.getCountry(ClausewitzUtils.removeQuotes(second)).getTransferTradePowerTo().isEmpty()) {
-            TransferTradePower.addToItem(this.item, first, second, startDate, amount, isEnforced);
-            this.save.getCountry(ClausewitzUtils.removeQuotes(second))
-                     .addTransferTradePowerTo(ClausewitzUtils.removeQuotes(first));
-            this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                     .addTransferTradePowerFrom(ClausewitzUtils.removeQuotes(second));
+    public void addTransferTradePower(Country first, Country second, Date startDate, double amount, boolean isEnforced) {
+        if (second.getTransferTradePowerTo().isEmpty()) {
+            TransferTradePower.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, isEnforced);
+            second.addTransferTradePowerTo(first);
+            first.addTransferTradePowerFrom(second);
             refreshAttributes();
         }
     }
 
-    public void removeTransferTradePower(String first, String second) {
+    public void removeTransferTradePower(Country first, Country second) {
         for (int i = 0; i < this.transferTradePowers.size(); i++) {
             DatableRelation guarantee = this.transferTradePowers.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(second))
-                         .removeTransferTradePowerTo(ClausewitzUtils.removeQuotes(first));
-                this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                         .removeTransferTradePowerFrom(ClausewitzUtils.removeQuotes(second));
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+                second.removeTransferTradePowerTo(first);
+                first.removeTransferTradePowerFrom(second);
                 this.item.removeChild("transfer_trade_power", i);
                 break;
             }
@@ -331,20 +308,17 @@ public class Diplomacy {
         return warReparations;
     }
 
-    public void addWarReparations(String first, String second, Date startDate, Date endDate) {
-        EndDatableRelation.addToItem(this.item, "war_reparations", first, second, startDate, endDate);
-        this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                 .addWarReparations(ClausewitzUtils.removeQuotes(second));
+    public void addWarReparations(Country first, Country second, Date startDate, Date endDate) {
+        EndDatableRelation.addToItem(this.item, "war_reparations", first.getTag(), second.getTag(), startDate, endDate);
+        first.addWarReparations(second);
         refreshAttributes();
     }
 
-    public void removeWarReparations(String first, String second) {
+    public void removeWarReparations(Country first, Country second) {
         for (int i = 0; i < this.warReparations.size(); i++) {
             DatableRelation guarantee = this.warReparations.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                         .removeWarReparations(ClausewitzUtils.removeQuotes(second));
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+                first.removeWarReparations(second);
                 this.item.removeChild("war_reparations", i);
                 break;
             }
@@ -358,19 +332,17 @@ public class Diplomacy {
     }
 
 
-    public void addWarning(String first, String second, Date startDate) {
-        DatableRelation.addToItem(this.item, "warning", first, second, startDate);
-        this.save.getCountry(ClausewitzUtils.removeQuotes(first)).addWarning(ClausewitzUtils.removeQuotes(second));
+    public void addWarning(Country first, Country second, Date startDate) {
+        DatableRelation.addToItem(this.item, "warning", first.getTag(), second.getTag(), startDate);
+        first.addWarning(second);
         refreshAttributes();
     }
 
-    public void removeWarning(String first, String second) {
+    public void removeWarning(Country first, Country second) {
         for (int i = 0; i < this.warnings.size(); i++) {
             DatableRelation guarantee = this.warnings.get(i);
-            if (guarantee.getFirst().equals(ClausewitzUtils.addQuotes(first)) && guarantee.getSecond()
-                                                                                          .equals(ClausewitzUtils.addQuotes(second))) {
-                this.save.getCountry(ClausewitzUtils.removeQuotes(first))
-                         .removeWarning(ClausewitzUtils.removeQuotes(second));
+            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+                first.removeWarning(second);
                 this.item.removeChild("warning", i);
                 break;
             }
@@ -387,12 +359,12 @@ public class Diplomacy {
 
         this.alliances = this.item.getChildren("alliance")
                                   .stream()
-                                  .map(DatableRelation::new)
+                                  .map(item1 -> new DatableRelation(item1, save))
                                   .collect(Collectors.toList());
 
         this.guarantees = this.item.getChildren("guarantee")
                                    .stream()
-                                   .map(DatableRelation::new)
+                                   .map(item1 -> new DatableRelation(item1, save))
                                    .collect(Collectors.toList());
 
         this.knowledgeSharing = this.item.getChildren("knowledge_sharing")
@@ -407,7 +379,7 @@ public class Diplomacy {
 
         this.royalMarriage = this.item.getChildren("royal_marriage")
                                       .stream()
-                                      .map(DatableRelation::new)
+                                      .map(item1 -> new DatableRelation(item1, save))
                                       .collect(Collectors.toList());
 
         this.militaryAccesses = this.item.getChildren("military_access")
@@ -427,7 +399,7 @@ public class Diplomacy {
 
         this.supportIndependence = this.item.getChildren("support_independence")
                                             .stream()
-                                            .map(DatableRelation::new)
+                                            .map(item1 -> new DatableRelation(item1, save))
                                             .collect(Collectors.toList());
 
         this.transferTradePowers = this.item.getChildren("transfer_trade_power")
@@ -442,7 +414,7 @@ public class Diplomacy {
 
         this.warnings = this.item.getChildren("warning")
                                  .stream()
-                                 .map(DatableRelation::new)
+                                 .map(item1 -> new DatableRelation(item1, save))
                                  .collect(Collectors.toList());
     }
 }

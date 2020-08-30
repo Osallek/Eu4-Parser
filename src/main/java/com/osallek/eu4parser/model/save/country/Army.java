@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Id;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,11 +13,17 @@ public class Army extends AbstractArmy {
     //			type=54
     //		}
 
+    private Id mercenaryCompany;
+
     private List<Regiment> regiments;
 
     public Army(ClausewitzItem item, Country country) {
         super(item, country);
         refreshAttributes();
+    }
+
+    public Id getMercenaryCompany() {
+        return mercenaryCompany;
     }
 
     public List<Regiment> getRegiments() {
@@ -94,6 +101,11 @@ public class Army extends AbstractArmy {
     @Override
     protected void refreshAttributes() {
         super.refreshAttributes();
+
+        ClausewitzItem child = this.item.getChild("mercenary_company");
+        if (child != null) {
+            this.mercenaryCompany = new Id(child);
+        }
 
         List<ClausewitzItem> regimentsItems = this.item.getChildren("regiment");
         this.regiments = regimentsItems.stream()

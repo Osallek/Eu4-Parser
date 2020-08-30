@@ -5,10 +5,13 @@ import com.osallek.eu4parser.model.game.Building;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public final class Eu4Utils {
 
@@ -73,6 +76,23 @@ public final class Eu4Utils {
         } catch (ParseException e) {
             return null;
         }
+    }
+
+    @SafeVarargs
+    public static <K, V> Map<K, V> mergeMaps(Map<K, V>... maps) {
+        Map<K, V> map = null;
+
+        for (Map<K, V> kvMap : maps) {
+            if (kvMap != null) {
+                if (map == null) {
+                    map = kvMap;
+                } else {
+                    map.putAll(kvMap);
+                }
+            }
+        }
+
+        return map;
     }
 
     public static List<List<Building>> buildingsTree(List<Building> buildings) {

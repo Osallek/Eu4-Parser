@@ -4,7 +4,9 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
@@ -14,6 +16,9 @@ import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.Advisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import com.osallek.eu4parser.model.save.war.ActiveWar;
+import org.apache.commons.lang3.StringUtils;
+import org.luaj.vm2.ast.Str;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -28,8 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -45,7 +53,7 @@ public class Country {
     // seat_in_parliament (back=yes vs back=2)
 
     //Todo
-    // Political rank max/min from define.lua
+    // mercenary_company
 
     public static final Pattern CUSTOM_COUNTRY_PATTERN = Pattern.compile("D[0-9]{2}");
     public static final Pattern COLONY_PATTERN = Pattern.compile("C[0-9]{2}");
@@ -57,6 +65,8 @@ public class Country {
     private Save save;
 
     private boolean isPlayable;
+
+    private GovernmentName governmentName;
 
     private String localizedName;
 
@@ -155,6 +165,8 @@ public class Country {
     private SortedMap<Integer, Integer> inflationStatistics;
 
     private List<TradeCompany> tradeCompanies;
+
+    private final SortedSet<ActiveWar> wars = new TreeSet<>(Comparator.comparing(ActiveWar::getStartDate));
 
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
@@ -296,14 +308,35 @@ public class Country {
         this.item.setVariable("government_rank", governmentRank);
     }
 
-    public String getGovernmentName() {
-        return this.item.getVarAsString("government_name");
+    public void setGovernmentRank(String governmentRank) {
+        Integer rank = null;
+
+        if (this.governmentName != null) {
+            rank = this.governmentName.getRanks()
+                                      .entrySet()
+                                      .stream()
+                                      .filter(entry -> entry.getValue().getKey().equals(governmentRank))
+                                      .findFirst()
+                                      .map(Map.Entry::getKey)
+                                      .orElse(null);
+        }
+
+        if (rank != null) {
+            setGovernmentRank(rank);
+        }
     }
 
-    public void setGovernmentName(String governmentName) {
-        governmentName = ClausewitzUtils.addQuotes(governmentName);
+    public GovernmentName getGovernmentName() {
+        return this.governmentName;
+    }
 
-        this.item.setVariable("government_name", governmentName);
+    //Fixme compute the value
+    public void setGovernmentName(GovernmentName governmentName) {
+        this.governmentName = governmentName;
+    }
+
+    public String getGovernmentLocalizedName() {
+        return this.governmentName == null ? null : this.governmentName.getRank(getGovernmentRank()).getValue();
     }
 
     public Integer getSubjectFocus() {
@@ -715,7 +748,7 @@ public class Country {
         return this.item.getVarAsInt("num_of_war_reparations");
     }
 
-    public void addWarReparations(String country) {
+    public void addWarReparations(Country country) {
         Integer nbWarReparations = getNumOfWarReparations();
 
         if (nbWarReparations == null) {
@@ -725,7 +758,7 @@ public class Country {
         this.item.setVariable("num_of_war_reparations", nbWarReparations + 1);
     }
 
-    public void removeWarReparations(String country) {
+    public void removeWarReparations(Country country) {
         Integer nbWarReparations = getNumOfWarReparations();
 
         if (nbWarReparations == null) {
@@ -992,7 +1025,7 @@ public class Country {
         return this.item.getVarAsInt("num_of_royal_marriages");
     }
 
-    public void addRoyalMarriage(String country) {
+    public void addRoyalMarriage(Country country) {
         Integer nbRoyalMarriages = getNumOfRoyalMarriages();
 
         if (nbRoyalMarriages == null) {
@@ -1002,7 +1035,7 @@ public class Country {
         this.item.setVariable("num_of_royal_marriages", nbRoyalMarriages + 1);
     }
 
-    public void removeRoyalMarriage(String country) {
+    public void removeRoyalMarriage(Country country) {
         Integer nbRoyalMarriages = getNumOfRoyalMarriages();
 
         if (nbRoyalMarriages == null) {
@@ -1202,93 +1235,93 @@ public class Country {
                     .collect(Collectors.toMap(var -> Integer.parseInt(var.getName()), ClausewitzVariable::getAsDouble));
     }
 
-    public List<Integer> getBorderProvinces() {
+    public List<SaveProvince> getBorderProvinces() {
         ClausewitzList list = this.item.getList("border_provinces");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt();
+        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
     }
 
-    public List<String> getNeighbours() {
+    public List<Country> getNeighbours() {
         ClausewitzList list = this.item.getList("neighbours");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getHomeNeighbours() {
+    public List<Country> getHomeNeighbours() {
         ClausewitzList list = this.item.getList("home_neighbours");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getCoreNeighbours() {
+    public List<Country> getCoreNeighbours() {
         ClausewitzList list = this.item.getList("core_neighbours");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getCurrentAtWarWith() {
+    public List<Country> getCurrentAtWarWith() {
         ClausewitzList list = this.item.getList("current_at_war_with");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getCurrentWarAllies() {
+    public List<Country> getCurrentWarAllies() {
         ClausewitzList list = this.item.getList("current_war_allies");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getCallToArmsFriends() {
+    public List<Country> getCallToArmsFriends() {
         ClausewitzList list = this.item.getList("call_to_arms_friends");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getAllies() {
+    public List<Country> getAllies() {
         ClausewitzList list = this.item.getList("allies");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public void addAlly(String ally) {
+    public void addAlly(Country ally) {
         ClausewitzList list = this.item.getList("allies");
 
         if (list == null) {
-            this.item.addList("allies", ally);
+            this.item.addList("allies", ally.getTag());
         } else {
-            list.add(ally);
+            list.add(ally.getTag());
         }
 
         Integer nbAllies = getNumOfAllies();
@@ -1300,11 +1333,11 @@ public class Country {
         this.item.setVariable("num_of_allies", nbAllies + 1);
     }
 
-    public void removeAlly(String ally) {
+    public void removeAlly(Country ally) {
         ClausewitzList list = this.item.getList("allies");
 
         if (list != null) {
-            list.remove(ally);
+            list.remove(ally.getTag());
 
             Integer nbAllies = getNumOfAllies();
 
@@ -1316,24 +1349,23 @@ public class Country {
         }
     }
 
-    public List<String> getSubjects() {
+    public List<Country> getSubjects() {
         ClausewitzList list = this.item.getList("subjects");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public void addSubject(String subject) {
+    public void addSubject(Country subject) {
         ClausewitzList list = this.item.getList("subjects");
-        subject = ClausewitzUtils.removeQuotes(subject);
 
         if (list == null) {
-            this.item.addList("subjects", subject);
+            this.item.addList("subjects", subject.getTag());
         } else {
-            list.add(subject);
+            list.add(subject.getTag());
         }
 
         Integer nbSubjects = getNumOfSubjects();
@@ -1345,11 +1377,11 @@ public class Country {
         this.item.setVariable("num_of_subjects", nbSubjects + 1);
     }
 
-    public void removeSubject(String subject) {
+    public void removeSubject(Country subject) {
         ClausewitzList list = this.item.getList("subjects");
 
         if (list != null) {
-            list.remove(ClausewitzUtils.removeQuotes(subject));
+            list.remove(subject.getTag());
 
             Integer nbSubjects = getNumOfSubjects();
 
@@ -1361,49 +1393,48 @@ public class Country {
         }
     }
 
-    public List<String> getIndependenceSupportedBy() {
+    public List<Country> getIndependenceSupportedBy() {
         ClausewitzList list = this.item.getList("support_independence");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
 
-    public void addIndependenceSupportedBy(String supporter) {
+    public void addIndependenceSupportedBy(Country supporter) {
         ClausewitzList list = this.item.getList("support_independence");
-        supporter = ClausewitzUtils.removeQuotes(supporter);
 
         if (list == null) {
-            this.item.addList("support_independence", supporter);
+            this.item.addList("support_independence", supporter.getTag());
         } else {
-            list.add(supporter);
+            list.add(supporter.getTag());
         }
     }
 
-    public void removeIndependenceSupportedBy(String supporter) {
+    public void removeIndependenceSupportedBy(Country supporter) {
         ClausewitzList list = this.item.getList("support_independence");
 
         if (list != null) {
-            list.remove(ClausewitzUtils.removeQuotes(supporter));
+            list.remove(supporter.getTag());
         }
     }
 
-    public List<String> getGuarantees() {
+    public List<Country> getGuarantees() {
         ClausewitzList list = this.item.getList("guarantees");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public void addGuarantee(String guarantee) {
+    public void addGuarantee(Country country) {
         ClausewitzList list = this.item.getList("guarantees");
-        guarantee = ClausewitzUtils.removeQuotes(guarantee);
+        String guarantee = country.getTag();
 
         if (list == null) {
             this.item.addList("guarantees", guarantee);
@@ -1412,28 +1443,28 @@ public class Country {
         }
     }
 
-    public void removeGuarantee(String guarantee) {
+    public void removeGuarantee(Country guarantee) {
         ClausewitzList list = this.item.getList("guarantees");
 
         if (list != null) {
-            list.remove(ClausewitzUtils.removeQuotes(guarantee));
+            list.remove(guarantee.getTag());
         }
     }
 
-    public List<String> getWarnings() {
+    public List<Country> getWarnings() {
         ClausewitzList list = this.item.getList("warnings");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
 
-    public void addWarning(String warning) {
+    public void addWarning(Country country) {
         ClausewitzList list = this.item.getList("warnings");
-        warning = ClausewitzUtils.removeQuotes(warning);
+        String warning = ClausewitzUtils.removeQuotes(country.getTag());
 
         if (list == null) {
             this.item.addList("warnings", warning);
@@ -1442,100 +1473,98 @@ public class Country {
         }
     }
 
-    public void removeWarning(String warning) {
+    public void removeWarning(Country warning) {
         ClausewitzList list = this.item.getList("warnings");
 
         if (list != null) {
-            list.remove(ClausewitzUtils.removeQuotes(warning));
+            list.remove(ClausewitzUtils.removeQuotes(warning.getTag()));
         }
     }
 
-    public List<String> getCondottieriClient() {
+    public List<Country> getCondottieriClient() {
         ClausewitzList list = this.item.getList("condottieri_client");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getTradeEmbargoedBy() {
+    public List<Country> getTradeEmbargoedBy() {
         ClausewitzList list = this.item.getList("trade_embargoed_by");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getTradeEmbargoes() {
+    public List<Country> getTradeEmbargoes() {
         ClausewitzList list = this.item.getList("trade_embargoes");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public List<String> getTransferTradePowerFrom() {
+    public List<Country> getTransferTradePowerFrom() {
         ClausewitzList list = this.item.getList("transfer_trade_power_from");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
-    public void addTransferTradePowerFrom(String country) {
+    public void addTransferTradePowerFrom(Country country) {
         ClausewitzList list = this.item.getList("transfer_trade_power_from");
-        country = ClausewitzUtils.removeQuotes(country);
 
         if (list == null) {
-            this.item.addList("transfer_trade_power_from", country);
+            this.item.addList("transfer_trade_power_from", country.getTag());
         } else {
-            list.add(country);
+            list.add(country.getTag());
         }
     }
 
-    public void removeTransferTradePowerFrom(String country) {
+    public void removeTransferTradePowerFrom(Country country) {
         ClausewitzList list = this.item.getList("transfer_trade_power_from");
 
         if (list != null) {
-            list.remove(ClausewitzUtils.removeQuotes(country));
+            list.remove(country.getTag());
         }
     }
 
-    public List<String> getTransferTradePowerTo() {
+    public List<Country> getTransferTradePowerTo() {
         ClausewitzList list = this.item.getList("ransfer_trade_power_to");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
     }
 
 
-    public void addTransferTradePowerTo(String country) {
+    public void addTransferTradePowerTo(Country country) {
         ClausewitzList list = this.item.getList("ransfer_trade_power_to");
-        country = ClausewitzUtils.removeQuotes(country);
 
         if (list == null) {
-            this.item.addList("ransfer_trade_power_to", country);
+            this.item.addList("ransfer_trade_power_to", country.getTag());
         } else {
-            list.add(country);
+            list.add(country.getTag());
         }
     }
 
-    public void removeTransferTradePowerTo(String country) {
+    public void removeTransferTradePowerTo(Country country) {
         ClausewitzList list = this.item.getList("ransfer_trade_power_to");
 
         if (list != null) {
-            list.remove(ClausewitzUtils.removeQuotes(country));
+            list.remove(country.getTag());
         }
     }
 
@@ -1754,31 +1783,31 @@ public class Country {
         return list.getValuesAsInt();
     }
 
-    public List<Integer> getOwnedProvinces() {
+    public List<SaveProvince> getOwnedProvinces() {
         ClausewitzList list = this.item.getList("owned_provinces");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt();
+        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
     }
 
-    public void addOwnedProvince(int provinceId) {
+    public void addOwnedProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("owned_provinces");
 
-        if (!list.contains(provinceId)) {
-            list.add(provinceId);
+        if (!list.contains(province.getId())) {
+            list.add(province.getId());
         }
     }
 
-    public void removeOwnedProvince(int provinceId) {
+    public void removeOwnedProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("owned_provinces");
 
         if (list != null) {
             Integer index = null;
             for (int i = 0; i < list.size(); i++) {
-                if (Objects.equals(list.getAsInt(i), provinceId)) {
+                if (Objects.equals(list.getAsInt(i), province.getId())) {
                     index = i;
                     break;
                 }
@@ -1790,31 +1819,31 @@ public class Country {
         }
     }
 
-    public List<Integer> getControlledProvinces() {
+    public List<SaveProvince> getControlledProvinces() {
         ClausewitzList list = this.item.getList("controlled_provinces");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt();
+        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
     }
 
-    public void addControlledProvince(int provinceId) {
+    public void addControlledProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("controlled_provinces");
 
-        if (!list.contains(provinceId)) {
-            list.add(provinceId);
+        if (!list.contains(province.getId())) {
+            list.add(province.getId());
         }
     }
 
-    public void removeControlledProvince(int provinceId) {
+    public void removeControlledProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("controlled_provinces");
 
         if (list != null) {
             Integer index = null;
             for (int i = 0; i < list.size(); i++) {
-                if (Objects.equals(list.getAsInt(i), provinceId)) {
+                if (Objects.equals(list.getAsInt(i), province.getId())) {
                     index = i;
                     break;
                 }
@@ -1826,31 +1855,31 @@ public class Country {
         }
     }
 
-    public List<Integer> getCoreProvinces() {
+    public List<SaveProvince> getCoreProvinces() {
         ClausewitzList list = this.item.getList("core_provinces");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt();
+        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
     }
 
-    public void addCoreProvince(int provinceId) {
+    public void addCoreProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("core_provinces");
 
-        if (!list.contains(provinceId)) {
-            list.add(provinceId);
+        if (!list.contains(province.getId())) {
+            list.add(province.getId());
         }
     }
 
-    public void removeCoreProvince(int provinceId) {
+    public void removeCoreProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("core_provinces");
 
         if (list != null) {
             Integer index = null;
             for (int i = 0; i < list.size(); i++) {
-                if (Objects.equals(list.getAsInt(i), provinceId)) {
+                if (Objects.equals(list.getAsInt(i), province.getId())) {
                     index = i;
                     break;
                 }
@@ -1862,31 +1891,31 @@ public class Country {
         }
     }
 
-    public List<Integer> getClaimProvinces() {
+    public List<SaveProvince> getClaimProvinces() {
         ClausewitzList list = this.item.getList("claim_provinces");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt();
+        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
     }
 
-    public void addClaimProvince(int provinceId) {
+    public void addClaimProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("claim_provinces");
 
-        if (!list.contains(provinceId)) {
-            list.add(provinceId);
+        if (!list.contains(province.getId())) {
+            list.add(province.getId());
         }
     }
 
-    public void removeClaimProvince(int provinceId) {
+    public void removeClaimProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("claim_provinces");
 
         if (list != null) {
             Integer index = null;
             for (int i = 0; i < list.size(); i++) {
-                if (Objects.equals(list.getAsInt(i), provinceId)) {
+                if (Objects.equals(list.getAsInt(i), province.getId())) {
                     index = i;
                     break;
                 }
@@ -2136,6 +2165,24 @@ public class Country {
         this.item.setVariable("corruption", corruption);
     }
 
+    public Double getRootOutCorruptionSlider() {
+        return this.item.getVarAsDouble("root_out_corruption_slider");
+    }
+
+    public Double getAuthority() {
+        return this.item.getVarAsDouble("authority");
+    }
+
+    public void setAuthority(Double authority) {
+        if (authority < 0d) {
+            authority = 0d;
+        } else if (authority > 100d) {
+            authority = 100d;
+        }
+
+        this.item.setVariable("authority", authority);
+    }
+
     public Double getLegitimacy() {
         return this.item.getVarAsDouble("legitimacy");
     }
@@ -2337,6 +2384,59 @@ public class Country {
 
     public Map<Integer, Army> getArmies() {
         return armies;
+    }
+
+    public int getArmySize() {
+        return this.armies.values().stream().mapToInt(army -> army.getRegiments().size()).sum();
+    }
+
+    public long getNbInfantry() {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.INFANTRY.equals(regiment.getType())).count())
+                          .sum();
+    }
+
+    public long getNbCavalry() {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.CAVALRY.equals(regiment.getType())).count())
+                          .sum();
+    }
+
+    public long getNbArtillery() {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.ARTILLERY.equals(regiment.getType())).count())
+                          .sum();
+    }
+
+    public long getNbHeavyShips() {
+        return this.navies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getType())).count())
+                          .sum();
+    }
+
+    public long getNbLightShips() {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getType())).count())
+                          .sum();
+    }
+
+    public long getNbGalleys() {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.GALLEY.equals(regiment.getType())).count())
+                          .sum();
+    }
+
+    public long getNbTransports() {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.TRANSPORT.equals(regiment.getType())).count())
+                          .sum();
     }
 
     public void addArmy(String name, int location, String graphicalCulture, String regimentName, String regimentType,
@@ -2749,8 +2849,29 @@ public class Country {
         this.tradeCompanies.add(tradeCompany);
     }
 
+    public SortedSet<ActiveWar> getWars() {
+        return wars;
+    }
+
+    public SortedSet<ActiveWar> getActiveWars() {
+        return this.wars.stream().filter(Predicate.not(ActiveWar::isFinished)).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public SortedSet<ActiveWar> getFinishedWars() {
+        return this.wars.stream().filter(ActiveWar::isFinished).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public void addWar(ActiveWar war) {
+        this.wars.add(war);
+    }
+
     private void refreshAttributes() {
         this.localizedName = ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+
+        String governmentNameVar = this.item.getVarAsString("government_name");
+        if (StringUtils.isNotBlank(governmentNameVar)) {
+            this.governmentName = this.save.getGame().getGovernmentName(ClausewitzUtils.removeQuotes(governmentNameVar));
+        }
 
         ClausewitzItem playerAiPrefsCommandItem = this.item.getChild("player_ai_prefs_command");
 
