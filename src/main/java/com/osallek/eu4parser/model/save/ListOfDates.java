@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import org.luaj.vm2.ast.Str;
 
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,10 @@ public class ListOfDates {
 
     public List<String> getNames() {
         return this.item.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
+    }
+
+    public boolean contains(String name) {
+        return this.item.getVar(name) != null;
     }
 
     public Date get(String name) {

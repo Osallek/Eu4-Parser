@@ -1,13 +1,14 @@
 package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 
 public class MilitaryAccess extends DatableRelation {
 
-    public MilitaryAccess(ClausewitzItem item) {
-        super(item);
+    public MilitaryAccess(ClausewitzItem item, Save save) {
+        super(item, save);
     }
 
     public boolean enforcePeace() {

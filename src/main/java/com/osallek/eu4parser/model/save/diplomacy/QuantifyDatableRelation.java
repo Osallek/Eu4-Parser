@@ -1,13 +1,14 @@
 package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 
 public class QuantifyDatableRelation extends DatableRelation {
 
-    public QuantifyDatableRelation(ClausewitzItem item) {
-        super(item);
+    public QuantifyDatableRelation(ClausewitzItem item, Save save) {
+        super(item, save);
     }
 
     public Double getAmount() {

@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -20,6 +21,8 @@ public class Area {
     private Map<String, CountryState> countriesStates;
 
     private Map<String, Investment> investments;
+
+    private List<SaveProvince> provinces;
 
     public Area(ClausewitzItem item, Save save) {
         this.item = item;
@@ -114,6 +117,7 @@ public class Area {
     }
 
     private void refreshAttributes() {
+        this.save.getGame().getA
         ClausewitzItem stateItem = this.item.getChild("state");
 
         if (stateItem != null) {

@@ -2,16 +2,15 @@ package com.osallek.eu4parser.common;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.game.Building;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public final class Eu4Utils {
 
@@ -68,6 +67,12 @@ public final class Eu4Utils {
         calendar.set(1, Calendar.JANUARY, 1, 0, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         DEFAULT_DATE = calendar.getTime();
+    }
+
+    public static boolean isTag(String s) {
+        return Country.CUSTOM_COUNTRY_PATTERN.matcher(s).matches() || Country.COLONY_PATTERN.matcher(s).matches()
+               || Country.TRADING_CITY_PATTERN.matcher(s).matches() || Country.CLIENT_STATE_PATTERN.matcher(s).matches()
+               || Country.COUNTRY_PATTERN.matcher(s).matches();
     }
 
     public static Date stringToDate(String s) {

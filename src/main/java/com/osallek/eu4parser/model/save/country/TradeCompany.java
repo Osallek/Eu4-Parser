@@ -3,15 +3,21 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TradeCompany {
 
+    private final Save save;
+
     private final ClausewitzItem item;
 
-    public TradeCompany(ClausewitzItem item) {
+    public TradeCompany(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
     }
 
@@ -19,29 +25,29 @@ public class TradeCompany {
         return this.item.getVarAsString("name");
     }
 
-    public List<Integer> getProvinces() {
+    public List<SaveProvince> getProvinces() {
         ClausewitzList list = this.item.getList("provinces");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt();
+        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
-    public void addProvince(int province) {
+    public void addProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("provinces");
 
-        if (!list.contains(province)) {
-            list.add(province);
+        if (!list.contains(province.getId())) {
+            list.add(province.getId());
         }
     }
 
-    public void removeProvince(int province) {
+    public void removeProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("provinces");
 
         if (list != null) {
-            list.remove(String.valueOf(province));
+            list.remove(String.valueOf(province.getId()));
         }
     }
 
@@ -49,8 +55,8 @@ public class TradeCompany {
         return this.item.getVarAsDouble("power");
     }
 
-    public String getOwner() {
-        return this.item.getVarAsString("owner");
+    public Country getOwner() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("owner")));
     }
 
     public Double getTaxIncome() {

@@ -5,16 +5,17 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class AbstractCulture {
 
     private String name;
 
-    private List<String> maleNames;
+    protected List<String> maleNames;
 
-    private List<String> femaleNames;
+    protected List<String> femaleNames;
 
-    private List<String> dynastyNames;
+    protected List<String> dynastyNames;
 
     public AbstractCulture(ClausewitzItem item) {
         this.name = item.getName();
@@ -89,5 +90,22 @@ public abstract class AbstractCulture {
 
     public void removeDynastyName(String dynastyName) {
         this.dynastyNames.remove(dynastyName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AbstractCulture)) {
+            return false;
+        }
+        AbstractCulture that = (AbstractCulture) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

@@ -3,7 +3,9 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
@@ -18,7 +20,6 @@ import com.osallek.eu4parser.model.save.province.Advisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
 import org.apache.commons.lang3.StringUtils;
-import org.luaj.vm2.ast.Str;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -55,6 +56,7 @@ public class Country {
     //Todo
     // mercenary_company
 
+    public static final Pattern COUNTRY_PATTERN = Pattern.compile("[A-Z]{3}");
     public static final Pattern CUSTOM_COUNTRY_PATTERN = Pattern.compile("D[0-9]{2}");
     public static final Pattern COLONY_PATTERN = Pattern.compile("C[0-9]{2}");
     public static final Pattern TRADING_CITY_PATTERN = Pattern.compile("T[0-9]{2}");
@@ -73,6 +75,8 @@ public class Country {
     private String player;
 
     private Integer greatPowerRank;
+
+    private Fervor fervor;
 
     private PlayerAiPrefsCommand playerAiPrefsCommand;
 
@@ -94,6 +98,8 @@ public class Country {
 
     private List<EstateInteraction> interactionsLastUsed;
 
+    private List<Faction> factions;
+
     private Map<String, Rival> rivals;
 
     private List<VictoryCard> victoryCards;
@@ -102,9 +108,13 @@ public class Country {
 
     private List<PowerProjection> powerProjections;
 
+    private Parliament parliament;
+
     private Ledger ledger;
 
     private List<Loan> loans;
+
+    private Church church;
 
     private IdeaGroups ideaGroups;
 
@@ -126,7 +136,7 @@ public class Country {
 
     private Map<Integer, Navy> navies;
 
-    private Map<String, ActiveRelation> activeRelations;
+    private Map<Country, ActiveRelation> activeRelations;
 
     private Map<Integer, Leader> leaders;
 
@@ -152,9 +162,11 @@ public class Country {
 
     private HistoryStatsCache historyStatsCache;
 
+    private List<CustomNationalIdea> customNationalIdeas;
+
     private Missions countryMissions;
 
-    private Map<String, CountryState> states;
+    private Map<SaveArea, CountryState> states = new HashMap<>();
 
     private SortedMap<Integer, Integer> incomeStatistics;
 
@@ -250,6 +262,10 @@ public class Country {
 
     public Boolean isHuman() {
         return this.item.getVarAsBool("human");
+    }
+
+    public Boolean hasSwitchedNation() {
+        return this.item.getVarAsBool("has_switched_nation");
     }
 
     public Boolean wasPlayer() {
@@ -400,6 +416,10 @@ public class Country {
         return false;
     }
 
+    public long getNbEmbracedInstitutions() {
+        return getEmbracedInstitutions().stream().filter(Boolean.TRUE::equals).count();
+    }
+
     public void embracedInstitution(int institution, boolean embraced) {
         ClausewitzList list = this.item.getList("institutions");
 
@@ -412,21 +432,17 @@ public class Country {
         return this.item.getVarAsInt("num_of_age_objectives");
     }
 
-    public List<AgeAbility> getActiveAgeAbility() {
-        List<AgeAbility> list = new ArrayList<>();
+    public List<String> getActiveAgeAbility() {
+        ClausewitzList list = this.item.getList("active_age_ability");
 
-        for (String ability : this.item.getVarsAsStrings("active_age_ability")) {
-            list.add(AgeAbility.valueOf(ClausewitzUtils.removeQuotes(ability).toUpperCase()));
-        }
-
-        return list;
+        return list == null ? new ArrayList<>() : list.getValues();
     }
 
-    public void addAgeAbility(AgeAbility ageAbility) {
+    public void addAgeAbility(String ageAbility) {
         List<String> abilities = this.item.getVarsAsStrings("active_age_ability");
 
-        if (!abilities.contains(ageAbility.name().toLowerCase())) {
-            this.item.addVariable("active_age_ability", ClausewitzUtils.addQuotes(ageAbility.name().toLowerCase()));
+        if (!abilities.contains(ageAbility.toLowerCase())) {
+            this.item.addVariable("active_age_ability", ClausewitzUtils.addQuotes(ageAbility.toLowerCase()));
         }
     }
 
@@ -434,8 +450,8 @@ public class Country {
         this.item.removeVariable("active_age_ability", index);
     }
 
-    public void removeAgeAbility(AgeAbility ageAbility) {
-        this.item.removeVariable("active_age_ability", ageAbility.name());
+    public void removeAgeAbility(String ageAbility) {
+        this.item.removeVariable("active_age_ability", ageAbility);
     }
 
     public Date getLastSoldProvince() {
@@ -582,6 +598,112 @@ public class Country {
         this.item.setVariable("isolationism", isolationism);
     }
 
+    public Boolean hasReformedReligion() {
+        return this.item.getVarAsBool("has_reformed_religion");
+    }
+
+    public void setHasReformedReligion(boolean hasReformedReligion) {
+        this.item.setVariable("has_reformed_religion", hasReformedReligion);
+    }
+
+    public Double getHarmony() {
+        return this.item.getVarAsDouble("harmony");
+    }
+
+    public void setHarmony(Double harmony) {
+        this.item.setVariable("harmony", harmony);
+    }
+
+    public String getHarmonyWithReligion() {
+        return this.item.getVarAsString("harmonizing_with_religion");
+    }
+
+    public void setHarmonizingWithReligion(String harmonizingWithReligion) {
+        this.item.setVariable("harmonizing_with_religion", harmonizingWithReligion);
+
+        if (getHarmonyProgress() == null) {
+            setHarmonyProgress(0d);
+        }
+    }
+
+    public Double getHarmonyProgress() {
+        return this.item.getVarAsDouble("harmonization_progress");
+    }
+
+    public void setHarmonyProgress(Double harmonizationProgress) {
+        if (getHarmonyWithReligion() != null) {
+            this.item.setVariable("harmonization_progress", harmonizationProgress);
+        }
+    }
+
+    public List<Integer> getHarmonizedReligionGroups() {
+        ClausewitzList list = this.item.getList("harmonized_religion_groups");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValuesAsInt();
+    }
+
+    public void addHarmonizedReligionGroup(Integer religionGroup) {
+        ClausewitzList list = this.item.getList("harmonized_religion_groups");
+
+        if (list == null) {
+            this.item.addList("harmonized_religion_groups", religionGroup);
+        } else {
+            list.add(religionGroup);
+        }
+    }
+
+    public void removeHarmonizedReligionGroup(Integer religionGroup) {
+        ClausewitzList list = this.item.getList("harmonized_religion_groups");
+
+        if (list != null) {
+            list.remove(religionGroup);
+        }
+    }
+
+    public List<String> getActiveIncidents() {
+        ClausewitzList list = this.item.getList("active_incidents");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValues();
+    }
+
+    public List<String> getPotentialIncidents() {
+        ClausewitzList list = this.item.getList("potential_incidents");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValues();
+    }
+
+    public List<String> getPastIncidents() {
+        ClausewitzList list = this.item.getList("past_incidents");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValues();
+    }
+
+    public Map<String, Double> getIncidentVariables() {
+        ClausewitzItem child = this.item.getChild("incident_variables");
+
+        if (child == null) {
+            return new HashMap<>();
+        }
+
+        return child.getVariables().stream().collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getAsDouble));
+    }
+
     public boolean hasCircumnavigatedWorld() {
         return Boolean.TRUE.equals(this.item.getVarAsBool("has_circumnavigated_world"));
     }
@@ -606,23 +728,23 @@ public class Country {
         return this.save.getGame().getCulture(this.item.getVarAsString("primary_culture"));
     }
 
-    public void setPrimaryCulture(String primaryCulture) {
-        this.item.setVariable("primary_culture", primaryCulture);
+    public void setPrimaryCulture(Culture primaryCulture) {
+        this.item.setVariable("primary_culture", primaryCulture.getName());
     }
 
     public Culture getDominantCulture() {
         return this.save.getGame().getCulture(this.item.getVarAsString("dominant_culture"));
     }
 
-    public List<String> getAcceptedCultures() {
-        return this.item.getVarsAsStrings("accepted_culture");
+    public List<Culture> getAcceptedCultures() {
+        return this.item.getVarsAsStrings("accepted_culture").stream().map(s -> this.save.getGame().getCulture(s)).collect(Collectors.toList());
     }
 
-    public void addAcceptedCulture(String culture) {
+    public void addAcceptedCulture(Culture culture) {
         List<String> ignoreDecisions = this.item.getVarsAsStrings("accepted_culture");
 
-        if (!ignoreDecisions.contains(culture)) {
-            this.item.addVariable("accepted_culture", culture);
+        if (!ignoreDecisions.contains(culture.getName())) {
+            this.item.addVariable("accepted_culture", culture.getName());
         }
     }
 
@@ -630,8 +752,8 @@ public class Country {
         this.item.removeVariable("accepted_culture", index);
     }
 
-    public void removeAcceptedCulture(String culture) {
-        this.item.removeVariable("accepted_culture", culture);
+    public void removeAcceptedCulture(Culture culture) {
+        this.item.removeVariable("accepted_culture", culture.getName());
     }
 
     public String getReligionName() {
@@ -646,29 +768,20 @@ public class Country {
         this.item.setVariable("religion", religion.getName());
     }
 
-    public String getDominantReligion() {
-        return this.item.getVarAsString("dominant_religion");
+    public SaveReligion getSecondaryReligion() {
+        return this.save.getReligions().getReligion(this.item.getVarAsString("secondary_religion"));
     }
 
-    public Double getFervor() {
-        ClausewitzItem fervorItem = this.item.getChild("fervor");
-
-        if (fervorItem != null) {
-            return fervorItem.getVarAsDouble("value");
-        }
-
-        return null;
+    public void setSecondaryReligion(SaveReligion religion) {
+        this.item.setVariable("secondary_religion", religion.getName());
     }
 
-    public void setFervor(double fervor) {
-        ClausewitzItem fervorItem = this.item.getChild("fervor");
+    public SaveReligion getDominantReligion() {
+        return this.save.getReligions().getReligion(this.item.getVarAsString("dominant_religion"));
+    }
 
-        if (fervorItem == null) {
-            fervorItem = new ClausewitzItem(this.item, "fervor", this.item.getOrder() + 1);
-            this.item.addChild(fervorItem);
-        }
-
-        fervorItem.setVariable("value", fervor);
+    public Fervor getFervor() {
+        return fervor;
     }
 
     public String getTechnologyGroup() {
@@ -699,12 +812,24 @@ public class Country {
         return interactionsLastUsed;
     }
 
+    public List<Faction> getFactions() {
+        return factions;
+    }
+
+    public Integer getTopFaction() {
+        return this.item.getVarAsInt("top_faction");
+    }
+
+    public void setTopFaction(int topFaction) {
+        this.item.setVariable("top_faction", topFaction);
+    }
+
     public Map<String, Rival> getRivals() {
         return rivals;
     }
 
-    public void addRival(String country, Date date) {
-        if (!this.rivals.containsKey(country)) {
+    public void addRival(Country country, Date date) {
+        if (!this.rivals.containsKey(ClausewitzUtils.addQuotes(country.getTag()))) {
             Rival.addToItem(this.item, country, date);
             refreshAttributes();
         }
@@ -715,12 +840,12 @@ public class Country {
         refreshAttributes();
     }
 
-    public void removeRival(String rival) {
+    public void removeRival(Country rival) {
         Integer index = null;
         List<Rival> rivalList = new ArrayList<>(this.rivals.values());
 
         for (int i = 0; i < rivalList.size(); i++) {
-            if (rivalList.get(i).getRival().equalsIgnoreCase(rival)) {
+            if (rivalList.get(i).getRival().equals(rival)) {
                 index = i;
                 break;
             }
@@ -730,6 +855,17 @@ public class Country {
             this.item.removeVariable("rival", index);
             refreshAttributes();
         }
+    }
+
+    public Double getStatistsVsMonarchists() {
+        return this.item.getVarAsDouble("statists_vs_monarchists");
+    }
+
+    public void setStatistsVsMonarchists(Double statistsVsMonarchists) {
+        statistsVsMonarchists = BigDecimal.valueOf(statistsVsMonarchists).divide(BigDecimal.valueOf(1000d), 3, RoundingMode.HALF_EVEN).doubleValue();
+        statistsVsMonarchists = Math.min(Math.max(statistsVsMonarchists, -1), 1);
+
+        this.item.setVariable("statists_vs_monarchists", statistsVsMonarchists);
     }
 
     public Integer getHighestPossibleFort() {
@@ -744,8 +880,35 @@ public class Country {
         return this.item.getVarAsDouble("transfer_home_bonus");
     }
 
+    public Boolean isExcommunicated() {
+        return this.item.getVarAsBool("excommunicated");
+    }
+
+    public void setExcommunicated(boolean excommunicated) {
+        this.item.setVariable("excommunicated", excommunicated);
+    }
+
     public Integer getNumOfWarReparations() {
         return this.item.getVarAsInt("num_of_war_reparations");
+    }
+
+    public Country getCoalitionTarget() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("coalition_target")));
+    }
+
+    public void setCoalitionTarget(Country coalitionTarget) {
+        this.item.setVariable("coalition_target", ClausewitzUtils.addQuotes(coalitionTarget.getTag()));
+        setCoalitionDate(this.save.getDate());
+    }
+
+    public Date getCoalitionDate() {
+        return this.item.getVarAsDate("coalition_date");
+    }
+
+    public void setCoalitionDate(Date coalitionDate) {
+        if (getCoalitionTarget() != null) {
+            this.item.setVariable("coalition_date", coalitionDate);
+        }
     }
 
     public void addWarReparations(Country country) {
@@ -794,20 +957,54 @@ public class Country {
         this.item.removeVariable("overlord");
     }
 
-    public List<String> getEnemies() {
-        return this.item.getVarsAsStrings("enemy");
+    public List<Country> getEnemies() {
+        return this.item.getVarsAsStrings("enemy")
+                        .stream()
+                        .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
+                        .collect(Collectors.toList());
     }
 
     public Integer getGoldType() {
         return this.item.getVarAsInt("goldtype");
     }
 
-    public List<String> getOurSpyNetwork() {
-        return this.item.getVarsAsStrings("our_spy_network");
+    public List<Country> getOurSpyNetwork() {
+        return this.item.getVarsAsStrings("our_spy_network")
+                        .stream()
+                        .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
+                        .collect(Collectors.toList());
     }
 
-    public List<String> getTheirSpyNetwork() {
-        return this.item.getVarsAsStrings("their_spy_network");
+    public List<Country> getTheirSpyNetwork() {
+        return this.item.getVarsAsStrings("their_spy_network")
+                        .stream()
+                        .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
+                        .collect(Collectors.toList());
+    }
+
+    public Country getFederationLeader() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("federation_leader")));
+    }
+
+    public List<Country> getFederationFriends() {
+        return this.item.getVarsAsStrings("federation_friends")
+                        .stream()
+                        .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
+                        .collect(Collectors.toList());
+    }
+
+    public List<Country> getCoalition() {
+        return this.item.getVarsAsStrings("coalition_against_us")
+                        .stream()
+                        .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
+                        .collect(Collectors.toList());
+    }
+
+    public List<Country> getPreferredCoalition() {
+        return this.item.getVarsAsStrings("preferred_coalition_against_us")
+                        .stream()
+                        .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
+                        .collect(Collectors.toList());
     }
 
     public List<VictoryCard> getVictoryCards() {
@@ -850,6 +1047,35 @@ public class Country {
 
     public void setConvert(boolean convert) {
         this.item.setVariable("convert", convert);
+    }
+
+    public Country getForceConvert() {
+        String forceConverted = ClausewitzUtils.removeQuotes(this.item.getVarAsString("force_converted"));
+
+        if (Eu4Utils.DEFAULT_TAG.equals(forceConverted)) {
+            forceConverted = null;
+        }
+
+        return this.save.getCountry(forceConverted);
+    }
+
+    public void setForceConvert(Country country) {
+        this.item.setVariable("force_converted", ClausewitzUtils.addQuotes(country.getTag()));
+        setConvert(true);
+    }
+
+    public Country getColonialParent() {
+        String colonialParent = ClausewitzUtils.removeQuotes(this.item.getVarAsString("colonial_parent"));
+
+        if (Eu4Utils.DEFAULT_TAG.equals(colonialParent)) {
+            colonialParent = null;
+        }
+
+        return this.save.getCountry(colonialParent);
+    }
+
+    public void setColonialParent(Country country) {
+        this.item.setVariable("colonial_parent", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
     public boolean newMonarch() {
@@ -953,6 +1179,10 @@ public class Country {
         return this.item.getVarAsDouble("navy_strength");
     }
 
+    public Parliament getParliament() {
+        return parliament;
+    }
+
     public Double getTariff() {
         return this.item.getVarAsDouble("tariff");
     }
@@ -971,6 +1201,10 @@ public class Country {
 
     public Double getNonOverseasDevelopment() {
         return this.item.getVarAsDouble("non_overseas_development");
+    }
+
+    public Integer getNumShipsPrivateering() {
+        return this.item.getVarAsInt("num_ships_privateering");
     }
 
     public Integer getNumOfControlledCities() {
@@ -1242,7 +1476,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
     public List<Country> getNeighbours() {
@@ -1252,7 +1486,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getHomeNeighbours() {
@@ -1262,7 +1496,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getCoreNeighbours() {
@@ -1272,7 +1506,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getCurrentAtWarWith() {
@@ -1282,7 +1516,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getCurrentWarAllies() {
@@ -1292,7 +1526,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getCallToArmsFriends() {
@@ -1302,7 +1536,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getAllies() {
@@ -1312,7 +1546,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public void addAlly(Country ally) {
@@ -1356,7 +1590,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public void addSubject(Country subject) {
@@ -1400,7 +1634,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
 
@@ -1429,7 +1663,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public void addGuarantee(Country country) {
@@ -1458,7 +1692,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
 
@@ -1488,7 +1722,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getTradeEmbargoedBy() {
@@ -1498,7 +1732,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getTradeEmbargoes() {
@@ -1508,7 +1742,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public List<Country> getTransferTradePowerFrom() {
@@ -1518,7 +1752,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public void addTransferTradePowerFrom(Country country) {
@@ -1546,7 +1780,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(tag -> this.save.getCountry(tag)).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
 
@@ -1790,7 +2024,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
     public void addOwnedProvince(SaveProvince province) {
@@ -1826,7 +2060,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
     public void addControlledProvince(SaveProvince province) {
@@ -1862,7 +2096,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
     public void addCoreProvince(SaveProvince province) {
@@ -1898,7 +2132,7 @@ public class Country {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(integer -> this.save.getProvince(integer)).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
     public void addClaimProvince(SaveProvince province) {
@@ -1983,6 +2217,10 @@ public class Country {
 
     public Boolean canTakeWartaxes() {
         return this.item.getVarAsBool("can_take_wartaxes");
+    }
+
+    public Boolean warTaxes() {
+        return this.item.getVarAsBool("wartax");
     }
 
     public Double getLandMaintenance() {
@@ -2123,6 +2361,20 @@ public class Country {
         return this.item.getVarAsDouble("religious_unity");
     }
 
+    public void setDevotion(Double devotion) {
+        if (devotion < 0d) {
+            devotion = 0d;
+        } else if (devotion > 100d) {
+            devotion = 100d;
+        }
+
+        this.item.setVariable("devotion", devotion);
+    }
+
+    public Double getDevotion() {
+        return this.item.getVarAsDouble("devotion");
+    }
+
     public Double getMeritocracy() {
         return this.item.getVarAsDouble("meritocracy");
     }
@@ -2169,6 +2421,57 @@ public class Country {
         return this.item.getVarAsDouble("root_out_corruption_slider");
     }
 
+    public Double getDoom() {
+        return this.item.getVarAsDouble("doom");
+    }
+
+    public void setDoom(Double doom) {
+        if (doom < 0d) {
+            doom = 0d;
+        } else if (doom > 100d) {
+            doom = 100d;
+        }
+
+        this.item.setVariable("doom", doom);
+    }
+
+    public String getPersonalDeity() {
+        return this.item.getVarAsString("personal_deity");
+    }
+
+    public void setPersonalDeity(String personalDeity) {
+        this.item.setVariable("personal_deity", ClausewitzUtils.addQuotes(personalDeity));
+    }
+
+    public List<String> getFetishistCults() {
+        ClausewitzList list = this.item.getList("fetishist_cult");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValues();
+    }
+
+    public void addFetishistCult(String fetishistCult) {
+        ClausewitzList list = this.item.getList("fetishist_cult");
+        fetishistCult = ClausewitzUtils.addQuotes(fetishistCult);
+
+        if (list == null) {
+            this.item.addList("fetishist_cult", fetishistCult);
+        } else {
+            list.add(fetishistCult);
+        }
+    }
+
+    public void removeFetishistCult(String fetishistCult) {
+        ClausewitzList list = this.item.getList("fetishist_cult");
+
+        if (list != null) {
+            list.remove(fetishistCult);
+        }
+    }
+
     public Double getAuthority() {
         return this.item.getVarAsDouble("authority");
     }
@@ -2195,6 +2498,20 @@ public class Country {
         }
 
         this.item.setVariable("legitimacy", legitimacy);
+    }
+
+    public Double getHordeUnity() {
+        return this.item.getVarAsDouble("horde_unity");
+    }
+
+    public void setHordeUnity(Double hordeUnity) {
+        if (hordeUnity < 0d) {
+            hordeUnity = 0d;
+        } else if (hordeUnity > 100d) {
+            hordeUnity = 100d;
+        }
+
+        this.item.setVariable("horde_unity", hordeUnity);
     }
 
     public Integer getMercantilism() {
@@ -2281,6 +2598,18 @@ public class Country {
         }
 
         this.item.setVariable("max_historic_army_professionalism", armyProfessionalism);
+    }
+
+    public String getActiveDisaster() {
+        return this.item.getVarAsString("active_disaster");
+    }
+
+    public void setActiveDisaster(String activeDisaster) {
+        this.item.setVariable("active_disaster", activeDisaster);
+    }
+
+    public Church getChurch() {
+        return church;
     }
 
     public IdeaGroups getIdeaGroups() {
@@ -2390,52 +2719,63 @@ public class Country {
         return this.armies.values().stream().mapToInt(army -> army.getRegiments().size()).sum();
     }
 
+    public int getNavySize() {
+        return this.navies.values().stream().mapToInt(army -> army.getRegiments().size()).sum();
+    }
+
     public long getNbInfantry() {
         return this.armies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.INFANTRY.equals(regiment.getType())).count())
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbCavalry() {
         return this.armies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.CAVALRY.equals(regiment.getType())).count())
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbArtillery() {
         return this.armies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.ARTILLERY.equals(regiment.getType())).count())
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbHeavyShips() {
         return this.navies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getType())).count())
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbLightShips() {
         return this.armies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getType())).count())
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbGalleys() {
         return this.armies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.GALLEY.equals(regiment.getType())).count())
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbTransports() {
         return this.armies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.TRANSPORT.equals(regiment.getType())).count())
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType())).count())
+                          .sum();
+    }
+
+    public long getNbRegimentOf(String type) {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> type.equals(regiment.getTypeName())).count())
                           .sum();
     }
 
@@ -2469,12 +2809,12 @@ public class Country {
         refreshAttributes();
     }
 
-    public Map<String, ActiveRelation> getActiveRelations() {
+    public Map<Country, ActiveRelation> getActiveRelations() {
         return activeRelations;
     }
 
-    public ActiveRelation getActiveRelation(String tag) {
-        return activeRelations.get(tag);
+    public ActiveRelation getActiveRelation(Country country) {
+        return this.activeRelations.get(country);
     }
 
     public Map<Integer, Leader> getLeaders() {
@@ -2524,6 +2864,10 @@ public class Country {
         return queen;
     }
 
+    public Monarch getConsort() {
+        return this.queen == null ? null : Boolean.TRUE.equals(this.queen.getConsort()) ? this.queen : this.monarch;
+    }
+
     public String getOriginalDynasty() {
         return this.item.getVarAsString("original_dynasty");
     }
@@ -2550,6 +2894,14 @@ public class Country {
 
     public Date getInauguration() {
         return this.item.getVarAsDate("inauguration");
+    }
+
+    public Date getLastMigration() {
+        return this.item.getVarAsDate("last_migration");
+    }
+
+    public void setLastMigration(Date lastMigration) {
+        this.item.setVariable("last_migration", lastMigration);
     }
 
     public List<Id> getPreviousMonarchs() {
@@ -2610,6 +2962,7 @@ public class Country {
         return new ArrayList<>();
     }
 
+
     public Map<Power, Integer> getPowers() {
         ClausewitzList list = this.item.getList("powers");
         Map<Power, Integer> powers = new EnumMap<>(Power.class);
@@ -2631,6 +2984,42 @@ public class Country {
         if (list != null) {
             list.set(power.ordinal(), value);
         }
+    }
+
+    //1 = Force embargo
+    //2 = Loyalists
+    //3 = Pay army
+    //4 = Scutage
+    //5 = Officers
+    //6 = Divert trade
+    public List<Boolean> getSubjectInteractions() {
+        ClausewitzList list = this.item.getList("subject_interactions");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValuesAsBool();
+    }
+
+    public List<Country> getHistoricalFriends() {
+        ClausewitzList list = this.item.getList("historical_friends");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getCountry(s)).collect(Collectors.toList());
+    }
+
+    public List<Country> getHistoricalRivals() {
+        ClausewitzList list = this.item.getList("historical_rivals");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getCountry(s)).collect(Collectors.toList());
     }
 
     public List<Integer> getInterestingCountries() {
@@ -2659,6 +3048,18 @@ public class Country {
 
     public Double getBlockadedPercent() {
         return this.item.getVarAsDouble("blockaded_percent");
+    }
+
+    public List<String> getPreviousCountryTags() {
+        return this.item.getVarsAsStrings("previous_country_tags");
+    }
+
+    public List<CustomNationalIdea> getCustomNationalIdeas() {
+        return customNationalIdeas;
+    }
+
+    public Integer getCustomNationalIdeasLevel() {
+        return this.item.getVarAsInt("custom_national_ideas_level");
     }
 
     public Integer getNativePolicy() {
@@ -2785,8 +3186,8 @@ public class Country {
         this.item.setVariable("government_reform_progress", governmentReformProgress);
     }
 
-    public Map<String, CountryState> getStates() {
-        return this.states == null ? new HashMap<>() : this.states;
+    public Map<SaveArea, CountryState> getStates() {
+        return this.states;
     }
 
     public SortedMap<Integer, Integer> getIncomeStatistics() {
@@ -2873,6 +3274,12 @@ public class Country {
             this.governmentName = this.save.getGame().getGovernmentName(ClausewitzUtils.removeQuotes(governmentNameVar));
         }
 
+        ClausewitzItem fervorItem = this.item.getChild("fervor");
+
+        if (fervorItem != null) {
+            this.fervor = new Fervor(fervorItem);
+        }
+
         ClausewitzItem playerAiPrefsCommandItem = this.item.getChild("player_ai_prefs_command");
 
         if (playerAiPrefsCommandItem != null) {
@@ -2888,7 +3295,7 @@ public class Country {
         ClausewitzItem historyItem = this.item.getChild("history");
 
         if (historyItem != null) {
-            this.history = new History(historyItem);
+            this.history = new History(historyItem, this.save);
         }
 
         ClausewitzItem flagsItem = this.item.getChild("flags");
@@ -2934,10 +3341,15 @@ public class Country {
                                                                 .collect(Collectors.toList());
         }
 
+        List<ClausewitzItem> factionItems = this.item.getChildren("faction");
+        this.factions = factionItems.stream()
+                                    .map(Faction::new)
+                                    .collect(Collectors.toList());
+
         List<ClausewitzItem> rivalItems = this.item.getChildren("rival");
         this.rivals = rivalItems.stream()
-                                .map(Rival::new)
-                                .collect(Collectors.toMap(Rival::getRival, Function.identity()));
+                                .map(child -> new Rival(child, this.save))
+                                .collect(Collectors.toMap(Rival::getRivalTag, Function.identity()));
 
         List<ClausewitzItem> victoryCardItems = this.item.getChildren("victory_card");
         this.victoryCards = victoryCardItems.stream()
@@ -2981,6 +3393,12 @@ public class Country {
             setCurrentPowerProjection(powerProjection);
         }
 
+        ClausewitzItem parliamentItem = this.item.getChild("parliament");
+
+        if (parliamentItem != null) {
+            this.parliament = new Parliament(parliamentItem);
+        }
+
         ClausewitzItem ledgerItem = this.item.getChild("ledger");
 
         if (ledgerItem != null) {
@@ -2990,6 +3408,12 @@ public class Country {
         this.loans = this.item.getChildren("loan").stream()
                               .map(Loan::new)
                               .collect(Collectors.toList());
+
+        ClausewitzItem churchItem = this.item.getChild("church");
+
+        if (churchItem != null) {
+            this.church = new Church(churchItem, this.save.getGame());
+        }
 
         ClausewitzItem activeIdeaGroupsItem = this.item.getChild("active_idea_groups");
 
@@ -3065,7 +3489,7 @@ public class Country {
         if (activeRelationsItem != null) {
             this.activeRelations = activeRelationsItem.getChildren()
                                                       .stream()
-                                                      .map(ActiveRelation::new)
+                                                      .map(child -> new ActiveRelation(child, this.save))
                                                       .collect(Collectors.toMap(ActiveRelation::getCountry, Function.identity()));
         }
 
@@ -3142,6 +3566,12 @@ public class Country {
 
         if (historicStatsCacheItem != null) {
             this.historyStatsCache = new HistoryStatsCache(historicStatsCacheItem);
+        }
+
+        ClausewitzItem customNationalIdeasItem = this.item.getChild("custom_national_ideas");
+
+        if (customNationalIdeasItem != null) {
+            this.customNationalIdeas = customNationalIdeasItem.getChildren().stream().map(CustomNationalIdea::new).collect(Collectors.toList());
         }
 
         ClausewitzItem countryMissionsItem = this.item.getChild("country_missions");

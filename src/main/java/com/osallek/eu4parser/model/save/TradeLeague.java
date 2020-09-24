@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,9 +13,12 @@ import java.util.stream.Collectors;
 
 public class TradeLeague {
 
+    private final Save save;
+
     private final ClausewitzItem item;
 
-    public TradeLeague(ClausewitzItem item) {
+    public TradeLeague(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
     }
 
@@ -22,31 +26,33 @@ public class TradeLeague {
         return this.item.getVarAsInt("id");
     }
 
-    public List<String> getMembers() {
+    public List<Country> getMembers() {
         ClausewitzList list = this.item.getList("members");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValues();
+        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void addMember(String member) {
+    public boolean hasMember(Country country) {
+        return getMembers().contains(country);
+    }
+
+    public void addMember(Country member) {
         ClausewitzList list = this.item.getList("members");
 
-        member = ClausewitzUtils.addQuotes(member);
-
-        if (member.length() == 5 && !list.contains(member)) {
-            list.add(member);
+        if (!list.contains(member.getTag())) {
+            list.add(member.getTag());
         }
     }
 
-    public void removeMember(String member) {
+    public void removeMember(Country member) {
         ClausewitzList list = this.item.getList("members");
 
         if (list != null) {
-            list.remove(member);
+            list.remove(member.getTag());
         }
     }
 

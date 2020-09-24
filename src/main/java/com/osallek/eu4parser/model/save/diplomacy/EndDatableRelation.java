@@ -1,13 +1,14 @@
 package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 
 public class EndDatableRelation extends DatableRelation {
 
-    public EndDatableRelation(ClausewitzItem item) {
-        super(item);
+    public EndDatableRelation(ClausewitzItem item, Save save) {
+        super(item, save);
     }
 
     public Date getEndDate() {

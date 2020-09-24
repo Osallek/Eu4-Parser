@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 import java.util.List;
@@ -8,17 +9,20 @@ import java.util.stream.Collectors;
 
 public class ActiveRelation {
 
+    private final Save save;
+
     private final ClausewitzItem item;
 
     private List<Opinion> opinions;
 
-    public ActiveRelation(ClausewitzItem item) {
+    public ActiveRelation(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
         refreshAttributes();
     }
 
-    public String getCountry() {
-        return this.item.getName();
+    public Country getCountry() {
+        return this.save.getCountry(this.item.getName());
     }
 
     public Integer getTrustValue() {
@@ -100,6 +104,10 @@ public class ActiveRelation {
 
     public Boolean isEmbargoing() {
         return this.item.getVarAsBool("is_embargoing");
+    }
+
+    public Boolean truce() {
+        return this.item.getVarAsBool("truce");
     }
 
     void setEmbargoing(boolean embargoing) {

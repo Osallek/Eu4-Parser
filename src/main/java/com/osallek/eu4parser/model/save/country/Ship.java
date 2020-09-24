@@ -3,9 +3,14 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.UnitType;
+import com.osallek.eu4parser.model.game.Unit;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Save;
+import org.luaj.vm2.ast.Str;
 
 public class Ship {
+
+    protected final Save save;
 
     protected final ClausewitzItem item;
 
@@ -13,7 +18,8 @@ public class Ship {
 
     private Id lastTarget;
 
-    public Ship(ClausewitzItem item) {
+    public Ship(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
         refreshAttributes();
     }
@@ -38,12 +44,20 @@ public class Ship {
         this.item.setVariable("home", home);
     }
 
-    public UnitType getType() {
-        return UnitType.value(this.item.getVarAsString("type"));
+    public Unit getType() {
+        return this.save.getGame().getUnit(getTypeName());
     }
 
-    public void setType(String type) {
-        this.item.setVariable("type", ClausewitzUtils.addQuotes(type));
+    public String getTypeName() {
+        return this.item.getVarAsString("type");
+    }
+
+    public UnitType getUnitType() {
+        return getType().getType();
+    }
+
+    public void setType(Unit unit) {
+        this.item.setVariable("type", ClausewitzUtils.addQuotes(unit.getName()));
     }
 
     public Double getMorale() {

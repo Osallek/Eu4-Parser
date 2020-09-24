@@ -3,20 +3,24 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Investment {
 
+    private final Save save;
+
     private final ClausewitzItem item;
 
-    public Investment(ClausewitzItem item) {
+    public Investment(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
     }
 
-    public String getCountry() {
-        return this.item.getVarAsString("tag");
+    public Country getCountry() {
+        return this.save.getCountry(this.item.getVarAsString("tag"));
     }
 
     public List<String> getInvestments() {
@@ -49,9 +53,9 @@ public class Investment {
         }
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String country, String... investments) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, String... investments) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "investments", parent.getOrder() + 1);
-        toItem.addVariable("tag", ClausewitzUtils.addQuotes(country));
+        toItem.addVariable("tag", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addList("investments", investments);
 
         parent.addChild(toItem);

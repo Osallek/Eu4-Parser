@@ -26,6 +26,10 @@ public class Institutions {
         return this.available.getAsInt(institution) == 1;
     }
 
+    public long getNbAvailable() {
+        return this.available.getValuesAsInt().stream().filter(integer -> integer == 1).count();
+    }
+
     public SaveProvince getOrigin(int institution) {
         return this.save.getProvince(this.origins.getAsInt(institution));
     }

@@ -87,6 +87,8 @@ public class Game {
 
     private Map<Unit, Path> units;
 
+    private Map<Area, Path> areas;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -115,6 +117,8 @@ public class Game {
         readEvents();
         readGovernments();
         readGovernmentNames();
+        readUnits();
+        readAreas();
     }
 
     public Collator getCollator() {
@@ -464,6 +468,22 @@ public class Game {
         return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_GOV_RANK").value).v;
     }
 
+    public int getMaxAspects() {
+        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_UNLOCKED_ASPECTS").value).v;
+    }
+
+    public int getGoldenEraDuration() {
+        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("GOLDEN_ERA_YEARS").value).v;
+    }
+
+    public int getBankruptcyDuration() {
+        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("BANKRUPTCY_DURATION").value).v;
+    }
+
+    public int getNbGreatPowers() {
+        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NUM_OF_GREAT_POWERS").value).v;
+    }
+
     public List<Government> getGovernments() {
         return this.governments.keySet()
                                .stream()
@@ -497,6 +517,42 @@ public class Game {
         for (GovernmentName governmentName : this.governmentNames.keySet()) {
             if (governmentName.getName().equals(name)) {
                 return governmentName;
+            }
+        }
+
+        return null;
+    }
+
+    public Set<Unit> getUnits() {
+        return this.units.keySet();
+    }
+
+    public Unit getUnit(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        for (Unit unit : this.units.keySet()) {
+            if (unit.getName().equals(name)) {
+                return unit;
+            }
+        }
+
+        return null;
+    }
+
+    public Set<Area> getAreas() {
+        return this.areas.keySet();
+    }
+
+    public Area getArea(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        for (Area area : this.areas.keySet()) {
+            if (area.getName().equals(name)) {
+                return area;
             }
         }
 
@@ -945,5 +1001,12 @@ public class Game {
                  });
         } catch (IOException e) {
         }
+    }
+
+    private void readAreas() {
+        File areasFile = new File(this.mapFolderPath + File.separator + "area.txt");
+        this.areas = new HashMap<>();
+        ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
+        areasItem.getLists().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
     }
 }

@@ -206,26 +206,6 @@ public class ActiveWar {
     }
 
     private void refreshAttributes() {
-        List<ClausewitzItem> participantsItems = this.item.getChildren("participants");
-        ClausewitzList attackersList = this.item.getList("attackers");
-        ClausewitzList defendersList = this.item.getList("defenders");
-
-        if (attackersList != null && defendersList != null) {
-            this.attackers = new HashMap<>();
-            this.defenders = new HashMap<>();
-            participantsItems.forEach(participantsItem -> {
-                WarParticipant warParticipant = new WarParticipant(participantsItem);
-                Country country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
-                country.addWar(this);
-
-                if (attackersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
-                    this.attackers.put(country, warParticipant);
-                } else if (defendersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
-                    this.defenders.put(country, warParticipant);
-                }
-            });
-        }
-
         ClausewitzItem historyItem = this.item.getChild("history");
 
         if (historyItem != null) {
@@ -257,6 +237,26 @@ public class ActiveWar {
                                                                 child -> Collections.singletonList(new Battle(child.getChild("battle"))),
                                                                 (a, b) -> Stream.concat(a.stream(), b.stream()).collect(Collectors.toList()),
                                                                 TreeMap::new));
+        }
+
+        List<ClausewitzItem> participantsItems = this.item.getChildren("participants");
+        ClausewitzList attackersList = this.item.getList("attackers");
+        ClausewitzList defendersList = this.item.getList("defenders");
+
+        if (attackersList != null && defendersList != null) {
+            this.attackers = new HashMap<>();
+            this.defenders = new HashMap<>();
+            participantsItems.forEach(participantsItem -> {
+                WarParticipant warParticipant = new WarParticipant(participantsItem);
+                Country country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
+                country.addWar(this);
+
+                if (attackersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
+                    this.attackers.put(country, warParticipant);
+                } else if (defendersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
+                    this.defenders.put(country, warParticipant);
+                }
+            });
         }
     }
 }

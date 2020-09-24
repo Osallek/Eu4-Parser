@@ -1,11 +1,12 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
 
 public class Heir extends Monarch {
 
-    public Heir(ClausewitzItem item) {
-        super(item);
+    public Heir(ClausewitzItem item, Save save) {
+        super(item, save);
     }
 
     public Integer getClaim() {

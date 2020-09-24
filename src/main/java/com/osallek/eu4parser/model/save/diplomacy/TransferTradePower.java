@@ -1,13 +1,14 @@
 package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 
 public class TransferTradePower extends QuantifyDatableRelation {
 
-    public TransferTradePower(ClausewitzItem item) {
-        super(item);
+    public TransferTradePower(ClausewitzItem item, Save save) {
+        super(item, save);
     }
 
     public boolean isEnforced() {

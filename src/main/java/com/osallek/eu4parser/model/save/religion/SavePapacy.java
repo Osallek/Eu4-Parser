@@ -89,20 +89,19 @@ public class SavePapacy {
     }
 
     public Country getController() {
-        return getControllerTag() == null ? null :
-               this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
     }
 
     public void setController(Country controller) {
         this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
-    public String getPreviousController() {
-        return this.item.getVarAsString("previous_controller");
+    public Country getPreviousController() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("previous_controller")));
     }
 
-    public void setPreviousController(String previousController) {
-        this.item.setVariable("previous_controller", previousController);
+    public void setPreviousController(Country previousController) {
+        this.item.setVariable("previous_controller", ClausewitzUtils.addQuotes(previousController.getTag()));
     }
 
     public Date getLastExcommunication() {

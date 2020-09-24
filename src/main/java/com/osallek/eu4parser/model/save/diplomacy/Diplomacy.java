@@ -51,7 +51,7 @@ public class Diplomacy {
         return dependencies;
     }
 
-    public void addDependency(Country first, Country second, Date startDate, SubjectType subjectType) {
+    public void addDependency(Country first, Country second, Date startDate, String subjectType) {
         if (second.getOverlord() == null) {
             Dependency.addToItem(this.item, first.getTag(), second.getTag(), startDate, subjectType);
             first.addSubject(second);
@@ -354,67 +354,67 @@ public class Diplomacy {
     private void refreshAttributes() {
         this.dependencies = this.item.getChildren("dependency")
                                      .stream()
-                                     .map(Dependency::new)
+                                     .map(child -> new Dependency(child, this.save))
                                      .collect(Collectors.toList());
 
         this.alliances = this.item.getChildren("alliance")
                                   .stream()
-                                  .map(item1 -> new DatableRelation(item1, save))
+                                  .map(child -> new DatableRelation(child, this.save))
                                   .collect(Collectors.toList());
 
         this.guarantees = this.item.getChildren("guarantee")
                                    .stream()
-                                   .map(item1 -> new DatableRelation(item1, save))
+                                   .map(child -> new DatableRelation(child, this.save))
                                    .collect(Collectors.toList());
 
         this.knowledgeSharing = this.item.getChildren("knowledge_sharing")
                                          .stream()
-                                         .map(KnowledgeSharing::new)
+                                         .map(child -> new KnowledgeSharing(child, this.save))
                                          .collect(Collectors.toList());
 
         this.subsidies = this.item.getChildren("subsidies")
                                   .stream()
-                                  .map(Subsidies::new)
+                                  .map(child -> new Subsidies(child, this.save))
                                   .collect(Collectors.toList());
 
         this.royalMarriage = this.item.getChildren("royal_marriage")
                                       .stream()
-                                      .map(item1 -> new DatableRelation(item1, save))
+                                      .map(child -> new DatableRelation(child, this.save))
                                       .collect(Collectors.toList());
 
         this.militaryAccesses = this.item.getChildren("military_access")
                                          .stream()
-                                         .map(MilitaryAccess::new)
+                                         .map(child -> new MilitaryAccess(child, this.save))
                                          .collect(Collectors.toList());
 
         this.fleetAccesses = this.item.getChildren("fleet_access")
                                       .stream()
-                                      .map(MilitaryAccess::new)
+                                      .map(child -> new MilitaryAccess(child, this.save))
                                       .collect(Collectors.toList());
 
         this.casusBellis = this.item.getChildren("casus_belli")
                                     .stream()
-                                    .map(CasusBelli::new)
+                                    .map(child -> new CasusBelli(child, this.save))
                                     .collect(Collectors.toList());
 
         this.supportIndependence = this.item.getChildren("support_independence")
                                             .stream()
-                                            .map(item1 -> new DatableRelation(item1, save))
+                                            .map(child -> new DatableRelation(child, save))
                                             .collect(Collectors.toList());
 
         this.transferTradePowers = this.item.getChildren("transfer_trade_power")
                                             .stream()
-                                            .map(TransferTradePower::new)
+                                            .map(child -> new TransferTradePower(child, save))
                                             .collect(Collectors.toList());
 
         this.warReparations = this.item.getChildren("war_reparations")
                                        .stream()
-                                       .map(EndDatableRelation::new)
+                                       .map(child -> new EndDatableRelation(child, save))
                                        .collect(Collectors.toList());
 
         this.warnings = this.item.getChildren("warning")
                                  .stream()
-                                 .map(item1 -> new DatableRelation(item1, save))
+                                 .map(child -> new DatableRelation(child, save))
                                  .collect(Collectors.toList());
     }
 }

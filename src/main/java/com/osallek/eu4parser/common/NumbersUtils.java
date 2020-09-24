@@ -27,4 +27,20 @@ public class NumbersUtils {
             return null;
         }
     }
+
+    public static int intOrDefault(Integer integer) {
+        return intOrDefault(integer, 0);
+    }
+
+    public static int intOrDefault(Integer integer, int defaultInt) {
+        return integer == null ? defaultInt : integer;
+    }
+
+    public static double doubleOrDefault(Double aDouble) {
+        return doubleOrDefault(aDouble, 0);
+    }
+
+    public static double doubleOrDefault(Double aDouble, double defaultDouble) {
+        return aDouble == null ? defaultDouble : aDouble;
+    }
 }

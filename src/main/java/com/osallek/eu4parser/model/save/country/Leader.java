@@ -4,6 +4,8 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 public class Leader {
@@ -116,9 +118,15 @@ public class Leader {
     public void setDeathDate(Date deathDate) {
         this.item.setVariable("death_date", deathDate);
     }
-    
+
     public Id getMonarchId() {
         return monarchId;
+    }
+
+    public int getNbStars() {
+        return BigDecimal.valueOf(getFire()).add(BigDecimal.valueOf(getShock())).divide(BigDecimal.valueOf(6), 0, RoundingMode.HALF_EVEN)
+                         .add(BigDecimal.valueOf(getManuever()).add(BigDecimal.valueOf(getSiege())).divide(BigDecimal.valueOf(18), 0, RoundingMode.HALF_EVEN))
+                         .add(BigDecimal.ONE).min(BigDecimal.valueOf(3)).intValue();
     }
 
     private void refreshAttributes() {
@@ -140,7 +148,8 @@ public class Leader {
                          leader.getId().getId());
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, Date activation, int id) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege,
+                                           String personality, Date activation, int id) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "leader", parent.getOrder() + 1);
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
         toItem.addVariable("type", type.name());

@@ -21,6 +21,10 @@ public class Modifier {
         return this.item.getVarAsBool("hidden");
     }
 
+    public Boolean rulerModifier() {
+        return this.item.getVarAsBool("ruler_modifier");
+    }
+
     public Date getDate() {
         return this.item.getVarAsDate("date");
     }

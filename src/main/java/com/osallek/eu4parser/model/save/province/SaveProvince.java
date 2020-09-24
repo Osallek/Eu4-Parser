@@ -38,6 +38,8 @@ public class SaveProvince extends Province {
 
     private Id occupyingRebelFaction;
 
+    private SeatInParliament seatInParliament;
+
     private List<ProvinceBuilding> buildings;
 
     private boolean buildingsUpdated;
@@ -145,6 +147,10 @@ public class SaveProvince extends Province {
 
     public Id getOccupyingRebelFaction() {
         return occupyingRebelFaction;
+    }
+
+    public SeatInParliament getSeatInParliament() {
+        return this.seatInParliament;
     }
 
     public List<Double> getInstitutionsProgress() {
@@ -359,6 +365,10 @@ public class SaveProvince extends Province {
 
     public boolean isCity() {
         return Boolean.TRUE.equals(this.item.getVarAsBool("is_city"));
+    }
+
+    public boolean isColony() {
+        return !isCity() && getOwner() != null;
     }
 
     public void colonize(Country country) {
@@ -969,6 +979,12 @@ public class SaveProvince extends Province {
 
         if (occupyingRebelFactionItem != null) {
             this.occupyingRebelFaction = new Id(occupyingRebelFactionItem);
+        }
+
+        ClausewitzItem seatInParliamentItem = this.item.getChild("seat_in_parliament");
+
+        if (seatInParliamentItem != null) {
+            this.seatInParliament = new SeatInParliament(seatInParliamentItem);
         }
 
         ClausewitzItem historyItem = this.item.getChild("history");

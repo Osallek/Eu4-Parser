@@ -84,6 +84,20 @@ public class SaveReligion {
         this.religionsItem.setVariable("enable", enable);
     }
 
+    public List<Country> getInLeague() {
+        return this.religionsItem.getVarsAsStrings("league").stream().map(ClausewitzUtils::removeQuotes).map(this.save::getCountry).collect(Collectors.toList());
+    }
+
+    public void addToLeague(Country country) {
+        if (!getInLeague().contains(country)) {
+            this.religionsItem.addVariable("league", ClausewitzUtils.addQuotes(country.getTag()));
+        }
+    }
+
+    public void removeFromLeague(Country country) {
+        this.religionsItem.removeVariable("league", ClausewitzUtils.addQuotes(country.getTag()));
+    }
+
     void setHreHereticReligion(boolean hreHereticReligion) {
         this.religionsItem.setVariable("hre_heretic_religion", hreHereticReligion);
     }
@@ -92,11 +106,11 @@ public class SaveReligion {
         this.religionsItem.setVariable("hre_religion", hreReligion);
     }
 
-    public Boolean getHreHereticReligion() {
+    public Boolean isHreHereticReligion() {
         return this.religionsItem.getVarAsBool("hre_heretic_religion");
     }
 
-    public Boolean getHreReligion() {
+    public Boolean isHreReligion() {
         return this.religionsItem.getVarAsBool("hre_religion");
     }
 

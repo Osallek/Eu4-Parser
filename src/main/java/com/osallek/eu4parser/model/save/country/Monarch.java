@@ -2,12 +2,17 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 
 import java.util.Date;
 
 public class Monarch {
+
+    protected final Save save;
 
     protected final ClausewitzItem item;
 
@@ -23,7 +28,8 @@ public class Monarch {
 
     private Leader leader;
 
-    public Monarch(ClausewitzItem item) {
+    public Monarch(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
         refreshAttributes();
     }
@@ -40,8 +46,8 @@ public class Monarch {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public String getCountry() {
-        return this.item.getVarAsString("country");
+    public Country getCountry() {
+        return this.save.getCountry(this.item.getVarAsString("country"));
     }
 
     public Integer getAdm() {
@@ -72,20 +78,24 @@ public class Monarch {
         return this.item.getVarAsBool("female");
     }
 
-    public String getCulture() {
-        return this.item.getVarAsString("culture");
+    public Boolean getRegent() {
+        return this.item.getVarAsBool("regent");
     }
 
-    public void setCulture(String culture) {
-        this.item.setVariable("culture", culture);
+    public Culture getCulture() {
+        return this.save.getGame().getCulture(this.item.getVarAsString("culture"));
     }
 
-    public String getReligion() {
-        return this.item.getVarAsString("religion");
+    public void setCulture(Culture culture) {
+        this.item.setVariable("culture", culture.getName());
     }
 
-    public void setReligion(String religion) {
-        this.item.setVariable("religion", religion);
+    public SaveReligion getReligion() {
+        return this.save.getReligions().getReligion(this.item.getVarAsString("religion"));
+    }
+
+    public void setReligion(SaveReligion religion) {
+        this.item.setVariable("religion", religion.getName());
     }
 
     public String getDynasty() {
@@ -112,6 +122,10 @@ public class Monarch {
         this.item.setVariable("death_date", deathDate);
     }
 
+    public Boolean getSucceeded() {
+        return this.item.getVarAsBool("succeeded");
+    }
+
     public String getMonarchName() {
         return this.item.getVarAsString("monarch_name");
     }
@@ -134,6 +148,36 @@ public class Monarch {
 
     public Leader getLeader() {
         return leader;
+    }
+
+    public ListOfDates getRulerFlags() {
+        return rulerFlags;
+    }
+
+    public Country getWho() {
+        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("who")));
+    }
+
+    public void setWho(Country who) {
+        this.item.setVariable("who", ClausewitzUtils.addQuotes(who.getTag()));
+    }
+
+    public Double getAmount() {
+        return this.item.getVarAsDouble("amount");
+    }
+
+    public void setAmount(double amount) {
+        if (amount < 0) {
+            amount = 0;
+        } else if (amount > 100) {
+            amount = 100;
+        }
+
+        this.item.setVariable("amount", amount);
+    }
+
+    public Boolean getHistory() {
+        return this.item.getVarAsBool("history");
     }
 
     private void refreshAttributes() {
