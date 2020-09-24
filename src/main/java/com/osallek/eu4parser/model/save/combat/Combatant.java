@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.combat;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public abstract class Combatant {
     }
 
     public boolean isAttacker() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("is_attacker"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_attacker"));
     }
 
     public Id getUnit() {
@@ -45,7 +46,7 @@ public abstract class Combatant {
     }
 
     public boolean arranged() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("arranged"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("arranged"));
     }
 
     private void refreshAttributes() {

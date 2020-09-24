@@ -6,7 +6,6 @@ import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Unit;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
-import org.luaj.vm2.ast.Str;
 
 public class Ship {
 

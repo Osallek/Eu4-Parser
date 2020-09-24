@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,11 +65,11 @@ public class TradeCompany {
     }
 
     public boolean strongCompany() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("strong_company"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("strong_company"));
     }
 
     public boolean promoteInvestments() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("promote_investments"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("promote_investments"));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String owner, Integer... provinces) {

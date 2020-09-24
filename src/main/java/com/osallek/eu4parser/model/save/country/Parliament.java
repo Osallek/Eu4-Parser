@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -24,7 +25,7 @@ public class Parliament {
     }
 
     public boolean getRecalculateIssues() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("recalculate_issues"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("recalculate_issues"));
     }
 
     public String getEnactedParliamentIssue() {

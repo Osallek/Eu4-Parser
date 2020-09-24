@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.war;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.BooleanUtils;
 
 public class Battle {
 
@@ -36,7 +37,7 @@ public class Battle {
     }
 
     public boolean getResult() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("result"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("result"));
     }
 
     public Double getWinnerAlliance() {

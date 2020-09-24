@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.Color;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -29,8 +30,8 @@ public class Religion {
         this.name = item.getName();
         ClausewitzList list = item.getList("color");
         this.color = list == null ? null : new Color(list);
-        this.hreReligion = Boolean.TRUE.equals(item.getVarAsBool("hre_religion"));
-        this.hreHereticReligion = Boolean.TRUE.equals(item.getVarAsBool("hre_heretic_religion"));
+        this.hreReligion = BooleanUtils.toBoolean(item.getVarAsBool("hre_religion"));
+        this.hreHereticReligion = BooleanUtils.toBoolean(item.getVarAsBool("hre_heretic_religion"));
         this.date = item.getVarAsDate("date");
         ClausewitzItem child = item.getChild("papacy");
         this.papacy = child == null ? null : new Papacy(child);

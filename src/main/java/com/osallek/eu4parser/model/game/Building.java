@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -87,11 +88,11 @@ public class Building {
         this.cost = item.getVarAsInt("cost");
         this.time = item.getVarAsInt("time");
         this.makeObsolete = item.getVarAsString("make_obsolete");
-        this.oncePerCountry = Boolean.TRUE.equals(item.getVarAsBool("one_per_country"));
-        this.allowInGoldProvince = Boolean.TRUE.equals(item.getVarAsBool("allow_in_gold_provinces"));
-        this.indestructible = Boolean.TRUE.equals(item.getVarAsBool("indestructible"));
-        this.onMap = Boolean.TRUE.equals(item.getVarAsBool("onmap"));
-        this.influencingFort = Boolean.TRUE.equals(item.getVarAsBool("influencing_fort"));
+        this.oncePerCountry = BooleanUtils.toBoolean(item.getVarAsBool("one_per_country"));
+        this.allowInGoldProvince = BooleanUtils.toBoolean(item.getVarAsBool("allow_in_gold_provinces"));
+        this.indestructible = BooleanUtils.toBoolean(item.getVarAsBool("indestructible"));
+        this.onMap = BooleanUtils.toBoolean(item.getVarAsBool("onmap"));
+        this.influencingFort = BooleanUtils.toBoolean(item.getVarAsBool("influencing_fort"));
 
         ClausewitzList list = item.getList("manufactory");
         this.manufactoryFor = list == null ? new ArrayList<>() :
@@ -100,8 +101,8 @@ public class Building {
         list = item.getList("bonus_manufactory");
         this.bonusManufactory = list == null ? new ArrayList<>() :
                                 list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
-        this.governmentSpecific = Boolean.TRUE.equals(item.getVarAsBool("government_specific"));
-        this.showSeparate = Boolean.TRUE.equals(item.getVarAsBool("show_separate"));
+        this.governmentSpecific = BooleanUtils.toBoolean(item.getVarAsBool("government_specific"));
+        this.showSeparate = BooleanUtils.toBoolean(item.getVarAsBool("show_separate"));
 
         ClausewitzItem child = item.getChild("modifier");
 
@@ -114,7 +115,7 @@ public class Building {
                                                                         LinkedHashMap::new));
 
         child = item.getChild("trigger");
-        this.onlyInPort = child != null && Boolean.TRUE.equals(child.getVarAsBool("has_port"));
+        this.onlyInPort = child != null && BooleanUtils.toBoolean(child.getVarAsBool("has_port"));
 
         child = item.getChild("build_trigger");
         this.onlyNatives = child != null

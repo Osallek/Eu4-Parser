@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.trade;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -77,11 +78,11 @@ public class TradeNodeCountry {
     }
 
     public boolean hasTrader() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("has_trader"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("has_trader"));
     }
 
     public boolean hasCapital() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("has_capital"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("has_capital"));
     }
 
     public List<TradeNodeModifier> getModifiers() {

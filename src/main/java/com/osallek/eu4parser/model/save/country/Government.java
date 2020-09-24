@@ -3,7 +3,6 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import org.luaj.vm2.ast.Str;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -16,6 +16,7 @@ import com.osallek.eu4parser.model.save.diplomacy.SubjectType;
 import com.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.math.BigDecimal;
@@ -76,7 +77,7 @@ public class ConditionsUtils {
             case "alliance_with":
                 return country.getAllies().stream().map(Country::getTag).anyMatch(tag -> tag.equalsIgnoreCase(value));
             case "allows_female_emperor":
-                return country.getSave().getHre() != null && Boolean.TRUE.equals(country.getSave().getHre().getAllowsFemaleEmperor());
+                return country.getSave().getHre() != null && BooleanUtils.toBoolean(country.getSave().getHre().getAllowsFemaleEmperor());
             case "always":
                 return "yes".equals(value);
             case "army_size":
@@ -378,7 +379,7 @@ public class ConditionsUtils {
             case "has_consort_flag":
                 return country.getConsort() != null && country.getConsort().getRulerFlags().contains(value);
             case "has_consort_regency":
-                return country.getConsort() != null && Boolean.TRUE.equals(country.getConsort().getRegent());
+                return country.getConsort() != null && BooleanUtils.toBoolean(country.getConsort().getRegent());
             case "has_country_flag":
                 return country.getFlags().contains(value);
             case "has_country_modifier":
@@ -397,9 +398,9 @@ public class ConditionsUtils {
             case "has_dlc":
                 return country.getSave().getDlcEnabled().contains(value);
             case "has_divert_trade":
-                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && Boolean.TRUE.equals(country.getSubjectInteractions().get(6));
+                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(6));
             case "has_embargo_rivals":
-                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && Boolean.TRUE.equals(country.getSubjectInteractions().get(1));
+                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(1));
             case "has_estate":
                 return country.getEstates().stream().map(Estate::getType).map(ClausewitzUtils::removeQuotes).anyMatch(value::equals);
             case "has_estate_influence_modifier": //Todo object
@@ -411,11 +412,11 @@ public class ConditionsUtils {
             case "has_factions":
                 return CollectionUtils.isNotEmpty(country.getFactions());
             case "has_female_consort":
-                return country.getConsort() != null && Boolean.TRUE.equals(country.getConsort().getFemale());
+                return country.getConsort() != null && BooleanUtils.toBoolean(country.getConsort().getFemale());
             case "has_female_heir":
-                return country.getHeir() != null && Boolean.TRUE.equals(country.getHeir().getFemale());
+                return country.getHeir() != null && BooleanUtils.toBoolean(country.getHeir().getFemale());
             case "has_first_revolution_started":
-                return country.getSave().getRevolution() != null && Boolean.TRUE.equals(country.getSave().getRevolution().hasFirstRevolutionStarted());
+                return country.getSave().getRevolution() != null && BooleanUtils.toBoolean(country.getSave().getRevolution().hasFirstRevolutionStarted());
             case "has_foreign_consort":
                 return country.getConsort() != null && country.getConsort().getWho() != null;
             case "has_foreign_heir":
@@ -424,7 +425,7 @@ public class ConditionsUtils {
                 return country.getOwnedProvinces()
                               .stream()
                               .filter(province -> province.getReligion().equals(country.getReligion()))
-                              .anyMatch(province -> Boolean.TRUE.equals(province.centerOfReligion()));
+                              .anyMatch(province -> BooleanUtils.toBoolean(province.centerOfReligion()));
             case "has_game_started":
                 return !country.getSave().getDate().equals(country.getSave().getStartDate());
             case "has_given_consort_to":
@@ -451,7 +452,7 @@ public class ConditionsUtils {
                 return country.getOwnedProvinces()
                               .stream()
                               .filter(province -> !province.getReligion().equals(country.getReligion()))
-                              .anyMatch(province -> Boolean.TRUE.equals(province.centerOfReligion()));
+                              .anyMatch(province -> BooleanUtils.toBoolean(province.centerOfReligion()));
             case "has_idea": //Todo parse idea groups
                 break;
             case "has_idea_group":
@@ -496,7 +497,7 @@ public class ConditionsUtils {
             case "has_promote_investments": //Todo parse trade companies
                 return CollectionUtils.isNotEmpty(country.getTradeCompanies());
             case "has_regency":
-                return Boolean.TRUE.equals(country.getMonarch().getRegent());
+                return BooleanUtils.toBoolean(country.getMonarch().getRegent());
             case "has_reform":
                 return country.getGovernment().getReforms().contains(value);
             case "government_reform_progress":
@@ -510,43 +511,43 @@ public class ConditionsUtils {
             case "has_ruler_modifier":
                 return country.getModifiers()
                               .stream()
-                              .filter(modifier -> Boolean.TRUE.equals(modifier.rulerModifier()))
+                              .filter(modifier -> BooleanUtils.toBoolean(modifier.rulerModifier()))
                               .map(Modifier::getModifier)
                               .anyMatch(value::equals);
             case "has_saved_event_target": //Todo ???
                 break;
             case "has_scutage":
-                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && Boolean.TRUE.equals(country.getSubjectInteractions().get(4));
+                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(4));
             case "has_secondary_religion":
                 return country.getSecondaryReligion() != null;
             case "has_send_officers":
-                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && Boolean.TRUE.equals(country.getSubjectInteractions().get(5));
+                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(5));
             case "has_spawned_rebels":
                 return country.getSave()
                               .getRebelFactions()
                               .stream()
-                              .anyMatch(rebelFaction -> Boolean.TRUE.equals(rebelFaction.isActive()) && rebelFaction.getCountry().equals(country)
+                              .anyMatch(rebelFaction -> BooleanUtils.toBoolean(rebelFaction.isActive()) && rebelFaction.getCountry().equals(country)
                                                         && rebelFaction.getType().equals(ClausewitzUtils.removeQuotes(value)));
             case "has_spawned_supported_rebels":
                 other = country.getSave().getCountry(value);
                 return country.getSave()
                               .getRebelFactions()
                               .stream()
-                              .anyMatch(rebelFaction -> Boolean.TRUE.equals(rebelFaction.isActive()) && rebelFaction.getCountry().equals(country)
+                              .anyMatch(rebelFaction -> BooleanUtils.toBoolean(rebelFaction.isActive()) && rebelFaction.getCountry().equals(country)
                                                         && rebelFaction.getSupportiveCountry() != null && rebelFaction.getSupportiveCountry().equals(other));
             case "has_spy_network_from": //Todo object
                 break;
             case "has_spy_network_in": //Todo object
                 break;
             case "has_subsidize_armies":
-                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && Boolean.TRUE.equals(country.getSubjectInteractions().get(3));
+                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(3));
             case "has_support_loyalists":
-                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && Boolean.TRUE.equals(country.getSubjectInteractions().get(2));
+                return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(2));
             case "has_switched_nation":
-                return Boolean.TRUE.equals(country.hasSwitchedNation());
+                return BooleanUtils.toBoolean(country.hasSwitchedNation());
             case "has_truce":
                 other = country.getSave().getCountry(value);
-                return country.getActiveRelation(other) != null && Boolean.TRUE.equals(country.getActiveRelation(other).truce());
+                return country.getActiveRelation(other) != null && BooleanUtils.toBoolean(country.getActiveRelation(other).truce());
             case "has_unembraced_institution": //Todo institutions
                 //                return country.getEmbracedInstitution();
                 break;
@@ -562,7 +563,7 @@ public class ConditionsUtils {
             case "has_unlocked_cult": //Todo parse cults
                 break;
             case "has_wartaxes":
-                return Boolean.TRUE.equals(country.warTaxes());
+                return BooleanUtils.toBoolean(country.warTaxes());
             case "heavy_ship_fraction":
                 return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getNavySize())).compareTo(BigDecimal.valueOf(country.getNbHeavyShips())) >= 0;
             case "heir_adm":
@@ -606,14 +607,14 @@ public class ConditionsUtils {
                     return other.getHordeUnity() != null && country.getHordeUnity() != null && country.getHordeUnity() >= other.getHordeUnity();
                 }
             case "hre_heretic_religion":
-                return !country.getSave().getHre().dismantled() && Boolean.TRUE.equals(
+                return !country.getSave().getHre().dismantled() && BooleanUtils.toBoolean(
                         country.getSave().getReligions().getReligion(value).isHreHereticReligion());
             case "hre_leagues_enabled":
-                return !country.getSave().getHre().dismantled() && Boolean.TRUE.equals(country.getSave().getHreLeaguesActive());
+                return !country.getSave().getHre().dismantled() && BooleanUtils.toBoolean(country.getSave().getHreLeaguesActive());
             case "hre_reform_level":
                 return !country.getSave().getHre().dismantled() && country.getSave().getHre().getPassedReforms().size() >= NumbersUtils.toInt(value);
             case "hre_religion":
-                return !country.getSave().getHre().dismantled() && Boolean.TRUE.equals(country.getSave().getReligions().getReligion(value).isHreReligion());
+                return !country.getSave().getHre().dismantled() && BooleanUtils.toBoolean(country.getSave().getReligions().getReligion(value).isHreReligion());
             case "hre_religion_locked":
                 return "yes".equals(value) == (!country.getSave().getHre().dismantled()
                                                && !HreReligionStatus.PEACE.equals(country.getSave().getHreReligionStatus()));
@@ -725,11 +726,11 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return country.getEnemies().contains(other);
             case "is_excommunicated":
-                return Boolean.TRUE.equals(country.isExcommunicated());
+                return BooleanUtils.toBoolean(country.isExcommunicated());
             case "is_federation_leader":
                 return country.equals(country.getFederationLeader());
             case "is_female":
-                return Boolean.TRUE.equals(country.getMonarch().getFemale());
+                return BooleanUtils.toBoolean(country.getMonarch().getFemale());
             case "is_force_converted":
                 return country.getForceConvert() != null;
             case "is_former_colonial_nation":
@@ -743,7 +744,7 @@ public class ConditionsUtils {
             case "is_hegemon":
                 return "yes".equals(value) == (country.getPowerProjections().stream().map(PowerProjection::getModifier).anyMatch("is_hegemon"::equals));
             case "is_imperial_ban_allowed":
-                return !country.getSave().getHre().dismantled() && Boolean.TRUE.equals(country.getSave().getHre().getImperialBanAllowed());
+                return !country.getSave().getHre().dismantled() && BooleanUtils.toBoolean(country.getSave().getHre().getImperialBanAllowed());
             case "is_incident_active":
                 switch (value) {
                     case "any":
@@ -786,7 +787,7 @@ public class ConditionsUtils {
                 return country.getReligion().equals(other.getReligion()) && country.getReligion().getInLeague().contains(country)
                        && country.getReligion().getInLeague().contains(other);
             case "is_league_leader":
-                return Boolean.TRUE.equals(country.getSave().getHreLeaguesActive())
+                return BooleanUtils.toBoolean(country.getSave().getHreLeaguesActive())
                        && (country.getSave().getHre().getEmperor().equals(country)
                            || CollectionUtils.isNotEmpty(country.getReligion().getInLeague()) && country.getReligion().getInLeague().get(0).equals(country));
             case "is_lesser_in_union":
@@ -852,7 +853,7 @@ public class ConditionsUtils {
                 return country.getSave().getReligions().getReligion(value) != null
                        && country.getSave().getReligions().getReligion(value).getEnable().before(country.getSave().getDate());
             case "is_religion_reformed":
-                return "yes".equals(value) == (Boolean.TRUE.equals(country.hasReformedReligion()));
+                return "yes".equals(value) == (BooleanUtils.toBoolean(country.hasReformedReligion()));
             case "is_revolution_target":
                 return country.getSave().getRevolution() != null && country.equals(country.getSave().getRevolution().getRevolutionTarget());
             case "is_rival":

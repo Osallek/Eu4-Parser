@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import org.luaj.vm2.ast.Str;
 
 import java.util.Date;
 import java.util.List;

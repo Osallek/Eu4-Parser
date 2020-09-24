@@ -3,11 +3,12 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Save;
 
 public class Regiment extends Ship {
 
-    public Regiment(ClausewitzItem item) {
-        super(item);
+    public Regiment(ClausewitzItem item, Save save) {
+        super(item, save);
     }
 
     public Double getDrill() {

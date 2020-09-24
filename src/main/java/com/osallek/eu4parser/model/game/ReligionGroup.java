@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.AbstractMap;
 import java.util.List;
@@ -37,8 +38,8 @@ public class ReligionGroup {
                              .stream()
                              .map(child -> new Religion(child, this))
                              .collect(Collectors.toList());
-        this.defenderOfFaith = Boolean.TRUE.equals(item.getVarAsBool("defender_of_faith"));
-        this.canFormPersonalUnions = Boolean.TRUE.equals(item.getVarAsBool("can_form_personal_unions"));
+        this.defenderOfFaith = BooleanUtils.toBoolean(item.getVarAsBool("defender_of_faith"));
+        this.canFormPersonalUnions = BooleanUtils.toBoolean(item.getVarAsBool("can_form_personal_unions"));
         this.centerOfReligion = item.getVarAsInt("center_of_religion");
         this.flagsWithEmblemPercentage = item.getVarAsInt("flags_with_emblem_percentage");
         ClausewitzList list = item.getList("flag_emblem_index_range");

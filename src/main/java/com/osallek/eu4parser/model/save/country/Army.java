@@ -109,7 +109,7 @@ public class Army extends AbstractArmy {
 
         List<ClausewitzItem> regimentsItems = this.item.getChildren("regiment");
         this.regiments = regimentsItems.stream()
-                                       .map(Regiment::new)
+                                       .map(regimentItem -> new Regiment(regimentItem, this.country.getSave()))
                                        .collect(Collectors.toList());
     }
 }

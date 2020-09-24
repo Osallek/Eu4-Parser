@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -123,14 +124,14 @@ public class ImperialReform implements Comparable<ImperialReform> {
         child = item.getChild("on_effect");
 
         if (child != null) {
-            this.enableImperialBanAllowed = Boolean.TRUE.equals(child.getVarAsBool("imperial_ban_allowed"));
-            this.disableImperialBanAllowed = Boolean.FALSE.equals(child.getVarAsBool("imperial_ban_allowed"));
-            this.enableInternalHreCb = Boolean.TRUE.equals(child.getVarAsBool("internal_hre_cb"));
-            this.disableInternalHreCb = Boolean.FALSE.equals(child.getVarAsBool("internal_hre_cb"));
-            this.enableEnableImperialRealmWar = Boolean.TRUE.equals(child.getVarAsBool("enable_imperial_realm_war"));
-            this.disableEnableImperialRealmWar = Boolean.FALSE.equals(child.getVarAsBool("enable_imperial_realm_war"));
-            this.enableHreInheritable = Boolean.TRUE.equals(child.getVarAsBool("hre_inheritable"));
-            this.disableHreInheritable = Boolean.FALSE.equals(child.getVarAsBool("hre_inheritable"));
+            this.enableImperialBanAllowed = BooleanUtils.toBoolean(child.getVarAsBool("imperial_ban_allowed"));
+            this.disableImperialBanAllowed = BooleanUtils.isFalse(child.getVarAsBool("imperial_ban_allowed"));
+            this.enableInternalHreCb = BooleanUtils.toBoolean(child.getVarAsBool("internal_hre_cb"));
+            this.disableInternalHreCb = BooleanUtils.isFalse(child.getVarAsBool("internal_hre_cb"));
+            this.enableEnableImperialRealmWar = BooleanUtils.toBoolean(child.getVarAsBool("enable_imperial_realm_war"));
+            this.disableEnableImperialRealmWar = BooleanUtils.isFalse(child.getVarAsBool("enable_imperial_realm_war"));
+            this.enableHreInheritable = BooleanUtils.toBoolean(child.getVarAsBool("hre_inheritable"));
+            this.disableHreInheritable = BooleanUtils.isFalse(child.getVarAsBool("hre_inheritable"));
         }
     }
 

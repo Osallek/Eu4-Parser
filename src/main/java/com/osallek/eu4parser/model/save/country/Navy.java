@@ -98,7 +98,7 @@ public class Navy extends Army {
 
         List<ClausewitzItem> shipsItems = this.item.getChildren("ship");
         this.ships = shipsItems.stream()
-                               .map(Regiment::new)
+                               .map(child -> new Regiment(child, this.country.getSave()))
                                .collect(Collectors.toList());
     }
 }

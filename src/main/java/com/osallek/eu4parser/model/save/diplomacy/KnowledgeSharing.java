@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -12,7 +13,7 @@ public class KnowledgeSharing extends EndDatableRelation {
     }
 
     public boolean getSubjectInteractions() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("subject_interactions"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("subject_interactions"));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, Date endDate, boolean subjectInteractions) {

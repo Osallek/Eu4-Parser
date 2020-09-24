@@ -11,9 +11,9 @@ import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.save.combat.Combats;
 import com.osallek.eu4parser.model.save.counters.IdCounters;
-import com.osallek.eu4parser.model.save.country.SaveArea;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Hegemon;
+import com.osallek.eu4parser.model.save.country.SaveArea;
 import com.osallek.eu4parser.model.save.country.TradeCompany;
 import com.osallek.eu4parser.model.save.diplomacy.Diplomacy;
 import com.osallek.eu4parser.model.save.empire.CelestialEmpire;
@@ -30,6 +30,7 @@ import com.osallek.eu4parser.model.save.revolution.Revolution;
 import com.osallek.eu4parser.model.save.trade.TradeNode;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
 import com.osallek.eu4parser.model.save.war.PreviousWar;
+import org.apache.commons.lang3.BooleanUtils;
 import org.luaj.vm2.parser.ParseException;
 
 import java.io.BufferedWriter;
@@ -214,11 +215,11 @@ public class Save {
     }
 
     public boolean isMultiPlayer() {
-        return Boolean.TRUE.equals(this.metaItem.getVarAsBool("multi_player"));
+        return BooleanUtils.toBoolean(this.metaItem.getVarAsBool("multi_player"));
     }
 
     public boolean isRandomNewWorld() {
-        return Boolean.TRUE.equals(this.metaItem.getVarAsBool("is_random_new_world"));
+        return BooleanUtils.toBoolean(this.metaItem.getVarAsBool("is_random_new_world"));
     }
 
     public GameplayOptions getGameplayOptions() {
@@ -474,7 +475,7 @@ public class Save {
         this.countries.values()
                       .stream()
                       .filter(country -> country.getPlayerAiPrefsCommand() == null
-                                         && Boolean.TRUE.equals(country.isHuman()))
+                                         && BooleanUtils.toBoolean(country.isHuman()))
                       .forEach(country -> country.setPlayerAiPrefsCommand(startWars, keepAlliances, keepTreaties,
                                                                           quickPeace, moveTraders, takeDecisions,
                                                                           embraceInstitutions, developProvinces,
@@ -528,7 +529,7 @@ public class Save {
     }
 
     public boolean getAchievementOk() {
-        return Boolean.TRUE.equals(this.gamestateItem.getVarAsBool("achievement_ok"));
+        return BooleanUtils.toBoolean(this.gamestateItem.getVarAsBool("achievement_ok"));
     }
 
     public void addTradeCompany(String name, String owner, Integer... provinces) {

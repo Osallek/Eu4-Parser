@@ -4,7 +4,6 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.eu4parser.model.Color;
-import org.luaj.vm2.ast.Str;
 
 import java.util.ArrayList;
 import java.util.Collection;

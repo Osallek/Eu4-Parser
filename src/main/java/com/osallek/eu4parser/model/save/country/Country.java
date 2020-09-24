@@ -19,6 +19,7 @@ import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.Advisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -705,7 +706,7 @@ public class Country {
     }
 
     public boolean hasCircumnavigatedWorld() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("has_circumnavigated_world"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("has_circumnavigated_world"));
     }
 
     public void setHasCircumnavigatedWorld(boolean hasCircumnavigatedWorld) {
@@ -713,15 +714,15 @@ public class Country {
     }
 
     public boolean initializedRivals() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("initialized_rivals"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("initialized_rivals"));
     }
 
     public boolean recalculateStrategy() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("recalculate_strategy"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("recalculate_strategy"));
     }
 
     public boolean dirtyColony() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("dirty_colony"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("dirty_colony"));
     }
 
     public Culture getPrimaryCulture() {
@@ -1042,7 +1043,7 @@ public class Country {
     }
 
     public boolean getConvert() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("convert"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("convert"));
     }
 
     public void setConvert(boolean convert) {
@@ -1079,11 +1080,11 @@ public class Country {
     }
 
     public boolean newMonarch() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("new_monarch"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("new_monarch"));
     }
 
     public boolean isAtWar() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("is_at_war"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_at_war"));
     }
 
     public Date lastElection() {
@@ -2865,7 +2866,7 @@ public class Country {
     }
 
     public Monarch getConsort() {
-        return this.queen == null ? null : Boolean.TRUE.equals(this.queen.getConsort()) ? this.queen : this.monarch;
+        return this.queen == null ? null : BooleanUtils.toBoolean(this.queen.getConsort()) ? this.queen : this.monarch;
     }
 
     public String getOriginalDynasty() {
@@ -2889,7 +2890,7 @@ public class Country {
     }
 
     public boolean isGreatPower() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("is_great_power"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_great_power"));
     }
 
     public Date getInauguration() {
@@ -2949,7 +2950,7 @@ public class Country {
     }
 
     public boolean getAssignedEstates() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("assigned_estates"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("assigned_estates"));
     }
 
     public List<Integer> getTradedBonus() {

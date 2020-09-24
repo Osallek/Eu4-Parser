@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.combat;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -78,6 +79,6 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
     }
 
     public boolean active() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("active"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("active"));
     }
 }

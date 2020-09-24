@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -12,7 +13,7 @@ public class MilitaryAccess extends DatableRelation {
     }
 
     public boolean enforcePeace() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("enforce_peace"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("enforce_peace"));
     }
 
     public void setEnforcePeace(boolean enforcePeace) {

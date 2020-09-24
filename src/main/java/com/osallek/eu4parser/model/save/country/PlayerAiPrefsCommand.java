@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.BooleanUtils;
 
 public class PlayerAiPrefsCommand {
 
@@ -11,7 +12,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean startWars() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("start_wars"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("start_wars"));
     }
 
     public void setStartWars(boolean startWars) {
@@ -19,7 +20,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean keepAlliances() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("keep_alliances"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("keep_alliances"));
     }
 
     public void setKeepAlliances(boolean keepAlliances) {
@@ -27,7 +28,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean keepTreaties() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("keep_treaties"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("keep_treaties"));
     }
 
     public void setKeepTreaties(boolean keepTreaties) {
@@ -35,7 +36,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean quickPeace() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("quick_peace"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("quick_peace"));
     }
 
     public void setQuickPeace(boolean quickPeace) {
@@ -43,7 +44,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean moveTraders() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("move_traders"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("move_traders"));
     }
 
     public void setMoveTraders(boolean moveTraders) {
@@ -51,7 +52,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean takeDecisions() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("take_decisions"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("take_decisions"));
     }
 
     public void setTakeDecisions(boolean takeDecisions) {
@@ -59,7 +60,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean embraceInstitutions() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("embrace_institutions"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("embrace_institutions"));
     }
 
     public void setEmbraceInstitutions(boolean embraceInstitutions) {
@@ -67,7 +68,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean developProvinces() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("develop_provinces"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("develop_provinces"));
     }
 
     public void setDevelopProvinces(boolean developProvinces) {
@@ -75,7 +76,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean disbandUnits() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("disband_units"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("disband_units"));
     }
 
     public void setDisbandUnits(boolean disbandUnits) {
@@ -83,7 +84,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean changeFleetMissions() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("change_fleet_missions"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("change_fleet_missions"));
     }
 
     public void setChangeFleetMissions(boolean changeFleetMissions) {
@@ -91,7 +92,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean sendMissionaries() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("send_missionaries"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("send_missionaries"));
     }
 
     public void setSendMissionaries(boolean sendMissionaries) {
@@ -99,7 +100,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean convertCultures() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("convert_cultures"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("convert_cultures"));
     }
 
     public void setConvertCultures(boolean convertCultures) {
@@ -107,7 +108,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean promoteCultures() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("promote_cultures"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("promote_cultures"));
     }
 
     public void setPromoteCultures(boolean promoteCultures) {
@@ -115,7 +116,7 @@ public class PlayerAiPrefsCommand {
     }
 
     public boolean braindead() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("braindead"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("braindead"));
     }
 
     public void setBraindead(boolean braindead) {

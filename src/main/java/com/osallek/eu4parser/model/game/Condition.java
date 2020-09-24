@@ -4,8 +4,6 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.ConditionsUtils;
-import com.osallek.eu4parser.common.NumbersUtils;
-import com.osallek.eu4parser.model.save.Power;
 import com.osallek.eu4parser.model.save.country.Country;
 
 import java.util.Collection;

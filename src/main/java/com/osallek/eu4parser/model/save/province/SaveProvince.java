@@ -16,6 +16,7 @@ import com.osallek.eu4parser.model.save.country.Army;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Modifier;
 import com.osallek.eu4parser.model.save.country.Navy;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -364,7 +365,7 @@ public class SaveProvince extends Province {
     }
 
     public boolean isCity() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("is_city"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_city"));
     }
 
     public boolean isColony() {
@@ -553,7 +554,7 @@ public class SaveProvince extends Province {
     }
 
     public boolean inHre() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("hre"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre"));
     }
 
     public void setInHre(boolean inHre) {
@@ -561,7 +562,7 @@ public class SaveProvince extends Province {
     }
 
     public boolean blockade() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("blockade"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("blockade"));
     }
 
     public Double getBlockadeEfficiency() {
@@ -875,7 +876,7 @@ public class SaveProvince extends Province {
     }
 
     public boolean fortMothballed() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("mothball_command"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("mothball_command"));
     }
 
     public void setFortMothballed(boolean fortMothballed) {
@@ -891,11 +892,11 @@ public class SaveProvince extends Province {
     }
 
     public boolean userChangedName() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("user_changed_name"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("user_changed_name"));
     }
 
     public boolean hreLiberated() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("hre_liberated"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_liberated"));
     }
 
     public void setHreLiberated(boolean hreLiberated) {

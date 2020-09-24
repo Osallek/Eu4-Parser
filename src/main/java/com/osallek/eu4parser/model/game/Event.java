@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class Event {
         this.desc = item.getVarAsString("desc");
         this.picture = item.getVarAsString("picture");
         this.type = EventType.getByType(item.getName());
-        this.fireOnlyOnce = Boolean.TRUE.equals(item.getVarAsBool("fire_only_once"));
+        this.fireOnlyOnce = BooleanUtils.toBoolean(item.getVarAsBool("fire_only_once"));
     }
 
     public String getId() {

@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.war;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.save.country.Losses;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class WarParticipant {
     }
 
     public boolean getPromisedLand() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("promised_land"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("promised_land"));
     }
 
     public void setPromisedLand(boolean promisedLand) {

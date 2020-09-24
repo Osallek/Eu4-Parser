@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +43,7 @@ public abstract class Empire {
     protected abstract String getId();
 
     public boolean dismantled() {
-        return Boolean.TRUE.equals(this.item.getVarAsBool("hre_dismantled"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_dismantled"));
     }
 
     public void dismantle() {
