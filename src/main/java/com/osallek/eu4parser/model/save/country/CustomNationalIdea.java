@@ -1,42 +1,48 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzObject;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-public class CustomNationalIdeas {
+public class CustomNationalIdea {
 
     private final ClausewitzItem item;
 
-    public CustomNationalIdeas(ClausewitzItem item) {
+    public CustomNationalIdea(ClausewitzItem item) {
         this.item = item;
     }
 
-    public Map<String, Integer> getIdeaGroups() {
-        return this.item.getVariables()
-                        .stream()
-                        .collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getAsInt, (a, b) -> a, LinkedHashMap::new));
+    public Integer getLevel() {
+        return this.item.getVarAsInt("level");
     }
 
-    public void addIdeaGroup(String name, int level) {
-        if (level < 0) {
-            level = 0;
-        } else if (level > 7) {
-            level = 7;
-        }
-
-        this.item.setVariable(name, level);
+    public void setProsperity(int level) {
+        this.item.setVariable("level", Math.max(0, level));
     }
 
-    public void removeIdeaGroup(int index) {
-        this.item.removeVariable(index);
+    public Integer getIndex() {
+        return this.item.getVarAsInt("index");
     }
 
-    public void removeIdeaGroup(String ideaGroup) {
-        this.item.removeVariable(ideaGroup);
+    public void setIndex(int index) {
+        this.item.setVariable("index", index);
+    }
+
+    public String getCountry() {
+        return this.item.getVarAsString("country");
+    }
+
+    public String getName() {
+        return this.item.getVarAsString("name");
+    }
+
+    public void setName(String name) {
+        this.item.setVariable("name", name);
+    }
+
+    public String getDesc() {
+        return this.item.getVarAsString("desc");
+    }
+
+    public void setDesc(String desc) {
+        this.item.setVariable("desc", desc);
     }
 }

@@ -1,42 +1,47 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzObject;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.game.Game;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
-public class IdeaGroups {
+public class Church {
+
+    private final Game game;
 
     private final ClausewitzItem item;
 
-    public IdeaGroups(ClausewitzItem item) {
+    public Church(ClausewitzItem item, Game game) {
+        this.game = game;
         this.item = item;
     }
 
-    public Map<String, Integer> getIdeaGroups() {
-        return this.item.getVariables()
-                        .stream()
-                        .collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getAsInt, (a, b) -> a, LinkedHashMap::new));
+    public Double getPower() {
+        return this.item.getVarAsDouble("power");
     }
 
-    public void addIdeaGroup(String name, int level) {
-        if (level < 0) {
-            level = 0;
-        } else if (level > 7) {
-            level = 7;
+    public void setPower(Double power) {
+        this.item.setVariable("power", power);
+    }
+
+    public List<String> getAspects() {
+        return this.item.getVarsAsStrings("aspect");
+    }
+
+    public void addAspect(String aspect) {
+        List<String> aspects = this.item.getVarsAsStrings("aspect");
+
+        if (!aspects.contains(aspect)) {
+            if (aspects.size() >= this.game.getMaxAspects()) {
+                removeAspect(aspects.get(aspects.size() - 1));
+            }
+
+            this.item.addVariable("aspect", aspect);
         }
-
-        this.item.setVariable(name, level);
     }
 
-    public void removeIdeaGroup(int index) {
-        this.item.removeVariable(index);
+    public void removeAspect(String aspect) {
+        this.item.removeVariable("aspect", aspect);
     }
 
-    public void removeIdeaGroup(String ideaGroup) {
-        this.item.removeVariable(ideaGroup);
-    }
 }

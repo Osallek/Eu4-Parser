@@ -2,35 +2,31 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class Technology {
+public class Faction {
 
     private final ClausewitzItem item;
 
-    public Technology(ClausewitzItem item) {
+    public Faction(ClausewitzItem item) {
         this.item = item;
     }
 
-    public Integer getAdm() {
-        return this.item.getVarAsInt("adm_tech");
+    public Double getInfluence() {
+        return this.item.getVarAsDouble("influence");
     }
 
-    public void setAdm(Integer adm) {
-        this.item.setVariable("adm_tech", adm);
+    public void setInfluence(double influence) {
+        this.item.setVariable("influence", Math.min(Math.max(0, influence), 100));
     }
 
-    public Integer getDip() {
-        return this.item.getVarAsInt("dip_tech");
+    public String getType() {
+        return this.item.getVarAsString("type");
     }
 
-    public void setDip(Integer dip) {
-        this.item.setVariable("dip_tech", dip);
+    public Double getOldInfluence() {
+        return this.item.getVarAsDouble("old_influence");
     }
 
-    public Integer getMil() {
-        return this.item.getVarAsInt("mil_tech");
-    }
-
-    public void setMil(Integer mil) {
-        this.item.setVariable("mil_tech", mil);
+    public void setOldInfluence(double influence) {
+        this.item.setVariable("old_influence", Math.min(Math.max(0, influence), 100));
     }
 }

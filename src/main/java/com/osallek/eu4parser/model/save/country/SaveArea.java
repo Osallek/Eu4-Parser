@@ -12,19 +12,19 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Area {
+public class SaveArea {
 
     private final ClausewitzItem item;
 
     private final Save save;
 
-    private Map<String, CountryState> countriesStates;
+    private Map<Country, CountryState> countriesStates;
 
-    private Map<String, Investment> investments;
+    private Map<Country, Investment> investments;
 
     private List<SaveProvince> provinces;
 
-    public Area(ClausewitzItem item, Save save) {
+    public SaveArea(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
         refreshAttributes();
@@ -34,16 +34,20 @@ public class Area {
         return this.item.getName();
     }
 
-    public CountryState getCountryState(String country) {
+    public List<SaveProvince> getProvinces() {
+        return provinces;
+    }
+
+    public CountryState getCountryState(Country country) {
         return this.countriesStates.get(country);
     }
 
-    public Map<String, CountryState> getCountriesStates() {
+    public Map<Country, CountryState> getCountriesStates() {
         return countriesStates;
     }
 
-    public void addCountryState(String country) {
-        if (!this.countriesStates.containsKey(ClausewitzUtils.removeQuotes(country))) {
+    public void addCountryState(Country country) {
+        if (!this.countriesStates.containsKey(country)) {
             ClausewitzItem stateItem = this.item.getChild("state");
 
             if (stateItem == null) {
@@ -56,32 +60,30 @@ public class Area {
         }
     }
 
-    public void removeCountryState(String country) {
-        Iterator<Map.Entry<String, CountryState>> iterator = this.countriesStates.entrySet().iterator();
+    public void removeCountryState(Country country) {
+        Iterator<Map.Entry<Country, CountryState>> iterator = this.countriesStates.entrySet().iterator();
         int i = 0;
         while (iterator.hasNext()) {
-            Map.Entry<String, CountryState> entry = iterator.next();
-            if (ClausewitzUtils.addQuotes(entry.getValue().getCountry()).equals(ClausewitzUtils.addQuotes(country))) {
+            Map.Entry<Country, CountryState> entry = iterator.next();
+            if (entry.getValue().getCountry().equals(country)) {
                 this.item.getChild("state").removeChild("country_state", i);
-                this.save.getCountry(ClausewitzUtils.removeQuotes(country))
-                         .getStates()
-                         .remove(ClausewitzUtils.removeQuotes(getName()));
+                country.getStates().remove(ClausewitzUtils.removeQuotes(getName()));
                 break;
             }
         }
         refreshAttributes();
     }
 
-    public Investment getInvestment(String country) {
+    public Investment getInvestment(Country country) {
         return this.investments.get(country);
     }
 
-    public Map<String, Investment> getInvestments() {
+    public Map<Country, Investment> getInvestments() {
         return investments;
     }
 
-    public void addInvestments(String country, String... investments) {
-        Investment investment = this.investments.get(ClausewitzUtils.removeQuotes(country));
+    public void addInvestments(Country country, String... investments) {
+        Investment investment = this.investments.get(country);
 
         if (investment != null) {
             for (String newInvestment : investments) {
@@ -93,12 +95,13 @@ public class Area {
         }
     }
 
-    public void removeInvestments(String country) {
-        Iterator<Map.Entry<String, Investment>> iterator = this.investments.entrySet().iterator();
+    public void removeInvestments(Country country) {
+        Iterator<Map.Entry<Country, Investment>> iterator = this.investments.entrySet().iterator();
         int i = 0;
+
         while (iterator.hasNext()) {
-            Map.Entry<String, Investment> entry = iterator.next();
-            if (ClausewitzUtils.addQuotes(entry.getValue().getCountry()).equals(ClausewitzUtils.addQuotes(country))) {
+            Map.Entry<Country, Investment> entry = iterator.next();
+            if (entry.getValue().getCountry().equals(country)) {
                 this.item.removeChild("investments", i);
                 break;
             }
@@ -106,8 +109,8 @@ public class Area {
         refreshAttributes();
     }
 
-    public void removeInvestments(String country, String... investments) {
-        Investment investment = this.investments.get(ClausewitzUtils.removeQuotes(country));
+    public void removeInvestments(Country country, String... investments) {
+        Investment investment = this.investments.get(country);
 
         if (investment != null) {
             for (String newInvestment : investments) {
@@ -117,31 +120,20 @@ public class Area {
     }
 
     private void refreshAttributes() {
-        this.save.getGame().getA
+        this.provinces = this.save.getGame().getArea(getName()).getProvinces().stream().map(this.save::getProvince).collect(Collectors.toList());
         ClausewitzItem stateItem = this.item.getChild("state");
 
         if (stateItem != null) {
             List<ClausewitzItem> countryStateItems = stateItem.getChildren("country_state");
             this.countriesStates = countryStateItems.stream()
-                                                    .map(CountryState::new)
-                                                    .collect(Collectors.toMap(countryState -> ClausewitzUtils.removeQuotes(countryState
-                                                                                                                                   .getCountry()),
-                                                                              Function.identity(),
-                                                                              (a, b) -> b,
-                                                                              LinkedHashMap::new));
-            this.countriesStates.forEach((country, countryState) -> this.save.getCountry(country)
-                                                                             .getStates()
-                                                                             .put(ClausewitzUtils.removeQuotes(getName()),
-                                                                                  countryState));
+                                                    .map(child -> new CountryState(child, this.save))
+                                                    .collect(Collectors.toMap(CountryState::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
+            this.countriesStates.forEach((country, countryState) -> country.getStates().put(this, countryState));
         }
 
         List<ClausewitzItem> investmentsItems = this.item.getChildren("investments");
         this.investments = investmentsItems.stream()
-                                           .map(Investment::new)
-                                           .collect(Collectors.toMap(investment -> ClausewitzUtils.removeQuotes(investment
-                                                                                                                        .getCountry()),
-                                                                     Function.identity(),
-                                                                     (a, b) -> b,
-                                                                     LinkedHashMap::new));
+                                           .map(child -> new Investment(child, this.save))
+                                           .collect(Collectors.toMap(Investment::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
     }
 }
