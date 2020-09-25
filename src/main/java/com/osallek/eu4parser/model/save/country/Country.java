@@ -6,6 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
@@ -571,6 +572,10 @@ public class Country {
         }
     }
 
+    public Double getCustomNationPoints() {
+        return this.item.getVarAsDouble("custom_nation_points");
+    }
+
     public Double getBaseTax() {
         return this.item.getVarAsDouble("base_tax");
     }
@@ -591,12 +596,24 @@ public class Country {
         return this.item.getVarAsDouble("realm_development");
     }
 
+    public Double getUsedGoverningCapacity() {
+        return this.item.getVarAsDouble("used_governing_capacity");
+    }
+
     public Integer getIsolationism() {
         return this.item.getVarAsInt("isolationism");
     }
 
     public void setIsolationism(Integer isolationism) {
         this.item.setVariable("isolationism", isolationism);
+    }
+
+    public Integer getKarma() {
+        return this.item.getVarAsDouble("karma").intValue();
+    }
+
+    public void setKarma(int karma) {
+        this.item.setVariable("karma", (double) karma);
     }
 
     public Boolean hasReformedReligion() {
@@ -793,6 +810,14 @@ public class Country {
         this.item.setVariable("technology_group", technologyGroup);
     }
 
+    public Double getLibertyDesire() {
+        return this.item.getVarAsDouble("liberty_desire");
+    }
+
+    public void setLibertyDesire(Double libertyDesire) {
+        this.item.setVariable("liberty_desire", libertyDesire);
+    }
+
     public String getUnitType() {
         return this.item.getVarAsString("unit_type");
     }
@@ -867,6 +892,16 @@ public class Country {
         statistsVsMonarchists = Math.min(Math.max(statistsVsMonarchists, -1), 1);
 
         this.item.setVariable("statists_vs_monarchists", statistsVsMonarchists);
+    }
+
+    public Double getMilitarisedSociety() {
+        return this.item.getVarAsDouble("militarised_society");
+    }
+
+    public void setMilitarisedSociety(Double militarisedSociety) {
+        militarisedSociety = Math.min(Math.max(militarisedSociety, 0), 100);
+
+        this.item.setVariable("militarised_society", militarisedSociety);
     }
 
     public Integer getHighestPossibleFort() {
@@ -981,6 +1016,14 @@ public class Country {
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
                         .collect(Collectors.toList());
+    }
+
+    public Boolean isLucky() {
+        return this.item.getVarAsBool("luck");
+    }
+
+    public void setLucky(boolean lucky) {
+        this.item.setVariable("luck", lucky);
     }
 
     public Country getFederationLeader() {
@@ -2362,6 +2405,20 @@ public class Country {
         return this.item.getVarAsDouble("religious_unity");
     }
 
+    public void setRepublicanTradition(Double republicanTradition) {
+        if (republicanTradition < 0d) {
+            republicanTradition = 0d;
+        } else if (republicanTradition > 100d) {
+            republicanTradition = 100d;
+        }
+
+        this.item.setVariable("republican_tradition", republicanTradition);
+    }
+
+    public Double getRepublicanTradition() {
+        return this.item.getVarAsDouble("republican_tradition");
+    }
+
     public void setDevotion(Double devotion) {
         if (devotion < 0d) {
             devotion = 0d;
@@ -2388,6 +2445,26 @@ public class Country {
         }
 
         this.item.setVariable("meritocracy", meritocracy);
+    }
+
+    public List<String> getBlessings() {
+        return this.item.getVarsAsStrings("blessing");
+    }
+
+    public void addBlessing(String ignoreDecision) {
+        List<String> ignoreDecisions = this.item.getVarsAsStrings("blessing");
+
+        if (!ignoreDecisions.contains(ignoreDecision)) {
+            this.item.addVariable("blessing", ClausewitzUtils.addQuotes(ignoreDecision));
+        }
+    }
+
+    public void removeBlessing(int index) {
+        this.item.removeVariable("blessing", index);
+    }
+
+    public void removeBlessing(String blessing) {
+        this.item.removeVariable("blessing", blessing);
     }
 
     public Double getPapalInfluence() {
@@ -2501,6 +2578,10 @@ public class Country {
         this.item.setVariable("legitimacy", legitimacy);
     }
 
+    public Double getLegitimacyEquivalent() {
+        return NumbersUtils.coalesce(getLegitimacy(), getHordeUnity(), getRepublicanTradition(), getMeritocracy(), getDevotion());
+    }
+
     public Double getHordeUnity() {
         return this.item.getVarAsDouble("horde_unity");
     }
@@ -2513,6 +2594,10 @@ public class Country {
         }
 
         this.item.setVariable("horde_unity", hordeUnity);
+    }
+
+    public Double getLegitimacyOrHordeUnity() {
+        return NumbersUtils.coalesce(getLegitimacy(), getHordeUnity());
     }
 
     public Integer getMercantilism() {
@@ -2820,6 +2905,10 @@ public class Country {
 
     public Map<Integer, Leader> getLeaders() {
         return leaders;
+    }
+
+    public List<Leader> getLeadersOfType(LeaderType leaderType) {
+        return this.leaders.values().stream().filter(leader -> LeaderType.ADMIRAL.equals(leader.getType())).collect(Collectors.toList());
     }
 
     public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality) {

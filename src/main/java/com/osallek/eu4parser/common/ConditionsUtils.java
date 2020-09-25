@@ -9,14 +9,18 @@ import com.osallek.eu4parser.model.save.country.Estate;
 import com.osallek.eu4parser.model.save.country.Faction;
 import com.osallek.eu4parser.model.save.country.Income;
 import com.osallek.eu4parser.model.save.country.Leader;
+import com.osallek.eu4parser.model.save.country.LeaderType;
 import com.osallek.eu4parser.model.save.country.Modifier;
 import com.osallek.eu4parser.model.save.country.PowerProjection;
 import com.osallek.eu4parser.model.save.country.Queen;
 import com.osallek.eu4parser.model.save.diplomacy.SubjectType;
 import com.osallek.eu4parser.model.save.empire.HreReligionStatus;
+import com.osallek.eu4parser.model.save.gameplayoptions.NationSetup;
+import com.osallek.eu4parser.model.save.gameplayoptions.ProvinceTaxManpower;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.math.BigDecimal;
@@ -36,6 +40,7 @@ public class ConditionsUtils {
         Integer integer;
         Double aDouble;
         Calendar calendar = Calendar.getInstance();
+        Calendar calendar2 = Calendar.getInstance();
 
         switch (condition) {
             case "absolutism":
@@ -87,7 +92,7 @@ public class ConditionsUtils {
                     other = country.getSave().getCountry(value);
                     return country.getArmySize() >= other.getArmySize();
                 }
-            case "army_size_percentage": //Fixme do land limit
+            case "army_size_percentage": //Todo fl
                 break;
             case "army_strength": // Todo object
                 break;
@@ -903,7 +908,196 @@ public class ConditionsUtils {
             case "isolationism":
                 return country.getIsolationism() != null && country.getIsolationism() >= NumbersUtils.toInt(value);
             case "janissary_percentage":
-                return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getArmySize())).compareTo(BigDecimal.valueOf(country.getNbRegimentOf("ottoman_janissary"))) >= 0;
+                return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getArmySize()))
+                                            .compareTo(BigDecimal.valueOf(country.getNbRegimentOf("ottoman_janissary"))) >= 0;
+            case "junior_union_with":
+                other = country.getSave().getCountry(value);
+                return country.getOverlord() != null && country.getOverlord().equals(other)
+                       && country.getSave()
+                                 .getDiplomacy()
+                                 .getDependencies()
+                                 .stream()
+                                 .anyMatch(dependency -> "personal_union".equals(dependency.getSubjectType()) && country.equals(dependency.getSecond()));
+            case "karma":
+                if ((integer = NumbersUtils.toInt(value)) != null) {
+                    return NumbersUtils.intOrDefault(country.getKarma()) >= integer;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return NumbersUtils.intOrDefault(country.getKarma()) >= NumbersUtils.intOrDefault(other.getKarma());
+                }
+            case "knows_country":
+                other = country.getSave().getCountry(value);
+                return other.getCapital().getDiscoveredBy().contains(country);
+            case "land_forcelimit": //Todo fl
+                break;
+            case "land_maintenance":
+                return NumbersUtils.doubleOrDefault(country.getLandMaintenance()) >= NumbersUtils.toDouble(value);
+            case "land_morale": //Todo morale
+                break;
+            case "last_mission": //Outdated was for old missions mechanism
+                break;
+            case "legitimacy":
+                if ((aDouble = NumbersUtils.toDouble(value)) != null) {
+                    return NumbersUtils.doubleOrDefault(country.getLegitimacy()) >= aDouble;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return other.getLegitimacy() != null
+                           && NumbersUtils.doubleOrDefault(country.getLegitimacy()) >= NumbersUtils.doubleOrDefault(other.getLegitimacy());
+                }
+            case "legitimacy_equivalent":
+                if ((aDouble = NumbersUtils.toDouble(value)) != null) {
+                    return NumbersUtils.doubleOrDefault(country.getLegitimacyEquivalent()) >= aDouble;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return NumbersUtils.doubleOrDefault(country.getLegitimacyEquivalent()) >= NumbersUtils.doubleOrDefault(other.getLegitimacyEquivalent());
+                }
+            case "legitimacy_or_horde_unity":
+                if (country.getLegitimacyOrHordeUnity() == null) {
+                    return false;
+                }
+
+                if ((aDouble = NumbersUtils.toDouble(value)) != null) {
+                    return NumbersUtils.doubleOrDefault(country.getLegitimacyOrHordeUnity()) >= aDouble;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    if (other.getLegitimacyOrHordeUnity() == null) {
+                        return false;
+                    }
+
+                    return country.getLegitimacyOrHordeUnity() >= other.getLegitimacyOrHordeUnity();
+                }
+            case "liberty_desire":
+                return country.getOverlord() != null || country.getLibertyDesire() >= NumbersUtils.toDouble(value);
+            case "light_ship_fraction":
+                return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getNavySize())).compareTo(BigDecimal.valueOf(country.getNbLightShips())) >= 0;
+            case "luck":
+                return !country.wasPlayer() && !country.isHuman() && BooleanUtils.toBoolean(country.isLucky());
+            case "march_of":
+                other = country.getSave().getCountry(value);
+                return country.getOverlord() != null && country.getOverlord().equals(other)
+                       && country.getSave()
+                                 .getDiplomacy()
+                                 .getDependencies()
+                                 .stream()
+                                 .anyMatch(dependency -> "march".equals(dependency.getSubjectType()) && country.equals(dependency.getSecond()));
+            case "manpower":
+                return country.getManpower() >= NumbersUtils.toInt(value) * 1000;
+            case "manpower_percentage":
+                return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getMaxManpower())).compareTo(BigDecimal.valueOf(country.getManpower())) >= 0;
+            case "marriage_with":
+                other = country.getSave().getCountry(value);
+                return country.getSave()
+                              .getDiplomacy()
+                              .getRoyalMarriage()
+                              .stream()
+                              .anyMatch(marriage -> (marriage.getFirst().equals(country) && marriage.getSecond().equals(other)
+                                                     || marriage.getFirst().equals(other) && marriage.getSecond().equals(country)));
+            case "max_manpower":
+                return country.getMaxManpower() >= NumbersUtils.toInt(value) * 1000;
+            case "mercantilism":
+                return country.getMercantilism() >= NumbersUtils.toDouble(value);
+            case "meritocracy":
+                return country.getMeritocracy() != null && country.getMeritocracy() >= NumbersUtils.toDouble(value);
+            case "mil":
+                if ((integer = NumbersUtils.toInt(value)) != null) {
+                    return country.getMonarch() != null && country.getMonarch().getMil() != null && country.getMonarch().getMil() >= integer;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return other.getMonarch() == null || other.getMonarch().getMil() == null
+                           || (country.getMonarch() != null
+                               && country.getMonarch().getMil() != null
+                               && country.getMonarch().getMil() >= other.getMonarch().getMil());
+                }
+            case "militarised_society":
+                return country.getMilitarisedSociety() != null && country.getMilitarisedSociety() >= NumbersUtils.toDouble(value);
+            case "mil_power":
+                if ((integer = NumbersUtils.toInt(value)) != null) {
+                    return country.getPowers() != null && country.getPowers().get(Power.MIL) != null && country.getPowers().get(Power.MIL) >= integer;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return other.getPowers() == null
+                           || other.getPowers().get(Power.MIL) == null
+                           || (country.getPowers() != null
+                               && country.getPowers().get(Power.MIL) != null
+                               && country.getPowers().get(Power.MIL) >= other.getPowers().get(Power.MIL));
+                }
+            case "mil_tech":
+                return country.getTech().getMil() >= Integer.parseInt(value);
+            case "mission_completed":
+                return country.getCompletedMissions().contains(ClausewitzUtils.addQuotes(value));
+            case "monthly_income":
+                if ((integer = NumbersUtils.toInt(value)) != null) {
+                    return country.getEstimatedMonthlyIncome() >= integer;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return country.getEstimatedMonthlyIncome() >= other.getEstimatedMonthlyIncome();
+                }
+            case "months_of_ruling":
+                if (country.getMonarch() == null) {
+                    return false;
+                }
+
+                calendar.setTime(country.getSave().getDate());
+                calendar2.setTime(country.getHistory().getMonarch(country.getMonarch().getId().getId()).getMonarchDate());
+                calendar2.add(Calendar.MONTH, NumbersUtils.toInt(value));
+
+                return calendar2.before(calendar);
+            case "military_strength": //Todo object
+                break;
+            case "national_focus":
+                return country.getNationalFocus().equals(Power.valueOf(value.toUpperCase()));
+            case "nation_designer_points":
+                return country.getCustomNationPoints() != null && country.getCustomNationPoints() >= NumbersUtils.toDouble(value);
+            case "naval_forcelimit": //Todo fl
+                break;
+            case "naval_maintenance":
+                return NumbersUtils.doubleOrDefault(country.getNavalMaintenance()) >= NumbersUtils.toDouble(value);
+            case "naval_morale": //Todo morale
+                break;
+            case "navy_size":
+                if ((integer = NumbersUtils.toInt(value)) != null) {
+                    return country.getNavySize() >= integer;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return country.getNavySize() >= other.getNavySize();
+                }
+            case "navy_size_percentage": //Todo fl
+                break;
+            case "naval_strength": //Todo object
+                break;
+            case "navy_tradition":
+                if ((aDouble = NumbersUtils.toDouble(value)) != null) {
+                    return NumbersUtils.doubleOrDefault(country.getNavyTradition()) >= aDouble;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return NumbersUtils.doubleOrDefault(country.getNavyTradition()) >= NumbersUtils.doubleOrDefault(other.getNavyTradition());
+                }
+            case "normal_or_historical_nations":
+                return "yes".equals(value) == (NationSetup.NORMAL.equals(country.getSave().getGameplayOptions().getNationSetup())
+                                               || NationSetup.HISTORICAL.equals(country.getSave().getGameplayOptions().getNationSetup()));
+            case "normal_province_values":
+                return "yes".equals(value) == (ProvinceTaxManpower.HISTORICAL.equals(country.getSave().getGameplayOptions().getProvinceTaxManpower()));
+            case "num_accepted_cultures":
+                return country.getAcceptedCultures().size() >= NumbersUtils.toInt(value);
+            case "num_of_active_blessings":
+                return country.getBlessings().size() >= NumbersUtils.toInt(value);
+            case "num_of_admirals":
+                if ((integer = NumbersUtils.toInt(value)) != null) {
+                    return country.getLeadersOfType(LeaderType.ADMIRAL).size() >= integer;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return country.getLeadersOfType(LeaderType.ADMIRAL).size() >= other.getLeadersOfType(LeaderType.ADMIRAL).size();
+                }
+            case "num_of_admirals_with_traits":
+                return country.getLeadersOfType(LeaderType.ADMIRAL).stream().filter(leader -> StringUtils.isNotBlank(leader.getPersonality())).count()
+                       >= NumbersUtils.toInt(value);
+            case "num_of_allies":
+                if ((integer = NumbersUtils.toInt(value)) != null) {
+                    return country.getNumOfAllies() >= integer;
+                } else {
+                    other = country.getSave().getCountry(value);
+                    return country.getNumOfAllies() >= other.getNumOfAllies();
+                }
         }
 
         return true;

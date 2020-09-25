@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Collection;
@@ -96,7 +97,7 @@ public class History {
                                      return monarchItem;
                                  })
                                  .filter(Objects::nonNull)
-                                 .map(child -> new Monarch(child, this.save))
+                                 .map(child -> new Monarch(child, this.save, Eu4Utils.stringToDate(child.getName())))
                                  .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity(), (monarch, monarch2) -> monarch2));
 
         this.leaders = this.item.getChildren()

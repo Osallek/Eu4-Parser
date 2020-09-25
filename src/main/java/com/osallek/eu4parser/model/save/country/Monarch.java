@@ -16,6 +16,8 @@ public class Monarch {
 
     protected final ClausewitzItem item;
 
+    protected Date monarchDate;
+
     private Id id;
 
     private Personalities personalities;
@@ -34,6 +36,13 @@ public class Monarch {
         refreshAttributes();
     }
 
+    public Monarch(ClausewitzItem item, Save save, Date date) {
+        this.save = save;
+        this.item = item;
+        this.monarchDate = date;
+        refreshAttributes();
+    }
+
     public Id getId() {
         return id;
     }
@@ -44,6 +53,10 @@ public class Monarch {
 
     public void setName(String name) {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
+    }
+
+    public Date getMonarchDate() {
+        return monarchDate;
     }
 
     public Country getCountry() {

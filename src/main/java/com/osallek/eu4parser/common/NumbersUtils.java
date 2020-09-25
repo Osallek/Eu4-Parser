@@ -1,5 +1,8 @@
 package com.osallek.eu4parser.common;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class NumbersUtils {
 
     private NumbersUtils() {}
@@ -42,5 +45,10 @@ public class NumbersUtils {
 
     public static double doubleOrDefault(Double aDouble, double defaultDouble) {
         return aDouble == null ? defaultDouble : aDouble;
+    }
+
+    public static <T> T coalesce(T... items) {
+        return Arrays.stream(items).filter(Objects::nonNull).findFirst().orElse(null);
+
     }
 }
