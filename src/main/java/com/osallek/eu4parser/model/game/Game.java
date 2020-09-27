@@ -89,6 +89,12 @@ public class Game {
 
     private Map<Area, Path> areas;
 
+    private Map<Advisor, Path> advisors;
+
+    private Map<IdeaGroup, Path> ideaGroups;
+
+    private Map<CasusBelli, Path> casusBelli;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -119,6 +125,9 @@ public class Game {
         readGovernmentNames();
         readUnits();
         readAreas();
+        readAdvisors();
+        readIdeaGroups();
+        readCasusBelli();
     }
 
     public Collator getCollator() {
@@ -553,6 +562,60 @@ public class Game {
         for (Area area : this.areas.keySet()) {
             if (area.getName().equals(name)) {
                 return area;
+            }
+        }
+
+        return null;
+    }
+
+    public List<Advisor> getAdvisors() {
+        return new ArrayList<>(this.advisors.keySet());
+    }
+
+    public Advisor getAdvisor(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Advisor advisor : this.advisors.keySet()) {
+            if (advisor.getName().equals(name)) {
+                return advisor;
+            }
+        }
+
+        return null;
+    }
+
+    public List<IdeaGroup> getIdeaGroups() {
+        return new ArrayList<>(this.ideaGroups.keySet());
+    }
+
+    public IdeaGroup getIdeaGroup(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (IdeaGroup ideaGroup : this.ideaGroups.keySet()) {
+            if (ideaGroup.getName().equals(name)) {
+                return ideaGroup;
+            }
+        }
+
+        return null;
+    }
+
+    public List<CasusBelli> getCasusBelli() {
+        return new ArrayList<>(this.casusBelli.keySet());
+    }
+
+    public CasusBelli getCasusBelli(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (CasusBelli casusBelli : this.casusBelli.keySet()) {
+            if (casusBelli.getName().equals(name)) {
+                return casusBelli;
             }
         }
 
@@ -1008,5 +1071,56 @@ public class Game {
         this.areas = new HashMap<>();
         ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
         areasItem.getLists().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
+    }
+
+    private void readAdvisors() {
+        File advisorsFolder = new File(this.commonFolderPath + File.separator + "advisortypes");
+
+        try (Stream<Path> paths = Files.walk(advisorsFolder.toPath())) {
+            this.advisors = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.advisors.put(new Advisor(item), path));
+                 });
+
+            this.advisors.keySet().forEach(advisor -> advisor.setLocalizedName(this.getLocalisation(advisor.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readIdeaGroups() {
+        File ideaGroupsFolder = new File(this.commonFolderPath + File.separator + "ideas");
+
+        try (Stream<Path> paths = Files.walk(ideaGroupsFolder.toPath())) {
+            this.ideaGroups = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.ideaGroups.put(new IdeaGroup(item), path));
+                 });
+
+            this.ideaGroups.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readCasusBelli() {
+        File casusBelliFolder = new File(this.commonFolderPath + File.separator + "cb_types");
+
+        try (Stream<Path> paths = Files.walk(casusBelliFolder.toPath())) {
+            this.casusBelli = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.casusBelli.put(new CasusBelli(item), path));
+                 });
+
+            this.casusBelli.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
+        } catch (IOException e) {
+        }
     }
 }

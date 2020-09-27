@@ -23,7 +23,7 @@ import com.osallek.eu4parser.model.save.events.FiredEvents;
 import com.osallek.eu4parser.model.save.events.PendingEvents;
 import com.osallek.eu4parser.model.save.gameplayoptions.GameplayOptions;
 import com.osallek.eu4parser.model.save.institutions.Institutions;
-import com.osallek.eu4parser.model.save.province.Advisor;
+import com.osallek.eu4parser.model.save.province.SaveAdvisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.religion.Religions;
 import com.osallek.eu4parser.model.save.revolution.Revolution;
@@ -110,7 +110,7 @@ public class Save {
 
     private SortedMap<Integer, Country> greatPowers;
 
-    private Map<Integer, Advisor> advisors;
+    private Map<Integer, SaveAdvisor> advisors;
 
     private Diplomacy diplomacy;
 
@@ -496,7 +496,7 @@ public class Save {
         return this.greatPowers == null ? new TreeMap<>() : this.greatPowers;
     }
 
-    private Map<Integer, Advisor> getInternalAdvisors() {
+    private Map<Integer, SaveAdvisor> getInternalAdvisors() {
         if (this.advisors == null) {
             this.advisors = new HashMap<>();
         }
@@ -504,11 +504,11 @@ public class Save {
         return this.advisors;
     }
 
-    public Map<Integer, Advisor> getAdvisors() {
+    public Map<Integer, SaveAdvisor> getAdvisors() {
         return this.advisors == null ? new HashMap<>() : this.advisors;
     }
 
-    public void putAllAdvisors(Map<Integer, Advisor> advisors) {
+    public void putAllAdvisors(Map<Integer, SaveAdvisor> advisors) {
         getInternalAdvisors().putAll(advisors);
     }
 

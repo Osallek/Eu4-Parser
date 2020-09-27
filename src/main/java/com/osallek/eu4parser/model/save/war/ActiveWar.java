@@ -31,6 +31,8 @@ public class ActiveWar {
 
     private Map<Country, WarParticipant> defenders;
 
+    private WarGoal warGoal;
+
     private SortedMap<Date, Map<WarHistoryAction, List<String>>> actionsHistory;
 
     private SortedMap<Date, List<Battle>> battles;
@@ -117,6 +119,10 @@ public class ActiveWar {
         return new EnumMap<>(Losses.class);
     }
 
+    public WarGoal getWarGoal() {
+        return warGoal;
+    }
+
     public List<String> getPersistentAttackers() {
         ClausewitzList list = this.item.getList("persistent_attackers");
 
@@ -181,6 +187,10 @@ public class ActiveWar {
         return this.item.getVarAsInt("stalled_years");
     }
 
+    public boolean isCoalition() {
+        return this.item.getVarAsBool("is_coalition");
+    }
+
     public boolean isFinished() {
         return false;
     }
@@ -238,6 +248,18 @@ public class ActiveWar {
                                                                 (a, b) -> Stream.concat(a.stream(), b.stream()).collect(Collectors.toList()),
                                                                 TreeMap::new));
         }
+
+        ClausewitzItem warGoalChild = this.item.getChild("superiority");
+
+        if (warGoalChild == null) {
+            warGoalChild = this.item.getChild("take_province");
+        }
+
+        if (warGoalChild == null) {
+            warGoalChild = this.item.getChild("blockade_ports");
+        }
+
+        this.warGoal = new WarGoal(warGoalChild, this.save);
 
         List<ClausewitzItem> participantsItems = this.item.getChildren("participants");
         ClausewitzList attackersList = this.item.getList("attackers");

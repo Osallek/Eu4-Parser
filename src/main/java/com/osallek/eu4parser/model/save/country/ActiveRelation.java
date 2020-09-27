@@ -130,6 +130,10 @@ public class ActiveRelation {
         return this.item.getVarAsBool("has_claim");
     }
 
+    public Boolean hasSuccessionClaim() {
+        return this.item.getVarAsBool("has_succession_claim");
+    }
+
     public Boolean hasCoreClaim() {
         return this.item.getVarAsBool("has_core_claim");
     }

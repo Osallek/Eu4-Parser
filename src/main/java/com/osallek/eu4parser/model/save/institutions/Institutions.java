@@ -4,6 +4,9 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Institutions {
 
     private final ClausewitzList origins;
@@ -28,6 +31,10 @@ public class Institutions {
 
     public long getNbAvailable() {
         return this.available.getValuesAsInt().stream().filter(integer -> integer == 1).count();
+    }
+
+    public List<SaveProvince> getOrigins() {
+        return this.origins.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
     public SaveProvince getOrigin(int institution) {

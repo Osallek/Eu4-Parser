@@ -48,6 +48,10 @@ public class SaveReligion {
         return this.gameReligion != null ? this.gameReligion.getLocalizedName() : getName();
     }
 
+    public Religion getGameReligion() {
+        return gameReligion;
+    }
+
     public boolean hasSpecialAttribute() {
         return hasDate() || hasDefenderOfFaith() || hasPapacy() || hasRelations();
     }

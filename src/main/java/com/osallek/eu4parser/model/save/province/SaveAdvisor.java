@@ -2,18 +2,27 @@ package com.osallek.eu4parser.model.save.province;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Advisor;
+import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
 
-public class Advisor {
+public class SaveAdvisor {
+
+    protected final Save save;
 
     protected final ClausewitzItem item;
 
+    private final Advisor gameAdvisor;
+
     private Id id;
 
-    public Advisor(ClausewitzItem item) {
+    public SaveAdvisor(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
+        this.gameAdvisor = this.save.getGame().getAdvisor(getName());
         refreshAttributes();
     }
 
@@ -27,6 +36,10 @@ public class Advisor {
 
     public void setName(String name) {
         this.item.setVariable("lender", ClausewitzUtils.addQuotes(name));
+    }
+
+    public Advisor getGameAdvisor() {
+        return gameAdvisor;
     }
 
     public String getType() {

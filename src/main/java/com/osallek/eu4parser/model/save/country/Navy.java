@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 
 public class Navy extends Army {
 
-    private List<Ship> ships;
+    private List<AbstractRegiment> ships;
 
     public Navy(ClausewitzItem item, Country country) {
         super(item, country);
     }
 
-    public List<Ship> getShips() {
+    public List<AbstractRegiment> getShips() {
         return ships;
     }
 
@@ -33,7 +33,7 @@ public class Navy extends Army {
     }
 
     public void addShip(String name, Integer home, String type, Double morale) {
-        Ship.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale);
+        AbstractRegiment.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale);
         refreshAttributes();
     }
 
@@ -87,7 +87,7 @@ public class Navy extends Army {
                                               String graphicalCulture, int shipId, String shipName,
                                               int shipHome, String shipType, double shipMorale) {
         ClausewitzItem toItem = AbstractArmy.addToItem(parent, "navy", name, location, graphicalCulture, id);
-        Ship.addToItem(toItem, shipId, shipName, shipHome, shipType, shipMorale);
+        AbstractRegiment.addToItem(toItem, shipId, shipName, shipHome, shipType, shipMorale);
 
         return toItem;
     }

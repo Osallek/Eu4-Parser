@@ -12,8 +12,8 @@ public class CasusBelli extends EndDatableRelation {
         super(item, save);
     }
 
-    public String getType() {
-        return this.item.getVarAsString("type");
+    public com.osallek.eu4parser.model.game.CasusBelli getType() {
+        return this.save.getGame().getCasusBelli(this.item.getVarAsString("type"));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, Date endDate, String type) {

@@ -6,8 +6,7 @@ import com.osallek.eu4parser.model.UnitType;
 import java.util.function.Function;
 
 public class Unit {
-
-
+    
     private final String name;
 
     private final String localizedName;

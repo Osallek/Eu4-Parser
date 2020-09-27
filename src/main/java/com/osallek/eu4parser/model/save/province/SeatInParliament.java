@@ -10,8 +10,8 @@ public class SeatInParliament {
         this.item = item;
     }
 
-    public String getBack() {
-        return this.item.getVarAsString("back");
+    public Boolean getBack() {
+        return this.item.getVarAsBool("back");
     }
 
     public void setBack(boolean back) {

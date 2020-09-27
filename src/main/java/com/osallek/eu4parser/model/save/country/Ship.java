@@ -2,103 +2,53 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.eu4parser.model.UnitType;
-import com.osallek.eu4parser.model.game.Unit;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
 
-public class Ship {
+public class Ship extends AbstractRegiment {
 
-    protected final Save save;
-
-    protected final ClausewitzItem item;
-
-    private Id id;
-
-    private Id lastTarget;
+    private FlagShip flagShip;
 
     public Ship(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
+        super(item, save);
         refreshAttributes();
     }
 
-    public Id getId() {
-        return id;
+    public Boolean hasDisengaged() {
+        return this.item.getVarAsBool("has_disengaged");
     }
 
-    public String getName() {
-        return this.item.getVarAsString("name");
+    public void setHasDisengaged(boolean hasDisengaged) {
+        this.item.setVariable("has_disengaged", hasDisengaged);
     }
 
-    public void setName(String name) {
-        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
+    public FlagShip getFlagShip() {
+        return flagShip;
     }
 
-    public Integer getHome() {
-        return this.item.getVarAsInt("home");
+    public void setFlagShip(FlagShip flagShip) {
+        this.flagShip = flagShip;
     }
 
-    public void setHome(Integer home) {
-        this.item.setVariable("home", home);
-    }
+    private void refreshAttributes() {
+        ClausewitzItem flagShipItem = this.item.getChild("flagship");
 
-    public Unit getType() {
-        return this.save.getGame().getUnit(getTypeName());
-    }
-
-    public String getTypeName() {
-        return this.item.getVarAsString("type");
-    }
-
-    public UnitType getUnitType() {
-        return getType().getType();
-    }
-
-    public void setType(Unit unit) {
-        this.item.setVariable("type", ClausewitzUtils.addQuotes(unit.getName()));
-    }
-
-    public Double getMorale() {
-        return this.item.getLastVarAsDouble("morale");
-    }
-
-    public void setMorale(Double morale) {
-        if (morale < 0d) {
-            morale = 0d;
+        if (flagShipItem != null) {
+            this.flagShip = new FlagShip(flagShipItem, this.save);
         }
-
-        this.item.setVariable("morale", morale);
     }
 
-    public Id getLastTarget() {
-        return lastTarget;
-    }
-
-    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "ship", parent.getOrder() + 1);
+    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale, boolean hasDisengaged) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, "regiment", parent.getOrder() + 1);
         Id.addToItem(toItem, id, 54);
         toItem.addVariable("name", name);
         toItem.addVariable("home", home);
         toItem.addVariable("type", ClausewitzUtils.addQuotes(type));
         toItem.addVariable("morale", morale);
+        toItem.addVariable("has_disengaged", hasDisengaged);
 
         parent.addChild(toItem);
 
         return toItem;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem lastTargetItem = this.item.getChild("last_target");
-
-        if (lastTargetItem != null) {
-            this.lastTarget = new Id(lastTargetItem);
-        }
     }
 }

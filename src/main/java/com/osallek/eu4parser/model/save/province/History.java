@@ -26,7 +26,7 @@ public class History {
 
     private SortedMap<Date, String> cultures;
 
-    private Map<Integer, Advisor> advisors;
+    private Map<Integer, SaveAdvisor> advisors;
 
     public History(ClausewitzItem item, SaveProvince province) {
         this.item = item;
@@ -50,7 +50,7 @@ public class History {
         return cultures;
     }
 
-    public Map<Integer, Advisor> getAdvisors() {
+    public Map<Integer, SaveAdvisor> getAdvisors() {
         return advisors;
     }
 
@@ -117,13 +117,13 @@ public class History {
                                  .stream()
                                  .map(child -> child.getChild("advisor"))
                                  .filter(Objects::nonNull)
-                                 .map(Advisor::new)
+                                 .map(child -> new SaveAdvisor(child, this.province.getSave()))
                                  .collect(Collectors.toMap(advisor -> advisor.getId().getId(), Function.identity()));
 
         ClausewitzItem advisorItem = this.item.getChild("advisor");
 
         if (advisorItem != null) {
-            Advisor advisor = new Advisor(advisorItem);
+            SaveAdvisor advisor = new SaveAdvisor(advisorItem, this.province.getSave());
             this.advisors.put(advisor.getId().getId(), advisor);
         }
 

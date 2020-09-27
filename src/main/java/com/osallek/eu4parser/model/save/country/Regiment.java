@@ -5,7 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
 
-public class Regiment extends Ship {
+public class Regiment extends AbstractRegiment {
 
     public Regiment(ClausewitzItem item, Save save) {
         super(item, save);

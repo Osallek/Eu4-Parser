@@ -17,7 +17,7 @@ import com.osallek.eu4parser.model.save.Power;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.counters.Counter;
-import com.osallek.eu4parser.model.save.province.Advisor;
+import com.osallek.eu4parser.model.save.province.SaveAdvisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
 import org.apache.commons.lang3.BooleanUtils;
@@ -43,6 +43,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Country {
 
@@ -136,6 +137,8 @@ public class Country {
 
     private Map<Integer, Army> armies;
 
+    private Map<Integer, MercenaryCompany> mercenaryCompanies;
+
     private Map<Integer, Navy> navies;
 
     private Map<Country, ActiveRelation> activeRelations;
@@ -146,9 +149,9 @@ public class Country {
 
     private List<Id> advisorsIds;
 
-    private Map<Integer, Advisor> advisors;
+    private Map<Integer, SaveAdvisor> advisors;
 
-    private Map<Integer, Advisor> activeAdvisors;
+    private Map<Integer, SaveAdvisor> activeAdvisors;
 
     private Monarch monarch;
 
@@ -408,6 +411,26 @@ public class Country {
         return new ArrayList<>();
     }
 
+    public List<Integer> getEmbracedInstitutionsIds() {
+        ClausewitzList list = this.item.getList("institutions");
+
+        if (list != null) {
+            return IntStream.range(0, list.size()).filter(this::getEmbracedInstitution).boxed().collect(Collectors.toList());
+        }
+
+        return new ArrayList<>();
+    }
+
+    public List<Integer> getNotEmbracedInstitutionsIds() {
+        ClausewitzList list = this.item.getList("institutions");
+
+        if (list != null) {
+            return IntStream.range(0, list.size()).filter(index -> !this.getEmbracedInstitution(index)).boxed().collect(Collectors.toList());
+        }
+
+        return new ArrayList<>();
+    }
+
     public boolean getEmbracedInstitution(int institution) {
         ClausewitzList list = this.item.getList("institutions");
 
@@ -531,7 +554,7 @@ public class Country {
     public void addIgnoreDecision(String ignoreDecision) {
         List<String> ignoreDecisions = this.item.getVarsAsStrings("ignore_decision");
 
-        if (!ignoreDecisions.contains(ignoreDecision)) {
+        if (!ignoreDecisions.contains(ClausewitzUtils.addQuotes(ignoreDecision))) {
             this.item.addVariable("ignore_decision", ClausewitzUtils.addQuotes(ignoreDecision));
         }
     }
@@ -904,6 +927,16 @@ public class Country {
         this.item.setVariable("militarised_society", militarisedSociety);
     }
 
+    public Double getTribalAllegiance() {
+        return this.item.getVarAsDouble("tribal_allegiance");
+    }
+
+    public void setTribalAllegiance(Double tribalAllegiance) {
+        tribalAllegiance = Math.min(Math.max(tribalAllegiance, 0), 100);
+
+        this.item.setVariable("tribal_allegiance", tribalAllegiance);
+    }
+
     public Integer getHighestPossibleFort() {
         return this.item.getVarAsInt("highest_possible_fort");
     }
@@ -1221,6 +1254,10 @@ public class Country {
 
     public Double getNavyStrength() {
         return this.item.getVarAsDouble("navy_strength");
+    }
+
+    public Country getPreferredEmperor() {
+        return this.save.getCountry(this.item.getVarAsString("preferred_emperor"));
     }
 
     public Parliament getParliament() {
@@ -2447,6 +2484,44 @@ public class Country {
         this.item.setVariable("meritocracy", meritocracy);
     }
 
+    public Double getPiety() {
+        return this.item.getVarAsDouble("piety");
+    }
+
+    public void setPiety(Double piety) {
+        if (piety < 0d) {
+            piety = 0d;
+        } else if (piety > 1d) {
+            piety = 1d;
+        }
+
+        this.item.setVariable("piety", piety);
+    }
+
+    public Double getPatriarchAuthority() {
+        return this.item.getVarAsDouble("patriarch_authority");
+    }
+
+    public void setPatriarchAuthority(Double patriarchAuthority) {
+        if (patriarchAuthority < 0d) {
+            patriarchAuthority = 0d;
+        } else if (patriarchAuthority > 1d) {
+            patriarchAuthority = 1d;
+        }
+
+        this.item.setVariable("patriarch_authority", patriarchAuthority);
+    }
+
+    public Integer getCurrentIcon() {
+        return this.item.getVarAsInt("current_icon");
+    }
+
+    public void setPatriarchAuthority(int icon) {
+        if (getReligion().getGameReligion().getIcons() != null && icon >= 0 && icon < getReligion().getGameReligion().getIcons().size()) {
+            this.item.setVariable("current_icon", icon);
+        }
+    }
+
     public List<String> getBlessings() {
         return this.item.getVarsAsStrings("blessing");
     }
@@ -2454,7 +2529,7 @@ public class Country {
     public void addBlessing(String ignoreDecision) {
         List<String> ignoreDecisions = this.item.getVarsAsStrings("blessing");
 
-        if (!ignoreDecisions.contains(ignoreDecision)) {
+        if (!ignoreDecisions.contains(ClausewitzUtils.addQuotes(ignoreDecision))) {
             this.item.addVariable("blessing", ClausewitzUtils.addQuotes(ignoreDecision));
         }
     }
@@ -2793,6 +2868,14 @@ public class Country {
         this.item.setVariable("num_of_captured_ships_with_boarding_doctrine", numOfCapturedShipsWithBoardingDoctrine);
     }
 
+    public Double getOverextensionPercentage() {
+        return this.item.getVarAsDouble("overextension_percentage");
+    }
+
+    public Map<Integer, MercenaryCompany> getMercenaryCompanies() {
+        return mercenaryCompanies;
+    }
+
     public Army getArmy(int id) {
         return this.armies.get(id);
     }
@@ -2862,6 +2945,16 @@ public class Country {
         return this.armies.values()
                           .stream()
                           .mapToLong(army -> army.getRegiments().stream().filter(regiment -> type.equals(regiment.getTypeName())).count())
+                          .sum();
+    }
+
+    public long getNbRegimentOfCategory(int category) {
+        return this.armies.values()
+                          .stream()
+                          .mapToLong(army -> army.getRegiments()
+                                                 .stream()
+                                                 .filter(regiment -> regiment.getCategory() != null && category == regiment.getCategory())
+                                                 .count())
                           .sum();
     }
 
@@ -2978,6 +3071,12 @@ public class Country {
         this.item.setVariable("num_of_consorts", numOfConsorts);
     }
 
+    public int getNumOfRelations() {
+        return (int) (getNumOfAllies() + getNumOfRoyalMarriages() + getNumOfSubjects()
+                      + this.save.getDiplomacy().getGuarantees().stream().filter(guarantee -> this.equals(guarantee.getFirst())).count()
+                      + this.save.getDiplomacy().getMilitaryAccesses().stream().filter(guarantee -> this.equals(guarantee.getSecond())).count());
+    }
+
     public boolean isGreatPower() {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("is_great_power"));
     }
@@ -3002,7 +3101,7 @@ public class Country {
         return advisorsIds;
     }
 
-    public Map<Integer, Advisor> getInternalAdvisors() {
+    public Map<Integer, SaveAdvisor> getInternalAdvisors() {
         if (this.advisors == null) {
             this.advisors = new HashMap<>();
         }
@@ -3010,15 +3109,15 @@ public class Country {
         return this.advisors;
     }
 
-    public Map<Integer, Advisor> getAdvisors() {
+    public Map<Integer, SaveAdvisor> getAdvisors() {
         return this.advisors == null ? new HashMap<>() : this.advisors;
     }
 
-    public void addAdvisor(Advisor advisor) {
+    public void addAdvisor(SaveAdvisor advisor) {
         getInternalAdvisors().put(advisor.getId().getId(), advisor);
     }
 
-    public Map<Integer, Advisor> getInternalActiveAdvisors() {
+    public Map<Integer, SaveAdvisor> getInternalActiveAdvisors() {
         if (this.activeAdvisors == null) {
             this.activeAdvisors = new HashMap<>();
         }
@@ -3026,15 +3125,15 @@ public class Country {
         return this.activeAdvisors;
     }
 
-    public Map<Integer, Advisor> getActiveAdvisors() {
+    public Map<Integer, SaveAdvisor> getActiveAdvisors() {
         return this.activeAdvisors == null ? new HashMap<>() : this.activeAdvisors;
     }
 
-    public void addActiveAdvisor(Advisor advisor) {
+    public void addActiveAdvisor(SaveAdvisor advisor) {
         getInternalActiveAdvisors().put(advisor.getId().getId(), advisor);
     }
 
-    public void setActiveAdvisors(Map<Integer, Advisor> activeAdvisors) {
+    public void setActiveAdvisors(Map<Integer, SaveAdvisor> activeAdvisors) {
         this.activeAdvisors = activeAdvisors;
     }
 
@@ -3508,7 +3607,7 @@ public class Country {
         ClausewitzItem activeIdeaGroupsItem = this.item.getChild("active_idea_groups");
 
         if (activeIdeaGroupsItem != null) {
-            this.ideaGroups = new IdeaGroups(activeIdeaGroupsItem);
+            this.ideaGroups = new IdeaGroups(activeIdeaGroupsItem, this.save);
         }
 
         ClausewitzItem governmentItem = this.item.getChild("government");
@@ -3568,6 +3667,11 @@ public class Country {
         this.armies = armiesItems.stream()
                                  .map(armyItem -> new Army(armyItem, this))
                                  .collect(Collectors.toMap(army -> army.getId().getId(), Function.identity()));
+
+        List<ClausewitzItem> mercenaryItems = this.item.getChildren("mercenary_company");
+        this.mercenaryCompanies = mercenaryItems.stream()
+                                                .map(armyItem -> new MercenaryCompany(armyItem, this))
+                                                .collect(Collectors.toMap(army -> army.getId().getId(), Function.identity()));
 
         List<ClausewitzItem> naviesItems = this.item.getChildren("navy");
         this.navies = naviesItems.stream()
