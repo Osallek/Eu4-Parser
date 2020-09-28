@@ -25,17 +25,17 @@ public class ImperialReform implements Comparable<ImperialReform> {
 
     private String empire;
 
-    private Map<String, Double> provinceModifiers;
+    private Map<String, String> provinceModifiers;
 
-    private Map<String, Double> emperorModifiers;
+    private Map<String, String> emperorModifiers;
 
-    private Map<String, Double> allModifiers;
+    private Map<String, String> allModifiers;
 
-    private Map<String, Double> memberModifiers;
+    private Map<String, String> memberModifiers;
 
-    private Map<String, Double> emperorPerPrinceModifiers;
+    private Map<String, String> emperorPerPrinceModifiers;
 
-    private Map<String, Double> electorPerPrinceModifiers;
+    private Map<String, String> electorPerPrinceModifiers;
 
     private String disabledBy;
 
@@ -79,42 +79,42 @@ public class ImperialReform implements Comparable<ImperialReform> {
         this.provinceModifiers = child == null ? null : child.getVariables()
                                                              .stream()
                                                              .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                       ClausewitzVariable::getAsDouble,
+                                                                                       ClausewitzVariable::getValue,
                                                                                        (a, b) -> b,
                                                                                        LinkedHashMap::new));
         child = item.getChild("emperor");
         this.emperorModifiers = child == null ? null : child.getVariables()
                                                             .stream()
                                                             .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                      ClausewitzVariable::getAsDouble,
+                                                                                      ClausewitzVariable::getValue,
                                                                                       (a, b) -> b,
                                                                                       LinkedHashMap::new));
         child = item.getChild("all");
         this.allModifiers = child == null ? null : child.getVariables()
                                                         .stream()
                                                         .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                  ClausewitzVariable::getAsDouble,
+                                                                                  ClausewitzVariable::getValue,
                                                                                   (a, b) -> b,
                                                                                   LinkedHashMap::new));
         child = item.getChild("member");
         this.memberModifiers = child == null ? null : child.getVariables()
                                                            .stream()
                                                            .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                     ClausewitzVariable::getAsDouble,
+                                                                                     ClausewitzVariable::getValue,
                                                                                      (a, b) -> b,
                                                                                      LinkedHashMap::new));
         child = item.getChild("emperor_per_prince");
         this.emperorPerPrinceModifiers = child == null ? null : child.getVariables()
                                                                      .stream()
                                                                      .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                               ClausewitzVariable::getAsDouble,
+                                                                                               ClausewitzVariable::getValue,
                                                                                                (a, b) -> b,
                                                                                                LinkedHashMap::new));
         child = item.getChild("elector_per_prince");
         this.electorPerPrinceModifiers = child == null ? null : child.getVariables()
                                                                      .stream()
                                                                      .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                               ClausewitzVariable::getAsDouble,
+                                                                                               ClausewitzVariable::getValue,
                                                                                                (a, b) -> b,
                                                                                                LinkedHashMap::new));
         this.disabledBy = item.getVarAsString("disabled_by");
@@ -167,11 +167,11 @@ public class ImperialReform implements Comparable<ImperialReform> {
         this.empire = empire;
     }
 
-    public Map<String, Double> getProvinceModifiers() {
+    public Map<String, String> getProvinceModifiers() {
         return this.provinceModifiers == null ? new LinkedHashMap<>() : this.provinceModifiers;
     }
 
-    public void addProvinceModifier(String modifier, Double quantity) {
+    public void addProvinceModifier(String modifier, String quantity) {
         if (this.provinceModifiers == null) {
             this.provinceModifiers = new LinkedHashMap<>();
         }
@@ -185,11 +185,11 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public Map<String, Double> getEmperorModifiers() {
+    public Map<String, String> getEmperorModifiers() {
         return this.emperorModifiers == null ? new LinkedHashMap<>() : this.emperorModifiers;
     }
 
-    public void addEmperorModifier(String modifier, Double quantity) {
+    public void addEmperorModifier(String modifier, String quantity) {
         if (this.emperorModifiers == null) {
             this.emperorModifiers = new LinkedHashMap<>();
         }
@@ -203,11 +203,11 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public Map<String, Double> getAllModifiers() {
+    public Map<String, String> getAllModifiers() {
         return this.allModifiers == null ? new LinkedHashMap<>() : this.allModifiers;
     }
 
-    public void addAllModifier(String modifier, Double quantity) {
+    public void addAllModifier(String modifier, String quantity) {
         if (this.allModifiers == null) {
             this.allModifiers = new LinkedHashMap<>();
         }
@@ -221,11 +221,11 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public Map<String, Double> getMemberModifiers() {
+    public Map<String, String> getMemberModifiers() {
         return this.memberModifiers == null ? new LinkedHashMap<>() : this.memberModifiers;
     }
 
-    public void addMemberModifier(String modifier, Double quantity) {
+    public void addMemberModifier(String modifier, String quantity) {
         if (this.memberModifiers == null) {
             this.memberModifiers = new LinkedHashMap<>();
         }
@@ -239,11 +239,11 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public Map<String, Double> getEmperorPerPrinceModifiers() {
+    public Map<String, String> getEmperorPerPrinceModifiers() {
         return this.emperorPerPrinceModifiers == null ? new LinkedHashMap<>() : this.emperorPerPrinceModifiers;
     }
 
-    public void addEmperorPerPrinceModifier(String modifier, Double quantity) {
+    public void addEmperorPerPrinceModifier(String modifier, String quantity) {
         if (this.emperorPerPrinceModifiers == null) {
             this.emperorPerPrinceModifiers = new LinkedHashMap<>();
         }
@@ -257,11 +257,11 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public Map<String, Double> getElectorPerPrinceModifiers() {
+    public Map<String, String> getElectorPerPrinceModifiers() {
         return this.electorPerPrinceModifiers == null ? new LinkedHashMap<>() : this.electorPerPrinceModifiers;
     }
 
-    public void addElectorPerPrinceModifier(String modifier, Double quantity) {
+    public void addElectorPerPrinceModifier(String modifier, String quantity) {
         if (this.electorPerPrinceModifiers == null) {
             this.electorPerPrinceModifiers = new LinkedHashMap<>();
         }

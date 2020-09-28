@@ -16,7 +16,7 @@ public class Institution {
 
     private Double penalty;
 
-    private Map<String, Double> bonus;
+    private Map<String, String> bonus;
 
     private Double tradeCompanyEfficiency;
 
@@ -32,7 +32,7 @@ public class Institution {
         this.bonus = child == null ? null : child.getVariables()
                                                  .stream()
                                                  .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                           ClausewitzVariable::getAsDouble,
+                                                                           ClausewitzVariable::getValue,
                                                                            (a, b) -> b,
                                                                            LinkedHashMap::new));
         this.historicalStartDate = item.getVarAsDate("historical_start_date");
@@ -63,11 +63,11 @@ public class Institution {
         this.penalty = penalty;
     }
 
-    public Map<String, Double> getBonuses() {
+    public Map<String, String> getBonuses() {
         return this.bonus == null ? new LinkedHashMap<>() : this.bonus;
     }
 
-    public void addBonus(String bonus, Double quantity) {
+    public void addBonus(String bonus, String quantity) {
         if (this.bonus == null) {
             this.bonus = new LinkedHashMap<>();
         }

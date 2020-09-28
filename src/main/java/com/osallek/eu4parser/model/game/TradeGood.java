@@ -18,9 +18,9 @@ public class TradeGood {
 
     private Color color;
 
-    private Map<String, Double> modifiers;
+    private Map<String, String> modifiers;
 
-    private Map<String, Double> provinceModifiers;
+    private Map<String, String> provinceModifiers;
 
     private Double basePrice;
 
@@ -32,14 +32,14 @@ public class TradeGood {
         this.modifiers = child == null ? null : child.getVariables()
                                                      .stream()
                                                      .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getAsDouble,
+                                                                               ClausewitzVariable::getValue,
                                                                                (a, b) -> b,
                                                                                LinkedHashMap::new));
         child = item.getChild("province");
         this.provinceModifiers = child == null ? null : child.getVariables()
                                                              .stream()
                                                              .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                       ClausewitzVariable::getAsDouble,
+                                                                                       ClausewitzVariable::getValue,
                                                                                        (a, b) -> b,
                                                                                        LinkedHashMap::new));
     }
@@ -72,11 +72,11 @@ public class TradeGood {
         this.color = color;
     }
 
-    public Map<String, Double> getModifiers() {
+    public Map<String, String> getModifiers() {
         return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
     }
 
-    public void addModifier(String modifier, Double quantity) {
+    public void addModifier(String modifier, String quantity) {
         if (this.modifiers == null) {
             this.modifiers = new LinkedHashMap<>();
         }
@@ -90,11 +90,11 @@ public class TradeGood {
         }
     }
 
-    public Map<String, Double> getProvinceModifiers() {
+    public Map<String, String> getProvinceModifiers() {
         return this.provinceModifiers == null ? new LinkedHashMap<>() : this.provinceModifiers;
     }
 
-    public void addProvinceModifier(String modifier, Double quantity) {
+    public void addProvinceModifier(String modifier, String quantity) {
         if (this.provinceModifiers == null) {
             this.provinceModifiers = new LinkedHashMap<>();
         }

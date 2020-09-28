@@ -22,15 +22,16 @@ public class IdeaGroup {
 
     private final Condition trigger;
 
-    private final Map<String, Double> start;
+    private final Map<String, String> start;
 
-    private final Map<String, Double> bonus;
+    private final Map<String, String> bonus;
 
-    private final Map<String, Map<String, Double>> ideas;
+    private final Map<String, Map<String, String>> ideas;
 
     public IdeaGroup(ClausewitzItem item) {
         this.name = item.getName();
-        this.category = Power.valueOf(item.getVarAsString("category").toUpperCase());
+        ClausewitzVariable var = item.getVar("category");
+        this.category = var == null ? null : Power.valueOf(var.getValue().toUpperCase());
         this.free = BooleanUtils.toBoolean(item.getVarAsBool("free"));
         this.ideas = item.getChildrenNot("start", "bonus", "trigger", "ai_will_do")
                          .stream()
@@ -38,7 +39,7 @@ public class IdeaGroup {
                                                    child -> child.getVariables()
                                                                  .stream()
                                                                  .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                           ClausewitzVariable::getAsDouble,
+                                                                                           ClausewitzVariable::getValue,
                                                                                            (a, b) -> b,
                                                                                            LinkedHashMap::new))));
         ClausewitzItem child = item.getChild("trigger");
@@ -47,14 +48,14 @@ public class IdeaGroup {
         this.start = child == null ? null : child.getVariables()
                                                  .stream()
                                                  .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                           ClausewitzVariable::getAsDouble,
+                                                                           ClausewitzVariable::getValue,
                                                                            (a, b) -> b,
                                                                            LinkedHashMap::new));
         child = item.getChild("bonus");
         this.bonus = child == null ? null : child.getVariables()
                                                  .stream()
                                                  .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                           ClausewitzVariable::getAsDouble,
+                                                                           ClausewitzVariable::getValue,
                                                                            (a, b) -> b,
                                                                            LinkedHashMap::new));
     }
@@ -83,15 +84,15 @@ public class IdeaGroup {
         return trigger;
     }
 
-    public Map<String, Double> getStart() {
+    public Map<String, String> getStart() {
         return start;
     }
 
-    public Map<String, Double> getBonus() {
+    public Map<String, String> getBonus() {
         return bonus;
     }
 
-    public Map<String, Map<String, Double>> getIdeas() {
+    public Map<String, Map<String, String>> getIdeas() {
         return ideas;
     }
 

@@ -14,14 +14,14 @@ public class Icon {
 
     private final Condition allow;
 
-    private final Map<String, Double> modifiers;
+    private final Map<String, String> modifiers;
 
     public Icon(ClausewitzItem item) {
         this.name = item.getName();
         this.allow = new Condition(item.getChild("allow"));
         this.modifiers = item.getVariables()
                              .stream()
-                             .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble, (a, b) -> b, LinkedHashMap::new));
+                             .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getValue, (a, b) -> b, LinkedHashMap::new));
     }
 
     public String getName() {
@@ -32,7 +32,7 @@ public class Icon {
         return allow;
     }
 
-    public Map<String, Double> getModifiers() {
+    public Map<String, String> getModifiers() {
         return modifiers;
     }
 }

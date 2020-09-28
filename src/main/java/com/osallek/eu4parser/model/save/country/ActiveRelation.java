@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
+import org.luaj.vm2.ast.Str;
 
 import java.util.Date;
 import java.util.List;
@@ -19,6 +20,10 @@ public class ActiveRelation {
         this.save = save;
         this.item = item;
         refreshAttributes();
+    }
+
+    public String getCountryTag() {
+        return this.item.getName();
     }
 
     public Country getCountry() {

@@ -15,9 +15,9 @@ public class PapacyConcession {
 
     private String concilatoryLocalizedName;
 
-    private Map<String, Double> harshModifiers;
+    private Map<String, String> harshModifiers;
 
-    private Map<String, Double> concilatoryModifiers;
+    private Map<String, String> concilatoryModifiers;
 
     public PapacyConcession(ClausewitzItem item) {
         this.name = item.getName();
@@ -25,14 +25,14 @@ public class PapacyConcession {
         this.harshModifiers = child == null ? null : child.getVariables()
                                                           .stream()
                                                           .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                    ClausewitzVariable::getAsDouble,
+                                                                                    ClausewitzVariable::getValue,
                                                                                     (a, b) -> b,
                                                                                     LinkedHashMap::new));
         child = item.getChild("concilatory");
         this.concilatoryModifiers = child == null ? null : child.getVariables()
                                                                 .stream()
                                                                 .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                          ClausewitzVariable::getAsDouble,
+                                                                                          ClausewitzVariable::getValue,
                                                                                           (a, b) -> b,
                                                                                           LinkedHashMap::new));
     }
@@ -61,11 +61,11 @@ public class PapacyConcession {
         this.concilatoryLocalizedName = concilatoryLocalizedName;
     }
 
-    public Map<String, Double> getHarshModifiers() {
+    public Map<String, String> getHarshModifiers() {
         return this.harshModifiers == null ? new LinkedHashMap<>() : this.harshModifiers;
     }
 
-    public void addHarshModifier(String modifier, Double quantity) {
+    public void addHarshModifier(String modifier, String quantity) {
         if (this.harshModifiers == null) {
             this.harshModifiers = new LinkedHashMap<>();
         }
@@ -79,11 +79,11 @@ public class PapacyConcession {
         }
     }
 
-    public Map<String, Double> getConcilatoryModifiers() {
+    public Map<String, String> getConcilatoryModifiers() {
         return this.concilatoryModifiers == null ? new LinkedHashMap<>() : this.concilatoryModifiers;
     }
 
-    public void addConcilatoryModifier(String modifier, Double quantity) {
+    public void addConcilatoryModifier(String modifier, String quantity) {
         if (this.concilatoryModifiers == null) {
             this.concilatoryModifiers = new LinkedHashMap<>();
         }

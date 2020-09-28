@@ -237,15 +237,15 @@ public class Diplomacy {
         return casusBellis;
     }
 
-    public void addCasusBelli(Country first, Country second, Date startDate, Date endDate, String type) {
+    public void addCasusBelli(Country first, Country second, Date startDate, Date endDate, com.osallek.eu4parser.model.game.CasusBelli type) {
         CasusBelli.addToItem(this.item, first.getTag(), second.getTag(), startDate, endDate, type);
         refreshAttributes();
     }
 
-    public void removeCasusBelli(Country first, Country second, String type) {
+    public void removeCasusBelli(Country first, Country second, com.osallek.eu4parser.model.game.CasusBelli type) {
         for (int i = 0; i < this.casusBellis.size(); i++) {
             CasusBelli casusBelli = this.casusBellis.get(i);
-            if (casusBelli.getFirst().equals(first) && casusBelli.getSecond().equals(second) && casusBelli.getType().equalsIgnoreCase(type)) {
+            if (casusBelli.getFirst().equals(first) && casusBelli.getSecond().equals(second) && casusBelli.getType().equals(type)) {
                 this.item.removeChild("casus_belli", i);
                 break;
             }

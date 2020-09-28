@@ -141,7 +141,7 @@ public class Country {
 
     private Map<Integer, Navy> navies;
 
-    private Map<Country, ActiveRelation> activeRelations;
+    private Map<String, ActiveRelation> activeRelations;
 
     private Map<Integer, Leader> leaders;
 
@@ -171,7 +171,7 @@ public class Country {
 
     private Missions countryMissions;
 
-    private Map<SaveArea, CountryState> states = new HashMap<>();
+    private final Map<SaveArea, CountryState> states = new HashMap<>();
 
     private SortedMap<Integer, Integer> incomeStatistics;
 
@@ -2988,12 +2988,12 @@ public class Country {
         refreshAttributes();
     }
 
-    public Map<Country, ActiveRelation> getActiveRelations() {
+    public Map<String, ActiveRelation> getActiveRelations() {
         return activeRelations;
     }
 
     public ActiveRelation getActiveRelation(Country country) {
-        return this.activeRelations.get(country);
+        return this.activeRelations.get(country.getTag());
     }
 
     public Map<Integer, Leader> getLeaders() {
@@ -3684,7 +3684,7 @@ public class Country {
             this.activeRelations = activeRelationsItem.getChildren()
                                                       .stream()
                                                       .map(child -> new ActiveRelation(child, this.save))
-                                                      .collect(Collectors.toMap(ActiveRelation::getCountry, Function.identity()));
+                                                      .collect(Collectors.toMap(ActiveRelation::getCountryTag, Function.identity()));
         }
 
         List<ClausewitzItem> previousMonarchsItems = this.item.getChildren("previous_monarch");
@@ -3792,5 +3792,10 @@ public class Country {
     @Override
     public int hashCode() {
         return Objects.hash(getTag());
+    }
+
+    @Override
+    public String toString() {
+        return localizedName + (getPlayer() == null ? "" : " (" + getPlayer() + ")");
     }
 }

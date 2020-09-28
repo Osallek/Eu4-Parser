@@ -16,9 +16,9 @@ public class CasusBelli extends EndDatableRelation {
         return this.save.getGame().getCasusBelli(this.item.getVarAsString("type"));
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, Date endDate, String type) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, Date endDate, com.osallek.eu4parser.model.game.CasusBelli type) {
         ClausewitzItem toItem = EndDatableRelation.addToItem(parent, "casus_belli", first, second, startDate, endDate);
-        toItem.addVariable("type", ClausewitzUtils.addQuotes(type));
+        toItem.addVariable("type", ClausewitzUtils.addQuotes(type.getName()));
 
         return toItem;
     }

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 public class GovernmentName {
@@ -178,5 +179,33 @@ public class GovernmentName {
 
     public Pair<String, String> getHeirFemale(int level) {
         return this.heirsFemale.get(level);
+    }
+
+    public Condition getTrigger() {
+        return trigger;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof GovernmentName)) {
+            return false;
+        }
+
+        GovernmentName that = (GovernmentName) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

@@ -50,9 +50,9 @@ public class Building {
 
     private boolean showSeparate;
 
-    private final Map<String, Double> modifiers;
+    private final Map<String, String> modifiers;
 
-    private Map<String, Double> internalModifiers;
+    private Map<String, String> internalModifiers;
 
     private final boolean onlyInPort;
 
@@ -110,7 +110,7 @@ public class Building {
                                        : child.getVariables()
                                               .stream()
                                               .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                        ClausewitzVariable::getAsDouble,
+                                                                        ClausewitzVariable::getValue,
                                                                         (a, b) -> b,
                                                                         LinkedHashMap::new));
 
@@ -277,18 +277,18 @@ public class Building {
         this.showSeparate = showSeparate;
     }
 
-    public Map<String, Double> getModifiers() {
-        Map<String, Double> map = this.internalModifiers == null ? new LinkedHashMap<>()
+    public Map<String, String> getModifiers() {
+        Map<String, String> map = this.internalModifiers == null ? new LinkedHashMap<>()
                                                                  : new LinkedHashMap<>(this.internalModifiers);
         map.putAll(this.modifiers);
         return map;
     }
 
-    public void addModifier(String modifier, Double quantity) {
+    public void addModifier(String modifier, String quantity) {
         this.modifiers.put(modifier, quantity);
     }
 
-    public void setInternalModifiers(Map<String, Double> internalModifiers) {
+    public void setInternalModifiers(Map<String, String> internalModifiers) {
         this.internalModifiers = internalModifiers;
     }
 

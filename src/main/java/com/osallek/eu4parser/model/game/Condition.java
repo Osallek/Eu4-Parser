@@ -6,59 +6,78 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.ConditionsUtils;
 import com.osallek.eu4parser.model.save.country.Country;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Condition {
 
-    private final List<Condition> not;
+    private final String name;
 
-    private final List<Condition> or;
+    private final Map<String, List<String>> conditions;
 
-    private final Map<String, String> conditions;
-
-    private final Map<String, List<Condition>> scopes;
+    private final List<Condition> scopes;
 
     public Condition(ClausewitzItem item) {
-        this.not = item.getChildren("NOT").stream().map(Condition::new).collect(Collectors.toList());
-        this.or = item.getChildren("OR").stream().map(Condition::new).collect(Collectors.toList());
-        this.conditions = item.getChildren("AND")
+        this.name = item.getName();
+        this.conditions = item.getVariables()
                               .stream()
-                              .map(ClausewitzItem::getVariables)
-                              .flatMap(Collection::stream)
-                              .collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getValue));
-        item.getVariables().forEach(variable -> this.conditions.put(variable.getName(), variable.getValue()));
-        this.scopes = item.getChildrenNot("NOT", "OR", "AND").stream().collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                                     Collectors.mapping(Condition::new, Collectors.toList())));
+                              .collect(Collectors.groupingBy(ClausewitzObject::getName, Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.scopes = item.getChildren().stream().map(Condition::new).collect(Collectors.toList());
     }
 
-    public List<Condition> getNot() {
-        return not;
+    public String getName() {
+        return name;
     }
 
-    public List<Condition> getOr() {
-        return or;
-    }
-
-    public Map<String, String> getConditions() {
+    public Map<String, List<String>> getConditions() {
         return conditions;
     }
 
-    public Map<String, List<Condition>> getScopes() {
+    public List<Condition> getScopes() {
         return scopes;
     }
 
-    public boolean applyToCountry(Country country) {
-        if (this.conditions.entrySet().stream().anyMatch(entry -> !applyConditionToCountry(country, entry.getKey(), entry.getValue()))) {
+    public boolean apply(Country root, Country from) {
+        if (this.conditions.entrySet()
+                           .stream()
+                           .anyMatch(entry -> entry.getValue()
+                                                   .stream()
+                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
+            return false;
+        }
+
+        if (this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
             return false;
         }
 
         return true;
     }
 
-    private boolean applyConditionToCountry(Country country, String condition, String value) {
-        return ConditionsUtils.applyConditionToCountry(country, condition, value);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Condition)) {
+            return false;
+        }
+
+        Condition condition = (Condition) o;
+        return Objects.equals(name, condition.name) &&
+               Objects.equals(conditions, condition.conditions) &&
+               Objects.equals(scopes, condition.scopes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, conditions, scopes);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

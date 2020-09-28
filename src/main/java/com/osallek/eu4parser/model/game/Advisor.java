@@ -22,9 +22,9 @@ public class Advisor {
 
     private final boolean allowOnlyFemale;
 
-    private final Map<String, Double> skillScaledModifier;
+    private final Map<String, String> skillScaledModifier;
 
-    private final Map<String, Double> modifiers;
+    private final Map<String, String> modifiers;
 
     public Advisor(ClausewitzItem item) {
         this.name = item.getName();
@@ -33,12 +33,12 @@ public class Advisor {
         this.allowOnlyFemale = BooleanUtils.toBoolean(item.getVarAsBool("allow_only_female"));
         this.modifiers = item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female")
                              .stream()
-                             .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble, (a, b) -> b, LinkedHashMap::new));
+                             .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getValue, (a, b) -> b, LinkedHashMap::new));
         ClausewitzItem child = item.getChild("skill_scaled_modifier");
         this.skillScaledModifier = child == null ? null : child.getVariables()
                                                                .stream()
                                                                .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                         ClausewitzVariable::getAsDouble,
+                                                                                         ClausewitzVariable::getValue,
                                                                                          (a, b) -> b,
                                                                                          LinkedHashMap::new));
     }
@@ -67,11 +67,11 @@ public class Advisor {
         return allowOnlyFemale;
     }
 
-    public Map<String, Double> getSkillScaledModifier() {
+    public Map<String, String> getSkillScaledModifier() {
         return skillScaledModifier;
     }
 
-    public Map<String, Double> getModifiers() {
+    public Map<String, String> getModifiers() {
         return modifiers;
     }
 

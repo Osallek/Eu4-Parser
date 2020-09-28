@@ -309,7 +309,7 @@ public class Game {
                                  .flatMap(Collection::stream)
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
-                                 .filter(culture -> culture.getName().equals(name))
+                                 .filter(culture -> culture.getName().equalsIgnoreCase(name))
                                  .findFirst()
                                  .orElse(null);
     }
@@ -334,7 +334,7 @@ public class Game {
         return getReligionGroups().stream()
                                   .map(ReligionGroup::getReligions)
                                   .flatMap(Collection::stream)
-                                  .filter(religion -> religion.getName().equals(name))
+                                  .filter(religion -> religion.getName().equalsIgnoreCase(name))
                                   .findFirst()
                                   .orElse(null);
     }
@@ -360,7 +360,7 @@ public class Game {
         }
 
         for (TradeGood tradeGood : this.tradeGoods.keySet()) {
-            if (tradeGood.getName().equals(name)) {
+            if (tradeGood.getName().equalsIgnoreCase(name)) {
                 return tradeGood;
             }
         }
@@ -382,7 +382,7 @@ public class Game {
         }
 
         for (Building building : this.buildings.keySet()) {
-            if (building.getName().equals(name)) {
+            if (building.getName().equalsIgnoreCase(name)) {
                 return building;
             }
         }
@@ -400,7 +400,7 @@ public class Game {
         }
 
         for (ImperialReform imperialReform : this.imperialReforms.keySet()) {
-            if (imperialReform.getName().equals(name)) {
+            if (imperialReform.getName().equalsIgnoreCase(name)) {
                 return imperialReform;
             }
         }
@@ -418,7 +418,7 @@ public class Game {
         }
 
         for (Decree saveDecree : this.decrees.keySet()) {
-            if (saveDecree.getName().equals(name)) {
+            if (saveDecree.getName().equalsIgnoreCase(name)) {
                 return saveDecree;
             }
         }
@@ -436,7 +436,7 @@ public class Game {
         }
 
         for (GoldenBull saveGoldenBull : this.goldenBulls.keySet()) {
-            if (saveGoldenBull.getName().equals(name)) {
+            if (saveGoldenBull.getName().equalsIgnoreCase(name)) {
                 return saveGoldenBull;
             }
         }
@@ -465,7 +465,7 @@ public class Game {
         }
 
         for (Event event : this.events.keySet()) {
-            if (event.getId().equals(id)) {
+            if (event.getId().equalsIgnoreCase(id)) {
                 return event;
             }
         }
@@ -506,7 +506,7 @@ public class Game {
         }
 
         for (Government government : this.governments.keySet()) {
-            if (government.getName().equals(name)) {
+            if (government.getName().equalsIgnoreCase(name)) {
                 return government;
             }
         }
@@ -524,7 +524,7 @@ public class Game {
         }
 
         for (GovernmentName governmentName : this.governmentNames.keySet()) {
-            if (governmentName.getName().equals(name)) {
+            if (governmentName.getName().equalsIgnoreCase(name)) {
                 return governmentName;
             }
         }
@@ -542,7 +542,7 @@ public class Game {
         }
 
         for (Unit unit : this.units.keySet()) {
-            if (unit.getName().equals(name)) {
+            if (unit.getName().equalsIgnoreCase(name)) {
                 return unit;
             }
         }
@@ -560,7 +560,7 @@ public class Game {
         }
 
         for (Area area : this.areas.keySet()) {
-            if (area.getName().equals(name)) {
+            if (area.getName().equalsIgnoreCase(name)) {
                 return area;
             }
         }
@@ -578,7 +578,7 @@ public class Game {
         }
 
         for (Advisor advisor : this.advisors.keySet()) {
-            if (advisor.getName().equals(name)) {
+            if (advisor.getName().equalsIgnoreCase(name)) {
                 return advisor;
             }
         }
@@ -596,7 +596,7 @@ public class Game {
         }
 
         for (IdeaGroup ideaGroup : this.ideaGroups.keySet()) {
-            if (ideaGroup.getName().equals(name)) {
+            if (ideaGroup.getName().equalsIgnoreCase(name)) {
                 return ideaGroup;
             }
         }
@@ -614,7 +614,7 @@ public class Game {
         }
 
         for (CasusBelli casusBelli : this.casusBelli.keySet()) {
-            if (casusBelli.getName().equals(name)) {
+            if (casusBelli.getName().equalsIgnoreCase(name)) {
                 return casusBelli;
             }
         }

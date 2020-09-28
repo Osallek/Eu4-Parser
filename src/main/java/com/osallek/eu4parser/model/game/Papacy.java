@@ -15,11 +15,11 @@ public class Papacy {
 
     private Integer electionCost;
 
-    private Map<String, Double> harshModifiers;
+    private Map<String, String> harshModifiers;
 
-    private Map<String, Double> neutralModifiers;
+    private Map<String, String> neutralModifiers;
 
-    private Map<String, Double> concilatoryModifiers;
+    private Map<String, String> concilatoryModifiers;
 
     private List<PapacyConcession> concessions;
 
@@ -30,21 +30,21 @@ public class Papacy {
         this.harshModifiers = child == null ? null : child.getVariables()
                                                           .stream()
                                                           .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                    ClausewitzVariable::getAsDouble,
+                                                                                    ClausewitzVariable::getValue,
                                                                                     (a, b) -> b,
                                                                                     LinkedHashMap::new));
         child = item.getChild("neutral");
         this.neutralModifiers = child == null ? null : child.getVariables()
                                                             .stream()
                                                             .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                      ClausewitzVariable::getAsDouble,
+                                                                                      ClausewitzVariable::getValue,
                                                                                       (a, b) -> b,
                                                                                       LinkedHashMap::new));
         child = item.getChild("concilatory");
         this.concilatoryModifiers = child == null ? null : child.getVariables()
                                                                 .stream()
                                                                 .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                          ClausewitzVariable::getAsDouble,
+                                                                                          ClausewitzVariable::getValue,
                                                                                           (a, b) -> b,
                                                                                           LinkedHashMap::new));
 
@@ -84,11 +84,11 @@ public class Papacy {
         this.electionCost = electionCost;
     }
 
-    public Map<String, Double> getHarshModifiers() {
+    public Map<String, String> getHarshModifiers() {
         return this.harshModifiers == null ? new LinkedHashMap<>() : this.harshModifiers;
     }
 
-    public void addHarshModifier(String modifier, Double quantity) {
+    public void addHarshModifier(String modifier, String quantity) {
         if (this.harshModifiers == null) {
             this.harshModifiers = new LinkedHashMap<>();
         }
@@ -102,11 +102,11 @@ public class Papacy {
         }
     }
 
-    public Map<String, Double> getNeutralModifiers() {
+    public Map<String, String> getNeutralModifiers() {
         return this.neutralModifiers == null ? new LinkedHashMap<>() : this.neutralModifiers;
     }
 
-    public void addNeutralModifier(String modifier, Double quantity) {
+    public void addNeutralModifier(String modifier, String quantity) {
         if (this.neutralModifiers == null) {
             this.neutralModifiers = new LinkedHashMap<>();
         }
@@ -120,11 +120,11 @@ public class Papacy {
         }
     }
 
-    public Map<String, Double> getConcilatoryModifiers() {
+    public Map<String, String> getConcilatoryModifiers() {
         return this.concilatoryModifiers == null ? new LinkedHashMap<>() : this.concilatoryModifiers;
     }
 
-    public void addConcilatoryModifier(String modifier, Double quantity) {
+    public void addConcilatoryModifier(String modifier, String quantity) {
         if (this.concilatoryModifiers == null) {
             this.concilatoryModifiers = new LinkedHashMap<>();
         }

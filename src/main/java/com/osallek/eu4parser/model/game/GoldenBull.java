@@ -19,7 +19,7 @@ public class GoldenBull {
 
     private List<String> mechanics;
 
-    private Map<String, Double> modifiers;
+    private Map<String, String> modifiers;
 
     public GoldenBull(ClausewitzItem item) {
         this.name = item.getName();
@@ -28,7 +28,7 @@ public class GoldenBull {
         this.modifiers = child == null ? null : child.getVariables()
                                                      .stream()
                                                      .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getAsDouble,
+                                                                               ClausewitzVariable::getValue,
                                                                                (a, b) -> b,
                                                                                LinkedHashMap::new));
         ClausewitzList list = item.getList("mechanics");
@@ -66,11 +66,11 @@ public class GoldenBull {
         this.mechanics = mechanics;
     }
 
-    public Map<String, Double> getModifiers() {
+    public Map<String, String> getModifiers() {
         return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
     }
 
-    public void addModifier(String modifier, Double quantity) {
+    public void addModifier(String modifier, String quantity) {
         if (modifier == null) {
             this.modifiers = new LinkedHashMap<>();
         }

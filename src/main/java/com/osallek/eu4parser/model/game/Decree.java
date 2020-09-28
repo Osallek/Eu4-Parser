@@ -18,7 +18,7 @@ public class Decree {
 
     private Integer duration;
 
-    private Map<String, Double> modifiers;
+    private Map<String, String> modifiers;
 
     public Decree(ClausewitzItem item) {
         this.name = item.getName();
@@ -29,7 +29,7 @@ public class Decree {
         this.modifiers = child == null ? null : child.getVariables()
                                                      .stream()
                                                      .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getAsDouble,
+                                                                               ClausewitzVariable::getValue,
                                                                                (a, b) -> b,
                                                                                LinkedHashMap::new));
     }
@@ -74,11 +74,11 @@ public class Decree {
         this.duration = duration;
     }
 
-    public Map<String, Double> getModifiers() {
+    public Map<String, String> getModifiers() {
         return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
     }
 
-    public void addModifier(String modifier, Double quantity) {
+    public void addModifier(String modifier, String quantity) {
         if (this.modifiers == null) {
             this.modifiers = new LinkedHashMap<>();
         }
