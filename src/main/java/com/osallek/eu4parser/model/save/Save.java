@@ -46,15 +46,12 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Save {
 
     //Todo in countries: custom countries
     //Todo Teams
-
-    private static final Logger LOGGER = Logger.getLogger(Save.class.getName());
 
     private final String name;
 

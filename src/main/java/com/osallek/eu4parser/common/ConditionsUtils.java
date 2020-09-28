@@ -27,6 +27,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,13 +38,12 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ConditionsUtils {
 
-    private static final Logger LOGGER = Logger.getLogger(ConditionsUtils.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConditionsUtils.class.getName());
 
     private ConditionsUtils() {}
 
@@ -1644,7 +1645,8 @@ public class ConditionsUtils {
                 return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getOwnedProvinces().size()))
                                             .compareTo(BigDecimal.valueOf(country.getOwnedProvinces()
                                                                                  .stream()
-                                                                                 .filter(province -> "REB".equals(ClausewitzUtils.removeQuotes(province.getControllerTag())))
+                                                                                 .filter(province -> "REB".equals(
+                                                                                         ClausewitzUtils.removeQuotes(province.getControllerTag())))
                                                                                  .count())) >= 0;
             case "revolution_target_exists":
                 return country.getSave().getRevolution().getRevolutionTarget() != null;
@@ -1866,10 +1868,9 @@ public class ConditionsUtils {
                     return BigDecimal.valueOf(country.getTreasury())
                                      .compareTo(BigDecimal.valueOf(other.getEstimatedMonthlyIncome()).multiply(BigDecimal.valueOf(12))) >= 0;
                 }
-            default:
-                LOGGER.info("Don't know how to manage country condition: " + condition + "=" + value);
         }
 
+        LOGGER.info("Don't know how to manage country condition: {} = {}", condition, value);
         return true;
     }
 
@@ -1906,10 +1907,9 @@ public class ConditionsUtils {
                 return condition.apply(root, from);
             case "from":
                 return condition.apply(from, root);
-            default:
-                LOGGER.info("Don't know how to manage country scope: " + condition);
         }
 
+        LOGGER.info("Don't know how to manage country scope: {} !", condition);
         return true;
     }
 }
