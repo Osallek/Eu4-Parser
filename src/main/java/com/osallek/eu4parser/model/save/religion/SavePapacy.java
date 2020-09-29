@@ -309,7 +309,7 @@ public class SavePapacy {
 
         if (activeCardinalsItem != null) {
             List<ClausewitzItem> cardinalsItems = activeCardinalsItem.getChildren("cardinal");
-            this.cardinals = cardinalsItems.stream().map(Cardinal::new).collect(Collectors.toList());
+            this.cardinals = cardinalsItems.stream().map(child -> new Cardinal(child, this.save)).collect(Collectors.toList());
         }
 
         ClausewitzList claimsList = this.item.getList("colony_claim");

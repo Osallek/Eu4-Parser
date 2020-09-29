@@ -2,24 +2,29 @@ package com.osallek.eu4parser.model.save.religion;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 public class Cardinal {
 
     private final ClausewitzItem item;
 
+    private final Save save;
+
     private Id id;
 
-    public Cardinal(ClausewitzItem item) {
+    public Cardinal(ClausewitzItem item, Save save) {
         this.item = item;
+        this.save = save;
         refreshAttributes();
     }
 
-    public Integer getLocation() {
-        return this.item.getVarAsInt("location");
+    public SaveProvince getLocation() {
+        return this.save.getProvince(this.item.getVarAsInt("location"));
     }
 
-    public void setLocation(Integer provinceId) {
-        this.item.setVariable("location", provinceId);
+    public void setLocation(SaveProvince province) {
+        this.item.setVariable("location", province.getId());
     }
 
     public Id getId() {

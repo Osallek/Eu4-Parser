@@ -34,7 +34,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,7 +66,7 @@ public class Game {
 
     private Map<Path, List<ReligionGroup>> religionGroups;
 
-    private Map<Path, List<Institution>> institutions;
+    private Map<Path, SortedSet<Institution>> institutions;
 
     private Map<TradeGood, Map.Entry<Path, Path>> tradeGoods;
 
@@ -340,11 +343,27 @@ public class Game {
     }
 
     public List<Institution> getInstitutions() {
-        return this.institutions.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return this.institutions.values()
+                                .stream()
+                                .flatMap(Collection::stream)
+                                .sorted(Comparator.comparingInt(Institution::getIndex))
+                                .collect(Collectors.toList());
     }
 
     public Institution getInstitution(int i) {
         return getInstitutions().get(i);
+    }
+
+    public Institution getInstitution(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        return this.institutions.values().stream()
+                                .flatMap(Collection::stream)
+                                .filter(institution -> institution.getName().equalsIgnoreCase(name))
+                                .findFirst()
+                                .orElse(null);
     }
 
     public List<TradeGood> getTradeGoods() {
@@ -862,14 +881,15 @@ public class Game {
 
         try (Stream<Path> paths = Files.walk(institutionsFolder.toPath())) {
             this.institutions = new HashMap<>();
+            AtomicInteger i = new AtomicInteger();
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
                      ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                      this.institutions.put(path, institutionsItem.getChildren()
                                                                  .stream()
-                                                                 .map(Institution::new)
-                                                                 .collect(Collectors.toList()));
+                                                                 .map(child -> new Institution(child, i.getAndIncrement()))
+                                                                 .collect(Collectors.toCollection(TreeSet::new)));
                  });
             this.institutions.values().forEach(institutionList -> institutionList.forEach(institution -> {
                 institution.setLocalizedName(this.getLocalisation(institution.getName()));

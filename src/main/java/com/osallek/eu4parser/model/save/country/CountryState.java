@@ -28,6 +28,14 @@ public class CountryState {
         this.item.setVariable("prosperity", prosperity);
     }
 
+    public Boolean hasStatePatriarch() {
+        return this.item.getVarAsBool("has_state_patriach");
+    }
+
+    public void setHasStatePatriarch(boolean hasStatePatriach) {
+        this.item.setVariable("has_state_patriach", hasStatePatriach);
+    }
+
     public Country getCountry() {
         return this.save.getCountry(this.item.getVarAsString("country"));
     }

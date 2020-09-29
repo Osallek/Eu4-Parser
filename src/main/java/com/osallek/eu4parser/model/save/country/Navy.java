@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 
 public class Navy extends Army {
 
-    private List<AbstractRegiment> ships;
+    private List<Ship> ships;
 
     public Navy(ClausewitzItem item, Country country) {
         super(item, country);
     }
 
-    public List<AbstractRegiment> getShips() {
+    public List<Ship> getShips() {
         return ships;
     }
 
@@ -98,7 +98,7 @@ public class Navy extends Army {
 
         List<ClausewitzItem> shipsItems = this.item.getChildren("ship");
         this.ships = shipsItems.stream()
-                               .map(child -> new Regiment(child, this.country.getSave()))
+                               .map(child -> new Ship(child, this.country.getSave(), this))
                                .collect(Collectors.toList());
     }
 }

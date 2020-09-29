@@ -7,11 +7,23 @@ import com.osallek.eu4parser.model.save.Save;
 
 public class Ship extends AbstractRegiment {
 
+    private final Navy navy;
+
     private FlagShip flagShip;
 
-    public Ship(ClausewitzItem item, Save save) {
+    public Ship(ClausewitzItem item, Save save, Navy navy) {
         super(item, save);
+        this.navy = navy;
         refreshAttributes();
+    }
+
+    @Override
+    public AbstractArmy getArmy() {
+        return getNavy();
+    }
+
+    public Navy getNavy() {
+        return navy;
     }
 
     public Boolean hasDisengaged() {

@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -19,6 +20,8 @@ public class History {
     private final SaveProvince province;
 
     private SortedMap<Date, String> owners;
+
+    private SortedMap<Date, List<String>> claims;
 
     private SortedMap<Date, String> controllers;
 
@@ -36,6 +39,10 @@ public class History {
 
     public SortedMap<Date, String> getOwners() {
         return owners;
+    }
+
+    public SortedMap<Date, List<String>> getClaims() {
+        return claims;
     }
 
     public SortedMap<Date, String> getControllers() {
@@ -78,6 +85,12 @@ public class History {
                                                          child -> child.getVarAsString("owner"),
                                                          (a, b) -> b,
                                                          TreeMap::new));
+        this.claims = this.item.getChildren()
+                               .stream()
+                               .filter(child -> child.hasVar("add_claim"))
+                               .collect(Collectors.groupingBy(child -> Eu4Utils.stringToDate(child.getName()),
+                                                              TreeMap::new,
+                                                              Collectors.mapping(child -> child.getVarAsString("add_claim"), Collectors.toList())));
         //No startDate because already in history
 
         this.controllers = this.item.getChildren()
@@ -89,6 +102,8 @@ public class History {
                                                                             .getVarAsString("tag"),
                                                               (a, b) -> b,
                                                               TreeMap::new));
+
+
         ClausewitzItem controllerItem = this.item.getChild("controller");
 
         if (controllerItem != null) {

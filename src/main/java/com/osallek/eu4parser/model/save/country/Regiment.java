@@ -7,8 +7,16 @@ import com.osallek.eu4parser.model.save.Save;
 
 public class Regiment extends AbstractRegiment {
 
-    public Regiment(ClausewitzItem item, Save save) {
+    private final Army army;
+
+    public Regiment(ClausewitzItem item, Save save, Army army) {
         super(item, save);
+        this.army = army;
+    }
+
+    @Override
+    public Army getArmy() {
+        return army;
     }
 
     public Double getDrill() {

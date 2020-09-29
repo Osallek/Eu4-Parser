@@ -83,7 +83,7 @@ public class Save {
 
     private ChangePrices changePrices;
 
-    private List<RebelFaction> rebelFactions;
+    private Map<Id, RebelFaction> rebelFactions;
 
     private Hre hre;
 
@@ -336,7 +336,7 @@ public class Save {
         return changePrices;
     }
 
-    public List<RebelFaction> getRebelFactions() {
+    public Map<Id, RebelFaction> getRebelFactions() {
         return rebelFactions;
     }
 
@@ -654,7 +654,7 @@ public class Save {
         List<ClausewitzItem> rebelFactionItems = this.gamestateItem.getChildren("rebel_faction");
         this.rebelFactions = rebelFactionItems.stream()
                                               .map(child -> new RebelFaction(child, this))
-                                              .collect(Collectors.toList());
+                                              .collect(Collectors.toMap(RebelFaction::getId, Function.identity()));
 
         ClausewitzItem hreItem = this.gamestateItem.getChild("empire");
 
@@ -760,6 +760,7 @@ public class Save {
                                         .filter(child -> child.getChild("state") != null || child.getChild("investments") != null)
                                         .map(child -> new SaveArea(child, this))
                                         .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()), Function.identity()));
+            this.areas.values().forEach(saveArea -> saveArea.getProvinces().forEach(province -> province.setArea(saveArea)));
         }
 
         ClausewitzItem activeAdvisorsItem = this.gamestateItem.getChild("active_advisors");

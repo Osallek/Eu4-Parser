@@ -29,6 +29,10 @@ public abstract class AbstractArmy {
         return id;
     }
 
+    public Country getCountry() {
+        return country;
+    }
+
     public String getName() {
         return this.item.getVarAsString("name");
     }

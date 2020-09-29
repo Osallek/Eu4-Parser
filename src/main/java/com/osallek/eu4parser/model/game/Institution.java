@@ -2,30 +2,36 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Institution {
+public class Institution implements Comparable<Institution> {
 
-    private String name;
+    private final String name;
 
     private String localizedName;
 
-    private Double penalty;
+    private final int index;
 
-    private Map<String, String> bonus;
+    private final Double penalty;
 
-    private Double tradeCompanyEfficiency;
+    private final Map<String, String> bonus;
 
-    private Date historicalStartDate;
+    private final Double tradeCompanyEfficiency;
 
-    private Integer historicalStartProvince;
+    private final Date historicalStartDate;
 
-    public Institution(ClausewitzItem item) {
+    private final Integer historicalStartProvince;
+
+    public Institution(ClausewitzItem item, int index) {
         this.name = item.getName();
+        this.index = index;
         this.penalty = item.getVarAsDouble("penalty");
         this.tradeCompanyEfficiency = item.getVarAsDouble("trade_company_efficiency");
         ClausewitzItem child = item.getChild("bonus");
@@ -43,10 +49,6 @@ public class Institution {
         return this.name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getLocalizedName() {
         return localizedName;
     }
@@ -55,53 +57,56 @@ public class Institution {
         this.localizedName = localizedName;
     }
 
-    public Double getPenalty() {
-        return this.penalty;
+    public int getIndex() {
+        return index;
     }
 
-    public void setPenalty(double penalty) {
-        this.penalty = penalty;
+    public Double getPenalty() {
+        return this.penalty;
     }
 
     public Map<String, String> getBonuses() {
         return this.bonus == null ? new LinkedHashMap<>() : this.bonus;
     }
 
-    public void addBonus(String bonus, String quantity) {
-        if (this.bonus == null) {
-            this.bonus = new LinkedHashMap<>();
-        }
-
-        this.bonus.put(bonus, quantity);
-    }
-
-    public void removeBonus(String bonus) {
-        if (this.bonus != null) {
-            this.bonus.remove(bonus);
-        }
-    }
-
     public Double getTradeCompanyEfficiency() {
         return this.tradeCompanyEfficiency;
-    }
-
-    public void setTradeCompanyEfficiency(double tradeCompanyEfficiency) {
-        this.tradeCompanyEfficiency = tradeCompanyEfficiency;
     }
 
     public Date getHistoricalStartDate() {
         return this.historicalStartDate;
     }
 
-    public void setHistoricalStartDate(Date historicalStartDate) {
-        this.historicalStartDate = historicalStartDate;
-    }
-
     public Integer getHistoricalStartProvince() {
         return this.historicalStartProvince;
     }
 
-    public void setHistoricalStartProvince(int historicalStartProvince) {
-        this.historicalStartProvince = historicalStartProvince;
+    @Override
+    public int compareTo(@NotNull Institution o) {
+        return Comparator.comparingInt(Institution::getIndex).compare(this, o);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Institution)) {
+            return false;
+        }
+
+        Institution that = (Institution) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

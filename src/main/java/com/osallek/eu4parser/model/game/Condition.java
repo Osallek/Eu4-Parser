@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.ConditionsUtils;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,22 @@ public class Condition {
         }
 
         if (this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean apply(SaveProvince province) {
+        if (this.conditions.entrySet()
+                           .stream()
+                           .anyMatch(entry -> entry.getValue()
+                                                   .stream()
+                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
+            return false;
+        }
+
+        if (this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
             return false;
         }
 

@@ -10,6 +10,7 @@ import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
+import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
@@ -401,31 +402,21 @@ public class Country {
         }
     }
 
-    public List<Boolean> getEmbracedInstitutions() {
+    public List<Institution> getEmbracedInstitutions() {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            return list.getValuesAsInt().stream().map(value -> 1 == value).collect(Collectors.toList());
+            return this.save.getGame().getInstitutions().stream().filter(this::getEmbracedInstitution).collect(Collectors.toList());
         }
 
         return new ArrayList<>();
     }
 
-    public List<Integer> getEmbracedInstitutionsIds() {
+    public List<Institution> getNotEmbracedInstitutions() {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            return IntStream.range(0, list.size()).filter(this::getEmbracedInstitution).boxed().collect(Collectors.toList());
-        }
-
-        return new ArrayList<>();
-    }
-
-    public List<Integer> getNotEmbracedInstitutionsIds() {
-        ClausewitzList list = this.item.getList("institutions");
-
-        if (list != null) {
-            return IntStream.range(0, list.size()).filter(index -> !this.getEmbracedInstitution(index)).boxed().collect(Collectors.toList());
+            return this.save.getGame().getInstitutions().stream().filter(index -> !this.getEmbracedInstitution(index)).collect(Collectors.toList());
         }
 
         return new ArrayList<>();
@@ -441,8 +432,18 @@ public class Country {
         return false;
     }
 
+    public boolean getEmbracedInstitution(Institution institution) {
+        ClausewitzList list = this.item.getList("institutions");
+
+        if (list != null) {
+            return 1 == list.getAsInt(institution.getIndex());
+        }
+
+        return false;
+    }
+
     public long getNbEmbracedInstitutions() {
-        return getEmbracedInstitutions().stream().filter(Boolean.TRUE::equals).count();
+        return getEmbracedInstitutions().size();
     }
 
     public void embracedInstitution(int institution, boolean embraced) {

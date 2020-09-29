@@ -58,6 +58,8 @@ public class Building {
 
     private final boolean onlyNatives;
 
+    private final Condition trigger;
+
     public Building(Building other) {
         this.game = other.game;
         this.name = other.name;
@@ -80,6 +82,8 @@ public class Building {
         this.internalModifiers = other.internalModifiers;
         this.onlyInPort = other.onlyInPort;
         this.onlyNatives = other.onlyNatives;
+        this.trigger = other.trigger;
+        ;
     }
 
     public Building(ClausewitzItem item, Game game) {
@@ -114,8 +118,9 @@ public class Building {
                                                                         (a, b) -> b,
                                                                         LinkedHashMap::new));
 
-        child = item.getChild("trigger");
+        child = item.getChild("build_trigger");
         this.onlyInPort = child != null && BooleanUtils.toBoolean(child.getVarAsBool("has_port"));
+        this.trigger = child == null ? null : new Condition(child);
 
         child = item.getChild("build_trigger");
         this.onlyNatives = child != null
@@ -302,6 +307,10 @@ public class Building {
 
     public boolean onlyNative() {
         return this.onlyNatives;
+    }
+
+    public Condition getTrigger() {
+        return trigger;
     }
 
     @Override

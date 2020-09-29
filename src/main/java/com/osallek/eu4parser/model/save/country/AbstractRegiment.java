@@ -7,7 +7,7 @@ import com.osallek.eu4parser.model.game.Unit;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
 
-public class AbstractRegiment {
+public abstract class AbstractRegiment {
 
     protected final Save save;
 
@@ -26,6 +26,8 @@ public class AbstractRegiment {
     public Id getId() {
         return id;
     }
+
+    public abstract AbstractArmy getArmy();
 
     public String getName() {
         return this.item.getVarAsString("name");
