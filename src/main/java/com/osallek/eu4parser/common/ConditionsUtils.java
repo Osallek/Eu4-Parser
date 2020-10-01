@@ -1601,8 +1601,10 @@ public class ConditionsUtils {
                 break;
             case "production_efficiency": //Todo
                 break;
-            case "production_income_percentage": //Can't do
-                break;
+            case "production_income_percentage":
+                return country.getLedger() != null
+                       && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
+                                            .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.PRODUCTION))) >= 0;
             case "production_leader": //Todo object
                 break;
             case "provinces_on_capital_continent_of":
@@ -1711,8 +1713,10 @@ public class ConditionsUtils {
                 return value.equalsIgnoreCase(country.getTag());
             case "tariff_value":
                 return country.getTariff() != null && country.getTariff() >= NumbersUtils.toDouble(value);
-            case "tax_income_percentage": //Can't do
-                break;
+            case "tax_income_percentage":
+                return country.getLedger() != null
+                       && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
+                                            .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TAXES))) >= 0;
             case "tech_difference": //Todo object
                 break;
             case "technology_group":
@@ -1761,8 +1765,10 @@ public class ConditionsUtils {
             case "trade_embargo_by":
                 other = country.getSave().getCountry(value);
                 return country.getTradeEmbargoedBy().contains(other);
-            case "trade_income_percentage": //Can't do
-                break;
+            case "trade_income_percentage":
+                return country.getLedger() != null
+                       && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
+                                            .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TRADE))) >= 0;
             case "trading_bonus": //Todo object
                 break;
             case "trading_part": //Todo object
