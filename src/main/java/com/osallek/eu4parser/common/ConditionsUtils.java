@@ -1966,8 +1966,8 @@ public class ConditionsUtils {
                     other = province.getSave().getCountry(value);
                     return province.getCavalry().stream().anyMatch(regiment -> regiment.getArmy().getCountry().equals(other));
                 }
-            case "colonial_region": //Todo colonial region
-                break;
+            case "colonial_region":
+                return province.getSave().getGame().getColonialRegion(value).getProvinces().contains(province.getId());
             case "colonysize":
                 return NumbersUtils.doubleOrDefault(province.getColonySize()) >= NumbersUtils.toDouble(value);
             case "construction_progress":
