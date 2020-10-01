@@ -1604,7 +1604,7 @@ public class ConditionsUtils {
             case "production_income_percentage":
                 return country.getLedger() != null
                        && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
-                                            .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.PRODUCTION))) >= 0;
+                                               .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.PRODUCTION))) >= 0;
             case "production_leader": //Todo object
                 break;
             case "provinces_on_capital_continent_of":
@@ -1716,7 +1716,7 @@ public class ConditionsUtils {
             case "tax_income_percentage":
                 return country.getLedger() != null
                        && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
-                                            .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TAXES))) >= 0;
+                                               .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TAXES))) >= 0;
             case "tech_difference": //Todo object
                 break;
             case "technology_group":
@@ -1768,7 +1768,7 @@ public class ConditionsUtils {
             case "trade_income_percentage":
                 return country.getLedger() != null
                        && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
-                                            .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TRADE))) >= 0;
+                                               .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TRADE))) >= 0;
             case "trading_bonus": //Todo object
                 break;
             case "trading_part": //Todo object
@@ -1800,8 +1800,8 @@ public class ConditionsUtils {
                 return country.getReligion().getGameReligion().useFetishistCult();
             case "uses_devotion": //Todo
                 break;
-            case "uses_doom": //Todo
-                break;
+            case "uses_doom":
+                return country.getReligion().getGameReligion().useDoom();
             case "uses_fervor":
                 return country.getReligion().getGameReligion().useFervor();
             case "uses_isolationism":
@@ -2052,8 +2052,6 @@ public class ConditionsUtils {
                 return province.getSave().getFlags().contains(value);
             case "has_great_project":
                 return province.getGreatProjects().contains(ClausewitzUtils.addQuotes(value));
-            case "has_harsh_treatment": //Todo
-                break;
             case "has_heir_leader_from":
                 other = province.getSave().getCountry(value);
                 return province.getArmies()
@@ -2288,8 +2286,16 @@ public class ConditionsUtils {
             case "started_in":
                 return province.getSave().getStartDate().equals(Eu4Utils.stringToDate(value))
                        || province.getSave().getStartDate().after(Eu4Utils.stringToDate(value));
-            case "sieged_by": //Todo
-                break;
+            case "sieged_by":
+                other = province.getSave().getCountry(value);
+                return province.getOwner().isAtWar() && province.getSave()
+                                                                .getCombats()
+                                                                .getSiegeCombats()
+                                                                .stream()
+                                                                .anyMatch(siegeCombat -> province.equals(siegeCombat.getLocation())
+                                                                                         && siegeCombat.getAttacker()
+                                                                                                       .getParticipatingCountries()
+                                                                                                       .contains(other));
             case "total_number_of_cardinals":
                 return province.getSave()
                                .getReligions()

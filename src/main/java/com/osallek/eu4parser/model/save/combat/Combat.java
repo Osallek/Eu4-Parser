@@ -2,14 +2,18 @@ package com.osallek.eu4parser.model.save.combat;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public abstract class Combat<C extends Combatant> {
 
+    protected final Save save;
+
     protected final ClausewitzItem item;
 
-    private final Function<ClausewitzItem, C> supplier;
+    private final BiFunction<ClausewitzItem, Save, C> supplier;
 
     protected Id id;
 
@@ -17,7 +21,8 @@ public abstract class Combat<C extends Combatant> {
 
     protected C defender;
 
-    public Combat(ClausewitzItem item, Function<ClausewitzItem, C> supplier) {
+    public Combat(ClausewitzItem item, Save save, BiFunction<ClausewitzItem, Save, C> supplier) {
+        this.save = save;
         this.item = item;
         this.supplier = supplier;
         refreshAttributes();
@@ -27,8 +32,8 @@ public abstract class Combat<C extends Combatant> {
         return id;
     }
 
-    public Integer getLocation() {
-        return this.item.getVarAsInt("location");
+    public SaveProvince getLocation() {
+        return this.save.getProvince(this.item.getVarAsInt("location"));
     }
 
     public Integer getPhase() {
@@ -69,13 +74,13 @@ public abstract class Combat<C extends Combatant> {
         ClausewitzItem attackerItem = this.item.getChild("attacker");
 
         if (attackerItem != null) {
-            this.attacker = supplier.apply(attackerItem);
+            this.attacker = supplier.apply(attackerItem, this.save);
         }
 
         ClausewitzItem defenderItem = this.item.getChild("defender");
 
         if (defenderItem != null) {
-            this.defender = supplier.apply(defenderItem);
+            this.defender = supplier.apply(defenderItem, this.save);
         }
     }
 }

@@ -2,14 +2,15 @@ package com.osallek.eu4parser.model.save.combat;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.model.save.Save;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 public class LandCombatant extends Combatant {
 
-    public LandCombatant(ClausewitzItem item) {
-        super(item);
+    public LandCombatant(ClausewitzItem item, Save save) {
+        super(item, save);
     }
 
     public Map<Losses, Double> getLosses() {

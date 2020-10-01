@@ -784,7 +784,7 @@ public class Save {
         ClausewitzItem combatItem = this.gamestateItem.getChild("combat");
 
         if (combatItem != null) {
-            this.combats = new Combats(combatItem);
+            this.combats = new Combats(combatItem, this);
         }
 
         List<ClausewitzItem> activeWarsItems = this.gamestateItem.getChildren("active_war");

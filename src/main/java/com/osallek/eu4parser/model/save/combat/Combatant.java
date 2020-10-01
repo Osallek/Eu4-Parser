@@ -2,17 +2,23 @@ package com.osallek.eu4parser.model.save.combat;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class Combatant {
+
+    protected final Save save;
 
     protected final ClausewitzItem item;
 
     protected Id unit;
 
-    public Combatant(ClausewitzItem item) {
+    public Combatant(ClausewitzItem item, Save save) {
+        this.save = save;
         this.item = item;
         refreshAttributes();
     }
@@ -41,8 +47,8 @@ public abstract class Combatant {
         return this.item.getVarAsDouble("losses");
     }
 
-    public List<String> getParticipatingCountry() {
-        return this.item.getVarsAsStrings("participating_country");
+    public List<Country> getParticipatingCountries() {
+        return this.item.getVarsAsStrings("participating_country").stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     public boolean arranged() {

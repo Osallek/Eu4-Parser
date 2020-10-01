@@ -2,14 +2,15 @@ package com.osallek.eu4parser.model.save.combat;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.save.Save;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
 public class SiegeCombat extends Combat<SiegeCombatant> {
 
-    public SiegeCombat(ClausewitzItem item) {
-        super(item, SiegeCombatant::new);
+    public SiegeCombat(ClausewitzItem item, Save save) {
+        super(item, save, SiegeCombatant::new);
     }
 
     public Double getMorale() {
