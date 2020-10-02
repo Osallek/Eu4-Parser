@@ -89,10 +89,8 @@ public class ChangePriceGood {
                                                .sum();
 
         BigDecimal newPrice = BigDecimal.valueOf(getBasicPrice())
-                                        .multiply(BigDecimal.valueOf(100))
-                                        .divide(BigDecimal.valueOf(100)
-                                                          .add(BigDecimal.valueOf(modifiersSum)),
-                                                RoundingMode.HALF_EVEN)
+                                        .multiply(BigDecimal.valueOf(100).add(BigDecimal.valueOf(modifiersSum)))
+                                        .divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_EVEN)
                                         .setScale(3, RoundingMode.HALF_EVEN);
 
         this.item.setVariable("current_price", newPrice.doubleValue());
