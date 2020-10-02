@@ -4,8 +4,8 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Color;
+import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,13 +19,13 @@ public class ColonialRegion {
 
     private final Color color;
 
-    private final int taxIncome;
+    private final Integer taxIncome;
 
-    private final int nativeSize;
+    private final Integer nativeSize;
 
-    private final int nativeFerocity;
+    private final Integer nativeFerocity;
 
-    private final int nativeHostileness;
+    private final Integer nativeHostileness;
 
     private final Map<TradeGood, Integer> tradeGoods;
 
@@ -54,18 +54,18 @@ public class ColonialRegion {
 
         child = item.getChild("religion");
         this.religions = child == null ? null : child.getVariables()
-                                                      .stream()
-                                                      .collect(Collectors.toMap(var -> game.getReligion(var.getName()), ClausewitzVariable::getAsInt));
+                                                     .stream()
+                                                     .collect(Collectors.toMap(var -> game.getReligion(var.getName()), ClausewitzVariable::getAsInt));
         child = item.getChild("culture");
         this.cultures = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.toMap(var -> game.getCulture(var.getName()), ClausewitzVariable::getAsInt));
+                                                    .stream()
+                                                    .collect(Collectors.toMap(var -> game.getCulture(var.getName()), ClausewitzVariable::getAsInt));
 
         List<ClausewitzItem> names = item.getChildren("names");
         this.colonialNames = names.stream().map(ColonialName::new).collect(Collectors.toList());
 
         list = item.getList("provinces");
-        this.provinces = list.getValuesAsInt();
+        this.provinces = list == null ? null : list.getValuesAsInt();
     }
 
     public String getName() {
@@ -84,19 +84,19 @@ public class ColonialRegion {
         return color;
     }
 
-    public int getTaxIncome() {
+    public Integer getTaxIncome() {
         return taxIncome;
     }
 
-    public int getNativeSize() {
+    public Integer getNativeSize() {
         return nativeSize;
     }
 
-    public int getNativeFerocity() {
+    public Integer getNativeFerocity() {
         return nativeFerocity;
     }
 
-    public int getNativeHostileness() {
+    public Integer getNativeHostileness() {
         return nativeHostileness;
     }
 
@@ -118,6 +118,10 @@ public class ColonialRegion {
 
     public List<Integer> getProvinces() {
         return provinces;
+    }
+
+    public boolean isRandom() {
+        return CollectionUtils.isEmpty(this.provinces);
     }
 
     @Override
