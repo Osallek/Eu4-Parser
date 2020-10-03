@@ -22,7 +22,9 @@ public class Province {
 
     private boolean isPort;
 
-    private int continent;
+    private Area area;
+
+    private Continent continent;
 
     public Province(String[] csvLine) {
         this.id = Integer.parseInt(csvLine[0]);
@@ -40,6 +42,7 @@ public class Province {
         this.impassable = other.impassable;
         this.winter = other.winter;
         this.isPort = other.isPort;
+        this.area = other.area;
         this.continent = other.continent;
     }
 
@@ -115,11 +118,19 @@ public class Province {
         this.isPort = isPort;
     }
 
-    public int getContinent() {
+    public Area getArea() {
+        return area;
+    }
+
+    void setArea(Area area) {
+        this.area = area;
+    }
+
+    public Continent getContinent() {
         return continent;
     }
 
-    public void setContinent(int continent) {
+    void setContinent(Continent continent) {
         this.continent = continent;
     }
 }

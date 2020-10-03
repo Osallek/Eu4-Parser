@@ -12,6 +12,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -236,31 +237,31 @@ public class SavePapacy {
         refreshAttributes();
     }
 
-    public Map<Colony, String> getColonyClaims() {
+    public List<String> getColonyClaims() {
         if (this.coloniesClaims == null) {
-            return new LinkedHashMap<>();
+            return new ArrayList<>();
         }
 
         return this.coloniesClaims.getColonyClaims();
     }
 
-    public String getColonyClaim(Colony colony) {
+    public String getColonyClaim(int index) {
         if (this.coloniesClaims == null) {
             return null;
         }
 
-        return this.coloniesClaims.getColonyClaim(colony);
+        return this.coloniesClaims.getColonyClaim(index);
     }
 
-    public void setColonyClaim(Colony colony, String tag) {
+    public void setColonyClaim(int index, Country country) {
         if (this.coloniesClaims != null) {
-            this.coloniesClaims.setColonyClaim(colony, tag);
+            this.coloniesClaims.setColonyClaim(index, country);
         }
     }
 
-    public void removeColonyClaim(Colony colony) {
+    public void removeColonyClaim(int index) {
         if (this.coloniesClaims != null) {
-            this.coloniesClaims.removeColonyClaim(colony);
+            this.coloniesClaims.removeColonyClaim(index);
         }
     }
 

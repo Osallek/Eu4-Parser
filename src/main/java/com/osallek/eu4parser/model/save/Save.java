@@ -14,7 +14,7 @@ import com.osallek.eu4parser.model.save.counters.IdCounters;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Hegemon;
 import com.osallek.eu4parser.model.save.country.SaveArea;
-import com.osallek.eu4parser.model.save.country.TradeCompany;
+import com.osallek.eu4parser.model.save.country.SaveTradeCompany;
 import com.osallek.eu4parser.model.save.diplomacy.Diplomacy;
 import com.osallek.eu4parser.model.save.empire.CelestialEmpire;
 import com.osallek.eu4parser.model.save.empire.Hre;
@@ -544,7 +544,7 @@ public class Save {
                 tradeCompanyManagerItem = this.gamestateItem.addChild("trade_company_manager");
             }
 
-            TradeCompany.addToItem(tradeCompanyManagerItem, name, owner, provinces);
+            SaveTradeCompany.addToItem(tradeCompanyManagerItem, name, owner, provinces);
             refreshAttributes();
         }
     }
@@ -640,7 +640,7 @@ public class Save {
         if (tradeItem != null) {
             this.tradeNodes = tradeItem.getChildren("node")
                                        .stream()
-                                       .map(item -> new TradeNode(item, this.game))
+                                       .map(item -> new TradeNode(item, this))
                                        .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()),
                                                                  Function.identity()));
         }
@@ -760,7 +760,7 @@ public class Save {
                                         .filter(child -> child.getChild("state") != null || child.getChild("investments") != null)
                                         .map(child -> new SaveArea(child, this))
                                         .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()), Function.identity()));
-            this.areas.values().forEach(saveArea -> saveArea.getProvinces().forEach(province -> province.setArea(saveArea)));
+            this.areas.values().forEach(saveArea -> saveArea.getProvinces().forEach(province -> province.setSaveArea(saveArea)));
         }
 
         ClausewitzItem activeAdvisorsItem = this.gamestateItem.getChild("active_advisors");
@@ -857,7 +857,7 @@ public class Save {
 
         if (tradeCompanyManagerItem != null) {
             tradeCompanyManagerItem.getChildren("trade_company").forEach(child -> {
-                TradeCompany company = new TradeCompany(child, this);
+                SaveTradeCompany company = new SaveTradeCompany(child, this);
                 company.getOwner().addTradeCompany(company);
             });
         }

@@ -3,9 +3,10 @@ package com.osallek.eu4parser.model.save.religion;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.save.country.Country;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColoniesClaims {
 
@@ -15,37 +16,27 @@ public class ColoniesClaims {
         this.list = list;
     }
 
-    public Map<Colony, String> getColonyClaims() {
-        Map<Colony, String> claims = new LinkedHashMap<>();
-
-        if (this.list != null) {
-            int max = Math.min(this.list.getValues().size(), Colony.values().length);
-            for (int i = 0; i < max; i++) {
-                String value = this.list.get(i).equals(Eu4Utils.DEFAULT_TAG) ? null : this.list.get(i);
-                claims.put(Colony.values()[i], value);
-            }
-        }
-
-        return claims;
+    public List<String> getColonyClaims() {
+        return this.list == null ? new ArrayList<>() : this.list.getValues();
     }
 
-    public String getColonyClaim(Colony colony) {
+    public String getColonyClaim(int index) {
         if (this.list != null) {
-            return this.list.get(colony.ordinal()).equals(Eu4Utils.DEFAULT_TAG) ? null : this.list.get(colony.ordinal());
+            return this.list.get(index);
         }
 
         return null;
     }
 
-    public void setColonyClaim(Colony colony, String tag) {
+    public void setColonyClaim(int index, Country country) {
         if (this.list != null) {
-            this.list.set(colony.ordinal(), ClausewitzUtils.isBlank(tag) ? Eu4Utils.DEFAULT_TAG : tag);
+            this.list.set(index, ClausewitzUtils.isBlank(country.getTag()) ? Eu4Utils.DEFAULT_TAG : country.getTag());
         }
     }
 
-    public void removeColonyClaim(Colony colony) {
+    public void removeColonyClaim(int index) {
         if (this.list != null) {
-            this.list.set(colony.ordinal(), Eu4Utils.DEFAULT_TAG);
+            this.list.set(index, Eu4Utils.DEFAULT_TAG);
         }
     }
 }

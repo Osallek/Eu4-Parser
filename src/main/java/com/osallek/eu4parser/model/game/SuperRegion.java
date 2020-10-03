@@ -4,34 +4,35 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-public class Area {
+public class SuperRegion {
 
     private final String name;
 
-    private final List<Integer> provinces;
+    private String localizedName;
 
-    private Region region;
+    private final List<Region> regions;
 
-    public Area(ClausewitzList list) {
+    public SuperRegion(ClausewitzList list, Game game) {
         this.name = list.getName();
-        this.provinces = list.getValuesAsInt();
+        this.regions = list.getValues().stream().map(game::getRegion).collect(Collectors.toList());
     }
 
     public String getName() {
         return name;
     }
 
-    public List<Integer> getProvinces() {
-        return provinces;
+    public String getLocalizedName() {
+        return localizedName;
     }
 
-    public Region getRegion() {
-        return region;
+    public void setLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
     }
 
-    void setRegion(Region region) {
-        this.region = region;
+    public List<Region> getRegions() {
+        return regions;
     }
 
     @Override
@@ -40,11 +41,11 @@ public class Area {
             return true;
         }
 
-        if (!(o instanceof Area)) {
+        if (!(o instanceof SuperRegion)) {
             return false;
         }
 
-        Area area = (Area) o;
+        SuperRegion area = (SuperRegion) o;
 
         return Objects.equals(name, area.name);
     }

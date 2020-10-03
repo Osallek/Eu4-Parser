@@ -5,17 +5,25 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import java.util.List;
 import java.util.Objects;
 
-public class Area {
+public class Continent {
 
     private final String name;
 
+    private String localizedName;
+
     private final List<Integer> provinces;
 
-    private Region region;
-
-    public Area(ClausewitzList list) {
+    public Continent(ClausewitzList list) {
         this.name = list.getName();
         this.provinces = list.getValuesAsInt();
+    }
+
+    public String getLocalizedName() {
+        return localizedName;
+    }
+
+    void setLocalizedName(String localizedName) {
+        this.localizedName = localizedName;
     }
 
     public String getName() {
@@ -26,25 +34,17 @@ public class Area {
         return provinces;
     }
 
-    public Region getRegion() {
-        return region;
-    }
-
-    void setRegion(Region region) {
-        this.region = region;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
 
-        if (!(o instanceof Area)) {
+        if (!(o instanceof Continent)) {
             return false;
         }
 
-        Area area = (Area) o;
+        Continent area = (Continent) o;
 
         return Objects.equals(name, area.name);
     }

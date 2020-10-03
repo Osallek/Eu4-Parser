@@ -97,11 +97,11 @@ public class SaveProvince extends Province {
         return Math.abs(Integer.parseInt(this.item.getName()));
     }
 
-    public SaveArea getArea() {
+    public SaveArea getSaveArea() {
         return area;
     }
 
-    public void setArea(SaveArea area) {
+    public void setSaveArea(SaveArea area) {
         this.area = area;
     }
 

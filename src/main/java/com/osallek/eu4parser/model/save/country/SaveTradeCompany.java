@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TradeCompany {
+public class SaveTradeCompany {
 
     private final Save save;
 
     private final ClausewitzItem item;
 
-    public TradeCompany(ClausewitzItem item, Save save) {
+    public SaveTradeCompany(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
     }

@@ -4,13 +4,13 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Objects;
 
-public class ColonialName {
+public class Names {
 
     private final String name;
 
     private final Condition trigger;
 
-    public ColonialName(ClausewitzItem item) {
+    public Names(ClausewitzItem item) {
         this.name = item.getVarAsString("name");
 
         ClausewitzItem child = item.getChild("trigger");
@@ -32,13 +32,13 @@ public class ColonialName {
             return true;
         }
 
-        if (!(o instanceof ColonialName)) {
+        if (!(o instanceof Names)) {
             return false;
         }
 
-        ColonialName colonialName = (ColonialName) o;
+        Names names = (Names) o;
 
-        return Objects.equals(name, colonialName.name);
+        return Objects.equals(name, names.name);
     }
 
     @Override

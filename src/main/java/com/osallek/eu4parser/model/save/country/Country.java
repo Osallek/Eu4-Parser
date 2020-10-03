@@ -8,6 +8,7 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.UnitType;
+import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
@@ -44,7 +45,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Country {
 
@@ -182,7 +182,7 @@ public class Country {
 
     private SortedMap<Integer, Integer> inflationStatistics;
 
-    private List<TradeCompany> tradeCompanies;
+    private List<SaveTradeCompany> tradeCompanies;
 
     private final SortedSet<ActiveWar> wars = new TreeSet<>(Comparator.comparing(ActiveWar::getStartDate));
 
@@ -378,9 +378,9 @@ public class Country {
         List<Continent> continents = new ArrayList<>();
 
         if (list != null) {
-            for (int i = 0; i < Continent.values().length; i++) {
+            for (int i = 0; i < this.save.getGame().getContinents().size(); i++) {
                 if (1 == list.getAsInt(i)) {
-                    continents.add(Continent.values()[i]);
+                    continents.add(this.save.getGame().getContinent(i));
                 }
             }
         }
@@ -3428,11 +3428,11 @@ public class Country {
         this.inflationStatistics.putAll(inflationStatistics);
     }
 
-    public List<TradeCompany> getTradeCompanies() {
+    public List<SaveTradeCompany> getTradeCompanies() {
         return tradeCompanies == null ? new ArrayList<>() : this.tradeCompanies;
     }
 
-    public void addTradeCompany(TradeCompany tradeCompany) {
+    public void addTradeCompany(SaveTradeCompany tradeCompany) {
         if (this.tradeCompanies == null) {
             this.tradeCompanies = new ArrayList<>(0);
         }

@@ -63,6 +63,8 @@ public class Game {
 
     private Map<Integer, Province> provincesByColor;
 
+    private Map<Continent, Path> continents;
+
     private Map<Path, List<CultureGroup>> cultureGroups;
 
     private Map<Path, List<ReligionGroup>> religionGroups;
@@ -103,6 +105,13 @@ public class Game {
 
     private Map<ColonialRegion, Path> colonialRegions;
 
+    private Map<TradeCompany, Path> tradeCompanies;
+
+    private Map<Region, Path> regions;
+
+    private Map<SuperRegion, Path> superRegions;
+
+    private Map<TechGroup, Path> techGroups;
 
     private final Map<String, Map<String, Exp.Constant>> defines;
 
@@ -135,10 +144,14 @@ public class Game {
         readGovernmentReforms();
         readUnits();
         readAreas();
+        readRegions();
+        readSuperRegions();
+        readTechGroups();
         readAdvisors();
         readIdeaGroups();
         readCasusBelli();
         readColonialRegions();
+        readTradeCompanies();
     }
 
     public Collator getCollator() {
@@ -207,6 +220,31 @@ public class Game {
 
     public Province getProvinceByColor(int red, int green, int blue) {
         return this.provincesByColor.get(Eu4Utils.rgbToColor(red, green, blue));
+    }
+
+    public List<Continent> getContinents() {
+        return this.continents.keySet()
+                              .stream()
+                              .sorted(Comparator.comparing(Continent::getLocalizedName, this.collator))
+                              .collect(Collectors.toList());
+    }
+
+    public Continent getContinent(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Continent continent : this.continents.keySet()) {
+            if (continent.getName().equalsIgnoreCase(name)) {
+                return continent;
+            }
+        }
+
+        return null;
+    }
+
+    public Continent getContinent(int i) {
+        return new ArrayList<>(this.continents.keySet()).get(i);
     }
 
     public String getLocalisation(String key) {
@@ -613,6 +651,60 @@ public class Game {
         return null;
     }
 
+    public Set<Region> getRegions() {
+        return this.regions.keySet();
+    }
+
+    public Region getRegion(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        for (Region region : this.regions.keySet()) {
+            if (region.getName().equalsIgnoreCase(name)) {
+                return region;
+            }
+        }
+
+        return null;
+    }
+
+    public Set<SuperRegion> getSuperRegions() {
+        return this.superRegions.keySet();
+    }
+
+    public SuperRegion getSuperRegion(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        for (SuperRegion superRegion : this.superRegions.keySet()) {
+            if (superRegion.getName().equalsIgnoreCase(name)) {
+                return superRegion;
+            }
+        }
+
+        return null;
+    }
+
+    public Set<TechGroup> getTechGroups() {
+        return this.techGroups.keySet();
+    }
+
+    public TechGroup getTechGroup(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        for (TechGroup techGroup : this.techGroups.keySet()) {
+            if (techGroup.getName().equalsIgnoreCase(name)) {
+                return techGroup;
+            }
+        }
+
+        return null;
+    }
+
     public List<Advisor> getAdvisors() {
         return new ArrayList<>(this.advisors.keySet());
     }
@@ -679,6 +771,24 @@ public class Game {
         for (ColonialRegion colonialRegion : this.colonialRegions.keySet()) {
             if (colonialRegion.getName().equalsIgnoreCase(name)) {
                 return colonialRegion;
+            }
+        }
+
+        return null;
+    }
+
+    public List<TradeCompany> getTradeCompanies() {
+        return new ArrayList<>(this.tradeCompanies.keySet());
+    }
+
+    public TradeCompany getTradeCompany(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (TradeCompany tradeCompany : this.tradeCompanies.keySet()) {
+            if (tradeCompany.getName().equalsIgnoreCase(name)) {
+                return tradeCompany;
             }
         }
 
@@ -773,7 +883,6 @@ public class Game {
     }
 
     private void readProvinces() throws IOException {
-
         File provincesDefinitionFile = new File(this.mapFolderPath + File.separator + "definition.csv");
 
         if (provincesDefinitionFile.canRead()) {
@@ -826,11 +935,13 @@ public class Game {
 
             if (continentFile.canRead()) {
                 ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile, 0, StandardCharsets.UTF_8);
-                List<ClausewitzList> lists = continentsItem.getListsNot("island_check_provinces");
-                for (int i = 0; i < lists.size(); i++) {
-                    int finalI = i;
-                    lists.get(i).getValuesAsInt().forEach(provinceId -> this.getProvince(provinceId).setContinent(finalI));
-                }
+
+                this.continents = new LinkedHashMap<>();
+                continentsItem.getListsNot("island_check_provinces").forEach(item -> this.continents.put(new Continent(item), continentFile.toPath()));
+                this.continents.keySet().forEach(continent -> {
+                    continent.setLocalizedName(this.getLocalisation(continent.getName()));
+                    continent.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setContinent(continent));
+                });
             }
 
             if (getProvincesImage().canRead()) {
@@ -1158,6 +1269,31 @@ public class Game {
         this.areas = new HashMap<>();
         ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
         areasItem.getLists().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
+        this.areas.keySet().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
+    }
+
+    private void readRegions() {
+        File regionsFile = new File(this.mapFolderPath + File.separator + "region.txt");
+        this.regions = new HashMap<>();
+        ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
+        regionsItem.getChildren().forEach(item -> this.regions.put(new Region(item, this), regionsFile.toPath()));
+        this.regions.keySet().forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
+    }
+
+    private void readSuperRegions() {
+        File regionsFile = new File(this.mapFolderPath + File.separator + "superregion.txt");
+        this.superRegions = new HashMap<>();
+        ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
+        regionsItem.getLists().forEach(item -> this.superRegions.put(new SuperRegion(item, this), regionsFile.toPath()));
+        this.superRegions.keySet().forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
+    }
+
+    private void readTechGroups() {
+        File techGroupsFile = new File(this.commonFolderPath + File.separator + "technology.txt");
+        this.techGroups = new HashMap<>();
+        ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile, 0);
+        techGroupsItem.getChild("groups").getChildren().forEach(item -> this.techGroups.put(new TechGroup(item), techGroupsFile.toPath()));
+        this.techGroups.keySet().forEach(techGroup -> techGroup.setLocalizedName(this.getLocalisation(techGroup.getName())));
     }
 
     private void readAdvisors() {
@@ -1224,6 +1360,23 @@ public class Game {
                  });
 
             this.colonialRegions.keySet().forEach(colonialRegion -> colonialRegion.setLocalizedName(this.getLocalisation(colonialRegion.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readTradeCompanies() {
+        File casusBelliFolder = new File(this.commonFolderPath + File.separator + "trade_companies");
+
+        try (Stream<Path> paths = Files.walk(casusBelliFolder.toPath())) {
+            this.tradeCompanies = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.tradeCompanies.put(new TradeCompany(item), path));
+                 });
+
+            this.tradeCompanies.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
         } catch (IOException e) {
         }
     }

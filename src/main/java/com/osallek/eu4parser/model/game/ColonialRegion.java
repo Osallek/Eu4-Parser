@@ -33,7 +33,7 @@ public class ColonialRegion {
 
     private final Map<Religion, Integer> religions;
 
-    private final List<ColonialName> colonialNames;
+    private final List<Names> names;
 
     private final List<Integer> provinces;
 
@@ -62,7 +62,7 @@ public class ColonialRegion {
                                                     .collect(Collectors.toMap(var -> game.getCulture(var.getName()), ClausewitzVariable::getAsInt));
 
         List<ClausewitzItem> names = item.getChildren("names");
-        this.colonialNames = names.stream().map(ColonialName::new).collect(Collectors.toList());
+        this.names = names.stream().map(Names::new).collect(Collectors.toList());
 
         list = item.getList("provinces");
         this.provinces = list == null ? null : list.getValuesAsInt();
@@ -112,8 +112,8 @@ public class ColonialRegion {
         return religions;
     }
 
-    public List<ColonialName> getColonialNames() {
-        return colonialNames;
+    public List<Names> getColonialNames() {
+        return names;
     }
 
     public List<Integer> getProvinces() {

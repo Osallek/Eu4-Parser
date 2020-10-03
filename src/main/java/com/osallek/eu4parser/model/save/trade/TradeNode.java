@@ -5,8 +5,9 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
-import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.TradeGood;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -19,7 +20,7 @@ public class TradeNode {
 
     private final ClausewitzItem item;
 
-    private final Game game;
+    private final Save save;
 
     private Map<String, TradeNodeCountry> countries;
 
@@ -27,9 +28,9 @@ public class TradeNode {
 
     private Map<String, Double> topPower;
 
-    public TradeNode(ClausewitzItem item, Game game) {
+    public TradeNode(ClausewitzItem item, Save save) {
         this.item = item;
-        this.game = game;
+        this.save = save;
         refreshAttributes();
     }
 
@@ -106,19 +107,19 @@ public class TradeNode {
 
         if (tradeGoodsSizeList != null) {
             for (int i = 0; i < tradeGoodsSizeList.size(); i++) {
-                productionLeaders.put(this.game.getTradeGood(i), tradeGoodsSizeList.getAsDouble(i));
+                productionLeaders.put(this.save.getGame().getTradeGood(i), tradeGoodsSizeList.getAsDouble(i));
             }
         }
 
         return productionLeaders;
     }
 
-    public Map<String, Double> getTopProvinces() {
-        return topProvinces;
+    public Map<Country, Double> getTopProvinces() {
+        return topProvinces.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
-    public Map<String, Double> getTopPower() {
-        return topPower;
+    public Map<Country, Double> getTopPower() {
+        return topPower.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
     public Date getMostRecentTreasureShipPassage() {
@@ -131,8 +132,8 @@ public class TradeNode {
         return date;
     }
 
-    public Map<String, TradeNodeCountry> getCountries() {
-        return countries;
+    public Map<Country, TradeNodeCountry> getCountries() {
+        return countries.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
     private void refreshAttributes() {
@@ -145,8 +146,7 @@ public class TradeNode {
         ClausewitzList topProvincesList = this.item.getList("top_provinces");
         ClausewitzList topProvincesValuesList = this.item.getList("top_provinces_values");
 
-        if (topProvincesList != null && topProvincesValuesList != null
-            && topProvincesList.size() == topProvincesValuesList.size()) {
+        if (topProvincesList != null && topProvincesValuesList != null && topProvincesList.size() == topProvincesValuesList.size()) {
             this.topProvinces = new LinkedHashMap<>();
             for (int i = 0; i < topProvincesList.size(); i++) {
                 this.topProvinces.put(ClausewitzUtils.removeQuotes(topProvincesList.get(i)), topProvincesValuesList.getAsDouble(i));
