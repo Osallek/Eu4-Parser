@@ -38,6 +38,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,6 +89,8 @@ public class Game {
 
     private Map<GovernmentName, Path> governmentNames;
 
+    private Map<GovernmentReform, Path> governmentReforms;
+
     private Map<Unit, Path> units;
 
     private Map<Area, Path> areas;
@@ -99,6 +102,7 @@ public class Game {
     private Map<CasusBelli, Path> casusBelli;
 
     private Map<ColonialRegion, Path> colonialRegions;
+
 
     private final Map<String, Map<String, Exp.Constant>> defines;
 
@@ -128,6 +132,7 @@ public class Game {
         readEvents();
         readGovernments();
         readGovernmentNames();
+        readGovernmentReforms();
         readUnits();
         readAreas();
         readAdvisors();
@@ -252,9 +257,9 @@ public class Game {
         }
 
         return localisation.toString().replace("\\r\\n", "")
-                .replace("\\n", " ")
-                .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
-                .trim();
+                           .replace("\\n", " ")
+                           .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
+                           .trim();
     }
 
     public String getLocalisationCleanNoPunctuation(String key) {
@@ -277,7 +282,7 @@ public class Game {
         }
 
         File file = new File(getGameFolderPath() + File.separator
-                + ClausewitzUtils.removeQuotes(spriteType.getTextureFile()));
+                             + ClausewitzUtils.removeQuotes(spriteType.getTextureFile()));
 
         if (file.exists()) {
             return file;
@@ -299,11 +304,11 @@ public class Game {
 
     public List<Culture> getCultures() {
         return this.cultureGroups.values().stream()
-                .flatMap(Collection::stream)
-                .map(CultureGroup::getCultures)
-                .flatMap(Collection::stream)
-                .sorted(Comparator.comparing(Culture::getLocalizedName, collator))
-                .collect(Collectors.toList());
+                                 .flatMap(Collection::stream)
+                                 .map(CultureGroup::getCultures)
+                                 .flatMap(Collection::stream)
+                                 .sorted(Comparator.comparing(Culture::getLocalizedName, collator))
+                                 .collect(Collectors.toList());
     }
 
     public Culture getCulture(String name) {
@@ -312,12 +317,12 @@ public class Game {
         }
 
         return this.cultureGroups.values().stream()
-                .flatMap(Collection::stream)
-                .map(CultureGroup::getCultures)
-                .flatMap(Collection::stream)
-                .filter(culture -> culture.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElse(null);
+                                 .flatMap(Collection::stream)
+                                 .map(CultureGroup::getCultures)
+                                 .flatMap(Collection::stream)
+                                 .filter(culture -> culture.getName().equalsIgnoreCase(name))
+                                 .findFirst()
+                                 .orElse(null);
     }
 
     public Collection<ReligionGroup> getReligionGroups() {
@@ -326,10 +331,10 @@ public class Game {
 
     public List<Religion> getReligions() {
         return getReligionGroups().stream()
-                .map(ReligionGroup::getReligions)
-                .flatMap(Collection::stream)
-                .sorted(Comparator.comparing(Religion::getLocalizedName, this.collator))
-                .collect(Collectors.toList());
+                                  .map(ReligionGroup::getReligions)
+                                  .flatMap(Collection::stream)
+                                  .sorted(Comparator.comparing(Religion::getLocalizedName, this.collator))
+                                  .collect(Collectors.toList());
     }
 
     public Religion getReligion(String name) {
@@ -338,11 +343,11 @@ public class Game {
         }
 
         return getReligionGroups().stream()
-                .map(ReligionGroup::getReligions)
-                .flatMap(Collection::stream)
-                .filter(religion -> religion.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElse(null);
+                                  .map(ReligionGroup::getReligions)
+                                  .flatMap(Collection::stream)
+                                  .filter(religion -> religion.getName().equalsIgnoreCase(name))
+                                  .findFirst()
+                                  .orElse(null);
     }
 
     public List<Institution> getInstitutions() {
@@ -371,9 +376,9 @@ public class Game {
 
     public List<TradeGood> getTradeGoods() {
         return this.tradeGoods.keySet()
-                .stream()
-                .sorted(Comparator.comparing(TradeGood::getLocalizedName, this.collator))
-                .collect(Collectors.toList());
+                              .stream()
+                              .sorted(Comparator.comparing(TradeGood::getLocalizedName, this.collator))
+                              .collect(Collectors.toList());
     }
 
     public TradeGood getTradeGood(String name) {
@@ -468,17 +473,17 @@ public class Game {
 
     public List<Event> getEvents() {
         return this.events.keySet()
-                .stream()
-                .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
-                .collect(Collectors.toList());
+                          .stream()
+                          .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
+                          .collect(Collectors.toList());
     }
 
     public List<Event> getFireOnlyOnceEvents() {
         return this.events.keySet()
-                .stream()
-                .filter(Event::fireOnlyOnce)
-                .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
-                .collect(Collectors.toList());
+                          .stream()
+                          .filter(Event::fireOnlyOnce)
+                          .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
+                          .collect(Collectors.toList());
     }
 
     public Event getEvent(String id) {
@@ -517,9 +522,9 @@ public class Game {
 
     public List<Government> getGovernments() {
         return this.governments.keySet()
-                .stream()
-                .sorted(Comparator.comparing(Government::getLocalizedName, this.collator))
-                .collect(Collectors.toList());
+                               .stream()
+                               .sorted(Comparator.comparing(Government::getLocalizedName, this.collator))
+                               .collect(Collectors.toList());
     }
 
     public Government getGovernment(String name) {
@@ -548,6 +553,24 @@ public class Game {
         for (GovernmentName governmentName : this.governmentNames.keySet()) {
             if (governmentName.getName().equalsIgnoreCase(name)) {
                 return governmentName;
+            }
+        }
+
+        return null;
+    }
+
+    public Set<GovernmentReform> getGovernmentReforms() {
+        return this.governmentReforms.keySet();
+    }
+
+    public GovernmentReform getGovernmentReform(String name) {
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+
+        for (GovernmentReform governmentReform : this.governmentReforms.keySet()) {
+            if (governmentReform.getName().equalsIgnoreCase(name)) {
+                return governmentReform;
             }
         }
 
@@ -729,20 +752,20 @@ public class Game {
                 this.spriteTypes = new HashMap<>();
 
                 paths.filter(Files::isRegularFile)
-                        .filter(path -> path.toString().endsWith(".gfx"))
-                        .forEach(path -> {
-                            ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
-                            ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
+                     .filter(path -> path.toString().endsWith(".gfx"))
+                     .forEach(path -> {
+                         ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
+                         ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
 
-                            if (spriteTypesItem != null) {
-                                this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
-                                        .stream()
-                                        .map(SpriteType::new)
-                                        .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
-                                                Function.identity(),
-                                                (a, b) -> a)));
-                            }
-                        });
+                         if (spriteTypesItem != null) {
+                             this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
+                                                                    .stream()
+                                                                    .map(SpriteType::new)
+                                                                    .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
+                                                                                              Function.identity(),
+                                                                                              (a, b) -> a)));
+                         }
+                     });
             } catch (IOException e) {
             }
         }
@@ -788,15 +811,15 @@ public class Game {
             if (climateFile.canRead()) {
                 ClausewitzItem climateItem = ClausewitzParser.parse(climateFile, 0, StandardCharsets.UTF_8);
                 climateItem.getLists()
-                        .forEach(list -> {
-                            if (list.getName().endsWith("_winter")) {
-                                list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
-                            } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
-                                list.getValuesAsInt().forEach(id -> this.provinces.get(id).setImpassable(true));
-                            } else {
-                                list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
-                            }
-                        });
+                           .forEach(list -> {
+                               if (list.getName().endsWith("_winter")) {
+                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
+                               } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
+                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setImpassable(true));
+                               } else {
+                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
+                               }
+                           });
             }
 
             File continentFile = new File(this.mapFolderPath + File.separator + "continent.txt");
@@ -860,13 +883,13 @@ public class Game {
             this.cultureGroups = new HashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
-                        this.cultureGroups.put(path, cultureGroupsItem.getChildren()
-                                .stream()
-                                .map(CultureGroup::new)
-                                .collect(Collectors.toList()));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
+                     this.cultureGroups.put(path, cultureGroupsItem.getChildren()
+                                                                   .stream()
+                                                                   .map(CultureGroup::new)
+                                                                   .collect(Collectors.toList()));
+                 });
             this.cultureGroups.values().forEach(groups -> groups.forEach(cultureGroup -> {
                 cultureGroup.setLocalizedName(this.getLocalisation(cultureGroup.getName()));
                 cultureGroup.getCultures().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
@@ -882,13 +905,13 @@ public class Game {
             this.religionGroups = new HashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                        this.religionGroups.put(path, religionGroupsItem.getChildren()
-                                .stream()
-                                .map(ReligionGroup::new)
-                                .collect(Collectors.toList()));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     this.religionGroups.put(path, religionGroupsItem.getChildren()
+                                                                     .stream()
+                                                                     .map(ReligionGroup::new)
+                                                                     .collect(Collectors.toList()));
+                 });
             this.religionGroups.values().forEach(groups -> groups.forEach(religionGroup -> {
                 religionGroup.setLocalizedName(this.getLocalisation(religionGroup.getName()));
                 religionGroup.getReligions().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
@@ -927,31 +950,31 @@ public class Game {
             this.tradeGoods = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                        tradeGoodsItem.getChildren()
-                                .forEach(tradeGoodItem -> this.tradeGoods.put(new TradeGood(tradeGoodItem),
-                                        new AbstractMap.SimpleEntry<>(path, null)));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     tradeGoodsItem.getChildren()
+                                   .forEach(tradeGoodItem -> this.tradeGoods.put(new TradeGood(tradeGoodItem),
+                                                                                 new AbstractMap.SimpleEntry<>(path, null)));
+                 });
         } catch (IOException e) {
         }
 
         try (Stream<Path> paths = Files.walk(pricesFolder.toPath())) {
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                        pricesItem.getChildren().forEach(priceItem -> {
-                            for (Map.Entry<TradeGood, Map.Entry<Path, Path>> entry : this.tradeGoods.entrySet()) {
-                                if (entry.getKey().getName().equals(priceItem.getName())) {
-                                    entry.getKey().setPriceItem(priceItem);
-                                    entry.getValue().setValue(path);
-                                }
-                            }
+                 .forEach(path -> {
+                     ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     pricesItem.getChildren().forEach(priceItem -> {
+                         for (Map.Entry<TradeGood, Map.Entry<Path, Path>> entry : this.tradeGoods.entrySet()) {
+                             if (entry.getKey().getName().equals(priceItem.getName())) {
+                                 entry.getKey().setPriceItem(priceItem);
+                                 entry.getValue().setValue(path);
+                             }
+                         }
 
-                        });
-                    });
+                     });
+                 });
             this.tradeGoods.keySet()
-                    .forEach(tradeGood -> tradeGood.setLocalizedName(this.getLocalisation(tradeGood.getName())));
+                           .forEach(tradeGood -> tradeGood.setLocalizedName(this.getLocalisation(tradeGood.getName())));
         } catch (IOException e) {
         }
     }
@@ -963,25 +986,25 @@ public class Game {
             this.buildings = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                        buildingsItem.getChildrenNot("manufactory")
-                                .forEach(
-                                        tradeGoodItem -> this.buildings.put(new Building(tradeGoodItem, this), path));
+                 .forEach(path -> {
+                     ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     buildingsItem.getChildrenNot("manufactory")
+                                  .forEach(
+                                          tradeGoodItem -> this.buildings.put(new Building(tradeGoodItem, this), path));
 
-                        if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
-                            Building manufactoryBuilding = new Building(buildingsItem, this);
-                            this.buildings.keySet().forEach(building -> {
-                                building.setInternalCost(manufactoryBuilding.getCost());
-                                building.setInternalTime(manufactoryBuilding.getTime());
-                                building.setInternalModifiers(manufactoryBuilding.getModifiers());
-                            });
-                        }
-                    });
+                     if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
+                         Building manufactoryBuilding = new Building(buildingsItem, this);
+                         this.buildings.keySet().forEach(building -> {
+                             building.setInternalCost(manufactoryBuilding.getCost());
+                             building.setInternalTime(manufactoryBuilding.getTime());
+                             building.setInternalModifiers(manufactoryBuilding.getModifiers());
+                         });
+                     }
+                 });
 
             this.buildings.keySet()
-                    .forEach(building -> building.setLocalizedName(this.getLocalisation(
-                            "building_" + building.getName())));
+                          .forEach(building -> building.setLocalizedName(this.getLocalisation(
+                                  "building_" + building.getName())));
         } catch (IOException e) {
         }
     }
@@ -993,13 +1016,13 @@ public class Game {
             this.imperialReforms = new HashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                        imperialReformsItem.getChildren().forEach(item -> this.imperialReforms.put(new ImperialReform(item, this), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     imperialReformsItem.getChildren().forEach(item -> this.imperialReforms.put(new ImperialReform(item, this), path));
+                 });
 
             this.imperialReforms.keySet()
-                    .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
+                                .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
         } catch (IOException e) {
         }
     }
@@ -1011,10 +1034,10 @@ public class Game {
             this.decrees = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                        decreesItem.getChildren().forEach(item -> this.decrees.put(new Decree(item), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     decreesItem.getChildren().forEach(item -> this.decrees.put(new Decree(item), path));
+                 });
 
             this.decrees.keySet().forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(saveDecree.getName() + "_title")));
         } catch (IOException e) {
@@ -1028,13 +1051,13 @@ public class Game {
             this.goldenBulls = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                        goldenBullsItem.getChildren().forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     goldenBullsItem.getChildren().forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
+                 });
 
             this.goldenBulls.keySet()
-                    .forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
+                            .forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
         } catch (IOException e) {
         }
     }
@@ -1046,15 +1069,15 @@ public class Game {
             this.events = new ConcurrentHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .parallel()
-                    .forEach(path -> {
-                        ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
-                        eventsItem.getChildren().forEach(item -> this.events.put(new Event(item), path));
-                    });
+                 .parallel()
+                 .forEach(path -> {
+                     ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     eventsItem.getChildren().forEach(item -> this.events.put(new Event(item), path));
+                 });
 
             this.events.keySet()
-                    .parallelStream()
-                    .forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
+                       .parallelStream()
+                       .forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
         } catch (IOException e) {
         }
     }
@@ -1066,10 +1089,10 @@ public class Game {
             this.governments = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
-                        governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item), path));
+                 });
 
             this.governments.keySet().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
         } catch (IOException e) {
@@ -1083,10 +1106,33 @@ public class Game {
             this.governmentNames = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
-                        governmentsItem.getChildren().forEach(item -> this.governmentNames.put(new GovernmentName(item, this), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     governmentsItem.getChildren().forEach(item -> this.governmentNames.put(new GovernmentName(item, this), path));
+                 });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readGovernmentReforms() {
+        File governmentReformsFolder = new File(this.commonFolderPath + File.separator + "government_reforms");
+
+        try (Stream<Path> paths = Files.walk(governmentReformsFolder.toPath())) {
+            this.governmentReforms = new LinkedHashMap<>();
+
+            Map<ClausewitzItem, Path> reformsItems = paths.filter(Files::isRegularFile)
+                                                          .collect(Collectors.toMap(path -> ClausewitzParser.parse(path.toFile(), 0), Function.identity()));
+
+            AtomicReference<GovernmentReform> defaultReform = new AtomicReference<>();
+            reformsItems.keySet().stream().filter(item -> item.hasChild("defaults_reform")).findFirst().ifPresent(item -> {
+                defaultReform.set(new GovernmentReform(item.getChild("defaults_reform"), this, null));
+            });
+
+            reformsItems.forEach((key, value) -> key
+                    .getChildrenNot("defaults_reform")
+                    .forEach(item -> this.governmentReforms.put(new GovernmentReform(item, this, defaultReform.get()), value)));
+
+            this.governmentReforms.keySet().forEach(governmentReform -> governmentReform.setLocalizedName(this.getLocalisation(governmentReform.getName())));
         } catch (IOException e) {
         }
     }
@@ -1098,11 +1144,11 @@ public class Game {
             this.units = new HashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
-                        unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
-                        unitItem.getChildren().forEach(item -> this.units.put(new Unit(item, this::getLocalisation), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
+                     unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
+                     unitItem.getChildren().forEach(item -> this.units.put(new Unit(item, this::getLocalisation), path));
+                 });
         } catch (IOException e) {
         }
     }
@@ -1121,10 +1167,10 @@ public class Game {
             this.advisors = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                        advisorsItem.getChildren().forEach(item -> this.advisors.put(new Advisor(item), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.advisors.put(new Advisor(item), path));
+                 });
 
             this.advisors.keySet().forEach(advisor -> advisor.setLocalizedName(this.getLocalisation(advisor.getName())));
         } catch (IOException e) {
@@ -1138,10 +1184,10 @@ public class Game {
             this.ideaGroups = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                        advisorsItem.getChildren().forEach(item -> this.ideaGroups.put(new IdeaGroup(item), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.ideaGroups.put(new IdeaGroup(item), path));
+                 });
 
             this.ideaGroups.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
         } catch (IOException e) {
@@ -1155,10 +1201,10 @@ public class Game {
             this.casusBelli = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                        advisorsItem.getChildren().forEach(item -> this.casusBelli.put(new CasusBelli(item), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.casusBelli.put(new CasusBelli(item), path));
+                 });
 
             this.casusBelli.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
         } catch (IOException e) {
@@ -1172,10 +1218,10 @@ public class Game {
             this.colonialRegions = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
-                    .forEach(path -> {
-                        ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                        advisorsItem.getChildren().forEach(item -> this.colonialRegions.put(new ColonialRegion(item, this), path));
-                    });
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.colonialRegions.put(new ColonialRegion(item, this), path));
+                 });
 
             this.colonialRegions.keySet().forEach(colonialRegion -> colonialRegion.setLocalizedName(this.getLocalisation(colonialRegion.getName())));
         } catch (IOException e) {
