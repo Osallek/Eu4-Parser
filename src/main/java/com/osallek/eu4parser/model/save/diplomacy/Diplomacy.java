@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.diplomacy;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import org.apache.commons.lang3.time.DateUtils;
@@ -51,7 +52,7 @@ public class Diplomacy {
         return dependencies;
     }
 
-    public void addDependency(Country first, Country second, Date startDate, String subjectType) {
+    public void addDependency(Country first, Country second, Date startDate, SubjectType subjectType) {
         if (second.getOverlord() == null) {
             Dependency.addToItem(this.item, first.getTag(), second.getTag(), startDate, subjectType);
             first.addSubject(second);
@@ -356,6 +357,7 @@ public class Diplomacy {
                                      .stream()
                                      .map(child -> new Dependency(child, this.save))
                                      .collect(Collectors.toList());
+        this.dependencies.forEach(dependency -> dependency.getSecond().setSubjectType(dependency.getSubjectType()));
 
         this.alliances = this.item.getChildren("alliance")
                                   .stream()

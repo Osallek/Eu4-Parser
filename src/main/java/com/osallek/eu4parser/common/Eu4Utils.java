@@ -62,6 +62,21 @@ public final class Eu4Utils {
 
     public static final String DEFINE_GOVERNMENT_KEY = "NGovernment";
 
+    public static final String SUBJECT_TYPE_COLONY = "colony";
+
+    public static final String SUBJECT_TYPE_MARCH = "march";
+
+    public static final String SUBJECT_TYPE_VASSAL = "vassal";
+
+    public static final String SUBJECT_TYPE_DAIMYO_VASSAL = "daimyo_vassal";
+
+    public static final String SUBJECT_TYPE_TRIBUTARY_STATE = "tributary_state";
+
+    public static final String SUBJECT_TYPE_CLIENT_VASSAL = "client_vassal";
+
+    public static final String SUBJECT_TYPE_PERSONAL_UNION = "personal_union";
+
+
     static {
         Calendar calendar = Calendar.getInstance();
         calendar.set(1, Calendar.JANUARY, 1, 0, 0, 0);

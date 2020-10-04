@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ public class TechGroup {
         this.name = item.getName();
         this.startLevel = item.getVarAsInt("start_level");
         this.startCostModifier = item.getVarAsDouble("start_cost_modifier");
-        this.isPrimitive = item.getVarAsBool("is_primitive");
+        this.isPrimitive = BooleanUtils.toBoolean(item.getVarAsBool("is_primitive"));
         this.nationDesignerUnitType = item.getVarAsString("nation_designer_unit_type");
 
         ClausewitzItem triggerChild = item.getChild("nation_designer_trigger");

@@ -3,6 +3,9 @@ package com.osallek.eu4parser.model.save.province;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.save.SaveReligion;
+import com.osallek.eu4parser.model.save.country.Country;
 
 import java.util.Date;
 import java.util.List;
@@ -19,15 +22,15 @@ public class History {
 
     private final SaveProvince province;
 
-    private SortedMap<Date, String> owners;
+    private SortedMap<Date, Country> owners;
 
-    private SortedMap<Date, List<String>> claims;
+    private SortedMap<Date, List<Country>> claims;
 
-    private SortedMap<Date, String> controllers;
+    private SortedMap<Date, Country> controllers;
 
-    private SortedMap<Date, String> religions;
+    private SortedMap<Date, SaveReligion> religions;
 
-    private SortedMap<Date, String> cultures;
+    private SortedMap<Date, Culture> cultures;
 
     private Map<Integer, SaveAdvisor> advisors;
 
@@ -37,23 +40,23 @@ public class History {
         refreshAttributes();
     }
 
-    public SortedMap<Date, String> getOwners() {
+    public SortedMap<Date, Country> getOwners() {
         return owners;
     }
 
-    public SortedMap<Date, List<String>> getClaims() {
+    public SortedMap<Date, List<Country>> getClaims() {
         return claims;
     }
 
-    public SortedMap<Date, String> getControllers() {
+    public SortedMap<Date, Country> getControllers() {
         return controllers;
     }
 
-    public SortedMap<Date, String> getReligions() {
+    public SortedMap<Date, SaveReligion> getReligions() {
         return religions;
     }
 
-    public SortedMap<Date, String> getCultures() {
+    public SortedMap<Date, Culture> getCultures() {
         return cultures;
     }
 
@@ -82,7 +85,7 @@ public class History {
                                .stream()
                                .filter(child -> child.hasVar("owner"))
                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                         child -> child.getVarAsString("owner"),
+                                                         child -> this.province.getSave().getCountry(child.getVarAsString("owner")),
                                                          (a, b) -> b,
                                                          TreeMap::new));
         this.claims = this.item.getChildren()
@@ -90,7 +93,8 @@ public class History {
                                .filter(child -> child.hasVar("add_claim"))
                                .collect(Collectors.groupingBy(child -> Eu4Utils.stringToDate(child.getName()),
                                                               TreeMap::new,
-                                                              Collectors.mapping(child -> child.getVarAsString("add_claim"), Collectors.toList())));
+                                                              Collectors.mapping(child -> this.province.getSave().getCountry(child.getVarAsString("add_claim")),
+                                                                                 Collectors.toList())));
         //No startDate because already in history
 
         this.controllers = this.item.getChildren()
@@ -98,8 +102,7 @@ public class History {
                                     .filter(child -> child.hasChild("controller"))
                                     .filter(child -> child.getChild("controller").hasVar("tag"))
                                     .collect(Collectors.toMap(var -> Eu4Utils.stringToDate(var.getName()),
-                                                              child -> child.getChild("controller")
-                                                                            .getVarAsString("tag"),
+                                                              child -> this.province.getSave().getCountry(child.getChild("controller").getVarAsString("tag")),
                                                               (a, b) -> b,
                                                               TreeMap::new));
 
@@ -107,26 +110,26 @@ public class History {
         ClausewitzItem controllerItem = this.item.getChild("controller");
 
         if (controllerItem != null) {
-            this.controllers.put(this.province.getSave().getStartDate(), controllerItem.getVarAsString("tag"));
+            this.controllers.put(this.province.getSave().getStartDate(), this.province.getSave().getCountry(controllerItem.getVarAsString("tag")));
         }
 
         this.religions = this.item.getChildrenNot("advisor")
                                   .stream()
                                   .filter(child -> child.hasVar("religion"))
                                   .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                            child -> child.getVarAsString("religion"),
+                                                            child -> this.province.getSave().getReligions().getReligion(child.getVarAsString("religion")),
                                                             (a, b) -> b,
                                                             TreeMap::new));
-        this.religions.put(this.province.getSave().getStartDate(), this.item.getVarAsString("religion"));
+        this.religions.put(this.province.getSave().getStartDate(), this.province.getSave().getReligions().getReligion(this.item.getVarAsString("religion")));
 
         this.cultures = this.item.getChildrenNot("advisor")
                                  .stream()
                                  .filter(child -> child.hasVar("culture"))
                                  .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                           child -> child.getVarAsString("culture"),
+                                                           child -> this.province.getSave().getGame().getCulture(child.getVarAsString("culture")),
                                                            (a, b) -> b,
                                                            TreeMap::new));
-        this.cultures.put(this.province.getSave().getStartDate(), this.item.getVarAsString("culture"));
+        this.cultures.put(this.province.getSave().getStartDate(), this.province.getSave().getGame().getCulture(this.item.getVarAsString("culture")));
 
         this.advisors = this.item.getChildren()
                                  .stream()
@@ -147,11 +150,8 @@ public class History {
                 this.advisors.values()
                              .forEach(advisor -> this.owners.values()
                                                             .stream()
-                                                            .map(owner -> this.province.getSave()
-                                                                                       .getCountry(ClausewitzUtils.removeQuotes(owner)))
                                                             .filter(country -> country.getAdvisorsIds() != null)
-                                                            .filter(country -> country.getAdvisorsIds()
-                                                                                      .contains(advisor.getId()))
+                                                            .filter(country -> country.getAdvisorsIds().contains(advisor.getId()))
                                                             .findFirst()
                                                             .ifPresent(country -> country.addAdvisor(advisor)));
             }

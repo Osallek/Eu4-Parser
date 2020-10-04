@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.empire;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -73,12 +74,12 @@ public class Hre extends Empire {
         }
     }
 
-    public Integer getContinent() {
+    public Continent getContinent() {
         if (dismantled()) {
             return null;
         }
 
-        return this.item.getVarAsInt("continent");
+        return this.save.getGame().getContinent(this.item.getVarAsInt("continent"));
     }
 
     public void setContinent(int continent) {
@@ -86,7 +87,7 @@ public class Hre extends Empire {
             return;
         }
 
-        ClausewitzVariable var = this.item.setVariable("continent", continent);
+        this.item.setVariable("continent", continent);
     }
 
     public Boolean getImperialBanAllowed() {

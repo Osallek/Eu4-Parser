@@ -72,6 +72,14 @@ public class Condition {
         return true;
     }
 
+    public void removeCondition(String condition, String value) {
+        if (this.conditions.containsKey(condition)) {
+            this.conditions.get(condition).remove(value);
+        }
+
+        this.scopes.forEach(scope -> scope.removeCondition(condition, value));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

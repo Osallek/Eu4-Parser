@@ -113,6 +113,10 @@ public class Game {
 
     private Map<TechGroup, Path> techGroups;
 
+    private Map<SubjectType, Path> subjectTypes;
+
+    private Map<FetishistCult, Path> fetishistCults;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -152,6 +156,8 @@ public class Game {
         readCasusBelli();
         readColonialRegions();
         readTradeCompanies();
+        readSubjectTypes();
+        readFetishistCults();
     }
 
     public Collator getCollator() {
@@ -750,9 +756,9 @@ public class Game {
             return null;
         }
 
-        for (CasusBelli casusBelli : this.casusBelli.keySet()) {
-            if (casusBelli.getName().equalsIgnoreCase(name)) {
-                return casusBelli;
+        for (CasusBelli cb : this.casusBelli.keySet()) {
+            if (cb.getName().equalsIgnoreCase(name)) {
+                return cb;
             }
         }
 
@@ -789,6 +795,42 @@ public class Game {
         for (TradeCompany tradeCompany : this.tradeCompanies.keySet()) {
             if (tradeCompany.getName().equalsIgnoreCase(name)) {
                 return tradeCompany;
+            }
+        }
+
+        return null;
+    }
+
+    public List<SubjectType> getSubjectTypes() {
+        return new ArrayList<>(this.subjectTypes.keySet());
+    }
+
+    public SubjectType getSubjectType(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (SubjectType subjectType : this.subjectTypes.keySet()) {
+            if (subjectType.getName().equalsIgnoreCase(name)) {
+                return subjectType;
+            }
+        }
+
+        return null;
+    }
+
+    public List<FetishistCult> getFetishistCults() {
+        return new ArrayList<>(this.fetishistCults.keySet());
+    }
+
+    public FetishistCult getFetishistCult(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (FetishistCult fetishistCult : this.fetishistCults.keySet()) {
+            if (fetishistCult.getName().equalsIgnoreCase(name)) {
+                return fetishistCult;
             }
         }
 
@@ -1269,6 +1311,7 @@ public class Game {
         this.areas = new HashMap<>();
         ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
         areasItem.getLists().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
+        areasItem.getChildren().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
         this.areas.keySet().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
     }
 
@@ -1277,7 +1320,7 @@ public class Game {
         this.regions = new HashMap<>();
         ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
         regionsItem.getChildren().forEach(item -> this.regions.put(new Region(item, this), regionsFile.toPath()));
-        this.regions.keySet().forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
+        this.regions.keySet().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
     }
 
     private void readSuperRegions() {
@@ -1285,7 +1328,10 @@ public class Game {
         this.superRegions = new HashMap<>();
         ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
         regionsItem.getLists().forEach(item -> this.superRegions.put(new SuperRegion(item, this), regionsFile.toPath()));
-        this.superRegions.keySet().forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
+        this.superRegions.keySet()
+                         .stream()
+                         .filter(superRegion -> superRegion.getRegions() != null)
+                         .forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
     }
 
     private void readTechGroups() {
@@ -1377,6 +1423,40 @@ public class Game {
                  });
 
             this.tradeCompanies.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readSubjectTypes() {
+        File subjectTypesFolder = new File(this.commonFolderPath + File.separator + "subject_types");
+
+        try (Stream<Path> paths = Files.walk(subjectTypesFolder.toPath())) {
+            this.subjectTypes = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.subjectTypes.put(new SubjectType(item, this.subjectTypes.keySet()), path));
+                 });
+
+            this.subjectTypes.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readFetishistCults() {
+        File fetishistCultsFolder = new File(this.commonFolderPath + File.separator + "fetishist_cults");
+
+        try (Stream<Path> paths = Files.walk(fetishistCultsFolder.toPath())) {
+            this.fetishistCults = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.fetishistCults.put(new FetishistCult(item), path));
+                 });
+
+            this.fetishistCults.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
         } catch (IOException e) {
         }
     }

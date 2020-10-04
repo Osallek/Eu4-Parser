@@ -12,6 +12,7 @@ import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
+import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
@@ -185,6 +186,8 @@ public class Country {
     private List<SaveTradeCompany> tradeCompanies;
 
     private final SortedSet<ActiveWar> wars = new TreeSet<>(Comparator.comparing(ActiveWar::getStartDate));
+
+    private SubjectType subjectType;
 
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
@@ -1005,6 +1008,14 @@ public class Country {
         String overlordTag = this.item.getVarAsString("overlord");
 
         return overlordTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(overlordTag));
+    }
+
+    public SubjectType getSubjectType() {
+        return this.subjectType;
+    }
+
+    public void setSubjectType(SubjectType subjectType) {
+        this.subjectType = subjectType;
     }
 
     public void setOverlord(String countryTag) {
@@ -2569,6 +2580,20 @@ public class Country {
         }
 
         this.item.setVariable("corruption", corruption);
+    }
+
+    public Double getRecoveryMotivation() {
+        return this.item.getVarAsDouble("recovery_motivation");
+    }
+
+    public void setRecoveryMotivation(Double recoveryMotivation) {
+        if (recoveryMotivation < 0d) {
+            recoveryMotivation = 0d;
+        } else if (recoveryMotivation > 100d) {
+            recoveryMotivation = 100d;
+        }
+
+        this.item.setVariable("recovery_motivation", recoveryMotivation);
     }
 
     public Double getRootOutCorruptionSlider() {

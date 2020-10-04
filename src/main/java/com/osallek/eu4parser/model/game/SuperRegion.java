@@ -16,7 +16,7 @@ public class SuperRegion {
 
     public SuperRegion(ClausewitzList list, Game game) {
         this.name = list.getName();
-        this.regions = list.getValues().stream().map(game::getRegion).collect(Collectors.toList());
+        this.regions = list.getValues().stream().filter(s -> !s.equalsIgnoreCase("restrict_charter")).map(game::getRegion).collect(Collectors.toList());
     }
 
     public String getName() {

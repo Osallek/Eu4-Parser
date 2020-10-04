@@ -1,7 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
+import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,6 +18,11 @@ public class Area {
     public Area(ClausewitzList list) {
         this.name = list.getName();
         this.provinces = list.getValuesAsInt();
+    }
+
+    public Area(ClausewitzItem item) {
+        this.name = item.getName();
+        this.provinces = new ArrayList<>();
     }
 
     public String getName() {

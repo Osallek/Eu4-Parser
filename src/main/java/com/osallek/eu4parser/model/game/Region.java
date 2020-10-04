@@ -32,11 +32,11 @@ public class Region {
         this.monsoon = list == null ? null : lists.stream()
                                                   .collect(Collectors.toMap(
                                                           l -> MonthDay.of(
-                                                                  Integer.parseInt(l.get(0).substring(l.get(0).indexOf("."), l.get(0).lastIndexOf("."))),
-                                                                  Integer.parseInt(l.get(0).substring(l.get(0).lastIndexOf(".")))),
+                                                                  Integer.parseInt(l.get(0).substring(l.get(0).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
+                                                                  Integer.parseInt(l.get(0).substring(l.get(0).lastIndexOf(".") + 1))),
                                                           l -> MonthDay.of(
-                                                                  Integer.parseInt(l.get(1).substring(l.get(1).indexOf("."), l.get(0).lastIndexOf("."))),
-                                                                  Integer.parseInt(l.get(1).substring(l.get(1).lastIndexOf("."))))));
+                                                                  Integer.parseInt(l.get(1).substring(l.get(1).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
+                                                                  Integer.parseInt(l.get(1).substring(l.get(1).lastIndexOf(".") + 1)))));
     }
 
     public String getName() {

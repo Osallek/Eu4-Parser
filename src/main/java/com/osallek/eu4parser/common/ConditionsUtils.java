@@ -7,6 +7,7 @@ import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentReform;
 import com.osallek.eu4parser.model.game.Institution;
+import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Power;
 import com.osallek.eu4parser.model.save.TradeLeague;
@@ -22,7 +23,6 @@ import com.osallek.eu4parser.model.save.country.PowerProjection;
 import com.osallek.eu4parser.model.save.country.Queen;
 import com.osallek.eu4parser.model.save.country.SaveTradeCompany;
 import com.osallek.eu4parser.model.save.diplomacy.QuantifyDatableRelation;
-import com.osallek.eu4parser.model.save.diplomacy.SubjectType;
 import com.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import com.osallek.eu4parser.model.save.gameplayoptions.NationSetup;
 import com.osallek.eu4parser.model.save.gameplayoptions.ProvinceTaxManpower;
@@ -62,6 +62,7 @@ public class ConditionsUtils {
         Calendar calendar = Calendar.getInstance();
         Calendar calendar2 = Calendar.getInstance();
         String value;
+        SubjectType subjectType;
 
         if ("ROOT".equals(rawValue)) {
             value = root.getTag().toUpperCase();
@@ -88,6 +89,10 @@ public class ConditionsUtils {
         if (country.getSave().getGame().getIdeaGroup(condition) != null) {
             return country.getIdeaGroups().getIdeaGroupsNames().containsKey(condition)
                    && country.getIdeaGroups().getIdeaGroupsNames().get(condition) >= NumbersUtils.toInt(value);
+        }
+
+        if ((subjectType = country.getSave().getGame().getSubjectType(condition)) != null) {
+            return country.getSubjects().stream().map(Country::getSubjectType).filter(subjectType::equals).count() >= NumbersUtils.toInt(value);
         }
 
         if (country.getSave().getGame().getReligion(condition) != null) {
@@ -642,8 +647,10 @@ public class ConditionsUtils {
                               .allMatch(province -> province.getOwner().equals(country));
             case "has_unit_type":
                 return country.getUnitType().equals(value);
-            case "has_unlocked_cult": //Todo parse cults
-                break;
+            case "has_unlocked_cult":
+                return country.getReligion().getGameReligion().useFetishistCult()
+                       && (country.getSave().getGame().getFetishistCult(value).getAllow() == null
+                           || country.getSave().getGame().getFetishistCult(value).getAllow().apply(country, from));
             case "has_wartaxes":
                 return BooleanUtils.toBoolean(country.warTaxes());
             case "heavy_ship_fraction":
@@ -744,8 +751,8 @@ public class ConditionsUtils {
                 return country.getPapalInfluence() != null && country.getPapalInfluence() >= NumbersUtils.toDouble(value);
             case "in_league":
                 return country.getSave().getReligions().getReligion(value).getInLeague().contains(country);
-            case "ironman": //Todo
-                break;
+            case "ironman":
+                return false;
             case "is_advisor_employed":
                 return country.getSave().getCountries().values().stream().anyMatch(c -> c.getActiveAdvisors().containsKey(NumbersUtils.toInt(value)));
             case "is_at_war":
@@ -757,41 +764,15 @@ public class ConditionsUtils {
             case "is_claim":
                 return country.getClaimProvinces().stream().map(SaveProvince::getId).anyMatch(NumbersUtils.toInt(value)::equals);
             case "is_client_nation":
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
-                              .stream()
-                              .anyMatch(dependency -> dependency.getSecond().equals(country)
-                                                      && ClausewitzUtils.removeQuotes(dependency.getSubjectType())
-                                                                        .equalsIgnoreCase(SubjectType.CLIENT_VASSAL.name()));
+                return country.getOverlord() != null && country.getSubjectType().getName().equalsIgnoreCase(Eu4Utils.SUBJECT_TYPE_CLIENT_VASSAL);
             case "is_client_nation_of":
                 other = country.getSave().getCountry(value);
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
-                              .stream()
-                              .anyMatch(dependency -> dependency.getSecond().equals(country)
-                                                      && dependency.getFirst().equals(other)
-                                                      && ClausewitzUtils.removeQuotes(dependency.getSubjectType())
-                                                                        .equalsIgnoreCase(SubjectType.CLIENT_VASSAL.name()));
+                return other.equals(country.getOverlord()) && country.getSubjectType().getName().equalsIgnoreCase(Eu4Utils.SUBJECT_TYPE_CLIENT_VASSAL);
             case "is_colonial_nation":
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
-                              .stream()
-                              .anyMatch(dependency -> dependency.getSecond().equals(country)
-                                                      && ClausewitzUtils.removeQuotes(dependency.getSubjectType())
-                                                                        .equalsIgnoreCase(SubjectType.COLONY.name()));
+                return country.getOverlord() != null && country.getSubjectType().getName().equalsIgnoreCase(Eu4Utils.SUBJECT_TYPE_COLONY);
             case "is_colonial_nation_of":
                 other = country.getSave().getCountry(value);
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
-                              .stream()
-                              .anyMatch(dependency -> dependency.getSecond().equals(country)
-                                                      && dependency.getFirst().equals(other)
-                                                      && ClausewitzUtils.removeQuotes(dependency.getSubjectType())
-                                                                        .equalsIgnoreCase(SubjectType.COLONY.name()));
+                return other.equals(country.getOverlord()) && country.getSubjectType().getName().equalsIgnoreCase(Eu4Utils.SUBJECT_TYPE_COLONY);
             case "is_core":
                 return country.getCoreProvinces().stream().map(SaveProvince::getId).anyMatch(NumbersUtils.toInt(value)::equals);
             case "is_crusade_target":
@@ -827,13 +808,7 @@ public class ConditionsUtils {
             case "is_former_colonial_nation":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null && country.getColonialParent() != null);
             case "is_free_or_tributary_trigger":
-                return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null
-                                                         || country.getSave()
-                                                                   .getDiplomacy()
-                                                                   .getDependencies()
-                                                                   .stream()
-                                                                   .anyMatch(dependency -> country.equals(dependency.getSecond())
-                                                                                           && "tributary_state".equals(dependency.getSubjectType())));
+                return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null || country.getSubjectType().isVoluntary());
             case "is_great_power":
                 return country.isGreatPower();
             case "is_harmonizing_with":
@@ -893,11 +868,7 @@ public class ConditionsUtils {
                        && (country.getSave().getHre().getEmperor().equals(country)
                            || CollectionUtils.isNotEmpty(country.getReligion().getInLeague()) && country.getReligion().getInLeague().get(0).equals(country));
             case "is_lesser_in_union":
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
-                              .stream()
-                              .anyMatch(dependency -> dependency.getSecond().equals(country) && "personal_union".equals(dependency.getSubjectType()));
+                return country.getOverlord() != null && Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equals(country.getSubjectType().getName());
             case "is_monarch_leader":
                 return country.getMonarch().getLeader() != null;
             case "is_month":
@@ -905,11 +876,7 @@ public class ConditionsUtils {
                 calendar.setTime(country.getSave().getDate());
                 return calendar.get(Calendar.MONTH) == NumbersUtils.toInt(value);
             case "is_march":
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
-                              .stream()
-                              .anyMatch(dependency -> dependency.getSecond().equals(country) && "march".equals(dependency.getSubjectType()));
+                return country.getOverlord() != null && Eu4Utils.SUBJECT_TYPE_MARCH.equals(country.getSubjectType().getName());
             case "is_neighbor_of":
                 other = country.getSave().getCountry(value);
                 return country.getNeighbours().contains(other);
@@ -936,13 +903,7 @@ public class ConditionsUtils {
                 return country.isCustom();
             case "is_possible_march":
                 other = country.getSave().getCountry(value);
-                return country.equals(other.getOverlord())
-                       && country.getSave()
-                                 .getDiplomacy()
-                                 .getDependencies()
-                                 .stream()
-                                 .anyMatch(dependency -> country.equals(dependency.getFirst()) && other.equals(dependency.getSecond())
-                                                         && "vassal".equals(dependency.getSubjectType()));
+                return country.equals(other.getOverlord()) && Eu4Utils.SUBJECT_TYPE_VASSAL.equals(other.getSubjectType().getName());
             case "is_possible_vassal": //Todo object
                 break;
             case "is_previous_papal_controller":
@@ -985,17 +946,9 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return country.getOverlord() != null && country.getOverlord().equals(other);
             case "is_subject_of_type":
-                return country.getOverlord() != null
-                       && country.getSave().getDiplomacy().getDependencies().stream().anyMatch(dependency -> country.equals(dependency.getSecond())
-                                                                                                             && value.equals(dependency.getSubjectType()));
+                return country.getOverlord() != null && value.equalsIgnoreCase(country.getSubjectType().getName());
             case "is_subject_other_than_tributary_trigger":
-                return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null
-                                                         && country.getSave()
-                                                                   .getDiplomacy()
-                                                                   .getDependencies()
-                                                                   .stream()
-                                                                   .noneMatch(dependency -> country.equals(dependency.getSecond())
-                                                                                            && "tributary_state".equals(dependency.getSubjectType())));
+                return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null && !country.getSubjectType().isVoluntary());
             case "is_territorial_core":
                 integer = NumbersUtils.toInt(value);
                 saveProvince = country.getSave().getProvince(integer);
@@ -1013,12 +966,7 @@ public class ConditionsUtils {
             case "is_tribal":
                 return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isTribal);
             case "is_vassal":
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
-                              .stream()
-                              .anyMatch(dependency -> dependency.getSecond().equals(country)
-                                                      && ClausewitzUtils.removeQuotes(dependency.getSubjectType()).equalsIgnoreCase(SubjectType.VASSAL.name()));
+                return country.getOverlord() != null && Eu4Utils.SUBJECT_TYPE_VASSAL.equalsIgnoreCase(country.getSubjectType().getName());
             case "is_year":
                 calendar.setTime(country.getSave().getDate());
                 return calendar.get(Calendar.YEAR) == NumbersUtils.toInt(value);
@@ -1029,12 +977,7 @@ public class ConditionsUtils {
                                             .compareTo(BigDecimal.valueOf(country.getNbRegimentOfCategory(5))) >= 0;
             case "junior_union_with":
                 other = country.getSave().getCountry(value);
-                return country.getOverlord() != null && country.getOverlord().equals(other)
-                       && country.getSave()
-                                 .getDiplomacy()
-                                 .getDependencies()
-                                 .stream()
-                                 .anyMatch(dependency -> "personal_union".equals(dependency.getSubjectType()) && country.equals(dependency.getSecond()));
+                return other.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equals(country.getSubjectType().getName());
             case "karma":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return NumbersUtils.intOrDefault(country.getKarma()) >= integer;
@@ -1091,12 +1034,7 @@ public class ConditionsUtils {
                 return !country.wasPlayer() && !country.isHuman() && BooleanUtils.toBoolean(country.isLucky());
             case "march_of":
                 other = country.getSave().getCountry(value);
-                return country.getOverlord() != null && country.getOverlord().equals(other)
-                       && country.getSave()
-                                 .getDiplomacy()
-                                 .getDependencies()
-                                 .stream()
-                                 .anyMatch(dependency -> "march".equals(dependency.getSubjectType()) && country.equals(dependency.getSecond()));
+                return other.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_MARCH.equals(country.getSubjectType().getName());
             case "manpower":
                 return country.getManpower() >= NumbersUtils.toInt(value) * 1000;
             case "manpower_percentage":
@@ -1363,24 +1301,20 @@ public class ConditionsUtils {
                 }
             case "num_of_marches":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
-                    return country.getSave()
-                                  .getDiplomacy()
-                                  .getDependencies()
+                    return country.getSubjects()
                                   .stream()
-                                  .filter(dependency -> dependency.getFirst().equals(country) && "march".equals(dependency.getSubjectType())).count()
+                                  .filter(subject -> Eu4Utils.SUBJECT_TYPE_MARCH.equals(subject.getSubjectType().getName()))
+                                  .count()
                            >= integer;
                 } else {
                     other = country.getSave().getCountry(value);
-                    return country.getSave()
-                                  .getDiplomacy()
-                                  .getDependencies()
+                    return country.getSubjects()
                                   .stream()
-                                  .filter(dependency -> dependency.getFirst().equals(country) && "march".equals(dependency.getSubjectType())).count() >=
-                           other.getSave()
-                                .getDiplomacy()
-                                .getDependencies()
+                                  .filter(dependency -> Eu4Utils.SUBJECT_TYPE_MARCH.equals(dependency.getSubjectType().getName()))
+                                  .count() >=
+                           other.getSubjects()
                                 .stream()
-                                .filter(dependency -> dependency.getFirst().equals(other) && "march".equals(dependency.getSubjectType()))
+                                .filter(dependency -> Eu4Utils.SUBJECT_TYPE_MARCH.equals(dependency.getSubjectType().getName()))
                                 .count();
                 }
             case "num_of_mercenaries":
@@ -1416,7 +1350,7 @@ public class ConditionsUtils {
                 return country.getNumOfProvincesInStates() >= NumbersUtils.toInt(value);
             case "num_of_provinces_in_territories":
                 return country.getNumOfProvincesInTerritories() >= NumbersUtils.toInt(value);
-            case "num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with": //Todo
+            case "num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with": //Todo object
                 break;
             case "num_of_rebel_armies":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
@@ -1516,11 +1450,9 @@ public class ConditionsUtils {
                 return country.getAllies().stream().filter(ally -> ally.getActiveRelation(country).getTrustValue() >= 100).count() >= NumbersUtils.toInt(value);
             case "num_of_unions":
             case "personal_union":
-                return country.getSave()
-                              .getDiplomacy()
-                              .getDependencies()
+                return country.getSubjects()
                               .stream()
-                              .filter(dependency -> country.equals(dependency.getFirst()) && "personal_union".equals(dependency.getSubjectType()))
+                              .filter(dependency -> Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equalsIgnoreCase(dependency.getSubjectType().getName()))
                               .count() >= NumbersUtils.toInt(value);
             case "num_of_unlocked_cults":
                 return country.getFetishistCults().size() >= NumbersUtils.toInt(value);
@@ -1559,10 +1491,13 @@ public class ConditionsUtils {
                 saveProvince = country.getSave().getProvince(NumbersUtils.toInt(value));
                 return country.equals(saveProvince.getOwner()) && saveProvince.getCores().contains(country);
             case "owns_or_non_sovereign_subject_of":
+            case "country_or_non_sovereign_subject_holds":
                 saveProvince = country.getSave().getProvince(NumbersUtils.toInt(value));
                 return country.getOwnedProvinces().contains(saveProvince) ||
-                       country.getSubjects().stream().anyMatch(subject -> subject.getOwnedProvinces().contains(saveProvince)); //Fixme not tributaries
-            //Todo parse subject types and check is_voluntary = no
+                       country.getSubjects()
+                              .stream()
+                              .filter(subject -> !subject.getSubjectType().isVoluntary())
+                              .anyMatch(subject -> subject.getOwnedProvinces().contains(saveProvince));
             case "owns_or_subject_of":
                 saveProvince = country.getSave().getProvince(NumbersUtils.toInt(value));
                 return country.getOwnedProvinces().contains(saveProvince) ||
@@ -1649,7 +1584,7 @@ public class ConditionsUtils {
             case "republican_tradition":
                 return country.getRepublicanTradition() == null || country.getRepublicanTradition() >= NumbersUtils.toDouble(value);
             case "revanchism":
-                return NumbersUtils.doubleOrDefault(country.getRepublicanTradition()) >= NumbersUtils.toDouble(value);
+                return NumbersUtils.doubleOrDefault(country.getRecoveryMotivation()) >= NumbersUtils.toDouble(value);
             case "reverse_has_opinion": //Todo object
                 break;
             case "reverse_has_opinion_modifier": //Todo object
@@ -1689,11 +1624,7 @@ public class ConditionsUtils {
             case "senior_union_with":
                 other = country.getSave().getCountry(value);
                 return other.getOverlord() != null && other.getOverlord().equals(country)
-                       && country.getSave()
-                                 .getDiplomacy()
-                                 .getDependencies()
-                                 .stream()
-                                 .anyMatch(dependency -> "personal_union".equals(dependency.getSubjectType()) && other.equals(dependency.getSecond()));
+                       && other.getSubjectType().getName().equalsIgnoreCase(Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION);
             case "splendor":
                 return NumbersUtils.intOrDefault(country.getSplendor()) >= NumbersUtils.toInt(value);
             case "stability":
@@ -1838,12 +1769,7 @@ public class ConditionsUtils {
                 break;
             case "vassal_of":
                 other = country.getSave().getCountry(value);
-                return country.getOverlord() != null && country.getOverlord().equals(other)
-                       && country.getSave()
-                                 .getDiplomacy()
-                                 .getDependencies()
-                                 .stream()
-                                 .anyMatch(dependency -> "vassal".equals(dependency.getSubjectType()) && country.equals(dependency.getSecond()));
+                return other.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_VASSAL.equals(country.getSubjectType().getName());
             case "war_exhaustion":
                 if ((aDouble = NumbersUtils.toDouble(value)) != null) {
                     return country.getWarExhaustion() >= aDouble;
@@ -2014,8 +1940,6 @@ public class ConditionsUtils {
                 return value.equalsIgnoreCase(province.getContinent().getName());
             case "controlled_by":
                 return value.equalsIgnoreCase(ClausewitzUtils.removeQuotes(province.getControllerTag()));
-            case "country_or_non_sovereign_subject_holds": //Todo tributary
-                break;
             case "country_or_subject_holds":
             case "country_or_vassal_holds":
                 other = province.getSave().getCountry(value);
@@ -2197,6 +2121,8 @@ public class ConditionsUtils {
                     other = province.getSave().getCountry(value);
                     return province.getInfantry().stream().anyMatch(regiment -> regiment.getArmy().getCountry().equals(other));
                 }
+            case "ironman":
+                return false;
             case "is_backing_current_issue":
                 return province.getSeatInParliament() != null && BooleanUtils.toBoolean(province.getSeatInParliament().getBack());
             case "is_blockaded":
@@ -2374,8 +2300,10 @@ public class ConditionsUtils {
                 return value.equalsIgnoreCase(province.getOwnerTag());
             case "papacy_active":
                 return province.getSave().getReligions().getReligions().values().stream().anyMatch(religion -> religion.getPapacy() != null);
-            case "previous_owner": //Todo
-                break;
+            case "previous_owner":
+                return province.getHistory().getOwners().size() >= 2
+                       && value.equalsIgnoreCase(new ArrayList<>(province.getHistory().getOwners().values()).get(province.getHistory().getOwners().size() - 2)
+                                                                                                            .getTag());
             case "province_has_center_of_trade_of_level":
                 return NumbersUtils.intOrDefault(province.getCenterOfTrade()) >= NumbersUtils.toInt(value);
             case "province_id":
