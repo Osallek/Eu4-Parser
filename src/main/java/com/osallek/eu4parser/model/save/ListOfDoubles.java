@@ -1,6 +1,10 @@
 package com.osallek.eu4parser.model.save;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.clausewitzparser.model.ClausewitzVariable;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListOfDoubles {
 
@@ -8,6 +12,14 @@ public class ListOfDoubles {
 
     public ListOfDoubles(ClausewitzItem item) {
         this.item = item;
+    }
+
+    public List<String> getNames() {
+        return this.item.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
+    }
+
+    public boolean contains(String name) {
+        return this.item.getVar(name) != null;
     }
 
     public Double get(String name) {

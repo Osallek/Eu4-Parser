@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.Power;
 
 import java.util.Date;
 

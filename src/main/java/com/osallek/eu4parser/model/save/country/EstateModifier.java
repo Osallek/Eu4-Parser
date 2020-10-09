@@ -4,11 +4,11 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Date;
 
-public class EstateInfluenceModifier {
+public class EstateModifier {
 
     private final ClausewitzItem item;
 
-    public EstateInfluenceModifier(ClausewitzItem item) {
+    public EstateModifier(ClausewitzItem item) {
         this.item = item;
     }
 
@@ -28,8 +28,8 @@ public class EstateInfluenceModifier {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Double value, String desc, Date date) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "influence_modifier", parent.getOrder() + 1);
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String type, Double value, String desc, Date date) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, type, parent.getOrder() + 1);
         toItem.addVariable("value", value);
         toItem.addVariable("date", date);
         toItem.addVariable("desc", desc);

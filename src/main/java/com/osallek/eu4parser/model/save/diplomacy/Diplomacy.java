@@ -357,7 +357,10 @@ public class Diplomacy {
                                      .stream()
                                      .map(child -> new Dependency(child, this.save))
                                      .collect(Collectors.toList());
-        this.dependencies.forEach(dependency -> dependency.getSecond().setSubjectType(dependency.getSubjectType()));
+        this.dependencies.forEach(dependency -> {
+            dependency.getSecond().setSubjectType(dependency.getSubjectType());
+            dependency.getSecond().setSubjectStartDate(dependency.getStartDate());
+        });
 
         this.alliances = this.item.getChildren("alliance")
                                   .stream()

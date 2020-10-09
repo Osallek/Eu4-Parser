@@ -2,7 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.eu4parser.model.save.Power;
+import com.osallek.eu4parser.model.Power;
 
 import java.util.Date;
 import java.util.EnumMap;

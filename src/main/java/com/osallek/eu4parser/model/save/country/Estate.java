@@ -1,11 +1,14 @@
 package com.osallek.eu4parser.model.save.country;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Estate {
@@ -14,7 +17,9 @@ public class Estate {
 
     private List<EstateInteraction> grantedPrivileges;
 
-    private List<EstateInfluenceModifier> influenceModifiers;
+    private Map<String, EstateModifier> influenceModifiers;
+
+    private Map<String, EstateModifier> loyaltyModifiers;
 
     public Estate(ClausewitzItem item) {
         this.item = item;
@@ -66,13 +71,13 @@ public class Estate {
         }
     }
 
-    public List<EstateInfluenceModifier> getInfluenceModifiers() {
+    public Map<String, EstateModifier> getInfluenceModifiers() {
         return influenceModifiers;
     }
 
     public void addInfluenceModifier(Double value, String desc, Date date) {
         if (this.item != null) {
-            EstateInfluenceModifier.addToItem(this.item, value, desc, date);
+            EstateModifier.addToItem(this.item, "influence_modifier", value, desc, date);
             refreshAttributes();
         }
     }
@@ -80,6 +85,24 @@ public class Estate {
     public void removeInfluenceModifier(Integer index) {
         if (this.item != null) {
             this.item.removeChild("influence_modifier", index);
+            refreshAttributes();
+        }
+    }
+
+    public Map<String, EstateModifier> getLoyaltyModifiers() {
+        return loyaltyModifiers;
+    }
+
+    public void addLoyaltyModifier(Double value, String desc, Date date) {
+        if (this.item != null) {
+            EstateModifier.addToItem(this.item, "loyalty_modifier", value, desc, date);
+            refreshAttributes();
+        }
+    }
+
+    public void removeLoyaltyModifier(Integer index) {
+        if (this.item != null) {
+            this.item.removeChild("loyalty_modifier", index);
             refreshAttributes();
         }
     }
@@ -106,10 +129,15 @@ public class Estate {
 
 
     private void refreshAttributes() {
-        List<ClausewitzItem> influenceModifierItems = this.item.getChildren("influence_modifier");
-        this.influenceModifiers = influenceModifierItems.stream()
-                                                        .map(EstateInfluenceModifier::new)
-                                                        .collect(Collectors.toList());
+        List<ClausewitzItem> modifierItems = this.item.getChildren("influence_modifier");
+        this.influenceModifiers = modifierItems.stream()
+                                               .map(EstateModifier::new)
+                                               .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getDesc()), Function.identity()));
+
+        modifierItems = this.item.getChildren("loyalty_modifier");
+        this.loyaltyModifiers = modifierItems.stream()
+                                             .map(EstateModifier::new)
+                                             .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getDesc()), Function.identity()));
 
         ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
 

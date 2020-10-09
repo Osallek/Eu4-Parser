@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.ConditionsUtils;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -24,7 +23,8 @@ public class Condition {
         this.name = item.getName();
         this.conditions = item.getVariables()
                               .stream()
-                              .collect(Collectors.groupingBy(ClausewitzObject::getName, Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+                              .collect(Collectors.groupingBy(var -> var.getName().toLowerCase(),
+                                                             Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
         this.scopes = item.getChildren().stream().map(Condition::new).collect(Collectors.toList());
     }
 
@@ -34,6 +34,10 @@ public class Condition {
 
     public Map<String, List<String>> getConditions() {
         return conditions;
+    }
+
+    public String getCondition(String condition) {
+        return this.conditions.containsKey(condition.toLowerCase()) ? this.conditions.get(condition.toLowerCase()).get(0) : null;
     }
 
     public List<Condition> getScopes() {

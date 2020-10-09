@@ -3,9 +3,10 @@ package com.osallek.eu4parser.model.save.province;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Advisor;
-import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
 
 import java.util.Date;
 
@@ -58,32 +59,32 @@ public class SaveAdvisor {
         this.item.setVariable("skill", skill);
     }
 
-    public Integer getLocation() {
-        return this.item.getVarAsInt("location");
+    public SaveProvince getLocation() {
+        return this.save.getProvince(this.item.getVarAsInt("location"));
     }
 
-    public void setLocation(int location) {
-        this.item.setVariable("location", location);
+    public void setLocation(SaveProvince location) {
+        this.item.setVariable("location", location.getId());
     }
 
     public Boolean getFemale() {
         return this.item.getVarAsBool("female");
     }
 
-    public String getCulture() {
-        return this.item.getVarAsString("culture");
+    public Culture getCulture() {
+        return this.save.getGame().getCulture(this.item.getVarAsString("culture"));
     }
 
-    public void setCulture(String culture) {
-        this.item.setVariable("culture", culture);
+    public void setCulture(Culture culture) {
+        this.item.setVariable("culture", culture.getName());
     }
 
-    public String getReligion() {
-        return this.item.getVarAsString("religion");
+    public SaveReligion getReligion() {
+        return this.save.getReligions().getReligion(this.item.getVarAsString("religion"));
     }
 
-    public void setReligion(String religion) {
-        this.item.setVariable("religion", religion);
+    public void setReligion(SaveReligion religion) {
+        this.item.setVariable("religion", religion.getName());
     }
 
     public Date getDate() {

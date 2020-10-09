@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.NumbersUtils;
 
 public class Technology {
 
@@ -32,5 +33,9 @@ public class Technology {
 
     public void setMil(Integer mil) {
         this.item.setVariable("mil_tech", mil);
+    }
+
+    public Integer getTotal() {
+        return NumbersUtils.intOrDefault(getAdm()) + NumbersUtils.intOrDefault(getDip()) + NumbersUtils.intOrDefault(getMil());
     }
 }

@@ -35,9 +35,14 @@ public class Modifier {
     public void setDate(Date date) {
         if (date == null) {
             this.item.setVariable("date", "-1.1.1");
+            this.item.setVariable("permanent", true);
         } else {
             this.item.setVariable("date", date);
         }
+    }
+
+    public Boolean isPermanent() {
+        return this.item.getVarAsBool("permanent");
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String modifier, Date date, Boolean hidden) {
@@ -47,6 +52,7 @@ public class Modifier {
 
         if (date == null) {
             toItem.addVariable("date", "-1.1.1");
+            toItem.addVariable("permanent", true);
         } else {
             toItem.addVariable("date", date);
         }

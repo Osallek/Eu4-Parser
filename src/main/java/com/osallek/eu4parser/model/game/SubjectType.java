@@ -19,6 +19,8 @@ public class SubjectType {
 
     private String localizedName;
 
+    private Condition isPotentialOverlord;
+
     private String sprite;
 
     private String diplomacyOverlordSprite;
@@ -224,6 +226,7 @@ public class SubjectType {
                     .ifPresent(this::copy);
 
         this.name = item.getName();
+
         this.sprite = StringUtils.defaultIfBlank(item.getVarAsString("sprite"), this.sprite);
         this.diplomacyOverlordSprite = StringUtils.defaultIfBlank(item.getVarAsString("diplomacy_overlord_sprite"), this.diplomacyOverlordSprite);
         this.diplomacySubjectSprite = StringUtils.defaultIfBlank(item.getVarAsString("diplomacy_subject_sprite"), this.diplomacySubjectSprite);
@@ -326,7 +329,10 @@ public class SubjectType {
         this.overlordOpinionModifier = StringUtils.defaultIfBlank(item.getVarAsString("overlord_opinion_modifier"), this.overlordOpinionModifier);
         this.subjectOpinionModifier = StringUtils.defaultIfBlank(item.getVarAsString("subject_opinion_modifier"), this.subjectOpinionModifier);
 
-        ClausewitzItem child = item.getChild("can_fight");
+        ClausewitzItem child = item.getChild("is_potential_overlord");
+        this.isPotentialOverlord = child == null ? null : new Condition(child);
+
+        child = item.getChild("can_fight");
         this.canFight = child == null ? null : child.getVariables()
                                                     .stream()
                                                     .collect(Collectors.toMap(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
@@ -475,6 +481,10 @@ public class SubjectType {
 
     void setLocalizedName(String localizedName) {
         this.localizedName = localizedName;
+    }
+
+    public Condition isPotentialOverlord() {
+        return isPotentialOverlord;
     }
 
     public String getSprite() {

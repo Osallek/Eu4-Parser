@@ -136,6 +136,10 @@ public class TradeNode {
         return countries.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
+    public TradeNodeCountry getCountry(Country country) {
+        return this.countries.get(country.getTag());
+    }
+
     private void refreshAttributes() {
         this.countries = this.item.getChildren()
                                   .stream()

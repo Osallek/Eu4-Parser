@@ -30,7 +30,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,7 +68,7 @@ public class SaveProvince extends Province {
 
     private ListOfDates discoveryReligionDates;
 
-    private List<Modifier> modifiers;
+    private Map<String, Modifier> modifiers;
 
     private Id rebelFaction;
 
@@ -959,7 +961,7 @@ public class SaveProvince extends Province {
         return this.item.getVarAsInt("previous_winter");
     }
 
-    public List<Modifier> getModifiers() {
+    public Map<String, Modifier> getModifiers() {
         return modifiers;
     }
 
@@ -1165,7 +1167,7 @@ public class SaveProvince extends Province {
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
         this.modifiers = modifierItems.stream()
                                       .map(Modifier::new)
-                                      .collect(Collectors.toList());
+                                      .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifier()), Function.identity()));
 
         ClausewitzItem rebelFactionItem = this.item.getChild("rebel_faction");
 

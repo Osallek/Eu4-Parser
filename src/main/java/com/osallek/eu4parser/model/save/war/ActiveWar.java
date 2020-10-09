@@ -167,6 +167,16 @@ public class ActiveWar {
         return this.item.getVarAsDouble("defender_score");
     }
 
+    public Double getScore(Country country) {
+        if (getAttacker(country) != null) {
+            return -getDefenderScore();
+        } else if (getDefender(country) != null) {
+            return getDefenderScore();
+        } else {
+            return null;
+        }
+    }
+
     public Integer getWarDirectionQuarter() {
         return this.item.getVarAsInt("war_direction_quarter");
     }

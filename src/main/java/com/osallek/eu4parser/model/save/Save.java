@@ -306,6 +306,10 @@ public class Save {
         return tradeNodes;
     }
 
+    public TradeNode getTradeNode(String name) {
+        return this.tradeNodes.get(name);
+    }
+
     public Map<TradeGood, String> getProductionLeaders() {
         Map<TradeGood, String> productionLeaders = new LinkedHashMap<>();
         ClausewitzList productionLeaderList = this.gamestateItem.getList("production_leader_tag");

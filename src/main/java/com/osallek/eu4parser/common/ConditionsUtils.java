@@ -1,6 +1,8 @@
 package com.osallek.eu4parser.common;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
+import com.osallek.eu4parser.model.Power;
+import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Condition;
 import com.osallek.eu4parser.model.game.Continent;
@@ -9,7 +11,7 @@ import com.osallek.eu4parser.model.game.GovernmentReform;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
-import com.osallek.eu4parser.model.save.Power;
+import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.TradeLeague;
 import com.osallek.eu4parser.model.save.country.ActivePolicy;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -41,7 +43,11 @@ import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -141,8 +147,6 @@ public class ConditionsUtils {
                 return country.getSave().getAdvisors().containsKey(Integer.parseInt(value));
             case "ai":
                 return !country.isHuman();
-            case "ai_attitude": //Todo Object
-                break;
             case "alliance_with":
                 return country.getAllies().stream().map(Country::getTag).anyMatch(tag -> tag.equalsIgnoreCase(value));
             case "allows_female_emperor":
@@ -157,8 +161,6 @@ public class ConditionsUtils {
                     return country.getArmySize() >= other.getArmySize();
                 }
             case "army_size_percentage": //Todo fl
-                break;
-            case "army_strength": // Todo object
                 break;
             case "army_professionalism":
                 if ((aDouble = NumbersUtils.toDouble(value)) != null) {
@@ -190,26 +192,14 @@ public class ConditionsUtils {
                 return NumbersUtils.doubleOrDefault(country.getAverageUnrest()) >= NumbersUtils.toDouble(value);
             case "blockade":
                 return NumbersUtils.doubleOrDefault(country.getBlockadedPercent()) >= NumbersUtils.toDouble(value);
-            case "border_distance": //Todo object
-                break;
-            case "calc_true_if": //Todo object
-                break;
-            case "can_be_overlord": //Todo object
-                break;
             case "can_create_vassals":
                 return country.getOverlord() == null;
-            case "can_heir_be_child_of_consort": //Fixme ???
-                break;
-            case "can_justify_trade_conflict": //Fixme ??
-                break;
             case "can_migrate":
                 return country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isAllowMigration)
                        && country.getOwnedProvinces().size() == 1 && !country.isAtWar() &&
                        (country.getLastMigration() == null || country.getLastMigration().before(DateUtils.addYears(country.getSave().getDate(), -5)));
             case "capital":
                 return country.getCapitalId() != null && country.getCapitalId().equals(NumbersUtils.toInt(value));
-            case "capital_distance": //Fixme distance
-                break;
             case "capital_trade_node":
                 return Objects.equals(country.getTradePort().getId(), NumbersUtils.toInt(value));
             case "cavalry_fraction":
@@ -272,17 +262,17 @@ public class ConditionsUtils {
                 return country.getLedger() != null && country.getLedger().getLastMonthIncome() != null && country.getLedger().getLastMonthExpense() != null
                        && new BigDecimal(value).add(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
                                                .subtract(BigDecimal.valueOf(country.getLedger().getLastMonthExpense())).compareTo(BigDecimal.ZERO) >= 0;
-            case "current_institution_growth": //Todo ???
+            case "current_institution_growth": //Todo
                 break;
             case "current_size_of_parliament":
                 return country.getParliament() != null
                        && country.getOwnedProvinces().stream().map(SaveProvince::getSeatInParliament).filter(Objects::nonNull).count() >=
                           NumbersUtils.toInt(value);
+            case "days": //Used for scope had_active_policy
+                return true;
             case "defensive_war_with":
                 other = country.getSave().getCountry(value);
                 return country.getActiveWars().stream().anyMatch(activeWar -> activeWar.getDefender(country) != null && activeWar.getDefender(other) != null);
-            case "development_in_provinces": //Todo object
-                break;
             case "development_of_overlord_fraction":
                 return country.getOverlord() != null && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getOverlord().getDevelopment()))
                                                                              .compareTo(BigDecimal.valueOf(country.getDevelopment())) >= 0;
@@ -319,6 +309,8 @@ public class ConditionsUtils {
                 }
             case "dip_tech":
                 return country.getTech().getDip() >= Integer.parseInt(value);
+            case "disaster": //Used for scope has_disaster_progress
+                return true;
             case "dominant_culture":
                 return country.getDominantCulture().getName().equals(value);
             case "dominant_religion":
@@ -344,29 +336,25 @@ public class ConditionsUtils {
             case "empire_of_china_reform_level":
                 return country.getSave().getCelestialEmpire() != null
                        && country.getSave().getCelestialEmpire().getPassedReforms().size() >= NumbersUtils.toInt(value);
-            case "employed_advisor": //Todo object
-                break;
-            case "estate_influence": //Todo object
-                break;
-            case "estate_loyalty": //Todo object
-                break;
-            case "estate_territory": //Todo object
-                break;
+            case "estate": //Used for scope estate_influence, estate_loyalty, estate_territory
+                return true;
             case "exists":
                 if ("yes".equalsIgnoreCase(value)) {
                     return true;
                 } else {
                     return country.getSave().getCountry(value) != null;
                 }
+            case "faction": //Used for scope faction_influence
+                return true;
             case "faction_in_power":
                 return CollectionUtils.isNotEmpty(country.getFactions())
                        && value.equalsIgnoreCase(country.getFactions().stream().max(Comparator.comparing(Faction::getInfluence)).get().getType());
-            case "faction_influence": //Todo faction
-                break;
             case "federation_size":
                 return country.getFederationFriends().size() >= NumbersUtils.toInt(value);
             case "fervor":
                 return country.getFervor() != null && NumbersUtils.doubleOrDefault(country.getFervor().getValue()) >= NumbersUtils.toDouble(value);
+            case "flag": //Used for scope had_consort_flag, had_country_flag, had_global_flag, had_heir_flag, had_province_flag, had_ruler_flag
+                return true;
             case "full_idea_group":
                 return country.getIdeaGroups().getIdeaGroupsNames().getOrDefault(value, -1) == 7;
             case "galley_fraction":
@@ -390,20 +378,8 @@ public class ConditionsUtils {
             case "guaranteed_by":
                 other = country.getSave().getCountry(value);
                 return country.getGuarantees().contains(other);
-            case "had_active_policy": //Todo object
-                break;
-            case "had_consort_flag": //Todo object
-                break;
-            case "had_country_flag": //Todo object
-                break;
-            case "had_global_flag": //Todo object
-                break;
-            case "had_heir_flag": //Todo object
-                break;
             case "had_recent_war":
                 return DateUtils.addYears(country.getLastWarEnded(), NumbersUtils.toInt(value)).after(country.getSave().getDate());
-            case "had_ruler_flag": //Todo object
-                break;
             case "harmonization_progress":
                 return NumbersUtils.doubleOrDefault(country.getHarmonyProgress()) >= NumbersUtils.toDouble(value);
             case "harmony":
@@ -428,8 +404,6 @@ public class ConditionsUtils {
                               .map(SaveProvince::getOwner)
                               .filter(Objects::nonNull)
                               .anyMatch(c -> !c.getReligion().equals(country.getReligion()));
-            case "has_casus_belli": //Todo object
-                break;
             case "has_casus_belli_against":
                 return country.getSave()
                               .getDiplomacy()
@@ -458,8 +432,6 @@ public class ConditionsUtils {
                 return CollectionUtils.isNotEmpty(country.getCustomNationalIdeas());
             case "has_disaster":
                 return value.equalsIgnoreCase(country.getActiveDisaster());
-            case "has_disaster_progress": //Todo object
-                break;
             case "has_discovered":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getSave().getProvince(integer) != null && country.getSave().getProvince(integer).getDiscoveredBy().contains(country);
@@ -473,10 +445,6 @@ public class ConditionsUtils {
                 return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(1));
             case "has_estate":
                 return country.getEstates().stream().map(Estate::getType).map(ClausewitzUtils::removeQuotes).anyMatch(value::equals);
-            case "has_estate_influence_modifier": //Todo object
-                break;
-            case "has_estate_loyalty_modifier": //Todo object
-                break;
             case "has_faction":
                 return CollectionUtils.isNotEmpty(country.getFactions()) && country.getFactions().stream().map(Faction::getType).anyMatch(value::equals);
             case "has_factions":
@@ -507,8 +475,6 @@ public class ConditionsUtils {
                 return other.getGuarantees().contains(country);
             case "has_global_flag":
                 return country.getSave().getFlags().contains(value);
-            case "has_global_modifier_value": //Todo object
-                break;
             case "has_government_attribute": //Todo not only custom attributes but also native ie: has_government_attribute = heir
                 return country.getGovernment()
                               .getReforms()
@@ -542,8 +508,6 @@ public class ConditionsUtils {
                 return country.getEmbracedInstitutions().stream().anyMatch(institution -> value.equalsIgnoreCase(institution.getName()));
             case "has_leader":
                 return country.getLeaders().values().stream().map(Leader::getName).anyMatch(value::equals);
-            case "has_leader_with": //Todo object
-                break;
             case "has_matching_religion":
                 if (Eu4Utils.isTag(value)) {
                     other = country.getSave().getCountry(value);
@@ -562,12 +526,6 @@ public class ConditionsUtils {
                                   .getMonarch(country.getPreviousMonarchs().get(country.getPreviousMonarchs().size() - 2).getId())
                                   .getDynasty()
                                   .equals(country.getMonarch().getDynasty());
-            case "has_opinion": //Todo object
-                break;
-            case "has_opinion_diff": //Todo object
-                break;
-            case "has_opinion_modifier": //Todo object
-                break;
             case "has_parliament":
                 return country.getParliament() != null;
             case "has_personal_deity":
@@ -587,8 +545,6 @@ public class ConditionsUtils {
                 return country.getGovernment().getHistory().stream().anyMatch(reform -> value.equalsIgnoreCase(reform.getName()));
             case "government_reform_progress":
                 return NumbersUtils.doubleOrDefault(country.getGovernmentReformProgress()) >= NumbersUtils.toDouble(value);
-            case "has_removed_fow": //Todo object
-                break;
             case "has_ruler":
                 return country.getMonarch() != null && country.getMonarch().getName().equals(value);
             case "has_ruler_flag":
@@ -622,10 +578,6 @@ public class ConditionsUtils {
                               .stream()
                               .anyMatch(rebelFaction -> BooleanUtils.toBoolean(rebelFaction.isActive()) && rebelFaction.getCountry().equals(country)
                                                         && rebelFaction.getSupportiveCountry() != null && rebelFaction.getSupportiveCountry().equals(other));
-            case "has_spy_network_from": //Todo object
-                break;
-            case "has_spy_network_in": //Todo object
-                break;
             case "has_subsidize_armies":
                 return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(3));
             case "has_support_loyalists":
@@ -680,8 +632,6 @@ public class ConditionsUtils {
                 return country.getHeir() != null && country.getHeir().getWho().equals(other);
             case "heir_religion":
                 return country.getHeir() != null && country.getHeir().getReligion().getName().equals(value);
-            case "hidden_trigger":// Todo object
-                break;
             case "historical_friend_with":
                 other = country.getSave().getCountry(value);
                 return country.getHistoricalFriends().contains(other);
@@ -730,6 +680,8 @@ public class ConditionsUtils {
                 return country.getGoldenEraDate() != null
                        && ChronoUnit.YEARS.between(country.getGoldenEraDate().toInstant(), country.getSave().getDate().toInstant())
                           < country.getSave().getGame().getGoldenEraDuration();
+            case "incident": //Used for scope incident_variable_value
+                return true;
             case "infantry_fraction":
                 return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getArmySize())).compareTo(BigDecimal.valueOf(country.getNbInfantry())) >= 0;
             case "inflation":
@@ -739,12 +691,10 @@ public class ConditionsUtils {
                     other = country.getSave().getCountry(value);
                     return NumbersUtils.doubleOrDefault(country.getInflation()) >= NumbersUtils.doubleOrDefault(other.getInflation());
                 }
-            case "incident_variable_value": //Todo object
-                break;
+            case "influence": //Used for scope faction_influence
+                return true;
             case "innovativeness":
                 return NumbersUtils.doubleOrDefault(country.getInnovativeness()) >= NumbersUtils.toDouble(value);
-            case "institution_difference": //Todo object
-                break;
             case "invasion_nation":
                 return country.getModifiers().stream().anyMatch(modifier -> "\"invasion_nation\"".equals(modifier.getModifier()));
             case "invested_papal_influence":
@@ -833,7 +783,7 @@ public class ConditionsUtils {
                 }
             case "is_incident_happened":
                 return country.getPastIncidents().contains(ClausewitzUtils.addQuotes(value));
-            case "is_incident_possible": //Todo ???
+            case "is_incident_possible": //Fixme ???
             case "is_incident_potential":
                 return country.getPotentialIncidents().contains(ClausewitzUtils.addQuotes(value));
             case "is_institution_enabled":
@@ -851,8 +801,6 @@ public class ConditionsUtils {
             case "is_in_trade_league_with":
                 other = country.getSave().getCountry(value);
                 return country.getSave().getTradeLeagues().stream().anyMatch(tradeLeague -> tradeLeague.hasMember(country) && tradeLeague.hasMember(other));
-            case "is_in_war": //Todo object
-                break;
             case "is_league_enemy":
                 other = country.getSave().getCountry(value);
                 return !country.getReligion().equals(other.getReligion()) && country.getReligion().getInLeague().contains(country)
@@ -904,7 +852,7 @@ public class ConditionsUtils {
             case "is_possible_march":
                 other = country.getSave().getCountry(value);
                 return country.equals(other.getOverlord()) && Eu4Utils.SUBJECT_TYPE_VASSAL.equals(other.getSubjectType().getName());
-            case "is_possible_vassal": //Todo object
+            case "is_possible_vassal": //todo
                 break;
             case "is_previous_papal_controller":
                 return country.getReligion().getPapacy() != null && country.equals(country.getReligion().getPapacy().getPreviousController());
@@ -1030,6 +978,8 @@ public class ConditionsUtils {
                 return country.getOverlord() != null || country.getLibertyDesire() >= NumbersUtils.toDouble(value);
             case "light_ship_fraction":
                 return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getNavySize())).compareTo(BigDecimal.valueOf(country.getNbLightShips())) >= 0;
+            case "loyalty": //Used for scope estate_loyalty
+                return true;
             case "luck":
                 return !country.wasPlayer() && !country.isHuman() && BooleanUtils.toBoolean(country.isLucky());
             case "march_of":
@@ -1080,6 +1030,8 @@ public class ConditionsUtils {
                 return country.getTech().getMil() >= Integer.parseInt(value);
             case "mission_completed":
                 return country.getCompletedMissions().contains(ClausewitzUtils.addQuotes(value));
+            case "modifier": //Used for scope has_estate_influence_modifier, has_estate_loyalty_modifier
+                return true;
             case "monthly_income":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getEstimatedMonthlyIncome() >= integer;
@@ -1097,8 +1049,6 @@ public class ConditionsUtils {
                 calendar2.add(Calendar.MONTH, NumbersUtils.toInt(value));
 
                 return calendar2.before(calendar);
-            case "military_strength": //Todo object
-                break;
             case "national_focus":
                 return country.getNationalFocus().equals(Power.valueOf(value.toUpperCase()));
             case "nation_designer_points":
@@ -1117,8 +1067,6 @@ public class ConditionsUtils {
                     return country.getNavySize() >= other.getNavySize();
                 }
             case "navy_size_percentage": //Todo fl
-                break;
-            case "naval_strength": //Todo object
                 break;
             case "navy_tradition":
                 if ((aDouble = NumbersUtils.toDouble(value)) != null) {
@@ -1330,8 +1278,6 @@ public class ConditionsUtils {
                               .stream()
                               .filter(province -> country.equals(province.getOwner()) && country.equals(province.getController()))
                               .count() >= NumbersUtils.toInt(value);
-            case "num_of_owned_provinces_with": //Todo object
-                break;
             case "num_of_ports":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getNumOfPorts() >= integer;
@@ -1350,8 +1296,6 @@ public class ConditionsUtils {
                 return country.getNumOfProvincesInStates() >= NumbersUtils.toInt(value);
             case "num_of_provinces_in_territories":
                 return country.getNumOfProvincesInTerritories() >= NumbersUtils.toInt(value);
-            case "num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with": //Todo object
-                break;
             case "num_of_rebel_armies":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getSave()
@@ -1403,8 +1347,6 @@ public class ConditionsUtils {
                                 .filter("REB"::equals)
                                 .count();
                 }
-            case "num_of_religion": //Todo object
-                break;
             case "num_of_royal_marriages":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getNumOfRoyalMarriages() >= integer;
@@ -1485,8 +1427,6 @@ public class ConditionsUtils {
                              .divide(nbProv, 3, RoundingMode.HALF_EVEN).compareTo(bigDecimal) >= 0;
             case "owns":
                 return country.equals(country.getSave().getProvince(NumbersUtils.toInt(value)).getOwner());
-            case "owns_all_provinces": //Todo object
-                break;
             case "owns_core_province":
                 saveProvince = country.getSave().getProvince(NumbersUtils.toInt(value));
                 return country.equals(saveProvince.getOwner()) && saveProvince.getCores().contains(country);
@@ -1536,6 +1476,8 @@ public class ConditionsUtils {
                     other = country.getSave().getCountry(value);
                     return country.getPiety() == null || other.getPiety() == null || country.getArmyTradition() >= other.getArmyTradition();
                 }
+            case "policy": //Used for scope had_active_policy
+                return true;
             case "preferred_emperor":
                 other = country.getSave().getCountry(value);
                 return country.getPreferredEmperor() == null || other.equals(country.getPreferredEmperor());
@@ -1556,8 +1498,6 @@ public class ConditionsUtils {
                 return country.getLedger() != null
                        && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
                                                .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.PRODUCTION))) >= 0;
-            case "production_leader": //Todo object
-                break;
             case "provinces_on_capital_continent_of":
                 other = country.getSave().getCountry(value);
                 return country.getOwnedProvinces().stream().anyMatch(province -> province.getContinent() == other.getCapital().getContinent());
@@ -1575,20 +1515,12 @@ public class ConditionsUtils {
                 return value.equalsIgnoreCase(country.getReligionName());
             case "religion_group":
                 return value.equalsIgnoreCase(country.getReligion().getReligionGroup().getName());
-            case "religion_years": //Todo object
-                break;
-            case "religious_school": //Todo object
-                break;
             case "religious_unity":
                 return country.getReligiousUnity() >= NumbersUtils.toDouble(value);
             case "republican_tradition":
                 return country.getRepublicanTradition() == null || country.getRepublicanTradition() >= NumbersUtils.toDouble(value);
             case "revanchism":
                 return NumbersUtils.doubleOrDefault(country.getRecoveryMotivation()) >= NumbersUtils.toDouble(value);
-            case "reverse_has_opinion": //Todo object
-                break;
-            case "reverse_has_opinion_modifier": //Todo object
-                break;
             case "revolt_percentage":
                 return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getOwnedProvinces().size()))
                                             .compareTo(BigDecimal.valueOf(country.getOwnedProvinces()
@@ -1617,8 +1549,6 @@ public class ConditionsUtils {
                                             .compareTo(BigDecimal.valueOf(country.getSailors())) >= 0;
             case "max_sailors":
                 return NumbersUtils.doubleOrDefault(country.getMaxSailors()) >= NumbersUtils.toDouble(value);
-            case "same_continent": //Todo object
-                break;
             case "secondary_religion":
                 return country.getSecondaryReligion() == null || value.equalsIgnoreCase(country.getSecondaryReligion().getName());
             case "senior_union_with":
@@ -1656,20 +1586,24 @@ public class ConditionsUtils {
                 return BooleanUtils.toBoolean(country.getActiveRelations().get(other.getTag()).hasSuccessionClaim());
             case "tag":
                 return value.equalsIgnoreCase(country.getTag());
+            case "target": //Used for scope has_casus_belli
+                return true;
             case "tariff_value":
                 return country.getTariff() != null && country.getTariff() >= NumbersUtils.toDouble(value);
             case "tax_income_percentage":
                 return country.getLedger() != null
                        && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
                                                .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TAXES))) >= 0;
-            case "tech_difference": //Todo object
-                break;
             case "technology_group":
                 if ((other = country.getSave().getCountry(value)) != null) {
                     return country.getTechnologyGroup().equals(other.getTechnologyGroup());
                 } else {
                     return value.equalsIgnoreCase(country.getTechnologyGroup());
                 }
+            case "tech_difference":
+                return root.getTech().getTotal() - NumbersUtils.toInt(value) >= from.getTech().getTotal();
+            case "territory": //Used for scope estate_territory
+                return true;
             case "tolerance_to_this": //Todo
                 break;
             case "total_base_tax":
@@ -1714,12 +1648,6 @@ public class ConditionsUtils {
                 return country.getLedger() != null
                        && new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))
                                                .compareTo(BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TRADE))) >= 0;
-            case "trading_bonus": //Todo object
-                break;
-            case "trading_part": //Todo object
-                break;
-            case "trading_policy_in_node": //Todo object
-                break;
             case "transport_fraction":
                 return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getNavySize())).compareTo(BigDecimal.valueOf(country.getNbTransports())) >= 0;
             case "treasury":
@@ -1731,8 +1659,8 @@ public class ConditionsUtils {
                 }
             case "tribal_allegiance":
                 return country.getTribalAllegiance() == null || country.getTribalAllegiance() >= NumbersUtils.toDouble(value);
-            case "trust": //Todo object
-                break;
+            case "type": //Used for scope has_casus_belli
+                return true;
             case "unit_type":
                 return value.equalsIgnoreCase(country.getUnitType());
             case "uses_authority":
@@ -1765,8 +1693,8 @@ public class ConditionsUtils {
                 return country.getReligion().getGameReligion().getIcons() != null;
             case "uses_syncretic_faiths":
                 return country.getReligion().getGameReligion().canHaveSecondaryReligion();
-            case "variable_arithmetic_trigger": //Todo object
-                break;
+            case "value": //Special case, used for scopes to count
+                return true;
             case "vassal_of":
                 other = country.getSave().getCountry(value);
                 return other.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_VASSAL.equals(country.getSubjectType().getName());
@@ -1782,8 +1710,6 @@ public class ConditionsUtils {
                               .stream()
                               .anyMatch(war -> (war.getDefenderScore() >= NumbersUtils.toDouble(value) && war.getDefenders().containsKey(country))
                                                || (war.getDefenderScore() <= -NumbersUtils.toDouble(value) && war.getAttackers().containsKey(country)));
-            case "war_score_against": //Todo object
-                break;
             case "war_with":
                 other = country.getSave().getCountry(value);
                 return country.getActiveWars()
@@ -1796,10 +1722,6 @@ public class ConditionsUtils {
             case "will_back_next_reform": //Todo
                 break;
             case "yearly_corruption_increase": //Todo
-                break;
-            case "years_in_union_under": //Todo object
-                break;
-            case "years_in_vassalage_under": //Todo
                 break;
             case "years_of_income":
                 if (NumbersUtils.toDouble(value) != null) {
@@ -1820,6 +1742,15 @@ public class ConditionsUtils {
     public static boolean applyScopeToCountry(Country root, Country from, Condition condition) {
         Country country;
         SaveProvince saveProvince;
+        SubjectType subjectType;
+        Estate estate;
+        Faction faction;
+        ActivePolicy activePolicy;
+        Double aDouble;
+        Integer integer;
+        TradeGood tradeGood;
+        TradeNode tradeNode;
+        SaveReligion religion;
 
         if ((country = root.getSave().getCountry(condition.getName())) != null) {
             return condition.apply(country, from);
@@ -1851,29 +1782,365 @@ public class ConditionsUtils {
                                                          .stream()
                                                          .anyMatch(value -> applyConditionToCountry(root, root, from, entry.getKey(), value)))
                        && condition.getScopes().stream().noneMatch(scope -> applyScopeToCountry(root, from, scope));
-            case "colonial_parent":
-                return root.getColonialParent() != null && condition.apply(root.getColonialParent(), from);
-            case "overlord":
-                return root.getOverlord() != null && condition.apply(root.getOverlord(), from);
-            case "capital_scope":
-                return condition.apply(root.getCapital());
             case "root":
                 return condition.apply(root, from);
             case "from":
                 return condition.apply(from, root);
-            case "emperor":
-                return !root.getSave().getHre().dismantled() && condition.apply(root.getSave().getHre().getEmperor(), from);
-            case "revolution_target":
-                return root.getSave().getRevolution() != null && root.getSave().getRevolution().getRevolutionTarget() != null &&
-                       condition.apply(root.getSave().getRevolution().getRevolutionTarget(), from);
+            case "ai_attitude":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return root.getActiveRelation(country) != null
+                       && condition.getCondition("attitude").equalsIgnoreCase(ClausewitzUtils.removeQuotes(root.getActiveRelation(country).getAttitude()));
+            case "army_strength": // Todo object
+                break;
+            case "can_be_overlord":
+                subjectType = root.getSave().getGame().getSubjectType(condition.getCondition("can_be_overlord"));
+                return subjectType.isPotentialOverlord() == null || subjectType.isPotentialOverlord().apply(root, from);
+            case "capital_scope":
+                return condition.apply(root.getCapital());
+            case "colonial_parent":
+                return root.getColonialParent() != null && condition.apply(root.getColonialParent(), from);
             case "crusade_target":
                 return root.getSave()
                            .getReligions()
                            .getReligions()
                            .values()
                            .stream()
-                           .anyMatch(religion -> religion.getPapacy() != null && religion.getPapacy().getCrusadeTarget() != null
-                                                 && condition.apply(religion.getPapacy().getCrusadeTarget(), from));
+                           .anyMatch(saveReligion -> saveReligion.getPapacy() != null && saveReligion.getPapacy().getCrusadeTarget() != null
+                                                     && condition.apply(saveReligion.getPapacy().getCrusadeTarget(), from));
+            case "development_in_provinces":
+                return root.getOwnedProvinces()
+                           .stream()
+                           .filter(condition::apply)
+                           .map(SaveProvince::getDevelopment)
+                           .mapToDouble(NumbersUtils::doubleOrDefault)
+                           .sum() >= NumbersUtils.toInt(condition.getCondition("value"));
+            case "emperor":
+                return !root.getSave().getHre().dismantled() && condition.apply(root.getSave().getHre().getEmperor(), from);
+            case "employed_advisor": //Todo object
+                Power power = Power.byName(condition.getCondition("category"));
+                String type = condition.getCondition("type");
+                String cultureS = condition.getCondition("culture");
+                Culture culture = "root".equalsIgnoreCase(cultureS) ? root.getPrimaryCulture() : root.getSave().getGame().getCulture(cultureS);
+                String religionS = condition.getCondition("religion");
+
+                return root.getAdvisors().values().stream().anyMatch(advisor -> {
+                    if (power != null && power != advisor.getGameAdvisor().getPower()) {
+                        return false;
+                    }
+
+                    if (type != null && !type.equalsIgnoreCase(advisor.getType())) {
+                        return false;
+                    }
+
+                    if (culture != null && !culture.equals(advisor.getCulture())) {
+                        return false;
+                    }
+
+                    if (religionS != null) {
+                        if (("root".equalsIgnoreCase(religionS) || "true_faith".equalsIgnoreCase(religionS))
+                            && !root.getReligion().equals(advisor.getReligion())) {
+                            return false;
+                        } else if ("heretic".equalsIgnoreCase(religionS)
+                                   && (!root.getReligion().getReligionGroup().equals(advisor.getReligion().getReligionGroup())
+                                       || root.getReligion().equals(advisor.getReligion()))) {
+                            return false;
+                        } else if ("heathen".equalsIgnoreCase(religionS)
+                                   && root.getReligion().getReligionGroup().equals(advisor.getReligion().getReligionGroup())) {
+                            return false;
+                        } else if (!advisor.getReligion().getName().equalsIgnoreCase(religionS)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+            case "estate_influence": //Todo object
+                break;
+            case "estate_loyalty":
+                estate = root.getEstate(condition.getCondition("estate"));
+                return estate != null && NumbersUtils.doubleOrDefault(estate.getLoyalty()) >= NumbersUtils.toDouble(condition.getCondition("loyalty"));
+            case "estate_territory":
+                estate = root.getEstate(condition.getCondition("estate"));
+                return estate != null && NumbersUtils.doubleOrDefault(estate.getTerritory()) >= NumbersUtils.toDouble(condition.getCondition("territory"));
+            case "faction_influence":
+                faction = root.getFaction(condition.getCondition("faction"));
+                return faction != null && NumbersUtils.doubleOrDefault(faction.getInfluence()) >= NumbersUtils.toDouble(condition.getCondition("influence"));
+            case "had_active_policy":
+                activePolicy = root.getActivePolicie(condition.getCondition("policy"));
+                return activePolicy != null
+                       && DateUtils.addDays(activePolicy.getDate(), NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+            case "had_consort_flag":
+                return root.getConsort() != null && root.getConsort().getRulerFlags().contains(condition.getCondition("flag"))
+                       && DateUtils.addDays(root.getConsort().getRulerFlags().get(condition.getCondition("flag")),
+                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+            case "had_country_flag":
+                return root.getFlags().contains(condition.getCondition("flag"))
+                       && DateUtils.addDays(root.getFlags().get(condition.getCondition("flag")),
+                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+            case "had_global_flag":
+                return root.getSave().getFlags().contains(condition.getCondition("flag"))
+                       && DateUtils.addDays(root.getSave().getFlags().get(condition.getCondition("flag")),
+                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+            case "had_heir_flag":
+                return root.getHeir() != null && root.getHeir().getRulerFlags().contains(condition.getCondition("flag"))
+                       && DateUtils.addDays(root.getHeir().getRulerFlags().get(condition.getCondition("flag")),
+                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+            case "had_ruler_flag":
+                return root.getMonarch() != null && root.getMonarch().getRulerFlags().contains(condition.getCondition("flag"))
+                       && DateUtils.addDays(root.getMonarch().getRulerFlags().get(condition.getCondition("flag")),
+                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+            case "has_casus_belli":
+                country = root.getSave().getCountry(condition.getCondition("target"));
+                Country finalCountry = country;
+                return root.getSave()
+                           .getDiplomacy()
+                           .getCasusBellis()
+                           .stream()
+                           .anyMatch(casusBelli -> root.equals(casusBelli.getFirst())
+                                                   && finalCountry.equals(casusBelli.getSecond())
+                                                   && condition.getCondition("type").equalsIgnoreCase(casusBelli.getType().getName()));
+            case "has_disaster_progress":
+                aDouble = root.getVariables().get(condition.getCondition("disaster") + "_progress");
+                return aDouble != null && aDouble >= NumbersUtils.toDouble(condition.getCondition("value"));
+            case "has_estate_influence_modifier":
+                estate = root.getEstate(condition.getCondition("estate"));
+                return estate != null && estate.getInfluenceModifiers().get(condition.getCondition("modifier")) != null;
+            case "has_estate_loyalty_modifier":
+                estate = root.getEstate(condition.getCondition("estate"));
+                return estate != null && estate.getLoyaltyModifiers().get(condition.getCondition("modifier")) != null;
+            case "has_global_modifier_value": //Todo object
+                break;
+            case "has_leader_with":
+                Integer fire = NumbersUtils.toInt(condition.getCondition("fire"));
+                Integer shock = NumbersUtils.toInt(condition.getCondition("shock"));
+                Integer manuever = NumbersUtils.toInt(condition.getCondition("manuever"));
+                Integer siege = NumbersUtils.toInt(condition.getCondition("siege"));
+                Integer totalPips = NumbersUtils.toInt(condition.getCondition("total_pips"));
+                boolean isMonarchLeader = BooleanUtils.toBoolean(condition.getCondition("is_monarch_leader"));
+                LeaderType leaderType = condition.getConditions()
+                                                 .keySet()
+                                                 .stream()
+                                                 .map(LeaderType::value)
+                                                 .filter(Objects::nonNull)
+                                                 .findFirst()
+                                                 .orElse(null);
+
+                List<Leader> leaders;
+
+                if (isMonarchLeader) {
+                    leaders = (root.getMonarch() == null || root.getMonarch().getLeader() == null)
+                              ? null : Collections.singletonList(root.getMonarch().getLeader());
+                } else if (leaderType != null) {
+                    leaders = root.getLeadersOfType(leaderType);
+                } else {
+                    leaders = new ArrayList<>(root.getLeaders().values());
+                }
+
+                return leaders != null && leaders.stream().anyMatch(leader -> {
+                    if (fire != null && leader.getFire() < fire) {
+                        return false;
+                    }
+
+                    if (shock != null && leader.getShock() < shock) {
+                        return false;
+                    }
+
+                    if (manuever != null && leader.getManuever() < manuever) {
+                        return false;
+                    }
+
+                    if (siege != null && leader.getSiege() < siege) {
+                        return false;
+                    }
+
+                    if (totalPips != null && leader.getTotalPips() < totalPips) {
+                        return false;
+                    }
+
+                    return true;
+                });
+            case "has_opinion_modifier":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return root.getActiveRelation(country) != null
+                       && root.getActiveRelation(country)
+                              .getOpinions()
+                              .stream()
+                              .anyMatch(opinion -> condition.getCondition("modifier").equalsIgnoreCase(opinion.getModifier()));
+            case "has_spy_network_from":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return NumbersUtils.intOrDefault(country.getActiveRelation(root).getSpyNetwork())
+                       >= NumbersUtils.toIntOrDefault(condition.getCondition("value"));
+            case "has_spy_network_in":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return NumbersUtils.intOrDefault(root.getActiveRelation(country).getSpyNetwork())
+                       >= NumbersUtils.toIntOrDefault(condition.getCondition("value"));
+            case "incident_variable_value":
+                return root.getIncidentVariables().getOrDefault(condition.getCondition("incident"), 0d)
+                       >= NumbersUtils.toDouble(condition.getCondition("value"));
+            case "institution_difference":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return root.getNbEmbracedInstitutions() + NumbersUtils.toIntOrDefault(condition.getCondition("value")) >= country.getNbEmbracedInstitutions();
+            case "is_in_war":
+                List<String> attackers = condition.getConditions().get("attackers");
+                List<String> defenders = condition.getConditions().get("defenders");
+                String attackerLeader = condition.getCondition("attacker_leader");
+                String defenderLeader = condition.getCondition("defender_leader");
+                String casusBelli = condition.getCondition("casus_belli");
+                Integer warGoalProvince = NumbersUtils.toInt(condition.getCondition("war_goal_province"));
+                Date startDate = Eu4Utils.stringToDate(condition.getCondition("start_date"));
+                Integer duration = NumbersUtils.toInt(condition.getCondition("duration"));
+
+                return root.getActiveWars().stream().anyMatch(activeWar -> {
+                    if (CollectionUtils.isNotEmpty(attackers)
+                        && activeWar.getAttackers()
+                                    .keySet()
+                                    .containsAll(attackers.stream().map(s -> root.getSave().getCountry(s)).collect(Collectors.toList()))) {
+                        return false;
+                    }
+
+                    if (CollectionUtils.isNotEmpty(defenders)
+                        && activeWar.getDefenders()
+                                    .keySet()
+                                    .containsAll(defenders.stream().map(s -> root.getSave().getCountry(s)).collect(Collectors.toList()))) {
+                        return false;
+                    }
+
+                    if (attackerLeader != null && activeWar.getAttackers().keySet().iterator().next() != root.getSave().getCountry(attackerLeader)) {
+                        return false;
+                    }
+
+                    if (defenderLeader != null && activeWar.getDefenders().keySet().iterator().next() != root.getSave().getCountry(defenderLeader)) {
+                        return false;
+                    }
+
+                    if (StringUtils.isNotBlank(casusBelli) && !casusBelli.equalsIgnoreCase(activeWar.getWarGoal().getCasusBelli().getName())) {
+                        return false;
+                    }
+
+                    if (warGoalProvince != null && activeWar.getWarGoal().getProvince() != null
+                        && activeWar.getWarGoal().getProvince().getId() != warGoalProvince) {
+                        return false;
+                    }
+
+                    if (startDate != null && activeWar.getStartDate().before(startDate)) {
+                        return false;
+                    }
+
+                    if (duration != null && DateUtils.addDays(activeWar.getStartDate(), duration).after(root.getSave().getDate())) {
+                        return false;
+                    }
+
+                    return true;
+                });
+            case "military_strength": //Todo object
+                break;
+            case "naval_strength": //Todo object
+                break;
+            case "num_of_owned_provinces_with":
+                return root.getOwnedProvinces().stream().filter(condition::apply).count() >= NumbersUtils.toInt(condition.getCondition("value"));
+            case "num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with":
+                return root.getOwnedProvinces().stream().filter(condition::apply).count()
+                       + root.getSubjects()
+                             .stream()
+                             .filter(c -> !c.getSubjectType().isVoluntary())
+                             .map(Country::getOwnedProvinces)
+                             .flatMap(Collection::stream)
+                             .filter(condition::apply)
+                             .count()
+                       >= NumbersUtils.toInt(condition.getCondition("value"));
+            case "num_of_religion":
+                religion = null;
+                if (condition.getCondition("secondary") != null) {
+                    religion = root.getSecondaryReligion();
+                } else if (condition.getCondition("religion") != null) {
+                    religion = root.getSave().getReligions().getReligion(condition.getCondition("religion"));
+                }
+
+                if ((integer = NumbersUtils.toInt(condition.getCondition("value"))) != null) {
+                    if (religion != null) {
+                        SaveReligion finalReligion = religion;
+                        return root.getOwnedProvinces().stream().filter(province -> finalReligion.equals(province.getReligion())).count() >= integer;
+                    } else if (condition.getCondition("heretic") != null) {
+                        return root.getOwnedProvinces().stream().filter(province -> !root.getReligion().equals(province.getReligion())).count() >= integer;
+                    } else {
+                        return false;
+                    }
+                } else if ((aDouble = NumbersUtils.toDouble(condition.getCondition("value"))) != null) {
+                    long nbProv;
+                    if (religion != null) {
+                        SaveReligion finalReligion = religion;
+                        nbProv = root.getOwnedProvinces().stream().filter(province -> finalReligion.equals(province.getReligion())).count();
+                    } else if (condition.getCondition("heretic") != null) {
+                        nbProv = root.getOwnedProvinces().stream().filter(province -> !root.getReligion().equals(province.getReligion())).count();
+                    } else {
+                        return false;
+                    }
+
+                    return BigDecimal.valueOf(aDouble).multiply(BigDecimal.valueOf(root.getOwnedProvinces().size())).compareTo(BigDecimal.valueOf(nbProv)) >= 0;
+                }
+                break;
+            case "overlord":
+                return root.getOverlord() != null && condition.apply(root.getOverlord(), from);
+            case "owns_all_provinces":
+                List<Country> countries = new ArrayList<>();
+                countries.add(root);
+                countries.addAll(root.getSubjects().stream().filter(c -> !c.getSubjectType().isVoluntary()).collect(Collectors.toList()));
+                return root.getSave().getProvinces().values().stream().filter(condition::apply).allMatch(province -> countries.contains(province.getOwner()));
+            case "production_leader":
+                tradeGood = root.getSave().getGame().getTradeGood(condition.getCondition("trade_goods"));
+                return root.equals(root.getSave().getProductionLeaders().get(tradeGood));
+            case "religion_years": //Todo object
+                break;
+            case "religious_school": //Todo object
+                break;
+            case "reverse_has_opinion_modifier":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return country.getActiveRelation(root) != null
+                       && country.getActiveRelation(root)
+                                 .getOpinions()
+                                 .stream()
+                                 .anyMatch(opinion -> condition.getCondition("modifier").equalsIgnoreCase(opinion.getModifier()));
+            case "revolution_target":
+                return root.getSave().getRevolution() != null && root.getSave().getRevolution().getRevolutionTarget() != null &&
+                       condition.apply(root.getSave().getRevolution().getRevolutionTarget(), from);
+            case "same_continent": //Todo object
+                break;
+            case "trading_bonus":
+                tradeGood = root.getSave().getGame().getTradeGood(condition.getCondition("trade_goods"));
+                return "yes".equalsIgnoreCase(condition.getCondition("value")) == root.getTradedBonus().contains(tradeGood);
+            case "trading_part":
+                tradeGood = root.getSave().getGame().getTradeGood(condition.getCondition("trade_goods"));
+                return root.getTraded().get(tradeGood) >= NumbersUtils.toDouble(condition.getCondition("value"));
+            case "trading_policy_in_node":
+                tradeNode = root.getSave().getTradeNode(condition.getCondition("node"));
+
+                if ("any".equalsIgnoreCase(condition.getCondition("policy"))) {
+                    return StringUtils.isNotBlank(tradeNode.getCountry(root).getTradePolicy());
+                } else {
+                    return condition.getCondition("policy").equalsIgnoreCase(tradeNode.getCountry(root).getTradePolicy());
+                }
+            case "trust":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return root.getActiveRelation(country) != null
+                       && root.getActiveRelation(country).getTrustValue() >= NumbersUtils.toInt(condition.getCondition("value"));
+            case "war_score_against":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                Country finalCountry1 = country;
+                return !CollectionUtils.isNotEmpty(root.getActiveWars())
+                       && root.getActiveWars()
+                              .stream()
+                              .anyMatch(activeWar -> activeWar.getOtherSide(root).containsKey(finalCountry1)
+                                                     && activeWar.getScore(root) >= NumbersUtils.toDouble(condition.getCondition("value")));
+            case "years_in_union_under":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return root.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equals(country.getSubjectType().getName())
+                       && DateUtils.addYears(country.getSubjectStartDate(), NumbersUtils.toInt(condition.getCondition("value")))
+                                   .before(root.getSave().getDate());
+            case "years_in_vassalage_under":
+                country = root.getSave().getCountry(condition.getCondition("who"));
+                return root.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_VASSAL.equals(country.getSubjectType().getName())
+                       && DateUtils.addYears(country.getSubjectStartDate(), NumbersUtils.toInt(condition.getCondition("value")))
+                                   .before(root.getSave().getDate());
         }
 
         LOGGER.info("Don't know how to manage country scope: {} !", condition);
@@ -2045,7 +2312,7 @@ public class ConditionsUtils {
             case "has_province_flag":
                 return province.getFlags().contains(value);
             case "has_province_modifier":
-                return province.getModifiers().stream().anyMatch(modifier -> value.equalsIgnoreCase(ClausewitzUtils.removeQuotes(modifier.getModifier())))
+                return province.getModifiers().containsKey(value)
                        || province.getTriggeredModifiers().contains(ClausewitzUtils.addQuotes(value))
                        || province.getAppliedTriggeredModifiers().contains(ClausewitzUtils.addQuotes(value));
             case "has_rebel_faction":
@@ -2402,28 +2669,19 @@ public class ConditionsUtils {
 
     public static boolean applyScopeToProvince(SaveProvince province, Condition condition) {
         Country country;
+        TradeNode tradeNode;
 
         if ((country = province.getSave().getCountry(condition.getName())) != null) {
             return condition.apply(country, country);
         }
 
-        if ((province = province.getSave().getProvince(NumbersUtils.toInt(condition.getName()))) != null) {
-            return condition.apply(province);
+        if (province.getSave().getProvince(NumbersUtils.toInt(condition.getName())) != null) {
+            return condition.apply(province.getSave().getProvince(NumbersUtils.toInt(condition.getName())));
         }
 
         switch (condition.getName().toLowerCase()) {
-            case "owner":
-                return condition.apply(province.getOwner(), province.getOwner());
             case "controller":
                 return condition.apply(province.getController(), province.getController());
-            case "sea_zone": //Todo
-                break;
-            case "emperor":
-                return !province.getSave().getHre().dismantled() && condition.apply(province.getSave().getHre().getEmperor(),
-                                                                                    province.getSave().getHre().getEmperor());
-            case "revolution_target":
-                return province.getSave().getRevolution() != null && province.getSave().getRevolution().getRevolutionTarget() != null &&
-                       condition.apply(province.getSave().getRevolution().getRevolutionTarget(), province.getSave().getRevolution().getRevolutionTarget());
             case "crusade_target":
                 return province.getSave()
                                .getReligions()
@@ -2432,9 +2690,58 @@ public class ConditionsUtils {
                                .stream()
                                .anyMatch(religion -> religion.getPapacy() != null && religion.getPapacy().getCrusadeTarget() != null
                                                      && condition.apply(religion.getPapacy().getCrusadeTarget(), religion.getPapacy().getCrusadeTarget()));
+            case "emperor":
+                return !province.getSave().getHre().dismantled() && condition.apply(province.getSave().getHre().getEmperor(),
+                                                                                    province.getSave().getHre().getEmperor());
+            case "had_global_flag":
+                return province.getSave().getFlags().contains(condition.getCondition("flag"))
+                       && DateUtils.addDays(province.getSave().getFlags().get(condition.getCondition("flag")),
+                                            NumbersUtils.toInt(condition.getCondition("days"))).before(province.getSave().getDate());
+            case "had_province_flag":
+                return province.getFlags().contains(condition.getCondition("flag"))
+                       && DateUtils.addDays(province.getFlags().get(condition.getCondition("flag")),
+                                            NumbersUtils.toInt(condition.getCondition("days"))).before(province.getSave().getDate());
+            case "has_local_modifier_value": //Todo
+                break;
+            case "has_trade_modifier":
+                country = province.getSave().getCountry(condition.getCondition("who"));
+                return province.getSave()
+                               .getTradeNodes()
+                               .get(province.getTrade())
+                               .getCountry(country)
+                               .getModifiers()
+                               .containsKey(condition.getCondition("key"));
             case "most_province_trade_power":
                 country = province.getSave().getTradeNodes().get(province.getTrade()).getTopProvinces().entrySet().iterator().next().getKey();
                 return condition.apply(country, country);
+            case "num_of_units_in_province":
+                UnitType type = UnitType.value(condition.getCondition("type"));
+                Country finalCountry = province.getSave().getCountry(condition.getCondition("who"));
+
+                return province.getUnits().stream().filter(regiment -> {
+                    if (type != null && !type.equals(regiment.getUnitType())) {
+                        return false;
+                    }
+
+                    if (finalCountry != null && !finalCountry.equals(regiment.getArmy().getCountry())) {
+                        return false;
+                    }
+
+                    return true;
+                }).count() >= NumbersUtils.toInt(condition.getCondition("amount"));
+            case "owner":
+                return condition.apply(province.getOwner(), province.getOwner());
+            case "privateer_power":
+                country = province.getSave().getCountry(condition.getCondition("country"));
+                tradeNode = province.getSave().getTradeNodes().get(province.getTrade());
+                return new BigDecimal(condition.getCondition("share"))
+                               .multiply(BigDecimal.valueOf(tradeNode.getTotal()))
+                               .compareTo(BigDecimal.valueOf(NumbersUtils.doubleOrDefault(tradeNode.getCountry(country).getPrivateerMission()))) >= 0;
+            case "revolution_target":
+                return province.getSave().getRevolution() != null && province.getSave().getRevolution().getRevolutionTarget() != null &&
+                       condition.apply(province.getSave().getRevolution().getRevolutionTarget(), province.getSave().getRevolution().getRevolutionTarget());
+            case "sea_zone": //Todo
+                break;
             case "strongest_trade_power":
                 country = province.getSave().getTradeNodes().get(province.getTrade()).getTopPower().entrySet().iterator().next().getKey();
                 return condition.apply(country, country);

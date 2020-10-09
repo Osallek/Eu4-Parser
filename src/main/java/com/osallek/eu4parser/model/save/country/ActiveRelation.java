@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
-import org.luaj.vm2.ast.Str;
 
 import java.util.Date;
 import java.util.List;
@@ -64,21 +63,19 @@ public class ActiveRelation {
         this.item.setVariable("last_spy_discovery", lastSpyDiscovery);
     }
 
-    /**
-     * @return Spy network: * 100 (ie: 5000 => 50 spy network)
-     */
     public Integer getSpyNetwork() {
-        return this.item.getVarAsInt("spy_network");
+        Integer spyNetwork = this.item.getVarAsInt("spy_network");
+        return spyNetwork == null ? null : (spyNetwork / 100);
     }
 
     public void setSpyNetwork(Integer spyNetwork) {
         if (spyNetwork < 0) {
             spyNetwork = 0;
-        } else if (spyNetwork > 10000) {
-            spyNetwork = 10000;
+        } else if (spyNetwork > 100) {
+            spyNetwork = 100;
         }
 
-        this.item.setVariable("spy_network", spyNetwork);
+        this.item.setVariable("spy_network", spyNetwork * 100);
     }
 
     public Date getLastWar() {

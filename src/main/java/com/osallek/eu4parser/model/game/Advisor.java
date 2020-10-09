@@ -2,7 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import com.osallek.eu4parser.model.save.Power;
+import com.osallek.eu4parser.model.Power;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.LinkedHashMap;

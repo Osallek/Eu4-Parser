@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.save.Id;
 
 import java.math.BigDecimal;
@@ -55,32 +56,32 @@ public class Leader {
         this.item.setVariable("female", female);
     }
 
-    public Integer getManuever() {
-        return this.item.getVarAsInt("manuever");
+    public int getManuever() {
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("manuever"));
     }
 
     public void setManuever(int manuever) {
         this.item.setVariable("manuever", manuever);
     }
 
-    public Integer getFire() {
-        return this.item.getVarAsInt("fire");
+    public int getFire() {
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("fire"));
     }
 
     public void setFire(int fire) {
         this.item.setVariable("fire", fire);
     }
 
-    public Integer getShock() {
-        return this.item.getVarAsInt("shock");
+    public int getShock() {
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("shock"));
     }
 
     public void setShock(int shock) {
         this.item.setVariable("shock", shock);
     }
 
-    public Integer getSiege() {
-        return this.item.getVarAsInt("siege");
+    public int getSiege() {
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("siege"));
     }
 
     public void setSiege(int siege) {
@@ -121,6 +122,14 @@ public class Leader {
 
     public Id getMonarchId() {
         return monarchId;
+    }
+
+    public int getTotalPips() {
+        return BigDecimal.valueOf(getFire())
+                         .add(BigDecimal.valueOf(getShock()))
+                         .add(BigDecimal.valueOf(getManuever()))
+                         .add(BigDecimal.valueOf(getSiege()))
+                         .intValue();
     }
 
     public int getNbStars() {

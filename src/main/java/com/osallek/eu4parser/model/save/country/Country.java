@@ -13,10 +13,11 @@ import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.SubjectType;
+import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
-import com.osallek.eu4parser.model.save.Power;
+import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.counters.Counter;
@@ -35,6 +36,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -100,6 +102,8 @@ public class Country {
     private Technology tech;
 
     private List<Estate> estates;
+
+    private ActiveAgenda activeAgenda;
 
     private List<EstateInteraction> interactionsLastUsed;
 
@@ -188,6 +192,8 @@ public class Country {
     private final SortedSet<ActiveWar> wars = new TreeSet<>(Comparator.comparing(ActiveWar::getStartDate));
 
     private SubjectType subjectType;
+
+    private Date subjectStartDate;
 
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
@@ -861,12 +867,24 @@ public class Country {
         return estates;
     }
 
+    public Estate getEstate(String name) {
+        return this.estates.stream().filter(estate -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(estate.getType()))).findFirst().orElse(null);
+    }
+
+    public ActiveAgenda getActiveAgenda() {
+        return activeAgenda;
+    }
+
     public List<EstateInteraction> getInteractionsLastUsed() {
         return interactionsLastUsed;
     }
 
     public List<Faction> getFactions() {
         return factions;
+    }
+
+    public Faction getFaction(String name) {
+        return this.factions.stream().filter(faction -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(faction.getType()))).findFirst().orElse(null);
     }
 
     public Integer getTopFaction() {
@@ -1016,6 +1034,14 @@ public class Country {
 
     public void setSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
+    }
+
+    public Date getSubjectStartDate() {
+        return subjectStartDate;
+    }
+
+    public void setSubjectStartDate(Date subjectStartDate) {
+        this.subjectStartDate = subjectStartDate;
     }
 
     public void setOverlord(String countryTag) {
@@ -1189,6 +1215,13 @@ public class Country {
 
     public List<ActivePolicy> getActivePolicies() {
         return activePolicies;
+    }
+
+    public ActivePolicy getActivePolicie(String name) {
+        return this.activePolicies.stream()
+                                  .filter(activePolicy -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(activePolicy.getPolicy())))
+                                  .findFirst()
+                                  .orElse(null);
     }
 
     public void addActivePolicy(String policy, Date date) {
@@ -1442,34 +1475,49 @@ public class Country {
                     .collect(Collectors.toMap(var -> Integer.parseInt(var.getName()), ClausewitzVariable::getAsInt));
     }
 
-    public List<Double> getProducedGoodsValue() {
+    public Map<TradeGood, Double> getProducedGoodsValue() {
         ClausewitzList list = this.item.getList("produced_goods_value");
+        Map<TradeGood, Double> map = new LinkedHashMap<>();
 
         if (list == null) {
-            return new ArrayList<>();
+            return map;
         }
 
-        return list.getValuesAsDouble();
+        for (int i = 0; i < list.size(); i++) {
+            map.put(this.save.getGame().getTradeGood(i), list.getAsDouble(i));
+        }
+
+        return map;
     }
 
-    public List<Integer> getNumOfGoodsProduced() {
+    public Map<TradeGood, Integer> getNumOfGoodsProduced() {
         ClausewitzList list = this.item.getList("num_of_goods_produced");
+        Map<TradeGood, Integer> map = new LinkedHashMap<>();
 
         if (list == null) {
-            return new ArrayList<>();
+            return map;
         }
 
-        return list.getValuesAsInt();
+        for (int i = 0; i < list.size(); i++) {
+            map.put(this.save.getGame().getTradeGood(i), list.getAsInt(i));
+        }
+
+        return map;
     }
 
-    public List<Double> getTraded() {
+    public Map<TradeGood, Double> getTraded() {
         ClausewitzList list = this.item.getList("traded");
+        Map<TradeGood, Double> map = new LinkedHashMap<>();
 
         if (list == null) {
-            return new ArrayList<>();
+            return map;
         }
 
-        return list.getValuesAsDouble();
+        for (int i = 0; i < list.size(); i++) {
+            map.put(this.save.getGame().getTradeGood(i), list.getAsDouble(i));
+        }
+
+        return map;
     }
 
     public Map<Integer, Integer> getNumOfReligionsIndexed() {
@@ -3027,7 +3075,7 @@ public class Country {
     }
 
     public List<Leader> getLeadersOfType(LeaderType leaderType) {
-        return this.leaders.values().stream().filter(leader -> LeaderType.ADMIRAL.equals(leader.getType())).collect(Collectors.toList());
+        return this.leaders.values().stream().filter(leader -> leaderType.equals(leader.getType())).collect(Collectors.toList());
     }
 
     public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality) {
@@ -3167,11 +3215,11 @@ public class Country {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("assigned_estates"));
     }
 
-    public List<Integer> getTradedBonus() {
+    public List<TradeGood> getTradedBonus() {
         ClausewitzList list = this.item.getList("traded_bonus");
 
         if (list != null) {
-            return list.getValuesAsInt();
+            return list.getValuesAsInt().stream().map(integer -> this.save.getGame().getTradeGood(integer)).collect(Collectors.toList());
         }
 
         return new ArrayList<>();
@@ -3545,8 +3593,13 @@ public class Country {
 
         List<ClausewitzItem> estateItems = this.item.getChildren("estate");
         this.estates = estateItems.stream()
-                                  .map(clausewitzItem -> new Estate(clausewitzItem))
+                                  .map(Estate::new)
                                   .collect(Collectors.toList());
+
+        ClausewitzItem activeAgendaItem = this.item.getChild("active_agenda");
+        if (activeAgendaItem != null) {
+            this.activeAgenda = new ActiveAgenda(activeAgendaItem, this);
+        }
 
         ClausewitzItem interactionsLastUsedItem = this.item.getChild("interactions_last_used");
 

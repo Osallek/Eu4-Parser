@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.CasusBelli;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 public class WarGoal {
 
@@ -34,5 +35,9 @@ public class WarGoal {
 
     public Country getTag() {
         return this.save.getCountry(this.item.getVarAsString("tag"));
+    }
+
+    public SaveProvince getProvince() {
+        return this.save.getProvince(this.item.getVarAsInt("province"));
     }
 }

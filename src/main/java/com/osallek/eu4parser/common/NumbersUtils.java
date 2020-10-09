@@ -39,6 +39,15 @@ public class NumbersUtils {
         return integer == null ? defaultInt : integer;
     }
 
+    public static int toIntOrDefault(String s) {
+        return toIntOrDefault(s, 0);
+    }
+
+    public static int toIntOrDefault(String s, int defaultInt) {
+        Integer integer = toInt(s);
+        return integer == null ? defaultInt : integer;
+    }
+
     public static double doubleOrDefault(Double aDouble) {
         return doubleOrDefault(aDouble, 0);
     }

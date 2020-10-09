@@ -6,15 +6,17 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TradeNodeCountry {
 
     private final ClausewitzItem item;
 
-    private List<TradeNodeModifier> modifiers;
+    private Map<String, TradeNodeModifier> modifiers;
 
     public TradeNodeCountry(ClausewitzItem item) {
         this.item = item;
@@ -85,7 +87,7 @@ public class TradeNodeCountry {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("has_capital"));
     }
 
-    public List<TradeNodeModifier> getModifiers() {
+    public Map<String, TradeNodeModifier> getModifiers() {
         return modifiers;
     }
 
@@ -95,12 +97,15 @@ public class TradeNodeCountry {
     }
 
     public void removeModifier(String key) {
-        for (int i = 0; i < this.modifiers.size(); i++) {
-            if (this.modifiers.get(i).getKey().equals(ClausewitzUtils.addQuotes(key))) {
+        int i = 0;
+        for (String modifier : this.modifiers.keySet()) {
+            if (modifier.equals(ClausewitzUtils.addQuotes(key))) {
                 this.item.removeChild("modifier", i);
                 break;
             }
+            i++;
         }
+
         refreshAttributes();
     }
 
@@ -174,6 +179,9 @@ public class TradeNodeCountry {
 
     private void refreshAttributes() {
         List<ClausewitzItem> modifiersItems = this.item.getChildren("modifier");
-        this.modifiers = modifiersItems.stream().map(TradeNodeModifier::new).collect(Collectors.toList());
+        this.modifiers = modifiersItems.stream()
+                                       .map(TradeNodeModifier::new)
+                                       .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getKey()),
+                                                                 Function.identity(), (a, b) -> a, LinkedHashMap::new));
     }
 }
