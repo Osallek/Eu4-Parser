@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
@@ -89,7 +90,9 @@ public class Mission {
     }
 
     void setRequiredMissions(Game game) {
-        this.requiredMissions = this.requiredMissionsNames.stream().map(game::getMission).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(requiredMissionsNames)) {
+            this.requiredMissions = this.requiredMissionsNames.stream().map(game::getMission).collect(Collectors.toList());
+        }
     }
 
     @Override

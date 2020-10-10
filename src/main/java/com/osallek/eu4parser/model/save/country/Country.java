@@ -7,6 +7,7 @@ import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.NumbersUtils;
+import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
@@ -18,7 +19,6 @@ import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
-import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.counters.Counter;
@@ -102,7 +102,7 @@ public class Country {
 
     private Technology tech;
 
-    private List<Estate> estates;
+    private List<SaveEstate> estates;
 
     private ActiveAgenda activeAgenda;
 
@@ -872,11 +872,11 @@ public class Country {
         return tech;
     }
 
-    public List<Estate> getEstates() {
+    public List<SaveEstate> getEstates() {
         return estates;
     }
 
-    public Estate getEstate(String name) {
+    public SaveEstate getEstate(String name) {
         return this.estates.stream().filter(estate -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(estate.getType()))).findFirst().orElse(null);
     }
 
@@ -3602,7 +3602,7 @@ public class Country {
 
         List<ClausewitzItem> estateItems = this.item.getChildren("estate");
         this.estates = estateItems.stream()
-                                  .map(Estate::new)
+                                  .map(i -> new SaveEstate(i, this.save.getGame()))
                                   .collect(Collectors.toList());
 
         ClausewitzItem activeAgendaItem = this.item.getChild("active_agenda");

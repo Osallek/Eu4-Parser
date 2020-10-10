@@ -121,6 +121,10 @@ public class Game {
 
     private Map<MissionTree, Path> missionTrees;
 
+    private Map<EstatePrivilege, Path> estatePrivileges;
+
+    private Map<Estate, Path> estates;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -164,6 +168,8 @@ public class Game {
         readSubjectTypes();
         readFetishistCults();
         readMissionTrees();
+        readEstatePrivileges();
+        readEstates();
     }
 
     public Collator getCollator() {
@@ -875,6 +881,42 @@ public class Game {
         return null;
     }
 
+    public List<EstatePrivilege> getEstatePrivileges() {
+        return new ArrayList<>(this.estatePrivileges.keySet());
+    }
+
+    public EstatePrivilege getEstatePrivilege(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (EstatePrivilege estatePrivilege : this.estatePrivileges.keySet()) {
+            if (estatePrivilege.getName().equalsIgnoreCase(name)) {
+                return estatePrivilege;
+            }
+        }
+
+        return null;
+    }
+
+    public List<Estate> getEstates() {
+        return new ArrayList<>(this.estates.keySet());
+    }
+
+    public Estate getEstate(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Estate estate : this.estates.keySet()) {
+            if (estate.getName().equalsIgnoreCase(name)) {
+                return estate;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1518,6 +1560,40 @@ public class Game {
                     mission.setRequiredMissions(this);
                 });
             });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readEstatePrivileges() {
+        File fetishistCultsFolder = new File(this.commonFolderPath + File.separator + "estate_privileges");
+
+        try (Stream<Path> paths = Files.walk(fetishistCultsFolder.toPath())) {
+            this.estatePrivileges = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.estatePrivileges.put(new EstatePrivilege(item), path));
+                 });
+
+            this.estatePrivileges.keySet().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readEstates() {
+        File fetishistCultsFolder = new File(this.commonFolderPath + File.separator + "estates");
+
+        try (Stream<Path> paths = Files.walk(fetishistCultsFolder.toPath())) {
+            this.estates = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.estates.put(new Estate(item, this), path));
+                 });
+
+            this.estates.keySet().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
         } catch (IOException e) {
         }
     }

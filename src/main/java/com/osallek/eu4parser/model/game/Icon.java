@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import org.luaj.vm2.ast.Str;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

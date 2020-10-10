@@ -24,11 +24,11 @@ public class ActiveAgenda {
         this.item.setVariable("agenda", ClausewitzUtils.addQuotes(agenda));
     }
 
-    public Estate getEstate() {
+    public SaveEstate getEstate() {
         return this.country.getEstate(ClausewitzUtils.removeQuotes(this.item.getVarAsString("estate")));
     }
 
-    public void setEstate(Estate estate) {
+    public void setEstate(SaveEstate estate) {
         this.item.setVariable("estate", ClausewitzUtils.addQuotes(estate.getType()));
     }
 

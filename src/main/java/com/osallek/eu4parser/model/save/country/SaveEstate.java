@@ -3,26 +3,29 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.model.game.Estate;
+import com.osallek.eu4parser.model.game.Game;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Estate {
+public class SaveEstate {
 
     private final ClausewitzItem item;
 
     private List<EstateInteraction> grantedPrivileges;
 
-    private Map<String, EstateModifier> influenceModifiers;
+    private List<EstateModifier> influenceModifiers;
 
-    private Map<String, EstateModifier> loyaltyModifiers;
+    private List<EstateModifier> loyaltyModifiers;
 
-    public Estate(ClausewitzItem item) {
+    private final Estate estateGame;
+
+    public SaveEstate(ClausewitzItem item, Game game) {
         this.item = item;
+        this.estateGame = game.getEstate(ClausewitzUtils.removeQuotes(getType()));
         refreshAttributes();
     }
 
@@ -71,7 +74,7 @@ public class Estate {
         }
     }
 
-    public Map<String, EstateModifier> getInfluenceModifiers() {
+    public List<EstateModifier> getInfluenceModifiers() {
         return influenceModifiers;
     }
 
@@ -89,7 +92,7 @@ public class Estate {
         }
     }
 
-    public Map<String, EstateModifier> getLoyaltyModifiers() {
+    public List<EstateModifier> getLoyaltyModifiers() {
         return loyaltyModifiers;
     }
 
@@ -127,17 +130,16 @@ public class Estate {
         return list.getValues().stream().map(Integer::parseInt).collect(Collectors.toList());
     }
 
+    public Estate getEstateGame() {
+        return estateGame;
+    }
 
     private void refreshAttributes() {
         List<ClausewitzItem> modifierItems = this.item.getChildren("influence_modifier");
-        this.influenceModifiers = modifierItems.stream()
-                                               .map(EstateModifier::new)
-                                               .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getDesc()), Function.identity()));
+        this.influenceModifiers = modifierItems.stream().map(EstateModifier::new).collect(Collectors.toList());
 
         modifierItems = this.item.getChildren("loyalty_modifier");
-        this.loyaltyModifiers = modifierItems.stream()
-                                             .map(EstateModifier::new)
-                                             .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getDesc()), Function.identity()));
+        this.loyaltyModifiers = modifierItems.stream().map(EstateModifier::new).collect(Collectors.toList());
 
         ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
 
