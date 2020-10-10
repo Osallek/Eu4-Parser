@@ -518,8 +518,8 @@ public class ConditionsUtils {
                     return country.getReligion().getName().equals(value)
                            || (country.getSecondaryReligion() != null && country.getSecondaryReligion().getName().equals(value));
                 }
-            case "has_mission": //Todo parse missions tree
-                break;
+            case "has_mission":
+                return root.getCountryMissions().getMissions().stream().anyMatch(mission -> value.equalsIgnoreCase(mission.getName()));
             case "has_new_dynasty":
                 return country.getPreviousMonarchs().size() >= 2 && country.getHistory().getMonarchs().size() >= 2
                        && !country.getHistory()

@@ -59,6 +59,8 @@ public class Game {
 
     private final String interfaceFolderPath;
 
+    private final String missionsFolderPath;
+
     private Map<Integer, Province> provinces;
 
     private Map<Integer, Province> provincesByColor;
@@ -117,6 +119,8 @@ public class Game {
 
     private Map<FetishistCult, Path> fetishistCults;
 
+    private Map<MissionTree, Path> missionTrees;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -129,6 +133,7 @@ public class Game {
         this.gfxFolderPath = this.gameFolderPath + File.separator + "gfx";
         this.localisationFolderPath = this.gameFolderPath + File.separator + "localisation";
         this.interfaceFolderPath = this.gameFolderPath + File.separator + "interface";
+        this.missionsFolderPath = this.gameFolderPath + File.separator + "missions";
         this.defines = LuaUtils.luaFileToMap(this.commonFolderPath + File.separator + "defines.lua");
 
         loadLocalisations();
@@ -158,6 +163,7 @@ public class Game {
         readTradeCompanies();
         readSubjectTypes();
         readFetishistCults();
+        readMissionTrees();
     }
 
     public Collator getCollator() {
@@ -837,6 +843,38 @@ public class Game {
         return null;
     }
 
+    public List<MissionTree> getMissionTrees() {
+        return new ArrayList<>(this.missionTrees.keySet());
+    }
+
+    public MissionTree getMissionTree(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (MissionTree missionTree : this.missionTrees.keySet()) {
+            if (missionTree.getName().equalsIgnoreCase(name)) {
+                return missionTree;
+            }
+        }
+
+        return null;
+    }
+
+    public Mission getMission(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (MissionTree missionTree : this.missionTrees.keySet()) {
+            if (missionTree.getMissions().containsKey(name)) {
+                return missionTree.getMissions().get(name);
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1456,7 +1494,30 @@ public class Game {
                      advisorsItem.getChildren().forEach(item -> this.fetishistCults.put(new FetishistCult(item), path));
                  });
 
-            this.fetishistCults.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
+            this.fetishistCults.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readMissionTrees() {
+        File missionTreesFolder = new File(this.missionsFolderPath);
+
+        try (Stream<Path> paths = Files.walk(missionTreesFolder.toPath())) {
+            this.missionTrees = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.missionTrees.put(new MissionTree(item, this), path));
+                 });
+
+            this.missionTrees.keySet().forEach(missionTree -> {
+                missionTree.setLocalizedName(this.getLocalisation(missionTree.getName()));
+                missionTree.getMissions().values().forEach(mission -> {
+                    mission.setLocalizedName(this.getLocalisation(mission.getName()));
+                    mission.setRequiredMissions(this);
+                });
+            });
         } catch (IOException e) {
         }
     }

@@ -12,6 +12,7 @@ import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
+import com.osallek.eu4parser.model.game.Mission;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
@@ -3402,26 +3403,26 @@ public class Country {
         this.item.setVariable("innovativeness", innovativeness);
     }
 
-    public List<String> getCompletedMissions() {
-        List<String> reforms = new ArrayList<>();
+    public List<Mission> getCompletedMissions() {
         ClausewitzList list = this.item.getList("completed_missions");
+        List<Mission> reforms = new ArrayList<>();
 
         if (list != null) {
-            return list.getValues();
+            return list.getValues().stream().map(s -> this.save.getGame().getMission(ClausewitzUtils.removeQuotes(s))).collect(Collectors.toList());
         }
 
         return reforms;
     }
 
-    public void addCompletedMission(String mission) {
+    public void addCompletedMission(Mission mission) {
         ClausewitzList list = this.item.getList("completed_missions");
 
         if (list != null) {
-            if (!list.getValues().contains(mission)) {
-                list.add(ClausewitzUtils.addQuotes(mission));
+            if (!getCompletedMissions().contains(mission)) {
+                list.add(ClausewitzUtils.addQuotes(mission.getName()));
             }
         } else {
-            this.item.addList("completed_missions", mission);
+            this.item.addList("completed_missions", mission.getName());
         }
     }
 
@@ -3433,11 +3434,11 @@ public class Country {
         }
     }
 
-    public void removeCompletedMission(String mission) {
+    public void removeCompletedMission(Mission mission) {
         ClausewitzList list = this.item.getList("completed_missions");
 
         if (list != null) {
-            list.remove(mission);
+            list.remove(ClausewitzUtils.addQuotes(mission.getName()));
         }
     }
 
@@ -3858,7 +3859,7 @@ public class Country {
         ClausewitzItem countryMissionsItem = this.item.getChild("country_missions");
 
         if (countryMissionsItem != null) {
-            this.countryMissions = new Missions(countryMissionsItem);
+            this.countryMissions = new Missions(countryMissionsItem, this.save.getGame());
         }
     }
 
