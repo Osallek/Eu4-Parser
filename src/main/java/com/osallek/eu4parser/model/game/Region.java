@@ -29,14 +29,14 @@ public class Region {
         this.areas = list == null ? null : list.getValues().stream().map(game::getArea).collect(Collectors.toList());
 
         List<ClausewitzList> lists = item.getLists("monsoon");
-        this.monsoon = list == null ? null : lists.stream()
-                                                  .collect(Collectors.toMap(
-                                                          l -> MonthDay.of(
-                                                                  Integer.parseInt(l.get(0).substring(l.get(0).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
-                                                                  Integer.parseInt(l.get(0).substring(l.get(0).lastIndexOf(".") + 1))),
-                                                          l -> MonthDay.of(
-                                                                  Integer.parseInt(l.get(1).substring(l.get(1).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
-                                                                  Integer.parseInt(l.get(1).substring(l.get(1).lastIndexOf(".") + 1)))));
+        this.monsoon = lists.stream()
+                            .collect(Collectors.toMap(
+                                    l -> MonthDay.of(
+                                            Integer.parseInt(l.get(0).substring(l.get(0).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
+                                            Integer.parseInt(l.get(0).substring(l.get(0).lastIndexOf(".") + 1))),
+                                    l -> MonthDay.of(
+                                            Integer.parseInt(l.get(1).substring(l.get(1).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
+                                            Integer.parseInt(l.get(1).substring(l.get(1).lastIndexOf(".") + 1)))));
     }
 
     public String getName() {

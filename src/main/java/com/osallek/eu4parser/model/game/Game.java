@@ -4,8 +4,11 @@ import com.osallek.clausewitzparser.ClausewitzParser;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.clausewitzparser.model.ClausewitzObject;
+import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.LuaUtils;
+import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4parser.model.save.country.Country;
 import org.apache.commons.io.FilenameUtils;
@@ -28,13 +31,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -125,6 +131,8 @@ public class Game {
 
     private Map<Estate, Path> estates;
 
+    private Map<Power, SortedMap<Technology, Path>> technologies;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -170,6 +178,7 @@ public class Game {
         readMissionTrees();
         readEstatePrivileges();
         readEstates();
+        readTechnologies();
     }
 
     public Collator getCollator() {
@@ -917,6 +926,14 @@ public class Game {
         return null;
     }
 
+    public Set<Technology> getTechnologies(Power power) {
+        return this.technologies.get(power).keySet();
+    }
+
+    public Technology getTechnology(Power power, int i) {
+        return new ArrayList<>(this.technologies.get(power).keySet()).get(i);
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1594,6 +1611,36 @@ public class Game {
                  });
 
             this.estates.keySet().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readTechnologies() {
+        File technologiesFolder = new File(this.commonFolderPath + File.separator + "technologies");
+
+        try (Stream<Path> paths = Files.walk(technologiesFolder.toPath())) {
+            this.technologies = new EnumMap<>(Power.class);
+            Map<Technology, Path> techs = new HashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
+
+                     Power power = Power.byName(techItem.getVarAsString("monarch_power"));
+                     Map<String, List<String>> aheadOfTime = !techItem.hasChild("ahead_of_time") ? null :
+                             techItem.getChild("ahead_of_time")
+                                     .getVariables()
+                                     .stream()
+                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
+                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+
+                     techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
+                 });
+
+            this.technologies = techs.entrySet()
+                                     .stream()
+                                     .collect(Collectors.groupingBy(entry -> entry.getKey().getType(),
+                                                                    Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, TreeMap::new)));
         } catch (IOException e) {
         }
     }
