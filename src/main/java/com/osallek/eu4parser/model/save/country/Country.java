@@ -819,6 +819,14 @@ public class Country {
         this.item.setVariable("religion", religion.getName());
     }
 
+    public String getReligiousSchool() {
+        return this.item.getVarAsString("religious_school");
+    }
+
+    public void setReligiousSchool(String religiousSchool) {
+        this.item.setVariable("religious_school", ClausewitzUtils.addQuotes(religiousSchool));
+    }
+
     public SaveReligion getSecondaryReligion() {
         return this.save.getReligions().getReligion(this.item.getVarAsString("secondary_religion"));
     }

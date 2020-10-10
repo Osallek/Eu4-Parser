@@ -2089,10 +2089,19 @@ public class ConditionsUtils {
             case "production_leader":
                 tradeGood = root.getSave().getGame().getTradeGood(condition.getCondition("trade_goods"));
                 return root.equals(root.getSave().getProductionLeaders().get(tradeGood));
-            case "religion_years": //Todo object
-                break;
-            case "religious_school": //Todo object
-                break;
+            case "religion_years":
+                religion = root.getSave().getReligions().getReligion(condition.getConditions().entrySet().iterator().next().getValue().get(0));
+                if (religion.getGameReligion().getDate() == null) {
+                    return DateUtils.addYears(root.getSave().getStartDate(), NumbersUtils.toInt(condition.getCondition(religion.getName())))
+                                    .before(root.getSave().getDate());
+                } else {
+                    return religion.getEnable() != null && DateUtils.addYears(religion.getEnable(),
+                                                                              NumbersUtils.toInt(condition.getCondition(religion.getName())))
+                                                                    .before(root.getSave().getDate());
+                }
+            case "religious_school":
+                return condition.getCondition("group").equalsIgnoreCase(root.getReligion().getReligionGroup().getName())
+                       && condition.getCondition("school").equalsIgnoreCase(ClausewitzUtils.removeQuotes(root.getReligiousSchool()));
             case "reverse_has_opinion_modifier":
                 country = root.getSave().getCountry(condition.getCondition("who"));
                 return country.getActiveRelation(root) != null
