@@ -8,6 +8,8 @@ import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.LuaUtils;
+import com.osallek.eu4parser.common.ModifiersUtils;
+import com.osallek.eu4parser.common.StaticModifiers;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -133,6 +135,8 @@ public class Game {
 
     private Map<Power, SortedMap<Technology, Path>> technologies;
 
+    private SortedMap<ProfessionalismModifier, Path> professionalismModifiers;
+
     private final Map<String, Map<String, Exp.Constant>> defines;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
@@ -179,6 +183,7 @@ public class Game {
         readEstatePrivileges();
         readEstates();
         readTechnologies();
+        readProfessionalismModifiers();
     }
 
     public Collator getCollator() {
@@ -934,6 +939,10 @@ public class Game {
         return new ArrayList<>(this.technologies.get(power).keySet()).get(i);
     }
 
+    public Set<ProfessionalismModifier> getProfessionalismModifiers() {
+        return this.professionalismModifiers.keySet();
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1610,7 +1619,11 @@ public class Game {
                      advisorsItem.getChildren().forEach(item -> this.estates.put(new Estate(item, this), path));
                  });
 
-            this.estates.keySet().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
+            this.estates.keySet().forEach(estate -> {
+                estate.setLocalizedName(this.getLocalisation(estate.getName()));
+                ModifiersUtils.addModifier(estate.getName() + "_influence_modifier", StaticModifiers.ModifierType.MULTIPLICATIVE);
+                ModifiersUtils.addModifier(estate.getName() + "_loyalty_modifier", StaticModifiers.ModifierType.MULTIPLICATIVE);
+            });
         } catch (IOException e) {
         }
     }
@@ -1628,11 +1641,12 @@ public class Game {
 
                      Power power = Power.byName(techItem.getVarAsString("monarch_power"));
                      Map<String, List<String>> aheadOfTime = !techItem.hasChild("ahead_of_time") ? null :
-                             techItem.getChild("ahead_of_time")
-                                     .getVariables()
-                                     .stream()
-                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+                                                             techItem.getChild("ahead_of_time")
+                                                                     .getVariables()
+                                                                     .stream()
+                                                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
+                                                                                                    Collectors.mapping(ClausewitzVariable::getValue,
+                                                                                                                       Collectors.toList())));
 
                      techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
                  });
@@ -1641,6 +1655,21 @@ public class Game {
                                      .stream()
                                      .collect(Collectors.groupingBy(entry -> entry.getKey().getType(),
                                                                     Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, TreeMap::new)));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readProfessionalismModifiers() {
+        File professionalismModifiersFolder = new File(this.commonFolderPath + File.separator + "professionalism");
+
+        try (Stream<Path> paths = Files.walk(professionalismModifiersFolder.toPath())) {
+            this.professionalismModifiers = new TreeMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren().forEach(item -> this.professionalismModifiers.put(new ProfessionalismModifier(item), path));
+                 });
         } catch (IOException e) {
         }
     }
