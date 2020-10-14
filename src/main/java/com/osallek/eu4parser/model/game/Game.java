@@ -139,6 +139,8 @@ public class Game {
 
     private final Map<String, Map<String, Exp.Constant>> defines;
 
+    private Map<RulerPersonality, Path> rulerPersonalities;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -183,6 +185,7 @@ public class Game {
         readEstatePrivileges();
         readEstates();
         readTechnologies();
+        readRulerPersonalities();
         readProfessionalismModifiers();
     }
 
@@ -939,6 +942,20 @@ public class Game {
         return new ArrayList<>(this.technologies.get(power).keySet()).get(i);
     }
 
+    public RulerPersonality getRulerPersonality(String name){
+        if (name == null) {
+            return null;
+        }
+
+        for (RulerPersonality personality : this.rulerPersonalities.keySet()) {
+            if (personality.getName().equalsIgnoreCase(name)) {
+                return personality;
+            }
+        }
+
+        return null;
+    }
+
     public Set<ProfessionalismModifier> getProfessionalismModifiers() {
         return this.professionalismModifiers.keySet();
     }
@@ -1655,6 +1672,24 @@ public class Game {
                                      .stream()
                                      .collect(Collectors.groupingBy(entry -> entry.getKey().getType(),
                                                                     Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, TreeMap::new)));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readRulerPersonalities() {
+        File rulerPersonalitiesFolder = new File(this.commonFolderPath + File.separator + "ruler_personalities");
+
+        try (Stream<Path> paths = Files.walk(rulerPersonalitiesFolder.toPath())) {
+            this.rulerPersonalities = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     rulerPersonalityItem.getChildren().forEach(item -> this.rulerPersonalities.put(new RulerPersonality(item), path));
+                 });
+
+            this.rulerPersonalities.keySet()
+                                .forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
         } catch (IOException e) {
         }
     }
