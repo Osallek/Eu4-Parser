@@ -1,12 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.time.MonthDay;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,9 +14,9 @@ public class RulerPersonality {
 
     private String localizedName;
 
-    private Condition ruler_allow;
-    private Condition heir_allow;
-    private Condition consort_allow;
+    private Condition rulerAllow;
+    private Condition heirAllow;
+    private Condition consortAllow;
     private Condition allow;
 
     private final Map<String, List<String>> modifiers;
@@ -28,9 +25,9 @@ public class RulerPersonality {
         this.name = item.getName();
 
         this.allow = item.getChild("allow") == null ? null : new Condition(item.getChild("allow"));
-        this.ruler_allow = item.getChild("ruler_allow") == null ? null : new Condition(item.getChild("ruler_allow"));
-        this.heir_allow = item.getChild("heir_allow") == null ? null : new Condition(item.getChild("heir_allow"));
-        this.consort_allow = item.getChild("consort_allow") == null ? null : new Condition(item.getChild("consort_allow"));
+        this.rulerAllow = item.getChild("ruler_allow") == null ? null : new Condition(item.getChild("ruler_allow"));
+        this.heirAllow = item.getChild("heir_allow") == null ? null : new Condition(item.getChild("heir_allow"));
+        this.consortAllow = item.getChild("consort_allow") == null ? null : new Condition(item.getChild("consort_allow"));
 
         List<ClausewitzVariable> list = item.getVarsNot();
         this.modifiers = list.stream()
@@ -39,16 +36,16 @@ public class RulerPersonality {
 
     }
 
-    public Condition getRuler_allow() {
-        return ruler_allow;
+    public Condition getRulerAllow() {
+        return rulerAllow;
     }
 
-    public Condition getHeir_allow() {
-        return heir_allow;
+    public Condition getHeirAllow() {
+        return heirAllow;
     }
 
-    public Condition getConsort_allow() {
-        return consort_allow;
+    public Condition getConsortAllow() {
+        return consortAllow;
     }
 
     public Condition getAllow() {
