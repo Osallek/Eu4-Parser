@@ -14,10 +14,13 @@ public class RulerPersonality {
 
     private String localizedName;
 
-    private Condition rulerAllow;
-    private Condition heirAllow;
-    private Condition consortAllow;
-    private Condition allow;
+    private final Condition rulerAllow;
+
+    private final Condition heirAllow;
+
+    private final Condition consortAllow;
+
+    private final Condition allow;
 
     private final Map<String, List<String>> modifiers;
 

@@ -230,7 +230,11 @@ public class ConditionsUtils {
                 return country.getConsort() != null && country.getConsort().getDip() >= NumbersUtils.toInt(value);
             case "consort_has_personality":
                 return country.getConsort() != null && country.getConsort().getPersonalities() != null
-                       && country.getConsort().getPersonalities().getPersonalities().contains(value);
+                       && country.getConsort()
+                                 .getPersonalities()
+                                 .getPersonalities()
+                                 .stream()
+                                 .anyMatch(rulerPersonality -> value.equalsIgnoreCase(rulerPersonality.getName()));
             case "consort_mil":
                 return country.getConsort() != null && country.getConsort().getMil() >= NumbersUtils.toInt(value);
             case "consort_religion":
@@ -647,7 +651,11 @@ public class ConditionsUtils {
             case "heir_has_consort_dynasty":
                 return country.getHeir() != null && country.getConsort() != null && country.getHeir().getDynasty().equals(country.getConsort().getDynasty());
             case "heir_has_personality":
-                return country.getHeir() != null && country.getHeir().getPersonalities().getPersonalities().contains(value);
+                return country.getHeir() != null && country.getHeir()
+                                                           .getPersonalities()
+                                                           .getPersonalities()
+                                                           .stream()
+                                                           .anyMatch(rulerPersonality -> value.equalsIgnoreCase(rulerPersonality.getName()));
             case "heir_has_ruler_dynasty":
                 return country.getHeir() != null && country.getHeir().getDynasty().equals(country.getMonarch().getDynasty());
             case "heir_mil":
@@ -1555,7 +1563,11 @@ public class ConditionsUtils {
                                                                     .count())) >= 0;
             case "personality":
             case "ruler_has_personality":
-                return country.getMonarch() == null || country.getMonarch().getPersonalities().getPersonalities().contains(value);
+                return country.getMonarch() == null || country.getMonarch()
+                                                              .getPersonalities()
+                                                              .getPersonalities()
+                                                              .stream()
+                                                              .anyMatch(rulerPersonality -> value.equalsIgnoreCase(rulerPersonality.getName()));
             case "piety":
                 if ((aDouble = NumbersUtils.toDouble(value)) != null) {
                     return country.getPiety() == null || country.getPiety() >= aDouble;

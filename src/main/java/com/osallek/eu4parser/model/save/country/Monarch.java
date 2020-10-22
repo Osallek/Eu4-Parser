@@ -203,7 +203,7 @@ public class Monarch {
         ClausewitzItem personalitiesItem = this.item.getChild("personalities");
 
         if (personalitiesItem != null) {
-            this.personalities = new Personalities(personalitiesItem);
+            this.personalities = new Personalities(personalitiesItem, this.save);
         }
 
         ClausewitzItem hasDeclaredWarItem = this.item.getChild("has_declared_war");
