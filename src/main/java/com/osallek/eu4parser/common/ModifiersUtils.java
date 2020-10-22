@@ -11,17 +11,17 @@ public class ModifiersUtils {
 
     private ModifiersUtils() {}
 
-    private static final Map<String, StaticModifiers.ModifierType> MODIFIERS_MAP = new HashMap<>();
+    private static final Map<String, Modifiers.ModifierType> MODIFIERS_MAP = new HashMap<>();
 
     static {
-        Arrays.stream(StaticModifiers.values()).forEach(staticModifier -> MODIFIERS_MAP.put(staticModifier.name(), staticModifier.type));
+        Arrays.stream(Modifiers.values()).forEach(staticModifier -> MODIFIERS_MAP.put(staticModifier.name(), staticModifier.type));
     }
 
-    public static void addModifier(String name, StaticModifiers.ModifierType type) {
+    public static void addModifier(String name, Modifiers.ModifierType type) {
         MODIFIERS_MAP.put(name.toUpperCase(), type);
     }
 
-    public static StaticModifiers.ModifierType getType(String name) {
+    public static Modifiers.ModifierType getType(String name) {
         return MODIFIERS_MAP.get(ClausewitzUtils.removeQuotes(name).toUpperCase());
     }
 
@@ -29,7 +29,7 @@ public class ModifiersUtils {
      * For constants (i.e. = yes) return 1 for yes, 0 for false
      */
     public static double getSum(double value, String name, String... values) {
-        StaticModifiers.ModifierType type = getType(name);
+        Modifiers.ModifierType type = getType(name);
 
         if (type == null) {
             return value;

@@ -1,6 +1,8 @@
 package com.osallek.eu4parser.common;
 
-public enum StaticModifiers {
+import com.osallek.eu4parser.model.save.country.Modifier;
+
+public enum Modifiers {
     ARMY_TRADITION(ModifierType.ADDITIVE),
     ARMY_TRADITION_DECAY(ModifierType.ADDITIVE),
     ARMY_TRADITION_FROM_BATTLE(ModifierType.MULTIPLICATIVE),
@@ -393,11 +395,15 @@ public enum StaticModifiers {
 
     public final ModifierType type;
 
-    StaticModifiers(ModifierType type) {
+    Modifiers(ModifierType type) {
         this.type = type;
     }
 
     public enum ModifierType {
         ADDITIVE, MULTIPLICATIVE, CONSTANT;
+    }
+
+    public static ModifierType getType(String modifier) {
+        return valueOf(modifier.toUpperCase()).type;
     }
 }

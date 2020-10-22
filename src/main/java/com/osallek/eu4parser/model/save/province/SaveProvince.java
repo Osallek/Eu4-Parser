@@ -25,10 +25,12 @@ import com.osallek.eu4parser.model.save.country.SaveArea;
 import com.osallek.eu4parser.model.save.country.Ship;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,6 +69,8 @@ public class SaveProvince extends Province {
     private ListOfDates discoveryDates;
 
     private ListOfDates discoveryReligionDates;
+
+    private Map<String, Integer> improveCount;
 
     private Map<String, Modifier> modifiers;
 
@@ -845,8 +849,15 @@ public class SaveProvince extends Province {
         list.remove(countryId);
     }
 
-    public Integer getImproveCount() {
-        return this.item.getVarAsInt("improve_count");
+    public Map<Country, Integer> getImproveCount() {
+        return this.improveCount.entrySet()
+                                .stream()
+                                .map(entry -> new AbstractMap.SimpleEntry<>(this.save.getCountry(entry.getKey()), entry.getValue()))
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public int getTotalImproveCount() {
+        return this.improveCount == null ? 0 : this.improveCount.values().stream().mapToInt(Integer::intValue).sum();
     }
 
     public List<String> getTriggeredModifiers() {
@@ -1066,6 +1077,26 @@ public class SaveProvince extends Province {
         this.item.setVariable("last_razed_by", ClausewitzUtils.addQuotes(lastRazedBy.getTag()));
     }
 
+    public boolean isRazed() {
+        Modifier modifier = getModifiers().get("province_razed");
+
+        if (modifier != null) {
+            return modifier.getDate().after(this.save.getDate());
+        }
+
+        return false;
+    }
+
+    public boolean isSlavesRaided() {
+        Modifier modifier = getModifiers().get("slaves_raided");
+
+        if (modifier != null) {
+            return modifier.getDate().after(this.save.getDate());
+        }
+
+        return false;
+    }
+
     public String getLastNativeUprising() {
         return this.item.getVarAsString("last_native_uprising");
     }
@@ -1162,6 +1193,15 @@ public class SaveProvince extends Province {
 
         if (discoveryReligionDatesItem != null) {
             this.discoveryReligionDates = new ListOfDates(discoveryReligionDatesItem);
+        }
+
+        ClausewitzList improveCountList = this.item.getList("country_improve_count");
+
+        if (improveCountList != null) {
+            this.improveCount = new LinkedHashMap<>();
+            for (int i = 0; i < improveCountList.size() - 2; i += 2) {
+                this.improveCount.put(ClausewitzUtils.removeQuotes(improveCountList.get(i)), improveCountList.getAsInt(i + 1));
+            }
         }
 
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");

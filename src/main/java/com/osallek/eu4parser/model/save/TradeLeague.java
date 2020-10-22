@@ -45,6 +45,7 @@ public class TradeLeague {
 
         if (!list.contains(member.getTag())) {
             list.add(member.getTag());
+            member.setTradeLeague(this);
         }
     }
 
@@ -53,6 +54,7 @@ public class TradeLeague {
 
         if (list != null) {
             list.remove(member.getTag());
+            member.setTradeLeague(null);
         }
     }
 

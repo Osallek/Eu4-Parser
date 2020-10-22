@@ -56,6 +56,14 @@ public class NumbersUtils {
         return aDouble == null ? defaultDouble : aDouble;
     }
 
+    public static double numberOrDefault(Number number) {
+        return numberOrDefault(number, 0);
+    }
+
+    public static double numberOrDefault(Number number, double defaultDouble) {
+        return number == null ? defaultDouble : number.doubleValue();
+    }
+
     public static <T> T coalesce(T... items) {
         return Arrays.stream(items).filter(Objects::nonNull).findFirst().orElse(null);
 

@@ -24,6 +24,8 @@ public class SaveArea {
 
     private List<SaveProvince> provinces;
 
+    private List<SupplyDepot> supplyDepots;
+
     public SaveArea(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
@@ -119,6 +121,10 @@ public class SaveArea {
         }
     }
 
+    public List<SupplyDepot> getSupplyDepots() {
+        return supplyDepots;
+    }
+
     private void refreshAttributes() {
         this.provinces = this.save.getGame().getArea(getName()).getProvinces().stream().map(this.save::getProvince).collect(Collectors.toList());
         ClausewitzItem stateItem = this.item.getChild("state");
@@ -135,5 +141,13 @@ public class SaveArea {
         this.investments = investmentsItems.stream()
                                            .map(child -> new Investment(child, this.save))
                                            .collect(Collectors.toMap(Investment::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
+
+        ClausewitzItem supplyDepotsItem = this.item.getChild("supply_depots");
+        if (supplyDepotsItem != null) {
+            this.supplyDepots = supplyDepotsItem.getChildren()
+                                                .stream()
+                                                .map(child -> new SupplyDepot(child, this.save))
+                                                .collect(Collectors.toList());
+        }
     }
 }

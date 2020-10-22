@@ -310,13 +310,13 @@ public class Save {
         return this.tradeNodes.get(name);
     }
 
-    public Map<TradeGood, String> getProductionLeaders() {
-        Map<TradeGood, String> productionLeaders = new LinkedHashMap<>();
+    public Map<TradeGood, Country> getProductionLeaders() {
+        Map<TradeGood, Country> productionLeaders = new LinkedHashMap<>();
         ClausewitzList productionLeaderList = this.gamestateItem.getList("production_leader_tag");
 
         if (productionLeaderList != null) {
             for (int i = 0; i < productionLeaderList.size(); i++) {
-                productionLeaders.put(this.game.getTradeGood(i), productionLeaderList.get(i));
+                productionLeaders.put(this.game.getTradeGood(i), getCountry(productionLeaderList.get(i)));
             }
         }
 
@@ -672,11 +672,6 @@ public class Save {
             this.celestialEmpire = new CelestialEmpire(celestialEmpireItem, this);
         }
 
-        List<ClausewitzItem> tradeLeaguesItems = this.gamestateItem.getChildren("trade_league");
-        this.tradeLeagues = tradeLeaguesItems.stream()
-                                             .map(child -> new TradeLeague(child, this))
-                                             .collect(Collectors.toList());
-
         ClausewitzItem religionsItem = this.gamestateItem.getChild("religions");
         ClausewitzItem religionInstantDateItem = this.gamestateItem.getChild("religion_instance_data");
 
@@ -716,11 +711,16 @@ public class Save {
         if (playersCountriesList != null) {
             for (int i = playersCountriesList.getValues().size() - 1; i > 0; i -= 2) {
                 if (this.countries.containsKey(ClausewitzUtils.removeQuotes(playersCountriesList.get(i)))) {
-                    this.getCountry(ClausewitzUtils.removeQuotes(playersCountriesList.get(i)))
-                        .setPlayer(playersCountriesList.get(i - 1));
+                    this.getCountry(ClausewitzUtils.removeQuotes(playersCountriesList.get(i))).setPlayer(playersCountriesList.get(i - 1));
                 }
             }
         }
+
+        List<ClausewitzItem> tradeLeaguesItems = this.gamestateItem.getChildren("trade_league");
+        this.tradeLeagues = tradeLeaguesItems.stream()
+                                             .map(child -> new TradeLeague(child, this))
+                                             .collect(Collectors.toList());
+        this.tradeLeagues.forEach(tradeLeague -> tradeLeague.getMembers().forEach(member -> member.setTradeLeague(tradeLeague)));
 
         ClausewitzItem greatPowersItem = this.gamestateItem.getChild("great_powers");
 

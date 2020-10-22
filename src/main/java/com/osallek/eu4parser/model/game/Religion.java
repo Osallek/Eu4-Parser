@@ -51,6 +51,8 @@ public class Religion {
 
     private final boolean usesPiety;
 
+    private final boolean usesHarmony;
+
     private final boolean canHaveSecondaryReligion;
 
     private final boolean doom;
@@ -87,6 +89,7 @@ public class Religion {
         this.usesKarma = BooleanUtils.toBoolean(item.getVarAsBool("uses_karma"));
         this.usePersonalDeity = BooleanUtils.toBoolean(item.getVarAsBool("personal_deity"));
         this.usesPiety = BooleanUtils.toBoolean(item.getVarAsBool("uses_piety"));
+        this.usesHarmony = BooleanUtils.toBoolean(item.getVarAsBool("uses_harmony"));
         this.canHaveSecondaryReligion = BooleanUtils.toBoolean(item.getVarAsBool("can_have_secondary_religion"));
         this.doom = BooleanUtils.toBoolean(item.getVarAsBool("doom"));
         list = item.getList("aspects");
@@ -182,6 +185,10 @@ public class Religion {
 
     public boolean usesPiety() {
         return usesPiety;
+    }
+
+    public boolean usesHarmony() {
+        return usesHarmony;
     }
 
     public boolean canHaveSecondaryReligion() {

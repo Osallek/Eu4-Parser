@@ -5,7 +5,10 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.ConditionsUtils;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,11 +16,24 @@ import java.util.stream.Collectors;
 
 public class Condition {
 
-    private final String name;
+    private String name;
 
-    private final Map<String, List<String>> conditions;
+    private Map<String, List<String>> conditions;
 
-    private final List<Condition> scopes;
+    private List<Condition> scopes;
+
+    @SafeVarargs
+    public Condition(Pair<String, String>... conditions) {
+        this.conditions = Arrays.stream(conditions).collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())));
+    }
+
+    @SafeVarargs
+    public Condition(String scope, Pair<String, String>... conditions) {
+        this.scopes = new ArrayList<>();
+        Condition condition = new Condition(conditions);
+        condition.name = scope;
+        this.scopes.add(condition);
+    }
 
     public Condition(ClausewitzItem item) {
         this.name = item.getName();
@@ -45,15 +61,16 @@ public class Condition {
     }
 
     public boolean apply(Country root, Country from) {
-        if (this.conditions.entrySet()
-                           .stream()
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
+        if (this.conditions != null && this.conditions.entrySet()
+                                                      .stream()
+                                                      .anyMatch(entry -> entry.getValue()
+                                                                              .stream()
+                                                                              .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(root, root, from,
+                                                                                                                                      entry.getKey(), s)))) {
             return false;
         }
 
-        if (this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
             return false;
         }
 

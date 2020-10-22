@@ -8,14 +8,13 @@ import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.LuaUtils;
+import com.osallek.eu4parser.common.Modifiers;
 import com.osallek.eu4parser.common.ModifiersUtils;
-import com.osallek.eu4parser.common.StaticModifiers;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4parser.model.save.country.Country;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.luaj.vm2.LuaInteger;
 import org.luaj.vm2.ast.Exp;
 import org.luaj.vm2.parser.ParseException;
 
@@ -187,6 +186,7 @@ public class Game {
         readTechnologies();
         readRulerPersonalities();
         readProfessionalismModifiers();
+        readStaticModifiers();
     }
 
     public Collator getCollator() {
@@ -574,23 +574,47 @@ public class Game {
     }
 
     public int getMaxGovRank() {
-        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_GOV_RANK").value).v;
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_GOV_RANK").value.toint();
     }
 
     public int getMaxAspects() {
-        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_UNLOCKED_ASPECTS").value).v;
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_UNLOCKED_ASPECTS").value.toint();
     }
 
     public int getGoldenEraDuration() {
-        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("GOLDEN_ERA_YEARS").value).v;
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("GOLDEN_ERA_YEARS").value.toint();
     }
 
     public int getBankruptcyDuration() {
-        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("BANKRUPTCY_DURATION").value).v;
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("BANKRUPTCY_DURATION").value.toint();
     }
 
     public int getNbGreatPowers() {
-        return ((LuaInteger) this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NUM_OF_GREAT_POWERS").value).v;
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NUM_OF_GREAT_POWERS").value.toint();
+    }
+
+    public int getNomadDevelopmentScale() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NOMAD_DEVELOPMENT_SCALE").value.toint();
+    }
+
+    public int getLargeColonialNationLimit() {
+        return this.defines.get(Eu4Utils.DEFINE_ECONOMY_KEY).get("LARGE_COLONIAL_NATION_LIMIT").value.toint();
+    }
+
+    public double getLowArmyProfessionalismMinRange() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("LOW_ARMY_PROFESSIONALISM_MIN_RANGE").value.todouble();
+    }
+
+    public double getLowArmyProfessionalismMaxRange() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("LOW_ARMY_PROFESSIONALISM_MAX_RANGE").value.todouble();
+    }
+
+    public double getHighArmyProfessionalismMinRange() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("HIGH_ARMY_PROFESSIONALISM_MIN_RANGE").value.todouble();
+    }
+
+    public double getHighArmyProfessionalismMaxRange() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("HIGH_ARMY_PROFESSIONALISM_MAX_RANGE").value.todouble();
     }
 
     public List<Government> getGovernments() {
@@ -942,7 +966,7 @@ public class Game {
         return new ArrayList<>(this.technologies.get(power).keySet()).get(i);
     }
 
-    public RulerPersonality getRulerPersonality(String name){
+    public RulerPersonality getRulerPersonality(String name) {
         if (name == null) {
             return null;
         }
@@ -1638,8 +1662,8 @@ public class Game {
 
             this.estates.keySet().forEach(estate -> {
                 estate.setLocalizedName(this.getLocalisation(estate.getName()));
-                ModifiersUtils.addModifier(estate.getName() + "_influence_modifier", StaticModifiers.ModifierType.MULTIPLICATIVE);
-                ModifiersUtils.addModifier(estate.getName() + "_loyalty_modifier", StaticModifiers.ModifierType.MULTIPLICATIVE);
+                ModifiersUtils.addModifier(estate.getName() + "_influence_modifier", Modifiers.ModifierType.MULTIPLICATIVE);
+                ModifiersUtils.addModifier(estate.getName() + "_loyalty_modifier", Modifiers.ModifierType.MULTIPLICATIVE);
             });
         } catch (IOException e) {
         }
@@ -1689,7 +1713,7 @@ public class Game {
                  });
 
             this.rulerPersonalities.keySet()
-                                .forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
+                                   .forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
         } catch (IOException e) {
         }
     }
@@ -1705,6 +1729,26 @@ public class Game {
                      ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
                      advisorsItem.getChildren().forEach(item -> this.professionalismModifiers.put(new ProfessionalismModifier(item), path));
                  });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readStaticModifiers() {
+        File staticModifiersFolder = new File(this.commonFolderPath + File.separator + "static_modifiers");
+
+        try (Stream<Path> paths = Files.walk(staticModifiersFolder.toPath())) {
+            paths.filter(Files::isRegularFile).forEach(path -> {
+                ClausewitzItem modifiersItem = ClausewitzParser.parse(path.toFile(), 0);
+                modifiersItem.getChildrenNot("null_modifier").forEach(item -> {
+                    if (StaticModifier.value(item.getName()) != null) {
+                        StaticModifier.value(item.getName()).setModifiers(item.getVariables()
+                                                                              .stream()
+                                                                              .collect(Collectors.groupingBy(ClausewitzVariable::getName,
+                                                                                                             Collectors.mapping(ClausewitzVariable::getValue,
+                                                                                                                                Collectors.toList()))));
+                    }
+                });
+            });
         } catch (IOException e) {
         }
     }

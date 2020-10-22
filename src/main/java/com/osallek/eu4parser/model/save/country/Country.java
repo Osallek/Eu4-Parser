@@ -21,6 +21,7 @@ import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
+import com.osallek.eu4parser.model.save.TradeLeague;
 import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.SaveAdvisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
@@ -195,6 +196,8 @@ public class Country {
     private SubjectType subjectType;
 
     private Date subjectStartDate;
+
+    private TradeLeague tradeLeague;
 
     public Country(ClausewitzItem item, Save save) {
         this.item = item;
@@ -642,6 +645,14 @@ public class Country {
         this.item.setVariable("isolationism", isolationism);
     }
 
+    public Integer getNumExpandedAdministration() {
+        return this.item.getVarAsInt("num_expanded_administration");
+    }
+
+    public void setNumExpandedAdministration(Integer numExpandedAdministration) {
+        this.item.setVariable("num_expanded_administration", numExpandedAdministration);
+    }
+
     public Integer getKarma() {
         return this.item.getVarAsDouble("karma").intValue();
     }
@@ -1053,6 +1064,8 @@ public class Country {
         this.subjectStartDate = subjectStartDate;
     }
 
+
+
     public void setOverlord(String countryTag) {
         if (countryTag == null) {
             this.item.removeVariable("overlord");
@@ -1082,6 +1095,21 @@ public class Country {
 
     public Integer getGoldType() {
         return this.item.getVarAsInt("goldtype");
+    }
+
+    public Double getCallForPeace() {
+        return this.item.getVarAsDouble("call_for_peace");
+    }
+
+    public Boolean hasUnconditionalSurrender() {
+        return this.item.getVarAsBool("has_unconditional_surrender");
+    }
+
+    public List<Country> gaveAccess() {
+        return this.item.getVarsAsStrings("gave_access")
+                        .stream()
+                        .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
+                        .collect(Collectors.toList());
     }
 
     public List<Country> getOurSpyNetwork() {
@@ -1775,6 +1803,23 @@ public class Country {
 
             this.item.setVariable("num_of_subjects", nbSubjects - 1);
         }
+    }
+
+    public int getNumOfSubjectsOfType(String type) {
+        return (int) getSubjects().stream()
+                                  .filter(subject -> type.equalsIgnoreCase(subject.getSubjectType().getName()))
+                                  .count();
+    }
+
+    public int getNumOfLargeColonies() {
+        return (int) getSubjects().stream()
+                                  .filter(subject -> this.equals(subject.getColonialParent())
+                                                     && subject.getOwnedProvinces().size() >= this.save.getGame().getLargeColonialNationLimit())
+                                  .count();
+    }
+
+    public int getNumOfStrongCompanies() {
+        return (int) getTradeCompanies().stream().filter(SaveTradeCompany::strongCompany).count();
     }
 
     public List<Country> getIndependenceSupportedBy() {
@@ -3522,6 +3567,17 @@ public class Country {
         this.tradeCompanies.add(tradeCompany);
     }
 
+    public TradeLeague getTradeLeague() {
+        return tradeLeague;
+    }
+
+    /* Don't use only for save !!
+       Use tradeLeague addMember to add
+     */
+    public void setTradeLeague(TradeLeague tradeLeague) {
+        this.tradeLeague = tradeLeague;
+    }
+
     public SortedSet<ActiveWar> getWars() {
         return wars;
     }
@@ -3884,6 +3940,6 @@ public class Country {
 
     @Override
     public String toString() {
-        return localizedName + (getPlayer() == null ? "" : " (" + getPlayer() + ")");
+        return this.localizedName == null ? getTag() : this.localizedName + (getPlayer() == null ? "" : " (" + getPlayer() + ")");
     }
 }

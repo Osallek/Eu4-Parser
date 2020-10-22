@@ -5,9 +5,11 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.GovernmentReform;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Government {
@@ -36,7 +38,12 @@ public class Government {
             ClausewitzList list = reformStack.getList("reforms");
 
             if (list != null) {
-                return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(this.game::getGovernmentReform).collect(Collectors.toList());
+                return list.getValues()
+                           .stream()
+                           .map(ClausewitzUtils::removeQuotes)
+                           .map(this.game::getGovernmentReform)
+                           .filter(Objects::nonNull)
+                           .collect(Collectors.toList());
             }
         }
 
