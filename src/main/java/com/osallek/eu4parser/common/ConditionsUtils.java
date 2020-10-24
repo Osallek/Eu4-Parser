@@ -2912,7 +2912,12 @@ public class ConditionsUtils {
                 String investment = condition.getCondition("investment");
                 return province.getOwner() != null && BooleanUtils.toBoolean(province.activeTradeCompany())
                        && province.getSaveArea() != null &&
-                       province.getSaveArea().getInvestment(province.getOwner()).getInvestments().stream().filter(s -> s.equalsIgnoreCase(investment)).count()
+                       province.getSaveArea()
+                               .getInvestment(province.getOwner())
+                               .getInvestments()
+                               .stream()
+                               .filter(invest -> invest.getName().equalsIgnoreCase(investment))
+                               .count()
                        >= NumbersUtils.toInt(condition.getCondition("value"));
             case "num_of_units_in_province":
                 UnitType type = UnitType.value(condition.getCondition("type"));

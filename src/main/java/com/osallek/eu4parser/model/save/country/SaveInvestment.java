@@ -3,10 +3,14 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.model.game.Investment;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SaveInvestment {
 
@@ -23,40 +27,40 @@ public class SaveInvestment {
         return this.save.getCountry(this.item.getVarAsString("tag"));
     }
 
-    public List<String> getInvestments() {
+    public List<Investment> getInvestments() {
         ClausewitzList investmentsList = this.item.getList("investments");
 
         if (investmentsList != null) {
-            return investmentsList.getValues();
+            return investmentsList.getValues().stream().map(s -> this.save.getGame().getInvestment(s)).filter(Objects::nonNull).collect(Collectors.toList());
         }
 
         return new ArrayList<>();
     }
 
-    public void addInvestment(String investment) {
+    public void addInvestment(Investment investment) {
         ClausewitzList investmentsList = this.item.getList("investments");
 
         if (investmentsList != null) {
-            if (!investmentsList.contains(investment)) {
-                investmentsList.add(investment);
+            if (!investmentsList.contains(investment.getName())) {
+                investmentsList.add(investment.getName());
             }
         } else {
-            this.item.addList("investments", investment);
+            this.item.addList("investments", investment.getName());
         }
     }
 
-    public void removeInvestment(String investment) {
+    public void removeInvestment(Investment investment) {
         ClausewitzList investmentsList = this.item.getList("investments");
 
         if (investmentsList != null) {
-            investmentsList.remove(investment);
+            investmentsList.remove(investment.getName());
         }
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, String... investments) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, Investment... investments) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "investments", parent.getOrder() + 1);
         toItem.addVariable("tag", ClausewitzUtils.addQuotes(country.getTag()));
-        toItem.addList("investments", investments);
+        toItem.addList("investments", Arrays.stream(investments).map(Investment::getName).collect(Collectors.toList()));
 
         parent.addChild(toItem);
 

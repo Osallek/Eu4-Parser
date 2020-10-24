@@ -2,9 +2,11 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Investment;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -84,13 +86,11 @@ public class SaveArea {
         return investments;
     }
 
-    public void addInvestments(Country country, String... investments) {
+    public void addInvestments(Country country, Investment... investments) {
         SaveInvestment investment = this.investments.get(country);
 
         if (investment != null) {
-            for (String newInvestment : investments) {
-                investment.addInvestment(newInvestment);
-            }
+            Arrays.stream(investments).forEach(investment::addInvestment);
         } else {
             SaveInvestment.addToItem(this.item, country, investments);
             refreshAttributes();
@@ -111,13 +111,11 @@ public class SaveArea {
         refreshAttributes();
     }
 
-    public void removeInvestments(Country country, String... investments) {
+    public void removeInvestments(Country country, Investment... investments) {
         SaveInvestment investment = this.investments.get(country);
 
         if (investment != null) {
-            for (String newInvestment : investments) {
-                investment.removeInvestment(newInvestment);
-            }
+            Arrays.stream(investments).forEach(investment::removeInvestment);
         }
     }
 
