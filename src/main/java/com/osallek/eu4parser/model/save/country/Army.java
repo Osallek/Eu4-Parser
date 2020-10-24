@@ -8,11 +8,6 @@ import java.util.stream.Collectors;
 
 public class Army extends AbstractArmy {
 
-    //Todo with provinces location -> 		unit={
-    //			id=6520
-    //			type=54
-    //		}
-
     private Id mercenaryCompany;
 
     private List<Regiment> regiments;

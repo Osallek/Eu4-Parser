@@ -20,7 +20,7 @@ public class SaveArea {
 
     private Map<Country, CountryState> countriesStates;
 
-    private Map<Country, Investment> investments;
+    private Map<Country, SaveInvestment> investments;
 
     private List<SaveProvince> provinces;
 
@@ -76,33 +76,33 @@ public class SaveArea {
         refreshAttributes();
     }
 
-    public Investment getInvestment(Country country) {
+    public SaveInvestment getInvestment(Country country) {
         return this.investments.get(country);
     }
 
-    public Map<Country, Investment> getInvestments() {
+    public Map<Country, SaveInvestment> getInvestments() {
         return investments;
     }
 
     public void addInvestments(Country country, String... investments) {
-        Investment investment = this.investments.get(country);
+        SaveInvestment investment = this.investments.get(country);
 
         if (investment != null) {
             for (String newInvestment : investments) {
                 investment.addInvestment(newInvestment);
             }
         } else {
-            Investment.addToItem(this.item, country, investments);
+            SaveInvestment.addToItem(this.item, country, investments);
             refreshAttributes();
         }
     }
 
     public void removeInvestments(Country country) {
-        Iterator<Map.Entry<Country, Investment>> iterator = this.investments.entrySet().iterator();
+        Iterator<Map.Entry<Country, SaveInvestment>> iterator = this.investments.entrySet().iterator();
         int i = 0;
 
         while (iterator.hasNext()) {
-            Map.Entry<Country, Investment> entry = iterator.next();
+            Map.Entry<Country, SaveInvestment> entry = iterator.next();
             if (entry.getValue().getCountry().equals(country)) {
                 this.item.removeChild("investments", i);
                 break;
@@ -112,7 +112,7 @@ public class SaveArea {
     }
 
     public void removeInvestments(Country country, String... investments) {
-        Investment investment = this.investments.get(country);
+        SaveInvestment investment = this.investments.get(country);
 
         if (investment != null) {
             for (String newInvestment : investments) {
@@ -139,8 +139,8 @@ public class SaveArea {
 
         List<ClausewitzItem> investmentsItems = this.item.getChildren("investments");
         this.investments = investmentsItems.stream()
-                                           .map(child -> new Investment(child, this.save))
-                                           .collect(Collectors.toMap(Investment::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
+                                           .map(child -> new SaveInvestment(child, this.save))
+                                           .collect(Collectors.toMap(SaveInvestment::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
 
         ClausewitzItem supplyDepotsItem = this.item.getChild("supply_depots");
         if (supplyDepotsItem != null) {

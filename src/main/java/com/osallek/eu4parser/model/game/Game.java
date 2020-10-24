@@ -140,6 +140,8 @@ public class Game {
 
     private Map<RulerPersonality, Path> rulerPersonalities;
 
+    private Map<Investment, Path> investments;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -187,6 +189,7 @@ public class Game {
         readRulerPersonalities();
         readProfessionalismModifiers();
         readStaticModifiers();
+        readInvestments();
     }
 
     public Collator getCollator() {
@@ -966,6 +969,14 @@ public class Game {
         return new ArrayList<>(this.technologies.get(power).keySet()).get(i);
     }
 
+    public Set<ProfessionalismModifier> getProfessionalismModifiers() {
+        return this.professionalismModifiers.keySet();
+    }
+
+    public List<RulerPersonality> getRulerPersonalities() {
+        return new ArrayList<>(this.rulerPersonalities.keySet());
+    }
+
     public RulerPersonality getRulerPersonality(String name) {
         if (name == null) {
             return null;
@@ -980,8 +991,22 @@ public class Game {
         return null;
     }
 
-    public Set<ProfessionalismModifier> getProfessionalismModifiers() {
-        return this.professionalismModifiers.keySet();
+    public List<Investment> getInvestments() {
+        return new ArrayList<>(this.investments.keySet());
+    }
+
+    public Investment getInvestment(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Investment investment : this.investments.keySet()) {
+            if (investment.getName().equalsIgnoreCase(name)) {
+                return investment;
+            }
+        }
+
+        return null;
     }
 
     public void loadLocalisations() throws IOException {
@@ -1749,6 +1774,23 @@ public class Game {
                     }
                 });
             });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readInvestments() {
+        File investmentsFolder = new File(this.commonFolderPath + File.separator + "tradecompany_investments");
+
+        try (Stream<Path> paths = Files.walk(investmentsFolder.toPath())) {
+            this.investments = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     investmentsItem.getChildren().forEach(item -> this.investments.put(new Investment(item, this), path));
+                 });
+
+            this.investments.keySet().forEach(investment -> investment.setLocalizedName(this.getLocalisation(investment.getName())));
         } catch (IOException e) {
         }
     }

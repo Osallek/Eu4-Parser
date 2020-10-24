@@ -8,13 +8,13 @@ import com.osallek.eu4parser.model.save.Save;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Investment {
+public class SaveInvestment {
 
     private final Save save;
 
     private final ClausewitzItem item;
 
-    public Investment(ClausewitzItem item, Save save) {
+    public SaveInvestment(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
     }

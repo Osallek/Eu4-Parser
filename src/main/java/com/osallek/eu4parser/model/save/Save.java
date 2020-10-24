@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 public class Save {
 
-    //Todo in countries: custom countries
+    //Todo in countries:
     //Todo Teams
 
     private final String name;

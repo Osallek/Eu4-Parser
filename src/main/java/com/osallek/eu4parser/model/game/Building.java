@@ -83,7 +83,6 @@ public class Building {
         this.onlyInPort = other.onlyInPort;
         this.onlyNatives = other.onlyNatives;
         this.trigger = other.trigger;
-        ;
     }
 
     public Building(ClausewitzItem item, Game game) {

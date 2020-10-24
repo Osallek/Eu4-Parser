@@ -2908,6 +2908,12 @@ public class ConditionsUtils {
             case "most_province_trade_power":
                 country = province.getSave().getTradeNodes().get(province.getTrade()).getTopProvinces().entrySet().iterator().next().getKey();
                 return condition.apply(country, country);
+            case "num_investments_in_trade_company_region":
+                String investment = condition.getCondition("investment");
+                return province.getOwner() != null && BooleanUtils.toBoolean(province.activeTradeCompany())
+                       && province.getSaveArea() != null &&
+                       province.getSaveArea().getInvestment(province.getOwner()).getInvestments().stream().filter(s -> s.equalsIgnoreCase(investment)).count()
+                       >= NumbersUtils.toInt(condition.getCondition("value"));
             case "num_of_units_in_province":
                 UnitType type = UnitType.value(condition.getCondition("type"));
                 Country finalCountry = province.getSave().getCountry(condition.getCondition("who"));

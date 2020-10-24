@@ -53,14 +53,9 @@ import java.util.stream.Collectors;
 
 public class Country {
 
-    //Todo custom countries (ideas, flag)
-
     //Todo combined countries:
     // trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes
     // subjects, overlord, diplomacy(dependency)
-
-    //Todo with provinces
-    // seat_in_parliament (back=yes vs back=2)
 
     //Todo
     // mercenary_company
