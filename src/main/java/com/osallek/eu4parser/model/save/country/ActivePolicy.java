@@ -2,26 +2,31 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.Policy;
 
 import java.util.Date;
 
 public class ActivePolicy {
 
+    private final Game game;
+
     private final ClausewitzItem item;
 
-    public ActivePolicy(ClausewitzItem item) {
+    public ActivePolicy(ClausewitzItem item, Game game) {
+        this.game = game;
         this.item = item;
     }
 
-    public String getPolicy() {
-        return this.item.getVarAsString("policy");
+    public Policy getPolicy() {
+        return this.game.getPolicy(ClausewitzUtils.removeQuotes(this.item.getVarAsString("policy")));
     }
 
-    public void setPolicy(String policy) {
+    public void setPolicy(Policy policy) {
         Date date = this.item.getVarAsDate("date");
 
         if (date != null) {
-            this.item.setVariable("policy", ClausewitzUtils.addQuotes(policy));
+            this.item.setVariable("policy", ClausewitzUtils.addQuotes(policy.getName()));
         }
     }
 
@@ -33,9 +38,9 @@ public class ActivePolicy {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String policy, Date date) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Policy policy, Date date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "active_policy", parent.getOrder() + 1);
-        toItem.addVariable("policy", ClausewitzUtils.addQuotes(policy));
+        toItem.addVariable("policy", ClausewitzUtils.addQuotes(policy.getName()));
         toItem.addVariable("date", date);
 
         parent.addChild(toItem);

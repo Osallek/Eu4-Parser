@@ -14,6 +14,7 @@ import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Mission;
+import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
@@ -138,11 +139,11 @@ public class Country {
 
     private SubUnit subUnit;
 
-    private Map<Integer, Army> armies;
+    private Map<Id, Army> armies;
 
     private Map<Integer, MercenaryCompany> mercenaryCompanies;
 
-    private Map<Integer, Navy> navies;
+    private Map<Id, Navy> navies;
 
     private Map<String, ActiveRelation> activeRelations;
 
@@ -1060,7 +1061,6 @@ public class Country {
     }
 
 
-
     public void setOverlord(String countryTag) {
         if (countryTag == null) {
             this.item.removeVariable("overlord");
@@ -1249,15 +1249,15 @@ public class Country {
         return activePolicies;
     }
 
-    public ActivePolicy getActivePolicie(String name) {
+    public ActivePolicy getActivePolicy(String policy) {
         return this.activePolicies.stream()
-                                  .filter(activePolicy -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(activePolicy.getPolicy())))
+                                  .filter(activePolicy -> policy.equals(activePolicy.getPolicy().getName()))
                                   .findFirst()
                                   .orElse(null);
     }
 
-    public void addActivePolicy(String policy, Date date) {
-        if (getActivePolicies().stream().noneMatch(activePolicy -> activePolicy.getPolicy().equalsIgnoreCase(policy))) {
+    public void addActivePolicy(Policy policy, Date date) {
+        if (getActivePolicies().stream().noneMatch(activePolicy -> activePolicy.getPolicy().equals(policy))) {
             ActivePolicy.addToItem(this.item, policy, date);
             refreshAttributes();
         }
@@ -1268,11 +1268,11 @@ public class Country {
         refreshAttributes();
     }
 
-    public void removeActivePolicy(String policy) {
+    public void removeActivePolicy(Policy policy) {
         Integer index = null;
 
         for (int i = 0; i < getActivePolicies().size(); i++) {
-            if (getActivePolicies().get(i).getPolicy().equalsIgnoreCase(policy)) {
+            if (getActivePolicies().get(i).getPolicy().equals(policy)) {
                 index = i;
                 break;
             }
@@ -2999,11 +2999,11 @@ public class Country {
         return mercenaryCompanies;
     }
 
-    public Army getArmy(int id) {
+    public Army getArmy(Id id) {
         return this.armies.get(id);
     }
 
-    public Map<Integer, Army> getArmies() {
+    public Map<Id, Army> getArmies() {
         return armies;
     }
 
@@ -3093,11 +3093,11 @@ public class Country {
         refreshAttributes();
     }
 
-    public Navy getNavy(int id) {
+    public Navy getNavy(Id id) {
         return this.navies.get(id);
     }
 
-    public Map<Integer, Navy> getNavies() {
+    public Map<Id, Navy> getNavies() {
         return navies;
     }
 
@@ -3686,7 +3686,7 @@ public class Country {
 
         List<ClausewitzItem> activePolicyItems = this.item.getChildren("active_policy");
         this.activePolicies = activePolicyItems.stream()
-                                               .map(ActivePolicy::new)
+                                               .map(child -> new ActivePolicy(child, this.save.getGame()))
                                                .collect(Collectors.toList());
 
         List<ClausewitzItem> powerProjectionItems = this.item.getChildren("power_projection");
@@ -3805,7 +3805,7 @@ public class Country {
         List<ClausewitzItem> armiesItems = this.item.getChildren("army");
         this.armies = armiesItems.stream()
                                  .map(armyItem -> new Army(armyItem, this))
-                                 .collect(Collectors.toMap(army -> army.getId().getId(), Function.identity()));
+                                 .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
 
         List<ClausewitzItem> mercenaryItems = this.item.getChildren("mercenary_company");
         this.mercenaryCompanies = mercenaryItems.stream()
@@ -3815,7 +3815,7 @@ public class Country {
         List<ClausewitzItem> naviesItems = this.item.getChildren("navy");
         this.navies = naviesItems.stream()
                                  .map(navyItem -> new Navy(navyItem, this))
-                                 .collect(Collectors.toMap(navy -> navy.getId().getId(), Function.identity()));
+                                 .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
 
         ClausewitzItem activeRelationsItem = this.item.getChild("active_relations");
 

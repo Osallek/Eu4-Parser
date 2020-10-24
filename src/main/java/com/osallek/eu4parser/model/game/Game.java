@@ -142,6 +142,8 @@ public class Game {
 
     private Map<Investment, Path> investments;
 
+    private Map<Policy, Path> policies;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -190,6 +192,7 @@ public class Game {
         readProfessionalismModifiers();
         readStaticModifiers();
         readInvestments();
+        readPolicies();
     }
 
     public Collator getCollator() {
@@ -1009,6 +1012,24 @@ public class Game {
         return null;
     }
 
+    public List<Policy> getPolicies() {
+        return new ArrayList<>(this.policies.keySet());
+    }
+
+    public Policy getPolicy(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Policy policy : this.policies.keySet()) {
+            if (policy.getName().equalsIgnoreCase(name)) {
+                return policy;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1791,6 +1812,23 @@ public class Game {
                  });
 
             this.investments.keySet().forEach(investment -> investment.setLocalizedName(this.getLocalisation(investment.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readPolicies() {
+        File policiesFolder = new File(this.commonFolderPath + File.separator + "policies");
+
+        try (Stream<Path> paths = Files.walk(policiesFolder.toPath())) {
+            this.policies = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     investmentsItem.getChildren().forEach(item -> this.policies.put(new Policy(item), path));
+                 });
+
+            this.policies.keySet().forEach(policy -> policy.setLocalizedName(this.getLocalisation(policy.getName())));
         } catch (IOException e) {
         }
     }

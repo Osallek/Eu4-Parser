@@ -1238,7 +1238,7 @@ public class SaveProvince extends Province {
         if (!unitsItems.isEmpty()) {
             this.armies = new ArrayList<>(0);
             this.navies = new ArrayList<>(0);
-            unitsItems.stream().map(Id::new).map(Id::getId).forEach(unitId -> {
+            unitsItems.stream().map(Id::new).forEach(unitId -> {
                 this.save.getCountries()
                          .values()
                          .stream()

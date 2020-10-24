@@ -9,6 +9,7 @@ import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentReform;
 import com.osallek.eu4parser.model.game.Institution;
+import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.SaveReligion;
@@ -402,7 +403,7 @@ public class ConditionsUtils {
             case "has_active_fervor":
                 return country.getFervor() != null && "yes".equalsIgnoreCase(value) != country.getFervor().getActives().isEmpty();
             case "has_active_policy":
-                return country.getActivePolicies().stream().map(ActivePolicy::getPolicy).anyMatch(value::equals);
+                return country.getActivePolicies().stream().map(ActivePolicy::getPolicy).map(Policy::getName).anyMatch(value::equals);
             case "has_adopted_cult":
                 return country.getFetishistCults().contains(ClausewitzUtils.addQuotes(value));
             case "has_advisor":
@@ -1977,7 +1978,7 @@ public class ConditionsUtils {
                 faction = root.getFaction(condition.getCondition("faction"));
                 return faction != null && NumbersUtils.doubleOrDefault(faction.getInfluence()) >= NumbersUtils.toDouble(condition.getCondition("influence"));
             case "had_active_policy":
-                activePolicy = root.getActivePolicie(condition.getCondition("policy"));
+                activePolicy = root.getActivePolicy(condition.getCondition("policy"));
                 return activePolicy != null
                        && DateUtils.addDays(activePolicy.getDate(), NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
             case "had_consort_flag":
