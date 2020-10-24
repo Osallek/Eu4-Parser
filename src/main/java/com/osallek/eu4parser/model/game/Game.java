@@ -148,6 +148,8 @@ public class Game {
 
     private Map<Faction, Path> factions;
 
+    private Map<Age, Path> ages;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -199,6 +201,7 @@ public class Game {
         readPolicies();
         readHegemons();
         readFactions();
+        readAges();
     }
 
     public Collator getCollator() {
@@ -1072,6 +1075,52 @@ public class Game {
         return null;
     }
 
+    public List<Age> getAges() {
+        return new ArrayList<>(this.ages.keySet());
+    }
+
+    public Age getAge(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Age age : this.ages.keySet()) {
+            if (age.getName().equalsIgnoreCase(name)) {
+                return age;
+            }
+        }
+
+        return null;
+    }
+
+    public AgeAbility getAgeAbility(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        return this.ages.keySet().stream()
+                        .map(Age::getAbilities)
+                        .map(Map::values)
+                        .flatMap(Collection::stream)
+                        .filter(ageAbility -> ageAbility.getName().equalsIgnoreCase(name))
+                        .findFirst()
+                        .orElse(null);
+    }
+
+    public AgeObjective getAgeObjective(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        return this.ages.keySet().stream()
+                        .map(Age::getObjectives)
+                        .map(Map::values)
+                        .flatMap(Collection::stream)
+                        .filter(ageObjective -> ageObjective.getName().equalsIgnoreCase(name))
+                        .findFirst()
+                        .orElse(null);
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1770,12 +1819,12 @@ public class Game {
 
                      Power power = Power.byName(techItem.getVarAsString("monarch_power"));
                      Map<String, List<String>> aheadOfTime = !techItem.hasChild("ahead_of_time") ? null :
-                                                             techItem.getChild("ahead_of_time")
-                                                                     .getVariables()
-                                                                     .stream()
-                                                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                                    Collectors.mapping(ClausewitzVariable::getValue,
-                                                                                                                       Collectors.toList())));
+                             techItem.getChild("ahead_of_time")
+                                     .getVariables()
+                                     .stream()
+                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
+                                                                    Collectors.mapping(ClausewitzVariable::getValue,
+                                                                                       Collectors.toList())));
 
                      techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
                  });
@@ -1905,6 +1954,23 @@ public class Game {
                  });
 
             this.factions.keySet().forEach(faction -> faction.setLocalizedName(this.getLocalisation(faction.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readAges() {
+        File agesFolder = new File(this.commonFolderPath + File.separator + "ages");
+
+        try (Stream<Path> paths = Files.walk(agesFolder.toPath())) {
+            this.ages = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     agesItem.getChildren().forEach(item -> this.ages.put(new Age(item), path));
+                 });
+
+            this.ages.keySet().forEach(age -> age.setLocalizedName(this.getLocalisation(age.getName())));
         } catch (IOException e) {
         }
     }
