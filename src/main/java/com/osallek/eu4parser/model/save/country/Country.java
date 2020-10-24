@@ -12,7 +12,6 @@ import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
-import com.osallek.eu4parser.model.game.Hegemon;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Mission;
 import com.osallek.eu4parser.model.game.Policy;
@@ -108,7 +107,7 @@ public class Country {
 
     private List<EstateInteraction> interactionsLastUsed;
 
-    private List<Faction> factions;
+    private List<SaveFaction> factions;
 
     private Map<String, Rival> rivals;
 
@@ -906,12 +905,15 @@ public class Country {
         return interactionsLastUsed;
     }
 
-    public List<Faction> getFactions() {
+    public List<SaveFaction> getFactions() {
         return factions;
     }
 
-    public Faction getFaction(String name) {
-        return this.factions.stream().filter(faction -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(faction.getType()))).findFirst().orElse(null);
+    public SaveFaction getFaction(String name) {
+        return this.factions.stream()
+                            .filter(faction -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(faction.getType().getName())))
+                            .findFirst()
+                            .orElse(null);
     }
 
     public Integer getTopFaction() {
@@ -3682,7 +3684,7 @@ public class Country {
 
         List<ClausewitzItem> factionItems = this.item.getChildren("faction");
         this.factions = factionItems.stream()
-                                    .map(Faction::new)
+                                    .map(child -> new SaveFaction(child, this.save.getGame()))
                                     .collect(Collectors.toList());
 
         List<ClausewitzItem> rivalItems = this.item.getChildren("rival");

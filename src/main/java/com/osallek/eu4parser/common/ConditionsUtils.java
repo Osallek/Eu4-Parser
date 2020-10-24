@@ -16,12 +16,11 @@ import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.TradeLeague;
 import com.osallek.eu4parser.model.save.country.ActivePolicy;
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4parser.model.save.country.Faction;
+import com.osallek.eu4parser.model.save.country.SaveFaction;
 import com.osallek.eu4parser.model.save.country.Income;
 import com.osallek.eu4parser.model.save.country.Leader;
 import com.osallek.eu4parser.model.save.country.LeaderType;
 import com.osallek.eu4parser.model.save.country.Modifier;
-import com.osallek.eu4parser.model.save.country.PowerProjection;
 import com.osallek.eu4parser.model.save.country.Queen;
 import com.osallek.eu4parser.model.save.country.SaveEstate;
 import com.osallek.eu4parser.model.save.diplomacy.QuantifyDatableRelation;
@@ -362,7 +361,7 @@ public class ConditionsUtils {
                 return true;
             case "faction_in_power":
                 return CollectionUtils.isNotEmpty(country.getFactions())
-                       && value.equalsIgnoreCase(country.getFactions().stream().max(Comparator.comparing(Faction::getInfluence)).get().getType());
+                       && value.equalsIgnoreCase(country.getFactions().stream().max(Comparator.comparing(SaveFaction::getInfluence)).get().getType().getName());
             case "federation_size":
                 return country.getFederationFriends().size() >= NumbersUtils.toInt(value);
             case "fervor":
@@ -460,7 +459,7 @@ public class ConditionsUtils {
             case "has_estate":
                 return country.getEstates().stream().map(SaveEstate::getType).map(ClausewitzUtils::removeQuotes).anyMatch(value::equals);
             case "has_faction":
-                return CollectionUtils.isNotEmpty(country.getFactions()) && country.getFactions().stream().map(Faction::getType).anyMatch(value::equals);
+                return CollectionUtils.isNotEmpty(country.getFactions()) && country.getFactions().stream().map(SaveFaction::getType).anyMatch(value::equals);
             case "has_factions":
                 return CollectionUtils.isNotEmpty(country.getFactions());
             case "has_female_consort":
@@ -1847,7 +1846,7 @@ public class ConditionsUtils {
         SaveProvince saveProvince;
         SubjectType subjectType;
         SaveEstate estate;
-        Faction faction;
+        SaveFaction faction;
         ActivePolicy activePolicy;
         Double aDouble;
         Integer integer;

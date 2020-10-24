@@ -15,7 +15,6 @@ public class Names {
 
         ClausewitzItem child = item.getChild("trigger");
         this.trigger = child == null ? null : new Condition(child);
-
     }
 
     public String getName() {

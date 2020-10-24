@@ -146,6 +146,8 @@ public class Game {
 
     private Map<Hegemon, Path> hegemons;
 
+    private Map<Faction, Path> factions;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -196,6 +198,7 @@ public class Game {
         readInvestments();
         readPolicies();
         readHegemons();
+        readFactions();
     }
 
     public Collator getCollator() {
@@ -1051,6 +1054,24 @@ public class Game {
         return null;
     }
 
+    public List<Faction> getFactions() {
+        return new ArrayList<>(this.factions.keySet());
+    }
+
+    public Faction getFaction(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Faction faction : this.factions.keySet()) {
+            if (faction.getName().equalsIgnoreCase(name)) {
+                return faction;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1867,6 +1888,23 @@ public class Game {
                  });
 
             this.hegemons.keySet().forEach(hegemon -> hegemon.setLocalizedName(this.getLocalisation(hegemon.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readFactions() {
+        File factionsFolder = new File(this.commonFolderPath + File.separator + "factions");
+
+        try (Stream<Path> paths = Files.walk(factionsFolder.toPath())) {
+            this.factions = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     hegemonsItem.getChildren().forEach(item -> this.factions.put(new Faction(item), path));
+                 });
+
+            this.factions.keySet().forEach(faction -> faction.setLocalizedName(this.getLocalisation(faction.getName())));
         } catch (IOException e) {
         }
     }

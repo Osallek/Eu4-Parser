@@ -1,12 +1,17 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Faction;
+import com.osallek.eu4parser.model.game.Game;
 
-public class Faction {
+public class SaveFaction {
+
+    private final Game game;
 
     private final ClausewitzItem item;
 
-    public Faction(ClausewitzItem item) {
+    public SaveFaction(ClausewitzItem item, Game game) {
+        this.game = game;
         this.item = item;
     }
 
@@ -18,8 +23,8 @@ public class Faction {
         this.item.setVariable("influence", Math.min(Math.max(0, influence), 100));
     }
 
-    public String getType() {
-        return this.item.getVarAsString("type");
+    public Faction getType() {
+        return this.game.getFaction(this.item.getVarAsString("type"));
     }
 
     public Double getOldInfluence() {
