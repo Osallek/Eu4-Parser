@@ -150,6 +150,8 @@ public class Game {
 
     private Map<Age, Path> ages;
 
+    private SortedMap<DefenderOfFaith, Path> defenderOfFaith;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -202,6 +204,7 @@ public class Game {
         readHegemons();
         readFactions();
         readAges();
+        readDefenderOfFaith();
     }
 
     public Collator getCollator() {
@@ -1121,6 +1124,10 @@ public class Game {
                         .orElse(null);
     }
 
+    public Set<DefenderOfFaith> getDefenderOfFaith() {
+        return this.defenderOfFaith.keySet();
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1971,6 +1978,21 @@ public class Game {
                  });
 
             this.ages.keySet().forEach(age -> age.setLocalizedName(this.getLocalisation(age.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readDefenderOfFaith() {
+        File defenderOfFaithFolder = new File(this.commonFolderPath + File.separator + "defender_of_faith");
+
+        try (Stream<Path> paths = Files.walk(defenderOfFaithFolder.toPath())) {
+            this.defenderOfFaith = new TreeMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
+                     defenderOfFaithItem.getChildren().forEach(item -> this.defenderOfFaith.put(new DefenderOfFaith(item), path));
+                 });
         } catch (IOException e) {
         }
     }

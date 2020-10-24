@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.DefenderOfFaith;
 import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.ReligionGroup;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -89,7 +90,11 @@ public class SaveReligion {
     }
 
     public List<Country> getInLeague() {
-        return this.religionsItem.getVarsAsStrings("league").stream().map(ClausewitzUtils::removeQuotes).map(this.save::getCountry).collect(Collectors.toList());
+        return this.religionsItem.getVarsAsStrings("league")
+                                 .stream()
+                                 .map(ClausewitzUtils::removeQuotes)
+                                 .map(this.save::getCountry)
+                                 .collect(Collectors.toList());
     }
 
     public void addToLeague(Country country) {
@@ -165,6 +170,28 @@ public class SaveReligion {
             this.religionInstanceDataItem.setVariable("defender", ClausewitzUtils.addQuotes(defender.getTag()));
             this.religionInstanceDataItem.setVariable("defender_date", defenderDate);
         }
+    }
+
+    public DefenderOfFaith getDefenderOfFaith() {
+        Country defender = getDefender();
+
+        if (defender == null) {
+            return null;
+        }
+
+        int nbCountries = (int) this.save.getCountries()
+                                         .values()
+                                         .stream()
+                                         .filter(Country::isAlive)
+                                         .filter(country -> defender.getReligion().equals(country.getReligion()))
+                                         .count();
+
+        return this.save.getGame()
+                        .getDefenderOfFaith()
+                        .stream()
+                        .filter(defenderOfFaith -> defenderOfFaith.isInRange(nbCountries))
+                        .findFirst()
+                        .orElse(this.save.getGame().getDefenderOfFaith().iterator().next());
     }
 
     public List<MuslimRelation> getRelations() {
