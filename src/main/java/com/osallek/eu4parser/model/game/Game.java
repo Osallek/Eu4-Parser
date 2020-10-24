@@ -144,6 +144,8 @@ public class Game {
 
     private Map<Policy, Path> policies;
 
+    private Map<Hegemon, Path> hegemons;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -193,6 +195,7 @@ public class Game {
         readStaticModifiers();
         readInvestments();
         readPolicies();
+        readHegemons();
     }
 
     public Collator getCollator() {
@@ -1030,6 +1033,24 @@ public class Game {
         return null;
     }
 
+    public List<Hegemon> getHegemons() {
+        return new ArrayList<>(this.hegemons.keySet());
+    }
+
+    public Hegemon getHegemon(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Hegemon hegemon : this.hegemons.keySet()) {
+            if (hegemon.getName().equalsIgnoreCase(name)) {
+                return hegemon;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1829,6 +1850,23 @@ public class Game {
                  });
 
             this.policies.keySet().forEach(policy -> policy.setLocalizedName(this.getLocalisation(policy.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readHegemons() {
+        File hegemonsFolder = new File(this.commonFolderPath + File.separator + "hegemons");
+
+        try (Stream<Path> paths = Files.walk(hegemonsFolder.toPath())) {
+            this.hegemons = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     hegemonsItem.getChildren().forEach(item -> this.hegemons.put(new Hegemon(item), path));
+                 });
+
+            this.hegemons.keySet().forEach(hegemon -> hegemon.setLocalizedName(this.getLocalisation(hegemon.getName())));
         } catch (IOException e) {
         }
     }

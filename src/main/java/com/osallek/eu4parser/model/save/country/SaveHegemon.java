@@ -2,21 +2,25 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Hegemon;
 import com.osallek.eu4parser.model.save.Save;
 
-public class Hegemon {
+public class SaveHegemon {
 
     private final Save save;
 
     private final ClausewitzItem item;
 
-    public Hegemon(ClausewitzItem item, Save save) {
+    private final Hegemon hegemon;
+
+    public SaveHegemon(ClausewitzItem item, Save save, Hegemon hegemon) {
         this.save = save;
         this.item = item;
+        this.hegemon = hegemon;
     }
 
-    public String getName() {
-        return this.item.getName();
+    public Hegemon getHegemon() {
+        return hegemon;
     }
 
     public Country getCountry() {

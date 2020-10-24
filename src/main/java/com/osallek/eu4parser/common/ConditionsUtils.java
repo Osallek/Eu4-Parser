@@ -818,10 +818,7 @@ public class ConditionsUtils {
             case "is_heir_leader":
                 return "yes".equalsIgnoreCase(value) == (country.getHeir() != null && country.getHeir().getLeader() != null);
             case "is_hegemon":
-                return "yes".equalsIgnoreCase(value) == (country.getPowerProjections()
-                                                                .stream()
-                                                                .map(PowerProjection::getModifier)
-                                                                .anyMatch("is_hegemon"::equals));
+                return "yes".equalsIgnoreCase(value) == (country.getHegemon() != null);
             case "is_imperial_ban_allowed":
                 return "yes".equalsIgnoreCase(value) == (!country.getSave().getHre().dismantled()
                                                          && BooleanUtils.toBoolean(country.getSave().getHre().getImperialBanAllowed()));

@@ -2,10 +2,13 @@ package com.osallek.eu4parser.common;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ModifiersUtils {
 
@@ -45,5 +48,25 @@ public class ModifiersUtils {
             default:
                 return value;
         }
+    }
+
+    public static Map<String, List<String>> scaleModifiers(Map<String, List<String>> modifiers, Number scale) {
+        scale = NumbersUtils.numberOrDefault(scale);
+        double finalScale = scale.doubleValue();
+        Map<String, List<String>> toReturn = new HashMap<>(modifiers);
+        toReturn.replaceAll((key, value) -> {
+            if (Modifiers.ModifierType.ADDITIVE.equals(ModifiersUtils.getType(key))
+                || Modifiers.ModifierType.MULTIPLICATIVE.equals(ModifiersUtils.getType(key))) {
+                return value.stream()
+                            .map(NumbersUtils::toDouble)
+                            .map(v -> BigDecimal.valueOf(v).multiply(BigDecimal.valueOf(finalScale)).doubleValue())
+                            .map(ClausewitzUtils::doubleToString)
+                            .collect(Collectors.toList());
+            }
+
+            return value;
+        });
+
+        return toReturn;
     }
 }

@@ -12,6 +12,7 @@ import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
+import com.osallek.eu4parser.model.game.Hegemon;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Mission;
 import com.osallek.eu4parser.model.game.Policy;
@@ -78,6 +79,8 @@ public class Country {
     private String localizedName;
 
     private String player;
+
+    private SaveHegemon hegemon;
 
     private Integer greatPowerRank;
 
@@ -269,6 +272,14 @@ public class Country {
 
     public boolean isNameEditable() {
         return isCustom() || isColony() || isTradeCity() || isClientState();
+    }
+
+    public SaveHegemon getHegemon() {
+        return hegemon;
+    }
+
+    public void setHegemon(SaveHegemon hegemon) {
+        this.hegemon = hegemon;
     }
 
     public File getFlagFile() {

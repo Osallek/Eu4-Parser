@@ -12,8 +12,8 @@ import com.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import com.osallek.eu4parser.model.save.combat.Combats;
 import com.osallek.eu4parser.model.save.counters.IdCounters;
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4parser.model.save.country.Hegemon;
 import com.osallek.eu4parser.model.save.country.SaveArea;
+import com.osallek.eu4parser.model.save.country.SaveHegemon;
 import com.osallek.eu4parser.model.save.country.SaveTradeCompany;
 import com.osallek.eu4parser.model.save.diplomacy.Diplomacy;
 import com.osallek.eu4parser.model.save.empire.CelestialEmpire;
@@ -47,6 +47,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Save {
 
@@ -77,7 +78,7 @@ public class Save {
 
     private Institutions institutions;
 
-    private List<Hegemon> hegemons; //Todo parse from game and check if a child with same name exists
+    private List<SaveHegemon> hegemons;
 
     private Map<String, TradeNode> tradeNodes;
 
@@ -300,6 +301,10 @@ public class Save {
 
     public Institutions getInstitutions() {
         return institutions;
+    }
+
+    public List<SaveHegemon> getHegemons() {
+        return hegemons;
     }
 
     public Map<String, TradeNode> getTradeNodes() {
@@ -715,6 +720,18 @@ public class Save {
                 }
             }
         }
+
+        this.hegemons = this.game.getHegemons().stream().flatMap(hegemon -> {
+            ClausewitzItem child = this.gamestateItem.getChild(hegemon.getName());
+
+            if (child != null) {
+                SaveHegemon saveHegemon = new SaveHegemon(child, this, hegemon);
+                saveHegemon.getCountry().setHegemon(saveHegemon);
+                return Stream.of(saveHegemon);
+            }
+
+            return Stream.empty();
+        }).collect(Collectors.toList());
 
         List<ClausewitzItem> tradeLeaguesItems = this.gamestateItem.getChildren("trade_league");
         this.tradeLeagues = tradeLeaguesItems.stream()
