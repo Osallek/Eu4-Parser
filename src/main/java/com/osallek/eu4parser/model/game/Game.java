@@ -156,6 +156,8 @@ public class Game {
 
     private Map<GreatProject, Path> greatProjects;
 
+    private Map<HolyOrder, Path> holyOrders;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -211,6 +213,7 @@ public class Game {
         readDefenderOfFaith();
         readFervors();
         readGreatProjects();
+        readHolyOrders();
     }
 
     public Collator getCollator() {
@@ -1166,6 +1169,24 @@ public class Game {
         return null;
     }
 
+    public List<HolyOrder> getHolyOrders() {
+        return new ArrayList<>(this.holyOrders.keySet());
+    }
+
+    public HolyOrder getHolyOrder(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (HolyOrder holyOrder : this.holyOrders.keySet()) {
+            if (holyOrder.getName().equalsIgnoreCase(name)) {
+                return holyOrder;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2060,11 +2081,28 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem great_projectsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     great_projectsItem.getChildren().forEach(item -> this.greatProjects.put(new GreatProject(item), path));
+                     ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     greatProjectsItem.getChildren().forEach(item -> this.greatProjects.put(new GreatProject(item), path));
                  });
 
             this.greatProjects.keySet().forEach(greatProject -> greatProject.setLocalizedName(this.getLocalisation(greatProject.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readHolyOrders() {
+        File holyOrdersFolder = new File(this.commonFolderPath + File.separator + "holy_orders");
+
+        try (Stream<Path> paths = Files.walk(holyOrdersFolder.toPath())) {
+            this.holyOrders = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem holyOrdersItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     holyOrdersItem.getChildren().forEach(item -> this.holyOrders.put(new HolyOrder(item), path));
+                 });
+
+            this.holyOrders.keySet().forEach(holyOrder -> holyOrder.setLocalizedName(this.getLocalisation(holyOrder.getName())));
         } catch (IOException e) {
         }
     }

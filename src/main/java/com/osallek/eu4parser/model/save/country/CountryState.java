@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.HolyOrder;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
@@ -65,6 +66,18 @@ public class CountryState {
     public void removeActiveEdit() {
         this.item.removeChild("active_edict");
         this.activeEdit = null;
+    }
+
+    public HolyOrder getHolyOrder() {
+        return this.save.getGame().getHolyOrder(ClausewitzUtils.removeQuotes(this.item.getVarAsString("holy_order")));
+    }
+
+    public void setHolyOrder(HolyOrder holyOrder) {
+        this.item.setVariable("holy_order", ClausewitzUtils.addQuotes(holyOrder.getName()));
+    }
+
+    public Country getHolyOrderFounder() {
+        return this.save.getCountry(this.item.getVarAsString("holy_order_founder"));
     }
 
     private void refreshAttributes() {
