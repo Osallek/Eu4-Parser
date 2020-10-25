@@ -979,7 +979,7 @@ public class ConditionsUtils {
                 calendar.setTime(country.getSave().getDate());
                 return calendar.get(Calendar.YEAR) == NumbersUtils.toInt(value);
             case "isolationism":
-                return country.getIsolationism() != null && country.getIsolationism() >= NumbersUtils.toInt(value);
+                return country.getIsolationism() != null && country.getIsolationismLevel() >= NumbersUtils.toInt(value);
             case "janissary_percentage":
                 return new BigDecimal(value).multiply(BigDecimal.valueOf(country.getArmySize()))
                                             .compareTo(BigDecimal.valueOf(country.getNbRegimentOfCategory(5))) >= 0;

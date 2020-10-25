@@ -13,6 +13,7 @@ import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
+import com.osallek.eu4parser.model.game.Isolationism;
 import com.osallek.eu4parser.model.game.Mission;
 import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.SubjectType;
@@ -643,12 +644,16 @@ public class Country {
         return this.item.getVarAsDouble("used_governing_capacity");
     }
 
-    public Integer getIsolationism() {
-        return this.item.getVarAsInt("isolationism");
+    public Isolationism getIsolationism() {
+        return this.save.getGame().getIsolationism(this.item.getVarAsInt("isolationism"));
     }
 
-    public void setIsolationism(Integer isolationism) {
-        this.item.setVariable("isolationism", isolationism);
+    public Integer getIsolationismLevel() {
+        return getIsolationism() == null ? null : getIsolationism().getIsolationValue();
+    }
+
+    public void setIsolationism(Isolationism isolationism) {
+        this.item.setVariable("isolationism", isolationism.getIsolationValue());
     }
 
     public Integer getNumExpandedAdministration() {

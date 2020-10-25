@@ -770,57 +770,63 @@ public enum StaticModifier {
     }
 
     private static Map<String, List<String>> scaleWithDaimyosAtPeace(Country country, StaticModifier staticModifier) {
-        return ModifiersUtils.scaleModifiers(staticModifier.modifiers, Math.min(10, country.getSubjects()
-                                                                                           .stream()
-                                                                                           .filter(subject -> !subject.isAtWar() &&
-                                                                                                              Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                                                                                      subject.getSubjectType().getName()))
-                                                                                           .count()));
+        return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
+                                             Math.min(10, country.getSubjects()
+                                                                 .stream()
+                                                                 .filter(subject -> !subject.isAtWar() &&
+                                                                                    Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
+                                                                                            subject.getSubjectType().getName()))
+                                                                 .count()));
     }
 
     private static Map<String, List<String>> scaleWithDaimyosSameIsolationism(Country country, StaticModifier staticModifier) {
-        return ModifiersUtils.scaleModifiers(staticModifier.modifiers, Math.min(10, country.getSubjects()
-                                                                                           .stream()
-                                                                                           .filter(subject ->
-                                                                                                           Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                                                                                   subject.getSubjectType().getName())
-                                                                                                           &&
-                                                                                                           NumbersUtils.intOrDefault(country.getIsolationism())
-                                                                                                           == NumbersUtils.intOrDefault(
-                                                                                                                   subject.getIsolationism()))
-                                                                                           .count()));
+        return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
+                                             Math.min(10, country.getSubjects()
+                                                                 .stream()
+                                                                 .filter(subject ->
+                                                                                 Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
+                                                                                         subject.getSubjectType().getName())
+                                                                                 &&
+                                                                                 NumbersUtils.intOrDefault(country.getIsolationismLevel())
+                                                                                 == NumbersUtils.intOrDefault(subject.getIsolationismLevel()))
+                                                                 .count()));
     }
 
     private static Map<String, List<String>> scaleWithDaimyosDifferentIsolationism(Country country, StaticModifier staticModifier) {
-        return ModifiersUtils.scaleModifiers(staticModifier.modifiers, Math.min(10, country.getSubjects()
-                                                                                           .stream()
-                                                                                           .filter(subject ->
-                                                                                                           Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                                                                                   subject.getSubjectType().getName())
-                                                                                                           &&
-                                                                                                           NumbersUtils.intOrDefault(country.getIsolationism())
-                                                                                                           != NumbersUtils.intOrDefault(
-                                                                                                                   subject.getIsolationism()))
-                                                                                           .count()));
+        return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
+                                             Math.min(10, country.getSubjects()
+                                                                 .stream()
+                                                                 .filter(subject ->
+                                                                                 Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
+                                                                                         subject.getSubjectType().getName())
+                                                                                 &&
+                                                                                 NumbersUtils.intOrDefault(country.getIsolationismLevel())
+                                                                                 != NumbersUtils.intOrDefault(subject.getIsolationismLevel()))
+                                                                 .count()));
     }
 
     private static Map<String, List<String>> scaleWithDaimyosSwordHunt(Country country, StaticModifier staticModifier) {
-        return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getSubjects()
-                                                                              .stream()
-                                                                              .filter(subject -> Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                                                      subject.getSubjectType().getName())
-                                                                                                 && subject.getModifiers().contains("subject_sword_hunt"))
-                                                                              .count());
+        return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
+                                             country.getSubjects()
+                                                    .stream()
+                                                    .filter(subject -> Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
+                                                            subject.getSubjectType().getName())
+                                                                       && subject.getModifiers().stream()
+                                                                                 .anyMatch(modifier -> "subject_sword_hunt".equalsIgnoreCase(
+                                                                                         modifier.getModifier())))
+                                                    .count());
     }
 
     private static Map<String, List<String>> scaleWithStreltsyPercent(Country country, StaticModifier staticModifier) {
-        return ModifiersUtils.scaleModifiers(staticModifier.modifiers, BigDecimal.valueOf(country.getNbRegimentOfCategory(3))
-                                                                                 .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
+        return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
+                                             BigDecimal.valueOf(country.getNbRegimentOfCategory(3))
+                                                       .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
     }
 
     private static Map<String, List<String>> scaleWithCossacksPercent(Country country, StaticModifier staticModifier) {
-        return ModifiersUtils.scaleModifiers(staticModifier.modifiers, BigDecimal.valueOf(country.getNbRegimentOfCategory(4))
-                                                                                 .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
+        return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
+                                             BigDecimal.valueOf(country.getNbRegimentOfCategory(4))
+                                                       .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
     }
 
     private static Map<String, List<String>> scaleWithLowProfessionalism(Country country, StaticModifier staticModifier) {

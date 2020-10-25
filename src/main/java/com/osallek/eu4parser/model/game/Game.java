@@ -158,6 +158,8 @@ public class Game {
 
     private Map<HolyOrder, Path> holyOrders;
 
+    private SortedMap<Isolationism, Path> isolationisms;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -214,6 +216,7 @@ public class Game {
         readFervors();
         readGreatProjects();
         readHolyOrders();
+        readIsolationism();
     }
 
     public Collator getCollator() {
@@ -1187,6 +1190,24 @@ public class Game {
         return null;
     }
 
+    public List<Isolationism> getIsolationisms() {
+        return new ArrayList<>(this.isolationisms.keySet());
+    }
+
+    public Isolationism getIsolationism(Integer level) {
+        if (level == null) {
+            return null;
+        }
+
+        for (Isolationism isolationism : this.isolationisms.keySet()) {
+            if (isolationism.getIsolationValue() == level) {
+                return isolationism;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2103,6 +2124,23 @@ public class Game {
                  });
 
             this.holyOrders.keySet().forEach(holyOrder -> holyOrder.setLocalizedName(this.getLocalisation(holyOrder.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readIsolationism() {
+        File isolationismFolder = new File(this.commonFolderPath + File.separator + "isolationism");
+
+        try (Stream<Path> paths = Files.walk(isolationismFolder.toPath())) {
+            this.isolationisms = new TreeMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem isolationismItem = ClausewitzParser.parse(path.toFile(), 0);
+                     isolationismItem.getChildren().forEach(item -> this.isolationisms.put(new Isolationism(item), path));
+                 });
+
+            this.isolationisms.keySet().forEach(isolationism -> isolationism.setLocalizedName(this.getLocalisation(isolationism.getName())));
         } catch (IOException e) {
         }
     }
