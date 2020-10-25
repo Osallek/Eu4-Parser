@@ -160,6 +160,8 @@ public class Game {
 
     private SortedMap<Isolationism, Path> isolationisms;
 
+    private Map<NativeAdvancements, Path> nativeAdvancements;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -217,6 +219,7 @@ public class Game {
         readGreatProjects();
         readHolyOrders();
         readIsolationism();
+        readNativeAdvancements();
     }
 
     public Collator getCollator() {
@@ -1208,6 +1211,24 @@ public class Game {
         return null;
     }
 
+    public List<NativeAdvancements> getNativeAdvancements() {
+        return new ArrayList<>(this.nativeAdvancements.keySet());
+    }
+
+    public NativeAdvancements getNativeAdvancements(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (NativeAdvancements advancements : this.nativeAdvancements.keySet()) {
+            if (advancements.getName().equalsIgnoreCase(name)) {
+                return advancements;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2141,6 +2162,27 @@ public class Game {
                  });
 
             this.isolationisms.keySet().forEach(isolationism -> isolationism.setLocalizedName(this.getLocalisation(isolationism.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readNativeAdvancements() {
+        File nativeAdvancementFolder = new File(this.commonFolderPath + File.separator + "native_advancement");
+
+        try (Stream<Path> paths = Files.walk(nativeAdvancementFolder.toPath())) {
+            this.nativeAdvancements = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem nativeAdvancementItem = ClausewitzParser.parse(path.toFile(), 0);
+                     nativeAdvancementItem.getChildren().forEach(item -> this.nativeAdvancements.put(new NativeAdvancements(item), path));
+                 });
+
+            this.nativeAdvancements.keySet().forEach(advancements -> {
+                advancements.setLocalizedName(this.getLocalisation(advancements.getName()));
+                advancements.getNativeAdvancements()
+                            .forEach(nativeAdvancement -> nativeAdvancement.setLocalizedName(this.getLocalisation(nativeAdvancement.getName())));
+            });
         } catch (IOException e) {
         }
     }

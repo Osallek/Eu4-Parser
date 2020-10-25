@@ -128,6 +128,8 @@ public class Country {
 
     private IdeaGroups ideaGroups;
 
+    private SaveNativeAdvancements nativeAdvancements;
+
     private Government government;
 
     private List<Envoy> colonists;
@@ -2918,6 +2920,10 @@ public class Country {
         return ideaGroups;
     }
 
+    public SaveNativeAdvancements getNativeAdvancements() {
+        return nativeAdvancements;
+    }
+
     public Government getGovernment() {
         return government;
     }
@@ -3765,6 +3771,12 @@ public class Country {
 
         if (activeIdeaGroupsItem != null) {
             this.ideaGroups = new IdeaGroups(activeIdeaGroupsItem, this.save);
+        }
+
+        ClausewitzItem activeNativeAdvancementItem = this.item.getChild("active_native_advancement");
+
+        if (activeNativeAdvancementItem != null) {
+            this.nativeAdvancements = new SaveNativeAdvancements(activeNativeAdvancementItem, this.save.getGame());
         }
 
         ClausewitzItem governmentItem = this.item.getChild("government");
