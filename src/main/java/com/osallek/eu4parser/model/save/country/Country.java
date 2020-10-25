@@ -3757,7 +3757,7 @@ public class Country {
         ClausewitzItem parliamentItem = this.item.getChild("parliament");
 
         if (parliamentItem != null) {
-            this.parliament = new Parliament(parliamentItem);
+            this.parliament = new Parliament(parliamentItem, this.save.getGame());
         }
 
         ClausewitzItem ledgerItem = this.item.getChild("ledger");

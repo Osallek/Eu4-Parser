@@ -164,6 +164,8 @@ public class Game {
 
     private Map<NavalDoctrine, Path> navalDoctrines;
 
+    private Map<ParliamentIssue, Path> parliamentIssues;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -223,6 +225,7 @@ public class Game {
         readIsolationism();
         readNativeAdvancements();
         readNavalDoctrine();
+        readParliamentIssue();
     }
 
     public Collator getCollator() {
@@ -1250,6 +1253,24 @@ public class Game {
         return null;
     }
 
+    public List<ParliamentIssue> getParliamentIssues() {
+        return new ArrayList<>(this.parliamentIssues.keySet());
+    }
+
+    public ParliamentIssue getParliamentIssue(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (ParliamentIssue parliamentIssue : this.parliamentIssues.keySet()) {
+            if (parliamentIssue.getName().equalsIgnoreCase(name)) {
+                return parliamentIssue;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2221,6 +2242,23 @@ public class Game {
                  });
 
             this.navalDoctrines.keySet().forEach(navalDoctrine -> navalDoctrine.setLocalizedName(this.getLocalisation(navalDoctrine.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readParliamentIssue() {
+        File parliamentIssueFolder = new File(this.commonFolderPath + File.separator + "parliament_issues");
+
+        try (Stream<Path> paths = Files.walk(parliamentIssueFolder.toPath())) {
+            this.parliamentIssues = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem parliamentIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                     parliamentIssueItem.getChildren().forEach(item -> this.parliamentIssues.put(new ParliamentIssue(item), path));
+                 });
+
+            this.parliamentIssues.keySet().forEach(parliamentIssue -> parliamentIssue.setLocalizedName(this.getLocalisation(parliamentIssue.getName())));
         } catch (IOException e) {
         }
     }

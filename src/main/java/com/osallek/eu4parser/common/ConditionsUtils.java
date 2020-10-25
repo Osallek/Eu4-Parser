@@ -259,7 +259,7 @@ public class ConditionsUtils {
                 return country.getSave().getCurrentAge().equals(value);
             case "current_debate":
                 return country.getParliament() != null && country.getParliament().getActiveParliamentIssue() != null
-                       && value.equalsIgnoreCase(ClausewitzUtils.removeQuotes(country.getParliament().getActiveParliamentIssue().getWhich()));
+                       && value.equalsIgnoreCase(country.getParliament().getActiveParliamentIssue().getWhich().getName());
             case "current_icon":
                 return country.getCurrentIcon() != null
                        && value.equalsIgnoreCase(country.getReligion().getGameReligion().getIcons().get(country.getCurrentIcon()).getName());

@@ -1,14 +1,20 @@
 package com.osallek.eu4parser.model.save.country;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.ParliamentIssue;
 
 import java.util.Date;
 
 public class ActiveParliamentIssue {
 
+    private final Game game;
+
     private final ClausewitzItem item;
 
-    public ActiveParliamentIssue(ClausewitzItem item) {
+    public ActiveParliamentIssue(ClausewitzItem item, Game game) {
+        this.game = game;
         this.item = item;
     }
 
@@ -24,11 +30,11 @@ public class ActiveParliamentIssue {
         return this.item.getVarAsInt("back");
     }
 
-    public String getWhich() {
-        return this.item.getVarAsString("which");
+    public ParliamentIssue getWhich() {
+        return this.game.getParliamentIssue(ClausewitzUtils.removeQuotes(this.item.getVarAsString("which")));
     }
 
-    public void setWhich(String which) {
-        this.item.setVariable("which", which);
+    public void setWhich(ParliamentIssue which) {
+        this.item.setVariable("which", ClausewitzUtils.addQuotes(which.getName()));
     }
 }
