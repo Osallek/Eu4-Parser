@@ -8,6 +8,7 @@ import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.GreatProject;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Province;
 import com.osallek.eu4parser.model.game.TradeGood;
@@ -799,11 +800,11 @@ public class SaveProvince extends Province {
         refreshAttributes();
     }
 
-    public List<String> getGreatProjects() {
+    public List<GreatProject> getGreatProjects() {
         ClausewitzList list = this.item.getList("great_projects");
 
         if (list != null) {
-            return list.getValues();
+            return list.getValues().stream().map(s -> this.save.getGame().getGreatProject(s)).filter(Objects::nonNull).collect(Collectors.toList());
         } else {
             return new ArrayList<>();
         }

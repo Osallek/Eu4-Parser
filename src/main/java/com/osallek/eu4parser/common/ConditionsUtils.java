@@ -16,13 +16,13 @@ import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.TradeLeague;
 import com.osallek.eu4parser.model.save.country.ActivePolicy;
 import com.osallek.eu4parser.model.save.country.Country;
-import com.osallek.eu4parser.model.save.country.SaveFaction;
 import com.osallek.eu4parser.model.save.country.Income;
 import com.osallek.eu4parser.model.save.country.Leader;
 import com.osallek.eu4parser.model.save.country.LeaderType;
 import com.osallek.eu4parser.model.save.country.Modifier;
 import com.osallek.eu4parser.model.save.country.Queen;
 import com.osallek.eu4parser.model.save.country.SaveEstate;
+import com.osallek.eu4parser.model.save.country.SaveFaction;
 import com.osallek.eu4parser.model.save.diplomacy.QuantifyDatableRelation;
 import com.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import com.osallek.eu4parser.model.save.gameplayoptions.NationSetup;
@@ -2406,7 +2406,7 @@ public class ConditionsUtils {
             case "has_global_flag":
                 return province.getSave().getFlags().contains(value);
             case "has_great_project":
-                return province.getGreatProjects().contains(ClausewitzUtils.addQuotes(value));
+                return province.getGreatProjects().stream().anyMatch(greatProject -> greatProject.getName().equalsIgnoreCase(value));
             case "has_heir_leader_from":
                 other = province.getSave().getCountry(value);
                 return province.getArmies()

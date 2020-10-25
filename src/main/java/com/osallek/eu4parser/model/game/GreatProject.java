@@ -2,27 +2,37 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Fervor {
+public class GreatProject {
 
     private final String name;
 
     private String localizedName;
 
-    private final int cost;
+    private final String ambientObject;
+
+    private final int province;
+
+    private final boolean isCanal;
+
+    private final int time;
 
     private final Map<String, List<String>> modifiers;
 
-    public Fervor(ClausewitzItem item) {
+    public GreatProject(ClausewitzItem item) {
         this.name = item.getName();
-        this.cost = item.getVarAsInt("cost");
+        this.ambientObject = item.getVarAsString("ambient_object");
+        this.province = item.getVarAsInt("province");
+        this.isCanal = BooleanUtils.toBoolean(item.getVarAsBool("is_canal"));
+        this.time = item.getVarAsInt("time");
 
-        ClausewitzItem child = item.getChild("effect");
+        ClausewitzItem child = item.getChild("modifier");
         this.modifiers = child == null ? null : child.getVariables()
                                                      .stream()
                                                      .collect(Collectors.groupingBy(ClausewitzVariable::getName,
@@ -41,8 +51,20 @@ public class Fervor {
         this.localizedName = localizedName;
     }
 
-    public int getCost() {
-        return cost;
+    public String getAmbientObject() {
+        return ambientObject;
+    }
+
+    public int getProvince() {
+        return province;
+    }
+
+    public boolean isCanal() {
+        return isCanal;
+    }
+
+    public int getTime() {
+        return time;
     }
 
     public Map<String, List<String>> getModifiers() {
@@ -55,11 +77,11 @@ public class Fervor {
             return true;
         }
 
-        if (!(o instanceof Fervor)) {
+        if (!(o instanceof GreatProject)) {
             return false;
         }
 
-        Fervor area = (Fervor) o;
+        GreatProject area = (GreatProject) o;
 
         return Objects.equals(name, area.name);
     }

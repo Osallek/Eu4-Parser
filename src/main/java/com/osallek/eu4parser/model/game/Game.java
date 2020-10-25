@@ -154,6 +154,8 @@ public class Game {
 
     private Map<Fervor, Path> fervors;
 
+    private Map<GreatProject, Path> greatProjects;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -208,6 +210,7 @@ public class Game {
         readAges();
         readDefenderOfFaith();
         readFervors();
+        readGreatProjects();
     }
 
     public Collator getCollator() {
@@ -255,11 +258,7 @@ public class Game {
     }
 
     public File getCountryFlagImage(Country country) {
-        if (country == null) {
-            return null;
-        }
-
-        return new File(this.gfxFolderPath + File.separator + "flags" + File.separator + country.getTag() + ".tga");
+        return country == null ? null : new File(this.gfxFolderPath + File.separator + "flags" + File.separator + country.getTag() + ".tga");
     }
 
     public Map<Integer, Province> getProvinces() {
@@ -1149,6 +1148,24 @@ public class Game {
         return null;
     }
 
+    public List<GreatProject> getGreatProjects() {
+        return new ArrayList<>(this.greatProjects.keySet());
+    }
+
+    public GreatProject getGreatProject(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (GreatProject greatProject : this.greatProjects.keySet()) {
+            if (greatProject.getName().equalsIgnoreCase(name)) {
+                return greatProject;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2031,6 +2048,23 @@ public class Game {
                  });
 
             this.fervors.keySet().forEach(fervor -> fervor.setLocalizedName(this.getLocalisation(fervor.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readGreatProjects() {
+        File greatProjectsFolder = new File(this.commonFolderPath + File.separator + "great_projects");
+
+        try (Stream<Path> paths = Files.walk(greatProjectsFolder.toPath())) {
+            this.greatProjects = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem great_projectsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     great_projectsItem.getChildren().forEach(item -> this.greatProjects.put(new GreatProject(item), path));
+                 });
+
+            this.greatProjects.keySet().forEach(greatProject -> greatProject.setLocalizedName(this.getLocalisation(greatProject.getName())));
         } catch (IOException e) {
         }
     }
