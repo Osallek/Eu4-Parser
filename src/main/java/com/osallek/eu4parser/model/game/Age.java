@@ -39,9 +39,9 @@ public class Age {
         this.canStart = child == null ? null : new Condition(child);
 
         child = item.getChild("absolutism");
-        this.absolutism = child.getVariables()
-                               .stream()
-                               .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt));
+        this.absolutism = child == null ? null : child.getVariables()
+                                                      .stream()
+                                                      .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt));
 
         child = item.getChild("abilities");
         this.abilities = child == null ? null : child.getChildren()

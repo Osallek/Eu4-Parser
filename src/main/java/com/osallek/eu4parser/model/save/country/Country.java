@@ -83,7 +83,7 @@ public class Country {
 
     private Integer greatPowerRank;
 
-    private Fervor fervor;
+    private SaveFervor fervor;
 
     private PlayerAiPrefsCommand playerAiPrefsCommand;
 
@@ -857,7 +857,7 @@ public class Country {
         return this.save.getReligions().getReligion(this.item.getVarAsString("dominant_religion"));
     }
 
-    public Fervor getFervor() {
+    public SaveFervor getFervor() {
         return fervor;
     }
 
@@ -3613,7 +3613,7 @@ public class Country {
         ClausewitzItem fervorItem = this.item.getChild("fervor");
 
         if (fervorItem != null) {
-            this.fervor = new Fervor(fervorItem);
+            this.fervor = new SaveFervor(fervorItem, this.save.getGame());
         }
 
         ClausewitzItem playerAiPrefsCommandItem = this.item.getChild("player_ai_prefs_command");

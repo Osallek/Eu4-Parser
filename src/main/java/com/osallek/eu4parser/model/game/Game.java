@@ -152,6 +152,8 @@ public class Game {
 
     private SortedMap<DefenderOfFaith, Path> defenderOfFaith;
 
+    private Map<Fervor, Path> fervors;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -205,6 +207,7 @@ public class Game {
         readFactions();
         readAges();
         readDefenderOfFaith();
+        readFervors();
     }
 
     public Collator getCollator() {
@@ -1128,6 +1131,24 @@ public class Game {
         return this.defenderOfFaith.keySet();
     }
 
+    public List<Fervor> getFervors() {
+        return new ArrayList<>(this.fervors.keySet());
+    }
+
+    public Fervor getFervor(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (Fervor fervor : this.fervors.keySet()) {
+            if (fervor.getName().equalsIgnoreCase(name)) {
+                return fervor;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -1826,12 +1847,12 @@ public class Game {
 
                      Power power = Power.byName(techItem.getVarAsString("monarch_power"));
                      Map<String, List<String>> aheadOfTime = !techItem.hasChild("ahead_of_time") ? null :
-                             techItem.getChild("ahead_of_time")
-                                     .getVariables()
-                                     .stream()
-                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                    Collectors.mapping(ClausewitzVariable::getValue,
-                                                                                       Collectors.toList())));
+                                                             techItem.getChild("ahead_of_time")
+                                                                     .getVariables()
+                                                                     .stream()
+                                                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
+                                                                                                    Collectors.mapping(ClausewitzVariable::getValue,
+                                                                                                                       Collectors.toList())));
 
                      techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
                  });
@@ -1993,6 +2014,23 @@ public class Game {
                      ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
                      defenderOfFaithItem.getChildren().forEach(item -> this.defenderOfFaith.put(new DefenderOfFaith(item), path));
                  });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readFervors() {
+        File fervorsFolder = new File(this.commonFolderPath + File.separator + "fervor");
+
+        try (Stream<Path> paths = Files.walk(fervorsFolder.toPath())) {
+            this.fervors = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem fervorsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                     fervorsItem.getChildren().forEach(item -> this.fervors.put(new Fervor(item), path));
+                 });
+
+            this.fervors.keySet().forEach(fervor -> fervor.setLocalizedName(this.getLocalisation(fervor.getName())));
         } catch (IOException e) {
         }
     }
