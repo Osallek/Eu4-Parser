@@ -162,6 +162,8 @@ public class Game {
 
     private Map<NativeAdvancements, Path> nativeAdvancements;
 
+    private Map<NavalDoctrine, Path> navalDoctrines;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -220,6 +222,7 @@ public class Game {
         readHolyOrders();
         readIsolationism();
         readNativeAdvancements();
+        readNavalDoctrine();
     }
 
     public Collator getCollator() {
@@ -1229,6 +1232,24 @@ public class Game {
         return null;
     }
 
+    public List<NavalDoctrine> getNavalDoctrines() {
+        return new ArrayList<>(this.navalDoctrines.keySet());
+    }
+
+    public NavalDoctrine getNavalDoctrine(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (NavalDoctrine navalDoctrine : this.navalDoctrines.keySet()) {
+            if (navalDoctrine.getName().equalsIgnoreCase(name)) {
+                return navalDoctrine;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2183,6 +2204,23 @@ public class Game {
                 advancements.getNativeAdvancements()
                             .forEach(nativeAdvancement -> nativeAdvancement.setLocalizedName(this.getLocalisation(nativeAdvancement.getName())));
             });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readNavalDoctrine() {
+        File navalDoctrineFolder = new File(this.commonFolderPath + File.separator + "naval_doctrines");
+
+        try (Stream<Path> paths = Files.walk(navalDoctrineFolder.toPath())) {
+            this.navalDoctrines = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem navalDoctrineItem = ClausewitzParser.parse(path.toFile(), 0);
+                     navalDoctrineItem.getChildren().forEach(item -> this.navalDoctrines.put(new NavalDoctrine(item), path));
+                 });
+
+            this.navalDoctrines.keySet().forEach(navalDoctrine -> navalDoctrine.setLocalizedName(this.getLocalisation(navalDoctrine.getName())));
         } catch (IOException e) {
         }
     }

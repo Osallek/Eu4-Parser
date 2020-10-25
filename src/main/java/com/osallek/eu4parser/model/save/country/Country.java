@@ -15,6 +15,7 @@ import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Isolationism;
 import com.osallek.eu4parser.model.game.Mission;
+import com.osallek.eu4parser.model.game.NavalDoctrine;
 import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
@@ -3508,6 +3509,14 @@ public class Country {
 
     public HistoryStatsCache getHistoryStatsCache() {
         return historyStatsCache;
+    }
+
+    public NavalDoctrine getNavalDoctrine() {
+        return this.save.getGame().getNavalDoctrine(ClausewitzUtils.removeQuotes(this.item.getVarAsString("naval_doctrine")));
+    }
+
+    public void setNavalDoctrine(NavalDoctrine navalDoctrine) {
+        this.item.setVariable("naval_doctrine", ClausewitzUtils.addQuotes(navalDoctrine.getName()));
     }
 
     public Missions getCountryMissions() {
