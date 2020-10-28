@@ -556,7 +556,7 @@ public class ConditionsUtils {
             case "has_patriarchs":
                 return "yes".equalsIgnoreCase(value) == country.getReligion().getGameReligion().hasPatriarchs();
             case "has_personal_deity":
-                return value.equalsIgnoreCase(ClausewitzUtils.removeQuotes(country.getPersonalDeity()));
+                return value.equalsIgnoreCase(country.getPersonalDeity().getName());
             case "has_privateers":
                 return "yes".equalsIgnoreCase(value) == NumbersUtils.intOrDefault(country.getNumShipsPrivateering()) > 0;
             case "has_promote_investments":

@@ -166,6 +166,8 @@ public class Game {
 
     private Map<ParliamentIssue, Path> parliamentIssues;
 
+    private Map<PersonalDeity, Path> personalDeities;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -226,6 +228,7 @@ public class Game {
         readNativeAdvancements();
         readNavalDoctrine();
         readParliamentIssue();
+        readPersonalDeities();
     }
 
     public Collator getCollator() {
@@ -1271,6 +1274,24 @@ public class Game {
         return null;
     }
 
+    public List<PersonalDeity> getPersonalDeities() {
+        return new ArrayList<>(this.personalDeities.keySet());
+    }
+
+    public PersonalDeity getPersonalDeity(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (PersonalDeity personalDeity : this.personalDeities.keySet()) {
+            if (personalDeity.getName().equalsIgnoreCase(name)) {
+                return personalDeity;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2259,6 +2280,23 @@ public class Game {
                  });
 
             this.parliamentIssues.keySet().forEach(parliamentIssue -> parliamentIssue.setLocalizedName(this.getLocalisation(parliamentIssue.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readPersonalDeities() {
+        File personalDeitiesFolder = new File(this.commonFolderPath + File.separator + "personal_deities");
+
+        try (Stream<Path> paths = Files.walk(personalDeitiesFolder.toPath())) {
+            this.personalDeities = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem personalIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                     personalIssueItem.getChildren().forEach(item -> this.personalDeities.put(new PersonalDeity(item), path));
+                 });
+
+            this.personalDeities.keySet().forEach(personalIssue -> personalIssue.setLocalizedName(this.getLocalisation(personalIssue.getName())));
         } catch (IOException e) {
         }
     }

@@ -16,6 +16,7 @@ import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Isolationism;
 import com.osallek.eu4parser.model.game.Mission;
 import com.osallek.eu4parser.model.game.NavalDoctrine;
+import com.osallek.eu4parser.model.game.PersonalDeity;
 import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
@@ -2732,12 +2733,12 @@ public class Country {
         this.item.setVariable("doom", doom);
     }
 
-    public String getPersonalDeity() {
-        return this.item.getVarAsString("personal_deity");
+    public PersonalDeity getPersonalDeity() {
+        return this.save.getGame().getPersonalDeity(ClausewitzUtils.removeQuotes(this.item.getVarAsString("personal_deity")));
     }
 
-    public void setPersonalDeity(String personalDeity) {
-        this.item.setVariable("personal_deity", ClausewitzUtils.addQuotes(personalDeity));
+    public void setPersonalDeity(PersonalDeity personalDeity) {
+        this.item.setVariable("personal_deity", ClausewitzUtils.addQuotes(personalDeity.getName()));
     }
 
     public List<String> getFetishistCults() {
