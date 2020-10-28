@@ -168,6 +168,8 @@ public class Game {
 
     private Map<PersonalDeity, Path> personalDeities;
 
+    private Map<ReligiousReforms, Path> religiousReforms;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -229,6 +231,7 @@ public class Game {
         readNavalDoctrine();
         readParliamentIssue();
         readPersonalDeities();
+        readReligiousReforms();
     }
 
     public Collator getCollator() {
@@ -1292,6 +1295,24 @@ public class Game {
         return null;
     }
 
+    public List<ReligiousReforms> getReligiousReforms() {
+        return new ArrayList<>(this.religiousReforms.keySet());
+    }
+
+    public ReligiousReforms getReligiousReforms(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (ReligiousReforms reforms : this.religiousReforms.keySet()) {
+            if (reforms.getName().equalsIgnoreCase(name)) {
+                return reforms;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2297,6 +2318,26 @@ public class Game {
                  });
 
             this.personalDeities.keySet().forEach(personalIssue -> personalIssue.setLocalizedName(this.getLocalisation(personalIssue.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readReligiousReforms() {
+        File religiousReformFolder = new File(this.commonFolderPath + File.separator + "religious_reforms");
+
+        try (Stream<Path> paths = Files.walk(religiousReformFolder.toPath())) {
+            this.religiousReforms = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem religiousReformItem = ClausewitzParser.parse(path.toFile(), 0);
+                     religiousReformItem.getChildren().forEach(item -> this.religiousReforms.put(new ReligiousReforms(item), path));
+                 });
+
+            this.religiousReforms.keySet().forEach(reforms -> {
+                reforms.setLocalizedName(this.getLocalisation(reforms.getName()));
+                reforms.getReforms().forEach(religiousReform -> religiousReform.setLocalizedName(this.getLocalisation(religiousReform.getName())));
+            });
         } catch (IOException e) {
         }
     }

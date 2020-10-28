@@ -130,6 +130,8 @@ public class Country {
 
     private IdeaGroups ideaGroups;
 
+    private SaveReligiousReforms religiousReforms;
+
     private SaveNativeAdvancements nativeAdvancements;
 
     private Government government;
@@ -2922,6 +2924,10 @@ public class Country {
         return ideaGroups;
     }
 
+    public SaveReligiousReforms getReligiousReforms() {
+        return religiousReforms;
+    }
+
     public SaveNativeAdvancements getNativeAdvancements() {
         return nativeAdvancements;
     }
@@ -3781,6 +3787,12 @@ public class Country {
 
         if (activeIdeaGroupsItem != null) {
             this.ideaGroups = new IdeaGroups(activeIdeaGroupsItem, this.save);
+        }
+
+        ClausewitzItem activeReligiousReformsItem = this.item.getChild("active_religious_reform");
+
+        if (activeReligiousReformsItem != null) {
+            this.religiousReforms = new SaveReligiousReforms(activeReligiousReformsItem, this.save.getGame());
         }
 
         ClausewitzItem activeNativeAdvancementItem = this.item.getChild("active_native_advancement");
