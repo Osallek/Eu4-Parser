@@ -170,6 +170,8 @@ public class Game {
 
     private Map<ReligiousReforms, Path> religiousReforms;
 
+    private Map<CrownLandBonus, Path> crownLandBonuses;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -232,6 +234,7 @@ public class Game {
         readParliamentIssue();
         readPersonalDeities();
         readReligiousReforms();
+        readCrownLandBonuses();
     }
 
     public Collator getCollator() {
@@ -1313,6 +1316,10 @@ public class Game {
         return null;
     }
 
+    public Set<CrownLandBonus> getCrownLandBonuses() {
+        return this.crownLandBonuses.keySet();
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2338,6 +2345,21 @@ public class Game {
                 reforms.setLocalizedName(this.getLocalisation(reforms.getName()));
                 reforms.getReforms().forEach(religiousReform -> religiousReform.setLocalizedName(this.getLocalisation(religiousReform.getName())));
             });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readCrownLandBonuses() {
+        File estateCrownLandFolder = new File(this.commonFolderPath + File.separator + "estate_crown_land");
+
+        try (Stream<Path> paths = Files.walk(estateCrownLandFolder.toPath())) {
+            this.crownLandBonuses = new TreeMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
+                     defenderOfFaithItem.getChildren("bonus").forEach(item -> this.crownLandBonuses.put(new CrownLandBonus(item), path));
+                 });
         } catch (IOException e) {
         }
     }

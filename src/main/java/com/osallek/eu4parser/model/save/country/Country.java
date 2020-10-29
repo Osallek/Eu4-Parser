@@ -10,6 +10,7 @@ import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Continent;
+import com.osallek.eu4parser.model.game.CrownLandBonus;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
@@ -906,6 +907,12 @@ public class Country {
 
     public SaveEstate getEstate(String name) {
         return this.estates.stream().filter(estate -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(estate.getType()))).findFirst().orElse(null);
+    }
+
+    public CrownLandBonus getCrownLandBonus() {
+        double crownLand = 100 - this.getEstates().stream().mapToDouble(SaveEstate::getTerritory).sum();
+
+        return this.save.getGame().getCrownLandBonuses().stream().filter(crownLandBonus -> crownLandBonus.isInRange(crownLand)).findFirst().orElse(null);
     }
 
     public ActiveAgenda getActiveAgenda() {
