@@ -2236,9 +2236,9 @@ public class ConditionsUtils {
                 tradeNode = root.getSave().getTradeNode(condition.getCondition("node"));
 
                 if ("any".equalsIgnoreCase(condition.getCondition("policy"))) {
-                    return StringUtils.isNotBlank(tradeNode.getCountry(root).getTradePolicy());
+                    return tradeNode.getCountry(root).getTradePolicy() != null;
                 } else {
-                    return condition.getCondition("policy").equalsIgnoreCase(tradeNode.getCountry(root).getTradePolicy());
+                    return condition.getCondition("policy").equalsIgnoreCase(tradeNode.getCountry(root).getTradePolicy().getName());
                 }
             case "trust":
                 country = root.getSave().getCountry(condition.getCondition("who"));

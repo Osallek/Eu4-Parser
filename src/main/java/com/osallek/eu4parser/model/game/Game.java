@@ -174,6 +174,8 @@ public class Game {
 
     private Map<StateEdict, Path> stateEdicts;
 
+    private Map<TradePolicy, Path> tradePolicies;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -238,6 +240,7 @@ public class Game {
         readReligiousReforms();
         readCrownLandBonuses();
         readStateEdicts();
+        readTradePolicies();
     }
 
     public Collator getCollator() {
@@ -1341,6 +1344,24 @@ public class Game {
         return null;
     }
 
+    public List<TradePolicy> getTradePolicies() {
+        return new ArrayList<>(this.tradePolicies.keySet());
+    }
+
+    public TradePolicy getTradePolicy(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (TradePolicy tradePolicy : this.tradePolicies.keySet()) {
+            if (tradePolicy.getName().equalsIgnoreCase(name)) {
+                return tradePolicy;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2398,6 +2419,23 @@ public class Game {
                  });
 
             this.stateEdicts.keySet().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readTradePolicies() {
+        File tradePoliciesFolder = new File(this.commonFolderPath + File.separator + "trading_policies");
+
+        try (Stream<Path> paths = Files.walk(tradePoliciesFolder.toPath())) {
+            this.tradePolicies = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem tradeIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                     tradeIssueItem.getChildren().forEach(item -> this.tradePolicies.put(new TradePolicy(item), path));
+                 });
+
+            this.tradePolicies.keySet().forEach(tradeIssue -> tradeIssue.setLocalizedName(this.getLocalisation(tradeIssue.getName())));
         } catch (IOException e) {
         }
     }

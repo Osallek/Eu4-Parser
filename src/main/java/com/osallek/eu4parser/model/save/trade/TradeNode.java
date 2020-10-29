@@ -144,7 +144,7 @@ public class TradeNode {
         this.countries = this.item.getChildren()
                                   .stream()
                                   .filter(child -> child.hasVar("max_demand"))
-                                  .map(TradeNodeCountry::new)
+                                  .map(child -> new TradeNodeCountry(this.save.getGame(), child))
                                   .collect(Collectors.toMap(TradeNodeCountry::getCountry, Function.identity()));
 
         ClausewitzList topProvincesList = this.item.getList("top_provinces");

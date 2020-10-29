@@ -2,6 +2,8 @@ package com.osallek.eu4parser.model.save.trade;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.TradePolicy;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
@@ -14,11 +16,14 @@ import java.util.stream.Collectors;
 
 public class TradeNodeCountry {
 
+    private final Game game;
+
     private final ClausewitzItem item;
 
     private Map<String, TradeNodeModifier> modifiers;
 
-    public TradeNodeCountry(ClausewitzItem item) {
+    public TradeNodeCountry(Game game, ClausewitzItem item) {
+        this.game = game;
         this.item = item;
         refreshAttributes();
     }
@@ -159,16 +164,16 @@ public class TradeNodeCountry {
         return this.item.getVarAsDouble("already_sent");
     }
 
-    public String getTradePolicy() {
-        return this.item.getVarAsString("trading_policy");
+    public TradePolicy getTradePolicy() {
+        return this.game.getTradePolicy(ClausewitzUtils.removeQuotes(this.item.getVarAsString("trading_policy")));
     }
 
     public Date getTradePolicyDate() {
         return this.item.getVarAsDate("trading_policy_date");
     }
 
-    public void setTradePolicy(String name, Date date) {
-        this.item.setVariable("trading_policy", ClausewitzUtils.addQuotes(name));
+    public void setTradePolicy(TradePolicy name, Date date) {
+        this.item.setVariable("trading_policy", ClausewitzUtils.addQuotes(name.getName()));
         this.item.setVariable("trading_policy_date", date);
     }
 
