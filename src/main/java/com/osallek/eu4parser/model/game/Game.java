@@ -172,6 +172,8 @@ public class Game {
 
     private Map<CrownLandBonus, Path> crownLandBonuses;
 
+    private Map<StateEdict, Path> stateEdicts;
+
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
@@ -235,6 +237,7 @@ public class Game {
         readPersonalDeities();
         readReligiousReforms();
         readCrownLandBonuses();
+        readStateEdicts();
     }
 
     public Collator getCollator() {
@@ -1320,6 +1323,24 @@ public class Game {
         return this.crownLandBonuses.keySet();
     }
 
+    public List<StateEdict> getStateEdicts() {
+        return new ArrayList<>(this.stateEdicts.keySet());
+    }
+
+    public StateEdict getStateEdict(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (StateEdict stateEdict : this.stateEdicts.keySet()) {
+            if (stateEdict.getName().equalsIgnoreCase(name)) {
+                return stateEdict;
+            }
+        }
+
+        return null;
+    }
+
     public void loadLocalisations() throws IOException {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
@@ -2360,6 +2381,23 @@ public class Game {
                      ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
                      defenderOfFaithItem.getChildren("bonus").forEach(item -> this.crownLandBonuses.put(new CrownLandBonus(item), path));
                  });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readStateEdicts() {
+        File stateEdictsFolder = new File(this.commonFolderPath + File.separator + "state_edicts");
+
+        try (Stream<Path> paths = Files.walk(stateEdictsFolder.toPath())) {
+            this.stateEdicts = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem stateIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                     stateIssueItem.getChildren().forEach(item -> this.stateEdicts.put(new StateEdict(item), path));
+                 });
+
+            this.stateEdicts.keySet().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
         } catch (IOException e) {
         }
     }

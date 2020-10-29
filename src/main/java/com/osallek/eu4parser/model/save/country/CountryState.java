@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.HolyOrder;
+import com.osallek.eu4parser.model.game.StateEdict;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.util.Date;
@@ -13,7 +14,7 @@ public class CountryState {
 
     private final ClausewitzItem item;
 
-    private Edit activeEdit;
+    private Edict activeEdict;
 
     public CountryState(ClausewitzItem item, Save save) {
         this.save = save;
@@ -49,23 +50,23 @@ public class CountryState {
         return this.save.getCountry(this.item.getVarAsString("country"));
     }
 
-    public Edit getActiveEdit() {
-        return activeEdit;
+    public Edict getActiveEdict() {
+        return activeEdict;
     }
 
-    public void setActiveEdit(String which, Date date) {
-        if (this.activeEdit != null) {
-            this.activeEdit.setWhich(which);
-            this.activeEdit.setDate(date);
+    public void setActiveEdict(StateEdict which, Date date) {
+        if (this.activeEdict != null) {
+            this.activeEdict.setWhich(which);
+            this.activeEdict.setDate(date);
         } else {
-            Edit.addToItem(this.item, which, date);
+            Edict.addToItem(this.item, which, date);
             refreshAttributes();
         }
     }
 
-    public void removeActiveEdit() {
+    public void removeActiveEdict() {
         this.item.removeChild("active_edict");
-        this.activeEdit = null;
+        this.activeEdict = null;
     }
 
     public HolyOrder getHolyOrder() {
@@ -84,7 +85,7 @@ public class CountryState {
         ClausewitzItem activeEditItem = this.item.getChild("active_edict");
 
         if (activeEditItem != null) {
-            this.activeEdit = new Edit(activeEditItem);
+            this.activeEdict = new Edict(activeEditItem, this.save.getGame());
         }
     }
 
