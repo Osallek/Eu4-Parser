@@ -51,28 +51,24 @@ public enum StaticModifiers {
     SEVERE_MONSOON(new Condition(Pair.of("has_monsoon", "severe_monsoon")), null, null),
     BLOCKADED(new Condition(Pair.of("is_blockaded", "yes")), null, null),
     NO_ADJACENT_CONTROLLED(new Condition(Pair.of("always", "no")), null, null), //Todo
-    PROVINCIAL_TAX_INCOME(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null,
-                          StaticModifiers::scaleTax),
-    PROVINCIAL_PRODUCTION_SIZE(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null,
-                               StaticModifiers::scaleProd),
+    PROVINCIAL_TAX_INCOME(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null, null),
+    PROVINCIAL_PRODUCTION_SIZE(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null, null),
     KNOWLEDGE_SHARING(new Condition(Pair.of("knowledge_sharing", "yes")), null, null),
     CARDINALS_SPREAD_INSTITUTION(new Condition(Pair.of("has_cardinal", "yes")), null, null),
-    MANPOWER(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null,
-             StaticModifiers::scaleManpower),
-    SAILORS(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null, StaticModifiers::scaleManpower),
+    MANPOWER(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null, null),
+    SAILORS(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null, null),
     HORDE_DEVELOPMENT(new Condition(Pair.of("nomad_development_scale", "yes")), null, null),
     PROVINCE_RAZED(new Condition(Pair.of("has_province_modifier", "province_razed")), null, null),
-    DEVELOPMENT(new Condition(Pair.of("always", "true")), null, StaticModifiers::scaleDev),
-    DEVELOPMENT_SCALED(new Condition(Pair.of("always", "true")), null, StaticModifiers::scaleDevImprove),
+    DEVELOPMENT(new Condition(Pair.of("always", "true")), null, null),
+    DEVELOPMENT_SCALED(new Condition(Pair.of("always", "true")), null, null),
     CAPITAL_CITY(new Condition(Pair.of("capital", "yes")), null, null),
     PATRIARCH_STATE(new Condition(Pair.of("has_state_patriach", "yes")), null, null),
-    PATRIARCH_AUTHORITY_LOCAL(new Condition(Pair.of("has_owner_religion", "yes"), Pair.of("owner_has_patriarchs", "yes")), null,
-                              StaticModifiers::scalePatriarchAuthority),
-    PATRIARCH_AUTHORITY_GLOBAL(new Condition(Pair.of("has_patriarchs", "yes")), StaticModifiers::scalePatriarchAuthority, null),
+    PATRIARCH_AUTHORITY_LOCAL(new Condition(Pair.of("has_owner_religion", "yes"), Pair.of("owner_has_patriarchs", "yes")), null, null),
+    PATRIARCH_AUTHORITY_GLOBAL(new Condition(Pair.of("has_patriarchs", "yes")), null, null),
     PASHA_STATE(new Condition(Pair.of("has_state_pasha", "yes")), null, null),
-    COLONY_LEVEL(new Condition(Pair.of("is_colony", "yes")), null, StaticModifiers::scaleColonySize100),
-    NATIVE_ASSIMILATION(new Condition(Pair.of("is_colony", "yes")), null, StaticModifiers::scaleNativeSize), //Fixme modifier
-    NATIVE_AGGRESSIVENESS(new Condition(Pair.of("is_colony", "yes")), null, StaticModifiers::scaleNativeHostileness),
+    COLONY_LEVEL(new Condition(Pair.of("is_colony", "yes")), null, null),
+    NATIVE_ASSIMILATION(new Condition(Pair.of("is_colony", "yes")), null, null), //Fixme modifier
+    NATIVE_AGGRESSIVENESS(new Condition(Pair.of("is_colony", "yes")), null, null),
     CORE(new Condition(Pair.of("is_state_core", "yes")), null, null),
     NON_CORE(new Condition(Pair.of("is_cored", "no"), Pair.of("is_state", "yes")), null, null),
     TERRITORY_CORE(new Condition(Pair.of("is_territorial_core", "yes")), null, null),
@@ -84,20 +80,20 @@ public enum StaticModifiers {
     NON_ACCEPTED_CULTURE_REPUBLIC(new Condition(Pair.of("non_accepted_culture_republic", "no")), null, null),
     OCCUPIED(new Condition(Pair.of("is_occupied", "yes")), null, null),
     UNDER_SIEGE(new Condition(Pair.of("unit_in_siege", "yes")), null, null),
-    DEVASTATION(new Condition(Pair.of("has_devastation", "yes")), null, StaticModifiers::scaleDevastation),
+    DEVASTATION(new Condition(Pair.of("has_devastation", "yes")), null, null),
     PROSPERITY(new Condition(Pair.of("is_prosperous", "yes")), null, null),
     SLAVES_RAIDED(new Condition(Pair.of("has_province_modifier", "slaves_raided")), null, null),
     //    TOLERANCE(new Condition(Pair.of("always", "yes")), null, applyToProvince), //Fixme //Scale with 1 tolerance
     //    INTOLERANCE(new Condition(Pair.of("always", "yes")), null, applyToProvince), //Fixme //Scale with -1 tolerance
-    UNREST(new Condition(Pair.of("always", "yes")), null, StaticModifiers::scaleUnrest),
-    NATIONALISM(new Condition(Pair.of("always", "yes")), null, StaticModifiers::scaleNationalism),
+    UNREST(new Condition(Pair.of("always", "yes")), null, null),
+    NATIONALISM(new Condition(Pair.of("always", "yes")), null, null),
     HARSH_TREATMENT(new Condition(Pair.of("always", "yes")), null, null), //Fixme Don't know how to parse
-    LOCAL_AUTONOMY_MULTIPLICATIVE(new Condition(Pair.of("is_owned_by_trade_company", "no")), null, StaticModifiers::scaleAutonomy),
+    LOCAL_AUTONOMY_MULTIPLICATIVE(new Condition(Pair.of("is_owned_by_trade_company", "no")), null, null),
     LOCAL_AUTONOMY(new Condition(Pair.of("always", "yes")), null, null),
-    LOCAL_AUTONOMY_TRADE_COMPANY_MULTIPLICATIVE(new Condition(Pair.of("is_owned_by_trade_company", "yes")), null, StaticModifiers::scaleAutonomy),
+    LOCAL_AUTONOMY_TRADE_COMPANY_MULTIPLICATIVE(new Condition(Pair.of("is_owned_by_trade_company", "yes")), null, null),
     LOCAL_AUTONOMY_TRADE_COMPANY(new Condition(Pair.of("always", "yes")), null, null),
     RECENT_UPRISING(new Condition(Pair.of("has_province_modifier", "recent_uprising")), null, null),
-    FRIENDLY_REGIMENTS(new Condition(Pair.of("units_in_province", "1")), null, StaticModifiers::scaleFriendlyRegimentMax20),
+    FRIENDLY_REGIMENTS(new Condition(Pair.of("units_in_province", "1")), null, null),
     ACTIVE_MISSIONARY(new Condition(Pair.of("has_missionary", "yes")), null, null),
     NATIONAL_DEFENSE(new Condition(Pair.of("national_defense", "yes")), null, null),
     RESOURCE_DEPLETED(new Condition(Pair.of("has_province_modifier", "resource_depleted")), null, null),
@@ -107,87 +103,87 @@ public enum StaticModifiers {
     BASE_VALUES(new Condition(Pair.of("always", "yes")), null, null),
     AI_NATION(new Condition(Pair.of("ai", "yes")), null, null),
     WAR_TAXES(new Condition(Pair.of("has_wartaxes", "yes")), null, null),
-    STABILITY(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithStability, null),
-    POSITIVE_STABILITY(new Condition(Pair.of("stability", "1")), StaticModifiers::scaleWithStability, null),
+    STABILITY(new Condition(Pair.of("always", "yes")), null, null),
+    POSITIVE_STABILITY(new Condition(Pair.of("stability", "1")), null, null),
     PRIVATEERING(new Condition(Pair.of("has_privateers", "yes")), null, null),
-    NEGATIVE_STABILITY(new Condition("not", Pair.of("stability", "0")), StaticModifiers::scaleWithStability, null),
+    NEGATIVE_STABILITY(new Condition("not", Pair.of("stability", "0")), null, null),
     LOST_MANDATE_OF_HEAVEN(new Condition(Pair.of("has_country_modifier", "lost_mandate_of_heaven")), null, null),
     CANCELLED_LOAN(new Condition(Pair.of("has_country_modifier", "cancelled_loan")), null, null),
     BANK_LOAN(new Condition(Pair.of("num_of_loans", "1")), null, null),
-    INFLATION(new Condition(Pair.of("inflation", "0.001")), StaticModifiers::scaleWithInflation, null),
+    INFLATION(new Condition(Pair.of("inflation", "0.001")), null, null),
     BANKRUPTCY(new Condition(Pair.of("is_bankrupt", "yes")), null, null),
     WAR(new Condition(Pair.of("is_at_war", "yes")), null, null),
     PEACE(new Condition(Pair.of("is_at_war", "no")), null, null),
     UNCONDITIONAL_SURRENDER(new Condition(Pair.of("has_unconditional_surrender", "yes")), null, null),
-    CALL_FOR_PEACE(new Condition(Pair.of("call_for_peace", "1")), StaticModifiers::scaleWithCallForPeace, null),
-    WAR_EXHAUSTION(new Condition(Pair.of("war_exhaustion", "0.001")), StaticModifiers::scaleWithWarExhaustion, null),
-    DOOM(new Condition(Pair.of("doom", "0.001")), StaticModifiers::scaleWithDoom, null),
-    AUTHORITY(new Condition(Pair.of("authority", "0.001")), StaticModifiers::scaleWithAuthority, null),
+    CALL_FOR_PEACE(new Condition(Pair.of("call_for_peace", "1")), null, null),
+    WAR_EXHAUSTION(new Condition(Pair.of("war_exhaustion", "0.001")), null, null),
+    DOOM(new Condition(Pair.of("doom", "0.001")), null, null),
+    AUTHORITY(new Condition(Pair.of("authority", "0.001")), null, null),
     REGENCY_COUNCIL(new Condition(Pair.of("has_regency", "yes")), null, null),
     //    TRADE_EFFICIENCY(new Condition(Pair.of("always", "yes")), applyToCountry, null), //Fixme //Scale
     //    PRODUCTION_EFFICIENCY(new Condition(Pair.of("always", "yes")), applyToCountry, null), //Fixme //Scale
-    TRADE_REFUSAL(new Condition(Pair.of("num_of_trade_embargos", "1")), StaticModifiers::scaleWithTradeRefusal, null),
-    MERCANTILISM(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithMercantilism, null),
-    ARMY_TRADITION(new Condition(Pair.of("army_tradition", "0.001")), StaticModifiers::scaleWithArmyTradition, null),
-    NAVY_TRADITION(new Condition(Pair.of("navy_tradition", "0.001")), StaticModifiers::scaleWithNavyTradition, null),
+    TRADE_REFUSAL(new Condition(Pair.of("num_of_trade_embargos", "1")), null, null),
+    MERCANTILISM(new Condition(Pair.of("always", "yes")), null, null),
+    ARMY_TRADITION(new Condition(Pair.of("army_tradition", "0.001")), null, null),
+    NAVY_TRADITION(new Condition(Pair.of("navy_tradition", "0.001")), null, null),
     DEFENDER_OF_FAITH(new Condition(Pair.of("is_defender_of_faith", "yes")), null, null),
     DEFENDER_OF_FAITH_REFUSED_CTA(new Condition(Pair.of("has_country_modifier", "defender_of_faith_refused_cta")), null, null),
     EMPEROR(new Condition(Pair.of("is_emperor", "yes")), null, null),
-    FREE_CITIES_IN_HRE(new Condition(Pair.of("is_emperor", "yes")), StaticModifiers::scaleWithFreeCitiesInHre, null),
+    FREE_CITIES_IN_HRE(new Condition(Pair.of("is_emperor", "yes")), null, null),
     FREE_CITY_IN_HRE(new Condition(Pair.of("is_free_city", "yes")), null, null),
     MEMBER_IN_HRE(new Condition(Pair.of("is_part_of_hre", "yes")), null, null),
-    OCCUPIED_IMPERIAL(new Condition(Pair.of("occupied_imperial", "1")), StaticModifiers::scaleOccupiedImperial, null),
-    NUM_OF_MARRIAGES(new Condition(Pair.of("num_of_royal_marriages", "1")), StaticModifiers::scaleWithNumOfRoyalMarriages, null),
-    NUM_OF_PROVINCES(new Condition(Pair.of("num_of_cities", "1")), StaticModifiers::scaleWithNumOfProvinces, null),
-    COUNTRY_DEVELOPMENT(new Condition(Pair.of("total_development", "1")), StaticModifiers::scaleCountryDev, null),
-    TRIBAL_ALLEGIANCE(new Condition(Pair.of("has_government_ability", "tribal_federation_mechanic")), StaticModifiers::scaleWithTribalAllegiance, null),
-    LEGITIMACY(new Condition(Pair.of("legitimacy", "0.001")), StaticModifiers::scaleWithLegitimacy50, null), //Fixme -> uses_legitimacy
-    HORDE_UNITY(new Condition(Pair.of("has_horde_unity", "yes")), StaticModifiers::scaleWithHordeUnity50, null),
-    DEVOTION(new Condition(Pair.of("uses_devotion", "yes")), StaticModifiers::scaleWithDevotion50, null),
-    MERITOCRACY(new Condition(Pair.of("has_meritocracy", "yes")), StaticModifiers::scaleWithMeritocracy50, null),
-    LOW_MERITOCRACY(new Condition(Pair.of("has_meritocracy", "yes")), StaticModifiers::scaleWithMeritocracy50Reverse, null),
-    CORRUPTION(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithCorruption, null),
-    ROOT_OUT_CORRUPTION(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithRootOutCorruption, null),
-    RECOVERY_MOTIVATION(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithRecoveryMotivation, null),
-    MILITARIZED_SOCIETY(new Condition(Pair.of("has_militarised_society", "yes")), StaticModifiers::scaleWithMilitarisedSociety, null),
+    OCCUPIED_IMPERIAL(new Condition(Pair.of("occupied_imperial", "1")), null, null),
+    NUM_OF_MARRIAGES(new Condition(Pair.of("num_of_royal_marriages", "1")), null, null),
+    NUM_OF_PROVINCES(new Condition(Pair.of("num_of_cities", "1")), null, null),
+    COUNTRY_DEVELOPMENT(new Condition(Pair.of("total_development", "1")), null, null),
+    TRIBAL_ALLEGIANCE(new Condition(Pair.of("has_government_ability", "tribal_federation_mechanic")), null, null),
+    LEGITIMACY(new Condition(Pair.of("legitimacy", "0.001")), null, null), //Fixme -> uses_legitimacy
+    HORDE_UNITY(new Condition(Pair.of("has_horde_unity", "yes")), null, null),
+    DEVOTION(new Condition(Pair.of("uses_devotion", "yes")), null, null),
+    MERITOCRACY(new Condition(Pair.of("has_meritocracy", "yes")), null, null),
+    LOW_MERITOCRACY(new Condition(Pair.of("has_meritocracy", "yes")), null, null),
+    CORRUPTION(new Condition(Pair.of("always", "yes")), null, null),
+    ROOT_OUT_CORRUPTION(new Condition(Pair.of("always", "yes")), null, null),
+    RECOVERY_MOTIVATION(new Condition(Pair.of("always", "yes")), null, null),
+    MILITARIZED_SOCIETY(new Condition(Pair.of("has_militarised_society", "yes")), null, null),
     LUCK(new Condition(Pair.of("luck", "yes")), null, null),
-    OVER_EXTENSION(new Condition(Pair.of("overextension_percentage", "0.001")), StaticModifiers::scaleWithOverextension, null),
-    PRESTIGE(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithPrestige, null),
+    OVER_EXTENSION(new Condition(Pair.of("overextension_percentage", "0.001")), null, null),
+    PRESTIGE(new Condition(Pair.of("always", "yes")), null, null),
     NO_DEBATE_IN_PARLIAMENT(new Condition(Pair.of("has_active_debate", "no")), null, null),
-    REPUBLICAN_TRADITION(new Condition(Pair.of("is_republic", "yes")), StaticModifiers::scaleWithRepublicanTradition, null),
-    INVERSE_REPUBLICAN_TRADITION(new Condition(Pair.of("is_republic", "yes")), StaticModifiers::scaleWithRepublicanTraditionReverse, null),
+    REPUBLICAN_TRADITION(new Condition(Pair.of("is_republic", "yes")), null, null),
+    INVERSE_REPUBLICAN_TRADITION(new Condition(Pair.of("is_republic", "yes")), null, null),
     CURIA_CONTROLLER(new Condition(Pair.of("is_papal_controller", "yes")), null, null),
     BOUGHT_INDULGENCE(new Condition(Pair.of("has_country_modifier", "bought_indulgence")), null, null),
-    RELIGIOUS_UNITY(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithReligiousUnity, null),
-    INVERSE_RELIGIOUS_UNITY(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithReligiousUnityReverse, null),
-    TOTAL_OCCUPATION(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithOccupiedProvinces, null),
-    TOTAL_BLOCKADED(new Condition(Pair.of("always", "yes")), StaticModifiers::scaleWithBlockadedProvinces, null),
-    UNCONTESTED_CORES(new Condition(Pair.of("num_uncontested_cores", "1")), StaticModifiers::scaleWithNotControlledCores, null),
-    NUM_OBJECTIVES_FULLFILLED(new Condition(Pair.of("num_of_age_objectives", "1")), StaticModifiers::scaleWithNumOfAgeObjectives, null),
+    RELIGIOUS_UNITY(new Condition(Pair.of("always", "yes")), null, null),
+    INVERSE_RELIGIOUS_UNITY(new Condition(Pair.of("always", "yes")), null, null),
+    TOTAL_OCCUPATION(new Condition(Pair.of("always", "yes")), null, null),
+    TOTAL_BLOCKADED(new Condition(Pair.of("always", "yes")), null, null),
+    UNCONTESTED_CORES(new Condition(Pair.of("num_uncontested_cores", "1")), null, null),
+    NUM_OBJECTIVES_FULLFILLED(new Condition(Pair.of("num_of_age_objectives", "1")), null, null),
     PRODUCTION_LEADER(new Condition(Pair.of("production_leader", "yes")), null, null),
     TRADE_COMPANY_BONUS(new Condition(Pair.of("always", "false")), null, null), //Fixme ?? //Scale
     BONUS_FROM_MERCHANT_REPUBLICS(new Condition(Pair.of("always", "false")), null, null), //Fixme ?? //Scale
     BONUS_FROM_MERCHANT_REPUBLICS_FOR_TRADE_LEAGUE_MEMBER(new Condition(Pair.of("always", "false")), null, null), //Fixme ?? //Scale
     MERCHANT_REPUBLIC_MECHANICS_MODIFIER(new Condition(Pair.of("always", "false")), null, null), //Fixme ?? //Scale
     FEDERATION_LEADER(new Condition(Pair.of("is_federation_leader", "yes")), null, null),
-    TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_ADM(new Condition(Pair.of("is_tributary", "yes")), StaticModifiers::scaleWithOverlordAdm, null),
-    TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_DIP(new Condition(Pair.of("is_tributary", "yes")), StaticModifiers::scaleWithOverlordDip, null),
-    TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_MIL(new Condition(Pair.of("is_tributary", "yes")), StaticModifiers::scaleWithOverlordMil, null),
-    LIBERTY_DESIRE(new Condition(Pair.of("liberty_desire", "0.001")), StaticModifiers::scaleWithLibertyDesire, null),
+    TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_ADM(new Condition(Pair.of("is_tributary", "yes")), null, null),
+    TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_DIP(new Condition(Pair.of("is_tributary", "yes")), null, null),
+    TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_MIL(new Condition(Pair.of("is_tributary", "yes")), null, null),
+    LIBERTY_DESIRE(new Condition(Pair.of("liberty_desire", "0.001")), null, null),
     IN_GOLDEN_ERA(new Condition(Pair.of("in_golden_age", "yes")), null, null),
-    ABSOLUTISM(new Condition(Pair.of("absolutism", "1")), StaticModifiers::scaleWithAbsolutism, null),
-    LOW_ARMY_PROFESSIONALISM(new Condition(Pair.of("low_army_professionalism", "yes")), StaticModifiers::scaleWithLowProfessionalism, null),
-    HIGH_ARMY_PROFESSIONALISM(new Condition(Pair.of("high_army_professionalism", "yes")), StaticModifiers::scaleWithHighProfessionalism, null),
-    STRELTSY_MODIFIER(new Condition(Pair.of("num_of_streltsy", "1")), StaticModifiers::scaleWithStreltsyPercent, null),
-    POWER_PROJECTION(new Condition(Pair.of("power_projection", "0.001")), StaticModifiers::scaleWithCurrentPowerProjection, null),
+    ABSOLUTISM(new Condition(Pair.of("absolutism", "1")), null, null),
+    LOW_ARMY_PROFESSIONALISM(new Condition(Pair.of("low_army_professionalism", "yes")), null, null),
+    HIGH_ARMY_PROFESSIONALISM(new Condition(Pair.of("high_army_professionalism", "yes")), null, null),
+    STRELTSY_MODIFIER(new Condition(Pair.of("num_of_streltsy", "1")), null, null),
+    POWER_PROJECTION(new Condition(Pair.of("power_projection", "0.001")), null, null),
     POWER_PROJECTION_25(new Condition(Pair.of("power_projection", "25")), null, null),
-    TRADE_COMPANY_STRONG(new Condition(Pair.of("num_of_strong_trade_companies", "1")), StaticModifiers::scaleWithStrongCompany, null), //Scale
+    TRADE_COMPANY_STRONG(new Condition(Pair.of("num_of_strong_trade_companies", "1")), null, null),
     TRADE_COMPANY_DOMINANT(new Condition(Pair.of("always", "no")), null, null), //Fixme ?? //Scale
-    LARGE_COLONIAL_NATION(new Condition(Pair.of("num_of_large_colonial_nation", "1")), StaticModifiers::scaleWithLargeColony, null),
-    MARCH_SUBJECT(new Condition(Pair.of("num_of_marches", "1")), StaticModifiers::scaleWithMarches, null),
-    VASSAL_SUBJECT(new Condition(Pair.of("num_of_vassals", "1")), StaticModifiers::scaleWithVassals, null),
-    DAIMYO_SUBJECT(new Condition(Pair.of("num_of_daimyos", "1")), StaticModifiers::scaleWithDaimyos, null),
-    UNION_SUBJECT(new Condition(Pair.of("num_of_unions", "1")), StaticModifiers::scaleWithUnions, null),
+    LARGE_COLONIAL_NATION(new Condition(Pair.of("num_of_large_colonial_nation", "1")), null, null),
+    MARCH_SUBJECT(new Condition(Pair.of("num_of_marches", "1")), null, null),
+    VASSAL_SUBJECT(new Condition(Pair.of("num_of_vassals", "1")), null, null),
+    DAIMYO_SUBJECT(new Condition(Pair.of("num_of_daimyos", "1")), null, null),
+    UNION_SUBJECT(new Condition(Pair.of("num_of_unions", "1")), null, null),
     ALL_NATIONS(new Condition(Pair.of("always", "yes")), null, null),
     SUBJECT_NATION(new Condition(Pair.of("is_subject", "yes")), null, null),
     VASSAL_NATION(new Condition(Pair.of("is_vassal", "yes")), null, null),
@@ -211,7 +207,7 @@ public enum StaticModifiers {
     DISCONTENT_SOWED(new Condition(Pair.of("has_country_modifier", "discontent_sowed")), null, null),
     REPUTATION_SABOTAGED(new Condition(Pair.of("has_country_modifier", "reputation_sabotaged")), null, null),
     CORRUPT_OFFICIALS(new Condition(Pair.of("has_country_modifier", "corrupt_officials")), null, null),
-    SCALED_TRADE_LEAGUE_LEADER(new Condition(Pair.of("is_trade_league_leader", "yes")), StaticModifiers::scaleWithNumTradeLeagueMembers, null),
+    SCALED_TRADE_LEAGUE_LEADER(new Condition(Pair.of("is_trade_league_leader", "yes")), null, null),
     IN_TRADE_LEAGUE(new Condition(Pair.of("is_in_trade_league", "yes")), null, null),
     CUSTOM_SETUP(new Condition(Pair.of("custom_nation_setup", "yes")), null, null),
     EMBARGO_RIVALS(new Condition(Pair.of("has_embargo_rivals", "yes")), null, null),
@@ -224,20 +220,20 @@ public enum StaticModifiers {
     NATIVE_POLICY_COEXIST(new Condition(Pair.of("native_policy", "1")), null, null),
     NATIVE_POLICY_TRADE(new Condition(Pair.of("native_policy", "2")), null, null),
     NATIVE_POLICY_HOSTILE(new Condition(Pair.of("native_policy", "3")), null, null),
-    HIGH_HARMONY(new Condition(Pair.of("uses_harmony", "yes")), StaticModifiers::scaleWithHarmony, null),
-    LOW_HARMONY(new Condition(Pair.of("uses_harmony", "yes")), StaticModifiers::scaleWithHarmonyReverse, null),
-    OVERLORD_DAIMYO_AT_PEACE(new Condition(Pair.of("num_of_daimyos", "1")), StaticModifiers::scaleWithDaimyosAtPeace, null),
+    HIGH_HARMONY(new Condition(Pair.of("uses_harmony", "yes")), null, null),
+    LOW_HARMONY(new Condition(Pair.of("uses_harmony", "yes")), null, null),
+    OVERLORD_DAIMYO_AT_PEACE(new Condition(Pair.of("num_of_daimyos", "1")), null, null),
     //    OVERLORD_DAIMYO_AT_PEACE_MAX(new Condition(Pair.of("num_of_daimyos", "1")), applyToCountry, null),
     //    OVERLORD_DAIMYO_AT_PEACE_MIN(new Condition(Pair.of("num_of_daimyos", "1")), applyToCountry, null),
-    OVERLORD_DAIMYO_SAME_ISOLATIONISM(new Condition(Pair.of("num_of_daimyos", "1")), StaticModifiers::scaleWithDaimyosSameIsolationism, null),
-    OVERLORD_DAIMYO_DIFFERENT_ISOLATIONISM(new Condition(Pair.of("num_of_daimyos", "1")), StaticModifiers::scaleWithDaimyosDifferentIsolationism, null),
+    OVERLORD_DAIMYO_SAME_ISOLATIONISM(new Condition(Pair.of("num_of_daimyos", "1")), null, null),
+    OVERLORD_DAIMYO_DIFFERENT_ISOLATIONISM(new Condition(Pair.of("num_of_daimyos", "1")), null, null),
     //    OVERLORD_DAIMYO_ISOLATIONISM_MAX(new Condition(Pair.of("num_of_daimyos", "1")), applyToCountry, null),
     //    OVERLORD_DAIMYO_ISOLATIONISM_MIN(new Condition(Pair.of("num_of_daimyos", "1")), applyToCountry, null),
     OVERLORD_SANKIN_KOTAI(new Condition(Pair.of("has_country_modifier", "overlord_sankin_kotai")), null, null),
     SUBJECT_SANKIN_KOTAI(new Condition(Pair.of("has_country_modifier", "subject_sankin_kotai")), null, null),
     OVERLORD_EXPEL_RONIN(new Condition(Pair.of("has_country_modifier", "overlord_expel_ronin")), null, null),
     SUBJECT_EXPEL_RONIN(new Condition(Pair.of("has_country_modifier", "subject_expel_ronin")), null, null),
-    OVERLORD_SWORD_HUNT(new Condition(Pair.of("num_of_daimyos", "1")), StaticModifiers::scaleWithDaimyosSwordHunt, null),
+    OVERLORD_SWORD_HUNT(new Condition(Pair.of("num_of_daimyos", "1")), null, null),
     SUBJECT_SWORD_HUNT(new Condition(Pair.of("has_country_modifier", "subject_sword_hunt")), null, null),
     SUPPLY_DEPOT_AREA(new Condition(Pair.of("has_supply_depot", "yes")), null, null),
     EFFICIENT_TAX_FARMING_MODIFIER(new Condition(Pair.of("has_country_modifier", "efficient_tax_farming_modifier")), null, null),
@@ -256,18 +252,18 @@ public enum StaticModifiers {
     ZAIDI_SCHOLAR_MODIFIER(new Condition(Pair.of("has_country_modifier", "zaidi_scholar_modifier")), null, null),
     //    JANISSARY_REGIMENT(new Condition(Pair.of())),
     //    REVOLUTIONARY_GUARD_REGIMENT(new Condition(Pair.of())),
-    INNOVATIVENESS(new Condition(Pair.of("innovativeness", "0.001")), StaticModifiers::scaleWithInnovativeness, null), //Scale
+    INNOVATIVENESS(new Condition(Pair.of("innovativeness", "0.001")), null, null), //Scale
     //    RAJPUT_REGIMENT(new Condition(Pair.of())),
     RAIDING_PARTIES_MODIFIER(new Condition(Pair.of("has_country_modifier", "raiding_parties_modifier")), null, null),
     SERFS_RECIEVED_BY_COSSACKS(new Condition(Pair.of("has_country_modifier", "serfs_recieved_by_cossacks")), null, null),
-    COSSACKS_MODIFIER(new Condition(Pair.of("num_of_cossacks", "1")), StaticModifiers::scaleWithCossacksPercent, null),
-    EXPAND_ADMINISTATION_MODIFIER(new Condition(Pair.of("num_expanded_administration", "1")), StaticModifiers::scaleWithNumExpandedAdministration, null),
+    COSSACKS_MODIFIER(new Condition(Pair.of("num_of_cossacks", "1")), null, null),
+    EXPAND_ADMINISTATION_MODIFIER(new Condition(Pair.of("num_expanded_administration", "1")), null, null),
     OVER_GOVERNING_CAPACITY_MODIFIER(new Condition(Pair.of("always", "no")), null, null), //Todo getUsedGoverningCapacity //Scale
     LOST_HEGEMONY(new Condition(Pair.of("has_country_modifier", "lost_hegemony")), null, null);
 
     public final Condition trigger;
 
-    public Modifiers modifiers;
+    private Modifiers modifiers;
 
     public BiFunction<Country, StaticModifiers, Modifiers> applyToCountry;
 
@@ -287,6 +283,7 @@ public enum StaticModifiers {
         APPLIED_TO_PROVINCE = Arrays.stream(StaticModifiers.values())
                                     .filter(staticModifiers -> staticModifiers.applyToProvince != null)
                                     .collect(Collectors.toList());
+
         DIFFICULTY_VERY_EASY_PLAYER.applyToCountry = (country, modif) -> StaticModifiers.DIFFICULTY_VERY_EASY_PLAYER.modifiers;
         DIFFICULTY_EASY_PLAYER.applyToCountry = (country, modif) -> StaticModifiers.DIFFICULTY_EASY_PLAYER.modifiers;
         DIFFICULTY_NORMAL_PLAYER.applyToCountry = (country, modif) -> StaticModifiers.DIFFICULTY_NORMAL_PLAYER.modifiers;
@@ -317,13 +314,24 @@ public enum StaticModifiers {
         SEVERE_MONSOON.applyToProvince = (province, modif) -> StaticModifiers.SEVERE_MONSOON.modifiers;
         BLOCKADED.applyToProvince = (province, modif) -> StaticModifiers.BLOCKADED.modifiers;
         NO_ADJACENT_CONTROLLED.applyToProvince = (province, modif) -> StaticModifiers.NO_ADJACENT_CONTROLLED.modifiers;
+        PROVINCIAL_TAX_INCOME.applyToProvince = (province, modif) -> ModifiersUtils.scaleTax(province, modif.modifiers);
+        PROVINCIAL_PRODUCTION_SIZE.applyToProvince = (province, modif) -> ModifiersUtils.scaleProd(province, modif.modifiers);
         KNOWLEDGE_SHARING.applyToCountry = (country, modif) -> StaticModifiers.KNOWLEDGE_SHARING.modifiers;
         CARDINALS_SPREAD_INSTITUTION.applyToProvince = (province, modif) -> StaticModifiers.CARDINALS_SPREAD_INSTITUTION.modifiers;
+        MANPOWER.applyToProvince = (province, modif) -> ModifiersUtils.scaleManpower(province, modif.modifiers);
+        SAILORS.applyToProvince = (province, modif) -> ModifiersUtils.scaleManpower(province, modif.modifiers);
         HORDE_DEVELOPMENT.applyToCountry = (country, modif) -> StaticModifiers.HORDE_DEVELOPMENT.modifiers;
         PROVINCE_RAZED.applyToProvince = (province, modif) -> StaticModifiers.PROVINCE_RAZED.modifiers;
+        DEVELOPMENT.applyToProvince = (province, modif) -> ModifiersUtils.scaleDev(province, modif.modifiers);
+        DEVELOPMENT_SCALED.applyToProvince = (province, modif) -> ModifiersUtils.scaleDevImprove(province, modif.modifiers);
         CAPITAL_CITY.applyToProvince = (province, modif) -> StaticModifiers.CAPITAL_CITY.modifiers;
         PATRIARCH_STATE.applyToProvince = (province, modif) -> StaticModifiers.PATRIARCH_STATE.modifiers;
+        PATRIARCH_AUTHORITY_LOCAL.applyToProvince = (province, modif) -> ModifiersUtils.scalePatriarchAuthority(province, modif.modifiers);
+        PATRIARCH_AUTHORITY_GLOBAL.applyToCountry = (country, modif) -> ModifiersUtils.scalePatriarchAuthority(country, modif.modifiers);
         PASHA_STATE.applyToProvince = (province, modif) -> StaticModifiers.PASHA_STATE.modifiers;
+        COLONY_LEVEL.applyToProvince = (province, modif) -> ModifiersUtils.scaleColonySize100(province, modif.modifiers);
+        NATIVE_ASSIMILATION.applyToProvince = (province, modif) -> ModifiersUtils.scaleNativeSize(province, modif.modifiers);
+        NATIVE_AGGRESSIVENESS.applyToProvince = (province, modif) -> ModifiersUtils.scaleNativeHostileness(province, modif.modifiers);
         CORE.applyToProvince = (province, modif) -> StaticModifiers.CORE.modifiers;
         NON_CORE.applyToProvince = (province, modif) -> StaticModifiers.NON_CORE.modifiers;
         TERRITORY_CORE.applyToProvince = (province, modif) -> StaticModifiers.TERRITORY_CORE.modifiers;
@@ -335,11 +343,17 @@ public enum StaticModifiers {
         NON_ACCEPTED_CULTURE_REPUBLIC.applyToProvince = (province, modif) -> StaticModifiers.NON_ACCEPTED_CULTURE_REPUBLIC.modifiers;
         OCCUPIED.applyToProvince = (province, modif) -> StaticModifiers.OCCUPIED.modifiers;
         UNDER_SIEGE.applyToProvince = (province, modif) -> StaticModifiers.UNDER_SIEGE.modifiers;
+        DEVASTATION.applyToProvince = (province, modif) -> ModifiersUtils.scaleDevastation(province, modif.modifiers);
         PROSPERITY.applyToProvince = (province, modif) -> StaticModifiers.PROSPERITY.modifiers;
         SLAVES_RAIDED.applyToProvince = (province, modif) -> StaticModifiers.SLAVES_RAIDED.modifiers;
+        UNREST.applyToProvince = (province, modif) -> ModifiersUtils.scaleUnrest(province, modif.modifiers);
+        NATIONALISM.applyToProvince = (province, modif) -> ModifiersUtils.scaleNationalism(province, modif.modifiers);
+        LOCAL_AUTONOMY_MULTIPLICATIVE.applyToProvince = (province, modif) -> ModifiersUtils.scaleAutonomy(province, modif.modifiers);
         LOCAL_AUTONOMY.applyToProvince = (province, modif) -> StaticModifiers.LOCAL_AUTONOMY.modifiers;
+        LOCAL_AUTONOMY_TRADE_COMPANY_MULTIPLICATIVE.applyToProvince = (province, modif) -> ModifiersUtils.scaleAutonomy(province, modif.modifiers);
         LOCAL_AUTONOMY_TRADE_COMPANY.applyToProvince = (province, modif) -> StaticModifiers.LOCAL_AUTONOMY_TRADE_COMPANY.modifiers;
         RECENT_UPRISING.applyToProvince = (province, modif) -> StaticModifiers.RECENT_UPRISING.modifiers;
+        FRIENDLY_REGIMENTS.applyToProvince = (province, modif) -> ModifiersUtils.scaleFriendlyRegimentMax20(province, modif.modifiers);
         ACTIVE_MISSIONARY.applyToProvince = (province, modif) -> StaticModifiers.ACTIVE_MISSIONARY.modifiers;
         NATIONAL_DEFENSE.applyToProvince = (province, modif) -> StaticModifiers.NATIONAL_DEFENSE.modifiers;
         RESOURCE_DEPLETED.applyToProvince = (province, modif) -> StaticModifiers.RESOURCE_DEPLETED.modifiers;
@@ -349,15 +363,67 @@ public enum StaticModifiers {
         BASE_VALUES.applyToCountry = (country, modif) -> StaticModifiers.BASE_VALUES.modifiers;
         AI_NATION.applyToCountry = (country, modif) -> StaticModifiers.AI_NATION.modifiers;
         WAR_TAXES.applyToCountry = (country, modif) -> StaticModifiers.WAR_TAXES.modifiers;
+        STABILITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStability(country, modif.modifiers);
+        POSITIVE_STABILITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStability(country, modif.modifiers);
         PRIVATEERING.applyToCountry = (country, modif) -> StaticModifiers.PRIVATEERING.modifiers;
+        NEGATIVE_STABILITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStability(country, modif.modifiers);
         LOST_MANDATE_OF_HEAVEN.applyToCountry = (country, modif) -> StaticModifiers.LOST_MANDATE_OF_HEAVEN.modifiers;
         CANCELLED_LOAN.applyToCountry = (country, modif) -> StaticModifiers.CANCELLED_LOAN.modifiers;
         BANK_LOAN.applyToCountry = (country, modif) -> StaticModifiers.BANK_LOAN.modifiers;
+        INFLATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStability(country, modif.modifiers);
         BANKRUPTCY.applyToCountry = (country, modif) -> StaticModifiers.BANKRUPTCY.modifiers;
         WAR.applyToCountry = (country, modif) -> StaticModifiers.WAR.modifiers;
         PEACE.applyToCountry = (country, modif) -> StaticModifiers.PEACE.modifiers;
         UNCONDITIONAL_SURRENDER.applyToCountry = (country, modif) -> StaticModifiers.UNCONDITIONAL_SURRENDER.modifiers;
+        CALL_FOR_PEACE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCallForPeace(country, modif.modifiers);
+        WAR_EXHAUSTION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithWarExhaustion(country, modif.modifiers);
+        DOOM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDoom(country, modif.modifiers);
+        AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithAuthority(country, modif.modifiers);
         REGENCY_COUNCIL.applyToCountry = (country, modif) -> StaticModifiers.REGENCY_COUNCIL.modifiers;
+        TRADE_REFUSAL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithTradeRefusal(country, modif.modifiers);
+        MERCANTILISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMercantilism(country, modif.modifiers);
+        ARMY_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithArmyTradition(country, modif.modifiers);
+        NAVY_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNavyTradition(country, modif.modifiers);
+        FREE_CITIES_IN_HRE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithFreeCitiesInHre(country, modif.modifiers);
+        OCCUPIED_IMPERIAL.applyToCountry = (country, modif) -> ModifiersUtils.scaleOccupiedImperial(country, modif.modifiers);
+        NUM_OF_MARRIAGES.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumOfRoyalMarriages(country, modif.modifiers);
+        NUM_OF_PROVINCES.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumOfProvinces(country, modif.modifiers);
+        COUNTRY_DEVELOPMENT.applyToCountry = (country, modif) -> ModifiersUtils.scaleCountryDev(country, modif.modifiers);
+        TRIBAL_ALLEGIANCE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithTribalAllegiance(country, modif.modifiers);
+        LEGITIMACY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLegitimacy50(country, modif.modifiers);
+        HORDE_UNITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHordeUnity50(country, modif.modifiers);
+        DEVOTION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDevotion50(country, modif.modifiers);
+        MERITOCRACY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMeritocracy50(country, modif.modifiers);
+        LOW_MERITOCRACY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMeritocracy50Reverse(country, modif.modifiers);
+        CORRUPTION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCorruption(country, modif.modifiers);
+        ROOT_OUT_CORRUPTION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithRootOutCorruption(country, modif.modifiers);
+        RECOVERY_MOTIVATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithRecoveryMotivation(country, modif.modifiers);
+        MILITARIZED_SOCIETY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMilitarisedSociety(country, modif.modifiers);
+        OVER_EXTENSION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverextension(country, modif.modifiers);
+        PRESTIGE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPrestige(country, modif.modifiers);
+        REPUBLICAN_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithRepublicanTradition(country, modif.modifiers);
+        INVERSE_REPUBLICAN_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithRepublicanTraditionReverse(country, modif.modifiers);
+        RELIGIOUS_UNITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithReligiousUnity(country, modif.modifiers);
+        INVERSE_RELIGIOUS_UNITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithReligiousUnityReverse(country, modif.modifiers);
+        TOTAL_OCCUPATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOccupiedProvinces(country, modif.modifiers);
+        TOTAL_BLOCKADED.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithBlockadedProvinces(country, modif.modifiers);
+        UNCONTESTED_CORES.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNotControlledCores(country, modif.modifiers);
+        NUM_OBJECTIVES_FULLFILLED.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumOfAgeObjectives(country, modif.modifiers);
+        TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_ADM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverlordAdm(country, modif.modifiers);
+        TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_DIP.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverlordDip(country, modif.modifiers);
+        TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_MIL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverlordMil(country, modif.modifiers);
+        LIBERTY_DESIRE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLibertyDesire(country, modif.modifiers);
+        ABSOLUTISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithAbsolutism(country, modif.modifiers);
+        LOW_ARMY_PROFESSIONALISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLowProfessionalism(country, modif.modifiers);
+        HIGH_ARMY_PROFESSIONALISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHighProfessionalism(country, modif.modifiers);
+        STRELTSY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStreltsyPercent(country, modif.modifiers);
+        POWER_PROJECTION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCurrentPowerProjection(country, modif.modifiers);
+        TRADE_COMPANY_STRONG.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStrongCompany(country, modif.modifiers);
+        LARGE_COLONIAL_NATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLargeColony(country, modif.modifiers);
+        MARCH_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMarches(country, modif.modifiers);
+        VASSAL_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithVassals(country, modif.modifiers);
+        DAIMYO_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyos(country, modif.modifiers);
+        UNION_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithUnions(country, modif.modifiers);
         DEFENDER_OF_FAITH.applyToCountry = (country, modif) -> StaticModifiers.DEFENDER_OF_FAITH.modifiers;
         DEFENDER_OF_FAITH_REFUSED_CTA.applyToCountry = (country, modif) -> StaticModifiers.DEFENDER_OF_FAITH_REFUSED_CTA.modifiers;
         EMPEROR.applyToCountry = (country, modif) -> StaticModifiers.EMPEROR.modifiers;
@@ -392,6 +458,8 @@ public enum StaticModifiers {
         MERCHANTS_SLANDERED.applyToCountry = (country, modif) -> StaticModifiers.MERCHANTS_SLANDERED.modifiers;
         DISCONTENT_SOWED.applyToCountry = (country, modif) -> StaticModifiers.DISCONTENT_SOWED.modifiers;
         REPUTATION_SABOTAGED.applyToCountry = (country, modif) -> StaticModifiers.REPUTATION_SABOTAGED.modifiers;
+        CORRUPT_OFFICIALS.applyToCountry = (country, modif) -> StaticModifiers.CORRUPT_OFFICIALS.modifiers;
+        SCALED_TRADE_LEAGUE_LEADER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumTradeLeagueMembers(country, modif.modifiers);
         IN_TRADE_LEAGUE.applyToCountry = (country, modif) -> StaticModifiers.IN_TRADE_LEAGUE.modifiers;
         CUSTOM_SETUP.applyToCountry = (country, modif) -> StaticModifiers.CUSTOM_SETUP.modifiers;
         EMBARGO_RIVALS.applyToCountry = (country, modif) -> StaticModifiers.EMBARGO_RIVALS.modifiers;
@@ -404,9 +472,15 @@ public enum StaticModifiers {
         NATIVE_POLICY_COEXIST.applyToCountry = (country, modif) -> StaticModifiers.NATIVE_POLICY_COEXIST.modifiers;
         NATIVE_POLICY_TRADE.applyToCountry = (country, modif) -> StaticModifiers.NATIVE_POLICY_TRADE.modifiers;
         NATIVE_POLICY_HOSTILE.applyToCountry = (country, modif) -> StaticModifiers.NATIVE_POLICY_HOSTILE.modifiers;
+        HIGH_HARMONY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHarmony(country, modif.modifiers);
+        LOW_HARMONY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHarmonyReverse(country, modif.modifiers);
+        OVERLORD_DAIMYO_AT_PEACE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosAtPeace(country, modif.modifiers);
+        OVERLORD_DAIMYO_SAME_ISOLATIONISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosSameIsolationism(country, modif.modifiers);
+        OVERLORD_DAIMYO_DIFFERENT_ISOLATIONISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosDifferentIsolationism(country, modif.modifiers);
         OVERLORD_SANKIN_KOTAI.applyToCountry = (country, modif) -> StaticModifiers.OVERLORD_SANKIN_KOTAI.modifiers;
         SUBJECT_SANKIN_KOTAI.applyToCountry = (country, modif) -> StaticModifiers.SUBJECT_SANKIN_KOTAI.modifiers;
         OVERLORD_EXPEL_RONIN.applyToCountry = (country, modif) -> StaticModifiers.OVERLORD_EXPEL_RONIN.modifiers;
+        OVERLORD_SWORD_HUNT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosSwordHunt(country, modif.modifiers);
         SUBJECT_EXPEL_RONIN.applyToCountry = (country, modif) -> StaticModifiers.SUBJECT_EXPEL_RONIN.modifiers;
         SUBJECT_SWORD_HUNT.applyToCountry = (country, modif) -> StaticModifiers.SUBJECT_SWORD_HUNT.modifiers;
         SUPPLY_DEPOT_AREA.applyToProvince = (province, modif) -> StaticModifiers.SUPPLY_DEPOT_AREA.modifiers;
@@ -424,8 +498,11 @@ public enum StaticModifiers {
         ISMAILI_SCHOLAR_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.ISMAILI_SCHOLAR_MODIFIER.modifiers;
         JAFARI_SCHOLAR_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.JAFARI_SCHOLAR_MODIFIER.modifiers;
         ZAIDI_SCHOLAR_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.ZAIDI_SCHOLAR_MODIFIER.modifiers;
+        INNOVATIVENESS.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithInnovativeness(country, modif.modifiers);
         RAIDING_PARTIES_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.RAIDING_PARTIES_MODIFIER.modifiers;
         SERFS_RECIEVED_BY_COSSACKS.applyToCountry = (country, modif) -> StaticModifiers.SERFS_RECIEVED_BY_COSSACKS.modifiers;
+        COSSACKS_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCossacksPercent(country, modif.modifiers);
+        EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
         LOST_HEGEMONY.applyToCountry = (country, modif) -> StaticModifiers.LOST_HEGEMONY.modifiers;
     }
 
@@ -456,382 +533,5 @@ public enum StaticModifiers {
                                                               .filter(staticModifiers -> staticModifiers.trigger.apply(province))
                                                               .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers))
                                                               .toArray(Modifiers[]::new));
-    }
-
-    private static Modifiers scaleTax(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getBaseTax());
-    }
-
-    private static Modifiers scaleProd(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getBaseProduction());
-    }
-
-    private static Modifiers scaleManpower(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getBaseManpower());
-    }
-
-    private static Modifiers scaleDev(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getDevelopment());
-    }
-
-    private static Modifiers scaleDevImprove(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getTotalImproveCount());
-    }
-
-    private static Modifiers scaleCountryDev(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getDevelopment());
-    }
-
-    private static Modifiers scaleColonySize100(SaveProvince province, StaticModifiers staticModifiers) {
-        double colonySize = NumbersUtils.doubleOrDefault(province.getColonySize()) % 100;
-
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, colonySize);
-    }
-
-    private static Modifiers scaleUnrest(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getUnrest());
-    }
-
-    private static Modifiers scaleDevastation(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getDevastation());
-    }
-
-    private static Modifiers scaleNativeSize(SaveProvince province, StaticModifiers staticModifiers) {
-        Integer nativeSize = NumbersUtils.intOrDefault(province.getNativeSize()) / 10;
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, nativeSize);
-    }
-
-    private static Modifiers scaleNativeHostileness(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getNativeHostileness());
-    }
-
-    private static Modifiers scaleNationalism(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getNationalism());
-    }
-
-    private static Modifiers scaleAutonomy(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, province.getLocalAutonomy());
-    }
-
-    private static Modifiers scalePatriarchAuthority(SaveProvince province, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(province.getOwner().getPatriarchAuthority()));
-    }
-
-    private static Modifiers scaleFriendlyRegimentMax20(SaveProvince province, StaticModifiers staticModifiers) {
-        int nbRegiments = province.getArmies()
-                                  .stream()
-                                  .map(army -> BigDecimal.valueOf(army.getRegiments().size())
-                                                         .multiply(BigDecimal.valueOf(NumbersUtils.doubleOrDefault(army.getCountry().getLandMaintenance()))))
-                                  .mapToInt(BigDecimal::intValue)
-                                  .sum();
-        nbRegiments = Math.min(nbRegiments, 20);
-
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, nbRegiments);
-    }
-
-    private static Modifiers scaleOccupiedImperial(Country country, StaticModifiers staticModifiers) {
-        List<SaveProvince> provinces = country.getOwnedProvinces();
-        provinces.retainAll(country.getCoreProvinces());
-        provinces.removeIf(Predicate.not(SaveProvince::inHre));
-
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, provinces.size());
-    }
-
-    private static Modifiers scalePatriarchAuthority(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getPatriarchAuthority()));
-    }
-
-    private static Modifiers scaleWithStability(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(country.getStability()));
-    }
-
-    private static Modifiers scaleWithInflation(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getInflation()));
-    }
-
-    private static Modifiers scaleWithCallForPeace(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getCallForPeace()));
-    }
-
-    private static Modifiers scaleWithWarExhaustion(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getWarExhaustion()));
-    }
-
-    private static Modifiers scaleWithDoom(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getDoom()));
-    }
-
-    private static Modifiers scaleWithAuthority(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getAuthority()));
-    }
-
-    private static Modifiers scaleWithTradeRefusal(Country country, StaticModifiers staticModifiers) {
-        int tradeRefusal = (int) country.getTradeEmbargoes().stream().filter(c -> !country.getRivals().containsKey(c.getTag())).count();
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(tradeRefusal));
-    }
-
-    private static Modifiers scaleWithMercantilism(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(country.getMercantilism()));
-    }
-
-    private static Modifiers scaleWithArmyTradition(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getArmyTradition()));
-    }
-
-    private static Modifiers scaleWithNavyTradition(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getNavyTradition()));
-    }
-
-    private static Modifiers scaleWithFreeCitiesInHre(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getSave()
-                                                                               .getCountries()
-                                                                               .values()
-                                                                               .stream()
-                                                                               .filter(c -> c.getGovernment() != null)
-                                                                               .filter(c -> CollectionUtils.isNotEmpty(c.getGovernment().getReforms()))
-                                                                               .filter(c -> c.getGovernment()
-                                                                                            .getReforms()
-                                                                                            .stream()
-                                                                                            .anyMatch(GovernmentReform::isFreeCity))
-                                                                               .count());
-    }
-
-    private static Modifiers scaleWithNumOfRoyalMarriages(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(country.getNumOfRoyalMarriages()));
-    }
-
-    private static Modifiers scaleWithNumOfProvinces(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(country.getOwnedProvinces().size()));
-    }
-
-    private static Modifiers scaleWithTribalAllegiance(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getTribalAllegiance()));
-    }
-
-    private static Modifiers scaleWithLegitimacy50(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (NumbersUtils.doubleOrDefault(country.getLegitimacy()) - 50) / 100);
-    }
-
-    private static Modifiers scaleWithHordeUnity50(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (NumbersUtils.doubleOrDefault(country.getHordeUnity()) - 50) / 100);
-    }
-
-    private static Modifiers scaleWithDevotion50(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (NumbersUtils.doubleOrDefault(country.getDevotion()) - 50) / 100);
-    }
-
-    private static Modifiers scaleWithMeritocracy50(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (NumbersUtils.doubleOrDefault(country.getMeritocracy()) - 50) / 100);
-    }
-
-    private static Modifiers scaleWithMeritocracy50Reverse(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (50 - NumbersUtils.doubleOrDefault(country.getMeritocracy())) / 100);
-    }
-
-    private static Modifiers scaleWithCorruption(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getCorruption()));
-    }
-
-    private static Modifiers scaleWithRootOutCorruption(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getRootOutCorruptionSlider()));
-    }
-
-    private static Modifiers scaleWithRecoveryMotivation(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getRecoveryMotivation()));
-    }
-
-    private static Modifiers scaleWithMilitarisedSociety(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getMilitarisedSociety()) / 100);
-    }
-
-    private static Modifiers scaleWithOverextension(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getOverextensionPercentage()));
-    }
-
-    private static Modifiers scaleWithPrestige(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getPrestige()) / 100);
-    }
-
-    private static Modifiers scaleWithRepublicanTradition(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getRepublicanTradition()) / 100);
-    }
-
-    private static Modifiers scaleWithRepublicanTraditionReverse(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (100 - NumbersUtils.doubleOrDefault(country.getRepublicanTradition())) / 100);
-    }
-
-    private static Modifiers scaleWithReligiousUnity(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getReligiousUnity()));
-    }
-
-    private static Modifiers scaleWithReligiousUnityReverse(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, 1 - NumbersUtils.doubleOrDefault(country.getReligiousUnity()));
-    }
-
-    private static Modifiers scaleWithOccupiedProvinces(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             country.getOwnedProvinces()
-                                                    .stream()
-                                                    .filter(province -> !province.getOwner().equals(province.getController()))
-                                                    .count());
-    }
-
-    private static Modifiers scaleWithBlockadedProvinces(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             country.getOwnedProvinces()
-                                                    .stream()
-                                                    .filter(province -> NumbersUtils.doubleOrDefault(province.getBlockadeEfficiency()) >= 0)
-                                                    .count());
-    }
-
-    private static Modifiers scaleWithNotControlledCores(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             country.getCoreProvinces().stream().filter(province -> !province.getOwner().equals(country)).count());
-    }
-
-    private static Modifiers scaleWithNumOfAgeObjectives(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(country.getNumOfAgeObjectives()));
-    }
-
-    private static Modifiers scaleWithOverlordAdm(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (Math.max(0, country.getTech().getAdm() - country.getOverlord().getTech().getAdm())));
-    }
-
-    private static Modifiers scaleWithOverlordDip(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (Math.max(0, country.getTech().getDip() - country.getOverlord().getTech().getDip())));
-    }
-
-    private static Modifiers scaleWithOverlordMil(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, (Math.max(0, country.getTech().getMil() - country.getOverlord().getTech().getMil())));
-    }
-
-    private static Modifiers scaleWithLibertyDesire(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getLibertyDesire()) / 100);
-    }
-
-    private static Modifiers scaleWithAbsolutism(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(country.getAbsolutism()) / 100);
-    }
-
-    private static Modifiers scaleWithCurrentPowerProjection(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getCurrentPowerProjection()) / 100);
-    }
-
-    private static Modifiers scaleWithStrongCompany(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getNumOfStrongCompanies());
-    }
-
-    private static Modifiers scaleWithLargeColony(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getNumOfLargeColonies());
-    }
-
-    private static Modifiers scaleWithVassals(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_CLIENT_VASSAL));
-    }
-
-    private static Modifiers scaleWithMarches(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_MARCH));
-    }
-
-    private static Modifiers scaleWithUnions(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION));
-    }
-
-    private static Modifiers scaleWithDaimyos(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL));
-    }
-
-    private static Modifiers scaleWithInnovativeness(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getInnovativeness()) / 100);
-    }
-
-    private static Modifiers scaleWithNumExpandedAdministration(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.intOrDefault(country.getNumExpandedAdministration()));
-    }
-
-    private static Modifiers scaleWithNumTradeLeagueMembers(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, country.getTradeLeague().getMembers().size());
-    }
-
-    private static Modifiers scaleWithHarmony(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, NumbersUtils.doubleOrDefault(country.getHarmony()));
-    }
-
-    private static Modifiers scaleWithHarmonyReverse(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers, 1 - (NumbersUtils.doubleOrDefault(country.getHarmony()) / 100));
-    }
-
-    private static Modifiers scaleWithDaimyosAtPeace(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             Math.min(10, country.getSubjects()
-                                                                 .stream()
-                                                                 .filter(subject -> !subject.isAtWar() &&
-                                                                                    Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                                                            subject.getSubjectType().getName()))
-                                                                 .count()));
-    }
-
-    private static Modifiers scaleWithDaimyosSameIsolationism(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             Math.min(10, country.getSubjects()
-                                                                 .stream()
-                                                                 .filter(subject ->
-                                                                                 Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                                                         subject.getSubjectType().getName())
-                                                                                 &&
-                                                                                 NumbersUtils.intOrDefault(country.getIsolationismLevel())
-                                                                                 == NumbersUtils.intOrDefault(subject.getIsolationismLevel()))
-                                                                 .count()));
-    }
-
-    private static Modifiers scaleWithDaimyosDifferentIsolationism(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             Math.min(10, country.getSubjects()
-                                                                 .stream()
-                                                                 .filter(subject ->
-                                                                                 Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                                                         subject.getSubjectType().getName())
-                                                                                 &&
-                                                                                 NumbersUtils.intOrDefault(country.getIsolationismLevel())
-                                                                                 != NumbersUtils.intOrDefault(subject.getIsolationismLevel()))
-                                                                 .count()));
-    }
-
-    private static Modifiers scaleWithDaimyosSwordHunt(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             country.getSubjects()
-                                                    .stream()
-                                                    .filter(subject -> Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
-                                                            subject.getSubjectType().getName())
-                                                                       && subject.getModifiers().stream()
-                                                                                 .anyMatch(modifier -> "subject_sword_hunt".equalsIgnoreCase(
-                                                                                         modifier.getModifierName())))
-                                                    .count());
-    }
-
-    private static Modifiers scaleWithStreltsyPercent(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             BigDecimal.valueOf(country.getNbRegimentOfCategory(3))
-                                                       .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
-    }
-
-    private static Modifiers scaleWithCossacksPercent(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             BigDecimal.valueOf(country.getNbRegimentOfCategory(4))
-                                                       .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
-    }
-
-    private static Modifiers scaleWithLowProfessionalism(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             Math.min(Math.max(0, NumbersUtils.doubleOrDefault(country.getArmyProfessionalism()) -
-                                                                  country.getSave().getGame().getLowArmyProfessionalismMinRange()),
-                                                      country.getSave().getGame().getLowArmyProfessionalismMaxRange()));
-    }
-
-    private static Modifiers scaleWithHighProfessionalism(Country country, StaticModifiers staticModifiers) {
-        return ModifiersUtils.scaleModifiers(staticModifiers.modifiers,
-                                             Math.min(Math.max(0, NumbersUtils.doubleOrDefault(country.getArmyProfessionalism()) -
-                                                                  country.getSave().getGame().getHighArmyProfessionalismMinRange()),
-                                                      country.getSave().getGame().getHighArmyProfessionalismMaxRange()));
     }
 }
