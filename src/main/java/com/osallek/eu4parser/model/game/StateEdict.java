@@ -23,22 +23,18 @@ public class StateEdict {
 
     private final Condition allow;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
 
     public StateEdict(ClausewitzItem item) {
         this.name = item.getName();
+        this.modifiers = new Modifiers(item.getChild("modifier"));
 
         ClausewitzItem child = item.getChild("potential");
         this.potential = child == null ? null : new Condition(child);
 
         child = item.getChild("allow");
         this.allow = child == null ? null : new Condition(child);
-
-        child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables().stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         ClausewitzList list = item.getList("color");
         this.color = list == null ? null : new Color(list);
@@ -64,7 +60,7 @@ public class StateEdict {
         return allow;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

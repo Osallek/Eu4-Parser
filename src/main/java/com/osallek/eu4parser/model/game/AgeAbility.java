@@ -1,11 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -17,7 +15,7 @@ public class AgeAbility {
 
     private final Condition allow;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     private final List<String> rules;
 
@@ -27,10 +25,7 @@ public class AgeAbility {
         ClausewitzItem child = item.getChild("allow");
         this.allow = child == null ? null : new Condition(child);
 
-        child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables().stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
 
         child = item.getChild("rule");
         this.rules = child == null ? null : child.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
@@ -52,7 +47,7 @@ public class AgeAbility {
         return allow;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

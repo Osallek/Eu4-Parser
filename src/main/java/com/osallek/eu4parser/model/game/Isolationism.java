@@ -1,14 +1,10 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Isolationism implements Comparable<Isolationism> {
 
@@ -18,17 +14,12 @@ public class Isolationism implements Comparable<Isolationism> {
 
     private final int isolationValue;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public Isolationism(ClausewitzItem item) {
         this.name = item.getName();
         this.isolationValue = item.getVarAsInt("isolation_value");
-
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
     }
 
     public String getName() {
@@ -47,7 +38,7 @@ public class Isolationism implements Comparable<Isolationism> {
         return isolationValue;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

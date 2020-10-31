@@ -1,14 +1,10 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Power;
 import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Advisor {
 
@@ -22,25 +18,17 @@ public class Advisor {
 
     private final boolean allowOnlyFemale;
 
-    private final Map<String, String> skillScaledModifier;
+    private final Modifiers skillScaledModifier;
 
-    private final Map<String, String> modifiers;
+    private final Modifiers modifiers;
 
     public Advisor(ClausewitzItem item) {
         this.name = item.getName();
         this.power = Power.valueOf(item.getVarAsString("monarch_power").toUpperCase());
         this.allowOnlyMale = BooleanUtils.toBoolean(item.getVarAsBool("allow_only_male"));
         this.allowOnlyFemale = BooleanUtils.toBoolean(item.getVarAsBool("allow_only_female"));
-        this.modifiers = item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female")
-                             .stream()
-                             .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getValue, (a, b) -> b, LinkedHashMap::new));
-        ClausewitzItem child = item.getChild("skill_scaled_modifier");
-        this.skillScaledModifier = child == null ? null : child.getVariables()
-                                                               .stream()
-                                                               .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                         ClausewitzVariable::getValue,
-                                                                                         (a, b) -> b,
-                                                                                         LinkedHashMap::new));
+        this.modifiers = new Modifiers(item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female"));
+        this.skillScaledModifier = new Modifiers(item.getChild("skill_scaled_modifier"));
     }
 
     public String getName() {
@@ -67,11 +55,11 @@ public class Advisor {
         return allowOnlyFemale;
     }
 
-    public Map<String, String> getSkillScaledModifier() {
+    public Modifiers getSkillScaledModifier() {
         return skillScaledModifier;
     }
 
-    public Map<String, String> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

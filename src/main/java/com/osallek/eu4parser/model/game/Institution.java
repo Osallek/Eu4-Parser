@@ -1,15 +1,12 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Institution implements Comparable<Institution> {
 
@@ -21,7 +18,7 @@ public class Institution implements Comparable<Institution> {
 
     private final Double penalty;
 
-    private final Map<String, String> bonus;
+    private final Modifiers bonus;
 
     private final Double tradeCompanyEfficiency;
 
@@ -34,13 +31,7 @@ public class Institution implements Comparable<Institution> {
         this.index = index;
         this.penalty = item.getVarAsDouble("penalty");
         this.tradeCompanyEfficiency = item.getVarAsDouble("trade_company_efficiency");
-        ClausewitzItem child = item.getChild("bonus");
-        this.bonus = child == null ? null : child.getVariables()
-                                                 .stream()
-                                                 .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                           ClausewitzVariable::getValue,
-                                                                           (a, b) -> b,
-                                                                           LinkedHashMap::new));
+        this.bonus = new Modifiers(item.getChild("bonus"));
         this.historicalStartDate = item.getVarAsDate("historical_start_date");
         this.historicalStartProvince = item.getVarAsInt("historical_start_province");
     }
@@ -65,8 +56,8 @@ public class Institution implements Comparable<Institution> {
         return this.penalty;
     }
 
-    public Map<String, String> getBonuses() {
-        return this.bonus == null ? new LinkedHashMap<>() : this.bonus;
+    public Modifiers getBonuses() {
+        return this.bonus;
     }
 
     public Double getTradeCompanyEfficiency() {

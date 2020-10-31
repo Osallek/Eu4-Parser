@@ -2,14 +2,11 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -50,9 +47,9 @@ public class Building {
 
     private boolean showSeparate;
 
-    private final Map<String, String> modifiers;
+    private final Modifiers modifiers;
 
-    private Map<String, String> internalModifiers;
+    private Modifiers internalModifiers;
 
     private final boolean onlyInPort;
 
@@ -107,17 +104,9 @@ public class Building {
         this.governmentSpecific = BooleanUtils.toBoolean(item.getVarAsBool("government_specific"));
         this.showSeparate = BooleanUtils.toBoolean(item.getVarAsBool("show_separate"));
 
-        ClausewitzItem child = item.getChild("modifier");
+        this.modifiers = new Modifiers(item.getChild("modifier"));
 
-        this.modifiers = child == null ? new LinkedHashMap<>()
-                                       : child.getVariables()
-                                              .stream()
-                                              .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                        ClausewitzVariable::getValue,
-                                                                        (a, b) -> b,
-                                                                        LinkedHashMap::new));
-
-        child = item.getChild("build_trigger");
+        ClausewitzItem child = item.getChild("build_trigger");
         this.onlyInPort = child != null && BooleanUtils.toBoolean(child.getVarAsBool("has_port"));
         this.trigger = child == null ? null : new Condition(child);
 
@@ -281,23 +270,26 @@ public class Building {
         this.showSeparate = showSeparate;
     }
 
-    public Map<String, String> getModifiers() {
-        Map<String, String> map = this.internalModifiers == null ? new LinkedHashMap<>()
-                                                                 : new LinkedHashMap<>(this.internalModifiers);
-        map.putAll(this.modifiers);
+    public Modifiers getModifiers() {
+        Modifiers map = this.internalModifiers == null ? null : Modifiers.copy(this.internalModifiers);
+
+        if (map != null) {
+            map.addAll(this.modifiers);
+        }
+
         return map;
     }
 
     public void addModifier(String modifier, String quantity) {
-        this.modifiers.put(modifier, quantity);
+        this.modifiers.add(modifier, quantity);
     }
 
-    public void setInternalModifiers(Map<String, String> internalModifiers) {
+    public void setInternalModifiers(Modifiers internalModifiers) {
         this.internalModifiers = internalModifiers;
     }
 
     public void removeModifier(String modifier) {
-        this.modifiers.remove(modifier);
+        this.modifiers.removeModifier(modifier);
     }
 
     public boolean onlyInPort() {

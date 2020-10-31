@@ -2361,8 +2361,8 @@ public class ConditionsUtils {
             case "fort_level":
                 return province.getBuildings()
                                .stream()
-                               .anyMatch(build -> build.getModifiers().containsKey("fort_level")
-                                                  && NumbersUtils.toInt(build.getModifiers().get("fort_level")) >= NumbersUtils.toInt(value));
+                               .anyMatch(build -> build.getModifiers().hasModifier("fort_level")
+                                                  && NumbersUtils.toInt(build.getModifiers().getModifier("fort_level")) >= NumbersUtils.toInt(value));
             case "galleys_in_province":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return province.getGalleys().size() >= integer;

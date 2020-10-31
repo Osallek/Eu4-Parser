@@ -1,13 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class GreatProject {
 
@@ -23,7 +19,7 @@ public class GreatProject {
 
     private final int time;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public GreatProject(ClausewitzItem item) {
         this.name = item.getName();
@@ -32,11 +28,7 @@ public class GreatProject {
         this.isCanal = BooleanUtils.toBoolean(item.getVarAsBool("is_canal"));
         this.time = item.getVarAsInt("time");
 
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
     }
 
     public String getName() {
@@ -67,7 +59,7 @@ public class GreatProject {
         return time;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

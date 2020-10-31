@@ -1,12 +1,8 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class ReligiousReform {
 
@@ -18,16 +14,13 @@ public class ReligiousReform {
 
     private final int index;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public ReligiousReform(ClausewitzItem item, ReligiousReforms religiousReforms, int index) {
         this.name = item.getName();
         this.nativeAdvancements = religiousReforms;
         this.index = index;
-        this.modifiers = item.getVariables()
-                             .stream()
-                             .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                            Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getVariables());
     }
 
     public String getName() {
@@ -50,7 +43,7 @@ public class ReligiousReform {
         return index;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

@@ -1,13 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Power;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class ParliamentIssue {
 
@@ -19,19 +15,14 @@ public class ParliamentIssue {
 
     private final Condition allow;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public ParliamentIssue(ClausewitzItem item) {
         this.name = item.getName();
         this.category = Power.byParliamentType(item.getVarAsInt("category"));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
 
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-        child = item.getChild("allow");
+        ClausewitzItem child = item.getChild("allow");
         this.allow = child == null ? null : new Condition(child);
     }
 
@@ -55,7 +46,7 @@ public class ParliamentIssue {
         return allow;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

@@ -28,46 +28,28 @@ public class TradePolicy {
 
     private final Condition canMaintain;
 
-    private final Map<String, List<String>> tradePower;
+    private final Modifiers tradePower;
 
-    private final Map<String, List<String>> countriesWithMerchantModifier;
+    private final Modifiers countriesWithMerchantModifier;
 
-    private final Map<String, List<String>> nodeProvinceModifier;
+    private final Modifiers nodeProvinceModifier;
 
 
     public TradePolicy(ClausewitzItem item) {
         this.name = item.getName();
+        this.tradePower = new Modifiers(item.getChild("trade_power"));
+        this.countriesWithMerchantModifier = new Modifiers(item.getChild("countries_with_merchant_modifier"));
+        this.nodeProvinceModifier = new Modifiers(item.getChild("node_province_modifier"));
+        this.buttonGfx = item.getVarAsString("button_gfx");
+        this.unique = BooleanUtils.toBoolean(item.getVarAsBool("unique"));
+        this.showAlert = BooleanUtils.toBoolean(item.getVarAsBool("show_alert"));
+        this.centerOfReformation = BooleanUtils.toBoolean(item.getVarAsBool("center_of_reformation"));
 
         ClausewitzItem child = item.getChild("can_select");
         this.canSelect = child == null ? null : new Condition(child);
 
         child = item.getChild("can_maintain");
         this.canMaintain = child == null ? null : new Condition(child);
-
-        child = item.getChild("trade_power");
-        this.tradePower = child == null ? null : child.getVariables()
-                                                      .stream()
-                                                      .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                     Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-        child = item.getChild("countries_with_merchant_modifier");
-        this.countriesWithMerchantModifier = child == null ? null : child.getVariables()
-                                                                         .stream()
-                                                                         .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                                        Collectors.mapping(ClausewitzVariable::getValue,
-                                                                                                                           Collectors.toList())));
-
-        child = item.getChild("node_province_modifier");
-        this.nodeProvinceModifier = child == null ? null : child.getVariables()
-                                                                .stream()
-                                                                .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                               Collectors.mapping(ClausewitzVariable::getValue,
-                                                                                                                  Collectors.toList())));
-
-        this.buttonGfx = item.getVarAsString("button_gfx");
-        this.unique = BooleanUtils.toBoolean(item.getVarAsBool("unique"));
-        this.showAlert = BooleanUtils.toBoolean(item.getVarAsBool("show_alert"));
-        this.centerOfReformation = BooleanUtils.toBoolean(item.getVarAsBool("center_of_reformation"));
     }
 
     public String getName() {
@@ -106,15 +88,15 @@ public class TradePolicy {
         return canMaintain;
     }
 
-    public Map<String, List<String>> getTradePower() {
+    public Modifiers getTradePower() {
         return tradePower;
     }
 
-    public Map<String, List<String>> getCountriesWithMerchantModifier() {
+    public Modifiers getCountriesWithMerchantModifier() {
         return countriesWithMerchantModifier;
     }
 
-    public Map<String, List<String>> getNodeProvinceModifier() {
+    public Modifiers getNodeProvinceModifier() {
         return nodeProvinceModifier;
     }
 

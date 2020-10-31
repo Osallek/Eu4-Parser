@@ -18,9 +18,9 @@ public class TradeGood {
 
     private Color color;
 
-    private Map<String, String> modifiers;
+    private Modifiers modifiers;
 
-    private Map<String, String> provinceModifiers;
+    private Modifiers provinceModifiers;
 
     private Double basePrice;
 
@@ -28,20 +28,8 @@ public class TradeGood {
         this.name = item.getName();
         ClausewitzList list = item.getList("color");
         this.color = list == null ? null : new Color(list, true);
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getValue,
-                                                                               (a, b) -> b,
-                                                                               LinkedHashMap::new));
-        child = item.getChild("province");
-        this.provinceModifiers = child == null ? null : child.getVariables()
-                                                             .stream()
-                                                             .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                       ClausewitzVariable::getValue,
-                                                                                       (a, b) -> b,
-                                                                                       LinkedHashMap::new));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
+        this.provinceModifiers = new Modifiers(item.getChild("province"));
     }
 
     void setPriceItem(ClausewitzItem priceItem) {
@@ -72,39 +60,39 @@ public class TradeGood {
         this.color = color;
     }
 
-    public Map<String, String> getModifiers() {
-        return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
+    public Modifiers getModifiers() {
+        return this.modifiers;
     }
 
     public void addModifier(String modifier, String quantity) {
         if (this.modifiers == null) {
-            this.modifiers = new LinkedHashMap<>();
+            this.modifiers = new Modifiers();
         }
 
-        this.modifiers.put(modifier, quantity);
+        this.modifiers.add(modifier, quantity);
     }
 
     public void removeModifier(String modifier) {
         if (this.modifiers != null) {
-            this.modifiers.remove(modifier);
+            this.modifiers.removeModifier(modifier);
         }
     }
 
-    public Map<String, String> getProvinceModifiers() {
-        return this.provinceModifiers == null ? new LinkedHashMap<>() : this.provinceModifiers;
+    public Modifiers getProvinceModifiers() {
+        return this.provinceModifiers;
     }
 
     public void addProvinceModifier(String modifier, String quantity) {
         if (this.provinceModifiers == null) {
-            this.provinceModifiers = new LinkedHashMap<>();
+            this.provinceModifiers = new Modifiers();
         }
 
-        this.provinceModifiers.put(modifier, quantity);
+        this.provinceModifiers.add(modifier, quantity);
     }
 
     public void removeProvinceModifier(String modifier) {
         if (this.provinceModifiers != null) {
-            this.provinceModifiers.remove(modifier);
+            this.provinceModifiers.removeModifier(modifier);
         }
     }
 

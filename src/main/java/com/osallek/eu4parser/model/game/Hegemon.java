@@ -1,12 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Hegemon {
 
@@ -16,40 +13,22 @@ public class Hegemon {
 
     private final Condition allow;
 
-    private final Map<String, String> base;
+    private final Modifiers base;
 
-    private final Map<String, String> scale;
+    private final Modifiers scale;
 
-    private final Map<String, String> max;
+    private final Modifiers max;
 
     public Hegemon(ClausewitzItem item) {
         this.name = item.getName();
 
-        ClausewitzItem child = item.getChild("base");
-        this.base = child == null ? new LinkedHashMap<>() : child.getVariables()
-                                                                 .stream()
-                                                                 .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                           ClausewitzVariable::getValue,
-                                                                                           (a, b) -> b,
-                                                                                           LinkedHashMap::new));
+        this.base = new Modifiers(item.getChild("base"));
 
-        child = item.getChild("scale");
-        this.scale = child == null ? new LinkedHashMap<>() : child.getVariables()
-                                                                  .stream()
-                                                                  .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                            ClausewitzVariable::getValue,
-                                                                                            (a, b) -> b,
-                                                                                            LinkedHashMap::new));
+        this.scale = new Modifiers(item.getChild("scale"));
 
-        child = item.getChild("max");
-        this.max = child == null ? new LinkedHashMap<>() : child.getVariables()
-                                                                .stream()
-                                                                .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                          ClausewitzVariable::getValue,
-                                                                                          (a, b) -> b,
-                                                                                          LinkedHashMap::new));
+        this.max = new Modifiers(item.getChild("max"));
 
-        child = item.getChild("allow");
+        ClausewitzItem child = item.getChild("allow");
         this.allow = child == null ? null : new Condition(child);
     }
 
@@ -69,15 +48,15 @@ public class Hegemon {
         return allow;
     }
 
-    public Map<String, String> getBase() {
+    public Modifiers getBase() {
         return base;
     }
 
-    public Map<String, String> getScale() {
+    public Modifiers getScale() {
         return scale;
     }
 
-    public Map<String, String> getMax() {
+    public Modifiers getMax() {
         return max;
     }
 

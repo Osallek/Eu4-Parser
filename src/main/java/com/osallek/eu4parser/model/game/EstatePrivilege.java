@@ -2,10 +2,8 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.NumbersUtils;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,11 +29,11 @@ public class EstatePrivilege {
 
     private final Condition canRevoke;
 
-    private final Map<String, String> modifiers;
+    private final Modifiers modifiers;
 
     private final List<EstatePrivilegeModifier> conditionalModifiers;
 
-    private final Map<String, String> modifierByLandOwnership;
+    private final Modifiers modifierByLandOwnership;
 
     private final List<String> mechanics;
 
@@ -58,22 +56,18 @@ public class EstatePrivilege {
         child = item.getChild("can_revoke");
         this.canRevoke = child == null ? null : new Condition(child);
 
-        this.modifiers = new LinkedHashMap<>();
+        this.modifiers = new Modifiers();
         child = item.getChild("penalties");
         if (child != null) {
-            child.getVariables().forEach(var -> this.modifiers.put(var.getName(), var.getValue()));
+            this.modifiers.addAll(new Modifiers(child.getVariables()));
         }
 
         child = item.getChild("benefits");
         if (child != null) {
-            child.getVariables().forEach(var -> this.modifiers.put(var.getName(), var.getValue()));
+            this.modifiers.addAll(new Modifiers(child.getVariables()));
         }
 
-        child = item.getChild("modifier_by_land_ownership");
-        this.modifierByLandOwnership = child == null ? null : child.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                                                     ClausewitzVariable::getValue,
-                                                                                                                     (a, b) -> b,
-                                                                                                                     LinkedHashMap::new));
+        this.modifierByLandOwnership = new Modifiers(item.getChild("modifier_by_land_ownership"));
 
         ClausewitzList list = item.getList("mechanics");
         this.mechanics = list == null ? null : list.getValues();
@@ -121,7 +115,7 @@ public class EstatePrivilege {
         return canRevoke;
     }
 
-    public Map<String, String> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 
@@ -129,7 +123,7 @@ public class EstatePrivilege {
         return conditionalModifiers;
     }
 
-    public Map<String, String> getModifierByLandOwnership() {
+    public Modifiers getModifierByLandOwnership() {
         return modifierByLandOwnership;
     }
 

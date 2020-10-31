@@ -22,20 +22,14 @@ public class Faction {
 
     private final List<Names> names;
 
-    private final Map<String, String> modifiers;
+    private final Modifiers modifiers;
 
     public Faction(ClausewitzItem item) {
         this.name = item.getName();
         ClausewitzVariable var = item.getVar("monarch_power");
         this.category = var == null ? null : Power.valueOf(var.getValue().toUpperCase());
 
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getValue,
-                                                                               (a, b) -> b,
-                                                                               LinkedHashMap::new));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
 
         List<ClausewitzItem> namesItems = item.getChildren("triggered_faction_name");
         this.names = namesItems.stream().map(Names::new).collect(Collectors.toList());
@@ -71,7 +65,7 @@ public class Faction {
         return names;
     }
 
-    public Map<String, String> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

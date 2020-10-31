@@ -1,15 +1,11 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzObject;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class RulerPersonality {
+
     private final String name;
 
     private String localizedName;
@@ -22,7 +18,7 @@ public class RulerPersonality {
 
     private final Condition allow;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public RulerPersonality(ClausewitzItem item) {
         this.name = item.getName();
@@ -31,12 +27,7 @@ public class RulerPersonality {
         this.rulerAllow = item.getChild("ruler_allow") == null ? null : new Condition(item.getChild("ruler_allow"));
         this.heirAllow = item.getChild("heir_allow") == null ? null : new Condition(item.getChild("heir_allow"));
         this.consortAllow = item.getChild("consort_allow") == null ? null : new Condition(item.getChild("consort_allow"));
-
-        List<ClausewitzVariable> list = item.getVarsNot();
-        this.modifiers = list.stream()
-                             .collect(Collectors.groupingBy(ClausewitzObject::getName, Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-
+        this.modifiers = new Modifiers(item);
     }
 
     public Condition getRulerAllow() {
@@ -55,7 +46,7 @@ public class RulerPersonality {
         return allow;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

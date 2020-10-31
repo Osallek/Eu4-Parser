@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -23,13 +22,13 @@ public class Estate {
 
     private final Condition trigger;
 
-    private final Map<String, String> countryModifierHappy;
+    private final Modifiers countryModifierHappy;
 
-    private final Map<String, String> countryModifierNeutral;
+    private final Modifiers countryModifierNeutral;
 
-    private final Map<String, String> countryModifierAngry;
+    private final Modifiers countryModifierAngry;
 
-    private final Map<String, String> landOwnershipModifier;
+    private final Modifiers landOwnershipModifier;
 
     private final double baseInfluence;
 
@@ -62,29 +61,13 @@ public class Estate {
         List<ClausewitzItem> items = item.getChildren("custom_name");
         this.names = items.stream().map(Names::new).collect(Collectors.toList());
 
-        child = item.getChild("country_modifier_happy");
-        this.countryModifierHappy = child == null ? null : child.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                                                  ClausewitzVariable::getValue,
-                                                                                                                  (a, b) -> b,
-                                                                                                                  LinkedHashMap::new));
+        this.countryModifierHappy = new Modifiers(item.getChild("country_modifier_happy"));
 
-        child = item.getChild("country_modifier_neutral");
-        this.countryModifierNeutral = child == null ? null : child.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                                                    ClausewitzVariable::getValue,
-                                                                                                                    (a, b) -> b,
-                                                                                                                    LinkedHashMap::new));
+        this.countryModifierNeutral = new Modifiers(item.getChild("country_modifier_neutral"));
 
-        child = item.getChild("country_modifier_angry");
-        this.countryModifierAngry = child == null ? null : child.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                                                  ClausewitzVariable::getValue,
-                                                                                                                  (a, b) -> b,
-                                                                                                                  LinkedHashMap::new));
+        this.countryModifierAngry = new Modifiers(item.getChild("country_modifier_angry"));
 
-        child = item.getChild("land_ownership_modifier");
-        this.landOwnershipModifier = child == null ? null : child.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                                                   ClausewitzVariable::getValue,
-                                                                                                                   (a, b) -> b,
-                                                                                                                   LinkedHashMap::new));
+        this.landOwnershipModifier = new Modifiers(item.getChild("land_ownership_modifier"));
 
         items = item.getChildren("influence_modifier");
         this.influenceModifiers = items.stream()
@@ -129,19 +112,19 @@ public class Estate {
         return trigger;
     }
 
-    public Map<String, String> getCountryModifierHappy() {
+    public Modifiers getCountryModifierHappy() {
         return countryModifierHappy;
     }
 
-    public Map<String, String> getCountryModifierNeutral() {
+    public Modifiers getCountryModifierNeutral() {
         return countryModifierNeutral;
     }
 
-    public Map<String, String> getCountryModifierAngry() {
+    public Modifiers getCountryModifierAngry() {
         return countryModifierAngry;
     }
 
-    public Map<String, String> getLandOwnershipModifier() {
+    public Modifiers getLandOwnershipModifier() {
         return landOwnershipModifier;
     }
 

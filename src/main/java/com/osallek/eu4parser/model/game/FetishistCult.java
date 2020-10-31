@@ -1,12 +1,8 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class FetishistCult {
 
@@ -14,7 +10,7 @@ public class FetishistCult {
 
     private String localizedName;
 
-    private final Map<String, String> modifiers;
+    private final Modifiers modifiers;
 
     private final Condition allow;
 
@@ -24,10 +20,7 @@ public class FetishistCult {
         this.name = item.getName();
         this.allow = item.getChild("allow") == null ? null : new Condition(item.getChild("allow"));
         this.sprite = item.getVarAsInt("sprite");
-        this.modifiers = item.getVarsNot("sprite").stream().collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                     ClausewitzVariable::getValue,
-                                                                                     (a, b) -> b,
-                                                                                     LinkedHashMap::new));
+        this.modifiers = new Modifiers(item.getVarsNot("sprite"));
 
         if (this.allow != null) {
             this.allow.removeCondition("has_unlocked_cult", this.name); //Prevent endless recursive
@@ -46,7 +39,7 @@ public class FetishistCult {
         this.localizedName = localizedName;
     }
 
-    public Map<String, String> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

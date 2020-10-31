@@ -21,19 +21,14 @@ public class Policy {
 
     private final Condition allow;
 
-    private final Map<String, String> modifiers;
+    private final Modifiers modifiers;
 
     public Policy(ClausewitzItem item) {
         this.name = item.getName();
         ClausewitzVariable var = item.getVar("monarch_power");
         this.category = var == null ? null : Power.valueOf(var.getValue().toUpperCase());
+        this.modifiers = new Modifiers(item.getVarsNot("monarch_power"));
 
-        this.modifiers = item.getVarsNot("monarch_power")
-                             .stream()
-                             .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                       ClausewitzVariable::getValue,
-                                                       (a, b) -> b,
-                                                       LinkedHashMap::new));
         ClausewitzItem child = item.getChild("potential");
         this.potential = child == null ? null : new Condition(child);
 
@@ -65,7 +60,7 @@ public class Policy {
         return allow;
     }
 
-    public Map<String, String> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

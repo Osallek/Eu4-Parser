@@ -2,14 +2,10 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class GoldenBull {
 
@@ -19,18 +15,12 @@ public class GoldenBull {
 
     private List<String> mechanics;
 
-    private Map<String, String> modifiers;
+    private Modifiers modifiers;
 
     public GoldenBull(ClausewitzItem item) {
         this.name = item.getName();
+        this.modifiers = new Modifiers(item.getChild("modifier"));
 
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getValue,
-                                                                               (a, b) -> b,
-                                                                               LinkedHashMap::new));
         ClausewitzList list = item.getList("mechanics");
         this.mechanics = list == null ? null : list.getValues();
     }
@@ -66,21 +56,21 @@ public class GoldenBull {
         this.mechanics = mechanics;
     }
 
-    public Map<String, String> getModifiers() {
-        return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
+    public Modifiers getModifiers() {
+        return this.modifiers;
     }
 
     public void addModifier(String modifier, String quantity) {
         if (modifier == null) {
-            this.modifiers = new LinkedHashMap<>();
+            this.modifiers = new Modifiers();
         }
 
-        this.modifiers.put(modifier, quantity);
+        this.modifiers.add(modifier, quantity);
     }
 
     public void removeModifier(String modifier) {
         if (this.modifiers != null) {
-            this.modifiers.remove(modifier);
+            this.modifiers.removeModifier(modifier);
         }
     }
 

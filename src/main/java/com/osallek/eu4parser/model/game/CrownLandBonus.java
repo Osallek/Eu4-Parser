@@ -1,15 +1,10 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class CrownLandBonus implements Comparable<CrownLandBonus> {
 
@@ -19,19 +14,14 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
 
     private final Double rangeTo;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public CrownLandBonus(ClausewitzItem item) {
         this.name = item.getVarAsString("key");
         this.rangeFrom = item.getVarAsDouble("range_from");
         this.rangeTo = item.getVarAsDouble("range_to");
 
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                    LinkedHashMap::new,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
     }
 
     public String getName() {
@@ -46,7 +36,7 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
         return rangeTo;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

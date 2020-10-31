@@ -1,12 +1,8 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Decree {
     
@@ -18,20 +14,14 @@ public class Decree {
 
     private Integer duration;
 
-    private Map<String, String> modifiers;
+    private Modifiers modifiers;
 
     public Decree(ClausewitzItem item) {
         this.name = item.getName();
         this.cost = item.getVarAsInt("cost");
         this.duration = item.getVarAsInt("time");
 
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getValue,
-                                                                               (a, b) -> b,
-                                                                               LinkedHashMap::new));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
     }
 
     public Decree(Decree other) {
@@ -74,21 +64,21 @@ public class Decree {
         this.duration = duration;
     }
 
-    public Map<String, String> getModifiers() {
-        return this.modifiers == null ? new LinkedHashMap<>() : this.modifiers;
+    public Modifiers getModifiers() {
+        return this.modifiers;
     }
 
     public void addModifier(String modifier, String quantity) {
         if (this.modifiers == null) {
-            this.modifiers = new LinkedHashMap<>();
+            this.modifiers = new Modifiers();
         }
 
-        this.modifiers.put(modifier, quantity);
+        this.modifiers.add(modifier, quantity);
     }
 
     public void removeModifier(String modifier) {
         if (this.modifiers != null) {
-            this.modifiers.remove(modifier);
+            this.modifiers.removeModifier(modifier);
         }
     }
 

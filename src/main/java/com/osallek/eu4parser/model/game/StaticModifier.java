@@ -267,11 +267,11 @@ public enum StaticModifier {
 
     public final Condition trigger;
 
-    public Map<String, List<String>> modifiers;
+    public Modifiers modifiers;
 
-    public BiFunction<Country, StaticModifier, Map<String, List<String>>> applyToCountry;
+    public BiFunction<Country, StaticModifier, Modifiers> applyToCountry;
 
-    public BiFunction<SaveProvince, StaticModifier, Map<String, List<String>>> applyToProvince;
+    public BiFunction<SaveProvince, StaticModifier, Modifiers> applyToProvince;
 
     private static final Map<String, StaticModifier> STATIC_MODIFIERS_MAP;
 
@@ -429,14 +429,14 @@ public enum StaticModifier {
         LOST_HEGEMONY.applyToCountry = (country, modif) -> StaticModifier.LOST_HEGEMONY.modifiers;
     }
 
-    StaticModifier(Condition trigger, BiFunction<Country, StaticModifier, Map<String, List<String>>> applyToCountry,
-                   BiFunction<SaveProvince, StaticModifier, Map<String, List<String>>> applyToProvince) {
+    StaticModifier(Condition trigger, BiFunction<Country, StaticModifier, Modifiers> applyToCountry,
+                   BiFunction<SaveProvince, StaticModifier, Modifiers> applyToProvince) {
         this.trigger = trigger;
         this.applyToCountry = applyToCountry;
         this.applyToProvince = applyToProvince;
     }
 
-    public void setModifiers(Map<String, List<String>> modifiers) {
+    public void setModifiers(Modifiers modifiers) {
         this.modifiers = modifiers;
     }
 
@@ -444,88 +444,80 @@ public enum StaticModifier {
         return STATIC_MODIFIERS_MAP.get(name.toUpperCase());
     }
 
-    public static Map<String, List<String>> applyToModifiersCountry(Country country) {
-        return APPLIED_TO_COUNTRY.stream()
-                                 .filter(staticModifier -> staticModifier.trigger.apply(country, country))
-                                 .map(staticModifier -> staticModifier.applyToCountry.apply(country, staticModifier))
-                                 .flatMap(map -> map.entrySet().stream())
-                                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (list1, list2) -> {
-                                     list1.addAll(list2);
-                                     return list1;
-                                 }));
+    public static Modifiers applyToModifiersCountry(Country country) {
+        return ModifiersUtils.sumModifiers(APPLIED_TO_COUNTRY.stream()
+                                                             .filter(staticModifier -> staticModifier.trigger.apply(country, country))
+                                                             .map(staticModifier -> staticModifier.applyToCountry.apply(country, staticModifier))
+                                                             .toArray(Modifiers[]::new));
     }
 
-    public static Map<String, List<String>> applyToModifiersProvince(SaveProvince province) {
-        return APPLIED_TO_PROVINCE.stream()
-                                  .filter(staticModifier -> staticModifier.trigger.apply(province))
-                                  .map(staticModifier -> staticModifier.applyToProvince.apply(province, staticModifier))
-                                  .flatMap(map -> map.entrySet().stream())
-                                  .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (list1, list2) -> {
-                                      list1.addAll(list2);
-                                      return list1;
-                                  }));
+    public static Modifiers applyToModifiersProvince(SaveProvince province) {
+        return ModifiersUtils.sumModifiers(APPLIED_TO_PROVINCE.stream()
+                                                              .filter(staticModifier -> staticModifier.trigger.apply(province))
+                                                              .map(staticModifier -> staticModifier.applyToProvince.apply(province, staticModifier))
+                                                              .toArray(Modifiers[]::new));
     }
 
-    private static Map<String, List<String>> scaleTax(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleTax(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getBaseTax());
     }
 
-    private static Map<String, List<String>> scaleProd(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleProd(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getBaseProduction());
     }
 
-    private static Map<String, List<String>> scaleManpower(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleManpower(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getBaseManpower());
     }
 
-    private static Map<String, List<String>> scaleDev(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleDev(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getDevelopment());
     }
 
-    private static Map<String, List<String>> scaleDevImprove(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleDevImprove(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getTotalImproveCount());
     }
 
-    private static Map<String, List<String>> scaleCountryDev(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleCountryDev(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getDevelopment());
     }
 
-    private static Map<String, List<String>> scaleColonySize100(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleColonySize100(SaveProvince province, StaticModifier staticModifier) {
         double colonySize = NumbersUtils.doubleOrDefault(province.getColonySize()) % 100;
 
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, colonySize);
     }
 
-    private static Map<String, List<String>> scaleUnrest(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleUnrest(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getUnrest());
     }
 
-    private static Map<String, List<String>> scaleDevastation(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleDevastation(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getDevastation());
     }
 
-    private static Map<String, List<String>> scaleNativeSize(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleNativeSize(SaveProvince province, StaticModifier staticModifier) {
         Integer nativeSize = NumbersUtils.intOrDefault(province.getNativeSize()) / 10;
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, nativeSize);
     }
 
-    private static Map<String, List<String>> scaleNativeHostileness(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleNativeHostileness(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getNativeHostileness());
     }
 
-    private static Map<String, List<String>> scaleNationalism(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleNationalism(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getNationalism());
     }
 
-    private static Map<String, List<String>> scaleAutonomy(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleAutonomy(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, province.getLocalAutonomy());
     }
 
-    private static Map<String, List<String>> scalePatriarchAuthority(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scalePatriarchAuthority(SaveProvince province, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(province.getOwner().getPatriarchAuthority()));
     }
 
-    private static Map<String, List<String>> scaleFriendlyRegimentMax20(SaveProvince province, StaticModifier staticModifier) {
+    private static Modifiers scaleFriendlyRegimentMax20(SaveProvince province, StaticModifier staticModifier) {
         int nbRegiments = province.getArmies()
                                   .stream()
                                   .map(army -> BigDecimal.valueOf(army.getRegiments().size())
@@ -537,7 +529,7 @@ public enum StaticModifier {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, nbRegiments);
     }
 
-    private static Map<String, List<String>> scaleOccupiedImperial(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleOccupiedImperial(Country country, StaticModifier staticModifier) {
         List<SaveProvince> provinces = country.getOwnedProvinces();
         provinces.retainAll(country.getCoreProvinces());
         provinces.removeIf(Predicate.not(SaveProvince::inHre));
@@ -545,52 +537,52 @@ public enum StaticModifier {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, provinces.size());
     }
 
-    private static Map<String, List<String>> scalePatriarchAuthority(Country country, StaticModifier staticModifier) {
+    private static Modifiers scalePatriarchAuthority(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getPatriarchAuthority()));
     }
 
-    private static Map<String, List<String>> scaleWithStability(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithStability(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(country.getStability()));
     }
 
-    private static Map<String, List<String>> scaleWithInflation(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithInflation(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getInflation()));
     }
 
-    private static Map<String, List<String>> scaleWithCallForPeace(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithCallForPeace(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getCallForPeace()));
     }
 
-    private static Map<String, List<String>> scaleWithWarExhaustion(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithWarExhaustion(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getWarExhaustion()));
     }
 
-    private static Map<String, List<String>> scaleWithDoom(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithDoom(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getDoom()));
     }
 
-    private static Map<String, List<String>> scaleWithAuthority(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithAuthority(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getAuthority()));
     }
 
-    private static Map<String, List<String>> scaleWithTradeRefusal(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithTradeRefusal(Country country, StaticModifier staticModifier) {
         int tradeRefusal = (int) country.getTradeEmbargoes().stream().filter(c -> !country.getRivals().containsKey(c.getTag())).count();
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(tradeRefusal));
     }
 
-    private static Map<String, List<String>> scaleWithMercantilism(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithMercantilism(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(country.getMercantilism()));
     }
 
-    private static Map<String, List<String>> scaleWithArmyTradition(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithArmyTradition(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getArmyTradition()));
     }
 
-    private static Map<String, List<String>> scaleWithNavyTradition(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithNavyTradition(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getNavyTradition()));
     }
 
-    private static Map<String, List<String>> scaleWithFreeCitiesInHre(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithFreeCitiesInHre(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getSave()
                                                                               .getCountries()
                                                                               .values()
@@ -604,79 +596,79 @@ public enum StaticModifier {
                                                                               .count());
     }
 
-    private static Map<String, List<String>> scaleWithNumOfRoyalMarriages(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithNumOfRoyalMarriages(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(country.getNumOfRoyalMarriages()));
     }
 
-    private static Map<String, List<String>> scaleWithNumOfProvinces(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithNumOfProvinces(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(country.getOwnedProvinces().size()));
     }
 
-    private static Map<String, List<String>> scaleWithTribalAllegiance(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithTribalAllegiance(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getTribalAllegiance()));
     }
 
-    private static Map<String, List<String>> scaleWithLegitimacy50(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithLegitimacy50(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (NumbersUtils.doubleOrDefault(country.getLegitimacy()) - 50) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithHordeUnity50(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithHordeUnity50(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (NumbersUtils.doubleOrDefault(country.getHordeUnity()) - 50) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithDevotion50(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithDevotion50(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (NumbersUtils.doubleOrDefault(country.getDevotion()) - 50) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithMeritocracy50(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithMeritocracy50(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (NumbersUtils.doubleOrDefault(country.getMeritocracy()) - 50) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithMeritocracy50Reverse(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithMeritocracy50Reverse(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (50 - NumbersUtils.doubleOrDefault(country.getMeritocracy())) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithCorruption(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithCorruption(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getCorruption()));
     }
 
-    private static Map<String, List<String>> scaleWithRootOutCorruption(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithRootOutCorruption(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getRootOutCorruptionSlider()));
     }
 
-    private static Map<String, List<String>> scaleWithRecoveryMotivation(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithRecoveryMotivation(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getRecoveryMotivation()));
     }
 
-    private static Map<String, List<String>> scaleWithMilitarisedSociety(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithMilitarisedSociety(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getMilitarisedSociety()) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithOverextension(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithOverextension(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getOverextensionPercentage()));
     }
 
-    private static Map<String, List<String>> scaleWithPrestige(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithPrestige(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getPrestige()) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithRepublicanTradition(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithRepublicanTradition(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getRepublicanTradition()) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithRepublicanTraditionReverse(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithRepublicanTraditionReverse(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (100 - NumbersUtils.doubleOrDefault(country.getRepublicanTradition())) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithReligiousUnity(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithReligiousUnity(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getReligiousUnity()));
     }
 
-    private static Map<String, List<String>> scaleWithReligiousUnityReverse(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithReligiousUnityReverse(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, 1 - NumbersUtils.doubleOrDefault(country.getReligiousUnity()));
     }
 
-    private static Map<String, List<String>> scaleWithOccupiedProvinces(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithOccupiedProvinces(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              country.getOwnedProvinces()
                                                     .stream()
@@ -684,7 +676,7 @@ public enum StaticModifier {
                                                     .count());
     }
 
-    private static Map<String, List<String>> scaleWithBlockadedProvinces(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithBlockadedProvinces(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              country.getOwnedProvinces()
                                                     .stream()
@@ -692,84 +684,84 @@ public enum StaticModifier {
                                                     .count());
     }
 
-    private static Map<String, List<String>> scaleWithNotControlledCores(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithNotControlledCores(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              country.getCoreProvinces().stream().filter(province -> !province.getOwner().equals(country)).count());
     }
 
-    private static Map<String, List<String>> scaleWithNumOfAgeObjectives(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithNumOfAgeObjectives(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(country.getNumOfAgeObjectives()));
     }
 
-    private static Map<String, List<String>> scaleWithOverlordAdm(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithOverlordAdm(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (Math.max(0, country.getTech().getAdm() - country.getOverlord().getTech().getAdm())));
     }
 
-    private static Map<String, List<String>> scaleWithOverlordDip(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithOverlordDip(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (Math.max(0, country.getTech().getDip() - country.getOverlord().getTech().getDip())));
     }
 
-    private static Map<String, List<String>> scaleWithOverlordMil(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithOverlordMil(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, (Math.max(0, country.getTech().getMil() - country.getOverlord().getTech().getMil())));
     }
 
-    private static Map<String, List<String>> scaleWithLibertyDesire(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithLibertyDesire(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getLibertyDesire()) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithAbsolutism(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithAbsolutism(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(country.getAbsolutism()) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithCurrentPowerProjection(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithCurrentPowerProjection(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getCurrentPowerProjection()) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithStrongCompany(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithStrongCompany(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getNumOfStrongCompanies());
     }
 
-    private static Map<String, List<String>> scaleWithLargeColony(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithLargeColony(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getNumOfLargeColonies());
     }
 
-    private static Map<String, List<String>> scaleWithVassals(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithVassals(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_CLIENT_VASSAL));
     }
 
-    private static Map<String, List<String>> scaleWithMarches(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithMarches(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_MARCH));
     }
 
-    private static Map<String, List<String>> scaleWithUnions(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithUnions(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION));
     }
 
-    private static Map<String, List<String>> scaleWithDaimyos(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithDaimyos(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL));
     }
 
-    private static Map<String, List<String>> scaleWithInnovativeness(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithInnovativeness(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getInnovativeness()) / 100);
     }
 
-    private static Map<String, List<String>> scaleWithNumExpandedAdministration(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithNumExpandedAdministration(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.intOrDefault(country.getNumExpandedAdministration()));
     }
 
-    private static Map<String, List<String>> scaleWithNumTradeLeagueMembers(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithNumTradeLeagueMembers(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, country.getTradeLeague().getMembers().size());
     }
 
-    private static Map<String, List<String>> scaleWithHarmony(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithHarmony(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, NumbersUtils.doubleOrDefault(country.getHarmony()));
     }
 
-    private static Map<String, List<String>> scaleWithHarmonyReverse(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithHarmonyReverse(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers, 1 - (NumbersUtils.doubleOrDefault(country.getHarmony()) / 100));
     }
 
-    private static Map<String, List<String>> scaleWithDaimyosAtPeace(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithDaimyosAtPeace(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              Math.min(10, country.getSubjects()
                                                                  .stream()
@@ -779,7 +771,7 @@ public enum StaticModifier {
                                                                  .count()));
     }
 
-    private static Map<String, List<String>> scaleWithDaimyosSameIsolationism(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithDaimyosSameIsolationism(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              Math.min(10, country.getSubjects()
                                                                  .stream()
@@ -792,7 +784,7 @@ public enum StaticModifier {
                                                                  .count()));
     }
 
-    private static Map<String, List<String>> scaleWithDaimyosDifferentIsolationism(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithDaimyosDifferentIsolationism(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              Math.min(10, country.getSubjects()
                                                                  .stream()
@@ -805,7 +797,7 @@ public enum StaticModifier {
                                                                  .count()));
     }
 
-    private static Map<String, List<String>> scaleWithDaimyosSwordHunt(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithDaimyosSwordHunt(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              country.getSubjects()
                                                     .stream()
@@ -817,26 +809,26 @@ public enum StaticModifier {
                                                     .count());
     }
 
-    private static Map<String, List<String>> scaleWithStreltsyPercent(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithStreltsyPercent(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              BigDecimal.valueOf(country.getNbRegimentOfCategory(3))
                                                        .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
     }
 
-    private static Map<String, List<String>> scaleWithCossacksPercent(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithCossacksPercent(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              BigDecimal.valueOf(country.getNbRegimentOfCategory(4))
                                                        .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
     }
 
-    private static Map<String, List<String>> scaleWithLowProfessionalism(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithLowProfessionalism(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              Math.min(Math.max(0, NumbersUtils.doubleOrDefault(country.getArmyProfessionalism()) -
                                                                   country.getSave().getGame().getLowArmyProfessionalismMinRange()),
                                                       country.getSave().getGame().getLowArmyProfessionalismMaxRange()));
     }
 
-    private static Map<String, List<String>> scaleWithHighProfessionalism(Country country, StaticModifier staticModifier) {
+    private static Modifiers scaleWithHighProfessionalism(Country country, StaticModifier staticModifier) {
         return ModifiersUtils.scaleModifiers(staticModifier.modifiers,
                                              Math.min(Math.max(0, NumbersUtils.doubleOrDefault(country.getArmyProfessionalism()) -
                                                                   country.getSave().getGame().getHighArmyProfessionalismMinRange()),

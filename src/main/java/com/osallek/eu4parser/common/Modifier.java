@@ -1,8 +1,6 @@
 package com.osallek.eu4parser.common;
 
-import com.osallek.eu4parser.model.save.country.Modifier;
-
-public enum Modifiers {
+public enum Modifier {
     ARMY_TRADITION(ModifierType.ADDITIVE),
     ARMY_TRADITION_DECAY(ModifierType.ADDITIVE),
     ARMY_TRADITION_FROM_BATTLE(ModifierType.MULTIPLICATIVE),
@@ -395,7 +393,7 @@ public enum Modifiers {
 
     public final ModifierType type;
 
-    Modifiers(ModifierType type) {
+    Modifier(ModifierType type) {
         this.type = type;
     }
 

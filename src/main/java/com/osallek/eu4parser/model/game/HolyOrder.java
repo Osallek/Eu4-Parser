@@ -1,13 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.Power;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class HolyOrder {
 
@@ -21,7 +17,7 @@ public class HolyOrder {
 
     private final Condition trigger;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public HolyOrder(ClausewitzItem item) {
         this.name = item.getName();
@@ -31,11 +27,7 @@ public class HolyOrder {
         ClausewitzItem child = item.getChild("trigger");
         this.trigger = child == null ? null : new Condition(child);
 
-        child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
     }
 
     public String getName() {
@@ -62,7 +54,7 @@ public class HolyOrder {
         return trigger;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

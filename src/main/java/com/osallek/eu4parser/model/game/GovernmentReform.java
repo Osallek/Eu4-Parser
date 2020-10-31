@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.NumbersUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -21,7 +22,7 @@ public class GovernmentReform {
 
     private String localizedName;
 
-    private Map<String, String> modifiers;
+    private Modifiers modifiers;
 
     private Map<String, String> customAttributes;
 
@@ -133,9 +134,9 @@ public class GovernmentReform {
 
     private boolean nomad;
 
-    private Map<String, Map<String, String>> assimilationCultures;
+    private Map<String, Modifiers> assimilationCultures;
 
-    private Map<String, Map<String, String>> statesGeneralMechanic;
+    private Map<String, Modifiers> statesGeneralMechanic;
 
     private boolean validForNationDesigner;
 
@@ -166,14 +167,9 @@ public class GovernmentReform {
         this.game = game;
         this.name = item.getName();
 
-        ClausewitzItem child = item.getChild("modifiers");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                               ClausewitzVariable::getValue,
-                                                                               (a, b) -> b,
-                                                                               LinkedHashMap::new));
-        child = item.getChild("custom_attributes");
+        this.modifiers = new Modifiers(item.getChild("modifiers"));
+
+        ClausewitzItem child = item.getChild("custom_attributes");
         this.customAttributes = child == null ? null : child.getVariables()
                                                             .stream()
                                                             .collect(Collectors.toMap(ClausewitzVariable::getName,
@@ -204,27 +200,13 @@ public class GovernmentReform {
         this.factions = list == null ? null : list.getValues();
 
         child = item.getChild("assimilation_cultures");
-        this.assimilationCultures = child == null ? null
-                                                  : child.getChildren()
-                                                         .stream()
-                                                         .collect(Collectors.toMap(ClausewitzObject::getName,
-                                                                                   culture -> culture.getVariables()
-                                                                                                     .stream()
-                                                                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                                                               ClausewitzVariable::getValue,
-                                                                                                                               (a, b) -> b,
-                                                                                                                               LinkedHashMap::new))));
+        this.assimilationCultures = child == null ? null : child.getChildren()
+                                                                .stream()
+                                                                .collect(Collectors.toMap(ClausewitzObject::getName, Modifiers::new));
         child = item.getChild("states_general_mechanic");
-        this.statesGeneralMechanic = child == null ? null
-                                                   : child.getChildren()
-                                                          .stream()
-                                                          .collect(Collectors.toMap(ClausewitzObject::getName,
-                                                                                    culture -> culture.getVariables()
-                                                                                                      .stream()
-                                                                                                      .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                                                                ClausewitzVariable::getValue,
-                                                                                                                                (a, b) -> b,
-                                                                                                                                LinkedHashMap::new))));
+        this.statesGeneralMechanic = child == null ? null : child.getChildren()
+                                                                 .stream()
+                                                                 .collect(Collectors.toMap(ClausewitzObject::getName, Modifiers::new));
         list = item.getList("disallowed_trade_goods");
         this.disallowedTradeGoods = list == null ? null : list.getValues().stream().map(game::getTradeGood).collect(Collectors.toList());
 
@@ -373,7 +355,7 @@ public class GovernmentReform {
         this.localizedName = localizedName;
     }
 
-    public Map<String, String> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 
@@ -597,11 +579,11 @@ public class GovernmentReform {
         return nomad;
     }
 
-    public Map<String, Map<String, String>> getAssimilationCultures() {
+    public Map<String, Modifiers> getAssimilationCultures() {
         return assimilationCultures;
     }
 
-    public Map<String, Map<String, String>> getStatesGeneralMechanic() {
+    public Map<String, Modifiers> getStatesGeneralMechanic() {
         return statesGeneralMechanic;
     }
 

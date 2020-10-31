@@ -1,12 +1,8 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class PersonalDeity {
 
@@ -18,16 +14,12 @@ public class PersonalDeity {
 
     private final Condition allow;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public PersonalDeity(ClausewitzItem item) {
         this.name = item.getName();
         this.sprite = item.getVarAsInt("sprite");
-
-        this.modifiers = item.getVarsNot("sprite")
-                             .stream()
-                             .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                            Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getVarsNot("sprite"));
 
         this.allow = item.getChild("allow") == null ? null : new Condition(item.getChild("allow"));
     }
@@ -52,7 +44,7 @@ public class PersonalDeity {
         return allow;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

@@ -1,12 +1,10 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class NavalDoctrine {
 
@@ -18,19 +16,14 @@ public class NavalDoctrine {
 
     private final Condition allow;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public NavalDoctrine(ClausewitzItem item) {
         this.name = item.getName();
         this.buttonGfx = item.getVarAsInt("button_gfx");
+        this.modifiers = new Modifiers(item.getChild("country_modifier"));
 
-        ClausewitzItem child = item.getChild("country_modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-        child = item.getChild("can_select");
+        ClausewitzItem child = item.getChild("can_select");
         this.allow = child == null ? null : new Condition(child);
     }
 
@@ -54,7 +47,7 @@ public class NavalDoctrine {
         return allow;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 

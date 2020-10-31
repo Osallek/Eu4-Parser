@@ -4,11 +4,9 @@ import com.osallek.clausewitzparser.ClausewitzParser;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.clausewitzparser.model.ClausewitzObject;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.LuaUtils;
-import com.osallek.eu4parser.common.Modifiers;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
@@ -2040,8 +2038,8 @@ public class Game {
 
             this.estates.keySet().forEach(estate -> {
                 estate.setLocalizedName(this.getLocalisation(estate.getName()));
-                ModifiersUtils.addModifier(estate.getName() + "_influence_modifier", Modifiers.ModifierType.MULTIPLICATIVE);
-                ModifiersUtils.addModifier(estate.getName() + "_loyalty_modifier", Modifiers.ModifierType.MULTIPLICATIVE);
+                ModifiersUtils.addModifier(estate.getName() + "_influence_modifier", Modifier.ModifierType.MULTIPLICATIVE);
+                ModifiersUtils.addModifier(estate.getName() + "_loyalty_modifier", Modifier.ModifierType.MULTIPLICATIVE);
             });
         } catch (IOException e) {
         }
@@ -2059,13 +2057,7 @@ public class Game {
                      ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
 
                      Power power = Power.byName(techItem.getVarAsString("monarch_power"));
-                     Map<String, List<String>> aheadOfTime = !techItem.hasChild("ahead_of_time") ? null :
-                                                             techItem.getChild("ahead_of_time")
-                                                                     .getVariables()
-                                                                     .stream()
-                                                                     .collect(Collectors.groupingBy(ClausewitzObject::getName,
-                                                                                                    Collectors.mapping(ClausewitzVariable::getValue,
-                                                                                                                       Collectors.toList())));
+                     Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time"));
 
                      techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
                  });
@@ -2119,11 +2111,7 @@ public class Game {
                 ClausewitzItem modifiersItem = ClausewitzParser.parse(path.toFile(), 0);
                 modifiersItem.getChildrenNot("null_modifier").forEach(item -> {
                     if (StaticModifier.value(item.getName()) != null) {
-                        StaticModifier.value(item.getName()).setModifiers(item.getVariables()
-                                                                              .stream()
-                                                                              .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                                             Collectors.mapping(ClausewitzVariable::getValue,
-                                                                                                                                Collectors.toList()))));
+                        StaticModifier.value(item.getName()).setModifiers(new Modifiers(item));
                     }
                 });
             });

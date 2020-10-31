@@ -1,7 +1,6 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
-import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
@@ -25,17 +24,17 @@ public class ImperialReform implements Comparable<ImperialReform> {
 
     private String empire;
 
-    private Map<String, String> provinceModifiers;
+    private Modifiers provinceModifiers;
 
-    private Map<String, String> emperorModifiers;
+    private Modifiers emperorModifiers;
 
-    private Map<String, String> allModifiers;
+    private Modifiers allModifiers;
 
-    private Map<String, String> memberModifiers;
+    private Modifiers memberModifiers;
 
-    private Map<String, String> emperorPerPrinceModifiers;
+    private Modifiers emperorPerPrinceModifiers;
 
-    private Map<String, String> electorPerPrinceModifiers;
+    private Modifiers electorPerPrinceModifiers;
 
     private String disabledBy;
 
@@ -75,48 +74,12 @@ public class ImperialReform implements Comparable<ImperialReform> {
             this.dlcRequiredNot = new ArrayList<>();
         }
         this.empire = item.getVarAsString("empire");
-        child = item.getChild("province");
-        this.provinceModifiers = child == null ? null : child.getVariables()
-                                                             .stream()
-                                                             .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                       ClausewitzVariable::getValue,
-                                                                                       (a, b) -> b,
-                                                                                       LinkedHashMap::new));
-        child = item.getChild("emperor");
-        this.emperorModifiers = child == null ? null : child.getVariables()
-                                                            .stream()
-                                                            .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                      ClausewitzVariable::getValue,
-                                                                                      (a, b) -> b,
-                                                                                      LinkedHashMap::new));
-        child = item.getChild("all");
-        this.allModifiers = child == null ? null : child.getVariables()
-                                                        .stream()
-                                                        .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                  ClausewitzVariable::getValue,
-                                                                                  (a, b) -> b,
-                                                                                  LinkedHashMap::new));
-        child = item.getChild("member");
-        this.memberModifiers = child == null ? null : child.getVariables()
-                                                           .stream()
-                                                           .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                     ClausewitzVariable::getValue,
-                                                                                     (a, b) -> b,
-                                                                                     LinkedHashMap::new));
-        child = item.getChild("emperor_per_prince");
-        this.emperorPerPrinceModifiers = child == null ? null : child.getVariables()
-                                                                     .stream()
-                                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                               ClausewitzVariable::getValue,
-                                                                                               (a, b) -> b,
-                                                                                               LinkedHashMap::new));
-        child = item.getChild("elector_per_prince");
-        this.electorPerPrinceModifiers = child == null ? null : child.getVariables()
-                                                                     .stream()
-                                                                     .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                               ClausewitzVariable::getValue,
-                                                                                               (a, b) -> b,
-                                                                                               LinkedHashMap::new));
+        this.provinceModifiers = new Modifiers(item.getChild("province"));
+        this.emperorModifiers = new Modifiers(item.getChild("emperor"));
+        this.allModifiers = new Modifiers(item.getChild("all"));
+        this.memberModifiers = new Modifiers(item.getChild("member"));
+        this.emperorPerPrinceModifiers = new Modifiers(item.getChild("emperor_per_prince"));
+        this.electorPerPrinceModifiers = new Modifiers(item.getChild("elector_per_prince"));
         this.disabledBy = item.getVarAsString("disabled_by");
         this.requiredReform = item.getVarAsString("required_reform");
         this.guiContainer = item.getVarAsString("gui_container");
@@ -167,111 +130,111 @@ public class ImperialReform implements Comparable<ImperialReform> {
         this.empire = empire;
     }
 
-    public Map<String, String> getProvinceModifiers() {
-        return this.provinceModifiers == null ? new LinkedHashMap<>() : this.provinceModifiers;
+    public Modifiers getProvinceModifiers() {
+        return this.provinceModifiers;
     }
 
     public void addProvinceModifier(String modifier, String quantity) {
         if (this.provinceModifiers == null) {
-            this.provinceModifiers = new LinkedHashMap<>();
+            this.provinceModifiers = new Modifiers();
         }
 
-        this.provinceModifiers.put(modifier, quantity);
+        this.provinceModifiers.add(modifier, quantity);
     }
 
     public void removeProvinceModifier(String modifier) {
         if (this.provinceModifiers != null) {
-            this.provinceModifiers.remove(modifier);
+            this.provinceModifiers.removeModifier(modifier);
         }
     }
 
-    public Map<String, String> getEmperorModifiers() {
-        return this.emperorModifiers == null ? new LinkedHashMap<>() : this.emperorModifiers;
+    public Modifiers getEmperorModifiers() {
+        return this.emperorModifiers;
     }
 
     public void addEmperorModifier(String modifier, String quantity) {
         if (this.emperorModifiers == null) {
-            this.emperorModifiers = new LinkedHashMap<>();
+            this.emperorModifiers = new Modifiers();
         }
 
-        this.emperorModifiers.put(modifier, quantity);
+        this.emperorModifiers.add(modifier, quantity);
     }
 
     public void removeEmperorModifier(String modifier) {
         if (this.emperorModifiers != null) {
-            this.emperorModifiers.remove(modifier);
+            this.emperorModifiers.removeModifier(modifier);
         }
     }
 
-    public Map<String, String> getAllModifiers() {
-        return this.allModifiers == null ? new LinkedHashMap<>() : this.allModifiers;
+    public Modifiers getAllModifiers() {
+        return this.allModifiers;
     }
 
     public void addAllModifier(String modifier, String quantity) {
         if (this.allModifiers == null) {
-            this.allModifiers = new LinkedHashMap<>();
+            this.allModifiers = new Modifiers();
         }
 
-        this.allModifiers.put(modifier, quantity);
+        this.allModifiers.add(modifier, quantity);
     }
 
     public void removeAllModifier(String modifier) {
         if (this.allModifiers != null) {
-            this.allModifiers.remove(modifier);
+            this.allModifiers.removeModifier(modifier);
         }
     }
 
-    public Map<String, String> getMemberModifiers() {
-        return this.memberModifiers == null ? new LinkedHashMap<>() : this.memberModifiers;
+    public Modifiers getMemberModifiers() {
+        return this.memberModifiers;
     }
 
     public void addMemberModifier(String modifier, String quantity) {
         if (this.memberModifiers == null) {
-            this.memberModifiers = new LinkedHashMap<>();
+            this.memberModifiers = new Modifiers();
         }
 
-        this.memberModifiers.put(modifier, quantity);
+        this.memberModifiers.add(modifier, quantity);
     }
 
     public void removeMemberModifier(String modifier) {
         if (this.memberModifiers != null) {
-            this.memberModifiers.remove(modifier);
+            this.memberModifiers.removeModifier(modifier);
         }
     }
 
-    public Map<String, String> getEmperorPerPrinceModifiers() {
-        return this.emperorPerPrinceModifiers == null ? new LinkedHashMap<>() : this.emperorPerPrinceModifiers;
+    public Modifiers getEmperorPerPrinceModifiers() {
+        return this.emperorPerPrinceModifiers;
     }
 
     public void addEmperorPerPrinceModifier(String modifier, String quantity) {
         if (this.emperorPerPrinceModifiers == null) {
-            this.emperorPerPrinceModifiers = new LinkedHashMap<>();
+            this.emperorPerPrinceModifiers = new Modifiers();
         }
 
-        this.emperorPerPrinceModifiers.put(modifier, quantity);
+        this.emperorPerPrinceModifiers.add(modifier, quantity);
     }
 
     public void removeEmperorPerPrinceModifier(String modifier) {
         if (this.emperorPerPrinceModifiers != null) {
-            this.emperorPerPrinceModifiers.remove(modifier);
+            this.emperorPerPrinceModifiers.removeModifier(modifier);
         }
     }
 
-    public Map<String, String> getElectorPerPrinceModifiers() {
-        return this.electorPerPrinceModifiers == null ? new LinkedHashMap<>() : this.electorPerPrinceModifiers;
+    public Modifiers getElectorPerPrinceModifiers() {
+        return this.electorPerPrinceModifiers;
     }
 
     public void addElectorPerPrinceModifier(String modifier, String quantity) {
         if (this.electorPerPrinceModifiers == null) {
-            this.electorPerPrinceModifiers = new LinkedHashMap<>();
+            this.electorPerPrinceModifiers = new Modifiers();
         }
 
-        this.electorPerPrinceModifiers.put(modifier, quantity);
+        this.electorPerPrinceModifiers.add(modifier, quantity);
     }
 
     public void removeElectorPerPrinceModifier(String modifier) {
         if (this.electorPerPrinceModifiers != null) {
-            this.electorPerPrinceModifiers.remove(modifier);
+            this.electorPerPrinceModifiers.removeModifier(modifier);
         }
     }
 

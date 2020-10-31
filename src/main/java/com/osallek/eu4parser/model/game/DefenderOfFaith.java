@@ -21,7 +21,7 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
 
     private final Integer rangeTo;
 
-    private final Map<String, List<String>> modifiers;
+    private final Modifiers modifiers;
 
     public DefenderOfFaith(ClausewitzItem item) {
         this.name = item.getName();
@@ -29,12 +29,7 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
         this.rangeFrom = item.getVarAsInt("range_from");
         this.rangeTo = item.getVarAsInt("range_to");
 
-        ClausewitzItem child = item.getChild("modifier");
-        this.modifiers = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.groupingBy(ClausewitzVariable::getName,
-                                                                                    LinkedHashMap::new,
-                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.modifiers = new Modifiers(item.getChild("modifier"));
     }
 
     public String getName() {
@@ -53,7 +48,7 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
         return rangeTo;
     }
 
-    public Map<String, List<String>> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 
