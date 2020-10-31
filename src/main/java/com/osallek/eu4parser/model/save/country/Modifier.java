@@ -2,23 +2,48 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.GameModifier;
+import com.osallek.eu4parser.model.game.Modifiers;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.Date;
 
 public class Modifier {
 
+    private final Game game;
+
     private final ClausewitzItem item;
 
-    public Modifier(ClausewitzItem item) {
+    public Modifier(ClausewitzItem item, Game game) {
+        this.game = game;
         this.item = item;
     }
 
-    public String getModifier() {
+    public String getModifierName() {
         return this.item.getVarAsString("modifier");
+    }
+
+    public GameModifier getModifier() {
+        return this.game.getModifier(this.item.getVarAsString("modifier"));
+    }
+
+    public Modifiers getModifiers(Country country) {
+        GameModifier gameModifier = getModifier();
+        return gameModifier == null ? null : gameModifier.getModifiers(country);
+    }
+
+    public Modifiers getModifiers(SaveProvince province) {
+        GameModifier gameModifier = getModifier();
+        return gameModifier == null ? null : gameModifier.getModifiers(province);
     }
 
     public Boolean getHidden() {
         return this.item.getVarAsBool("hidden");
+    }
+
+    public Boolean isParliamentModifier() {
+        return this.item.getVarAsBool("parliament_modifier");
     }
 
     public Boolean rulerModifier() {

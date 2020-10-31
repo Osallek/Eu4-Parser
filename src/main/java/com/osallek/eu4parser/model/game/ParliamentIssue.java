@@ -5,37 +5,18 @@ import com.osallek.eu4parser.model.Power;
 
 import java.util.Objects;
 
-public class ParliamentIssue {
-
-    private final String name;
-
-    private String localizedName;
+public class ParliamentIssue extends GameModifier {
 
     private final Power category;
 
     private final Condition allow;
 
-    private final Modifiers modifiers;
-
     public ParliamentIssue(ClausewitzItem item) {
-        this.name = item.getName();
+        super(item, new Modifiers(item.getChild("modifier")));
         this.category = Power.byParliamentType(item.getVarAsInt("category"));
-        this.modifiers = new Modifiers(item.getChild("modifier"));
 
         ClausewitzItem child = item.getChild("allow");
         this.allow = child == null ? null : new Condition(child);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public Power getCategory() {
@@ -44,10 +25,6 @@ public class ParliamentIssue {
 
     public Condition getAllow() {
         return allow;
-    }
-
-    public Modifiers getModifiers() {
-        return modifiers;
     }
 
     @Override

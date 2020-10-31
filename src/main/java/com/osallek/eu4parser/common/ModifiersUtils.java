@@ -129,6 +129,28 @@ public class ModifiersUtils {
         return new Modifiers();
     }
 
+    public static void sumModifiers(String name, String value, Modifiers modifiers) {
+        name = ClausewitzUtils.removeQuotes(name).toLowerCase();
+        Modifier.ModifierType type = getType(name);
+
+        if (type == null) {
+            return;
+        }
+
+        switch (type) {
+            case ADDITIVE:
+            case MULTIPLICATIVE:
+                modifiers.getModifiers().put(name, ClausewitzUtils.doubleToString(NumbersUtils.toDouble(modifiers.getModifiers().getOrDefault(name, "0"))
+                                                                                  + NumbersUtils.doubleOrDefault(NumbersUtils.toDouble(value))));
+                break;
+            case CONSTANT:
+                modifiers.getModifiers()
+                         .put(name,
+                              ("yes".equalsIgnoreCase(modifiers.getModifiers().getOrDefault(name, value)) || "yes".equalsIgnoreCase(value)) ? "yes" : "no");
+                break;
+        }
+    }
+
     public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(Function<? super T, ? extends K> keyMapper,
                                                              Function<? super T, ? extends V> valueMapper,
                                                              Predicate<? super K> useOlder) {

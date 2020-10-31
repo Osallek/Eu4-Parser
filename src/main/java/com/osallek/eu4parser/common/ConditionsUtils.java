@@ -440,7 +440,7 @@ public class ConditionsUtils {
             case "has_country_flag":
                 return country.getFlags().contains(value);
             case "has_country_modifier":
-                return country.getModifiers().stream().anyMatch(modifier -> modifier.getModifier().equals(value));
+                return country.getModifiers().stream().anyMatch(modifier -> modifier.getModifierName().equals(value));
             case "has_custom_ideas":
                 return CollectionUtils.isNotEmpty(country.getCustomNationalIdeas());
             case "has_disaster":
@@ -580,7 +580,7 @@ public class ConditionsUtils {
                 return country.getModifiers()
                               .stream()
                               .filter(modifier -> BooleanUtils.toBoolean(modifier.rulerModifier()))
-                              .map(Modifier::getModifier)
+                              .map(Modifier::getModifierName)
                               .anyMatch(value::equals);
             case "has_saved_event_target": //Todo ???
                 break;
@@ -735,7 +735,7 @@ public class ConditionsUtils {
             case "invasion_nation":
                 return "yes".equalsIgnoreCase(value) == country.getModifiers()
                                                                .stream()
-                                                               .anyMatch(modifier -> "\"invasion_nation\"".equals(modifier.getModifier()));
+                                                               .anyMatch(modifier -> "\"invasion_nation\"".equals(modifier.getModifierName()));
             case "invested_papal_influence":
                 return country.getPapalInfluence() != null && country.getPapalInfluence() >= NumbersUtils.toDouble(value);
             case "in_league":

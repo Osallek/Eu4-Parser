@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -87,8 +88,8 @@ public class Modifiers {
 
         if ("enable".equals(ClausewitzUtils.removeQuotes(name.toLowerCase()))) {
             this.enables.add(ClausewitzUtils.removeQuotes(name.toLowerCase()));
-        } else { //Fixme add values instead of overriding
-            this.modifiers.put(ClausewitzUtils.removeQuotes(name.toLowerCase()), value);
+        } else {
+            ModifiersUtils.sumModifiers(name, value, this);
         }
     }
 

@@ -150,6 +150,8 @@ public class Game {
 
     private SortedMap<DefenderOfFaith, Path> defenderOfFaith;
 
+    private SortedMap<CenterOfTrade, Path> centersOfTrade;
+
     private Map<Fervor, Path> fervors;
 
     private Map<GreatProject, Path> greatProjects;
@@ -173,6 +175,14 @@ public class Game {
     private Map<StateEdict, Path> stateEdicts;
 
     private Map<TradePolicy, Path> tradePolicies;
+
+    private Map<StaticModifier, Path> staticModifiers;
+
+    private Map<EventModifier, Path> eventModifiers;
+
+    private Map<TriggeredModifier, Path> provinceTriggeredModifiers;
+
+    private Map<TriggeredModifier, Path> triggeredModifiers;
 
     public Game(String gameFolderPath) throws IOException, ParseException {
         this.collator = Collator.getInstance();
@@ -227,6 +237,7 @@ public class Game {
         readFactions();
         readAges();
         readDefenderOfFaith();
+        readCentersOfTrade();
         readFervors();
         readGreatProjects();
         readHolyOrders();
@@ -239,6 +250,9 @@ public class Game {
         readCrownLandBonuses();
         readStateEdicts();
         readTradePolicies();
+        readEventModifiers();
+        readProvinceTriggeredModifiers();
+        readTriggeredModifiers();
     }
 
     public Collator getCollator() {
@@ -1158,6 +1172,10 @@ public class Game {
         return this.defenderOfFaith.keySet();
     }
 
+    public Set<CenterOfTrade> getCentersOfTrade() {
+        return this.centersOfTrade.keySet();
+    }
+
     public List<Fervor> getFervors() {
         return new ArrayList<>(this.fervors.keySet());
     }
@@ -1358,6 +1376,84 @@ public class Game {
         }
 
         return null;
+    }
+
+    public List<StaticModifier> getStaticModifiers() {
+        return new ArrayList<>(this.staticModifiers.keySet());
+    }
+
+    public StaticModifier getStaticModifier(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (StaticModifier staticModifier : this.staticModifiers.keySet()) {
+            if (staticModifier.getName().equalsIgnoreCase(name)) {
+                return staticModifier;
+            }
+        }
+
+        return null;
+    }
+
+    public List<EventModifier> getEventModifiers() {
+        return new ArrayList<>(this.eventModifiers.keySet());
+    }
+
+    public EventModifier getEventModifier(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (EventModifier eventModifier : this.eventModifiers.keySet()) {
+            if (eventModifier.getName().equalsIgnoreCase(name)) {
+                return eventModifier;
+            }
+        }
+
+        return null;
+    }
+
+    public List<TriggeredModifier> getProvinceTriggeredModifiers() {
+        return new ArrayList<>(this.provinceTriggeredModifiers.keySet());
+    }
+
+    public TriggeredModifier getProvinceTriggeredModifier(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (TriggeredModifier triggeredModifier : this.provinceTriggeredModifiers.keySet()) {
+            if (triggeredModifier.getName().equalsIgnoreCase(name)) {
+                return triggeredModifier;
+            }
+        }
+
+        return null;
+    }
+
+    public List<TriggeredModifier> getTriggeredModifiers() {
+        return new ArrayList<>(this.triggeredModifiers.keySet());
+    }
+
+    public TriggeredModifier getTriggeredModifier(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (TriggeredModifier triggeredModifier : this.triggeredModifiers.keySet()) {
+            if (triggeredModifier.getName().equalsIgnoreCase(name)) {
+                return triggeredModifier;
+            }
+        }
+
+        return null;
+    }
+
+    public GameModifier getModifier(String modifier) {
+        modifier = ClausewitzUtils.removeQuotes(modifier).toLowerCase();
+
+        return Eu4Utils.coalesce(modifier, this::getStaticModifier, this::getParliamentIssue, this::getEventModifier, this::getProvinceTriggeredModifier, this::getTriggeredModifier);
     }
 
     public void loadLocalisations() throws IOException {
@@ -2107,14 +2203,19 @@ public class Game {
         File staticModifiersFolder = new File(this.commonFolderPath + File.separator + "static_modifiers");
 
         try (Stream<Path> paths = Files.walk(staticModifiersFolder.toPath())) {
+            this.staticModifiers = new LinkedHashMap<>();
+
             paths.filter(Files::isRegularFile).forEach(path -> {
                 ClausewitzItem modifiersItem = ClausewitzParser.parse(path.toFile(), 0);
                 modifiersItem.getChildrenNot("null_modifier").forEach(item -> {
-                    if (StaticModifier.value(item.getName()) != null) {
-                        StaticModifier.value(item.getName()).setModifiers(new Modifiers(item));
+                    if (StaticModifiers.value(item.getName()) != null) {
+                        StaticModifiers.value(item.getName()).setModifiers(new Modifiers(item));
+                        this.staticModifiers.put(new StaticModifier(item), path);
                     }
                 });
             });
+
+            this.staticModifiers.keySet().forEach(staticModifier -> staticModifier.setLocalizedName(this.getLocalisation(staticModifier.getName())));
         } catch (IOException e) {
         }
     }
@@ -2214,6 +2315,21 @@ public class Game {
                  .forEach(path -> {
                      ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
                      defenderOfFaithItem.getChildren().forEach(item -> this.defenderOfFaith.put(new DefenderOfFaith(item), path));
+                 });
+        } catch (IOException e) {
+        }
+    }
+
+    private void readCentersOfTrade() {
+        File centersOfTradeFolder = new File(this.commonFolderPath + File.separator + "centers_of_trade");
+
+        try (Stream<Path> paths = Files.walk(centersOfTradeFolder.toPath())) {
+            this.centersOfTrade = new TreeMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem centersOfTradeItem = ClausewitzParser.parse(path.toFile(), 0);
+                     centersOfTradeItem.getChildren().forEach(item -> this.centersOfTrade.put(new CenterOfTrade(item), path));
                  });
         } catch (IOException e) {
         }
@@ -2402,8 +2518,8 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem stateIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                     stateIssueItem.getChildren().forEach(item -> this.stateEdicts.put(new StateEdict(item), path));
+                     ClausewitzItem stateEdictsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     stateEdictsItem.getChildren().forEach(item -> this.stateEdicts.put(new StateEdict(item), path));
                  });
 
             this.stateEdicts.keySet().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
@@ -2419,11 +2535,64 @@ public class Game {
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
-                     ClausewitzItem tradeIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                     tradeIssueItem.getChildren().forEach(item -> this.tradePolicies.put(new TradePolicy(item), path));
+                     ClausewitzItem tradePoliciesItem = ClausewitzParser.parse(path.toFile(), 0);
+                     tradePoliciesItem.getChildren().forEach(item -> this.tradePolicies.put(new TradePolicy(item), path));
                  });
 
-            this.tradePolicies.keySet().forEach(tradeIssue -> tradeIssue.setLocalizedName(this.getLocalisation(tradeIssue.getName())));
+            this.tradePolicies.keySet().forEach(tradePolicy -> tradePolicy.setLocalizedName(this.getLocalisation(tradePolicy.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readEventModifiers() {
+        File eventModifiersFolder = new File(this.commonFolderPath + File.separator + "event_modifiers");
+
+        try (Stream<Path> paths = Files.walk(eventModifiersFolder.toPath())) {
+            this.eventModifiers = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem eventModifierItem = ClausewitzParser.parse(path.toFile(), 0);
+                     eventModifierItem.getChildren().forEach(item -> this.eventModifiers.put(new EventModifier(item), path));
+                 });
+
+            this.eventModifiers.keySet().forEach(eventModifier -> eventModifier.setLocalizedName(this.getLocalisation(eventModifier.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readProvinceTriggeredModifiers() {
+        File provinceTriggeredModifiersFolder = new File(this.commonFolderPath + File.separator + "province_triggered_modifiers");
+
+        try (Stream<Path> paths = Files.walk(provinceTriggeredModifiersFolder.toPath())) {
+            this.provinceTriggeredModifiers = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem provinceTriggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                     provinceTriggeredIssueItem.getChildren().forEach(item -> this.provinceTriggeredModifiers.put(new TriggeredModifier(item), path));
+                 });
+
+            this.provinceTriggeredModifiers.keySet()
+                                           .forEach(provinceTriggered -> provinceTriggered.setLocalizedName(this.getLocalisation(provinceTriggered.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readTriggeredModifiers() {
+        File triggeredModifiersFolder = new File(this.commonFolderPath + File.separator + "triggered_modifiers");
+
+        try (Stream<Path> paths = Files.walk(triggeredModifiersFolder.toPath())) {
+            this.triggeredModifiers = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem triggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                     triggeredIssueItem.getChildren().forEach(item -> this.triggeredModifiers.put(new TriggeredModifier(item), path));
+                 });
+
+            this.triggeredModifiers.keySet()
+                                   .forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
         } catch (IOException e) {
         }
     }

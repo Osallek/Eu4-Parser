@@ -2808,7 +2808,7 @@ public class Country {
     }
 
     public Double getLegitimacyEquivalent() {
-        return NumbersUtils.coalesce(getLegitimacy(), getHordeUnity(), getRepublicanTradition(), getMeritocracy(), getDevotion());
+        return Eu4Utils.coalesce(getLegitimacy(), getHordeUnity(), getRepublicanTradition(), getMeritocracy(), getDevotion());
     }
 
     public Double getHordeUnity() {
@@ -2826,7 +2826,7 @@ public class Country {
     }
 
     public Double getLegitimacyOrHordeUnity() {
-        return NumbersUtils.coalesce(getLegitimacy(), getHordeUnity());
+        return Eu4Utils.coalesce(getLegitimacy(), getHordeUnity());
     }
 
     public Integer getMercantilism() {
@@ -2982,7 +2982,7 @@ public class Country {
         modifier = ClausewitzUtils.addQuotes(modifier);
 
         for (int i = 0; i < this.modifiers.size(); i++) {
-            if (this.modifiers.get(i).getModifier().equalsIgnoreCase(modifier)) {
+            if (this.modifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
                 index = i;
                 break;
             }
@@ -3852,7 +3852,7 @@ public class Country {
 
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
         this.modifiers = modifierItems.stream()
-                                      .map(Modifier::new)
+                                      .map(child -> new Modifier(child, this.save.getGame()))
                                       .collect(Collectors.toList());
 
         ClausewitzItem subUnitItem = this.item.getChild("sub_unit");

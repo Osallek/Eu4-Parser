@@ -63,9 +63,4 @@ public class NumbersUtils {
     public static double numberOrDefault(Number number, double defaultDouble) {
         return number == null ? defaultDouble : number.doubleValue();
     }
-
-    public static <T> T coalesce(T... items) {
-        return Arrays.stream(items).filter(Objects::nonNull).findFirst().orElse(null);
-
-    }
 }

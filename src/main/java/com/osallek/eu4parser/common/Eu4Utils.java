@@ -6,11 +6,14 @@ import com.osallek.eu4parser.model.save.country.Country;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 
 public final class Eu4Utils {
 
@@ -154,5 +157,23 @@ public final class Eu4Utils {
 
     public static int rgbToColor(int red, int green, int blue) {
         return ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | ((blue & 0xFF));
+    }
+
+    @SafeVarargs
+    public static <T, R> R coalesce(T value, Function<T, R>... functions) {
+        for (Function<T, R> f : functions) {
+            R apply = f.apply(value);
+
+            if (apply != null) {
+                return apply;
+            }
+        }
+
+        return null;
+    }
+
+    @SafeVarargs
+    public static <T> T coalesce(T... items) {
+        return Arrays.stream(items).filter(Objects::nonNull).findFirst().orElse(null);
     }
 }

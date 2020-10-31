@@ -996,7 +996,7 @@ public class SaveProvince extends Province {
         modifier = ClausewitzUtils.addQuotes(modifier);
 
         for (int i = 0; i < this.modifiers.size(); i++) {
-            if (this.modifiers.get(i).getModifier().equalsIgnoreCase(modifier)) {
+            if (this.modifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
                 index = i;
                 break;
             }
@@ -1207,8 +1207,8 @@ public class SaveProvince extends Province {
 
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
         this.modifiers = modifierItems.stream()
-                                      .map(Modifier::new)
-                                      .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifier()), Function.identity()));
+                                      .map(child -> new Modifier(child, this.save.getGame()))
+                                      .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifierName()), Function.identity()));
 
         ClausewitzItem rebelFactionItem = this.item.getChild("rebel_faction");
 
