@@ -6,7 +6,8 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.LuaUtils;
-import com.osallek.eu4parser.common.Modifier;
+import com.osallek.eu4parser.common.ModifierScope;
+import com.osallek.eu4parser.common.ModifierType;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
@@ -199,6 +200,8 @@ public class Game {
 
         loadLocalisations();
         readSpriteTypes();
+        readEstates();
+        readFactions();
         readProvinces();
         readCultures();
         readReligion();
@@ -225,8 +228,6 @@ public class Game {
         readSubjectTypes();
         readFetishistCults();
         readMissionTrees();
-        readEstatePrivileges();
-        readEstates();
         readTechnologies();
         readRulerPersonalities();
         readProfessionalismModifiers();
@@ -234,7 +235,6 @@ public class Game {
         readInvestments();
         readPolicies();
         readHegemons();
-        readFactions();
         readAges();
         readDefenderOfFaith();
         readCentersOfTrade();
@@ -1453,7 +1453,8 @@ public class Game {
     public GameModifier getModifier(String modifier) {
         modifier = ClausewitzUtils.removeQuotes(modifier).toLowerCase();
 
-        return Eu4Utils.coalesce(modifier, this::getStaticModifier, this::getParliamentIssue, this::getEventModifier, this::getProvinceTriggeredModifier, this::getTriggeredModifier);
+        return Eu4Utils.coalesce(modifier, this::getStaticModifier, this::getParliamentIssue, this::getEventModifier, this::getProvinceTriggeredModifier,
+                                 this::getTriggeredModifier);
     }
 
     public void loadLocalisations() throws IOException {
@@ -2103,10 +2104,31 @@ public class Game {
         }
     }
 
-    private void readEstatePrivileges() {
-        File fetishistCultsFolder = new File(this.commonFolderPath + File.separator + "estate_privileges");
+    private void readEstates() {
+        //Read estates modifiers before necessary for privileges
+        File estatesPreloadFolder = new File(this.commonFolderPath + File.separator + "estates_preload");
 
-        try (Stream<Path> paths = Files.walk(fetishistCultsFolder.toPath())) {
+        try (Stream<Path> paths = Files.walk(estatesPreloadFolder.toPath())) {
+            List<ModifierDefinition> modifierDefinitions = new ArrayList<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                     advisorsItem.getChildren()
+                                 .stream()
+                                 .map(item -> item.getChildren("modifier_definition"))
+                                 .flatMap(Collection::stream)
+                                 .forEach(item -> modifierDefinitions.add(new ModifierDefinition(item)));
+                 });
+
+            modifierDefinitions.forEach(
+                    modifierDefinition -> ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY));
+        } catch (IOException e) {
+        }
+
+        File estatePrivilegesFolder = new File(this.commonFolderPath + File.separator + "estate_privileges");
+
+        try (Stream<Path> paths = Files.walk(estatePrivilegesFolder.toPath())) {
             this.estatePrivileges = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
@@ -2118,12 +2140,10 @@ public class Game {
             this.estatePrivileges.keySet().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
         } catch (IOException e) {
         }
-    }
 
-    private void readEstates() {
-        File fetishistCultsFolder = new File(this.commonFolderPath + File.separator + "estates");
+        File estatesFolder = new File(this.commonFolderPath + File.separator + "estates");
 
-        try (Stream<Path> paths = Files.walk(fetishistCultsFolder.toPath())) {
+        try (Stream<Path> paths = Files.walk(estatesFolder.toPath())) {
             this.estates = new LinkedHashMap<>();
 
             paths.filter(Files::isRegularFile)
@@ -2134,8 +2154,6 @@ public class Game {
 
             this.estates.keySet().forEach(estate -> {
                 estate.setLocalizedName(this.getLocalisation(estate.getName()));
-                ModifiersUtils.addModifier(estate.getName() + "_influence_modifier", Modifier.ModifierType.MULTIPLICATIVE);
-                ModifiersUtils.addModifier(estate.getName() + "_loyalty_modifier", Modifier.ModifierType.MULTIPLICATIVE);
             });
         } catch (IOException e) {
         }
@@ -2283,7 +2301,10 @@ public class Game {
                      hegemonsItem.getChildren().forEach(item -> this.factions.put(new Faction(item), path));
                  });
 
-            this.factions.keySet().forEach(faction -> faction.setLocalizedName(this.getLocalisation(faction.getName())));
+            this.factions.keySet().forEach(faction -> {
+                faction.setLocalizedName(this.getLocalisation(faction.getName()));
+                ModifiersUtils.addModifier(ClausewitzUtils.removeQuotes(faction.getName()) + "_influence", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+            });
         } catch (IOException e) {
         }
     }

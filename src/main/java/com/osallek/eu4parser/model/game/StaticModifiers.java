@@ -370,7 +370,7 @@ public enum StaticModifiers {
         LOST_MANDATE_OF_HEAVEN.applyToCountry = (country, modif) -> StaticModifiers.LOST_MANDATE_OF_HEAVEN.modifiers;
         CANCELLED_LOAN.applyToCountry = (country, modif) -> StaticModifiers.CANCELLED_LOAN.modifiers;
         BANK_LOAN.applyToCountry = (country, modif) -> StaticModifiers.BANK_LOAN.modifiers;
-        INFLATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStability(country, modif.modifiers);
+        INFLATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithInflation(country, modif.modifiers);
         BANKRUPTCY.applyToCountry = (country, modif) -> StaticModifiers.BANKRUPTCY.modifiers;
         WAR.applyToCountry = (country, modif) -> StaticModifiers.WAR.modifiers;
         PEACE.applyToCountry = (country, modif) -> StaticModifiers.PEACE.modifiers;

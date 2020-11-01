@@ -3,9 +3,11 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -16,59 +18,43 @@ public class Modifiers {
 
     private final Set<String> enables;
 
-    private final Map<String, String> modifiers;
+    private final Map<Modifier, String> modifiers;
 
     public Modifiers(ClausewitzItem item) {
-        this.enables = item == null ? null : item.getVariables("enable")
-                                                 .stream()
-                                                 .map(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()))
-                                                 .collect(Collectors.toSet());
-
-        this.modifiers = item == null ? null : item.getVarsNot("enable")
-                                                   .stream()
-                                                   .collect(Collectors.toMap(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()),
-                                                                             ClausewitzVariable::getValue,
-                                                                             (a, b) -> b));
+        this(item == null ? new ArrayList<>() : item.getVariables());
     }
 
     public Modifiers(List<ClausewitzVariable> variables) {
         this.enables = variables.stream()
+                                .filter(var -> "enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
+                                               || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
+                                               || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
                                 .map(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()))
-                                .filter("enable"::equals)
                                 .collect(Collectors.toSet());
 
         this.modifiers = variables.stream()
-                                  .filter(var -> !"enable".equals(ClausewitzUtils.removeQuotes(var.getName().toLowerCase())))
-                                  .collect(Collectors.toMap(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()),
-                                                            ClausewitzVariable::getValue,
-                                                            (a, b) -> b));
+                                  .filter(var -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
+                                                 && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
+                                                 && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
+                                  .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getValue, (a, b) -> b));
     }
 
     public Modifiers(ClausewitzVariable... variables) {
         this.enables = Arrays.stream(variables)
+                             .filter(var -> "enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
+                                            || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
+                                            || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
                              .map(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()))
-                             .filter("enable"::equals)
                              .collect(Collectors.toSet());
 
         this.modifiers = Arrays.stream(variables)
-                               .filter(var -> !"enable".equals(ClausewitzUtils.removeQuotes(var.getName().toLowerCase())))
-                               .collect(Collectors.toMap(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()),
-                                                         ClausewitzVariable::getValue,
-                                                         (a, b) -> b));
+                               .filter(var -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
+                                              && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
+                                              && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
+                               .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getValue, (a, b) -> b));
     }
 
-    public Modifiers(Map<String, String> variables) {
-        this.enables = variables.keySet()
-                                .stream()
-                                .map(s -> ClausewitzUtils.removeQuotes(s.toLowerCase()))
-                                .filter("enable"::equals)
-                                .collect(Collectors.toSet());
-
-        this.modifiers = variables;
-        this.modifiers.entrySet().removeIf(entry -> "enable".equals(ClausewitzUtils.removeQuotes(entry.getKey().toLowerCase())));
-    }
-
-    public Modifiers(Set<String> enables, Map<String, String> modifiers) {
+    public Modifiers(Set<String> enables, Map<Modifier, String> modifiers) {
         this.enables = enables;
         this.modifiers = modifiers;
     }
@@ -86,16 +72,21 @@ public class Modifiers {
             return;
         }
 
-        if ("enable".equals(ClausewitzUtils.removeQuotes(name.toLowerCase()))) {
+        if ("enable".equals(ClausewitzUtils.removeQuotes(name.toLowerCase())) || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(value))
+            || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(value))) {
             this.enables.add(ClausewitzUtils.removeQuotes(name.toLowerCase()));
         } else {
             ModifiersUtils.sumModifiers(name, value, this);
         }
     }
 
+    public void addModifier(Modifier modifier, String value) {
+        ModifiersUtils.sumModifiers(modifier, value, this);
+    }
+
     public void addAll(Modifiers modifiers) {
         this.enables.addAll(modifiers.enables);
-        modifiers.modifiers.forEach(this::add);
+        modifiers.modifiers.forEach(this::addModifier);
     }
 
     public Set<String> getEnables() {
@@ -111,18 +102,26 @@ public class Modifiers {
     }
 
     public boolean hasModifier(String modifier) {
-        return this.modifiers.containsKey(ClausewitzUtils.removeQuotes(modifier.toLowerCase()));
+        return this.modifiers.containsKey(ModifiersUtils.getModifier(modifier));
     }
 
     public String getModifier(String modifier) {
-        return this.modifiers.get(ClausewitzUtils.removeQuotes(modifier.toLowerCase()));
+        return this.modifiers.get(ModifiersUtils.getModifier(modifier));
+    }
+
+    public String getModifier(Modifier modifier) {
+        return this.modifiers.get(modifier);
     }
 
     public void removeModifier(String modifier) {
-        this.modifiers.remove(ClausewitzUtils.removeQuotes(modifier.toLowerCase()));
+        this.modifiers.remove(ModifiersUtils.getModifier(modifier));
     }
 
-    public Map<String, String> getModifiers() {
+    public void removeModifier(Modifier modifier) {
+        this.modifiers.remove(modifier);
+    }
+
+    public Map<Modifier, String> getModifiers() {
         return modifiers;
     }
 

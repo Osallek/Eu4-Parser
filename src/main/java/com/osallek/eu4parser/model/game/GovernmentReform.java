@@ -4,7 +4,6 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.NumbersUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
