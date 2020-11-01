@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Game;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Objects;
 
@@ -13,7 +14,7 @@ public class ChangePrice {
 
     private final String localizedName;
 
-    public ChangePrice(String key, int percent, Date expiryDate) {
+    public ChangePrice(String key, int percent, LocalDate expiryDate) {
         this.item = ChangePrice.addToItem(null, key, percent, expiryDate);
         this.localizedName = key;
     }
@@ -39,15 +40,15 @@ public class ChangePrice {
         this.item.setVariable("value", (double) percent / 100);
     }
 
-    public Date getExpiryDate() {
+    public LocalDate getExpiryDate() {
         return this.item.getVarAsDate("expiry_date");
     }
 
-    public void setExpiryDate(Date expiryDate) {
+    public void setExpiryDate(LocalDate expiryDate) {
         this.item.setVariable("expiry_date", expiryDate);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String key, int percent, Date expiryDate) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String key, int percent, LocalDate expiryDate) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "change_price", parent == null ? 0 : parent.getOrder() + 1);
         toItem.addVariable("key", key.toUpperCase());
         toItem.addVariable("value", (double) percent / 100);

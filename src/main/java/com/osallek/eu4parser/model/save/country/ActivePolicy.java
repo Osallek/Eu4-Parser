@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.Policy;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class ActivePolicy {
@@ -23,22 +24,22 @@ public class ActivePolicy {
     }
 
     public void setPolicy(Policy policy) {
-        Date date = this.item.getVarAsDate("date");
+        LocalDate date = this.item.getVarAsDate("date");
 
         if (date != null) {
             this.item.setVariable("policy", ClausewitzUtils.addQuotes(policy.getName()));
         }
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Policy policy, Date date) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Policy policy, LocalDate date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "active_policy", parent.getOrder() + 1);
         toItem.addVariable("policy", ClausewitzUtils.addQuotes(policy.getName()));
         toItem.addVariable("date", date);

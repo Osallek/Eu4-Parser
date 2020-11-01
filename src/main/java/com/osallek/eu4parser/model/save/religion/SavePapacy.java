@@ -12,6 +12,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -51,8 +52,8 @@ public class SavePapacy {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(target));
     }
 
-    public Date getCrusadeStart() {
-        Date date = this.item.getVarAsDate("crusade_start");
+    public LocalDate getCrusadeStart() {
+        LocalDate date = this.item.getVarAsDate("crusade_start");
 
         if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
             return null;
@@ -105,8 +106,8 @@ public class SavePapacy {
         this.item.setVariable("previous_controller", ClausewitzUtils.addQuotes(previousController.getTag()));
     }
 
-    public Date getLastExcommunication() {
-        Date date = this.item.getVarAsDate("last_excom");
+    public LocalDate getLastExcommunication() {
+        LocalDate date = this.item.getVarAsDate("last_excom");
 
         if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
             return null;
@@ -115,7 +116,7 @@ public class SavePapacy {
         return date;
     }
 
-    public void setLastExcommunication(Date lastExcommunication) {
+    public void setLastExcommunication(LocalDate lastExcommunication) {
         this.item.setVariable("last_excom", lastExcommunication);
     }
 

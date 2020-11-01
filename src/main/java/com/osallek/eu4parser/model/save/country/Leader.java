@@ -7,6 +7,7 @@ import com.osallek.eu4parser.model.save.Id;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Leader {
@@ -96,27 +97,27 @@ public class Leader {
         this.item.setVariable("personality", personality);
     }
 
-    public Date getActivation() {
+    public LocalDate getActivation() {
         return this.item.getVarAsDate("activation");
     }
 
-    public void setActivation(Date activation) {
+    public void setActivation(LocalDate activation) {
         this.item.setVariable("activation", activation);
     }
 
-    public Date getBirthDate() {
+    public LocalDate getBirthDate() {
         return this.item.getVarAsDate("birth_date");
     }
 
-    public void setBirthDate(Date birthDate) {
+    public void setBirthDate(LocalDate birthDate) {
         this.item.setVariable("birth_date", birthDate);
     }
 
-    public Date getDeathDate() {
+    public LocalDate getDeathDate() {
         return this.item.getVarAsDate("death_date");
     }
 
-    public void setDeathDate(Date deathDate) {
+    public void setDeathDate(LocalDate deathDate) {
         this.item.setVariable("death_date", deathDate);
     }
 
@@ -158,7 +159,7 @@ public class Leader {
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege,
-                                           String personality, Date activation, int id) {
+                                           String personality, LocalDate activation, int id) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "leader", parent.getOrder() + 1);
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
         toItem.addVariable("type", type.name());

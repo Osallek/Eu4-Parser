@@ -35,6 +35,7 @@ import org.luaj.vm2.parser.ParseException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -154,11 +155,11 @@ public class Save {
         return game;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.metaItem.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.metaItem.setVariable("date", date);
     }
 
@@ -279,11 +280,11 @@ public class Save {
         return revolution;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return this.gamestateItem.getVarAsDate("start_date");
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.gamestateItem.setVariable("start_date", startDate);
     }
 

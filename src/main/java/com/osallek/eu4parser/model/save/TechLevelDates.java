@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.Power;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class TechLevelDates {
@@ -14,7 +15,7 @@ public class TechLevelDates {
         this.item = item;
     }
 
-    public Date getTechDate(Power power) {
+    public LocalDate getTechDate(Power power) {
         return this.item.getVarAsDate(power.ordinal());
     }
 
@@ -22,7 +23,7 @@ public class TechLevelDates {
         return this.item.getVarAsInt(power.ordinal());
     }
 
-    public void setTechDate(Power power, Date date) {
+    public void setTechDate(Power power, LocalDate date) {
         this.item.setVariable(power.ordinal(), date, true);
     }
 

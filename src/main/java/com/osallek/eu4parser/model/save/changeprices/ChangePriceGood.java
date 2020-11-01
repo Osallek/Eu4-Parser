@@ -6,7 +6,7 @@ import com.osallek.eu4parser.model.game.TradeGood;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,7 +52,7 @@ public class ChangePriceGood {
         refreshAttributes();
     }
 
-    public ChangePrice addChangePrice(String key, int percent, Date expiryDate) {
+    public ChangePrice addChangePrice(String key, int percent, LocalDate expiryDate) {
         ChangePrice.addToItem(this.item, key, percent, expiryDate);
         refreshAttributes();
         return this.changePrices.stream()

@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.empire;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class HreIncident {
@@ -16,11 +17,11 @@ public class HreIncident {
         return this.item.getVarAsString("incident");
     }
 
-    public Date getExpiryDate() {
+    public LocalDate getExpiryDate() {
         return this.item.getVarAsDate("expiry_date");
     }
 
-    public void setExpiryDate(Date date) {
+    public void setExpiryDate(LocalDate date) {
         this.item.setVariable("expiry_date", date);
     }
 

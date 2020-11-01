@@ -75,7 +75,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("GLOBAL_REGIMENT_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_REGIMENT_RECRUIT_SPEED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_SUPPLY_LIMIT_MODIFIER", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("LAND_FORCELIMIT", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("LAND_FORCELIMIT", ModifierType.ADDITIVE, ModifierScope.COUNTRY, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("LAND_FORCELIMIT_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("LAND_MAINTENANCE_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MERCENARY_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -463,8 +463,8 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("power_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
     }
 
-    public static void addModifier(String name, ModifierType type, ModifierScope scope) {
-        Modifier modifier = new Modifier(name, type, scope);
+    public static void addModifier(String name, ModifierType type, ModifierScope... scopes) {
+        Modifier modifier = new Modifier(name, type, scopes);
         MODIFIERS_MAP.put(modifier.getName(), modifier);
     }
 

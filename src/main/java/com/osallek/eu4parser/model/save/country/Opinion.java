@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Opinion {
@@ -16,11 +17,11 @@ public class Opinion {
         return this.item.getVarAsString("modifier");
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
     }
 
@@ -36,7 +37,7 @@ public class Opinion {
         return this.item.getVarAsBool("expiry_date");
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String modifier, Date date, Double currentOpinion) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String modifier, LocalDate date, Double currentOpinion) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "opinion", parent.getOrder() + 1);
         toItem.addVariable("modifier", modifier);
         toItem.addVariable("current_opinion", currentOpinion);

@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Decree;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class SaveDecree {
@@ -26,7 +27,7 @@ public class SaveDecree {
         return this.saveItem.getVarAsString("decree_name");
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.saveItem.getVarAsDate("decree_date");
     }
 
@@ -35,7 +36,7 @@ public class SaveDecree {
         refreshAttributes();
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.saveItem.setVariable("decree_date", date);
     }
 
@@ -47,7 +48,7 @@ public class SaveDecree {
         }
     }
 
-    public void setDecree(String type, Date date) {
+    public void setDecree(String type, LocalDate date) {
         if (ClausewitzUtils.isBlank(type)) {
             this.saveItem.removeVariable("decree_name");
             this.saveItem.removeVariable("decree_date");
@@ -69,7 +70,7 @@ public class SaveDecree {
         return this.decree.getLocalizedName();
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, Date date) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LocalDate date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "decree", parent.getOrder() + 1);
         toItem.addVariable("decree_name", name);
         toItem.addVariable("decree_date", date);

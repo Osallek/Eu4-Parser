@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.save.Id;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -79,7 +80,7 @@ public abstract class AbstractArmy {
         this.item.setVariable("location", location);
     }
 
-    public Date getMovementProgressLastUpdated() {
+    public LocalDate getMovementProgressLastUpdated() {
         return this.item.getVarAsDate("movement_progress_last_updated");
     }
 

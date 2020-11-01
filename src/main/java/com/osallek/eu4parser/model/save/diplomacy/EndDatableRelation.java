@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.diplomacy;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class EndDatableRelation extends DatableRelation {
@@ -11,15 +12,15 @@ public class EndDatableRelation extends DatableRelation {
         super(item, save);
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return this.item.getVarAsDate("end_date");
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.item.setVariable("end_date", endDate);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String first, String second, Date startDate, Date endDate) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String first, String second, LocalDate startDate, LocalDate endDate) {
         ClausewitzItem toItem = DatableRelation.addToItem(parent, "casus_belli", first, second, startDate);
 
         if (endDate != null) {

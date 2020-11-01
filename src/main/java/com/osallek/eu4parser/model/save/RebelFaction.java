@@ -8,6 +8,7 @@ import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Leader;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -89,7 +90,7 @@ public class RebelFaction {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("supportive_country")));
     }
 
-    public Date getSupportiveCountryDate() {
+    public LocalDate getSupportiveCountryDate() {
         return this.item.getVarAsDate("supportive_country_date");
     }
 

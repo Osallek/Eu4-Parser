@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class ProvinceConstruction {
@@ -18,12 +19,12 @@ public class ProvinceConstruction {
         this.province = province;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return this.item.getVarAsDate("start_date");
     }
 
-    public void setStartDate(Date startDate) {
-        if ((startDate.before(this.province.getSave().getDate()) || startDate.equals(this.province.getSave().getDate()))) {
+    public void setStartDate(LocalDate startDate) {
+        if ((startDate.isBefore(this.province.getSave().getDate()) || startDate.equals(this.province.getSave().getDate()))) {
             this.item.setVariable("start_date", startDate);
         }
     }
@@ -52,12 +53,12 @@ public class ProvinceConstruction {
         return this.item.getVarAsInt("envoy");
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
-        if ((date.after(this.province.getSave().getDate()))) {
+    public void setDate(LocalDate date) {
+        if ((date.isAfter(this.province.getSave().getDate()))) {
             this.item.setVariable("date", date);
         }
     }

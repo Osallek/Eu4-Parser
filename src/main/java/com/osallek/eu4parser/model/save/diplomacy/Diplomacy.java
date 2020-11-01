@@ -6,6 +6,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class Diplomacy {
         return dependencies;
     }
 
-    public void addDependency(Country first, Country second, Date startDate, SubjectType subjectType) {
+    public void addDependency(Country first, Country second, LocalDate startDate, SubjectType subjectType) {
         if (second.getOverlord() == null) {
             Dependency.addToItem(this.item, first.getTag(), second.getTag(), startDate, subjectType);
             first.addSubject(second);
@@ -79,7 +80,7 @@ public class Diplomacy {
         return alliances;
     }
 
-    public void addAlliance(Country first, Country second, Date startDate) {
+    public void addAlliance(Country first, Country second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "alliance", first.getTag(), second.getTag(), startDate);
         first.addAlly(second);
         second.addAlly(first);
@@ -105,7 +106,7 @@ public class Diplomacy {
         return guarantees;
     }
 
-    public void addGuarantee(Country first, Country second, Date startDate) {
+    public void addGuarantee(Country first, Country second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "guarantee", first.getTag(), second.getTag(), startDate);
         first.addGuarantee(second);
         refreshAttributes();
@@ -128,8 +129,8 @@ public class Diplomacy {
         return knowledgeSharing;
     }
 
-    public void addKnowledgeSharing(Country first, Country second, Date startDate) {
-        KnowledgeSharing.addToItem(this.item, first.getTag(), second.getTag(), startDate, DateUtils.addYears(startDate, 10), false);
+    public void addKnowledgeSharing(Country first, Country second, LocalDate startDate) {
+        KnowledgeSharing.addToItem(this.item, first.getTag(), second.getTag(), startDate, startDate.plusYears(10), false);
         refreshAttributes();
     }
 
@@ -149,7 +150,7 @@ public class Diplomacy {
         return subsidies;
     }
 
-    public void addSubsidies(Country first, Country second, Date startDate, double amount, int duration) {
+    public void addSubsidies(Country first, Country second, LocalDate startDate, double amount, int duration) {
         Subsidies.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, duration);
         refreshAttributes();
     }
@@ -170,7 +171,7 @@ public class Diplomacy {
         return royalMarriage;
     }
 
-    public void addRoyalMarriage(Country first, Country second, Date startDate) {
+    public void addRoyalMarriage(Country first, Country second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "royal_marriage", first.getTag(), second.getTag(), startDate);
         first.addRoyalMarriage(second);
         second.addRoyalMarriage(first);
@@ -196,7 +197,7 @@ public class Diplomacy {
         return militaryAccesses;
     }
 
-    public void addMilitaryAccess(Country first, Country second, Date startDate, boolean enforcePeace) {
+    public void addMilitaryAccess(Country first, Country second, LocalDate startDate, boolean enforcePeace) {
         MilitaryAccess.addToItem(this.item, "military_access", first.getTag(), second.getTag(), startDate, enforcePeace);
         refreshAttributes();
     }
@@ -217,7 +218,7 @@ public class Diplomacy {
         return fleetAccesses;
     }
 
-    public void addFleetAccess(Country first, Country second, Date startDate, boolean enforcePeace) {
+    public void addFleetAccess(Country first, Country second, LocalDate startDate, boolean enforcePeace) {
         MilitaryAccess.addToItem(this.item, "fleet_access", first.getTag(), second.getTag(), startDate, enforcePeace);
         refreshAttributes();
     }
@@ -238,7 +239,7 @@ public class Diplomacy {
         return casusBellis;
     }
 
-    public void addCasusBelli(Country first, Country second, Date startDate, Date endDate, com.osallek.eu4parser.model.game.CasusBelli type) {
+    public void addCasusBelli(Country first, Country second, LocalDate startDate, LocalDate endDate, com.osallek.eu4parser.model.game.CasusBelli type) {
         CasusBelli.addToItem(this.item, first.getTag(), second.getTag(), startDate, endDate, type);
         refreshAttributes();
     }
@@ -259,7 +260,7 @@ public class Diplomacy {
         return supportIndependence;
     }
 
-    public void addSupportIndependence(Country first, Country second, Date startDate) {
+    public void addSupportIndependence(Country first, Country second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "support_independence", first.getTag(), second.getTag(), startDate);
         second.addIndependenceSupportedBy(first);
         refreshAttributes();
@@ -282,7 +283,7 @@ public class Diplomacy {
         return transferTradePowers;
     }
 
-    public void addTransferTradePower(Country first, Country second, Date startDate, double amount, boolean isEnforced) {
+    public void addTransferTradePower(Country first, Country second, LocalDate startDate, double amount, boolean isEnforced) {
         if (second.getTransferTradePowerTo().isEmpty()) {
             TransferTradePower.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, isEnforced);
             second.addTransferTradePowerTo(first);
@@ -309,7 +310,7 @@ public class Diplomacy {
         return warReparations;
     }
 
-    public void addWarReparations(Country first, Country second, Date startDate, Date endDate) {
+    public void addWarReparations(Country first, Country second, LocalDate startDate, LocalDate endDate) {
         EndDatableRelation.addToItem(this.item, "war_reparations", first.getTag(), second.getTag(), startDate, endDate);
         first.addWarReparations(second);
         refreshAttributes();
@@ -333,7 +334,7 @@ public class Diplomacy {
     }
 
 
-    public void addWarning(Country first, Country second, Date startDate) {
+    public void addWarning(Country first, Country second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "warning", first.getTag(), second.getTag(), startDate);
         first.addWarning(second);
         refreshAttributes();

@@ -3,7 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class ActiveAgenda {
 
@@ -32,11 +32,11 @@ public class ActiveAgenda {
         this.item.setVariable("estate", ClausewitzUtils.addQuotes(estate.getType()));
     }
 
-    public Date getExpiryDate() {
+    public LocalDate getExpiryDate() {
         return this.item.getVarAsDate("expiry_date");
     }
 
-    public void setExpiryDate(Date expiryDate) {
+    public void setExpiryDate(LocalDate expiryDate) {
         this.item.setVariable("expiry_date", expiryDate);
     }
 

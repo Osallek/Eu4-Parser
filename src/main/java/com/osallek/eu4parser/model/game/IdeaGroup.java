@@ -2,10 +2,16 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.common.Modifier;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.Power;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -78,6 +84,26 @@ public class IdeaGroup {
 
     public Map<String, Modifiers> getIdeas() {
         return ideas;
+    }
+
+    public Modifiers getModifiers(int level) {
+        List<Modifiers> modifiers = new ArrayList<>();
+        level = Math.min(level, ideas.size());
+
+        if (level >= 0) {
+            modifiers.add(this.start);
+        }
+
+        Iterator<Modifiers> modifiersIterator = this.ideas.values().iterator();
+        for (int i = level; i > 0; i--) {
+            modifiers.add(modifiersIterator.next());
+        }
+
+        if (level >= this.ideas.size()) {
+            modifiers.add(this.bonus);
+        }
+
+        return ModifiersUtils.sumModifiers(modifiers.toArray(Modifiers[]::new));
     }
 
     @Override

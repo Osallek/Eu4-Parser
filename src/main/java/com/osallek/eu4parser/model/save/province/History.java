@@ -7,6 +7,7 @@ import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,15 +23,15 @@ public class History {
 
     private final SaveProvince province;
 
-    private SortedMap<Date, Country> owners;
+    private SortedMap<LocalDate, Country> owners;
 
-    private SortedMap<Date, List<Country>> claims;
+    private SortedMap<LocalDate, List<Country>> claims;
 
-    private SortedMap<Date, Country> controllers;
+    private SortedMap<LocalDate, Country> controllers;
 
-    private SortedMap<Date, SaveReligion> religions;
+    private SortedMap<LocalDate, SaveReligion> religions;
 
-    private SortedMap<Date, Culture> cultures;
+    private SortedMap<LocalDate, Culture> cultures;
 
     private Map<Integer, SaveAdvisor> advisors;
 
@@ -40,23 +41,23 @@ public class History {
         refreshAttributes();
     }
 
-    public SortedMap<Date, Country> getOwners() {
+    public SortedMap<LocalDate, Country> getOwners() {
         return owners;
     }
 
-    public SortedMap<Date, List<Country>> getClaims() {
+    public SortedMap<LocalDate, List<Country>> getClaims() {
         return claims;
     }
 
-    public SortedMap<Date, Country> getControllers() {
+    public SortedMap<LocalDate, Country> getControllers() {
         return controllers;
     }
 
-    public SortedMap<Date, SaveReligion> getReligions() {
+    public SortedMap<LocalDate, SaveReligion> getReligions() {
         return religions;
     }
 
-    public SortedMap<Date, Culture> getCultures() {
+    public SortedMap<LocalDate, Culture> getCultures() {
         return cultures;
     }
 
@@ -64,7 +65,7 @@ public class History {
         return advisors;
     }
 
-    public void addEvent(Date date, String key, String value) {
+    public void addEvent(LocalDate date, String key, String value) {
         if (date != null) {
             ClausewitzItem eventItem = this.item.addChild(ClausewitzUtils.dateToString(date));
             eventItem.addVariable(key, value);
@@ -72,7 +73,7 @@ public class History {
         }
     }
 
-    public void addEvent(Date date, String key, boolean value) {
+    public void addEvent(LocalDate date, String key, boolean value) {
         if (date != null) {
             ClausewitzItem eventItem = this.item.addChild(ClausewitzUtils.dateToString(date));
             eventItem.addVariable(key, value);

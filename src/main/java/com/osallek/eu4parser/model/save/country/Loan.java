@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Id;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Loan {
@@ -64,11 +65,11 @@ public class Loan {
         this.item.setVariable("amount", amount);
     }
 
-    public Date getExpiryDate() {
+    public LocalDate getExpiryDate() {
         return this.item.getVarAsDate("expiry_date");
     }
 
-    public void setExpiryDate(Date expiryDate) {
+    public void setExpiryDate(LocalDate expiryDate) {
         this.item.setVariable("expiry_date", expiryDate);
     }
 
@@ -88,11 +89,11 @@ public class Loan {
         }
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, double interest, boolean fixedInterest, int amount, Date expiryDate) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, double interest, boolean fixedInterest, int amount, LocalDate expiryDate) {
         return addToItem(parent, id, Eu4Utils.DEFAULT_TAG_QUOTES, interest, fixedInterest, amount, expiryDate);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String lender, double interest, boolean fixedInterest, int amount, Date expiryDate) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String lender, double interest, boolean fixedInterest, int amount, LocalDate expiryDate) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "loan", parent.getOrder() + 1);
         Id.addToItem(toItem, id, 4713);
 

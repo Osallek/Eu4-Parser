@@ -6,6 +6,7 @@ import com.osallek.eu4parser.model.game.HolyOrder;
 import com.osallek.eu4parser.model.game.StateEdict;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class CountryState {
@@ -54,7 +55,7 @@ public class CountryState {
         return activeEdict;
     }
 
-    public void setActiveEdict(StateEdict which, Date date) {
+    public void setActiveEdict(StateEdict which, LocalDate date) {
         if (this.activeEdict != null) {
             this.activeEdict.setWhich(which);
             this.activeEdict.setDate(date);

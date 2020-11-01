@@ -6,6 +6,7 @@ import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.ParliamentIssue;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Parliament {
@@ -22,11 +23,11 @@ public class Parliament {
         refreshAttributes();
     }
 
-    public Date getLastDebate() {
+    public LocalDate getLastDebate() {
         return this.item.getVarAsDate("last_debate");
     }
 
-    public void setLastDebate(Date lastDebate) {
+    public void setLastDebate(LocalDate lastDebate) {
         this.item.setVariable("last_debate", lastDebate);
     }
 

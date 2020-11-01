@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Id;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class MercenaryCompany {
@@ -70,11 +71,11 @@ public class MercenaryCompany {
         this.item.setVariable("starting_manpower", manpower);
     }
 
-    public Date getHiringDate() {
+    public LocalDate getHiringDate() {
         return this.item.getVarAsDate("hiring_date");
     }
 
-    public Date getDisbandDate() {
+    public LocalDate getDisbandDate() {
         return this.item.getVarAsDate("disband_date");
     }
 

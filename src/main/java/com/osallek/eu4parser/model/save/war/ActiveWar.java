@@ -9,6 +9,7 @@ import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Losses;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,9 +36,9 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
     private WarGoal warGoal;
 
-    private SortedMap<Date, Map<WarHistoryAction, List<String>>> actionsHistory;
+    private SortedMap<LocalDate, Map<WarHistoryAction, List<String>>> actionsHistory;
 
-    private SortedMap<Date, List<Battle>> battles;
+    private SortedMap<LocalDate, List<Battle>> battles;
 
     public ActiveWar(ClausewitzItem item, Save save) {
         this.save = save;
@@ -53,15 +54,15 @@ public class ActiveWar implements Comparable<ActiveWar> {
         this.item.setVariable("name", name);
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return this.actionsHistory.firstKey();
     }
 
-    public SortedMap<Date, Map<WarHistoryAction, List<String>>> getActionsHistory() {
+    public SortedMap<LocalDate, Map<WarHistoryAction, List<String>>> getActionsHistory() {
         return actionsHistory;
     }
 
-    public SortedMap<Date, List<Battle>> getBattles() {
+    public SortedMap<LocalDate, List<Battle>> getBattles() {
         return battles;
     }
 
@@ -161,7 +162,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         this.item.setVariable("original_defender", ClausewitzUtils.addQuotes(tag));
     }
 
-    public Date getAction() {
+    public LocalDate getAction() {
         return this.item.getVarAsDate("action");
     }
 

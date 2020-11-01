@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,7 +68,7 @@ public class Religion {
 
     private final List<Icon> icons;
 
-    private final Date date;
+    private final LocalDate date;
 
     public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
         this.religionGroup = religionGroup;
@@ -215,7 +216,7 @@ public class Religion {
         return holySites;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.date;
     }
 

@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.changeprices;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Game;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class ChangePrices {
         return null;
     }
 
-    public void addChangePrice(String good, String key, int percent, Date expiryDate) {
+    public void addChangePrice(String good, String key, int percent, LocalDate expiryDate) {
         ChangePriceGood changePriceGood = this.goods.get(good);
 
         if (changePriceGood != null) {

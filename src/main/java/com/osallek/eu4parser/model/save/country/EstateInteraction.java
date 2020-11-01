@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class EstateInteraction {
@@ -18,15 +19,15 @@ public class EstateInteraction {
         return this.list.get(0);
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.list.getAsDate(1);
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.list.set(1, date);
     }
 
-    public static ClausewitzList addToItem(ClausewitzItem parent, String name, Date date) {
+    public static ClausewitzList addToItem(ClausewitzItem parent, String name, LocalDate date) {
         return parent.addList(null, name, ClausewitzUtils.dateToString(date));
     }
 }

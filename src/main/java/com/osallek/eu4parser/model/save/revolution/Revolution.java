@@ -6,6 +6,7 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,8 +48,8 @@ public class Revolution {
         this.item.setVariable("has_first_revolution_started", hasFirstRevolutionStarted);
     }
 
-    public Date getDismantleDate() {
-        Date date = this.item.getVarAsDate("dismantle_date");
+    public LocalDate getDismantleDate() {
+        LocalDate date = this.item.getVarAsDate("dismantle_date");
 
         if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
             return null;
@@ -57,7 +58,7 @@ public class Revolution {
         return date;
     }
 
-    public void setDismantleDate(Date dismantleDate) {
+    public void setDismantleDate(LocalDate dismantleDate) {
         if (dismantleDate == null) {
             dismantleDate = Eu4Utils.DEFAULT_DATE;
         }
@@ -65,8 +66,8 @@ public class Revolution {
         this.item.setVariable("dismantle_date", dismantleDate);
     }
 
-    public Date getClaimed() {
-        Date date = this.item.getVarAsDate("claimed");
+    public LocalDate getClaimed() {
+        LocalDate date = this.item.getVarAsDate("claimed");
 
         if (date == null || this.save.getStartDate().equals(date)) {
             return null;
@@ -75,7 +76,7 @@ public class Revolution {
         return date;
     }
 
-    public void setClaimed(Date claimed) {
+    public void setClaimed(LocalDate claimed) {
         if (claimed == null) {
             claimed = this.save.getStartDate();
         }

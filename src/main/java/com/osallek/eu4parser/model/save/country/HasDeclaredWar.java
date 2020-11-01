@@ -2,7 +2,7 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class HasDeclaredWar {
 
@@ -12,7 +12,7 @@ public class HasDeclaredWar {
         this.item = item;
     }
 
-    public Date getId() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 

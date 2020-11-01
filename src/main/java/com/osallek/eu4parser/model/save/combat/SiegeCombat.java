@@ -5,6 +5,7 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Save;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class SiegeCombat extends Combat<SiegeCombatant> {
@@ -57,8 +58,8 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
         this.item.setVariable("total", total);
     }
 
-    public Date getLastAssault() {
-        Date date = this.item.getVarAsDate("last_assault");
+    public LocalDate getLastAssault() {
+        LocalDate date = this.item.getVarAsDate("last_assault");
 
         if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
             return null;
@@ -67,7 +68,7 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
         return date;
     }
 
-    public void setLastAssault(Date lastAssault) {
+    public void setLastAssault(LocalDate lastAssault) {
         this.item.setVariable("last_assault", lastAssault);
     }
 

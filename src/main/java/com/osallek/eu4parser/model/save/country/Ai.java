@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.Power;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -47,7 +48,7 @@ public class Ai {
         return this.item.getVarAsString("personality");
     }
 
-    public Date getLastRecalcDate() {
+    public LocalDate getLastRecalcDate() {
         return this.item.getVarAsDate("last_recalc_date");
     }
 

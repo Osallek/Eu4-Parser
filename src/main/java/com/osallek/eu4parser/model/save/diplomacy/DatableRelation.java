@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class DatableRelation {
@@ -26,15 +27,15 @@ public class DatableRelation {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("second")));
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return this.item.getVarAsDate("start_date");
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.item.setVariable("start_date", startDate);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String first, String second, Date startDate) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String first, String second, LocalDate startDate) {
         ClausewitzItem toItem = new ClausewitzItem(parent, name, parent.getOrder() + 1);
         toItem.addVariable("first", ClausewitzUtils.addQuotes(first));
         toItem.addVariable("second", ClausewitzUtils.addQuotes(second));

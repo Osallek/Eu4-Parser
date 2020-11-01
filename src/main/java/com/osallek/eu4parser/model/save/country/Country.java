@@ -6,7 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
-import com.osallek.eu4parser.common.NumbersUtils;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Continent;
@@ -16,9 +16,12 @@ import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Isolationism;
 import com.osallek.eu4parser.model.game.Mission;
+import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.game.NavalDoctrine;
 import com.osallek.eu4parser.model.game.PersonalDeity;
 import com.osallek.eu4parser.model.game.Policy;
+import com.osallek.eu4parser.model.game.StaticModifier;
+import com.osallek.eu4parser.model.game.StaticModifiers;
 import com.osallek.eu4parser.model.game.SubjectType;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
@@ -31,12 +34,14 @@ import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.SaveAdvisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -201,7 +206,7 @@ public class Country {
 
     private SubjectType subjectType;
 
-    private Date subjectStartDate;
+    private LocalDate subjectStartDate;
 
     private TradeLeague tradeLeague;
 
@@ -421,7 +426,7 @@ public class Country {
         return var == null ? null : Power.valueOf(var.toUpperCase());
     }
 
-    public void setNationalFocus(Power power, Date date) {
+    public void setNationalFocus(Power power, LocalDate date) {
         this.item.setVariable("national_focus", power.name());
 
         if (this.history != null) {
@@ -507,19 +512,19 @@ public class Country {
         this.item.removeVariable("active_age_ability", ageAbility);
     }
 
-    public Date getLastSoldProvince() {
+    public LocalDate getLastSoldProvince() {
         return this.item.getVarAsDate("last_sold_province");
     }
 
-    public void setLastSoldProvince(Date lastSoldProvince) {
+    public void setLastSoldProvince(LocalDate lastSoldProvince) {
         this.item.setVariable("last_sold_province", lastSoldProvince);
     }
 
-    public Date getGoldenEraDate() {
+    public LocalDate getGoldenEraDate() {
         return this.item.getVarAsDate("golden_era_date");
     }
 
-    public void setGoldenEraDate(Date goldenEraDate) {
+    public void setGoldenEraDate(LocalDate goldenEraDate) {
         this.item.setVariable("golden_era_date", goldenEraDate);
     }
 
@@ -527,27 +532,27 @@ public class Country {
         this.item.removeVariable("golden_era_date");
     }
 
-    public Date getLastFocusMove() {
+    public LocalDate getLastFocusMove() {
         return this.item.getVarAsDate("last_focus_move");
     }
 
-    public void setLastFocusMove(Date lastFocusMove) {
+    public void setLastFocusMove(LocalDate lastFocusMove) {
         this.item.setVariable("last_focus_move", lastFocusMove);
     }
 
-    public Date getLastSentAllianceOffer() {
+    public LocalDate getLastSentAllianceOffer() {
         return this.item.getVarAsDate("last_sent_alliance_offer");
     }
 
-    public void setLastSentAllianceOffer(Date lastSentAllianceOffer) {
+    public void setLastSentAllianceOffer(LocalDate lastSentAllianceOffer) {
         this.item.setVariable("last_sent_alliance_offer", lastSentAllianceOffer);
     }
 
-    public Date getLastConversionSecondary() {
+    public LocalDate getLastConversionSecondary() {
         return this.item.getVarAsDate("last_conversion_secondary");
     }
 
-    public void setLastConversionSecondary(Date lastConversionSecondary) {
+    public void setLastConversionSecondary(LocalDate lastConversionSecondary) {
         this.item.setVariable("last_conversion_secondary", lastConversionSecondary);
     }
 
@@ -946,7 +951,7 @@ public class Country {
         return rivals;
     }
 
-    public void addRival(Country country, Date date) {
+    public void addRival(Country country, LocalDate date) {
         if (!this.rivals.containsKey(ClausewitzUtils.addQuotes(country.getTag()))) {
             Rival.addToItem(this.item, country, date);
             refreshAttributes();
@@ -1039,11 +1044,11 @@ public class Country {
         setCoalitionDate(this.save.getDate());
     }
 
-    public Date getCoalitionDate() {
+    public LocalDate getCoalitionDate() {
         return this.item.getVarAsDate("coalition_date");
     }
 
-    public void setCoalitionDate(Date coalitionDate) {
+    public void setCoalitionDate(LocalDate coalitionDate) {
         if (getCoalitionTarget() != null) {
             this.item.setVariable("coalition_date", coalitionDate);
         }
@@ -1083,11 +1088,11 @@ public class Country {
         this.subjectType = subjectType;
     }
 
-    public Date getSubjectStartDate() {
+    public LocalDate getSubjectStartDate() {
         return subjectStartDate;
     }
 
-    public void setSubjectStartDate(Date subjectStartDate) {
+    public void setSubjectStartDate(LocalDate subjectStartDate) {
         this.subjectStartDate = subjectStartDate;
     }
 
@@ -1264,11 +1269,11 @@ public class Country {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("is_at_war"));
     }
 
-    public Date lastElection() {
+    public LocalDate lastElection() {
         return this.item.getVarAsDate("last_election");
     }
 
-    public void setLastElection(Date lastElection) {
+    public void setLastElection(LocalDate lastElection) {
         this.item.setVariable("last_election", lastElection);
     }
 
@@ -1287,7 +1292,7 @@ public class Country {
                                   .orElse(null);
     }
 
-    public void addActivePolicy(Policy policy, Date date) {
+    public void addActivePolicy(Policy policy, LocalDate date) {
         if (getActivePolicies().stream().noneMatch(activePolicy -> activePolicy.getPolicy().equals(policy))) {
             ActivePolicy.addToItem(this.item, policy, date);
             refreshAttributes();
@@ -2408,19 +2413,19 @@ public class Country {
         return this.item.getVarAsBool("needs_rebel_unit_refresh");
     }
 
-    public Date lastBetrayedAlly() {
+    public LocalDate lastBetrayedAlly() {
         return this.item.getVarAsDate("last_betrayed_ally");
     }
 
-    public void setLastBetrayedAlly(Date lastBetrayedAlly) {
+    public void setLastBetrayedAlly(LocalDate lastBetrayedAlly) {
         this.item.setVariable("last_betrayed_ally", lastBetrayedAlly);
     }
 
-    public Date lastBankrupt() {
+    public LocalDate lastBankrupt() {
         return this.item.getVarAsDate("last_bankrupt");
     }
 
-    public void setLastBankrupt(Date lastBankrupt) {
+    public void setLastBankrupt(LocalDate lastBankrupt) {
         this.item.setVariable("last_bankrupt", lastBankrupt);
     }
 
@@ -2528,7 +2533,7 @@ public class Country {
         this.item.setVariable("navy_tradition", navyTradition);
     }
 
-    public Date getLastWarEnded() {
+    public LocalDate getLastWarEnded() {
         return this.item.getVarAsDate("last_war_ended");
     }
 
@@ -2559,7 +2564,7 @@ public class Country {
         return loans;
     }
 
-    public void addLoan(double interest, int amount, Date expiryDate) {
+    public void addLoan(double interest, int amount, LocalDate expiryDate) {
         Loan.addToItem(this.item, this.save.getCountries()
                                            .values()
                                            .stream()
@@ -2963,11 +2968,11 @@ public class Country {
         return modifiers;
     }
 
-    public void addModifier(String modifier, Date date) {
+    public void addModifier(String modifier, LocalDate date) {
         addModifier(modifier, date, null);
     }
 
-    public void addModifier(String modifier, Date date, Boolean hidden) {
+    public void addModifier(String modifier, LocalDate date, Boolean hidden) {
         Modifier.addToItem(this.item, modifier, date, hidden);
         refreshAttributes();
     }
@@ -3166,7 +3171,7 @@ public class Country {
         return this.leaders.values().stream().filter(leader -> leaderType.equals(leader.getType())).collect(Collectors.toList());
     }
 
-    public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality) {
+    public void addLeader(LocalDate date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality) {
         int leaderId = this.save.getIdCounters().getAndIncrement(Counter.LEADER);
         Id.addToItem(this.item, "leader", leaderId, 49);
         this.history.addLeader(date, name, type, manuever, fire, shock, siege, personality, leaderId);
@@ -3243,15 +3248,15 @@ public class Country {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("is_great_power"));
     }
 
-    public Date getInauguration() {
+    public LocalDate getInauguration() {
         return this.item.getVarAsDate("inauguration");
     }
 
-    public Date getLastMigration() {
+    public LocalDate getLastMigration() {
         return this.item.getVarAsDate("last_migration");
     }
 
-    public void setLastMigration(Date lastMigration) {
+    public void setLastMigration(LocalDate lastMigration) {
         this.item.setVariable("last_migration", lastMigration);
     }
 
@@ -3421,11 +3426,11 @@ public class Country {
         this.item.setVariable("native_policy", nativePolicy);
     }
 
-    public Date getAntiNationRuiningEndDate() {
+    public LocalDate getAntiNationRuiningEndDate() {
         return this.item.getVarAsDate("anti_nation_ruining_end_date");
     }
 
-    public void setAntiNationRuiningEndDate(Date antiNationRuiningEndDate) {
+    public void setAntiNationRuiningEndDate(LocalDate antiNationRuiningEndDate) {
         this.item.setVariable("anti_nation_ruining_end_date", antiNationRuiningEndDate);
     }
 
@@ -3634,6 +3639,27 @@ public class Country {
 
     public void addWar(ActiveWar war) {
         this.wars.add(war);
+    }
+
+    public Modifiers getTotalModifiers() {
+        List<Modifiers> list = new ArrayList<>();
+        list.add(StaticModifiers.applyToModifiersCountry(this));
+
+        if (CollectionUtils.isNotEmpty(getModifiers())) {
+            list.addAll(getModifiers().stream()
+                                      .filter(modifier -> !StaticModifier.class.equals(modifier.getModifier().getClass()))
+                                      .map(modifier -> modifier.getModifiers(this))
+                                      .filter(Objects::nonNull)
+                                      .map(Modifiers::getCountryModifiers)
+                                      .filter(Objects::nonNull)
+                                      .collect(Collectors.toList()));
+        }
+
+        if (getIdeaGroups() != null) {
+            getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(key.getModifiers(value).getCountryModifiers()));
+        }
+
+        return ModifiersUtils.sumModifiers(list.toArray(Modifiers[]::new));
     }
 
     private void refreshAttributes() {

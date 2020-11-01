@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class SupplyDepot {
@@ -26,15 +27,15 @@ public class SupplyDepot {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("builder")));
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, Date date) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, LocalDate date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "rival", parent.getOrder() + 1);
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addVariable("date", date);

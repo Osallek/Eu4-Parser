@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class MilitaryAccess extends DatableRelation {
@@ -20,7 +21,7 @@ public class MilitaryAccess extends DatableRelation {
         this.item.setVariable("enforce_peace", enforcePeace);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String first, String second, Date startDate, boolean enforcePeace) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, String first, String second, LocalDate startDate, boolean enforcePeace) {
         ClausewitzItem toItem = DatableRelation.addToItem(parent, name, first, second, startDate);
         toItem.addVariable("enforce_peace", enforcePeace);
 

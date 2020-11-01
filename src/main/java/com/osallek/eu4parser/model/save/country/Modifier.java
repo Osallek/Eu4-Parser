@@ -7,6 +7,7 @@ import com.osallek.eu4parser.model.game.GameModifier;
 import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Modifier {
@@ -50,14 +51,14 @@ public class Modifier {
         return this.item.getVarAsBool("ruler_modifier");
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
     /**
      * @param date If null set to never expires
      */
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         if (date == null) {
             this.item.setVariable("date", "-1.1.1");
             this.item.setVariable("permanent", true);
@@ -70,7 +71,7 @@ public class Modifier {
         return this.item.getVarAsBool("permanent");
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String modifier, Date date, Boolean hidden) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String modifier, LocalDate date, Boolean hidden) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "modifier", parent.getOrder() + 1);
         toItem.addVariable("modifier", ClausewitzUtils.addQuotes(modifier));
         toItem.addVariable("hidden", hidden);

@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -65,16 +66,16 @@ public class History {
         return queens;
     }
 
-    public void addEvent(Date date, String name, String value) {
+    public void addEvent(LocalDate date, String name, String value) {
         addEvents(date, Collections.singletonMap(name, value));
     }
 
-    public void addEvents(Date date, Map<String, String> variables) {
+    public void addEvents(LocalDate date, Map<String, String> variables) {
         ClausewitzItem child = this.item.addChild(ClausewitzUtils.dateToString(date));
         variables.forEach(child::addVariable);
     }
 
-    public void addLeader(Date date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, int id) {
+    public void addLeader(LocalDate date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, int id) {
         ClausewitzItem child = this.item.addChild(ClausewitzUtils.dateToString(date));
         Leader.addToItem(child, name, type, manuever, fire, shock, siege, personality, date, id);
         refreshAttributes();

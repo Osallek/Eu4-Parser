@@ -13,6 +13,7 @@ import com.osallek.eu4parser.model.save.religion.MuslimRelationValue;
 import com.osallek.eu4parser.model.save.religion.ReformationCenter;
 import com.osallek.eu4parser.model.save.religion.SavePapacy;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,11 +82,11 @@ public class SaveReligion {
         return this.religionsItem.getVarAsInt("amount_of_provinces");
     }
 
-    public Date getEnable() {
+    public LocalDate getEnable() {
         return this.religionsItem.getVarAsDate("enable");
     }
 
-    public void setEnable(Date enable) {
+    public void setEnable(LocalDate enable) {
         this.religionsItem.setVariable("enable", enable);
     }
 
@@ -137,7 +138,7 @@ public class SaveReligion {
         return defenderTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(defenderTag));
     }
 
-    public Date getDefenderDate() {
+    public LocalDate getDefenderDate() {
         return this.religionInstanceDataItem.getVarAsDate("defender_date");
     }
 
@@ -146,7 +147,7 @@ public class SaveReligion {
             this.religionInstanceDataItem.removeVariable("defender");
             this.religionInstanceDataItem.removeVariable("defender_date");
         } else {
-            Date defenderDate = this.religionInstanceDataItem.getVarAsDate("defender_date");
+            LocalDate defenderDate = this.religionInstanceDataItem.getVarAsDate("defender_date");
 
             if (defenderDate != null) {
                 this.religionInstanceDataItem.setVariable("defender", ClausewitzUtils.addQuotes(defender.getTag()));
@@ -154,7 +155,7 @@ public class SaveReligion {
         }
     }
 
-    public void setDefenderDate(Date defenderDate) {
+    public void setDefenderDate(LocalDate defenderDate) {
         String defender = this.religionInstanceDataItem.getVarAsString("defender");
 
         if (defender != null) {
@@ -162,7 +163,7 @@ public class SaveReligion {
         }
     }
 
-    public void setDefender(Country defender, Date defenderDate) {
+    public void setDefender(Country defender, LocalDate defenderDate) {
         if (defender == null || Eu4Utils.DEFAULT_TAG.equals(defender.getTag())) {
             this.religionInstanceDataItem.removeVariable("defender");
             this.religionInstanceDataItem.removeVariable("defender_date");

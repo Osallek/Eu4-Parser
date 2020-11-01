@@ -134,14 +134,14 @@ public class Modifiers {
     public Modifiers getCountryModifiers() {
         return new Modifiers(this.enables, this.modifiers.entrySet()
                                                          .stream()
-                                                         .filter(entry -> ModifierScope.COUNTRY.equals(entry.getKey().getScope()))
+                                                         .filter(entry -> entry.getKey().getScopes().contains(ModifierScope.COUNTRY))
                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     public Modifiers getProvinceModifiers() {
         return new Modifiers(this.enables, this.modifiers.entrySet()
                                                          .stream()
-                                                         .filter(entry -> ModifierScope.PROVINCE.equals(entry.getKey().getScope()))
+                                                         .filter(entry -> entry.getKey().getScopes().contains(ModifierScope.PROVINCE))
                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 

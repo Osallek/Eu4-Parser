@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save.province;
 
 import com.osallek.eu4parser.model.game.Building;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -11,7 +12,7 @@ public class ProvinceBuilding extends Building implements Comparable<ProvinceBui
 
     private final String builder;
 
-    private final Date date;
+    private final LocalDate date;
 
     public ProvinceBuilding(ProvinceBuilding other, Building building) {
         super(building);
@@ -20,7 +21,7 @@ public class ProvinceBuilding extends Building implements Comparable<ProvinceBui
         this.date = other.date;
     }
 
-    public ProvinceBuilding(String name, String builder, Date date, Building building) {
+    public ProvinceBuilding(String name, String builder, LocalDate date, Building building) {
         super(building);
         this.name = name;
         this.builder = builder;
@@ -36,12 +37,12 @@ public class ProvinceBuilding extends Building implements Comparable<ProvinceBui
         return builder;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
     @Override
     public int compareTo(ProvinceBuilding o) {
-        return Comparator.nullsLast(Date::compareTo).compare(this.date, o.date);
+        return Comparator.nullsLast(LocalDate::compareTo).compare(this.date, o.date);
     }
 }

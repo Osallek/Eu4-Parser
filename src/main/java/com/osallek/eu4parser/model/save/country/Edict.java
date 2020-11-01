@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.StateEdict;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Edict {
@@ -26,15 +27,15 @@ public class Edict {
         this.item.setVariable("which", ClausewitzUtils.addQuotes(which.getName()));
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, StateEdict which, Date date) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, StateEdict which, LocalDate date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "active_edict", parent.getOrder() + 1);
         toItem.addVariable("which", ClausewitzUtils.addQuotes(which.getName()));
         toItem.addVariable("date", date);

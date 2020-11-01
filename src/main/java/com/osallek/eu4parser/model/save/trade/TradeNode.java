@@ -9,6 +9,7 @@ import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -122,8 +123,8 @@ public class TradeNode {
         return topPower.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
-    public Date getMostRecentTreasureShipPassage() {
-        Date date = this.item.getVarAsDate("most_recent_treasure_ship_passage");
+    public LocalDate getMostRecentTreasureShipPassage() {
+        LocalDate date = this.item.getVarAsDate("most_recent_treasure_ship_passage");
 
         if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
             return null;

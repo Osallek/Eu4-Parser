@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.empire;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class OldEmperor {
@@ -21,7 +22,7 @@ public class OldEmperor {
         return this.item.getVarAsString("country");
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -29,11 +30,11 @@ public class OldEmperor {
         this.item.setVariable("country", ClausewitzUtils.addQuotes(tag.toUpperCase()));
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String id, String country, Date date) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String id, String country, LocalDate date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "old_emperor", parent.getOrder() + 1);
         toItem.addVariable("id", id);
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country));

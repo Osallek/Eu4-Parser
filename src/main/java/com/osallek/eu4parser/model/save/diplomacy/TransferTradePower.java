@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.diplomacy;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class TransferTradePower extends QuantifyDatableRelation {
@@ -15,7 +16,7 @@ public class TransferTradePower extends QuantifyDatableRelation {
         return this.item.getVarAsBool("is_enforced");
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, double amount, boolean isEnforced) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, LocalDate startDate, double amount, boolean isEnforced) {
         if (amount < 0d) {
             amount = 0d;
         } else if (amount > 100d) {

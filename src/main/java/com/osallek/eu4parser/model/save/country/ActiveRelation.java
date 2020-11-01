@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,19 +48,19 @@ public class ActiveRelation {
         return this.item.getVarAsInt("cached_sum");
     }
 
-    public Date getLastSendDiplomat() {
+    public LocalDate getLastSendDiplomat() {
         return this.item.getVarAsDate("last_send_diplomat");
     }
 
-    public void setLastSendDiplomat(Date lastSendDiplomat) {
+    public void setLastSendDiplomat(LocalDate lastSendDiplomat) {
         this.item.setVariable("last_send_diplomat", lastSendDiplomat);
     }
 
-    public Date getLastSpyDiscovery() {
+    public LocalDate getLastSpyDiscovery() {
         return this.item.getVarAsDate("last_spy_discovery");
     }
 
-    public void setLastSpyDiscovery(Date lastSpyDiscovery) {
+    public void setLastSpyDiscovery(LocalDate lastSpyDiscovery) {
         this.item.setVariable("last_spy_discovery", lastSpyDiscovery);
     }
 
@@ -78,11 +79,11 @@ public class ActiveRelation {
         this.item.setVariable("spy_network", spyNetwork * 100);
     }
 
-    public Date getLastWar() {
+    public LocalDate getLastWar() {
         return this.item.getVarAsDate("last_war");
     }
 
-    public void setLastWar(Date lastWar) {
+    public void setLastWar(LocalDate lastWar) {
         this.item.setVariable("last_war", lastWar);
     }
 
@@ -144,7 +145,7 @@ public class ActiveRelation {
         return opinions;
     }
 
-    public void addOpinion(String modifier, Date date, Double currentOpinion) {
+    public void addOpinion(String modifier, LocalDate date, Double currentOpinion) {
         Opinion.addToItem(this.item, modifier, date, currentOpinion);
         refreshAttributes();
     }

@@ -8,6 +8,7 @@ import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class SaveAdvisor {
@@ -87,19 +88,19 @@ public class SaveAdvisor {
         this.item.setVariable("religion", religion.getName());
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
     }
 
-    public Date getHireDate() {
+    public LocalDate getHireDate() {
         return this.item.getVarAsDate("hire_date");
     }
 
-    public void setHireDate(Date hireDate) {
+    public void setHireDate(LocalDate hireDate) {
         this.item.setVariable("hire_date", hireDate);
     }
 

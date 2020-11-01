@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class CasusBelli extends EndDatableRelation {
@@ -16,7 +17,7 @@ public class CasusBelli extends EndDatableRelation {
         return this.save.getGame().getCasusBelli(this.item.getVarAsString("type"));
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, Date endDate, com.osallek.eu4parser.model.game.CasusBelli type) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, LocalDate startDate, LocalDate endDate, com.osallek.eu4parser.model.game.CasusBelli type) {
         ClausewitzItem toItem = EndDatableRelation.addToItem(parent, "casus_belli", first, second, startDate, endDate);
         toItem.addVariable("type", ClausewitzUtils.addQuotes(type.getName()));
 

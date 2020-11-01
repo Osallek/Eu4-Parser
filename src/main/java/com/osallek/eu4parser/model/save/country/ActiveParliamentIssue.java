@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.ParliamentIssue;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class ActiveParliamentIssue {
@@ -18,11 +19,11 @@ public class ActiveParliamentIssue {
         this.item = item;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return this.item.getVarAsDate("date");
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
     }
 

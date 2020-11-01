@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
@@ -21,7 +22,7 @@ public class Institution implements Comparable<Institution> {
 
     private final Double tradeCompanyEfficiency;
 
-    private final Date historicalStartDate;
+    private final LocalDate historicalStartDate;
 
     private final Integer historicalStartProvince;
 
@@ -63,7 +64,7 @@ public class Institution implements Comparable<Institution> {
         return this.tradeCompanyEfficiency;
     }
 
-    public Date getHistoricalStartDate() {
+    public LocalDate getHistoricalStartDate() {
         return this.historicalStartDate;
     }
 

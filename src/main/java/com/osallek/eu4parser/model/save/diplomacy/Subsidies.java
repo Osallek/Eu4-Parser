@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.diplomacy;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Subsidies extends QuantifyDatableRelation {
@@ -19,7 +20,7 @@ public class Subsidies extends QuantifyDatableRelation {
         this.item.setVariable("duration", duration);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, Date startDate, double amount, int duration) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, LocalDate startDate, double amount, int duration) {
         ClausewitzItem toItem = QuantifyDatableRelation.addToItem(parent, "subsidies", first, second, startDate, amount);
         toItem.addVariable("duration", duration);
 

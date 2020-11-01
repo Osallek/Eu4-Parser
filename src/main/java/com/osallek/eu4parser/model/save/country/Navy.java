@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +62,7 @@ public class Navy extends Army {
         }
     }
 
-    public Date getLastAtSea() {
+    public LocalDate getLastAtSea() {
         return this.item.getVarAsDate("last_at_sea");
     }
 

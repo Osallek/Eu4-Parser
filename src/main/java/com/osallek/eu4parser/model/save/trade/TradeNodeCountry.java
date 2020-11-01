@@ -6,6 +6,7 @@ import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.TradePolicy;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -168,11 +169,11 @@ public class TradeNodeCountry {
         return this.game.getTradePolicy(ClausewitzUtils.removeQuotes(this.item.getVarAsString("trading_policy")));
     }
 
-    public Date getTradePolicyDate() {
+    public LocalDate getTradePolicyDate() {
         return this.item.getVarAsDate("trading_policy_date");
     }
 
-    public void setTradePolicy(TradePolicy name, Date date) {
+    public void setTradePolicy(TradePolicy name, LocalDate date) {
         this.item.setVariable("trading_policy", ClausewitzUtils.addQuotes(name.getName()));
         this.item.setVariable("trading_policy_date", date);
     }

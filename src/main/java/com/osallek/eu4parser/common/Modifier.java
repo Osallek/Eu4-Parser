@@ -2,6 +2,8 @@ package com.osallek.eu4parser.common;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Modifier {
@@ -10,12 +12,12 @@ public class Modifier {
 
     private final ModifierType type;
 
-    private final ModifierScope scope;
+    private final List<ModifierScope> scopes;
 
-    public Modifier(String name, ModifierType type, ModifierScope scope) {
+    public Modifier(String name, ModifierType type, ModifierScope... scopes) {
         this.name = ClausewitzUtils.removeQuotes(name.toLowerCase());
         this.type = type;
-        this.scope = scope;
+        this.scopes = Arrays.asList(scopes);
     }
 
     public String getName() {
@@ -26,8 +28,8 @@ public class Modifier {
         return type;
     }
 
-    public ModifierScope getScope() {
-        return scope;
+    public List<ModifierScope> getScopes() {
+        return scopes;
     }
 
     @Override

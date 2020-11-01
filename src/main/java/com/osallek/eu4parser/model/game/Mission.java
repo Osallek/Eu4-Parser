@@ -5,6 +5,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +23,7 @@ public class Mission {
 
     private final Integer position;
 
-    private final Date completedBy;
+    private final LocalDate completedBy;
 
     private final Condition provincesToHighlight;
 
@@ -73,7 +74,7 @@ public class Mission {
         return position;
     }
 
-    public Date getCompletedBy() {
+    public LocalDate getCompletedBy() {
         return completedBy;
     }
 

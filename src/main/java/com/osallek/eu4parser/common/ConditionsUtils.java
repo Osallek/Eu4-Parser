@@ -33,19 +33,18 @@ import com.osallek.eu4parser.model.save.war.ActiveWar;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,8 +63,8 @@ public class ConditionsUtils {
         SaveProvince saveProvince;
         Integer integer;
         Double aDouble;
-        Calendar calendar = Calendar.getInstance();
-        Calendar calendar2 = Calendar.getInstance();
+        LocalDate calendar;
+        LocalDate calendar2;
         String value;
         SubjectType subjectType;
 
@@ -198,7 +197,7 @@ public class ConditionsUtils {
             case "can_migrate":
                 return country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isAllowMigration)
                        && country.getOwnedProvinces().size() == 1 && !country.isAtWar() &&
-                       (country.getLastMigration() == null || country.getLastMigration().before(DateUtils.addYears(country.getSave().getDate(), -5)));
+                       (country.getLastMigration() == null || country.getLastMigration().isBefore(country.getSave().getDate().plusYears(-5)));
             case "capital":
                 return country.getCapitalId() != null && country.getCapitalId().equals(NumbersUtils.toInt(value));
             case "capital_trade_node":
@@ -223,7 +222,7 @@ public class ConditionsUtils {
                 return country.getConsort() != null && country.getConsort().getAdm() >= NumbersUtils.toInt(value);
             case "consort_age":
                 return country.getConsort() != null
-                       && DateUtils.addYears(country.getConsort().getBirthDate(), NumbersUtils.toInt(value)).before(country.getSave().getDate());
+                       && country.getConsort().getBirthDate().plusYears(NumbersUtils.toInt(value)).isBefore(country.getSave().getDate());
             case "consort_culture":
                 return country.getConsort() != null && country.getConsort().getCulture().getName().equals(value);
             case "consort_dip":
@@ -392,7 +391,7 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return country.getGuarantees().contains(other);
             case "had_recent_war":
-                return DateUtils.addYears(country.getLastWarEnded(), NumbersUtils.toInt(value)).after(country.getSave().getDate());
+                return country.getLastWarEnded().plusYears(NumbersUtils.toInt(value)).isAfter(country.getSave().getDate());
             case "harmonization_progress":
                 return NumbersUtils.doubleOrDefault(country.getHarmonyProgress()) >= NumbersUtils.toDouble(value);
             case "harmony":
@@ -640,8 +639,7 @@ public class ConditionsUtils {
                 return country.getHeir() != null && NumbersUtils.intOrDefault(country.getHeir().getAdm()) >= NumbersUtils.toInt(value);
             case "heir_age":
                 return country.getHeir() != null
-                       && ChronoUnit.YEARS.between(country.getHeir().getBirthDate().toInstant(), country.getSave().getDate().toInstant())
-                          >= NumbersUtils.toInt(value);
+                       && ChronoUnit.YEARS.between(country.getHeir().getBirthDate(), country.getSave().getDate()) >= NumbersUtils.toInt(value);
             case "heir_dip":
                 return country.getHeir() != null && NumbersUtils.intOrDefault(country.getHeir().getDip()) >= NumbersUtils.toInt(value);
             case "heir_claim":
@@ -715,8 +713,9 @@ public class ConditionsUtils {
                        && NumbersUtils.doubleOrDefault(country.getSave().getCelestialEmpire().getImperialInfluence()) >= NumbersUtils.toDouble(value);
             case "in_golden_age":
                 return country.getGoldenEraDate() != null
-                       && ChronoUnit.YEARS.between(country.getGoldenEraDate().toInstant(), country.getSave().getDate().toInstant())
-                          < country.getSave().getGame().getGoldenEraDuration();
+                       && ChronoUnit.YEARS.between(country.getGoldenEraDate(), country.getSave().getDate()) < country.getSave()
+                                                                                                                     .getGame()
+                                                                                                                     .getGoldenEraDuration();
             case "incident": //Used for scope incident_variable_value
                 return true;
             case "infantry_fraction":
@@ -748,7 +747,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == country.isAtWar();
             case "is_bankrupt":
                 return "yes".equalsIgnoreCase(value) == (country.lastBankrupt() != null &&
-                                                         ChronoUnit.YEARS.between(country.lastBankrupt().toInstant(), country.getSave().getDate().toInstant())
+                                                         ChronoUnit.YEARS.between(country.lastBankrupt(), country.getSave().getDate())
                                                          < country.getSave().getGame().getBankruptcyDuration());
             case "is_claim":
                 return country.getClaimProvinces().stream().map(SaveProvince::getId).anyMatch(NumbersUtils.toInt(value)::equals);
@@ -875,8 +874,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getMonarch().getLeader() != null);
             case "is_month":
             case "real_month_of_year":
-                calendar.setTime(country.getSave().getDate());
-                return calendar.get(Calendar.MONTH) == NumbersUtils.toInt(value);
+                return country.getSave().getDate().getMonthValue() == NumbersUtils.toInt(value);
             case "is_march":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null
                                                          && Eu4Utils.SUBJECT_TYPE_MARCH.equals(country.getSubjectType().getName()));
@@ -918,7 +916,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == country.getSave().isRandomNewWorld();
             case "is_religion_enabled":
                 return country.getSave().getReligions().getReligion(value) != null
-                       && country.getSave().getReligions().getReligion(value).getEnable().before(country.getSave().getDate());
+                       && country.getSave().getReligions().getReligion(value).getEnable().isBefore(country.getSave().getDate());
             case "is_religion_reformed":
                 return "yes".equalsIgnoreCase(value) == (BooleanUtils.toBoolean(country.hasReformedReligion()));
             case "is_republic":
@@ -976,8 +974,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null
                                                          && Eu4Utils.SUBJECT_TYPE_VASSAL.equalsIgnoreCase(country.getSubjectType().getName()));
             case "is_year":
-                calendar.setTime(country.getSave().getDate());
-                return calendar.get(Calendar.YEAR) == NumbersUtils.toInt(value);
+                return country.getSave().getDate().getYear() == NumbersUtils.toInt(value);
             case "isolationism":
                 return country.getIsolationism() != null && country.getIsolationismLevel() >= NumbersUtils.toInt(value);
             case "janissary_percentage":
@@ -993,6 +990,12 @@ public class ConditionsUtils {
                     other = country.getSave().getCountry(value);
                     return NumbersUtils.intOrDefault(country.getKarma()) >= NumbersUtils.intOrDefault(other.getKarma());
                 }
+            case "knowledge_sharing":
+                return "yes".equalsIgnoreCase(value) == country.getSave()
+                                                               .getDiplomacy()
+                                                               .getKnowledgeSharing()
+                                                               .stream()
+                                                               .anyMatch(knowledgeSharing -> knowledgeSharing.getFirst().equals(country));
             case "knows_country":
                 other = country.getSave().getCountry(value);
                 return other.getCapital().getDiscoveredBy().contains(country);
@@ -1108,11 +1111,9 @@ public class ConditionsUtils {
                     return false;
                 }
 
-                calendar.setTime(country.getSave().getDate());
-                calendar2.setTime(country.getHistory().getMonarch(country.getMonarch().getId().getId()).getMonarchDate());
-                calendar2.add(Calendar.MONTH, NumbersUtils.toInt(value));
-
-                return calendar2.before(calendar);
+                return ChronoUnit.MONTHS.between(country.getSave().getDate(),
+                                                 country.getHistory().getMonarch(country.getMonarch().getId().getId()).getMonarchDate())
+                       >= NumbersUtils.toInt(value);
             case "national_focus":
                 return country.getNationalFocus().equals(Power.valueOf(value.toUpperCase()));
             case "nation_designer_points":
@@ -1600,8 +1601,7 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return country.getOwnedProvinces().stream().anyMatch(province -> province.getContinent() == other.getCapital().getContinent());
             case "real_day_of_year":
-                calendar.setTime(country.getSave().getDate());
-                return calendar.get(Calendar.DAY_OF_YEAR) == NumbersUtils.toInt(value);
+                return country.getSave().getDate().getDayOfYear() == NumbersUtils.toInt(value);
             case "reform_desire":
                 return country.getSave()
                               .getReligions()
@@ -1632,7 +1632,7 @@ public class ConditionsUtils {
                 return NumbersUtils.doubleOrDefault(country.getRootOutCorruptionSlider()) >= NumbersUtils.toDouble(value);
             case "ruler_age":
                 return country.getMonarch() == null
-                       || DateUtils.addYears(country.getMonarch().getBirthDate(), NumbersUtils.toInt(value)).before(country.getSave().getDate());
+                       || country.getMonarch().getBirthDate().plusYears(NumbersUtils.toInt(value)).isBefore(country.getSave().getDate());
             case "ruler_consort_marriage_length": //Todo
                 break;
             case "ruler_culture":
@@ -1668,7 +1668,7 @@ public class ConditionsUtils {
                 return country.getSave().getStartDate().equals(Eu4Utils.stringToDate(value));
             case "started_in":
                 return country.getSave().getStartDate().equals(Eu4Utils.stringToDate(value))
-                       || country.getSave().getStartDate().after(Eu4Utils.stringToDate(value));
+                       || country.getSave().getStartDate().isAfter(Eu4Utils.stringToDate(value));
             case "statists_vs_orangists":
                 return country.getStatistsVsMonarchists() == null
                        || NumbersUtils.doubleOrDefault(country.getStatistsVsMonarchists()) >= NumbersUtils.toDouble(value);
@@ -1976,27 +1976,27 @@ public class ConditionsUtils {
             case "had_active_policy":
                 activePolicy = root.getActivePolicy(condition.getCondition("policy"));
                 return activePolicy != null
-                       && DateUtils.addDays(activePolicy.getDate(), NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+                       && activePolicy.getDate().plusDays(NumbersUtils.toInt(condition.getCondition("days"))).isBefore(root.getSave().getDate());
             case "had_consort_flag":
                 return root.getConsort() != null && root.getConsort().getRulerFlags().contains(condition.getCondition("flag"))
-                       && DateUtils.addDays(root.getConsort().getRulerFlags().get(condition.getCondition("flag")),
-                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+                       && root.getConsort().getRulerFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
+                              .isBefore(root.getSave().getDate());
             case "had_country_flag":
                 return root.getFlags().contains(condition.getCondition("flag"))
-                       && DateUtils.addDays(root.getFlags().get(condition.getCondition("flag")),
-                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+                       && root.getFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
+                              .isBefore(root.getSave().getDate());
             case "had_global_flag":
                 return root.getSave().getFlags().contains(condition.getCondition("flag"))
-                       && DateUtils.addDays(root.getSave().getFlags().get(condition.getCondition("flag")),
-                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+                       && root.getSave().getFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
+                              .isBefore(root.getSave().getDate());
             case "had_heir_flag":
                 return root.getHeir() != null && root.getHeir().getRulerFlags().contains(condition.getCondition("flag"))
-                       && DateUtils.addDays(root.getHeir().getRulerFlags().get(condition.getCondition("flag")),
-                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+                       && root.getHeir().getRulerFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
+                              .isBefore(root.getSave().getDate());
             case "had_ruler_flag":
                 return root.getMonarch() != null && root.getMonarch().getRulerFlags().contains(condition.getCondition("flag"))
-                       && DateUtils.addDays(root.getMonarch().getRulerFlags().get(condition.getCondition("flag")),
-                                            NumbersUtils.toInt(condition.getCondition("days"))).before(root.getSave().getDate());
+                       && root.getMonarch().getRulerFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
+                              .isBefore(root.getSave().getDate());
             case "has_casus_belli":
                 country = root.getSave().getCountry(condition.getCondition("target"));
                 Country finalCountry = country;
@@ -2099,7 +2099,7 @@ public class ConditionsUtils {
                 String defenderLeader = condition.getCondition("defender_leader");
                 String casusBelli = condition.getCondition("casus_belli");
                 Integer warGoalProvince = NumbersUtils.toInt(condition.getCondition("war_goal_province"));
-                Date startDate = Eu4Utils.stringToDate(condition.getCondition("start_date"));
+                LocalDate startDate = Eu4Utils.stringToDate(condition.getCondition("start_date"));
                 Integer duration = NumbersUtils.toInt(condition.getCondition("duration"));
 
                 return root.getActiveWars().stream().anyMatch(activeWar -> {
@@ -2134,11 +2134,11 @@ public class ConditionsUtils {
                         return false;
                     }
 
-                    if (startDate != null && activeWar.getStartDate().before(startDate)) {
+                    if (startDate != null && activeWar.getStartDate().isBefore(startDate)) {
                         return false;
                     }
 
-                    if (duration != null && DateUtils.addDays(activeWar.getStartDate(), duration).after(root.getSave().getDate())) {
+                    if (duration != null && activeWar.getStartDate().plusDays(duration).isAfter(root.getSave().getDate())) {
                         return false;
                     }
 
@@ -2204,12 +2204,11 @@ public class ConditionsUtils {
             case "religion_years":
                 religion = root.getSave().getReligions().getReligion(condition.getConditions().entrySet().iterator().next().getValue().get(0));
                 if (religion.getGameReligion().getDate() == null) {
-                    return DateUtils.addYears(root.getSave().getStartDate(), NumbersUtils.toInt(condition.getCondition(religion.getName())))
-                                    .before(root.getSave().getDate());
+                    return root.getSave().getStartDate().plusYears(NumbersUtils.toInt(condition.getCondition(religion.getName())))
+                               .isBefore(root.getSave().getDate());
                 } else {
-                    return religion.getEnable() != null && DateUtils.addYears(religion.getEnable(),
-                                                                              NumbersUtils.toInt(condition.getCondition(religion.getName())))
-                                                                    .before(root.getSave().getDate());
+                    return religion.getEnable() != null && religion.getEnable().plusYears(NumbersUtils.toInt(condition.getCondition(religion.getName())))
+                                                                   .isBefore(root.getSave().getDate());
                 }
             case "religious_school":
                 return condition.getCondition("group").equalsIgnoreCase(root.getReligion().getReligionGroup().getName())
@@ -2255,13 +2254,11 @@ public class ConditionsUtils {
             case "years_in_union_under":
                 country = root.getSave().getCountry(condition.getCondition("who"));
                 return root.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equals(country.getSubjectType().getName())
-                       && DateUtils.addYears(country.getSubjectStartDate(), NumbersUtils.toInt(condition.getCondition("value")))
-                                   .before(root.getSave().getDate());
+                       && country.getSubjectStartDate().plusYears(NumbersUtils.toInt(condition.getCondition("value"))).isBefore(root.getSave().getDate());
             case "years_in_vassalage_under":
                 country = root.getSave().getCountry(condition.getCondition("who"));
                 return root.equals(country.getOverlord()) && Eu4Utils.SUBJECT_TYPE_VASSAL.equals(country.getSubjectType().getName())
-                       && DateUtils.addYears(country.getSubjectStartDate(), NumbersUtils.toInt(condition.getCondition("value")))
-                                   .before(root.getSave().getDate());
+                       && country.getSubjectStartDate().plusYears(NumbersUtils.toInt(condition.getCondition("value"))).isBefore(root.getSave().getDate());
         }
 
         LOGGER.info("Don't know how to manage country scope: {} !", condition);
@@ -2588,8 +2585,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (province.getLootRemaining() != null);
             case "is_month":
             case "real_month_of_year":
-                calendar.setTime(province.getSave().getDate());
-                return calendar.get(Calendar.MONTH) == NumbersUtils.toInt(value);
+                return province.getSave().getDate().getMonthValue() == NumbersUtils.toInt(value);
             case "is_node_in_trade_company_region":
                 return "yes".equalsIgnoreCase(value) == province.getSave()
                                                                 .getGame()
@@ -2620,7 +2616,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == BooleanUtils.toBoolean(province.centerOfReligion());
             case "is_religion_enabled":
                 return province.getSave().getReligions().getReligion(value) != null
-                       && province.getSave().getReligions().getReligion(value).getEnable().before(province.getSave().getDate());
+                       && province.getSave().getReligions().getReligion(value).getEnable().isBefore(province.getSave().getDate());
             case "is_religion_grant_colonial_claim":
                 if (province.getSave().getCountry(value) != null) {
                     return !province.getSave()
@@ -2697,15 +2693,15 @@ public class ConditionsUtils {
             case "is_wasteland":
                 return "yes".equalsIgnoreCase(value) == (province.isImpassable());
             case "is_year":
-                calendar.setTime(province.getSave().getDate());
-                return calendar.get(Calendar.YEAR) == NumbersUtils.toInt(value);
+                return province.getSave().getDate().getYear() == NumbersUtils.toInt(value);
             case "knowledge_sharing":
-                return province.getOwner() != null && province.getArea().equals(province.getOwner().getCapital().getArea())
-                       && province.getSave()
-                                  .getDiplomacy()
-                                  .getKnowledgeSharing()
-                                  .stream()
-                                  .anyMatch(knowledgeSharing -> knowledgeSharing.getSecond().equals(province.getOwner()));
+                return "yes".equalsIgnoreCase(value) ==
+                       (province.getOwner() != null && province.getArea().equals(province.getOwner().getCapital().getArea())
+                        && province.getSave()
+                                   .getDiplomacy()
+                                   .getKnowledgeSharing()
+                                   .stream()
+                                   .anyMatch(knowledgeSharing -> knowledgeSharing.getSecond().equals(province.getOwner())));
             case "light_ships_in_province":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return province.getLightShips().size() >= integer;
@@ -2782,8 +2778,7 @@ public class ConditionsUtils {
             case "pure_unrest": // Fixme ??
                 break;
             case "real_day_of_year":
-                calendar.setTime(province.getSave().getDate());
-                return calendar.get(Calendar.DAY_OF_YEAR) == NumbersUtils.toInt(value);
+                return province.getSave().getDate().getDayOfYear() == NumbersUtils.toInt(value);
             case "reform_desire":
                 return province.getSave()
                                .getReligions()
@@ -2813,7 +2808,7 @@ public class ConditionsUtils {
                 return province.getSave().getStartDate().equals(Eu4Utils.stringToDate(value));
             case "started_in":
                 return province.getSave().getStartDate().equals(Eu4Utils.stringToDate(value))
-                       || province.getSave().getStartDate().after(Eu4Utils.stringToDate(value));
+                       || province.getSave().getStartDate().isAfter(Eu4Utils.stringToDate(value));
             case "superregion":
                 return value.equalsIgnoreCase(province.getArea().getRegion().getSuperRegion().getName());
             case "total_number_of_cardinals":
@@ -2897,12 +2892,12 @@ public class ConditionsUtils {
                                                                                     province.getSave().getHre().getEmperor());
             case "had_global_flag":
                 return province.getSave().getFlags().contains(condition.getCondition("flag"))
-                       && DateUtils.addDays(province.getSave().getFlags().get(condition.getCondition("flag")),
-                                            NumbersUtils.toInt(condition.getCondition("days"))).before(province.getSave().getDate());
+                       && province.getSave().getFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
+                                  .isBefore(province.getSave().getDate());
             case "had_province_flag":
                 return province.getFlags().contains(condition.getCondition("flag"))
-                       && DateUtils.addDays(province.getFlags().get(condition.getCondition("flag")),
-                                            NumbersUtils.toInt(condition.getCondition("days"))).before(province.getSave().getDate());
+                       && province.getFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
+                                  .isBefore(province.getSave().getDate());
             case "has_local_modifier_value": //Todo
                 break;
             case "has_trade_modifier":

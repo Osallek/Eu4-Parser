@@ -6,6 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.game.Estate;
 import com.osallek.eu4parser.model.game.Game;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,7 +50,7 @@ public class SaveEstate {
         return grantedPrivileges;
     }
 
-    public void addGrantedPrivilege(String name, Date date) {
+    public void addGrantedPrivilege(String name, LocalDate date) {
         ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
 
         if (grantedPrivilegesItem == null) {
@@ -60,7 +61,7 @@ public class SaveEstate {
         refreshAttributes();
     }
 
-    public void addInteraction(String name, Date date) {
+    public void addInteraction(String name, LocalDate date) {
         if (this.item != null) {
             EstateInteraction.addToItem(this.item, name, date);
             refreshAttributes();
@@ -78,7 +79,7 @@ public class SaveEstate {
         return influenceModifiers;
     }
 
-    public void addInfluenceModifier(Double value, String desc, Date date) {
+    public void addInfluenceModifier(Double value, String desc, LocalDate date) {
         if (this.item != null) {
             EstateModifier.addToItem(this.item, "influence_modifier", value, desc, date);
             refreshAttributes();
@@ -96,7 +97,7 @@ public class SaveEstate {
         return loyaltyModifiers;
     }
 
-    public void addLoyaltyModifier(Double value, String desc, Date date) {
+    public void addLoyaltyModifier(Double value, String desc, LocalDate date) {
         if (this.item != null) {
             EstateModifier.addToItem(this.item, "loyalty_modifier", value, desc, date);
             refreshAttributes();

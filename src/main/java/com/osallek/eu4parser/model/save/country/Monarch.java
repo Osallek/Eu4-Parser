@@ -8,6 +8,7 @@ import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Monarch {
@@ -16,7 +17,7 @@ public class Monarch {
 
     protected final ClausewitzItem item;
 
-    protected Date monarchDate;
+    protected LocalDate monarchDate;
 
     private Id id;
 
@@ -36,7 +37,7 @@ public class Monarch {
         refreshAttributes();
     }
 
-    public Monarch(ClausewitzItem item, Save save, Date date) {
+    public Monarch(ClausewitzItem item, Save save, LocalDate date) {
         this.save = save;
         this.item = item;
         this.monarchDate = date;
@@ -55,7 +56,7 @@ public class Monarch {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public Date getMonarchDate() {
+    public LocalDate getMonarchDate() {
         return monarchDate;
     }
 
@@ -119,19 +120,19 @@ public class Monarch {
         this.item.setVariable("dynasty", ClausewitzUtils.addQuotes(dynasty));
     }
 
-    public Date getBirthDate() {
+    public LocalDate getBirthDate() {
         return this.item.getVarAsDate("birth_date");
     }
 
-    public void setBirthDate(Date birthDate) {
+    public void setBirthDate(LocalDate birthDate) {
         this.item.setVariable("birth_date", birthDate);
     }
 
-    public Date getDeathDate() {
+    public LocalDate getDeathDate() {
         return this.item.getVarAsDate("death_date");
     }
 
-    public void setDeathDate(Date deathDate) {
+    public void setDeathDate(LocalDate deathDate) {
         this.item.setVariable("death_date", deathDate);
     }
 
