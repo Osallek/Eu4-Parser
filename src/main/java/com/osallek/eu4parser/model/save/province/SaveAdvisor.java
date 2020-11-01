@@ -9,7 +9,6 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class SaveAdvisor {
 

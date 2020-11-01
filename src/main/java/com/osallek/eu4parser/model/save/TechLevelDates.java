@@ -5,7 +5,6 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.Power;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class TechLevelDates {
 

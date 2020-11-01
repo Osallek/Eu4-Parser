@@ -8,7 +8,6 @@ import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class Modifier {
 

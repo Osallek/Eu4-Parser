@@ -1,8 +1,5 @@
 package com.osallek.eu4parser.common;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 public class NumbersUtils {
 
     private NumbersUtils() {}

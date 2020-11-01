@@ -7,7 +7,6 @@ import com.osallek.eu4parser.model.game.StateEdict;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class CountryState {
 

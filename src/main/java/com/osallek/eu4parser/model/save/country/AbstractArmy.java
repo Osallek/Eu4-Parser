@@ -7,7 +7,6 @@ import com.osallek.eu4parser.model.save.Id;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public abstract class AbstractArmy {

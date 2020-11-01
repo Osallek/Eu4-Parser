@@ -6,7 +6,6 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Id;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class Loan {
 

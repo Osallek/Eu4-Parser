@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Objects;
 
 public class Institution implements Comparable<Institution> {

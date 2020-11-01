@@ -6,7 +6,6 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class SupplyDepot {
 

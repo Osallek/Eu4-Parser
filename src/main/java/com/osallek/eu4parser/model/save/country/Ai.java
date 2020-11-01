@@ -5,7 +5,6 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.Power;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;

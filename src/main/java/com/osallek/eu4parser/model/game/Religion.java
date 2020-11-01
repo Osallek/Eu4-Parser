@@ -6,7 +6,6 @@ import com.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -3,7 +3,6 @@ package com.osallek.eu4parser.model.save.empire;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class HreIncident {
 

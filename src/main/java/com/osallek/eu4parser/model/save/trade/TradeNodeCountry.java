@@ -7,7 +7,6 @@ import com.osallek.eu4parser.model.game.TradePolicy;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;

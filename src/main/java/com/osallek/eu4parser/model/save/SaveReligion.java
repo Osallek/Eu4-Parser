@@ -14,7 +14,6 @@ import com.osallek.eu4parser.model.save.religion.ReformationCenter;
 import com.osallek.eu4parser.model.save.religion.SavePapacy;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 

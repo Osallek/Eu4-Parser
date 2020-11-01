@@ -4,7 +4,6 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class OldEmperor {
 

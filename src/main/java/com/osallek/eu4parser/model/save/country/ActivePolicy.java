@@ -6,7 +6,6 @@ import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.Policy;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class ActivePolicy {
 

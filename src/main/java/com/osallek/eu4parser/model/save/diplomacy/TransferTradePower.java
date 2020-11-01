@@ -4,7 +4,6 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class TransferTradePower extends QuantifyDatableRelation {
 

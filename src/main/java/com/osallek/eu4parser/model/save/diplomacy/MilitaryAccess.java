@@ -5,7 +5,6 @@ import com.osallek.eu4parser.model.save.Save;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class MilitaryAccess extends DatableRelation {
 

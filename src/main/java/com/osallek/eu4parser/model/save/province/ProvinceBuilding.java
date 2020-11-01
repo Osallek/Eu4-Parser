@@ -4,7 +4,6 @@ import com.osallek.eu4parser.model.game.Building;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Date;
 
 public class ProvinceBuilding extends Building implements Comparable<ProvinceBuilding> {
 

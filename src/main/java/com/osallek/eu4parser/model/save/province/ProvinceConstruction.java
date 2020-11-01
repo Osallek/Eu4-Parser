@@ -6,7 +6,6 @@ import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.save.country.Country;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class ProvinceConstruction {
 
