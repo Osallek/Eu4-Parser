@@ -16,6 +16,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.luaj.vm2.ast.Exp;
 import org.luaj.vm2.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -26,6 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +47,9 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -50,6 +57,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Game {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
     private final Collator collator;
 
@@ -198,61 +207,69 @@ public class Game {
         this.missionsFolderPath = this.gameFolderPath + File.separator + "missions";
         this.defines = LuaUtils.luaFileToMap(this.commonFolderPath + File.separator + "defines.lua");
 
+        Instant start = Instant.now();
+
         loadLocalisations();
         readSpriteTypes();
         readEstates();
         readFactions();
         readProvinces();
-        readCultures();
-        readReligion();
-        readInstitutions();
-        readTradeGoods();
-        readBuildings();
-        readImperialReforms();
-        readDecrees();
-        readGoldenBulls();
-        readEvents();
-        readGovernments();
-        readGovernmentNames();
-        readGovernmentReforms();
-        readUnits();
         readAreas();
         readRegions();
         readSuperRegions();
-        readTechGroups();
-        readAdvisors();
-        readIdeaGroups();
-        readCasusBelli();
-        readColonialRegions();
-        readTradeCompanies();
-        readSubjectTypes();
-        readFetishistCults();
-        readMissionTrees();
-        readTechnologies();
-        readRulerPersonalities();
-        readProfessionalismModifiers();
-        readStaticModifiers();
-        readInvestments();
-        readPolicies();
-        readHegemons();
-        readAges();
-        readDefenderOfFaith();
-        readCentersOfTrade();
-        readFervors();
-        readGreatProjects();
-        readHolyOrders();
-        readIsolationism();
-        readNativeAdvancements();
-        readNavalDoctrine();
-        readParliamentIssue();
-        readPersonalDeities();
-        readReligiousReforms();
-        readCrownLandBonuses();
-        readStateEdicts();
-        readTradePolicies();
-        readEventModifiers();
-        readProvinceTriggeredModifiers();
-        readTriggeredModifiers();
+        readCultures();
+        readReligion();
+
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+        executor.execute(this::readInstitutions);
+        executor.execute(this::readTradeGoods);
+        executor.execute(this::readBuildings);
+        executor.execute(this::readImperialReforms);
+        executor.execute(this::readDecrees);
+        executor.execute(this::readGoldenBulls);
+        executor.execute(this::readEvents);
+        executor.execute(this::readGovernments);
+        executor.execute(this::readGovernmentNames);
+        executor.execute(this::readGovernmentReforms);
+        executor.execute(this::readUnits);
+        executor.execute(this::readTechGroups);
+        executor.execute(this::readAdvisors);
+        executor.execute(this::readIdeaGroups);
+        executor.execute(this::readCasusBelli);
+        executor.execute(this::readTradeCompanies);
+        executor.execute(this::readSubjectTypes);
+        executor.execute(this::readFetishistCults);
+        executor.execute(this::readMissionTrees);
+        executor.execute(this::readTechnologies);
+        executor.execute(this::readRulerPersonalities);
+        executor.execute(this::readProfessionalismModifiers);
+        executor.execute(this::readStaticModifiers);
+        executor.execute(this::readInvestments);
+        executor.execute(this::readPolicies);
+        executor.execute(this::readHegemons);
+        executor.execute(this::readAges);
+        executor.execute(this::readDefenderOfFaith);
+        executor.execute(this::readCentersOfTrade);
+        executor.execute(this::readFervors);
+        executor.execute(this::readGreatProjects);
+        executor.execute(this::readHolyOrders);
+        executor.execute(this::readIsolationism);
+        executor.execute(this::readNativeAdvancements);
+        executor.execute(this::readNavalDoctrine);
+        executor.execute(this::readParliamentIssue);
+        executor.execute(this::readPersonalDeities);
+        executor.execute(this::readReligiousReforms);
+        executor.execute(this::readCrownLandBonuses);
+        executor.execute(this::readStateEdicts);
+        executor.execute(this::readTradePolicies);
+        executor.execute(this::readEventModifiers);
+        executor.execute(this::readProvinceTriggeredModifiers);
+        executor.execute(this::readTriggeredModifiers);
+        executor.execute(this::readColonialRegions);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Time to read game date: {}ms !", Duration.between(start, Instant.now()).toMillis());
+        }
     }
 
     public Collator getCollator() {

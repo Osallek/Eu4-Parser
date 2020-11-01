@@ -4,13 +4,16 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GreatProject;
 import com.osallek.eu4parser.model.game.Institution;
+import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.game.Province;
+import com.osallek.eu4parser.model.game.StaticModifiers;
 import com.osallek.eu4parser.model.game.TradeGood;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
@@ -327,88 +330,98 @@ public class SaveProvince extends Province {
     }
 
     public int getArmySize() {
-        return this.armies.stream().mapToInt(army -> army.getRegiments().size()).sum();
+        return this.armies == null ? 0 : this.armies.stream().mapToInt(army -> army.getRegiments().size()).sum();
     }
 
     public int getNavySize() {
-        return this.navies.stream().mapToInt(army -> army.getRegiments().size()).sum();
+        return this.navies == null ? 0 : this.navies.stream().mapToInt(army -> army.getRegiments().size()).sum();
     }
 
     public List<Regiment> getInfantry() {
-        return this.armies.stream()
-                          .map(Army::getRegiments)
-                          .flatMap(Collection::stream)
-                          .filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType()))
-                          .collect(Collectors.toList());
+        return this.armies == null ? new ArrayList<>() : this.armies.stream()
+                                                                    .map(Army::getRegiments)
+                                                                    .flatMap(Collection::stream)
+                                                                    .filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType()))
+                                                                    .collect(Collectors.toList());
     }
 
     public List<Regiment> getCavalry() {
-        return this.armies.stream()
-                          .map(Army::getRegiments)
-                          .flatMap(Collection::stream)
-                          .filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType()))
-                          .collect(Collectors.toList());
+        return this.armies == null ? new ArrayList<>() : this.armies.stream()
+                                                                    .map(Army::getRegiments)
+                                                                    .flatMap(Collection::stream)
+                                                                    .filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType()))
+                                                                    .collect(Collectors.toList());
     }
 
     public List<Regiment> getArtillery() {
-        return this.armies.stream()
-                          .map(Army::getRegiments)
-                          .flatMap(Collection::stream)
-                          .filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType()))
-                          .collect(Collectors.toList());
+        return this.armies == null ? new ArrayList<>() : this.armies.stream()
+                                                                    .map(Army::getRegiments)
+                                                                    .flatMap(Collection::stream)
+                                                                    .filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType()))
+                                                                    .collect(Collectors.toList());
     }
 
     public List<Ship> getHeavyShips() {
-        return this.navies.stream()
-                          .map(Navy::getShips)
-                          .flatMap(Collection::stream)
-                          .filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType()))
-                          .collect(Collectors.toList());
+        return this.navies == null ? new ArrayList<>() : this.navies.stream()
+                                                                    .map(Navy::getShips)
+                                                                    .flatMap(Collection::stream)
+                                                                    .filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType()))
+                                                                    .collect(Collectors.toList());
     }
 
     public List<Ship> getLightShips() {
-        return this.navies.stream()
-                          .map(Navy::getShips)
-                          .flatMap(Collection::stream)
-                          .filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType()))
-                          .collect(Collectors.toList());
+        return this.navies == null ? new ArrayList<>() : this.navies.stream()
+                                                                    .map(Navy::getShips)
+                                                                    .flatMap(Collection::stream)
+                                                                    .filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType()))
+                                                                    .collect(Collectors.toList());
     }
 
     public List<Ship> getGalleys() {
-        return this.navies.stream()
-                          .map(Navy::getShips)
-                          .flatMap(Collection::stream)
-                          .filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType()))
-                          .collect(Collectors.toList());
+        return this.navies == null ? new ArrayList<>() : this.navies.stream()
+                                                                    .map(Navy::getShips)
+                                                                    .flatMap(Collection::stream)
+                                                                    .filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType()))
+                                                                    .collect(Collectors.toList());
     }
 
     public List<Ship> getTransports() {
-        return this.navies.stream()
-                          .map(Navy::getShips)
-                          .flatMap(Collection::stream)
-                          .filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType()))
-                          .collect(Collectors.toList());
+        return this.navies == null ? new ArrayList<>() : this.navies.stream()
+                                                                    .map(Navy::getShips)
+                                                                    .flatMap(Collection::stream)
+                                                                    .filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType()))
+                                                                    .collect(Collectors.toList());
     }
 
     public List<AbstractRegiment> getUnits() {
-        return Stream.concat(this.navies.stream().map(Navy::getShips).flatMap(Collection::stream),
-                             this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream)).collect(Collectors.toList());
-
+        if (this.navies == null && this.armies == null) {
+            return new ArrayList<>();
+        } else if (this.navies == null) {
+            return this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream).collect(Collectors.toList());
+        } else if (this.armies == null) {
+            return this.navies.stream().map(Navy::getShips).flatMap(Collection::stream).collect(Collectors.toList());
+        } else {
+            return Stream.concat(this.navies.stream().map(Navy::getShips).flatMap(Collection::stream),
+                                 this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream)).collect(Collectors.toList());
+        }
     }
 
     public long getNbRegimentOf(String type) {
-        return this.armies.stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> type.equals(regiment.getTypeName())).count())
-                          .sum();
+        return this.armies == null ? 0 : this.armies.stream()
+                                                    .mapToLong(army -> army.getRegiments()
+                                                                           .stream()
+                                                                           .filter(regiment -> type.equals(regiment.getTypeName()))
+                                                                           .count())
+                                                    .sum();
     }
 
     public long getNbRegimentOfCategory(int category) {
-        return this.armies.stream()
-                          .mapToLong(army -> army.getRegiments()
-                                                 .stream()
-                                                 .filter(regiment -> regiment.getCategory() != null && category == regiment.getCategory())
-                                                 .count())
-                          .sum();
+        return this.armies == null ? 0 : this.armies.stream()
+                                                    .mapToLong(army -> army.getRegiments()
+                                                                           .stream()
+                                                                           .filter(regiment -> Objects.equals(regiment.getCategory(), category))
+                                                                           .count())
+                                                    .sum();
     }
 
     public Boolean activeTradeCompany() {
@@ -1136,6 +1149,10 @@ public class SaveProvince extends Province {
 
     public ProvinceConstruction getMissionaryConstruction() {
         return missionaryConstruction;
+    }
+
+    public Modifiers getTotalModifiers() {
+        return ModifiersUtils.sumModifiers(StaticModifiers.applyToModifiersProvince(this));
     }
 
     private void refreshAttributes() {

@@ -277,12 +277,6 @@ public enum StaticModifiers {
 
     static {
         STATIC_MODIFIERS_MAP = Arrays.stream(StaticModifiers.values()).collect(Collectors.toMap(Enum::name, Function.identity()));
-        APPLIED_TO_COUNTRY = Arrays.stream(StaticModifiers.values())
-                                   .filter(staticModifiers -> staticModifiers.applyToCountry != null)
-                                   .collect(Collectors.toList());
-        APPLIED_TO_PROVINCE = Arrays.stream(StaticModifiers.values())
-                                    .filter(staticModifiers -> staticModifiers.applyToProvince != null)
-                                    .collect(Collectors.toList());
 
         DIFFICULTY_VERY_EASY_PLAYER.applyToCountry = (country, modif) -> StaticModifiers.DIFFICULTY_VERY_EASY_PLAYER.modifiers;
         DIFFICULTY_EASY_PLAYER.applyToCountry = (country, modif) -> StaticModifiers.DIFFICULTY_EASY_PLAYER.modifiers;
@@ -504,6 +498,13 @@ public enum StaticModifiers {
         COSSACKS_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCossacksPercent(country, modif.modifiers);
         EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
         LOST_HEGEMONY.applyToCountry = (country, modif) -> StaticModifiers.LOST_HEGEMONY.modifiers;
+
+        APPLIED_TO_COUNTRY = Arrays.stream(StaticModifiers.values())
+                                   .filter(staticModifiers -> staticModifiers.applyToCountry != null)
+                                   .collect(Collectors.toList());
+        APPLIED_TO_PROVINCE = Arrays.stream(StaticModifiers.values())
+                                    .filter(staticModifiers -> staticModifiers.applyToProvince != null)
+                                    .collect(Collectors.toList());
     }
 
     StaticModifiers(Condition trigger, BiFunction<Country, StaticModifiers, Modifiers> applyToCountry,

@@ -320,8 +320,9 @@ public class Save {
         ClausewitzList productionLeaderList = this.gamestateItem.getList("production_leader_tag");
 
         if (productionLeaderList != null) {
-            for (int i = 0; i < productionLeaderList.size(); i++) {
-                productionLeaders.put(this.game.getTradeGood(i), getCountry(productionLeaderList.get(i)));
+            //Start from 1 because first leader is for empty trade good
+            for (int i = 1; i < productionLeaderList.size(); i++) {
+                productionLeaders.put(this.game.getTradeGood(i - 1), getCountry(productionLeaderList.get(i)));
             }
         }
 

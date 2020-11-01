@@ -2311,6 +2311,8 @@ public class ConditionsUtils {
             case "can_build":
                 building = province.getSave().getGame().getBuilding(value);
                 return building != null && (building.getTrigger() == null || building.getTrigger().apply(province));
+            case "capital":
+                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getOwner().getCapital().equals(province));
             case "cavalry_in_province":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return province.getCavalry().size() >= integer;
@@ -2472,7 +2474,7 @@ public class ConditionsUtils {
                 break;
             case "has_supply_depot":
                 return "yes".equalsIgnoreCase(value) ==
-                       (province.getOwner() != null && province.getSaveArea() != null
+                       (province.getOwner() != null && province.getSaveArea() != null && province.getSaveArea().getSupplyDepots() != null
                         && province.getSaveArea()
                                    .getSupplyDepots()
                                    .stream()

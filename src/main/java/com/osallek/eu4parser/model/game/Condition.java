@@ -53,7 +53,7 @@ public class Condition {
     }
 
     public String getCondition(String condition) {
-        return this.conditions.containsKey(condition.toLowerCase()) ? this.conditions.get(condition.toLowerCase()).get(0) : null;
+        return (this.conditions != null && this.conditions.containsKey(condition.toLowerCase())) ? this.conditions.get(condition.toLowerCase()).get(0) : null;
     }
 
     public List<Condition> getScopes() {
@@ -78,7 +78,7 @@ public class Condition {
     }
 
     public boolean apply(SaveProvince province) {
-        if (this.conditions.entrySet()
+        if (this.conditions != null && this.conditions.entrySet()
                            .stream()
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
@@ -86,7 +86,7 @@ public class Condition {
             return false;
         }
 
-        if (this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
             return false;
         }
 
@@ -94,11 +94,13 @@ public class Condition {
     }
 
     public void removeCondition(String condition, String value) {
-        if (this.conditions.containsKey(condition)) {
+        if (this.conditions != null && this.conditions.containsKey(condition)) {
             this.conditions.get(condition).remove(value);
         }
 
-        this.scopes.forEach(scope -> scope.removeCondition(condition, value));
+        if (this.scopes != null) {
+            this.scopes.forEach(scope -> scope.removeCondition(condition, value));
+        }
     }
 
     @Override

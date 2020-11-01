@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Modifier;
+import com.osallek.eu4parser.common.ModifierScope;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -123,6 +124,20 @@ public class Modifiers {
 
     public Map<Modifier, String> getModifiers() {
         return modifiers;
+    }
+
+    public Map<Modifier, String> getCountryModifiers() {
+        return modifiers.entrySet()
+                        .stream()
+                        .filter(entry -> ModifierScope.COUNTRY.equals(entry.getKey().getScope()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Map<Modifier, String> getProvinceModifiers() {
+        return modifiers.entrySet()
+                        .stream()
+                        .filter(entry -> ModifierScope.PROVINCE.equals(entry.getKey().getScope()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
