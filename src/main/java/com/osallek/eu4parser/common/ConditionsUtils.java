@@ -2341,7 +2341,7 @@ public class ConditionsUtils {
                 return province.getCulture().getCultureGroup().getName().equals(value);
             case "current_age":
                 return province.getSave().getCurrentAge().equals(value);
-            case "current_institution_growth": //Todo
+            case "current_institution_growth": //Todo (global + local)
                 break;
             case "custom_nation_setup":
                 return "yes".equalsIgnoreCase(value) == NationSetup.CUSTOM.equals(province.getSave().getGameplayOptions().getNationSetup());
@@ -2364,7 +2364,7 @@ public class ConditionsUtils {
                 return province.getBuildings()
                                .stream()
                                .anyMatch(build -> build.getModifiers().hasModifier("fort_level")
-                                                  && NumbersUtils.toInt(build.getModifiers().getModifier("fort_level")) >= NumbersUtils.toInt(value));
+                                                  && build.getModifiers().getModifier("fort_level") >= NumbersUtils.toInt(value));
             case "galleys_in_province":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return province.getGalleys().size() >= integer;
@@ -2465,11 +2465,15 @@ public class ConditionsUtils {
             case "has_siege":
                 return "yes".equalsIgnoreCase(value) == (province.getSiege() != null);
             case "has_state_patriach":
-                return province.getSaveArea().getCountryState(province.getOwner()) != null
-                       && BooleanUtils.toBoolean(province.getSaveArea().getCountryState(province.getOwner()).hasStatePatriarch());
+                return "yes".equalsIgnoreCase(value) ==
+                       (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
+                        && province.getSaveArea().getCountryState(province.getOwner()) != null
+                        && BooleanUtils.toBoolean(province.getSaveArea().getCountryState(province.getOwner()).hasStatePatriarch()));
             case "has_state_pasha":
-                return province.getSaveArea().getCountryState(province.getOwner()) != null
-                       && BooleanUtils.toBoolean(province.getSaveArea().getCountryState(province.getOwner()).hasStatePasha());
+                return "yes".equalsIgnoreCase(value) ==
+                       (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
+                        && province.getSaveArea().getCountryState(province.getOwner()) != null
+                        && BooleanUtils.toBoolean(province.getSaveArea().getCountryState(province.getOwner()).hasStatePasha()));
             case "has_terrain": //Don't do
                 break;
             case "has_supply_depot":
@@ -2602,13 +2606,14 @@ public class ConditionsUtils {
             case "is_part_of_hre":
                 return "yes".equalsIgnoreCase(value) == province.inHre();
             case "is_permanent_claim":
+                other = province.getSave().getCountry(value);
                 return province.getClaimsTags().contains(value.toUpperCase())
-                       && province.getHistory().getClaims().getOrDefault(Eu4Utils.DEFAULT_DATE, new ArrayList<>()).contains(ClausewitzUtils.addQuotes(value));
+                       && province.getHistory().getClaims().getOrDefault(Eu4Utils.DEFAULT_DATE, new ArrayList<>()).contains(other);
             case "is_prosperous":
-                return "yes".equalsIgnoreCase(value) == (province.getSaveArea().getCountryState(province.getController()) != null
-                                                         && NumbersUtils.doubleOrDefault(province.getSaveArea()
-                                                                                                 .getCountryState(province.getController())
-                                                                                                 .getProsperity()) >= 100d);
+                return "yes".equalsIgnoreCase(value) ==
+                       (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
+                        && province.getSaveArea().getCountryState(province.getController()) != null
+                        && NumbersUtils.doubleOrDefault(province.getSaveArea().getCountryState(province.getController()).getProsperity()) >= 100d);
             case "is_random_new_world":
                 return "yes".equalsIgnoreCase(value) == province.getSave().isRandomNewWorld();
             case "is_reformation_center":
@@ -2672,19 +2677,23 @@ public class ConditionsUtils {
             case "is_sea":
                 return "yes".equalsIgnoreCase(value) == province.isOcean();
             case "is_state":
-                return "yes".equalsIgnoreCase(value) == (province.getSaveArea().getCountryState(province.getOwner()) != null);
+                return "yes".equalsIgnoreCase(value) == (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
+                                                         && province.getSaveArea().getCountryState(province.getOwner()) != null);
             case "is_state_core":
                 other = province.getSave().getCountry(value);
-                return province.getCores().contains(other) && province.getSaveArea().getCountryState(other) != null;
+                return province.getCores().contains(other) && province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
+                       && province.getSaveArea().getCountryState(other) != null;
             case "is_strongest_trade_power":
                 other = province.getSave().getCountry(value);
                 return other.equals(province.getSave().getTradeNodes().get(province.getTrade()).getTopPower().entrySet().iterator().next().getKey());
             case "is_territory":
-                return "yes".equalsIgnoreCase(value) == (province.getSaveArea().getCountryState(province.getOwner()) == null);
+                return "yes".equalsIgnoreCase(value) == (province.getSaveArea() == null || province.getSaveArea().getCountriesStates() != null
+                                                         || province.getSaveArea().getCountryState(province.getOwner()) == null);
             case "is_territorial_core":
                 other = province.getSave().getCountry(value);
-                return province.getSaveArea().getCountryState(other) == null
-                       && province.getSaveArea().getProvinces().stream().anyMatch(prov -> prov.getCores().contains(other) && prov.getOwner().equals(other));
+                return (province.getSaveArea() == null || province.getSaveArea().getCountriesStates() == null
+                        || province.getSaveArea().getCountryState(other) == null)
+                       && province.getCores().contains(other);
             case "is_wasteland":
                 return "yes".equalsIgnoreCase(value) == (province.isImpassable());
             case "is_year":

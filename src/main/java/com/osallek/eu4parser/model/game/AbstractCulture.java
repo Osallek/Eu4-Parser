@@ -17,6 +17,10 @@ public abstract class AbstractCulture {
 
     protected List<String> dynastyNames;
 
+    protected Modifiers countryModifiers;
+
+    protected Modifiers provinceModifiers;
+
     public AbstractCulture(ClausewitzItem item) {
         this.name = item.getName();
 
@@ -28,6 +32,9 @@ public abstract class AbstractCulture {
 
         list = item.getList("dynasty_names");
         this.dynastyNames = list == null ? null : list.getValues();
+
+        this.countryModifiers = new Modifiers(item.getChild("country"));
+        this.provinceModifiers = new Modifiers(item.getChild("province"));
     }
 
     public String getName() {
@@ -90,6 +97,14 @@ public abstract class AbstractCulture {
 
     public void removeDynastyName(String dynastyName) {
         this.dynastyNames.remove(dynastyName);
+    }
+
+    public Modifiers getCountryModifiers() {
+        return countryModifiers;
+    }
+
+    public Modifiers getProvinceModifiers() {
+        return provinceModifiers;
     }
 
     @Override

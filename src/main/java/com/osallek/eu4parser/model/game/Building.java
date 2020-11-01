@@ -275,9 +275,10 @@ public class Building {
 
         if (map != null) {
             map.addAll(this.modifiers);
+            return map;
+        } else {
+            return Modifiers.copy(this.modifiers);
         }
-
-        return map;
     }
 
     public void addModifier(String modifier, String quantity) {

@@ -2,8 +2,6 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class NavalDoctrine {

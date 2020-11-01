@@ -1,22 +1,18 @@
 package com.osallek.eu4parser.model.game;
 
-import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
-import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public enum StaticModifiers {
@@ -59,8 +55,8 @@ public enum StaticModifiers {
     SAILORS(new Condition(Pair.of("is_ocean", "no"), Pair.of("is_lake", "no"), Pair.of("is_wasteland", "no")), null, null),
     HORDE_DEVELOPMENT(new Condition(Pair.of("nomad_development_scale", "yes")), null, null),
     PROVINCE_RAZED(new Condition(Pair.of("has_province_modifier", "province_razed")), null, null),
-    DEVELOPMENT(new Condition(Pair.of("always", "true")), null, null),
-    DEVELOPMENT_SCALED(new Condition(Pair.of("always", "true")), null, null),
+    DEVELOPMENT(new Condition(Pair.of("always", "yes")), null, null),
+    DEVELOPMENT_SCALED(new Condition(Pair.of("always", "yes")), null, null),
     CAPITAL_CITY(new Condition(Pair.of("capital", "yes")), null, null),
     PATRIARCH_STATE(new Condition(Pair.of("has_state_patriach", "yes")), null, null),
     PATRIARCH_AUTHORITY_LOCAL(new Condition(Pair.of("has_owner_religion", "yes"), Pair.of("owner_has_patriarchs", "yes")), null, null),
@@ -316,7 +312,6 @@ public enum StaticModifiers {
         SAILORS.applyToProvince = (province, modif) -> ModifiersUtils.scaleManpower(province, modif.modifiers);
         HORDE_DEVELOPMENT.applyToCountry = (country, modif) -> StaticModifiers.HORDE_DEVELOPMENT.modifiers;
         PROVINCE_RAZED.applyToProvince = (province, modif) -> StaticModifiers.PROVINCE_RAZED.modifiers;
-        DEVELOPMENT.applyToProvince = (province, modif) -> ModifiersUtils.scaleDev(province, modif.modifiers);
         DEVELOPMENT_SCALED.applyToProvince = (province, modif) -> ModifiersUtils.scaleDevImprove(province, modif.modifiers);
         CAPITAL_CITY.applyToProvince = (province, modif) -> StaticModifiers.CAPITAL_CITY.modifiers;
         PATRIARCH_STATE.applyToProvince = (province, modif) -> StaticModifiers.PATRIARCH_STATE.modifiers;
@@ -470,7 +465,8 @@ public enum StaticModifiers {
         LOW_HARMONY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHarmonyReverse(country, modif.modifiers);
         OVERLORD_DAIMYO_AT_PEACE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosAtPeace(country, modif.modifiers);
         OVERLORD_DAIMYO_SAME_ISOLATIONISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosSameIsolationism(country, modif.modifiers);
-        OVERLORD_DAIMYO_DIFFERENT_ISOLATIONISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosDifferentIsolationism(country, modif.modifiers);
+        OVERLORD_DAIMYO_DIFFERENT_ISOLATIONISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyosDifferentIsolationism(country,
+                                                                                                                                         modif.modifiers);
         OVERLORD_SANKIN_KOTAI.applyToCountry = (country, modif) -> StaticModifiers.OVERLORD_SANKIN_KOTAI.modifiers;
         SUBJECT_SANKIN_KOTAI.applyToCountry = (country, modif) -> StaticModifiers.SUBJECT_SANKIN_KOTAI.modifiers;
         OVERLORD_EXPEL_RONIN.applyToCountry = (country, modif) -> StaticModifiers.OVERLORD_EXPEL_RONIN.modifiers;
@@ -498,6 +494,39 @@ public enum StaticModifiers {
         COSSACKS_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCossacksPercent(country, modif.modifiers);
         EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
         LOST_HEGEMONY.applyToCountry = (country, modif) -> StaticModifiers.LOST_HEGEMONY.modifiers;
+        DEVELOPMENT.applyToProvince = (province, modif) -> { //Ugly but thanks to Paradox
+            Modifiers m = Modifiers.copy(modif.modifiers);
+
+            if (m.hasModifier("land_forcelimit")) {
+                Modifier modifier = ModifiersUtils.getModifier("land_forcelimit");
+                Modifiers newM = ModifiersUtils.scaleAutonomy(province, new Modifiers(new HashSet<>(), Map.of(modifier, m.getModifier(modifier))));
+                m.getModifiers().put(modifier, newM.getModifier(modifier));
+            }
+
+            if (m.hasModifier("naval_forcelimit")) {
+                Modifier modifier = ModifiersUtils.getModifier("naval_forcelimit");
+
+                if (!province.isPort()) {
+                    m.getModifiers().put(modifier, 0d);
+                } else {
+                    Modifiers newM = ModifiersUtils.scaleAutonomy(province, new Modifiers(new HashSet<>(), Map.of(modifier, m.getModifier(modifier))));
+                    m.getModifiers().put(modifier, newM.getModifier(modifier));
+                }
+            }
+
+            if (m.hasModifier("local_sailors")) {
+                Modifier modifier = ModifiersUtils.getModifier("local_sailors");
+
+                if (!province.isPort()) {
+                    m.getModifiers().put(modifier, 0d);
+                } else {
+                    Modifiers newM = ModifiersUtils.scaleAutonomy(province, new Modifiers(new HashSet<>(), Map.of(modifier, m.getModifier(modifier))));
+                    m.getModifiers().put(modifier, newM.getModifier(modifier));
+                }
+            }
+
+            return ModifiersUtils.scaleDev(province, m);
+        };
 
         APPLIED_TO_COUNTRY = Arrays.stream(StaticModifiers.values())
                                    .filter(staticModifiers -> staticModifiers.applyToCountry != null)

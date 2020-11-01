@@ -492,21 +492,21 @@ public class ModifiersUtils {
                 return value + Arrays.stream(modifiers)
                                      .map(m -> m.getModifier(modifier))
                                      .filter(Objects::nonNull)
-                                     .map(NumbersUtils::toDouble)
-                                     .filter(Objects::nonNull)
                                      .mapToDouble(Double::doubleValue)
                                      .sum();
             case MULTIPLICATIVE:
                 return value * (1 + Arrays.stream(modifiers)
                                           .map(m -> m.getModifier(modifier))
                                           .filter(Objects::nonNull)
-                                          .map(NumbersUtils::toDouble)
-                                          .filter(Objects::nonNull)
                                           .mapToDouble(Double::doubleValue)
                                           .sum());
             case CONSTANT:
-                return (value == 1 || Arrays.stream(modifiers).map(m -> m.getModifier(modifier)).filter(Objects::nonNull).anyMatch("yes"::equalsIgnoreCase)) ? 1
-                                                                                                                                                             : 0;
+                return Math.max(value, Arrays.stream(modifiers)
+                                             .map(m -> m.getModifier(modifier))
+                                             .filter(Objects::nonNull)
+                                             .mapToDouble(Double::doubleValue)
+                                             .max()
+                                             .orElse(0));
             default:
                 return value;
         }
@@ -519,7 +519,7 @@ public class ModifiersUtils {
 
         toReturn.getModifiers().replaceAll((key, value) -> {
             if (ModifierType.ADDITIVE.equals(key.getType()) || ModifierType.MULTIPLICATIVE.equals(key.getType())) {
-                return ClausewitzUtils.doubleToString(BigDecimal.valueOf(NumbersUtils.toDouble(value)).multiply(BigDecimal.valueOf(finalScale)).doubleValue());
+                return BigDecimal.valueOf(value).multiply(BigDecimal.valueOf(finalScale)).doubleValue();
             }
 
             return value;
@@ -531,7 +531,8 @@ public class ModifiersUtils {
     public static Modifiers sumModifiers(Modifiers... modifiers) {
         if (modifiers.length > 0) {
             Set<String> enables = Arrays.stream(modifiers).map(Modifiers::getEnables).flatMap(Collection::stream).collect(Collectors.toSet());
-            Map<Modifier, String> modifier = Arrays.stream(modifiers)
+            Map<Modifier, Double> modifier = Arrays.stream(modifiers)
+                                                   .filter(Objects::nonNull)
                                                    .map(Modifiers::getModifiers)
                                                    .map(Map::entrySet)
                                                    .flatMap(Collection::stream)
@@ -544,17 +545,14 @@ public class ModifiersUtils {
                                                        switch (entry.getKey().getType()) {
                                                            case ADDITIVE:
                                                            case MULTIPLICATIVE:
-                                                               return ClausewitzUtils.doubleToString(entry.getValue()
-                                                                                                          .stream()
-                                                                                                          .filter(Objects::nonNull)
-                                                                                                          .map(NumbersUtils::toDouble)
-                                                                                                          .filter(Objects::nonNull)
-                                                                                                          .mapToDouble(Double::doubleValue)
-                                                                                                          .sum());
+                                                               return entry.getValue().stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).sum();
                                                            case CONSTANT:
-                                                               return entry.getValue().stream().filter(Objects::nonNull).anyMatch("yes"::equalsIgnoreCase)
-                                                                      ? "yes"
-                                                                      : "no";
+                                                               return entry.getValue()
+                                                                           .stream()
+                                                                           .filter(Objects::nonNull)
+                                                                           .mapToDouble(Double::doubleValue)
+                                                                           .max()
+                                                                           .orElse(0);
                                                        }
 
                                                        return entry.getValue().get(0);
@@ -566,22 +564,18 @@ public class ModifiersUtils {
         return new Modifiers();
     }
 
-    public static void sumModifiers(String name, String value, Modifiers modifiers) {
+    public static void sumModifiers(String name, Double value, Modifiers modifiers) {
         sumModifiers(ModifiersUtils.getModifier(name), value, modifiers);
     }
 
-    public static void sumModifiers(Modifier modifier, String value, Modifiers modifiers) {
+    public static void sumModifiers(Modifier modifier, Double value, Modifiers modifiers) {
         switch (modifier.getType()) {
             case ADDITIVE:
             case MULTIPLICATIVE:
-                modifiers.getModifiers()
-                         .put(modifier, ClausewitzUtils.doubleToString(NumbersUtils.toDouble(modifiers.getModifiers().getOrDefault(modifier, "0"))
-                                                                       + NumbersUtils.doubleOrDefault(NumbersUtils.toDouble(value))));
+                modifiers.getModifiers().put(modifier, modifiers.getModifiers().getOrDefault(modifier, 0d) + NumbersUtils.doubleOrDefault(value));
                 break;
             case CONSTANT:
-                modifiers.getModifiers()
-                         .put(modifier,
-                              ("yes".equalsIgnoreCase(modifiers.getModifiers().getOrDefault(modifier, value)) || "yes".equalsIgnoreCase(value)) ? "yes" : "no");
+                modifiers.getModifiers().put(modifier, value);
                 break;
         }
     }
@@ -638,7 +632,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleAutonomy(SaveProvince province, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, province.getLocalAutonomy());
+        return ModifiersUtils.scaleModifiers(modifiers, (100 - NumbersUtils.doubleOrDefault(province.getLocalAutonomy())) / 100);
     }
 
     public static Modifiers scalePatriarchAuthority(SaveProvince province, Modifiers modifiers) {

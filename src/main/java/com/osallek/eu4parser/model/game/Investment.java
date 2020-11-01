@@ -3,7 +3,6 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class Investment {
@@ -30,9 +29,9 @@ public class Investment {
 
     private final Modifiers areaModifier;
 
-    private final Modifiers ownerCompanyRegionModifier;
+    private final Modifiers ownerCompanyRegionModifier; //Apply to the owner in the region (ie: country modifiers)
 
-    private final Modifiers companyRegionModifier;
+    private final Modifiers companyRegionModifier; //Apply to provinces in region (ie: province modifiers)
 
     public Investment(ClausewitzItem item, Game game) {
         this.game = game;

@@ -23,11 +23,10 @@ public class HolyOrder {
         this.name = item.getName();
         this.icon = item.getVarAsString("icon");
         this.category = Power.valueOf(item.getVarAsString("cost_type").replace("_power", "").toUpperCase());
+        this.modifiers = new Modifiers(item.getChild("modifier"));
 
         ClausewitzItem child = item.getChild("trigger");
         this.trigger = child == null ? null : new Condition(child);
-
-        this.modifiers = new Modifiers(item.getChild("modifier"));
     }
 
     public String getName() {

@@ -7,9 +7,11 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.Losses;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ActiveWar {
+public class ActiveWar implements Comparable<ActiveWar> {
 
     protected final Save save;
 
@@ -223,6 +225,11 @@ public class ActiveWar {
         } else {
             return new HashMap<>();
         }
+    }
+
+    @Override
+    public int compareTo(@NotNull ActiveWar o) {
+        return Comparator.comparing(ActiveWar::getStartDate).compare(this, o);
     }
 
     private void refreshAttributes() {

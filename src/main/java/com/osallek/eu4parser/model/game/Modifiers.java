@@ -6,10 +6,13 @@ import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifierScope;
 import com.osallek.eu4parser.common.ModifiersUtils;
+import com.osallek.eu4parser.common.NumbersUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +22,7 @@ public class Modifiers {
 
     private final Set<String> enables;
 
-    private final Map<Modifier, String> modifiers;
+    private final Map<Modifier, Double> modifiers;
 
     public Modifiers(ClausewitzItem item) {
         this(item == null ? new ArrayList<>() : item.getVariables());
@@ -36,8 +39,9 @@ public class Modifiers {
         this.modifiers = variables.stream()
                                   .filter(var -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
                                                  && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                                 && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
-                                  .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getValue, (a, b) -> b));
+                                                 && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
+                                                 && NumbersUtils.toDouble(var.getValue()) != null)
+                                  .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getAsDouble, (a, b) -> b));
     }
 
     public Modifiers(ClausewitzVariable... variables) {
@@ -51,17 +55,18 @@ public class Modifiers {
         this.modifiers = Arrays.stream(variables)
                                .filter(var -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
                                               && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                              && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
-                               .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getValue, (a, b) -> b));
+                                              && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
+                                              && NumbersUtils.toDouble(var.getValue()) != null)
+                               .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getAsDouble, (a, b) -> b));
     }
 
-    public Modifiers(Set<String> enables, Map<Modifier, String> modifiers) {
+    public Modifiers(Set<String> enables, Map<Modifier, Double> modifiers) {
         this.enables = enables;
         this.modifiers = modifiers;
     }
 
     public static Modifiers copy(Modifiers other) {
-        return new Modifiers(other.enables, other.modifiers);
+        return new Modifiers(new HashSet<>(other.enables), new HashMap<>(other.modifiers));
     }
 
     public boolean isEmpty() {
@@ -76,12 +81,12 @@ public class Modifiers {
         if ("enable".equals(ClausewitzUtils.removeQuotes(name.toLowerCase())) || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(value))
             || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(value))) {
             this.enables.add(ClausewitzUtils.removeQuotes(name.toLowerCase()));
-        } else {
-            ModifiersUtils.sumModifiers(name, value, this);
+        } else if (NumbersUtils.toDouble(value) != null) {
+            ModifiersUtils.sumModifiers(name, NumbersUtils.toDouble(value), this);
         }
     }
 
-    public void addModifier(Modifier modifier, String value) {
+    public void addModifier(Modifier modifier, Double value) {
         ModifiersUtils.sumModifiers(modifier, value, this);
     }
 
@@ -106,11 +111,11 @@ public class Modifiers {
         return this.modifiers.containsKey(ModifiersUtils.getModifier(modifier));
     }
 
-    public String getModifier(String modifier) {
+    public Double getModifier(String modifier) {
         return this.modifiers.get(ModifiersUtils.getModifier(modifier));
     }
 
-    public String getModifier(Modifier modifier) {
+    public Double getModifier(Modifier modifier) {
         return this.modifiers.get(modifier);
     }
 
@@ -122,22 +127,22 @@ public class Modifiers {
         this.modifiers.remove(modifier);
     }
 
-    public Map<Modifier, String> getModifiers() {
+    public Map<Modifier, Double> getModifiers() {
         return modifiers;
     }
 
-    public Map<Modifier, String> getCountryModifiers() {
-        return modifiers.entrySet()
-                        .stream()
-                        .filter(entry -> ModifierScope.COUNTRY.equals(entry.getKey().getScope()))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public Modifiers getCountryModifiers() {
+        return new Modifiers(this.enables, this.modifiers.entrySet()
+                                                         .stream()
+                                                         .filter(entry -> ModifierScope.COUNTRY.equals(entry.getKey().getScope()))
+                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
-    public Map<Modifier, String> getProvinceModifiers() {
-        return modifiers.entrySet()
-                        .stream()
-                        .filter(entry -> ModifierScope.PROVINCE.equals(entry.getKey().getScope()))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public Modifiers getProvinceModifiers() {
+        return new Modifiers(this.enables, this.modifiers.entrySet()
+                                                         .stream()
+                                                         .filter(entry -> ModifierScope.PROVINCE.equals(entry.getKey().getScope()))
+                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     @Override

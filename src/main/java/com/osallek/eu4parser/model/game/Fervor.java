@@ -17,7 +17,6 @@ public class Fervor {
     public Fervor(ClausewitzItem item) {
         this.name = item.getName();
         this.cost = item.getVarAsInt("cost");
-
         this.modifiers = new Modifiers(item.getChild("effect"));
     }
 
