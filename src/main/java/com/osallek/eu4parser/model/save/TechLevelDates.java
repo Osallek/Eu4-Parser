@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.save;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.Power;
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ public class TechLevelDates {
     }
 
     public Integer getTechLevel(Power power) {
-        return this.item.getVarAsInt(power.ordinal());
+        return NumbersUtils.toInt(ClausewitzUtils.removeQuotes(this.item.getVar(power.ordinal()).getName()));
     }
 
     public void setTechDate(Power power, LocalDate date) {
