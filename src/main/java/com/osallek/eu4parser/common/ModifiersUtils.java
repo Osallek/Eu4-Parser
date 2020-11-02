@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.model.game.GovernmentReform;
 import com.osallek.eu4parser.model.game.Modifiers;
+import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
@@ -461,6 +462,32 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("immortal", ModifierType.CONSTANT, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monarch_lifespan", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("power_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        //Special case for techs because most are additive and conflicts with "natives" one
+        ModifiersUtils.addModifier("tech_sprite_level", ModifierType.CONSTANT, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_allowed_idea_groups", ModifierType.CONSTANT, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_production_efficiency", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_max_states", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_administrative_efficiency", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_development_efficiency", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_naval_morale", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_naval_maintenance", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_range", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_global_colonial_growth", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_trade_range", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_trade_efficiency", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_num_accepted_cultures", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_infantry_fire", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_infantry_shock", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_cavalry_fire", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_cavalry_shock", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_artillery_shock", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_artillery_fire", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_land_morale", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_military_tactics", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_supply_limit", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_maneuver_value", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_combat_width", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_governing_capacity", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope... scopes) {
@@ -519,7 +546,7 @@ public class ModifiersUtils {
 
         toReturn.getModifiers().replaceAll((key, value) -> {
             if (ModifierType.ADDITIVE.equals(key.getType()) || ModifierType.MULTIPLICATIVE.equals(key.getType())) {
-                return BigDecimal.valueOf(value).multiply(BigDecimal.valueOf(finalScale)).doubleValue();
+                return BigDecimal.valueOf(value).multiply(BigDecimal.valueOf(finalScale)).setScale(4, RoundingMode.HALF_EVEN).doubleValue();
             }
 
             return value;
@@ -530,7 +557,11 @@ public class ModifiersUtils {
 
     public static Modifiers sumModifiers(Modifiers... modifiers) {
         if (modifiers.length > 0) {
-            Set<String> enables = Arrays.stream(modifiers).map(Modifiers::getEnables).flatMap(Collection::stream).collect(Collectors.toSet());
+            Set<String> enables = Arrays.stream(modifiers)
+                                        .filter(Objects::nonNull)
+                                        .map(Modifiers::getEnables)
+                                        .flatMap(Collection::stream)
+                                        .collect(Collectors.toSet());
             Map<Modifier, Double> modifier = Arrays.stream(modifiers)
                                                    .filter(Objects::nonNull)
                                                    .map(Modifiers::getModifiers)
@@ -545,7 +576,13 @@ public class ModifiersUtils {
                                                        switch (entry.getKey().getType()) {
                                                            case ADDITIVE:
                                                            case MULTIPLICATIVE:
-                                                               return entry.getValue().stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).sum();
+                                                               return entry.getValue()
+                                                                           .stream()
+                                                                           .filter(Objects::nonNull)
+                                                                           .map(BigDecimal::valueOf)
+                                                                           .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                                                           .setScale(4, RoundingMode.HALF_EVEN)
+                                                                           .doubleValue();
                                                            case CONSTANT:
                                                                return entry.getValue()
                                                                            .stream()
@@ -615,7 +652,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleDevastation(SaveProvince province, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, province.getDevastation());
+        return ModifiersUtils.scaleModifiers(modifiers, province.getDevastation() / 100);
     }
 
     public static Modifiers scaleNativeSize(SaveProvince province, Modifiers modifiers) {
@@ -697,11 +734,11 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithArmyTradition(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getArmyTradition()));
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getArmyTradition()) / 100);
     }
 
     public static Modifiers scaleWithNavyTradition(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getNavyTradition()));
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getNavyTradition()) / 100);
     }
 
     public static Modifiers scaleWithFreeCitiesInHre(Country country, Modifiers modifiers) {
@@ -726,7 +763,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithTribalAllegiance(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getTribalAllegiance()));
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getTribalAllegiance()) / 100);
     }
 
     public static Modifiers scaleWithLegitimacy50(Country country, Modifiers modifiers) {
@@ -750,7 +787,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithCorruption(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getCorruption()));
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getCorruption()) / 100);
     }
 
     public static Modifiers scaleWithRootOutCorruption(Country country, Modifiers modifiers) {
@@ -758,7 +795,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithRecoveryMotivation(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getRecoveryMotivation()));
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getRecoveryMotivation()) / 100);
     }
 
     public static Modifiers scaleWithMilitarisedSociety(Country country, Modifiers modifiers) {
@@ -799,7 +836,7 @@ public class ModifiersUtils {
     public static Modifiers scaleWithBlockadedProvinces(Country country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getOwnedProvinces()
                                                                .stream()
-                                                               .filter(province -> NumbersUtils.doubleOrDefault(province.getBlockadeEfficiency()) >= 0)
+                                                               .filter(SaveProvince::blockade)
                                                                .count());
     }
 
@@ -872,7 +909,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithHarmony(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getHarmony()));
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getHarmony()) / 100);
     }
 
     public static Modifiers scaleWithHarmonyReverse(Country country, Modifiers modifiers) {
@@ -943,5 +980,15 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, Math.min(Math.max(0, NumbersUtils.doubleOrDefault(country.getArmyProfessionalism()) -
                                                                              country.getSave().getGame().getHighArmyProfessionalismMinRange()),
                                                                  country.getSave().getGame().getHighArmyProfessionalismMaxRange()));
+    }
+
+    public static Modifiers scaleWithPrinces(Save save, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, save.getCountries()
+                                                            .values()
+                                                            .stream()
+                                                            .map(Country::getCapital)
+                                                            .filter(Objects::nonNull)
+                                                            .filter(SaveProvince::inHre)
+                                                            .count());
     }
 }

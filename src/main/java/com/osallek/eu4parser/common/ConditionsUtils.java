@@ -380,7 +380,7 @@ public class ConditionsUtils {
             case "government":
                 return country.getGovernment().getType().equals(ClausewitzUtils.addQuotes(value));
             case "government_rank":
-                return NumbersUtils.intOrDefault(country.getGovernmentRank()) >= NumbersUtils.toInt(value);
+                return country.getGovernmentLevel() >= NumbersUtils.toInt(value);
             case "grown_by_development":
                 return country.getHistoryStatsCache() != null &&
                        BigDecimal.valueOf(NumbersUtils.doubleOrDefault(country.getHistoryStatsCache().getStartingDevelopment()))
@@ -407,7 +407,7 @@ public class ConditionsUtils {
             case "has_advisor":
                 return !country.getAdvisors().isEmpty();
             case "has_age_ability":
-                return country.getActiveAgeAbility().contains(ClausewitzUtils.addQuotes(value));
+                return country.getActiveAgeAbility().stream().anyMatch(ageAbility -> ageAbility.getName().equalsIgnoreCase(ClausewitzUtils.addQuotes(value)));
             case "has_any_disaster":
                 return country.getActiveDisaster() != null;
             case "has_border_with_religious_enemy":
@@ -458,7 +458,10 @@ public class ConditionsUtils {
             case "has_estate":
                 return country.getEstates().stream().map(SaveEstate::getType).map(ClausewitzUtils::removeQuotes).anyMatch(value::equals);
             case "has_faction":
-                return CollectionUtils.isNotEmpty(country.getFactions()) && country.getFactions().stream().map(SaveFaction::getType).anyMatch(value::equals);
+                return CollectionUtils.isNotEmpty(country.getFactions()) && country.getFactions()
+                                                                                   .stream()
+                                                                                   .map(SaveFaction::getType)
+                                                                                   .anyMatch(faction -> value.equalsIgnoreCase(faction.getName()));
             case "has_factions":
                 return CollectionUtils.isNotEmpty(country.getFactions());
             case "has_female_consort":
@@ -1590,7 +1593,7 @@ public class ConditionsUtils {
             case "primary_culture":
                 return value.equalsIgnoreCase(country.getPrimaryCulture().getName());
             case "primitives":
-                return "yes".equalsIgnoreCase(value) == country.getSave().getGame().getTechGroup(country.getTechnologyGroup()).isPrimitive();
+                return "yes".equalsIgnoreCase(value) == country.getTechnologyGroup().isPrimitive();
             case "production_efficiency": //Todo
                 break;
             case "production_income_percentage":
@@ -1698,7 +1701,7 @@ public class ConditionsUtils {
                 if ((other = country.getSave().getCountry(value)) != null) {
                     return country.getTechnologyGroup().equals(other.getTechnologyGroup());
                 } else {
-                    return value.equalsIgnoreCase(country.getTechnologyGroup());
+                    return value.equalsIgnoreCase(country.getTechnologyGroup().getName());
                 }
             case "tech_difference":
                 return root.getTech().getTotal() - NumbersUtils.toInt(value) >= from.getTech().getTotal();

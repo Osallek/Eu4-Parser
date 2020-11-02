@@ -7,23 +7,37 @@ import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.ModifiersUtils;
+import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.UnitType;
+import com.osallek.eu4parser.model.game.AgeAbility;
+import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.CrownLandBonus;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.Fervor;
 import com.osallek.eu4parser.model.game.GovernmentName;
+import com.osallek.eu4parser.model.game.GovernmentRank;
+import com.osallek.eu4parser.model.game.GovernmentReform;
+import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.game.Institution;
+import com.osallek.eu4parser.model.game.Investment;
 import com.osallek.eu4parser.model.game.Isolationism;
 import com.osallek.eu4parser.model.game.Mission;
 import com.osallek.eu4parser.model.game.Modifiers;
+import com.osallek.eu4parser.model.game.NativeAdvancement;
 import com.osallek.eu4parser.model.game.NavalDoctrine;
 import com.osallek.eu4parser.model.game.PersonalDeity;
 import com.osallek.eu4parser.model.game.Policy;
+import com.osallek.eu4parser.model.game.ProfessionalismModifier;
+import com.osallek.eu4parser.model.game.ReligiousReform;
+import com.osallek.eu4parser.model.game.RulerPersonality;
 import com.osallek.eu4parser.model.game.StaticModifier;
 import com.osallek.eu4parser.model.game.StaticModifiers;
 import com.osallek.eu4parser.model.game.SubjectType;
+import com.osallek.eu4parser.model.game.TechGroup;
 import com.osallek.eu4parser.model.game.TradeGood;
+import com.osallek.eu4parser.model.game.TradePolicy;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.ListOfDoubles;
@@ -33,8 +47,11 @@ import com.osallek.eu4parser.model.save.TradeLeague;
 import com.osallek.eu4parser.model.save.counters.Counter;
 import com.osallek.eu4parser.model.save.province.SaveAdvisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import com.osallek.eu4parser.model.save.religion.SavePapacy;
+import com.osallek.eu4parser.model.save.trade.TradeNodeCountry;
 import com.osallek.eu4parser.model.save.war.ActiveWar;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -107,7 +124,7 @@ public class Country {
 
     private Colors colors;
 
-    private Technology tech;
+    private CountryTechnology tech;
 
     private List<SaveEstate> estates;
 
@@ -297,16 +314,16 @@ public class Country {
         return this.save.getGame().getCountryFlagImage(this);
     }
 
-    public Boolean isHuman() {
-        return this.item.getVarAsBool("human");
+    public boolean isHuman() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("human"));
     }
 
     public Boolean hasSwitchedNation() {
         return this.item.getVarAsBool("has_switched_nation");
     }
 
-    public Boolean wasPlayer() {
-        return this.item.getVarAsBool("was_player");
+    public boolean wasPlayer() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("was_player"));
     }
 
     public void setWasPlayer(boolean wasPlayer) {
@@ -349,8 +366,12 @@ public class Country {
         return this.item.getVarAsBool("has_set_government_name");
     }
 
-    public Integer getGovernmentRank() {
+    public Integer getGovernmentLevel() {
         return this.item.getVarAsInt("government_rank");
+    }
+
+    public GovernmentRank getGovernmentRank() {
+        return this.save.getGame().getGovernmentRank(getGovernmentLevel());
     }
 
     public void setGovernmentRank(int governmentRank) {
@@ -389,7 +410,7 @@ public class Country {
     }
 
     public String getGovernmentLocalizedName() {
-        return this.governmentName == null ? null : this.governmentName.getRank(getGovernmentRank()).getValue();
+        return this.governmentName == null ? null : this.governmentName.getRank(getGovernmentLevel()).getValue();
     }
 
     public Integer getSubjectFocus() {
@@ -489,10 +510,13 @@ public class Country {
         return this.item.getVarAsInt("num_of_age_objectives");
     }
 
-    public List<String> getActiveAgeAbility() {
+    public List<AgeAbility> getActiveAgeAbility() {
         ClausewitzList list = this.item.getList("active_age_ability");
 
-        return list == null ? new ArrayList<>() : list.getValues();
+        return list == null ? new ArrayList<>() : list.getValues()
+                                                      .stream()
+                                                      .map(s -> this.save.getGame().getAgeAbility(ClausewitzUtils.removeQuotes(s)))
+                                                      .collect(Collectors.toList());
     }
 
     public void addAgeAbility(String ageAbility) {
@@ -877,8 +901,8 @@ public class Country {
         return fervor;
     }
 
-    public String getTechnologyGroup() {
-        return this.item.getVarAsString("technology_group");
+    public TechGroup getTechnologyGroup() {
+        return this.save.getGame().getTechGroup(ClausewitzUtils.removeQuotes(this.item.getVarAsString("technology_group")));
     }
 
     public void setTechnologyGroup(String technologyGroup) {
@@ -901,7 +925,7 @@ public class Country {
         this.item.setVariable("unit_type", unitType);
     }
 
-    public Technology getTech() {
+    public CountryTechnology getTech() {
         return tech;
     }
 
@@ -3658,6 +3682,255 @@ public class Country {
             getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(key.getModifiers(value).getCountryModifiers()));
         }
 
+        list.add(getTech().getModifiers(Power.ADM, getTech().getAdm()));
+        list.add(getTech().getModifiers(Power.DIP, getTech().getDip()));
+        list.add(getTech().getModifiers(Power.MIL, getTech().getMil()));
+
+        Monarch m;
+        if ((m = getMonarch()) != null && m.getPersonalities() != null
+            && CollectionUtils.isNotEmpty(m.getPersonalities().getPersonalities())) {
+            list.addAll(m.getPersonalities()
+                         .getPersonalities()
+                         .stream()
+                         .map(RulerPersonality::getModifiers)
+                         .filter(Objects::nonNull)
+                         .map(Modifiers::getCountryModifiers)
+                         .collect(Collectors.toList()));
+        }
+
+        list.addAll(this.save.getGame()
+                             .getProfessionalismModifiers()
+                             .stream()
+                             .filter(modifier -> modifier.getArmyProfessionalism() <= NumbersUtils.doubleOrDefault(getArmyProfessionalism()))
+                             .map(ProfessionalismModifier::getModifiers)
+                             .filter(Objects::nonNull)
+                             .map(Modifiers::getCountryModifiers)
+                             .collect(Collectors.toList()));
+
+        list.addAll(getTradedBonus().stream()
+                                    .map(TradeGood::getModifiers)
+                                    .filter(Objects::nonNull)
+                                    .map(Modifiers::getCountryModifiers)
+                                    .collect(Collectors.toList()));
+
+        list.addAll(getActivePolicies().stream()
+                                       .map(ActivePolicy::getPolicy)
+                                       .map(Policy::getModifiers)
+                                       .filter(Objects::nonNull)
+                                       .map(Modifiers::getCountryModifiers)
+                                       .collect(Collectors.toList()));
+
+        list.addAll(getActiveAgeAbility().stream()
+                                         .map(AgeAbility::getModifiers)
+                                         .filter(Objects::nonNull)
+                                         .map(Modifiers::getCountryModifiers)
+                                         .collect(Collectors.toList()));
+
+        list.addAll(getEmbracedInstitutions().stream()
+                                             .map(Institution::getBonuses)
+                                             .filter(Objects::nonNull)
+                                             .map(Modifiers::getCountryModifiers)
+                                             .collect(Collectors.toList()));
+
+        if (getCapital().inHre() && !this.save.getHre().dismantled()) {
+            list.addAll(this.save.getHre()
+                                 .getPassedReforms()
+                                 .stream()
+                                 .map(ImperialReform::getAllModifiers)
+                                 .filter(Objects::nonNull)
+                                 .map(Modifiers::getCountryModifiers)
+                                 .filter(Objects::nonNull)
+                                 .collect(Collectors.toList()));
+
+            if (this.equals(this.save.getHre().getEmperor())) {
+                list.addAll(this.save.getHre()
+                                     .getPassedReforms()
+                                     .stream()
+                                     .map(ImperialReform::getEmperorModifiers)
+                                     .filter(Objects::nonNull)
+                                     .map(Modifiers::getCountryModifiers)
+                                     .filter(Objects::nonNull)
+                                     .collect(Collectors.toList()));
+                list.addAll(this.save.getHre()
+                                     .getPassedReforms()
+                                     .stream()
+                                     .map(ImperialReform::getEmperorPerPrinceModifiers)
+                                     .filter(Objects::nonNull)
+                                     .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
+                                     .map(Modifiers::getCountryModifiers)
+                                     .filter(Objects::nonNull)
+                                     .collect(Collectors.toList()));
+            } else {
+                list.addAll(this.save.getHre()
+                                     .getPassedReforms()
+                                     .stream()
+                                     .map(ImperialReform::getMemberModifiers)
+                                     .filter(Objects::nonNull)
+                                     .map(Modifiers::getCountryModifiers)
+                                     .filter(Objects::nonNull)
+                                     .collect(Collectors.toList()));
+            }
+
+            if (this.save.getHre().getElectors().contains(this)) {
+                list.addAll(this.save.getHre()
+                                     .getPassedReforms()
+                                     .stream()
+                                     .map(ImperialReform::getElectorPerPrinceModifiers)
+                                     .filter(Objects::nonNull)
+                                     .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
+                                     .map(Modifiers::getCountryModifiers)
+                                     .filter(Objects::nonNull)
+                                     .collect(Collectors.toList()));
+            }
+        }
+
+        if (!this.save.getCelestialEmpire().dismantled() && this.equals(this.save.getCelestialEmpire().getEmperor())) {
+            list.addAll(this.save.getCelestialEmpire()
+                                 .getPassedReforms()
+                                 .stream()
+                                 .map(ImperialReform::getEmperorModifiers)
+                                 .filter(Objects::nonNull)
+                                 .map(Modifiers::getCountryModifiers)
+                                 .collect(Collectors.toList()));
+        }
+
+        if (getFervor() != null) {
+            list.addAll(getFervor().getActives()
+                                   .stream()
+                                   .map(Fervor::getModifiers)
+                                   .filter(Objects::nonNull)
+                                   .map(Modifiers::getCountryModifiers)
+                                   .collect(Collectors.toList()));
+        }
+
+        if (getNativeAdvancements() != null) {
+            list.addAll(getNativeAdvancements().getNativeAdvancements()
+                                               .values()
+                                               .stream()
+                                               .map(SaveNativeAdvancement::getEmbracedNativeAdvancements)
+                                               .flatMap(Collection::stream)
+                                               .filter(Objects::nonNull)
+                                               .map(NativeAdvancement::getModifiers)
+                                               .filter(Objects::nonNull)
+                                               .map(Modifiers::getCountryModifiers)
+                                               .collect(Collectors.toList()));
+        }
+
+        if (getNavalDoctrine() != null) {
+            list.add(getNavalDoctrine().getModifiers().getCountryModifiers());
+        }
+
+        if (getPersonalDeity() != null) {
+            list.add(getPersonalDeity().getModifiers().getCountryModifiers());
+        }
+
+        if (getReligiousReforms() != null) {
+            list.addAll(getReligiousReforms().getAdoptedReforms()
+                                             .stream()
+                                             .map(ReligiousReform::getModifiers)
+                                             .filter(Objects::nonNull)
+                                             .map(Modifiers::getCountryModifiers)
+                                             .collect(Collectors.toList()));
+        }
+
+        list.addAll(this.save.getTradeNodes()
+                             .values()
+                             .stream()
+                             .map(tradeNode -> tradeNode.getCountry(this))
+                             .filter(Objects::nonNull)
+                             .filter(TradeNodeCountry::hasTrader)
+                             .map(TradeNodeCountry::getTradePolicy)
+                             .filter(Objects::nonNull)
+                             .map(TradePolicy::getCountriesWithMerchantModifier)
+                             .filter(Objects::nonNull)
+                             .map(Modifiers::getCountryModifiers)
+                             .collect(Collectors.toList()));
+
+        if (MapUtils.isNotEmpty(getAdvisors())) {
+            list.addAll(getAdvisors().values()
+                                     .stream()
+                                     .map(SaveAdvisor::getModifiers)
+                                     .filter(Objects::nonNull)
+                                     .map(Modifiers::getCountryModifiers)
+                                     .collect(Collectors.toList()));
+        }
+
+        list.addAll(this.getOwnedProvinces()
+                        .stream()
+                        .map(SaveProvince::getSaveArea)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .map(saveArea -> saveArea.getInvestment(this))
+                        .filter(Objects::nonNull)
+                        .map(SaveInvestment::getInvestments)
+                        .flatMap(Collection::stream)
+                        .map(Investment::getOwnerModifier)
+                        .filter(Objects::nonNull)
+                        .map(Modifiers::getCountryModifiers)
+                        .collect(Collectors.toList()));
+
+        if (getFactions() != null) {
+            getFactions().stream()
+                         .max(Comparator.comparing(SaveFaction::getInfluence))
+                         .ifPresent(faction -> list.add(faction.getType().getModifiers().getCountryModifiers()));
+        }
+
+        list.addAll(this.getOwnedProvinces()
+                        .stream()
+                        .map(SaveProvince::getBuildings)
+                        .flatMap(Collection::stream)
+                        .map(Building::getModifiers)
+                        .filter(Objects::nonNull)
+                        .map(Modifiers::getCountryModifiers)
+                        .filter(Predicate.not(Modifiers::isEmpty))
+                        .collect(Collectors.toList()));
+
+        if (getGovernment() != null) {
+            list.addAll(getGovernment().getReforms()
+                                       .stream()
+                                       .map(GovernmentReform::getModifiers)
+                                       .filter(Objects::nonNull)
+                                       .map(Modifiers::getCountryModifiers)
+                                       .collect(Collectors.toList()));
+        }
+
+        if (getGovernmentRank() != null) {
+            list.add(getGovernmentRank().getModifiers().getCountryModifiers());
+        }
+
+        if (getHegemon() != null) {
+            list.add(getHegemon().getModifiers().getCountryModifiers());
+        }
+
+        if (getReligion().getGameReligion().getCountry() != null) {
+            list.add(getReligion().getGameReligion().getCountry().getCountryModifiers());
+        }
+
+        if (getSecondaryReligion() != null && getSecondaryReligion().getGameReligion().getCountryAsSecondary() != null) {
+            list.add(getReligion().getGameReligion().getCountryAsSecondary().getCountryModifiers());
+        }
+
+        SavePapacy papacy;
+        if ((papacy = getReligion().getPapacy()) != null && BooleanUtils.toBoolean(papacy.getPapacyActive())) {
+            if (papacy.getGoldenBull() != null) {
+                list.add(papacy.getGoldenBull().getModifiers().getCountryModifiers());
+            }
+
+            if (BooleanUtils.toBoolean(papacy.getCouncilActive()) && !BooleanUtils.toBoolean(papacy.getCouncilFinished())) {
+                if (papacy.getHarsh().contains(this)) {
+                    list.add(papacy.getGamePapacy().getHarshModifiers().getCountryModifiers());
+                } else if (papacy.getNeutral().contains(this)) {
+                    list.add(papacy.getGamePapacy().getNeutralModifiers().getCountryModifiers());
+                } else if (papacy.getConcilatory().contains(this)) {
+                    list.add(papacy.getGamePapacy().getConcilatoryModifiers().getCountryModifiers());
+                }
+            }
+
+            if (MapUtils.isNotEmpty(papacy.getConcessions())) {
+                list.add(papacy.getConcessionsModifiers());
+            }
+        }
+
         return ModifiersUtils.sumModifiers(list.toArray(Modifiers[]::new));
     }
 
@@ -3720,7 +3993,7 @@ public class Country {
         ClausewitzItem techItem = this.item.getChild("technology");
 
         if (techItem != null) {
-            this.tech = new Technology(techItem);
+            this.tech = new CountryTechnology(this.save, techItem);
         }
 
         List<ClausewitzItem> estateItems = this.item.getChildren("estate");

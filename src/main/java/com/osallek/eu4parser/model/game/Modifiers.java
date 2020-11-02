@@ -29,6 +29,10 @@ public class Modifiers {
     }
 
     public Modifiers(List<ClausewitzVariable> variables) {
+        this(variables, "");
+    }
+
+    public Modifiers(List<ClausewitzVariable> variables, String prefix) {
         this.enables = variables.stream()
                                 .filter(var -> "enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
                                                || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
@@ -41,7 +45,8 @@ public class Modifiers {
                                                  && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
                                                  && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
                                                  && NumbersUtils.toDouble(var.getValue()) != null)
-                                  .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getAsDouble, (a, b) -> b));
+                                  .collect(Collectors.toMap(var -> ModifiersUtils.getModifier(prefix + var.getName()), ClausewitzVariable::getAsDouble,
+                                                            (a, b) -> b));
     }
 
     public Modifiers(ClausewitzVariable... variables) {

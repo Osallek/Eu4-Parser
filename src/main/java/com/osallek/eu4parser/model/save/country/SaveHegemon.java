@@ -2,7 +2,9 @@ package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.game.Hegemon;
+import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.save.Save;
 
 public class SaveHegemon {
@@ -38,5 +40,11 @@ public class SaveHegemon {
     public void setProgress(Double progress) {
         progress = Math.max(0d, Math.min(progress, 100d));
         this.item.setVariable("progress", progress);
+    }
+
+    public Modifiers getModifiers() {
+        return ModifiersUtils.sumModifiers(getHegemon().getBase(),
+                                           ModifiersUtils.scaleModifiers(getHegemon().getScale(), getProgress() / 100),
+                                           getProgress() >= 100d ? getHegemon().getMax() : null);
     }
 }

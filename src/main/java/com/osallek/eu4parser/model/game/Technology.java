@@ -22,7 +22,7 @@ public class Technology implements Comparable<Technology> {
         this.aheadOfTime = aheadOfTime;
         this.year = item.getVarAsInt("year");
 
-        this.modifiers = new Modifiers(item.getVarsNot("year"));
+        this.modifiers = new Modifiers(item.getVarsNot("year"), "tech_");
     }
 
     public Power getType() {

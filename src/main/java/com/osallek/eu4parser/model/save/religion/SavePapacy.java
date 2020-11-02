@@ -5,12 +5,16 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.game.GoldenBull;
+import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.game.Papacy;
+import com.osallek.eu4parser.model.game.PapacyConcession;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SavePapacy {
 
@@ -39,6 +44,10 @@ public class SavePapacy {
         this.religion = religion;
         this.save = save;
         refreshAttributes();
+    }
+
+    public Papacy getGamePapacy() {
+        return this.save.getGame().getReligion(this.religion.getName()).getPapacy();
     }
 
     public Country getCrusadeTarget() {
@@ -268,7 +277,7 @@ public class SavePapacy {
     public Map<String, List<String>> getConcessions() {
         Map<String, List<String>> concessions = new LinkedHashMap<>();
 
-        if (getCouncilActive() == null || !getCouncilActive()) {
+        if (!BooleanUtils.toBoolean(getCouncilActive())) {
             return concessions;
         }
 
@@ -278,14 +287,10 @@ public class SavePapacy {
             return concessions;
         }
 
-        Papacy gamePapacy = this.save.getGame().getReligion(this.religion.getName()).getPapacy();
         for (int i = 0; i < list.size(); i++) {
-            String choose = gamePapacy.getConcession(i).getName() + (list.getAsInt(i) == 1 ? "_harsh" :
-                                                                     "_concilatory");
-
+            String choose = getGamePapacy().getConcession(i).getName() + (list.getAsInt(i) == 1 ? "_harsh" : "_concilatory");
             concessions.put(choose,
-                            Arrays.asList(gamePapacy.getConcession(i).getName() + "_harsh",
-                                          gamePapacy.getConcession(i).getName() + "_concilatory"));
+                            Arrays.asList(getGamePapacy().getConcession(i).getName() + "_harsh", getGamePapacy().getConcession(i).getName() + "_concilatory"));
         }
 
         return concessions;
@@ -303,6 +308,47 @@ public class SavePapacy {
             list.clear();
             list.addAll(concessionsIds.toArray(new Integer[0]));
         }
+    }
+
+    public Map<PapacyConcession, Integer> getConcessionsChoices() {
+        if (!BooleanUtils.toBoolean(getCouncilActive())) {
+            return new LinkedHashMap<>();
+        }
+
+        ClausewitzList list = this.item.getList("concessions");
+
+        if (list == null) {
+            return new LinkedHashMap<>();
+        }
+
+        return IntStream.range(0, list.size()).boxed().collect(Collectors.toMap(i -> getGamePapacy().getConcession(i), list::getAsInt));
+    }
+
+    public Modifiers getConcessionsModifiers() {
+        return ModifiersUtils.sumModifiers(getConcessionsChoices().entrySet()
+                                                                  .stream()
+                                                                  .filter(entry -> entry.getValue() != 0)
+                                                                  .map(entry -> entry.getValue() == 1 ? entry.getKey().getHarshModifiers()
+                                                                                                      : entry.getKey().getConcilatoryModifiers())
+                                                                  .toArray(Modifiers[]::new));
+    }
+
+    public List<Country> getConcilatory() {
+        ClausewitzList list = this.item.getList("concilatory");
+
+        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+    }
+
+    public List<Country> getNeutral() {
+        ClausewitzList list = this.item.getList("neutral");
+
+        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+    }
+
+    public List<Country> getHarsh() {
+        ClausewitzList list = this.item.getList("harsh");
+
+        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
     private void refreshAttributes() {

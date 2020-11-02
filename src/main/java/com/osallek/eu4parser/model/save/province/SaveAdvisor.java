@@ -2,8 +2,10 @@ package com.osallek.eu4parser.model.save.province;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.game.Advisor;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
@@ -23,7 +25,7 @@ public class SaveAdvisor {
     public SaveAdvisor(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        this.gameAdvisor = this.save.getGame().getAdvisor(getName());
+        this.gameAdvisor = this.save.getGame().getAdvisor(getType());
         refreshAttributes();
     }
 
@@ -101,6 +103,15 @@ public class SaveAdvisor {
 
     public void setHireDate(LocalDate hireDate) {
         this.item.setVariable("hire_date", hireDate);
+    }
+
+    public Modifiers getModifiers() {
+        if (getGameAdvisor().getSkillScaledModifier() == null) {
+            return getGameAdvisor().getModifiers();
+        } else {
+            return ModifiersUtils.sumModifiers(getGameAdvisor().getModifiers(),
+                                               ModifiersUtils.scaleModifiers(getGameAdvisor().getSkillScaledModifier(), getSkill()));
+        }
     }
 
     private void refreshAttributes() {

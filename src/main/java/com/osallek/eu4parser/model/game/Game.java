@@ -103,6 +103,8 @@ public class Game {
 
     private Map<Government, Path> governments;
 
+    private Map<GovernmentRank, Path> governmentRanks;
+
     private Map<GovernmentName, Path> governmentNames;
 
     private Map<GovernmentReform, Path> governmentReforms;
@@ -224,6 +226,7 @@ public class Game {
         readGoldenBulls();
         readEvents();
         readGovernments();
+        readGovernmentRanks();
         readGovernmentNames();
         readGovernmentReforms();
         readUnits();
@@ -710,6 +713,14 @@ public class Game {
         }
 
         return null;
+    }
+
+    public Set<GovernmentRank> getGovernmentRanks() {
+        return this.governmentRanks.keySet();
+    }
+
+    public GovernmentRank getGovernmentRank(int level) {
+        return this.governmentRanks.keySet().stream().filter(governmentRank -> governmentRank.getLevel() == level).findFirst().orElse(null);
     }
 
     public Set<GovernmentName> getGovernmentNames() {
@@ -1699,7 +1710,16 @@ public class Game {
                  });
             this.religionGroups.values().forEach(groups -> groups.forEach(religionGroup -> {
                 religionGroup.setLocalizedName(this.getLocalisation(religionGroup.getName()));
-                religionGroup.getReligions().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
+                religionGroup.getReligions().forEach(religion -> {
+                    religion.setLocalizedName(this.getLocalisation(religion.getName()));
+
+                    if (religion.getPapacy() != null) {
+                        religion.getPapacy().getConcessions().forEach(papacyConcession -> {
+                            papacyConcession.setConcilatoryLocalizedName(papacyConcession.getName() + "_concilatory");
+                            papacyConcession.setHarshLocalizedName(papacyConcession.getName() + "_harsh");
+                        });
+                    }
+                });
             }));
         } catch (IOException e) {
         }
@@ -1880,6 +1900,21 @@ public class Game {
                  });
 
             this.governments.keySet().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readGovernmentRanks() {
+        File governmentRanksFolder = new File(this.commonFolderPath + File.separator + "government_ranks");
+
+        try (Stream<Path> paths = Files.walk(governmentRanksFolder.toPath())) {
+            this.governmentRanks = new TreeMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem governmentRanksItem = ClausewitzParser.parse(path.toFile(), 0);
+                     governmentRanksItem.getChildren().forEach(item -> this.governmentRanks.put(new GovernmentRank(item), path));
+                 });
         } catch (IOException e) {
         }
     }

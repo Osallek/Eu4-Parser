@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -69,6 +70,10 @@ public class Religion {
 
     private final LocalDate date;
 
+    private final Modifiers country;
+
+    private final Modifiers countryAsSecondary;
+
     public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
         this.religionGroup = religionGroup;
         this.name = item.getName();
@@ -105,6 +110,8 @@ public class Religion {
         this.papacy = child == null ? null : new Papacy(child);
         child = item.getChild("orthodox_icons");
         this.icons = child == null ? null : child.getChildren().stream().map(Icon::new).collect(Collectors.toList());
+        this.country = new Modifiers(item.getChild("country"));
+        this.countryAsSecondary = new Modifiers(item.getChild("country_as_secondary"));
     }
 
     public String getLocalizedName() {
@@ -229,5 +236,13 @@ public class Religion {
 
     public ReligionGroup getReligionGroup() {
         return religionGroup;
+    }
+
+    public Modifiers getCountry() {
+        return country;
+    }
+
+    public Modifiers getCountryAsSecondary() {
+        return countryAsSecondary;
     }
 }

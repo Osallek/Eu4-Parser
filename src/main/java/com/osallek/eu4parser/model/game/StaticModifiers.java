@@ -267,9 +267,9 @@ public enum StaticModifiers {
 
     private static final Map<String, StaticModifiers> STATIC_MODIFIERS_MAP;
 
-    private static final List<StaticModifiers> APPLIED_TO_COUNTRY;
+    public static final List<StaticModifiers> APPLIED_TO_COUNTRY;
 
-    private static final List<StaticModifiers> APPLIED_TO_PROVINCE;
+    public static final List<StaticModifiers> APPLIED_TO_PROVINCE;
 
     static {
         STATIC_MODIFIERS_MAP = Arrays.stream(StaticModifiers.values()).collect(Collectors.toMap(Enum::name, Function.identity()));

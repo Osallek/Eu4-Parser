@@ -43,8 +43,7 @@ public class ReligionGroup {
         this.centerOfReligion = item.getVarAsInt("center_of_religion");
         this.flagsWithEmblemPercentage = item.getVarAsInt("flags_with_emblem_percentage");
         ClausewitzList list = item.getList("flag_emblem_index_range");
-        this.flagEmblemIndexRange = list == null ? null :
-                                    new AbstractMap.SimpleEntry<>(list.getAsInt(0), list.getAsInt(1));
+        this.flagEmblemIndexRange = list == null ? null : new AbstractMap.SimpleEntry<>(list.getAsInt(0), list.getAsInt(1));
         this.harmonizedModifier = item.getVarAsString("harmonized_modifier");
         this.crusadeName = item.getVarAsString("crusade_name");
     }
