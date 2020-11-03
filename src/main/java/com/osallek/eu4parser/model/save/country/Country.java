@@ -60,10 +60,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -3664,27 +3666,40 @@ public class Country {
         this.wars.add(war);
     }
 
+    public double getProductionEfficiency() {
+        return getTotalModifiers("production_efficiency", StaticModifiers.PRODUCTION_EFFICIENCY).getModifier("production_efficiency")
+               + getTotalModifiers("tech_production_efficiency", StaticModifiers.PRODUCTION_EFFICIENCY).getModifier("tech_production_efficiency");
+    }
+
+    public Modifiers getTotalModifiers(String name, StaticModifiers... toIgnore) {
+        return getTotalModifiers(m -> m.getModifiers(name), toIgnore);
+    }
+
     public Modifiers getTotalModifiers() {
+        return getTotalModifiers(Modifiers::getCountryModifiers);
+    }
+
+    public Modifiers getTotalModifiers(Function<Modifiers, Modifiers> mapper, StaticModifiers... toIgnore) {
         List<Modifiers> list = new ArrayList<>();
-        list.add(StaticModifiers.applyToModifiersCountry(this));
+        list.add(mapper.apply(StaticModifiers.applyToModifiersCountry(this, toIgnore)));
 
         if (CollectionUtils.isNotEmpty(getModifiers())) {
             list.addAll(getModifiers().stream()
                                       .filter(modifier -> !StaticModifier.class.equals(modifier.getModifier().getClass()))
                                       .map(modifier -> modifier.getModifiers(this))
                                       .filter(Objects::nonNull)
-                                      .map(Modifiers::getCountryModifiers)
+                                      .map(mapper)
                                       .filter(Objects::nonNull)
                                       .collect(Collectors.toList()));
         }
 
         if (getIdeaGroups() != null) {
-            getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(key.getModifiers(value).getCountryModifiers()));
+            getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(mapper.apply(key.getModifiers(value))));
         }
 
-        list.add(getTech().getModifiers(Power.ADM, getTech().getAdm()));
-        list.add(getTech().getModifiers(Power.DIP, getTech().getDip()));
-        list.add(getTech().getModifiers(Power.MIL, getTech().getMil()));
+        list.add(mapper.apply(getTech().getModifiers(Power.ADM, getTech().getAdm())));
+        list.add(mapper.apply(getTech().getModifiers(Power.DIP, getTech().getDip())));
+        list.add(mapper.apply(getTech().getModifiers(Power.MIL, getTech().getMil())));
 
         Monarch m;
         if ((m = getMonarch()) != null && m.getPersonalities() != null
@@ -3694,7 +3709,7 @@ public class Country {
                          .stream()
                          .map(RulerPersonality::getModifiers)
                          .filter(Objects::nonNull)
-                         .map(Modifiers::getCountryModifiers)
+                         .map(mapper)
                          .collect(Collectors.toList()));
         }
 
@@ -3704,32 +3719,32 @@ public class Country {
                              .filter(modifier -> modifier.getArmyProfessionalism() <= NumbersUtils.doubleOrDefault(getArmyProfessionalism()))
                              .map(ProfessionalismModifier::getModifiers)
                              .filter(Objects::nonNull)
-                             .map(Modifiers::getCountryModifiers)
+                             .map(mapper)
                              .collect(Collectors.toList()));
 
         list.addAll(getTradedBonus().stream()
                                     .map(TradeGood::getModifiers)
                                     .filter(Objects::nonNull)
-                                    .map(Modifiers::getCountryModifiers)
+                                    .map(mapper)
                                     .collect(Collectors.toList()));
 
         list.addAll(getActivePolicies().stream()
                                        .map(ActivePolicy::getPolicy)
                                        .map(Policy::getModifiers)
                                        .filter(Objects::nonNull)
-                                       .map(Modifiers::getCountryModifiers)
+                                       .map(mapper)
                                        .collect(Collectors.toList()));
 
         list.addAll(getActiveAgeAbility().stream()
                                          .map(AgeAbility::getModifiers)
                                          .filter(Objects::nonNull)
-                                         .map(Modifiers::getCountryModifiers)
+                                         .map(mapper)
                                          .collect(Collectors.toList()));
 
         list.addAll(getEmbracedInstitutions().stream()
                                              .map(Institution::getBonuses)
                                              .filter(Objects::nonNull)
-                                             .map(Modifiers::getCountryModifiers)
+                                             .map(mapper)
                                              .collect(Collectors.toList()));
 
         if (getCapital().inHre() && !this.save.getHre().dismantled()) {
@@ -3738,7 +3753,7 @@ public class Country {
                                  .stream()
                                  .map(ImperialReform::getAllModifiers)
                                  .filter(Objects::nonNull)
-                                 .map(Modifiers::getCountryModifiers)
+                                 .map(mapper)
                                  .filter(Objects::nonNull)
                                  .collect(Collectors.toList()));
 
@@ -3748,7 +3763,7 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getEmperorModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(Modifiers::getCountryModifiers)
+                                     .map(mapper)
                                      .filter(Objects::nonNull)
                                      .collect(Collectors.toList()));
                 list.addAll(this.save.getHre()
@@ -3756,9 +3771,9 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getEmperorPerPrinceModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
-                                     .map(Modifiers::getCountryModifiers)
+                                     .map(mapper)
                                      .filter(Objects::nonNull)
+                                     .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
                                      .collect(Collectors.toList()));
             } else {
                 list.addAll(this.save.getHre()
@@ -3766,7 +3781,7 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getMemberModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(Modifiers::getCountryModifiers)
+                                     .map(mapper)
                                      .filter(Objects::nonNull)
                                      .collect(Collectors.toList()));
             }
@@ -3777,9 +3792,9 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getElectorPerPrinceModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
-                                     .map(Modifiers::getCountryModifiers)
+                                     .map(mapper)
                                      .filter(Objects::nonNull)
+                                     .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
                                      .collect(Collectors.toList()));
             }
         }
@@ -3790,7 +3805,7 @@ public class Country {
                                  .stream()
                                  .map(ImperialReform::getEmperorModifiers)
                                  .filter(Objects::nonNull)
-                                 .map(Modifiers::getCountryModifiers)
+                                 .map(mapper)
                                  .collect(Collectors.toList()));
         }
 
@@ -3799,8 +3814,12 @@ public class Country {
                                    .stream()
                                    .map(Fervor::getModifiers)
                                    .filter(Objects::nonNull)
-                                   .map(Modifiers::getCountryModifiers)
+                                   .map(mapper)
                                    .collect(Collectors.toList()));
+
+            list.add(mapper.apply(ModifiersUtils.scaleWithActivesFervor(this,
+                                                                        new Modifiers(new HashSet<>(),
+                                                                                      Map.of(ModifiersUtils.getModifier("MONTHLY_FERVOR_INCREASE"), -5d)))));
         }
 
         if (getNativeAdvancements() != null) {
@@ -3812,16 +3831,16 @@ public class Country {
                                                .filter(Objects::nonNull)
                                                .map(NativeAdvancement::getModifiers)
                                                .filter(Objects::nonNull)
-                                               .map(Modifiers::getCountryModifiers)
+                                               .map(mapper)
                                                .collect(Collectors.toList()));
         }
 
         if (getNavalDoctrine() != null) {
-            list.add(getNavalDoctrine().getModifiers().getCountryModifiers());
+            list.add(mapper.apply(getNavalDoctrine().getModifiers()));
         }
 
         if (getPersonalDeity() != null) {
-            list.add(getPersonalDeity().getModifiers().getCountryModifiers());
+            list.add(mapper.apply(getPersonalDeity().getModifiers()));
         }
 
         if (getReligiousReforms() != null) {
@@ -3829,7 +3848,7 @@ public class Country {
                                              .stream()
                                              .map(ReligiousReform::getModifiers)
                                              .filter(Objects::nonNull)
-                                             .map(Modifiers::getCountryModifiers)
+                                             .map(mapper)
                                              .collect(Collectors.toList()));
         }
 
@@ -3843,7 +3862,7 @@ public class Country {
                              .filter(Objects::nonNull)
                              .map(TradePolicy::getCountriesWithMerchantModifier)
                              .filter(Objects::nonNull)
-                             .map(Modifiers::getCountryModifiers)
+                             .map(mapper)
                              .collect(Collectors.toList()));
 
         if (MapUtils.isNotEmpty(getAdvisors())) {
@@ -3851,7 +3870,7 @@ public class Country {
                                      .stream()
                                      .map(SaveAdvisor::getModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(Modifiers::getCountryModifiers)
+                                     .map(mapper)
                                      .collect(Collectors.toList()));
         }
 
@@ -3866,13 +3885,13 @@ public class Country {
                         .flatMap(Collection::stream)
                         .map(Investment::getOwnerModifier)
                         .filter(Objects::nonNull)
-                        .map(Modifiers::getCountryModifiers)
+                        .map(mapper)
                         .collect(Collectors.toList()));
 
         if (getFactions() != null) {
             getFactions().stream()
                          .max(Comparator.comparing(SaveFaction::getInfluence))
-                         .ifPresent(faction -> list.add(faction.getType().getModifiers().getCountryModifiers()));
+                         .ifPresent(faction -> list.add(mapper.apply(faction.getType().getModifiers())));
         }
 
         list.addAll(this.getOwnedProvinces()
@@ -3881,7 +3900,7 @@ public class Country {
                         .flatMap(Collection::stream)
                         .map(Building::getModifiers)
                         .filter(Objects::nonNull)
-                        .map(Modifiers::getCountryModifiers)
+                        .map(mapper)
                         .filter(Predicate.not(Modifiers::isEmpty))
                         .collect(Collectors.toList()));
 
@@ -3890,44 +3909,44 @@ public class Country {
                                        .stream()
                                        .map(GovernmentReform::getModifiers)
                                        .filter(Objects::nonNull)
-                                       .map(Modifiers::getCountryModifiers)
+                                       .map(mapper)
                                        .collect(Collectors.toList()));
         }
 
         if (getGovernmentRank() != null) {
-            list.add(getGovernmentRank().getModifiers().getCountryModifiers());
+            list.add(mapper.apply(getGovernmentRank().getModifiers()));
         }
 
         if (getHegemon() != null) {
-            list.add(getHegemon().getModifiers().getCountryModifiers());
+            list.add(mapper.apply(getHegemon().getModifiers()));
         }
 
         if (getReligion().getGameReligion().getCountry() != null) {
-            list.add(getReligion().getGameReligion().getCountry().getCountryModifiers());
+            list.add(mapper.apply(getReligion().getGameReligion().getCountry()));
         }
 
         if (getSecondaryReligion() != null && getSecondaryReligion().getGameReligion().getCountryAsSecondary() != null) {
-            list.add(getReligion().getGameReligion().getCountryAsSecondary().getCountryModifiers());
+            list.add(mapper.apply(getReligion().getGameReligion().getCountryAsSecondary()));
         }
 
         SavePapacy papacy;
         if ((papacy = getReligion().getPapacy()) != null && BooleanUtils.toBoolean(papacy.getPapacyActive())) {
             if (papacy.getGoldenBull() != null) {
-                list.add(papacy.getGoldenBull().getModifiers().getCountryModifiers());
+                list.add(mapper.apply(papacy.getGoldenBull().getModifiers()));
             }
 
             if (BooleanUtils.toBoolean(papacy.getCouncilActive()) && !BooleanUtils.toBoolean(papacy.getCouncilFinished())) {
                 if (papacy.getHarsh().contains(this)) {
-                    list.add(papacy.getGamePapacy().getHarshModifiers().getCountryModifiers());
+                    list.add(mapper.apply(papacy.getGamePapacy().getHarshModifiers()));
                 } else if (papacy.getNeutral().contains(this)) {
-                    list.add(papacy.getGamePapacy().getNeutralModifiers().getCountryModifiers());
+                    list.add(mapper.apply(papacy.getGamePapacy().getNeutralModifiers()));
                 } else if (papacy.getConcilatory().contains(this)) {
-                    list.add(papacy.getGamePapacy().getConcilatoryModifiers().getCountryModifiers());
+                    list.add(mapper.apply(papacy.getGamePapacy().getConcilatoryModifiers()));
                 }
             }
 
             if (MapUtils.isNotEmpty(papacy.getConcessions())) {
-                list.add(papacy.getConcessionsModifiers());
+                list.add(mapper.apply(papacy.getConcessionsModifiers()));
             }
         }
 

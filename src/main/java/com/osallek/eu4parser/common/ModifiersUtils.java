@@ -269,7 +269,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("GLOBAL_UNREST", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("STABILITY_COST_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("MIN_AUTONOMY", ModifierType.CONSTANT, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("MIN_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("AUTONOMY_CHANGE_TIME", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("HARSH_TREATMENT_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("YEARS_OF_NATIONALISM", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
@@ -982,6 +982,10 @@ public class ModifiersUtils {
                                                                  country.getSave().getGame().getHighArmyProfessionalismMaxRange()));
     }
 
+    public static Modifiers scaleWithActivesFervor(Country country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getFervor() == null ? 0 : country.getFervor().getActives().size());
+    }
+
     public static Modifiers scaleWithPrinces(Save save, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, save.getCountries()
                                                             .values()
@@ -990,5 +994,9 @@ public class ModifiersUtils {
                                                             .filter(Objects::nonNull)
                                                             .filter(SaveProvince::inHre)
                                                             .count());
+    }
+
+    public static Modifiers scaleWithProductionEfficiency(Country country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getProductionEfficiency() * 100);
     }
 }

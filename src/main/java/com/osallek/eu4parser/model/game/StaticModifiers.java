@@ -5,6 +5,7 @@ import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public enum StaticModifiers {
@@ -117,7 +119,7 @@ public enum StaticModifiers {
     AUTHORITY(new Condition(Pair.of("authority", "0.001")), null, null),
     REGENCY_COUNCIL(new Condition(Pair.of("has_regency", "yes")), null, null),
     //    TRADE_EFFICIENCY(new Condition(Pair.of("always", "yes")), applyToCountry, null), //Fixme //Scale
-    //    PRODUCTION_EFFICIENCY(new Condition(Pair.of("always", "yes")), applyToCountry, null), //Fixme //Scale
+    PRODUCTION_EFFICIENCY(new Condition(Pair.of("always", "yes")), null, null),
     TRADE_REFUSAL(new Condition(Pair.of("num_of_trade_embargos", "1")), null, null),
     MERCANTILISM(new Condition(Pair.of("always", "yes")), null, null),
     ARMY_TRADITION(new Condition(Pair.of("army_tradition", "0.001")), null, null),
@@ -184,7 +186,7 @@ public enum StaticModifiers {
     SUBJECT_NATION(new Condition(Pair.of("is_subject", "yes")), null, null),
     VASSAL_NATION(new Condition(Pair.of("is_vassal", "yes")), null, null),
     PRIMITIVE_NATION(new Condition(Pair.of("primitives", "yes")), null, null),
-    MAINTAINED_FORTS(new Condition(Pair.of("always", "no")), null, null), //Fixme
+    MAINTAINED_FORTS(new Condition(Pair.of("always", "no")), null, null), //Fixme nbForts_maintained / (dev / 50)
     GOV_RANK_1(new Condition(Pair.of("government_rank", "1")), null, null),
     GOV_RANK_2(new Condition(Pair.of("government_rank", "2")), null, null),
     GOV_RANK_3(new Condition(Pair.of("government_rank", "3")), null, null),
@@ -369,6 +371,7 @@ public enum StaticModifiers {
         DOOM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDoom(country, modif.modifiers);
         AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithAuthority(country, modif.modifiers);
         REGENCY_COUNCIL.applyToCountry = (country, modif) -> StaticModifiers.REGENCY_COUNCIL.modifiers;
+        PRODUCTION_EFFICIENCY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithProductionEfficiency(country, modif.modifiers);
         TRADE_REFUSAL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithTradeRefusal(country, modif.modifiers);
         MERCANTILISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMercantilism(country, modif.modifiers);
         ARMY_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithArmyTradition(country, modif.modifiers);
@@ -551,15 +554,21 @@ public enum StaticModifiers {
         return STATIC_MODIFIERS_MAP.get(name.toUpperCase());
     }
 
-    public static Modifiers applyToModifiersCountry(Country country) {
+    public static Modifiers applyToModifiersCountry(Country country, StaticModifiers... toIgnore) {
+        List<StaticModifiers> ignore = Arrays.asList(toIgnore);
+
         return ModifiersUtils.sumModifiers(APPLIED_TO_COUNTRY.stream()
+                                                             .filter(Predicate.not(ignore::contains))
                                                              .filter(staticModifiers -> staticModifiers.trigger.apply(country, country))
                                                              .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers))
                                                              .toArray(Modifiers[]::new));
     }
 
-    public static Modifiers applyToModifiersProvince(SaveProvince province) {
+    public static Modifiers applyToModifiersProvince(SaveProvince province, StaticModifiers... toIgnore) {
+        List<StaticModifiers> ignore = Arrays.asList(toIgnore);
+
         return ModifiersUtils.sumModifiers(APPLIED_TO_PROVINCE.stream()
+                                                              .filter(Predicate.not(ignore::contains))
                                                               .filter(staticModifiers -> staticModifiers.trigger.apply(province))
                                                               .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers))
                                                               .toArray(Modifiers[]::new));

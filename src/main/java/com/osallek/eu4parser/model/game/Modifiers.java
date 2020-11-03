@@ -136,6 +136,13 @@ public class Modifiers {
         return modifiers;
     }
 
+    public Modifiers getModifiers(String name) {
+        return new Modifiers(new HashSet<>(), this.modifiers.entrySet()
+                                                         .stream()
+                                                         .filter(entry -> entry.getKey().getName().equalsIgnoreCase(name))
+                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    }
+
     public Modifiers getCountryModifiers() {
         return new Modifiers(this.enables, this.modifiers.entrySet()
                                                          .stream()
