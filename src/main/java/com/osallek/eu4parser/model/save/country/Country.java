@@ -1044,6 +1044,10 @@ public class Country {
         return this.item.getVarAsString("highest_possible_fort_building");
     }
 
+    public int getTotalFortLevel() {
+        return getOwnedProvinces().stream().filter(province -> province.getOwner().equals(province.getController())).mapToInt(SaveProvince::getFortLevel).sum();
+    }
+
     public Double getTransferHomeBonus() {
         return this.item.getVarAsDouble("transfer_home_bonus");
     }
@@ -3666,6 +3670,11 @@ public class Country {
         this.wars.add(war);
     }
 
+    public double getLandForceLimit() { //Fixme provinces buildings
+        return getTotalModifiers("land_forcelimit").getModifier("land_forcelimit")
+               * (1 + getTotalModifiers("land_forcelimit_modifier").getModifier("land_forcelimit_modifier"));
+    }
+
     public double getProductionEfficiency() {
         return getTotalModifiers("production_efficiency", StaticModifiers.PRODUCTION_EFFICIENCY).getModifier("production_efficiency")
                + getTotalModifiers("tech_production_efficiency", StaticModifiers.PRODUCTION_EFFICIENCY).getModifier("tech_production_efficiency");
@@ -3682,6 +3691,14 @@ public class Country {
     public Modifiers getTotalModifiers(Function<Modifiers, Modifiers> mapper, StaticModifiers... toIgnore) {
         List<Modifiers> list = new ArrayList<>();
         list.add(mapper.apply(StaticModifiers.applyToModifiersCountry(this, toIgnore)));
+
+        List<StaticModifiers> ignore = Arrays.asList(toIgnore);
+        String ss = StaticModifiers.APPLIED_TO_COUNTRY.stream()
+                                                      .filter(Predicate.not(ignore::contains))
+                                                      .filter(staticModifiers -> staticModifiers.trigger.apply(this, this))
+                                                      .map(staticModifiers -> staticModifiers.applyToCountry.apply(this, staticModifiers))
+                                                      .map(Modifiers::toString)
+                                                      .collect(Collectors.joining("\n"));
 
         if (CollectionUtils.isNotEmpty(getModifiers())) {
             list.addAll(getModifiers().stream()
@@ -3948,6 +3965,15 @@ public class Country {
             if (MapUtils.isNotEmpty(papacy.getConcessions())) {
                 list.add(mapper.apply(papacy.getConcessionsModifiers()));
             }
+        }
+
+        if (CollectionUtils.isNotEmpty(getSubjects())) {
+            list.add(mapper.apply(new Modifiers(new HashSet<>(),
+                                                Map.of(ModifiersUtils.getModifier("LAND_FORCELIMIT"),
+                                                       getSubjects().stream()
+                                                                    .mapToDouble(subject -> subject.getLandForceLimit()
+                                                                                            * subject.getSubjectType().getForcelimitToOverlord())
+                                                                    .sum()))));
         }
 
         return ModifiersUtils.sumModifiers(list.toArray(Modifiers[]::new));

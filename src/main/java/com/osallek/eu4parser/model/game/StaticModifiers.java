@@ -186,7 +186,7 @@ public enum StaticModifiers {
     SUBJECT_NATION(new Condition(Pair.of("is_subject", "yes")), null, null),
     VASSAL_NATION(new Condition(Pair.of("is_vassal", "yes")), null, null),
     PRIMITIVE_NATION(new Condition(Pair.of("primitives", "yes")), null, null),
-    MAINTAINED_FORTS(new Condition(Pair.of("always", "no")), null, null), //Fixme nbForts_maintained / (dev / 50)
+    MAINTAINED_FORTS(new Condition(Pair.of("always", "yes")), null, null),
     GOV_RANK_1(new Condition(Pair.of("government_rank", "1")), null, null),
     GOV_RANK_2(new Condition(Pair.of("government_rank", "2")), null, null),
     GOV_RANK_3(new Condition(Pair.of("government_rank", "3")), null, null),
@@ -433,6 +433,7 @@ public enum StaticModifiers {
         SUBJECT_NATION.applyToCountry = (country, modif) -> StaticModifiers.SUBJECT_NATION.modifiers;
         VASSAL_NATION.applyToCountry = (country, modif) -> StaticModifiers.VASSAL_NATION.modifiers;
         PRIMITIVE_NATION.applyToCountry = (country, modif) -> StaticModifiers.PRIMITIVE_NATION.modifiers;
+        MAINTAINED_FORTS.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMaintainedForts(country, modif.modifiers);
         GOV_RANK_1.applyToCountry = (country, modif) -> StaticModifiers.GOV_RANK_1.modifiers;
         GOV_RANK_2.applyToCountry = (country, modif) -> StaticModifiers.GOV_RANK_2.modifiers;
         GOV_RANK_3.applyToCountry = (country, modif) -> StaticModifiers.GOV_RANK_3.modifiers;

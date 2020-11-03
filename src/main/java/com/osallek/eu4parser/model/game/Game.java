@@ -663,11 +663,11 @@ public class Game {
     }
 
     public int getBankruptcyDuration() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("BANKRUPTCY_DURATION").value.toint();
+        return this.defines.get(Eu4Utils.DEFINE_ECONOMY_KEY).get("BANKRUPTCY_DURATION").value.toint();
     }
 
     public int getNbGreatPowers() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NUM_OF_GREAT_POWERS").value.toint();
+        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("NUM_OF_GREAT_POWERS").value.toint();
     }
 
     public int getNomadDevelopmentScale() {
@@ -676,6 +676,10 @@ public class Game {
 
     public int getLargeColonialNationLimit() {
         return this.defines.get(Eu4Utils.DEFINE_ECONOMY_KEY).get("LARGE_COLONIAL_NATION_LIMIT").value.toint();
+    }
+
+    public int getFortPerDevRatio() {
+        return this.defines.get(Eu4Utils.DEFINE_MILITARY_KEY).get("FORT_PER_DEV_RATIO").value.toint();
     }
 
     public double getLowArmyProfessionalismMinRange() {
@@ -2105,6 +2109,8 @@ public class Game {
                      ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
                      advisorsItem.getChildren().forEach(item -> this.subjectTypes.put(new SubjectType(item, this.subjectTypes.keySet()), path));
                  });
+
+            this.subjectTypes.entrySet().removeIf(entry -> StringUtils.isBlank(entry.getKey().getSprite()));
 
             this.subjectTypes.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
         } catch (IOException e) {

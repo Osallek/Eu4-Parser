@@ -46,6 +46,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1041,6 +1042,24 @@ public class SaveProvince extends Province {
         this.item.setVariable("mothball_command", fortMothballed);
     }
 
+    public int getFortLevel() {
+        if (fortMothballed()) {
+            return 0;
+        }
+
+        OptionalDouble fortLevel = getBuildings().stream()
+                                                 .map(Building::getModifiers)
+                                                 .filter(m -> m.getModifier("fort_level") != null)
+                                                 .mapToDouble(m -> m.getModifier("fort_level"))
+                                                 .max();
+
+        if (fortLevel.isEmpty()) {
+            return 0;
+        } else {
+            return (int) (fortLevel.getAsDouble() + ((getOwner() != null && getOwner().getCapital().equals(this)) ? 1 : 0));
+        }
+    }
+
     public Double getTradePower() {
         return this.item.getVarAsDouble("trade_power");
     }
@@ -1339,10 +1358,14 @@ public class SaveProvince extends Province {
                                .stream()
                                .filter(child -> child.hasVar(var.getName()))
                                .findFirst()
-                               .ifPresent(child -> this.buildings.add(new ProvinceBuilding(var.getName(),
-                                                                                           var.getValue(),
-                                                                                           Eu4Utils.stringToDate(child.getName()),
-                                                                                           this.save.getGame().getBuilding(var.getName()))));
+                               .ifPresentOrElse(child -> this.buildings.add(new ProvinceBuilding(var.getName(),
+                                                                                                 var.getValue(),
+                                                                                                 Eu4Utils.stringToDate(child.getName()),
+                                                                                                 this.save.getGame().getBuilding(var.getName()))),
+                                                () -> this.buildings.add(new ProvinceBuilding(var.getName(),
+                                                                                              var.getValue(),
+                                                                                              null,
+                                                                                              this.save.getGame().getBuilding(var.getName()))));
                 }
             });
             this.buildings.sort(ProvinceBuilding::compareTo);

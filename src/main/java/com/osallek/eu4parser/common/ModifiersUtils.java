@@ -971,9 +971,13 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithLowProfessionalism(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, Math.min(Math.max(0, NumbersUtils.doubleOrDefault(country.getArmyProfessionalism()) -
-                                                                             country.getSave().getGame().getLowArmyProfessionalismMinRange()),
-                                                                 country.getSave().getGame().getLowArmyProfessionalismMaxRange()));
+        double value = Math.min(country.getSave().getGame().getLowArmyProfessionalismMaxRange(),
+                                (country.getSave().getGame().getLowArmyProfessionalismMaxRange()
+                                 - Math.max(0, (NumbersUtils.doubleOrDefault(country.getArmyProfessionalism())
+                                                - country.getSave().getGame().getLowArmyProfessionalismMinRange()))))
+                       / country.getSave().getGame().getLowArmyProfessionalismMaxRange();
+
+        return ModifiersUtils.scaleModifiers(modifiers, value);
     }
 
     public static Modifiers scaleWithHighProfessionalism(Country country, Modifiers modifiers) {
@@ -998,5 +1002,11 @@ public class ModifiersUtils {
 
     public static Modifiers scaleWithProductionEfficiency(Country country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getProductionEfficiency() * 100);
+    }
+
+    public static Modifiers scaleWithMaintainedForts(Country country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers,
+                                             country.getTotalFortLevel() / (country.getRawDevelopment() / country.getSave().getGame().getFortPerDevRatio())
+                                             / country.getHighestPossibleFort());
     }
 }

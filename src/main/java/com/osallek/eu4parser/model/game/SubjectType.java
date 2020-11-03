@@ -19,7 +19,7 @@ public class SubjectType {
 
     private String localizedName;
 
-    private Condition isPotentialOverlord;
+    private final Condition isPotentialOverlord;
 
     private String sprite;
 
@@ -888,18 +888,17 @@ public class SubjectType {
         if (this == o) {
             return true;
         }
-
-        if (!(o instanceof SubjectType)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         SubjectType that = (SubjectType) o;
-        return Objects.equals(name, that.name);
+        return Objects.equals(name, that.name) &&
+               Objects.equals(sprite, that.sprite);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(name, sprite);
     }
 
     @Override
