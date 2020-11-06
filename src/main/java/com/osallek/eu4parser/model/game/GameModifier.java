@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
@@ -37,16 +38,16 @@ public class GameModifier {
         this.localizedName = localizedName;
     }
 
-    public Modifiers getModifiers() {
+    public Modifiers getModifier() {
         return modifiers;
     }
 
-    public Modifiers getModifiers(Country country) {
-        return modifiers;
+    public Double getModifier(Country country, Modifier modifierName) {
+        return modifiers.hasModifier(modifierName) ? modifiers.getModifier(modifierName) : null;
     }
 
-    public Modifiers getModifiers(SaveProvince province) {
-        return modifiers;
+    public Double getModifier(SaveProvince province, Modifier modifierName) {
+        return modifiers.hasModifier(modifierName) ? modifiers.getModifier(modifierName) : null;
     }
 
     @Override

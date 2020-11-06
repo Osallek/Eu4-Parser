@@ -48,8 +48,11 @@ public class Estate {
 
     private final double influenceFromDevModifier;
 
-    public Estate(ClausewitzItem item, Game game) {
+    private List<ModifierDefinition> modifierDefinitions;
+
+    public Estate(ClausewitzItem item, List<ModifierDefinition> modifierDefinitions, Game game) {
         this.name = item.getName();
+        this.modifierDefinitions = modifierDefinitions;
         this.icon = item.getVarAsInt("icon");
 
         ClausewitzItem child = item.getChild("trigger");
@@ -102,6 +105,14 @@ public class Estate {
 
     void setLocalizedName(String localizedName) {
         this.localizedName = localizedName;
+    }
+
+    public List<ModifierDefinition> getModifierDefinitions() {
+        return modifierDefinitions;
+    }
+
+    public void setModifierDefinitions(List<ModifierDefinition> modifierDefinitions) {
+        this.modifierDefinitions = modifierDefinitions;
     }
 
     public int getIcon() {

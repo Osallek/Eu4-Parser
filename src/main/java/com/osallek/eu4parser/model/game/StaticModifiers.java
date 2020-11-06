@@ -5,7 +5,6 @@ import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
@@ -261,7 +260,7 @@ public enum StaticModifiers {
 
     public final Condition trigger;
 
-    private Modifiers modifiers;
+    public Modifiers modifiers;
 
     public BiFunction<Country, StaticModifiers, Modifiers> applyToCountry;
 
@@ -555,23 +554,28 @@ public enum StaticModifiers {
         return STATIC_MODIFIERS_MAP.get(name.toUpperCase());
     }
 
-    public static Modifiers applyToModifiersCountry(Country country, StaticModifiers... toIgnore) {
+    public static Double applyToModifiersCountry(Country country, Modifier modifier, StaticModifiers... toIgnore) {
         List<StaticModifiers> ignore = Arrays.asList(toIgnore);
 
-        return ModifiersUtils.sumModifiers(APPLIED_TO_COUNTRY.stream()
+        return ModifiersUtils.sumModifiers(modifier,
+                                           APPLIED_TO_COUNTRY.stream()
                                                              .filter(Predicate.not(ignore::contains))
                                                              .filter(staticModifiers -> staticModifiers.trigger.apply(country, country))
-                                                             .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers))
-                                                             .toArray(Modifiers[]::new));
+                                                             .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
+                                                             .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers)
+                                                                                                                   .getModifier(modifier))
+                                                             .collect(Collectors.toList()));
     }
 
-    public static Modifiers applyToModifiersProvince(SaveProvince province, StaticModifiers... toIgnore) {
+    public static Double applyToModifiersProvince(SaveProvince province, Modifier modifier, StaticModifiers... toIgnore) {
         List<StaticModifiers> ignore = Arrays.asList(toIgnore);
 
-        return ModifiersUtils.sumModifiers(APPLIED_TO_PROVINCE.stream()
-                                                              .filter(Predicate.not(ignore::contains))
-                                                              .filter(staticModifiers -> staticModifiers.trigger.apply(province))
-                                                              .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers))
-                                                              .toArray(Modifiers[]::new));
+        return ModifiersUtils.sumModifiers(modifier, APPLIED_TO_PROVINCE.stream()
+                                                                        .filter(Predicate.not(ignore::contains))
+                                                                        .filter(staticModifiers -> staticModifiers.trigger.apply(province))
+                                                                        .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
+                                                                        .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers)
+                                                                                                                               .getModifier(modifier))
+                                                                        .collect(Collectors.toList()));
     }
 }

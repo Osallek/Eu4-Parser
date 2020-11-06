@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,8 @@ public class History {
     private Map<Integer, Heir> heirs;
 
     private Map<Integer, Queen> queens;
+
+    private SortedMap<LocalDate, String> changedTagFrom;
 
     public History(ClausewitzItem item, Save save) {
         this.save = save;
@@ -63,6 +67,14 @@ public class History {
 
     public Map<Integer, Queen> getQueens() {
         return queens;
+    }
+
+    public SortedMap<LocalDate, String> getChangedTagFrom() {
+        return changedTagFrom;
+    }
+
+    public void setChangedTagFrom(SortedMap<LocalDate, String> changedTagFrom) {
+        this.changedTagFrom = changedTagFrom;
     }
 
     public void addEvent(LocalDate date, String name, String value) {
@@ -141,5 +153,13 @@ public class History {
                                       .filter(heir -> heir.getLeader() != null)
                                       .collect(Collectors.toMap(heir -> heir.getLeader().getId().getId(),
                                                                 Heir::getLeader)));
+
+        this.changedTagFrom = this.item.getChildren()
+                                       .stream()
+                                       .filter(child -> child.hasVar("changed_tag_from"))
+                                       .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
+                                                                 child -> ClausewitzUtils.removeQuotes(child.getVarAsString("changed_tag_from")),
+                                                                 (a, b) -> b,
+                                                                 TreeMap::new));
     }
 }

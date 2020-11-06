@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.Power;
 import org.apache.commons.lang3.BooleanUtils;
@@ -84,24 +85,28 @@ public class IdeaGroup {
         return ideas;
     }
 
-    public Modifiers getModifiers(int level) {
-        List<Modifiers> modifiers = new ArrayList<>();
-        level = Math.min(level, ideas.size());
+    public Double getModifier(int level, Modifier modifier) {
+        List<Double> modifiers = new ArrayList<>();
+        level = Math.min(level, this.ideas.size());
 
-        if (level >= 0) {
-            modifiers.add(this.start);
+        if (level >= 0 && this.start.hasModifier(modifier)) {
+            modifiers.add(this.start.getModifier(modifier));
         }
 
         Iterator<Modifiers> modifiersIterator = this.ideas.values().iterator();
         for (int i = level; i > 0; i--) {
-            modifiers.add(modifiersIterator.next());
+            Modifiers m = modifiersIterator.next();
+
+            if (m.hasModifier(modifier)) {
+                modifiers.add(m.getModifier(modifier));
+            }
         }
 
-        if (level >= this.ideas.size()) {
-            modifiers.add(this.bonus);
+        if (level >= this.ideas.size() && this.bonus.hasModifier(modifier)) {
+            modifiers.add(this.bonus.getModifier(modifier));
         }
 
-        return ModifiersUtils.sumModifiers(modifiers.toArray(Modifiers[]::new));
+        return ModifiersUtils.sumModifiers(modifier, modifiers);
     }
 
     @Override

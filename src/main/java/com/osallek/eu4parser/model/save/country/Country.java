@@ -6,12 +6,12 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.AgeAbility;
-import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.CrownLandBonus;
 import com.osallek.eu4parser.model.game.Culture;
@@ -54,13 +54,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -87,6 +88,8 @@ public class Country {
 
     //Todo
     // mercenary_company
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Country.class);
 
     public static final Pattern COUNTRY_PATTERN = Pattern.compile("[A-Z]{3}");
     public static final Pattern CUSTOM_COUNTRY_PATTERN = Pattern.compile("D[0-9]{2}");
@@ -168,7 +171,7 @@ public class Country {
 
     private List<Envoy> diplomats;
 
-    private List<Modifier> modifiers;
+    private List<SaveModifier> modifiers;
 
     private SubUnit subUnit;
 
@@ -2993,7 +2996,7 @@ public class Country {
         return diplomats;
     }
 
-    public List<Modifier> getModifiers() {
+    public List<SaveModifier> getModifiers() {
         return modifiers;
     }
 
@@ -3002,7 +3005,7 @@ public class Country {
     }
 
     public void addModifier(String modifier, LocalDate date, Boolean hidden) {
-        Modifier.addToItem(this.item, modifier, date, hidden);
+        SaveModifier.addToItem(this.item, modifier, date, hidden);
         refreshAttributes();
     }
 
@@ -3671,97 +3674,83 @@ public class Country {
     }
 
     public double getLandForceLimit() { //Fixme provinces buildings
-        return getTotalModifiers("land_forcelimit").getModifier("land_forcelimit")
-               * (1 + getTotalModifiers("land_forcelimit_modifier").getModifier("land_forcelimit_modifier"));
+        return getModifier(ModifiersUtils.getModifier("land_forcelimit")) * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier")));
     }
 
     public double getProductionEfficiency() {
-        return getTotalModifiers("production_efficiency", StaticModifiers.PRODUCTION_EFFICIENCY).getModifier("production_efficiency")
-               + getTotalModifiers("tech_production_efficiency", StaticModifiers.PRODUCTION_EFFICIENCY).getModifier("tech_production_efficiency");
+        return getModifier(ModifiersUtils.getModifier("production_efficiency")) +
+               getModifier(ModifiersUtils.getModifier("tech_production_efficiency"));
     }
 
-    public Modifiers getTotalModifiers(String name, StaticModifiers... toIgnore) {
-        return getTotalModifiers(m -> m.getModifiers(name), toIgnore);
-    }
-
-    public Modifiers getTotalModifiers() {
-        return getTotalModifiers(Modifiers::getCountryModifiers);
-    }
-
-    public Modifiers getTotalModifiers(Function<Modifiers, Modifiers> mapper, StaticModifiers... toIgnore) {
-        List<Modifiers> list = new ArrayList<>();
-        list.add(mapper.apply(StaticModifiers.applyToModifiersCountry(this, toIgnore)));
-
-        List<StaticModifiers> ignore = Arrays.asList(toIgnore);
-        String ss = StaticModifiers.APPLIED_TO_COUNTRY.stream()
-                                                      .filter(Predicate.not(ignore::contains))
-                                                      .filter(staticModifiers -> staticModifiers.trigger.apply(this, this))
-                                                      .map(staticModifiers -> staticModifiers.applyToCountry.apply(this, staticModifiers))
-                                                      .map(Modifiers::toString)
-                                                      .collect(Collectors.joining("\n"));
+    public Double getModifier(Modifier modifier) {
+        List<Double> list = new ArrayList<>();
+        list.add(StaticModifiers.applyToModifiersCountry(this, modifier));
 
         if (CollectionUtils.isNotEmpty(getModifiers())) {
             list.addAll(getModifiers().stream()
-                                      .filter(modifier -> !StaticModifier.class.equals(modifier.getModifier().getClass()))
-                                      .map(modifier -> modifier.getModifiers(this))
-                                      .filter(Objects::nonNull)
-                                      .map(mapper)
-                                      .filter(Objects::nonNull)
+                                      .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
+                                      .map(m -> m.getModifiers(this, modifier))
                                       .collect(Collectors.toList()));
         }
 
         if (getIdeaGroups() != null) {
-            getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(mapper.apply(key.getModifiers(value))));
+            getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(key.getModifier(value, modifier)));
         }
 
-        list.add(mapper.apply(getTech().getModifiers(Power.ADM, getTech().getAdm())));
-        list.add(mapper.apply(getTech().getModifiers(Power.DIP, getTech().getDip())));
-        list.add(mapper.apply(getTech().getModifiers(Power.MIL, getTech().getMil())));
+        list.add(getTech().getModifier(Power.ADM, getTech().getAdm(), modifier));
+        list.add(getTech().getModifier(Power.DIP, getTech().getDip(), modifier));
+        list.add(getTech().getModifier(Power.MIL, getTech().getMil(), modifier));
 
-        Monarch m;
-        if ((m = getMonarch()) != null && m.getPersonalities() != null
-            && CollectionUtils.isNotEmpty(m.getPersonalities().getPersonalities())) {
-            list.addAll(m.getPersonalities()
-                         .getPersonalities()
-                         .stream()
-                         .map(RulerPersonality::getModifiers)
-                         .filter(Objects::nonNull)
-                         .map(mapper)
-                         .collect(Collectors.toList()));
+        Monarch mon;
+        if ((mon = getMonarch()) != null && mon.getPersonalities() != null
+            && CollectionUtils.isNotEmpty(mon.getPersonalities().getPersonalities())) {
+            list.addAll(mon.getPersonalities()
+                           .getPersonalities()
+                           .stream()
+                           .map(RulerPersonality::getModifiers)
+                           .filter(Objects::nonNull)
+                           .filter(m -> m.hasModifier(modifier))
+                           .map(m -> m.getModifier(modifier))
+                           .collect(Collectors.toList()));
         }
 
         list.addAll(this.save.getGame()
                              .getProfessionalismModifiers()
                              .stream()
-                             .filter(modifier -> modifier.getArmyProfessionalism() <= NumbersUtils.doubleOrDefault(getArmyProfessionalism()))
+                             .filter(m -> m.getArmyProfessionalism() <= NumbersUtils.doubleOrDefault(getArmyProfessionalism()))
                              .map(ProfessionalismModifier::getModifiers)
                              .filter(Objects::nonNull)
-                             .map(mapper)
+                             .filter(m -> m.hasModifier(modifier))
+                             .map(m -> m.getModifier(modifier))
                              .collect(Collectors.toList()));
 
         list.addAll(getTradedBonus().stream()
                                     .map(TradeGood::getModifiers)
                                     .filter(Objects::nonNull)
-                                    .map(mapper)
+                                    .filter(m -> m.hasModifier(modifier))
+                                    .map(m -> m.getModifier(modifier))
                                     .collect(Collectors.toList()));
 
         list.addAll(getActivePolicies().stream()
                                        .map(ActivePolicy::getPolicy)
                                        .map(Policy::getModifiers)
                                        .filter(Objects::nonNull)
-                                       .map(mapper)
+                                       .filter(m -> m.hasModifier(modifier))
+                                       .map(m -> m.getModifier(modifier))
                                        .collect(Collectors.toList()));
 
         list.addAll(getActiveAgeAbility().stream()
                                          .map(AgeAbility::getModifiers)
                                          .filter(Objects::nonNull)
-                                         .map(mapper)
+                                         .filter(m -> m.hasModifier(modifier))
+                                         .map(m -> m.getModifier(modifier))
                                          .collect(Collectors.toList()));
 
         list.addAll(getEmbracedInstitutions().stream()
                                              .map(Institution::getBonuses)
                                              .filter(Objects::nonNull)
-                                             .map(mapper)
+                                             .filter(m -> m.hasModifier(modifier))
+                                             .map(m -> m.getModifier(modifier))
                                              .collect(Collectors.toList()));
 
         if (getCapital().inHre() && !this.save.getHre().dismantled()) {
@@ -3770,7 +3759,8 @@ public class Country {
                                  .stream()
                                  .map(ImperialReform::getAllModifiers)
                                  .filter(Objects::nonNull)
-                                 .map(mapper)
+                                 .filter(m -> m.hasModifier(modifier))
+                                 .map(m -> m.getModifier(modifier))
                                  .filter(Objects::nonNull)
                                  .collect(Collectors.toList()));
 
@@ -3780,7 +3770,8 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getEmperorModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(mapper)
+                                     .filter(m -> m.hasModifier(modifier))
+                                     .map(m -> m.getModifier(modifier))
                                      .filter(Objects::nonNull)
                                      .collect(Collectors.toList()));
                 list.addAll(this.save.getHre()
@@ -3788,9 +3779,11 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getEmperorPerPrinceModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(mapper)
+                                     .filter(m -> m.hasModifier(modifier))
+                                     .map(m -> m.getModifiers(modifier))
                                      .filter(Objects::nonNull)
-                                     .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
+                                     .map(m -> ModifiersUtils.scaleWithPrinces(this.save, m))
+                                     .map(m -> m.getModifier(modifier))
                                      .collect(Collectors.toList()));
             } else {
                 list.addAll(this.save.getHre()
@@ -3798,8 +3791,8 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getMemberModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(mapper)
-                                     .filter(Objects::nonNull)
+                                     .filter(m -> m.hasModifier(modifier))
+                                     .map(m -> m.getModifier(modifier))
                                      .collect(Collectors.toList()));
             }
 
@@ -3809,9 +3802,11 @@ public class Country {
                                      .stream()
                                      .map(ImperialReform::getElectorPerPrinceModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(mapper)
+                                     .filter(m -> m.hasModifier(modifier))
+                                     .map(m -> m.getModifiers(modifier))
                                      .filter(Objects::nonNull)
                                      .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
+                                     .map(m -> m.getModifier(modifier))
                                      .collect(Collectors.toList()));
             }
         }
@@ -3822,7 +3817,8 @@ public class Country {
                                  .stream()
                                  .map(ImperialReform::getEmperorModifiers)
                                  .filter(Objects::nonNull)
-                                 .map(mapper)
+                                 .filter(m -> m.hasModifier(modifier))
+                                 .map(m -> m.getModifier(modifier))
                                  .collect(Collectors.toList()));
         }
 
@@ -3831,12 +3827,16 @@ public class Country {
                                    .stream()
                                    .map(Fervor::getModifiers)
                                    .filter(Objects::nonNull)
-                                   .map(mapper)
+                                   .filter(m -> m.hasModifier(modifier))
+                                   .map(m -> m.getModifier(modifier))
                                    .collect(Collectors.toList()));
 
-            list.add(mapper.apply(ModifiersUtils.scaleWithActivesFervor(this,
-                                                                        new Modifiers(new HashSet<>(),
-                                                                                      Map.of(ModifiersUtils.getModifier("MONTHLY_FERVOR_INCREASE"), -5d)))));
+            if (modifier.getName().equalsIgnoreCase("MONTHLY_FERVOR_INCREASE")) {
+                list.add(ModifiersUtils.scaleWithActivesFervor(this, new Modifiers(new HashSet<>(),
+                                                                                   Map.of(ModifiersUtils.getModifier("MONTHLY_FERVOR_INCREASE"),
+                                                                                          -5d)))
+                                       .getModifier(modifier));
+            }
         }
 
         if (getNativeAdvancements() != null) {
@@ -3848,16 +3848,17 @@ public class Country {
                                                .filter(Objects::nonNull)
                                                .map(NativeAdvancement::getModifiers)
                                                .filter(Objects::nonNull)
-                                               .map(mapper)
+                                               .filter(m -> m.hasModifier(modifier))
+                                               .map(m -> m.getModifier(modifier))
                                                .collect(Collectors.toList()));
         }
 
-        if (getNavalDoctrine() != null) {
-            list.add(mapper.apply(getNavalDoctrine().getModifiers()));
+        if (getNavalDoctrine() != null && getNavalDoctrine().getModifiers().hasModifier(modifier)) {
+            list.add(getNavalDoctrine().getModifiers().getModifier(modifier));
         }
 
-        if (getPersonalDeity() != null) {
-            list.add(mapper.apply(getPersonalDeity().getModifiers()));
+        if (getPersonalDeity() != null && getPersonalDeity().getModifiers().hasModifier(modifier)) {
+            list.add(getPersonalDeity().getModifiers().getModifier(modifier));
         }
 
         if (getReligiousReforms() != null) {
@@ -3865,7 +3866,8 @@ public class Country {
                                              .stream()
                                              .map(ReligiousReform::getModifiers)
                                              .filter(Objects::nonNull)
-                                             .map(mapper)
+                                             .filter(m -> m.hasModifier(modifier))
+                                             .map(m -> m.getModifier(modifier))
                                              .collect(Collectors.toList()));
         }
 
@@ -3879,7 +3881,8 @@ public class Country {
                              .filter(Objects::nonNull)
                              .map(TradePolicy::getCountriesWithMerchantModifier)
                              .filter(Objects::nonNull)
-                             .map(mapper)
+                             .filter(m -> m.hasModifier(modifier))
+                             .map(m -> m.getModifier(modifier))
                              .collect(Collectors.toList()));
 
         if (MapUtils.isNotEmpty(getAdvisors())) {
@@ -3887,7 +3890,8 @@ public class Country {
                                      .stream()
                                      .map(SaveAdvisor::getModifiers)
                                      .filter(Objects::nonNull)
-                                     .map(mapper)
+                                     .filter(m -> m.hasModifier(modifier))
+                                     .map(m -> m.getModifier(modifier))
                                      .collect(Collectors.toList()));
         }
 
@@ -3902,16 +3906,21 @@ public class Country {
                         .flatMap(Collection::stream)
                         .map(Investment::getOwnerModifier)
                         .filter(Objects::nonNull)
-                        .map(mapper)
+                        .filter(m -> m.hasModifier(modifier))
+                        .map(m -> m.getModifier(modifier))
                         .collect(Collectors.toList()));
 
         if (getFactions() != null) {
             getFactions().stream()
                          .max(Comparator.comparing(SaveFaction::getInfluence))
-                         .ifPresent(faction -> list.add(mapper.apply(faction.getType().getModifiers())));
+                         .ifPresent(faction -> {
+                             if (faction.getType().getModifiers().hasModifier(modifier)) {
+                                 list.add(faction.getType().getModifiers().getModifier(modifier));
+                             }
+                         });
         }
 
-        list.addAll(this.getOwnedProvinces()
+/*        list.addAll(this.getOwnedProvinces()
                         .stream()
                         .map(SaveProvince::getBuildings)
                         .flatMap(Collection::stream)
@@ -3919,64 +3928,78 @@ public class Country {
                         .filter(Objects::nonNull)
                         .map(mapper)
                         .filter(Predicate.not(Modifiers::isEmpty))
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()));*/
 
         if (getGovernment() != null) {
             list.addAll(getGovernment().getReforms()
                                        .stream()
                                        .map(GovernmentReform::getModifiers)
                                        .filter(Objects::nonNull)
-                                       .map(mapper)
+                                       .filter(m -> m.hasModifier(modifier))
+                                       .map(m -> m.getModifier(modifier))
                                        .collect(Collectors.toList()));
         }
 
-        if (getGovernmentRank() != null) {
-            list.add(mapper.apply(getGovernmentRank().getModifiers()));
+        if (getGovernmentRank() != null && getGovernmentRank().getModifiers().hasModifier(modifier)) {
+            list.add(getGovernmentRank().getModifiers().getModifier(modifier));
         }
 
-        if (getHegemon() != null) {
-            list.add(mapper.apply(getHegemon().getModifiers()));
+        if (getHegemon() != null && getHegemon().getModifiers().hasModifier(modifier)) {
+            list.add(getHegemon().getModifiers().getModifier(modifier));
         }
 
-        if (getReligion().getGameReligion().getCountry() != null) {
-            list.add(mapper.apply(getReligion().getGameReligion().getCountry()));
+        if (getReligion().getGameReligion().getCountry() != null && getReligion().getGameReligion().getCountry().hasModifier(modifier)) {
+            list.add(getReligion().getGameReligion().getCountry().getModifier(modifier));
         }
 
-        if (getSecondaryReligion() != null && getSecondaryReligion().getGameReligion().getCountryAsSecondary() != null) {
-            list.add(mapper.apply(getReligion().getGameReligion().getCountryAsSecondary()));
+        if (getSecondaryReligion() != null && getSecondaryReligion().getGameReligion().getCountryAsSecondary() != null
+            && getSecondaryReligion().getGameReligion().getCountryAsSecondary().hasModifier(modifier)) {
+            list.add(getReligion().getGameReligion().getCountryAsSecondary().getModifier(modifier));
         }
 
         SavePapacy papacy;
         if ((papacy = getReligion().getPapacy()) != null && BooleanUtils.toBoolean(papacy.getPapacyActive())) {
-            if (papacy.getGoldenBull() != null) {
-                list.add(mapper.apply(papacy.getGoldenBull().getModifiers()));
+            if (papacy.getGoldenBull() != null && papacy.getGoldenBull().getModifiers().hasModifier(modifier)) {
+                list.add(papacy.getGoldenBull().getModifiers().getModifier(modifier));
             }
 
             if (BooleanUtils.toBoolean(papacy.getCouncilActive()) && !BooleanUtils.toBoolean(papacy.getCouncilFinished())) {
                 if (papacy.getHarsh().contains(this)) {
-                    list.add(mapper.apply(papacy.getGamePapacy().getHarshModifiers()));
+                    if (papacy.getGamePapacy().getHarshModifiers().hasModifier(modifier)) {
+                        list.add(papacy.getGamePapacy().getHarshModifiers().getModifier(modifier));
+                    }
                 } else if (papacy.getNeutral().contains(this)) {
-                    list.add(mapper.apply(papacy.getGamePapacy().getNeutralModifiers()));
+                    if (papacy.getGamePapacy().getNeutralModifiers().hasModifier(modifier)) {
+                        list.add(papacy.getGamePapacy().getNeutralModifiers().getModifier(modifier));
+                    }
                 } else if (papacy.getConcilatory().contains(this)) {
-                    list.add(mapper.apply(papacy.getGamePapacy().getConcilatoryModifiers()));
+                    if (papacy.getGamePapacy().getConcilatoryModifiers().hasModifier(modifier)) {
+                        list.add(papacy.getGamePapacy().getConcilatoryModifiers().getModifier(modifier));
+                    }
                 }
             }
 
-            if (MapUtils.isNotEmpty(papacy.getConcessions())) {
-                list.add(mapper.apply(papacy.getConcessionsModifiers()));
+            if (MapUtils.isNotEmpty(papacy.getConcessions()) && papacy.getConcessionsModifiers(modifier) != null) {
+                list.add(papacy.getConcessionsModifiers(modifier));
             }
         }
 
-        if (CollectionUtils.isNotEmpty(getSubjects())) {
-            list.add(mapper.apply(new Modifiers(new HashSet<>(),
-                                                Map.of(ModifiersUtils.getModifier("LAND_FORCELIMIT"),
-                                                       getSubjects().stream()
-                                                                    .mapToDouble(subject -> subject.getLandForceLimit()
-                                                                                            * subject.getSubjectType().getForcelimitToOverlord())
-                                                                    .sum()))));
+        if (CollectionUtils.isNotEmpty(getSubjects()) && modifier.getName().equalsIgnoreCase("LAND_FORCELIMIT")) {
+            list.add(getSubjects().stream()
+                                  .mapToDouble(subject -> subject.getLandForceLimit() * subject.getSubjectType().getForcelimitToOverlord())
+                                  .sum());
         }
 
-        return ModifiersUtils.sumModifiers(list.toArray(Modifiers[]::new));
+        if (CollectionUtils.isNotEmpty(getEstates())) {
+            list.addAll(getEstates().stream()
+                                    .map(estate -> estate.getModifiers(modifier))
+                                    .collect(Collectors.toList()));
+        }
+
+//        LOGGER.info(getTag());
+//        LOGGER.info(list.stream().map(String::valueOf).collect(Collectors.joining("\n")));
+
+        return ModifiersUtils.sumModifiers(modifier, list);
     }
 
     private void refreshAttributes() {
@@ -4043,7 +4066,7 @@ public class Country {
 
         List<ClausewitzItem> estateItems = this.item.getChildren("estate");
         this.estates = estateItems.stream()
-                                  .map(i -> new SaveEstate(i, this.save.getGame()))
+                                  .map(i -> new SaveEstate(i, this))
                                   .collect(Collectors.toList());
 
         ClausewitzItem activeAgendaItem = this.item.getChild("active_agenda");
@@ -4055,7 +4078,7 @@ public class Country {
 
         if (interactionsLastUsedItem != null) {
             this.interactionsLastUsed = interactionsLastUsedItem.getLists().stream()
-                                                                .map(EstateInteraction::new)
+                                                                .map(list -> new EstateInteraction(this.save.getGame(), list))
                                                                 .collect(Collectors.toList());
         }
 
@@ -4195,7 +4218,7 @@ public class Country {
 
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
         this.modifiers = modifierItems.stream()
-                                      .map(child -> new Modifier(child, this.save.getGame()))
+                                      .map(child -> new SaveModifier(child, this.save.getGame()))
                                       .collect(Collectors.toList());
 
         ClausewitzItem subUnitItem = this.item.getChild("sub_unit");

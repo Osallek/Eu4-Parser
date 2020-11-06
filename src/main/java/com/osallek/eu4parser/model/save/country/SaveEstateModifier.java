@@ -4,16 +4,16 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
 
-public class EstateModifier {
+public class SaveEstateModifier {
 
     private final ClausewitzItem item;
 
-    public EstateModifier(ClausewitzItem item) {
+    public SaveEstateModifier(ClausewitzItem item) {
         this.item = item;
     }
 
-    public Integer getValue() {
-        return this.item.getVarAsInt("value");
+    public Double getValue() {
+        return this.item.getVarAsDouble("value");
     }
 
     public String getDesc() {

@@ -6,8 +6,6 @@ import java.util.Objects;
 
 public class ModifierDefinition {
 
-    private final String name;
-
     private final String type;
 
     private final String key;
@@ -15,14 +13,9 @@ public class ModifierDefinition {
     private final Condition trigger;
 
     public ModifierDefinition(ClausewitzItem item) {
-        this.name = item.getName();
         this.type = item.getVarAsString("type");
         this.key = item.getVarAsString("key");
         this.trigger = item.hasChild("trigger") ? new Condition(item.getChild("trigger")) : null;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getType() {
@@ -49,16 +42,16 @@ public class ModifierDefinition {
 
         ModifierDefinition area = (ModifierDefinition) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(key, area.key);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(key);
     }
 
     @Override
     public String toString() {
-        return name;
+        return key;
     }
 }

@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.UnitType;
@@ -13,7 +14,6 @@ import com.osallek.eu4parser.model.game.GreatProject;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Investment;
-import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.game.Province;
 import com.osallek.eu4parser.model.game.StaticModifier;
 import com.osallek.eu4parser.model.game.StaticModifiers;
@@ -27,11 +27,11 @@ import com.osallek.eu4parser.model.save.country.AbstractRegiment;
 import com.osallek.eu4parser.model.save.country.Army;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.country.CountryState;
-import com.osallek.eu4parser.model.save.country.Modifier;
 import com.osallek.eu4parser.model.save.country.Navy;
 import com.osallek.eu4parser.model.save.country.Regiment;
 import com.osallek.eu4parser.model.save.country.SaveArea;
 import com.osallek.eu4parser.model.save.country.SaveInvestment;
+import com.osallek.eu4parser.model.save.country.SaveModifier;
 import com.osallek.eu4parser.model.save.country.Ship;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -85,7 +85,7 @@ public class SaveProvince extends Province {
 
     private Map<String, Integer> improveCount;
 
-    private Map<String, Modifier> modifiers;
+    private Map<String, SaveModifier> modifiers;
 
     private Id rebelFaction;
 
@@ -995,7 +995,7 @@ public class SaveProvince extends Province {
         return this.item.getVarAsInt("previous_winter");
     }
 
-    public Map<String, Modifier> getModifiers() {
+    public Map<String, SaveModifier> getModifiers() {
         return modifiers;
     }
 
@@ -1004,7 +1004,7 @@ public class SaveProvince extends Province {
     }
 
     public void addModifier(String modifier, LocalDate date, Boolean hidden) {
-        Modifier.addToItem(this.item, modifier, date, hidden);
+        SaveModifier.addToItem(this.item, modifier, date, hidden);
         refreshAttributes();
     }
 
@@ -1119,7 +1119,7 @@ public class SaveProvince extends Province {
     }
 
     public boolean isRazed() {
-        Modifier modifier = getModifiers().get("province_razed");
+        SaveModifier modifier = getModifiers().get("province_razed");
 
         if (modifier != null) {
             return modifier.getDate().isAfter(this.save.getDate());
@@ -1129,7 +1129,7 @@ public class SaveProvince extends Province {
     }
 
     public boolean isSlavesRaided() {
-        Modifier modifier = getModifiers().get("slaves_raided");
+        SaveModifier modifier = getModifiers().get("slaves_raided");
 
         if (modifier != null) {
             return modifier.getDate().isAfter(this.save.getDate());
@@ -1182,7 +1182,7 @@ public class SaveProvince extends Province {
         if (getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
             return 0;
         } else {
-            return NumbersUtils.doubleOrDefault(getTotalModifiers().getModifier("land_forcelimit"));
+            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit")));
         }
     }
 
@@ -1190,36 +1190,39 @@ public class SaveProvince extends Province {
         if (getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
             return 0;
         } else {
-            return NumbersUtils.doubleOrDefault(getTotalModifiers().getModifier("naval_forcelimit"));
+            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit")));
         }
     }
 
-    public Modifiers getTotalModifiers() {
-        List<Modifiers> list = new ArrayList<>();
-        list.add(StaticModifiers.applyToModifiersProvince(this));
+    public Double getModifier(Modifier modifier) {
+        List<Double> list = new ArrayList<>();
+        list.add(StaticModifiers.applyToModifiersProvince(this, modifier));
 
         if (CollectionUtils.isNotEmpty(getBuildings())) {
             list.addAll(getBuildings().stream()
                                       .map(ProvinceBuilding::getModifiers)
                                       .filter(Objects::nonNull)
-                                      .map(Modifiers::getProvinceModifiers)
-                                      .filter(Objects::nonNull)
+                                      .filter(m -> m.hasModifier(modifier))
+                                      .map(m -> m.getModifier(modifier))
                                       .collect(Collectors.toList()));
         }
 
         if (MapUtils.isNotEmpty(getModifiers())) {
             list.addAll(getModifiers().values()
                                       .stream()
-                                      .filter(modifier -> !StaticModifier.class.equals(modifier.getModifier().getClass()))
-                                      .map(modifier -> modifier.getModifiers(this))
-                                      .filter(Objects::nonNull)
-                                      .map(Modifiers::getProvinceModifiers)
+                                      .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
+                                      .map(m -> m.getModifiers(this, modifier))
                                       .filter(Objects::nonNull)
                                       .collect(Collectors.toList()));
         }
 
-        list.add(getCulture().getProvinceModifiers());
-        list.add(getTradeGood().getProvinceModifiers());
+        if (getCulture().getProvinceModifiers().hasModifier(modifier)) {
+            list.add(getCulture().getProvinceModifiers().getModifier(modifier));
+        }
+
+        if (getTradeGood().getProvinceModifiers().hasModifier(modifier)) {
+            list.add(getTradeGood().getProvinceModifiers().getModifier(modifier));
+        }
 
         if (inHre() && !this.save.getHre().dismantled()) {
             list.addAll(this.save.getHre()
@@ -1227,8 +1230,8 @@ public class SaveProvince extends Province {
                                  .stream()
                                  .map(ImperialReform::getProvinceModifiers)
                                  .filter(Objects::nonNull)
-                                 .map(Modifiers::getProvinceModifiers)
-                                 .filter(Objects::nonNull)
+                                 .filter(m -> m.hasModifier(modifier))
+                                 .map(m -> m.getModifier(modifier))
                                  .collect(Collectors.toList()));
         }
 
@@ -1238,8 +1241,8 @@ public class SaveProvince extends Province {
                                  .stream()
                                  .map(ImperialReform::getProvinceModifiers)
                                  .filter(Objects::nonNull)
-                                 .map(Modifiers::getProvinceModifiers)
-                                 .filter(Objects::nonNull)
+                                 .filter(m -> m.hasModifier(modifier))
+                                 .map(m -> m.getModifier(modifier))
                                  .collect(Collectors.toList()));
         }
 
@@ -1247,8 +1250,8 @@ public class SaveProvince extends Province {
             list.addAll(getGreatProjects().stream()
                                           .map(GreatProject::getModifiers)
                                           .filter(Objects::nonNull)
-                                          .map(Modifiers::getProvinceModifiers)
-                                          .filter(Objects::nonNull)
+                                          .filter(m -> m.hasModifier(modifier))
+                                          .map(m -> m.getModifier(modifier))
                                           .collect(Collectors.toList()));
         }
 
@@ -1257,12 +1260,14 @@ public class SaveProvince extends Province {
                 CountryState countryState = getSaveArea().getCountryState(getOwner());
 
                 if (countryState != null) {
-                    if (countryState.getActiveEdict() != null) {
-                        list.add(countryState.getActiveEdict().getWhich().getModifiers().getProvinceModifiers());
+                    if (countryState.getActiveEdict() != null
+                        && countryState.getActiveEdict().getWhich().getModifiers().getProvinceModifiers().hasModifier(modifier)) {
+                        list.add(countryState.getActiveEdict().getWhich().getModifiers().getProvinceModifiers().getModifier(modifier));
                     }
 
-                    if (countryState.getHolyOrder() != null) {
-                        list.add(countryState.getHolyOrder().getModifiers().getProvinceModifiers());
+                    if (countryState.getHolyOrder() != null
+                        && countryState.getHolyOrder().getModifiers().getProvinceModifiers().hasModifier(modifier)) {
+                        list.add(countryState.getHolyOrder().getModifiers().getProvinceModifiers().getModifier(modifier));
                     }
                 }
             }
@@ -1274,8 +1279,8 @@ public class SaveProvince extends Province {
                                       .stream()
                                       .map(Investment::getAreaModifier)
                                       .filter(Objects::nonNull)
-                                      .map(Modifiers::getProvinceModifiers)
-                                      .filter(Objects::nonNull)
+                                      .filter(m -> m.hasModifier(modifier))
+                                      .map(m -> m.getModifier(modifier))
                                       .collect(Collectors.toList()));
 
                 if (BooleanUtils.toBoolean(activeTradeCompany())) {
@@ -1283,8 +1288,8 @@ public class SaveProvince extends Province {
                                           .stream()
                                           .map(Investment::getCompanyProvinceAreaModifier)
                                           .filter(Objects::nonNull)
-                                          .map(Modifiers::getProvinceModifiers)
-                                          .filter(Objects::nonNull)
+                                          .filter(m -> m.hasModifier(modifier))
+                                          .map(m -> m.getModifier(modifier))
                                           .collect(Collectors.toList()));
 
                     getOwner().getTradeCompanies()
@@ -1302,8 +1307,8 @@ public class SaveProvince extends Province {
                                                                        .flatMap(Collection::stream)
                                                                        .map(Investment::getCompanyRegionModifier)
                                                                        .filter(Objects::nonNull)
-                                                                       .map(Modifiers::getProvinceModifiers)
-                                                                       .filter(Objects::nonNull)
+                                                                       .filter(m -> m.hasModifier(modifier))
+                                                                       .map(m -> m.getModifier(modifier))
                                                                        .collect(Collectors.toList())));
                 }
             }
@@ -1313,12 +1318,17 @@ public class SaveProvince extends Province {
             TradePolicy tradePolicy = this.save.getTradeNode(ClausewitzUtils.removeQuotes(getTrade())).getCountry(getOwner()).getTradePolicy();
 
             if (tradePolicy != null) {
-                list.add(tradePolicy.getNodeProvinceModifier().getProvinceModifiers());
-                list.add(tradePolicy.getTradePower().getProvinceModifiers());
+                if (tradePolicy.getNodeProvinceModifier().getProvinceModifiers().hasModifier(modifier)) {
+                    list.add(tradePolicy.getNodeProvinceModifier().getProvinceModifiers().getModifier(modifier));
+                }
+
+                if (tradePolicy.getTradePower().getProvinceModifiers().hasModifier(modifier)) {
+                    list.add(tradePolicy.getTradePower().getProvinceModifiers().getModifier(modifier));
+                }
             }
         }
 
-        return ModifiersUtils.sumModifiers(list.toArray(Modifiers[]::new));
+        return ModifiersUtils.sumModifiers(modifier, list);
     }
 
     private void refreshAttributes() {
@@ -1394,7 +1404,7 @@ public class SaveProvince extends Province {
 
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
         this.modifiers = modifierItems.stream()
-                                      .map(child -> new Modifier(child, this.save.getGame()))
+                                      .map(child -> new SaveModifier(child, this.save.getGame()))
                                       .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifierName()), Function.identity()));
 
         ClausewitzItem rebelFactionItem = this.item.getChild("rebel_faction");

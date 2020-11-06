@@ -698,6 +698,34 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("HIGH_ARMY_PROFESSIONALISM_MAX_RANGE").value.todouble();
     }
 
+    public double getEstateAngryThreshold() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_ANGRY_THRESHOLD").value.todouble();
+    }
+
+    public double getEstateHappyThreshold() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_HAPPY_THRESHOLD").value.todouble();
+    }
+
+    public double getEstateInfluenceLevel1() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_LEVEL_1").value.todouble();
+    }
+
+    public double getEstateInfluenceLevel2() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_LEVEL_2").value.todouble();
+    }
+
+    public double getEstateInfluenceLevel3() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_LEVEL_3").value.todouble();
+    }
+
+    public double getEstateInfluencePerDev() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_PER_DEV").value.todouble();
+    }
+
+    public double getEstateMaxInfluenceFromDev() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_MAX_INFLUENCE_FROM_DEV").value.todouble();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.keySet()
                                .stream()
@@ -2160,22 +2188,25 @@ public class Game {
     private void readEstates() {
         //Read estates modifiers before necessary for privileges
         File estatesPreloadFolder = new File(this.commonFolderPath + File.separator + "estates_preload");
+        Map<String, List<ModifierDefinition>> modifierDefinitions = new HashMap<>();
 
         try (Stream<Path> paths = Files.walk(estatesPreloadFolder.toPath())) {
-            List<ModifierDefinition> modifierDefinitions = new ArrayList<>();
 
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
                      ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren()
-                                 .stream()
-                                 .map(item -> item.getChildren("modifier_definition"))
-                                 .flatMap(Collection::stream)
-                                 .forEach(item -> modifierDefinitions.add(new ModifierDefinition(item)));
+                     advisorsItem.getChildren().forEach(item -> modifierDefinitions.put(item.getName(),
+                                                                                        item.getChildren("modifier_definition")
+                                                                                            .stream()
+                                                                                            .map(ModifierDefinition::new)
+                                                                                            .collect(Collectors.toList())));
                  });
 
-            modifierDefinitions.forEach(
-                    modifierDefinition -> ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY));
+            modifierDefinitions.values()
+                               .stream()
+                               .flatMap(Collection::stream)
+                               .forEach(modifierDefinition -> ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE,
+                                                                                         ModifierScope.COUNTRY));
         } catch (IOException e) {
         }
 
@@ -2202,12 +2233,10 @@ public class Game {
             paths.filter(Files::isRegularFile)
                  .forEach(path -> {
                      ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.estates.put(new Estate(item, this), path));
+                     advisorsItem.getChildren().forEach(item -> this.estates.put(new Estate(item, modifierDefinitions.get(item.getName()), this), path));
                  });
 
-            this.estates.keySet().forEach(estate -> {
-                estate.setLocalizedName(this.getLocalisation(estate.getName()));
-            });
+            this.estates.keySet().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
         } catch (IOException e) {
         }
     }

@@ -116,6 +116,10 @@ public class Modifiers {
         return this.modifiers.containsKey(ModifiersUtils.getModifier(modifier));
     }
 
+    public boolean hasModifier(Modifier modifier) {
+        return this.modifiers.containsKey(modifier);
+    }
+
     public Double getModifier(String modifier) {
         return this.modifiers.get(ModifiersUtils.getModifier(modifier));
     }
@@ -137,10 +141,14 @@ public class Modifiers {
     }
 
     public Modifiers getModifiers(String name) {
+        return getModifiers(ModifiersUtils.getModifier(name));
+    }
+
+    public Modifiers getModifiers(Modifier modifier) {
         return new Modifiers(new HashSet<>(), this.modifiers.entrySet()
-                                                         .stream()
-                                                         .filter(entry -> entry.getKey().getName().equalsIgnoreCase(name))
-                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                                                            .stream()
+                                                            .filter(entry -> entry.getKey().equals(modifier))
+                                                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     public Modifiers getCountryModifiers() {

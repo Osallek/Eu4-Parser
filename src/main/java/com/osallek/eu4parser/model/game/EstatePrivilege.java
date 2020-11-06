@@ -42,8 +42,8 @@ public class EstatePrivilege {
         this.name = item.getName();
         this.icon = item.getVarAsString("icon");
         this.maxAbsolutism = NumbersUtils.doubleOrDefault(item.getVarAsDouble("max_absolutism"));
-        this.loyalty = NumbersUtils.doubleOrDefault(item.getVarAsDouble("loyalty"));
-        this.influence = NumbersUtils.doubleOrDefault(item.getVarAsDouble("influence"));
+        this.loyalty = NumbersUtils.doubleOrDefault(item.getVarAsDouble("loyalty")) * 100; //Percent
+        this.influence = NumbersUtils.doubleOrDefault(item.getVarAsDouble("influence")) * 100; //Percent
         this.cooldownYears = NumbersUtils.intOrDefault(item.getVarAsInt("cooldown_years"));
 
         ClausewitzItem child = item.getChild("is_valid");

@@ -1,15 +1,16 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.Power;
-import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.game.Technology;
 import com.osallek.eu4parser.model.save.Save;
-import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class CountryTechnology {
@@ -51,17 +52,21 @@ public class CountryTechnology {
         return NumbersUtils.intOrDefault(getAdm()) + NumbersUtils.intOrDefault(getDip()) + NumbersUtils.intOrDefault(getMil());
     }
 
-    public Modifiers getModifiers(Power power, Integer level) {
-        Modifiers[] modifiers = IntStream.rangeClosed(0, level)
-                                         .mapToObj(i -> this.save.getGame().getTechnology(power, i))
-                                         .filter(Objects::nonNull)
-                                         .map(Technology::getModifiers)
-                                         .filter(Objects::nonNull)
-                                         .map(Modifiers::getCountryModifiers)
-                                         .toArray(Modifiers[]::new);
+    public Double getModifier(Power power, Integer level, Modifier modifier) {
+        List<Double> modifiers = IntStream.rangeClosed(0, level)
+                                          .mapToObj(i -> this.save.getGame().getTechnology(power, i))
+                                          .filter(Objects::nonNull)
+                                          .map(Technology::getModifiers)
+                                          .filter(Objects::nonNull)
+                                          .filter(m -> m.hasModifier(modifier))
+                                          .map(m -> m.getModifier(modifier))
+                                          .collect(Collectors.toList());
 
-        return ModifiersUtils.sumModifiers(
-                ArrayUtils.add(modifiers, this.save.getGame().getTechnology(power, level).getYear() > this.save.getDate().getYear()
-                                          ? this.save.getGame().getTechnology(power, level).getAheadOfTime().getCountryModifiers() : null));
+        if (this.save.getGame().getTechnology(power, level).getYear() > this.save.getDate().getYear()
+            && this.save.getGame().getTechnology(power, level).getAheadOfTime().hasModifier(modifier)) {
+            modifiers.add(this.save.getGame().getTechnology(power, level).getAheadOfTime().getModifier(modifier));
+        }
+
+        return ModifiersUtils.sumModifiers(modifier, modifiers);
     }
 }

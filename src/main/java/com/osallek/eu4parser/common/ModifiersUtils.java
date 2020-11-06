@@ -617,6 +617,19 @@ public class ModifiersUtils {
         }
     }
 
+    public static Double sumModifiers(Modifier modifier, List<Double> values) {
+        switch (modifier.getType()) {
+            case ADDITIVE:
+            case MULTIPLICATIVE:
+                return values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).sum();
+            case CONSTANT:
+                return values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).max().isPresent()
+                       ? values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).max().getAsDouble() : null;
+        }
+
+        return null;
+    }
+
     public static Modifiers scaleTax(SaveProvince province, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, province.getBaseTax());
     }
@@ -881,7 +894,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithVassals(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_CLIENT_VASSAL));
+        return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_VASSAL));
     }
 
     public static Modifiers scaleWithMarches(Country country, Modifiers modifiers) {

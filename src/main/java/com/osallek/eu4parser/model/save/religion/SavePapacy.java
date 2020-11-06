@@ -5,9 +5,9 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.model.game.GoldenBull;
-import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.game.Papacy;
 import com.osallek.eu4parser.model.game.PapacyConcession;
 import com.osallek.eu4parser.model.save.Id;
@@ -324,13 +324,15 @@ public class SavePapacy {
         return IntStream.range(0, list.size()).boxed().collect(Collectors.toMap(i -> getGamePapacy().getConcession(i), list::getAsInt));
     }
 
-    public Modifiers getConcessionsModifiers() {
-        return ModifiersUtils.sumModifiers(getConcessionsChoices().entrySet()
-                                                                  .stream()
-                                                                  .filter(entry -> entry.getValue() != 0)
-                                                                  .map(entry -> entry.getValue() == 1 ? entry.getKey().getHarshModifiers()
-                                                                                                      : entry.getKey().getConcilatoryModifiers())
-                                                                  .toArray(Modifiers[]::new));
+    public Double getConcessionsModifiers(Modifier modifier) {
+        return ModifiersUtils.sumModifiers(modifier, getConcessionsChoices().entrySet()
+                                                                            .stream()
+                                                                            .filter(entry -> entry.getValue() != 0)
+                                                                            .map(entry -> entry.getValue() == 1 ? entry.getKey().getHarshModifiers()
+                                                                                                                : entry.getKey().getConcilatoryModifiers())
+                                                                            .filter(m -> m.hasModifier(modifier))
+                                                                            .map(m -> m.getModifier(modifier))
+                                                                            .collect(Collectors.toList()));
     }
 
     public List<Country> getConcilatory() {

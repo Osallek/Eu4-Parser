@@ -6,6 +6,7 @@ import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.country.Country;
+import org.apache.commons.collections4.MapUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -105,6 +106,14 @@ public class History {
                                                               child -> this.province.getSave().getCountry(child.getChild("controller").getVarAsString("tag")),
                                                               (a, b) -> b,
                                                               TreeMap::new));
+
+        if (MapUtils.isNotEmpty(this.owners) && this.province.getOwner() != null && !this.owners.containsValue(this.province.getOwner())) {
+            if (MapUtils.isNotEmpty(this.province.getOwner().getHistory().getChangedTagFrom())) {
+                this.owners.put(this.province.getOwner().getHistory().getChangedTagFrom().lastKey(), this.province.getOwner());
+            } else {
+                this.owners.put(this.province.getSave().getDate(), this.province.getOwner());
+            }
+        }
 
 
         ClausewitzItem controllerItem = this.item.getChild("controller");

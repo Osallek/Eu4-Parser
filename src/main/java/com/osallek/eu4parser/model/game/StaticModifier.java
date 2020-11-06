@@ -1,6 +1,7 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.model.save.country.Country;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 
@@ -16,13 +17,15 @@ public class StaticModifier extends GameModifier {
     }
 
     @Override
-    public Modifiers getModifiers(Country country) {
-        return this.staticModifiers.applyToCountry.apply(country, this.staticModifiers);
+    public Double getModifier(Country country, Modifier modifierName) {
+        return this.staticModifiers.modifiers.hasModifier(modifierName) ? this.staticModifiers.applyToCountry.apply(country, this.staticModifiers)
+                                                                                                             .getModifier(modifierName) : null;
     }
 
     @Override
-    public Modifiers getModifiers(SaveProvince province) {
-        return this.staticModifiers.applyToProvince.apply(province, this.staticModifiers);
+    public Double getModifier(SaveProvince province, Modifier modifierName) {
+        return this.staticModifiers.modifiers.hasModifier(modifierName) ? this.staticModifiers.applyToProvince.apply(province, this.staticModifiers)
+                                                                                                              .getModifier(modifierName) : null;
     }
 
     @Override
