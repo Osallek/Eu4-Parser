@@ -1845,7 +1845,7 @@ public class ConditionsUtils {
                 }
         }
 
-        LOGGER.info("Don't know how to manage country condition: {} = {}", condition, value);
+        LOGGER.debug("Don't know how to manage country condition: {} = {}", condition, value);
         return false;
     }
 
@@ -1881,6 +1881,7 @@ public class ConditionsUtils {
                                                                                                                                          value))))
                        || (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToCountry(root, from, scope)));
             case "and":
+            case "if":
                 return (condition.getConditions() == null || condition.getConditions().entrySet()
                                                                       .stream()
                                                                       .allMatch(entry -> entry.getValue()
@@ -1906,6 +1907,13 @@ public class ConditionsUtils {
                 country = root.getSave().getCountry(condition.getCondition("who"));
                 return root.getActiveRelation(country) != null
                        && condition.getCondition("attitude").equalsIgnoreCase(ClausewitzUtils.removeQuotes(root.getActiveRelation(country).getAttitude()));
+            case "any_known_country":
+                return root.getSave()
+                           .getCountries()
+                           .values()
+                           .stream()
+                           .filter(other -> other.isAlive() && other.getCapital() != null && other.getCapital().getDiscoveredBy().contains(root))
+                           .anyMatch(other -> condition.apply(other, root));
             case "any_owned_province":
                 return root.getOwnedProvinces().stream().anyMatch(condition::apply);
             case "army_strength": // Todo object
@@ -2271,7 +2279,7 @@ public class ConditionsUtils {
                        && country.getSubjectStartDate().plusYears(NumbersUtils.toInt(condition.getCondition("value"))).isBefore(root.getSave().getDate());
         }
 
-        LOGGER.info("Don't know how to manage country scope: {} !", condition);
+        LOGGER.debug("Don't know how to manage country scope: {} !", condition);
         return false;
     }
 
@@ -2870,7 +2878,7 @@ public class ConditionsUtils {
                 return NumbersUtils.doubleOrDefault(province.getUnrest()) >= NumbersUtils.toDouble(value);
         }
 
-        LOGGER.info("Don't know how to manage province condition: {} !", condition);
+        LOGGER.debug("Don't know how to manage province condition: {} !", condition);
         return false;
     }
 
@@ -2991,7 +2999,7 @@ public class ConditionsUtils {
                 return condition.apply(country, country);
         }
 
-        LOGGER.info("Don't know how to manage province scope: {} !", condition);
+        LOGGER.debug("Don't know how to manage province scope: {} !", condition);
         return false;
     }
 

@@ -1,9 +1,12 @@
 package com.osallek.eu4parser.model.save.country;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.ChurchAspect;
 import com.osallek.eu4parser.model.game.Game;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Church {
 
@@ -24,19 +27,19 @@ public class Church {
         this.item.setVariable("power", power);
     }
 
-    public List<String> getAspects() {
-        return this.item.getVarsAsStrings("aspect");
+    public List<ChurchAspect> getAspects() {
+        return this.item.getVarsAsStrings("aspect").stream().map(this.game::getChurchAspect).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    public void addAspect(String aspect) {
+    public void addAspect(ChurchAspect aspect) {
         List<String> aspects = this.item.getVarsAsStrings("aspect");
 
-        if (!aspects.contains(aspect)) {
+        if (!aspects.contains(aspect.getName())) {
             if (aspects.size() >= this.game.getMaxAspects()) {
                 removeAspect(aspects.get(aspects.size() - 1));
             }
 
-            this.item.addVariable("aspect", aspect);
+            this.item.addVariable("aspect", aspect.getName());
         }
     }
 

@@ -338,7 +338,6 @@ public enum StaticModifiers {
         SLAVES_RAIDED.applyToProvince = (province, modif) -> StaticModifiers.SLAVES_RAIDED.modifiers;
         UNREST.applyToProvince = (province, modif) -> ModifiersUtils.scaleUnrest(province, modif.modifiers);
         NATIONALISM.applyToProvince = (province, modif) -> ModifiersUtils.scaleNationalism(province, modif.modifiers);
-        LOCAL_AUTONOMY_MULTIPLICATIVE.applyToProvince = (province, modif) -> ModifiersUtils.scaleAutonomy(province, modif.modifiers);
         LOCAL_AUTONOMY.applyToProvince = (province, modif) -> StaticModifiers.LOCAL_AUTONOMY.modifiers;
         LOCAL_AUTONOMY_TRADE_COMPANY_MULTIPLICATIVE.applyToProvince = (province, modif) -> ModifiersUtils.scaleAutonomy(province, modif.modifiers);
         LOCAL_AUTONOMY_TRADE_COMPANY.applyToProvince = (province, modif) -> StaticModifiers.LOCAL_AUTONOMY_TRADE_COMPANY.modifiers;
@@ -526,6 +525,19 @@ public enum StaticModifiers {
                     Modifiers newM = ModifiersUtils.scaleAutonomy(province, new Modifiers(new HashSet<>(), Map.of(modifier, m.getModifier(modifier))));
                     m.getModifiers().put(modifier, newM.getModifier(modifier));
                 }
+            }
+
+            return ModifiersUtils.scaleDev(province, m);
+        };
+        LOCAL_AUTONOMY_MULTIPLICATIVE.applyToProvince = (province, modif) -> { //Ugly but thanks to Paradox
+            Modifiers m = Modifiers.copy(modif.modifiers);
+
+            if (m.hasModifier("land_forcelimit_modifier")) {
+                m.removeModifier("land_forcelimit_modifier");
+            }
+
+            if (m.hasModifier("naval_forcelimit_modifier")) {
+                m.removeModifier("naval_forcelimit_modifier");
             }
 
             return ModifiersUtils.scaleDev(province, m);

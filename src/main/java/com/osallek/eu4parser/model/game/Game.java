@@ -133,6 +133,8 @@ public class Game {
 
     private Map<FetishistCult, Path> fetishistCults;
 
+    private Map<ChurchAspect, Path> churchAspects;
+
     private Map<MissionTree, Path> missionTrees;
 
     private Map<EstatePrivilege, Path> estatePrivileges;
@@ -237,6 +239,7 @@ public class Game {
         readTradeCompanies();
         readSubjectTypes();
         readFetishistCults();
+        readChurchAspects();
         readMissionTrees();
         readTechnologies();
         readRulerPersonalities();
@@ -1001,6 +1004,24 @@ public class Game {
         for (FetishistCult fetishistCult : this.fetishistCults.keySet()) {
             if (fetishistCult.getName().equalsIgnoreCase(name)) {
                 return fetishistCult;
+            }
+        }
+
+        return null;
+    }
+
+    public List<ChurchAspect> getChurchAspects() {
+        return new ArrayList<>(this.churchAspects.keySet());
+    }
+
+    public ChurchAspect getChurchAspect(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        for (ChurchAspect churchAspect : this.churchAspects.keySet()) {
+            if (churchAspect.getName().equalsIgnoreCase(name)) {
+                return churchAspect;
             }
         }
 
@@ -2158,6 +2179,23 @@ public class Game {
                  });
 
             this.fetishistCults.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
+        } catch (IOException e) {
+        }
+    }
+
+    private void readChurchAspects() {
+        File churchAspectsFolder = new File(this.commonFolderPath + File.separator + "church_aspects");
+
+        try (Stream<Path> paths = Files.walk(churchAspectsFolder.toPath())) {
+            this.churchAspects = new LinkedHashMap<>();
+
+            paths.filter(Files::isRegularFile)
+                 .forEach(path -> {
+                     ClausewitzItem aspectsItems = ClausewitzParser.parse(path.toFile(), 0);
+                     aspectsItems.getChildren().forEach(item -> this.churchAspects.put(new ChurchAspect(item), path));
+                 });
+
+            this.churchAspects.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
         } catch (IOException e) {
         }
     }

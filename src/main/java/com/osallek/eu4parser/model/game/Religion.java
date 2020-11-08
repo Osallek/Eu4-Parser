@@ -2,7 +2,6 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
-import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.BooleanUtils;
 
