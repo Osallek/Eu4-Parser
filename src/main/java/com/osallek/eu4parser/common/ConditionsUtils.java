@@ -7,7 +7,6 @@ import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.Condition;
 import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.Culture;
-import com.osallek.eu4parser.model.game.GovernmentReform;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.SubjectType;
@@ -193,7 +192,9 @@ public class ConditionsUtils {
             case "can_create_vassals":
                 return country.getOverlord() == null;
             case "can_migrate":
-                return country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isAllowMigration)
+                return country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isAllowMigration().getKey()
+                                                                                        && (reform.isAllowMigration().getValue() == null
+                                                                                            || reform.isAllowMigration().getValue().apply(country, country)))
                        && country.getOwnedProvinces().size() == 1 && !country.isAtWar() &&
                        (country.getLastMigration() == null || country.getLastMigration().isBefore(country.getSave().getDate().plusYears(-5)));
             case "capital":
@@ -282,7 +283,9 @@ public class ConditionsUtils {
                        && BigDecimal.valueOf(country.getDevelopment())
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getOverlord().getDevelopment()))) >= 0;
             case "devotion":
-                if (country.getGovernment().getReforms().stream().noneMatch(GovernmentReform::isHasDevotion)) {
+                if (country.getGovernment().getReforms().stream().noneMatch(reform -> reform.isHasDevotion().getKey()
+                                                                                      && (reform.isHasDevotion().getValue() == null
+                                                                                          || reform.isHasDevotion().getValue().apply(country, country)))) {
                     return false;
                 }
 
@@ -325,7 +328,7 @@ public class ConditionsUtils {
             case "dominant_culture":
                 return country.getDominantCulture().getName().equals(rawValueToCulture(rawValue, root, from));
             case "dominant_religion":
-                return country.getReligion().getName().equals(rawValueToReligion(rawValue, root, from));
+                return country.getDominantReligion().getName().equals(rawValueToReligion(rawValue, root, from));
             case "doom":
                 if ((aDouble = NumbersUtils.toDouble(value)) != null) {
                     return NumbersUtils.doubleOrDefault(country.getDoom()) >= aDouble;
@@ -511,8 +514,20 @@ public class ConditionsUtils {
                               .map(index -> country.getSave().getGame().getReligions().get(index))
                               .anyMatch(religion -> value.equalsIgnoreCase(religion.getName()));
             case "has_horde_unity":
-                return "yes".equalsIgnoreCase(value) == (country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isTribal)
-                                                         && country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isNomad));
+                return "yes".equalsIgnoreCase(value) == (country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isTribal().getKey()
+                                                                                                                          && (reform.isTribal().getValue()
+                                                                                                                              == null
+                                                                                                                              || reform.isTribal()
+                                                                                                                                       .getValue()
+                                                                                                                                       .apply(country,
+                                                                                                                                              country)))
+                                                         && country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isNomad().getKey()
+                                                                                                                             && (reform.isNomad().getValue()
+                                                                                                                                 == null
+                                                                                                                                 || reform.isNomad()
+                                                                                                                                          .getValue()
+                                                                                                                                          .apply(country,
+                                                                                                                                                 country))));
             case "has_heir":
                 return "yes".equalsIgnoreCase(value) == (country.getHeir() != null);
             case "has_heir_flag":
@@ -541,9 +556,19 @@ public class ConditionsUtils {
                            || (country.getSecondaryReligion() != null && country.getSecondaryReligion().getName().equals(value));
                 }
             case "has_meritocracy":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isHasMeritocracy);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment()
+                                                               .getReforms()
+                                                               .stream()
+                                                               .anyMatch(reform -> reform.isHasMeritocracy().getKey()
+                                                                                   && (reform.isHasMeritocracy().getValue() == null
+                                                                                       || reform.isHasMeritocracy().getValue().apply(country, country)));
             case "has_militarised_society":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isMilitarisedSociety);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment()
+                                                               .getReforms()
+                                                               .stream()
+                                                               .anyMatch(reform -> reform.isMilitarisedSociety().getKey()
+                                                                                   && (reform.isMilitarisedSociety().getValue() == null
+                                                                                       || reform.isMilitarisedSociety().getValue().apply(country, country)));
             case "has_mission":
                 return country.getCountryMissions().getMissions().stream().anyMatch(mission -> value.equalsIgnoreCase(mission.getName()));
             case "has_new_dynasty":
@@ -810,7 +835,13 @@ public class ConditionsUtils {
             case "is_former_colonial_nation":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null && country.getColonialParent() != null);
             case "is_free_city":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isFreeCity);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isFreeCity().getKey()
+                                                                                                                         && (reform.isFreeCity().getValue()
+                                                                                                                             == null
+                                                                                                                             || reform.isFreeCity()
+                                                                                                                                      .getValue()
+                                                                                                                                      .apply(country,
+                                                                                                                                             country)));
             case "is_free_or_tributary_trigger":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null || country.getSubjectType().isVoluntary());
             case "is_great_power":
@@ -886,7 +917,12 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return country.getNeighbours().contains(other);
             case "is_nomad":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isNomad);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isNomad().getKey()
+                                                                                                                         && (reform.isNomad().getValue() == null
+                                                                                                                             || reform.isNomad()
+                                                                                                                                      .getValue()
+                                                                                                                                      .apply(country,
+                                                                                                                                             country)));
             case "is_orangists_in_power":
                 return "yes".equalsIgnoreCase(value) == (country.getStatistsVsMonarchists() != null && country.getStatistsVsMonarchists() > 0);
             case "is_origin_of_consort":
@@ -928,9 +964,21 @@ public class ConditionsUtils {
             case "is_religion_reformed":
                 return "yes".equalsIgnoreCase(value) == (BooleanUtils.toBoolean(country.hasReformedReligion()));
             case "is_republic":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isRepublic);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isRepublic().getKey()
+                                                                                                                         && (reform.isRepublic().getValue()
+                                                                                                                             == null
+                                                                                                                             || reform.isRepublic()
+                                                                                                                                      .getValue()
+                                                                                                                                      .apply(country,
+                                                                                                                                             country)));
             case "is_revolutionary":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isRevolutionary);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isRevolutionary().getKey()
+                                                                                                                         && (reform.isRevolutionary().getValue()
+                                                                                                                             == null
+                                                                                                                             || reform.isRevolutionary()
+                                                                                                                                      .getValue()
+                                                                                                                                      .apply(country,
+                                                                                                                                             country)));
             case "is_revolution_target":
                 return "yes".equalsIgnoreCase(value) == (country.getSave().getRevolution() != null
                                                          && country.equals(country.getSave().getRevolution().getRevolutionTarget()));
@@ -948,13 +996,9 @@ public class ConditionsUtils {
                 return country.getCoreProvinces().contains(saveProvince)
                        && country.getStates().keySet().stream().anyMatch(area -> area.getProvinces().contains(saveProvince));
             case "is_statists_in_power":
-                return "yes".equalsIgnoreCase(value) == (
-                        country.getGovernment().getReforms().stream().anyMatch(reform -> reform.getStatesGeneralMechanic() != null)
-                        && NumbersUtils.doubleOrDefault(country.getStatistsVsMonarchists()) <= 0);
+                return "yes".equalsIgnoreCase(value) == country.isStatistsInPower();
             case "is_monarchists_in_power":
-                return "yes".equalsIgnoreCase(value) == (
-                        country.getGovernment().getReforms().stream().anyMatch(reform -> reform.getStatesGeneralMechanic() != null)
-                        && NumbersUtils.doubleOrDefault(country.getStatistsVsMonarchists()) > 0);
+                return "yes".equalsIgnoreCase(value) == country.isMonarchistsInPower();
             case "is_subject":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null);
             case "is_subject_of":
@@ -975,7 +1019,13 @@ public class ConditionsUtils {
             case "is_trade_league_leader":
                 return "yes".equalsIgnoreCase(value) == (country.getTradeLeague() != null && country.getTradeLeague().getMembers().get(0).equals(country));
             case "is_tribal":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isTribal);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isTribal().getKey()
+                                                                                                                         && (reform.isTribal().getValue()
+                                                                                                                             == null
+                                                                                                                             || reform.isTribal()
+                                                                                                                                      .getValue()
+                                                                                                                                      .apply(country,
+                                                                                                                                             country)));
             case "is_tributary":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null && country.getSubjectType().isVoluntary());
             case "is_vassal":
@@ -1151,7 +1201,13 @@ public class ConditionsUtils {
                     return NumbersUtils.doubleOrDefault(country.getNavyTradition()) >= NumbersUtils.doubleOrDefault(other.getNavyTradition());
                 }
             case "nomad_development_scale":
-                return "yes".equalsIgnoreCase(value) == (country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isNomad)
+                return "yes".equalsIgnoreCase(value) == (country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isNomad().getKey()
+                                                                                                                          && (reform.isNomad().getValue()
+                                                                                                                              == null
+                                                                                                                              || reform.isNomad()
+                                                                                                                                       .getValue()
+                                                                                                                                       .apply(country,
+                                                                                                                                              country)))
                                                          && country.getRawDevelopment() >= country.getSave().getGame().getNomadDevelopmentScale());
             case "normal_or_historical_nations":
                 return "yes".equalsIgnoreCase(value) == (NationSetup.NORMAL.equals(country.getSave().getGameplayOptions().getNationSetup())
@@ -1780,7 +1836,12 @@ public class ConditionsUtils {
             case "uses_cults":
                 return "yes".equalsIgnoreCase(value) == country.getReligion().getGameReligion().useFetishistCult();
             case "uses_devotion":
-                return "yes".equalsIgnoreCase(value) == country.getGovernment().getReforms().stream().anyMatch(GovernmentReform::isHasDevotion);
+                return "yes".equalsIgnoreCase(value) == country.getGovernment()
+                                                               .getReforms()
+                                                               .stream()
+                                                               .anyMatch(reform -> reform.isHasDevotion().getKey()
+                                                                                   && (reform.isHasDevotion().getValue() == null
+                                                                                       || reform.isHasDevotion().getValue().apply(country, country)));
             case "uses_doom":
                 return "yes".equalsIgnoreCase(value) == country.getReligion().getGameReligion().useDoom();
             case "uses_fervor":
@@ -2701,7 +2762,7 @@ public class ConditionsUtils {
                 other = province.getSave().getCountry(value);
                 return other.equals(province.getSave().getTradeNodes().get(province.getTrade()).getTopPower().entrySet().iterator().next().getKey());
             case "is_territory":
-                return "yes".equalsIgnoreCase(value) == (province.getSaveArea() == null || province.getSaveArea().getCountriesStates() != null
+                return "yes".equalsIgnoreCase(value) == (province.getSaveArea() == null || province.getSaveArea().getCountriesStates() == null
                                                          || province.getSaveArea().getCountryState(province.getOwner()) == null);
             case "is_territorial_core":
                 other = province.getSave().getCountry(value);
@@ -2753,7 +2814,14 @@ public class ConditionsUtils {
             case "num_of_times_improved":
                 return province.getTotalImproveCount() >= NumbersUtils.toInt(value);
             case "non_accepted_culture_republic":
-                return province.getOwner() != null && province.getOwner().getGovernment().getReforms().stream().anyMatch(GovernmentReform::isRepublic)
+                return province.getOwner() != null
+                       && province.getOwner()
+                                  .getGovernment()
+                                  .getReforms()
+                                  .stream()
+                                  .anyMatch(reform -> reform.isRepublic().getKey()
+                                                      && (reform.isRepublic().getValue() == null
+                                                          || reform.isRepublic().getValue().apply(province.getOwner(), province.getOwner())))
                        && !province.getCulture().getCultureGroup().equals(province.getOwner().getPrimaryCulture().getCultureGroup())
                        && !province.getOwner().getAcceptedCultures().contains(province.getCulture());
             case "normal_or_historical_nations":

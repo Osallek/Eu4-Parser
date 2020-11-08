@@ -101,6 +101,11 @@ public class TradeGood {
     }
 
     @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -111,11 +116,11 @@ public class TradeGood {
         }
 
         TradeGood tradeGood = (TradeGood) o;
-        return Objects.equals(getName(), tradeGood.getName());
+        return Objects.equals(name, tradeGood.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName());
+        return Objects.hash(name);
     }
 }

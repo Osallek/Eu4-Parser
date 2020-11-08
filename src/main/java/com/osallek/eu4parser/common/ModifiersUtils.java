@@ -2,7 +2,6 @@ package com.osallek.eu4parser.common;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
-import com.osallek.eu4parser.model.game.GovernmentReform;
 import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.country.Country;
@@ -29,7 +28,7 @@ public class ModifiersUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifiersUtils.class);
 
-    private static final Map<String, Modifier> MODIFIERS_MAP = new HashMap<>();
+    public static final Map<String, Modifier> MODIFIERS_MAP = new HashMap<>();
 
     static {
         ModifiersUtils.addModifier("ARMY_TRADITION", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
@@ -754,6 +753,14 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getNavyTradition()) / 100);
     }
 
+    public static Modifiers scaleWithPositivePiety(Country country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, NumbersUtils.doubleOrDefault(country.getPiety())));
+    }
+
+    public static Modifiers scaleWithNegativePiety(Country country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, -NumbersUtils.doubleOrDefault(country.getPiety())));
+    }
+
     public static Modifiers scaleWithFreeCitiesInHre(Country country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getSave().getCountries()
                                                                .values()
@@ -763,7 +770,9 @@ public class ModifiersUtils {
                                                                .filter(c -> c.getGovernment()
                                                                              .getReforms()
                                                                              .stream()
-                                                                             .anyMatch(GovernmentReform::isFreeCity))
+                                                                             .anyMatch(reform -> reform.isFreeCity().getKey()
+                                                                                                 && (reform.isFreeCity().getValue() == null
+                                                                                                     || reform.isFreeCity().getValue().apply(country, country))))
                                                                .count());
     }
 

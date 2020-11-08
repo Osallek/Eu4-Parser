@@ -95,6 +95,8 @@ public class SaveProvince extends Province {
 
     private ProvinceConstruction missionaryConstruction;
 
+    private Double localAutonomy;
+
     public SaveProvince(ClausewitzItem item, Province province, Save save) {
         super(province);
         this.item = item;
@@ -694,7 +696,12 @@ public class SaveProvince extends Province {
     }
 
     public Double getLocalAutonomy() { //Fixme get country modifier min_autonomy
-        return this.item.getVarAsDouble("local_autonomy");
+        if (this.localAutonomy == null) {
+            this.localAutonomy = Math.max(NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("min_local_autonomy"))),
+                                          NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("local_autonomy")));
+        }
+
+        return this.localAutonomy;
     }
 
     public void setLocalAutonomy(double localAutonomy) {
@@ -1180,17 +1187,27 @@ public class SaveProvince extends Province {
 
     public double getLandForceLimit() {
         if (getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
-            return 0;
+            if (getTradeGood().getProvinceModifiers().hasModifier(ModifiersUtils.getModifier("land_forcelimit"))) {
+                return getTradeGood().getProvinceModifiers().getModifier(ModifiersUtils.getModifier("land_forcelimit"));
+            } else {
+                return 0;
+            }
         } else {
-            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit")));
+            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit")))
+                   * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier")));
         }
     }
 
     public double getNavalForceLimit() {
-        if (getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
-            return 0;
+        if (!isPort() || getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
+            if (getTradeGood().getProvinceModifiers().hasModifier(ModifiersUtils.getModifier("naval_forcelimit"))) {
+                return getTradeGood().getProvinceModifiers().getModifier(ModifiersUtils.getModifier("naval_forcelimit"));
+            } else {
+                return 0;
+            }
         } else {
-            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit")));
+            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit")))
+                   * (1 + getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier")));
         }
     }
 
@@ -1453,6 +1470,8 @@ public class SaveProvince extends Province {
                          .ifPresent(this.navies::add);
             });
         }
+
+        this.localAutonomy = null;
     }
 
     @Override
@@ -1472,5 +1491,10 @@ public class SaveProvince extends Province {
     @Override
     public int hashCode() {
         return Objects.hash(getId());
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

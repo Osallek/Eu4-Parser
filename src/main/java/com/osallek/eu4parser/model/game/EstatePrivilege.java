@@ -2,6 +2,7 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
 
 import java.util.List;
@@ -15,8 +16,6 @@ public class EstatePrivilege {
     private String localizedName;
 
     private final String icon;
-
-    private final double maxAbsolutism;
 
     private final double loyalty;
 
@@ -41,7 +40,6 @@ public class EstatePrivilege {
     public EstatePrivilege(ClausewitzItem item) {
         this.name = item.getName();
         this.icon = item.getVarAsString("icon");
-        this.maxAbsolutism = NumbersUtils.doubleOrDefault(item.getVarAsDouble("max_absolutism"));
         this.loyalty = NumbersUtils.doubleOrDefault(item.getVarAsDouble("loyalty")) * 100; //Percent
         this.influence = NumbersUtils.doubleOrDefault(item.getVarAsDouble("influence")) * 100; //Percent
         this.cooldownYears = NumbersUtils.intOrDefault(item.getVarAsInt("cooldown_years"));
@@ -56,6 +54,8 @@ public class EstatePrivilege {
         this.canRevoke = child == null ? null : new Condition(child);
 
         this.modifiers = new Modifiers();
+        this.modifiers.addModifier(ModifiersUtils.getModifier("max_absolutism"), NumbersUtils.doubleOrDefault(item.getVarAsDouble("max_absolutism")));
+
         child = item.getChild("penalties");
         if (child != null) {
             this.modifiers.addAll(new Modifiers(child.getVariables()));
@@ -88,10 +88,6 @@ public class EstatePrivilege {
 
     public String getIcon() {
         return icon;
-    }
-
-    public double getMaxAbsolutism() {
-        return maxAbsolutism;
     }
 
     public double getLoyalty() {

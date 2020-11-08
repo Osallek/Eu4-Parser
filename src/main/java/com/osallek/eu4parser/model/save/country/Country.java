@@ -54,6 +54,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -516,12 +517,11 @@ public class Country {
     }
 
     public List<AgeAbility> getActiveAgeAbility() {
-        ClausewitzList list = this.item.getList("active_age_ability");
+        List<ClausewitzVariable> variables = this.item.getVariables("active_age_ability");
 
-        return list == null ? new ArrayList<>() : list.getValues()
-                                                      .stream()
-                                                      .map(s -> this.save.getGame().getAgeAbility(ClausewitzUtils.removeQuotes(s)))
-                                                      .collect(Collectors.toList());
+        return variables.stream()
+                        .map(variable -> this.save.getGame().getAgeAbility(ClausewitzUtils.removeQuotes(variable.getValue())))
+                        .collect(Collectors.toList());
     }
 
     public void addAgeAbility(String ageAbility) {
@@ -1010,6 +1010,20 @@ public class Country {
 
     public Double getStatistsVsMonarchists() {
         return this.item.getVarAsDouble("statists_vs_monarchists");
+    }
+
+    public boolean isStatistsInPower() {
+        return NumbersUtils.doubleOrDefault(getStatistsVsMonarchists()) <= 0
+               && getGovernment().getReforms().stream().anyMatch(reform -> reform.getStatesGeneralMechanic() != null
+                                                                           && (reform.getStatesGeneralMechanic().getValue() == null
+                                                                               || reform.getStatesGeneralMechanic().getValue().apply(this, this)));
+    }
+
+    public boolean isMonarchistsInPower() {
+        return NumbersUtils.doubleOrDefault(getStatistsVsMonarchists()) > 0
+               && getGovernment().getReforms().stream().anyMatch(reform -> reform.getStatesGeneralMechanic() != null
+                                                                           && (reform.getStatesGeneralMechanic().getValue() == null
+                                                                               || reform.getStatesGeneralMechanic().getValue().apply(this, this)));
     }
 
     public void setStatistsVsMonarchists(Double statistsVsMonarchists) {
@@ -3345,7 +3359,7 @@ public class Country {
         ClausewitzList list = this.item.getList("traded_bonus");
 
         if (list != null) {
-            return list.getValuesAsInt().stream().map(integer -> this.save.getGame().getTradeGood(integer)).collect(Collectors.toList());
+            return list.getValuesAsInt().stream().map(integer -> this.save.getGame().getTradeGood(integer - 1)).collect(Collectors.toList());
         }
 
         return new ArrayList<>();
@@ -3675,11 +3689,19 @@ public class Country {
     }
 
     public double getLandForceLimit() {
-        return getModifier(ModifiersUtils.getModifier("land_forcelimit")) * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier")));
+        return Math.max(5, (getModifier(ModifiersUtils.getModifier("land_forcelimit"), false)
+                            + getOwnedProvinces().stream().mapToDouble(SaveProvince::getLandForceLimit).sum()))
+               * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier"), false));
     }
 
     public double getNavalForceLimit() {
-        return getModifier(ModifiersUtils.getModifier("naval_forcelimit")) * (1 + getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier")));
+        if (getOwnedProvinces().stream().noneMatch(SaveProvince::isPort)) {
+            return 0;
+        }
+
+        return (getModifier(ModifiersUtils.getModifier("naval_forcelimit"), false)
+                + getOwnedProvinces().stream().mapToDouble(SaveProvince::getNavalForceLimit).sum())
+               * (1 + getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier"), false));
     }
 
     public double getProductionEfficiency() {
@@ -3705,6 +3727,10 @@ public class Country {
     }
 
     public Double getModifier(Modifier modifier) {
+        return getModifier(modifier, true);
+    }
+
+    public Double getModifier(Modifier modifier, boolean includeProvinces) {
         List<Double> list = new ArrayList<>();
         list.add(StaticModifiers.applyToModifiersCountry(this, modifier));
 
@@ -3939,9 +3965,11 @@ public class Country {
                                        .map(m -> m.getModifier(modifier))
                                        .collect(Collectors.toList()));
 
-        list.addAll(getOwnedProvinces().stream()
-                                       .map(province -> province.getModifier(modifier))
-                                       .collect(Collectors.toList()));
+        if (includeProvinces) {
+            list.addAll(getOwnedProvinces().stream()
+                                           .map(province -> province.getModifier(modifier))
+                                           .collect(Collectors.toList()));
+        }
 
         if (getFactions() != null) {
             getFactions().stream()
@@ -3958,6 +3986,34 @@ public class Country {
                                        .stream()
                                        .map(GovernmentReform::getModifiers)
                                        .filter(Objects::nonNull)
+                                       .filter(m -> m.hasModifier(modifier))
+                                       .map(m -> m.getModifier(modifier))
+                                       .collect(Collectors.toList()));
+        }
+
+        if (isStatistsInPower()) {
+            list.addAll(getGovernment().getReforms()
+                                       .stream()
+                                       .filter(reform -> reform.getStatesGeneralMechanic() != null
+                                                         && (reform.getStatesGeneralMechanic().getValue() == null
+                                                             || reform.getStatesGeneralMechanic().getValue().apply(this, this)))
+                                       .map(GovernmentReform::getStatesGeneralMechanic)
+                                       .map(Pair::getKey)
+                                       .filter(Objects::nonNull)
+                                       .map(m -> m.get(0))
+                                       .filter(m -> m.hasModifier(modifier))
+                                       .map(m -> m.getModifier(modifier))
+                                       .collect(Collectors.toList()));
+        } else if (isMonarchistsInPower()) {
+            list.addAll(getGovernment().getReforms()
+                                       .stream()
+                                       .filter(reform -> reform.getStatesGeneralMechanic() != null
+                                                         && (reform.getStatesGeneralMechanic().getValue() == null
+                                                             || reform.getStatesGeneralMechanic().getValue().apply(this, this)))
+                                       .map(GovernmentReform::getStatesGeneralMechanic)
+                                       .map(Pair::getKey)
+                                       .filter(Objects::nonNull)
+                                       .map(m -> m.get(1))
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))
                                        .collect(Collectors.toList()));
@@ -4118,7 +4174,7 @@ public class Country {
         List<ClausewitzItem> rivalItems = this.item.getChildren("rival");
         this.rivals = rivalItems.stream()
                                 .map(child -> new Rival(child, this.save))
-                                .collect(Collectors.toMap(Rival::getRivalTag, Function.identity()));
+                                .collect(Collectors.toMap(rival -> ClausewitzUtils.removeQuotes(rival.getRivalTag()), Function.identity()));
 
         List<ClausewitzItem> victoryCardItems = this.item.getChildren("victory_card");
         this.victoryCards = victoryCardItems.stream()

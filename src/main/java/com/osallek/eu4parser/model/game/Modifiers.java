@@ -7,6 +7,8 @@ import com.osallek.eu4parser.common.Modifier;
 import com.osallek.eu4parser.common.ModifierScope;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -75,7 +77,7 @@ public class Modifiers {
     }
 
     public boolean isEmpty() {
-        return this.enables.isEmpty() && this.modifiers.isEmpty();
+        return CollectionUtils.isEmpty(this.enables) && MapUtils.isEmpty(this.modifiers);
     }
 
     public void add(String name, String value) {

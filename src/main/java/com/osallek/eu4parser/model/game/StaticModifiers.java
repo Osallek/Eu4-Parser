@@ -66,9 +66,9 @@ public enum StaticModifiers {
     COLONY_LEVEL(new Condition(Pair.of("is_colony", "yes")), null, null),
     NATIVE_ASSIMILATION(new Condition(Pair.of("is_colony", "yes")), null, null), //Fixme modifier
     NATIVE_AGGRESSIVENESS(new Condition(Pair.of("is_colony", "yes")), null, null),
-    CORE(new Condition(Pair.of("is_state_core", "yes")), null, null),
+    CORE(new Condition(Pair.of("is_state", "yes"), Pair.of("is_cored", "yes")), null, null),
     NON_CORE(new Condition(Pair.of("is_cored", "no"), Pair.of("is_state", "yes")), null, null),
-    TERRITORY_CORE(new Condition(Pair.of("is_territorial_core", "yes")), null, null),
+    TERRITORY_CORE(new Condition(Pair.of("is_territory", "yes"), Pair.of("is_cored", "yes")), null, null),
     TERRITORY_NON_CORE(new Condition(Pair.of("is_territory", "yes"), Pair.of("is_cored", "no")), null, null),
     MARCH_BONUS(new Condition(Pair.of("is_march", "yes")), null, null),
     SAME_CULTURE_GROUP(new Condition(Pair.of("has_owner_accepted_culture", "no"), Pair.of("has_owner_culture_group", "yes")), null, null),
@@ -123,6 +123,8 @@ public enum StaticModifiers {
     MERCANTILISM(new Condition(Pair.of("always", "yes")), null, null),
     ARMY_TRADITION(new Condition(Pair.of("army_tradition", "0.001")), null, null),
     NAVY_TRADITION(new Condition(Pair.of("navy_tradition", "0.001")), null, null),
+    POSITIVE_PIETY(new Condition(Pair.of("uses_piety", "yes")), null, null),
+    NEGATIVE_PIETY(new Condition(Pair.of("uses_piety", "yes")), null, null),
     DEFENDER_OF_FAITH(new Condition(Pair.of("is_defender_of_faith", "yes")), null, null),
     DEFENDER_OF_FAITH_REFUSED_CTA(new Condition(Pair.of("has_country_modifier", "defender_of_faith_refused_cta")), null, null),
     EMPEROR(new Condition(Pair.of("is_emperor", "yes")), null, null),
@@ -374,6 +376,8 @@ public enum StaticModifiers {
         MERCANTILISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMercantilism(country, modif.modifiers);
         ARMY_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithArmyTradition(country, modif.modifiers);
         NAVY_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNavyTradition(country, modif.modifiers);
+        POSITIVE_PIETY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPositivePiety(country, modif.modifiers);
+        NEGATIVE_PIETY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNegativePiety(country, modif.modifiers);
         FREE_CITIES_IN_HRE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithFreeCitiesInHre(country, modif.modifiers);
         OCCUPIED_IMPERIAL.applyToCountry = (country, modif) -> ModifiersUtils.scaleOccupiedImperial(country, modif.modifiers);
         NUM_OF_MARRIAGES.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumOfRoyalMarriages(country, modif.modifiers);
@@ -566,12 +570,10 @@ public enum StaticModifiers {
         return STATIC_MODIFIERS_MAP.get(name.toUpperCase());
     }
 
-    public static Double applyToModifiersCountry(Country country, Modifier modifier, StaticModifiers... toIgnore) {
-        List<StaticModifiers> ignore = Arrays.asList(toIgnore);
-
+    public static Double applyToModifiersCountry(Country country, Modifier modifier) {
         return ModifiersUtils.sumModifiers(modifier,
                                            APPLIED_TO_COUNTRY.stream()
-                                                             .filter(Predicate.not(ignore::contains))
+                                                             .filter(staticModifiers -> !staticModifiers.modifiers.isEmpty())
                                                              .filter(staticModifiers -> staticModifiers.trigger.apply(country, country))
                                                              .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
                                                              .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers)
@@ -579,11 +581,9 @@ public enum StaticModifiers {
                                                              .collect(Collectors.toList()));
     }
 
-    public static Double applyToModifiersProvince(SaveProvince province, Modifier modifier, StaticModifiers... toIgnore) {
-        List<StaticModifiers> ignore = Arrays.asList(toIgnore);
-
+    public static Double applyToModifiersProvince(SaveProvince province, Modifier modifier) {
         return ModifiersUtils.sumModifiers(modifier, APPLIED_TO_PROVINCE.stream()
-                                                                        .filter(Predicate.not(ignore::contains))
+                                                                        .filter(staticModifiers -> !staticModifiers.modifiers.isEmpty())
                                                                         .filter(staticModifiers -> staticModifiers.trigger.apply(province))
                                                                         .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
                                                                         .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers)
