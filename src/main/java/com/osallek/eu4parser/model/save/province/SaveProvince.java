@@ -1185,6 +1185,18 @@ public class SaveProvince extends Province {
         return missionaryConstruction;
     }
 
+    public double getTolerance() {
+        if (getOwner() == null) {
+            return 0;
+        } else if (getReligion().equals(getOwner().getReligion())) {
+            return getOwner().getToleranceOwn();
+        } else if (getReligion().getReligionGroup().equals(getOwner().getReligion().getReligionGroup())) {
+            return getOwner().getToleranceHeretic();
+        } else {
+            return getOwner().getToleranceHeathen();
+        }
+    }
+
     public double getLandForceLimit() {
         if (getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
             if (getTradeGood().getProvinceModifiers().hasModifier(ModifiersUtils.getModifier("land_forcelimit"))) {

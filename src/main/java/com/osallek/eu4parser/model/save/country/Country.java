@@ -3688,6 +3688,16 @@ public class Country {
         this.wars.add(war);
     }
 
+    public double getGoverningCapacity() {
+        return (getModifier(ModifiersUtils.getModifier("governing_capacity")) +
+               getModifier(ModifiersUtils.getModifier("tech_governing_capacity")))
+               * (1 + getModifier(ModifiersUtils.getModifier("governing_capacity_modifier"), false));
+    }
+
+    public double getGoverningCapacityUsedPercent() {
+        return getUsedGoverningCapacity() / getGoverningCapacity();
+    }
+
     public double getLandForceLimit() {
         return Math.max(5, (getModifier(ModifiersUtils.getModifier("land_forcelimit"), false)
                             + getOwnedProvinces().stream().mapToDouble(SaveProvince::getLandForceLimit).sum()))
@@ -3712,6 +3722,18 @@ public class Country {
     public double getTradeEfficiency() {
         return getModifier(ModifiersUtils.getModifier("trade_efficiency")) +
                getModifier(ModifiersUtils.getModifier("tech_trade_efficiency"));
+    }
+
+    public double getToleranceOwn() {
+        return getModifier(ModifiersUtils.getModifier("tolerance_own"));
+    }
+
+    public double getToleranceHeretic() {
+        return getModifier(ModifiersUtils.getModifier("tolerance_heretic"));
+    }
+
+    public double getToleranceHeathen() {
+        return getModifier(ModifiersUtils.getModifier("tolerance_heathen"));
     }
 
     public double getTaxModifier() {

@@ -688,6 +688,14 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(province.getOwner().getPatriarchAuthority()));
     }
 
+    public static Modifiers scaleWithTolerance(SaveProvince province, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, province.getTolerance()));
+    }
+
+    public static Modifiers scaleWithIntolerance(SaveProvince province, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, -province.getTolerance()));
+    }
+
     public static Modifiers scaleFriendlyRegimentMax20(SaveProvince province, Modifiers modifiers) {
         int nbRegiments = province.getArmies()
                                   .stream()
@@ -742,7 +750,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithMercantilism(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getMercantilism()));
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getMercantilism()) / 100d);
     }
 
     public static Modifiers scaleWithArmyTradition(Country country, Modifiers modifiers) {
@@ -1023,7 +1031,15 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithProductionEfficiency(Country country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, country.getProductionEfficiency() * 100);
+        return ModifiersUtils.scaleModifiers(modifiers, country.getProductionEfficiency());
+    }
+
+    public static Modifiers scaleWithTradeEfficiency(Country country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getTradeEfficiency() * 100);
+    }
+
+    public static Modifiers scaleWithOverGoverningCapacity(Country country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, country.getGoverningCapacityUsedPercent() - 1));
     }
 
     public static Modifiers scaleWithMaintainedForts(Country country, Modifiers modifiers) {

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public enum StaticModifiers {
@@ -80,8 +79,8 @@ public enum StaticModifiers {
     DEVASTATION(new Condition(Pair.of("has_devastation", "yes")), null, null),
     PROSPERITY(new Condition(Pair.of("is_prosperous", "yes")), null, null),
     SLAVES_RAIDED(new Condition(Pair.of("has_province_modifier", "slaves_raided")), null, null),
-    //    TOLERANCE(new Condition(Pair.of("always", "yes")), null, applyToProvince), //Fixme //Scale with 1 tolerance
-    //    INTOLERANCE(new Condition(Pair.of("always", "yes")), null, applyToProvince), //Fixme //Scale with -1 tolerance
+    TOLERANCE(new Condition(Pair.of("always", "yes")), null, null),
+    INTOLERANCE(new Condition(Pair.of("always", "yes")), null, null),
     UNREST(new Condition(Pair.of("always", "yes")), null, null),
     NATIONALISM(new Condition(Pair.of("always", "yes")), null, null),
     HARSH_TREATMENT(new Condition(Pair.of("always", "yes")), null, null), //Fixme Don't know how to parse
@@ -117,7 +116,7 @@ public enum StaticModifiers {
     DOOM(new Condition(Pair.of("doom", "0.001")), null, null),
     AUTHORITY(new Condition(Pair.of("authority", "0.001")), null, null),
     REGENCY_COUNCIL(new Condition(Pair.of("has_regency", "yes")), null, null),
-    //    TRADE_EFFICIENCY(new Condition(Pair.of("always", "yes")), applyToCountry, null), //Fixme //Scale
+    TRADE_EFFICIENCY(new Condition(Pair.of("always", "yes")), null, null),
     PRODUCTION_EFFICIENCY(new Condition(Pair.of("always", "yes")), null, null),
     TRADE_REFUSAL(new Condition(Pair.of("num_of_trade_embargos", "1")), null, null),
     MERCANTILISM(new Condition(Pair.of("always", "yes")), null, null),
@@ -257,7 +256,7 @@ public enum StaticModifiers {
     SERFS_RECIEVED_BY_COSSACKS(new Condition(Pair.of("has_country_modifier", "serfs_recieved_by_cossacks")), null, null),
     COSSACKS_MODIFIER(new Condition(Pair.of("num_of_cossacks", "1")), null, null),
     EXPAND_ADMINISTATION_MODIFIER(new Condition(Pair.of("num_expanded_administration", "1")), null, null),
-    OVER_GOVERNING_CAPACITY_MODIFIER(new Condition(Pair.of("always", "no")), null, null), //Todo getUsedGoverningCapacity //Scale
+    OVER_GOVERNING_CAPACITY_MODIFIER(new Condition(Pair.of("always", "yes")), null, null),
     LOST_HEGEMONY(new Condition(Pair.of("has_country_modifier", "lost_hegemony")), null, null);
 
     public final Condition trigger;
@@ -338,6 +337,8 @@ public enum StaticModifiers {
         DEVASTATION.applyToProvince = (province, modif) -> ModifiersUtils.scaleDevastation(province, modif.modifiers);
         PROSPERITY.applyToProvince = (province, modif) -> StaticModifiers.PROSPERITY.modifiers;
         SLAVES_RAIDED.applyToProvince = (province, modif) -> StaticModifiers.SLAVES_RAIDED.modifiers;
+        TOLERANCE.applyToProvince = (province, modif) -> ModifiersUtils.scaleWithTolerance(province, modif.modifiers);
+        INTOLERANCE.applyToProvince = (province, modif) -> ModifiersUtils.scaleWithIntolerance(province, modif.modifiers);
         UNREST.applyToProvince = (province, modif) -> ModifiersUtils.scaleUnrest(province, modif.modifiers);
         NATIONALISM.applyToProvince = (province, modif) -> ModifiersUtils.scaleNationalism(province, modif.modifiers);
         LOCAL_AUTONOMY.applyToProvince = (province, modif) -> StaticModifiers.LOCAL_AUTONOMY.modifiers;
@@ -371,6 +372,7 @@ public enum StaticModifiers {
         DOOM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDoom(country, modif.modifiers);
         AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithAuthority(country, modif.modifiers);
         REGENCY_COUNCIL.applyToCountry = (country, modif) -> StaticModifiers.REGENCY_COUNCIL.modifiers;
+        TRADE_EFFICIENCY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithTradeEfficiency(country, modif.modifiers);
         PRODUCTION_EFFICIENCY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithProductionEfficiency(country, modif.modifiers);
         TRADE_REFUSAL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithTradeRefusal(country, modif.modifiers);
         MERCANTILISM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMercantilism(country, modif.modifiers);
@@ -499,6 +501,7 @@ public enum StaticModifiers {
         SERFS_RECIEVED_BY_COSSACKS.applyToCountry = (country, modif) -> StaticModifiers.SERFS_RECIEVED_BY_COSSACKS.modifiers;
         COSSACKS_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCossacksPercent(country, modif.modifiers);
         EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
+        OVER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverGoverningCapacity(country, modif.modifiers);
         LOST_HEGEMONY.applyToCountry = (country, modif) -> StaticModifiers.LOST_HEGEMONY.modifiers;
         DEVELOPMENT.applyToProvince = (province, modif) -> { //Ugly but thanks to Paradox
             Modifiers m = Modifiers.copy(modif.modifiers);
