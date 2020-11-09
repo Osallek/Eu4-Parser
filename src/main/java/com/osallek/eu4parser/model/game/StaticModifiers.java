@@ -248,6 +248,7 @@ public enum StaticModifiers {
     ISMAILI_SCHOLAR_MODIFIER(new Condition(Pair.of("has_country_modifier", "ismaili_scholar_modifier")), null, null),
     JAFARI_SCHOLAR_MODIFIER(new Condition(Pair.of("has_country_modifier", "jafari_scholar_modifier")), null, null),
     ZAIDI_SCHOLAR_MODIFIER(new Condition(Pair.of("has_country_modifier", "zaidi_scholar_modifier")), null, null),
+    DISHONOURED_ALLIANCE(new Condition(Pair.of("has_country_modifier", "dishonoured_alliance")), null, null),
     //    JANISSARY_REGIMENT(new Condition(Pair.of())),
     //    REVOLUTIONARY_GUARD_REGIMENT(new Condition(Pair.of())),
     INNOVATIVENESS(new Condition(Pair.of("innovativeness", "0.001")), null, null), //Scale
@@ -496,6 +497,7 @@ public enum StaticModifiers {
         ISMAILI_SCHOLAR_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.ISMAILI_SCHOLAR_MODIFIER.modifiers;
         JAFARI_SCHOLAR_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.JAFARI_SCHOLAR_MODIFIER.modifiers;
         ZAIDI_SCHOLAR_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.ZAIDI_SCHOLAR_MODIFIER.modifiers;
+        DISHONOURED_ALLIANCE.applyToCountry = (country, modif) -> StaticModifiers.DISHONOURED_ALLIANCE.modifiers;
         INNOVATIVENESS.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithInnovativeness(country, modif.modifiers);
         RAIDING_PARTIES_MODIFIER.applyToCountry = (country, modif) -> StaticModifiers.RAIDING_PARTIES_MODIFIER.modifiers;
         SERFS_RECIEVED_BY_COSSACKS.applyToCountry = (country, modif) -> StaticModifiers.SERFS_RECIEVED_BY_COSSACKS.modifiers;

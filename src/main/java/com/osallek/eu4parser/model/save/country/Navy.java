@@ -83,6 +83,26 @@ public class Navy extends Army {
         return this.item.getVarAsDouble("active_fraction_last_month");
     }
 
+    public boolean isProtecting() {
+        ClausewitzItem item = this.item.getChild("mission");
+
+        if (item != null) {
+            return item.hasChild("protect_mission");
+        }
+
+        return false;
+    }
+
+    public boolean isPrivateering() {
+        ClausewitzItem item = this.item.getChild("mission");
+
+        if (item != null) {
+            return item.hasChild("privateer_mission_2");
+        }
+
+        return false;
+    }
+
     protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location,
                                               String graphicalCulture, int shipId, String shipName,
                                               int shipHome, String shipType, double shipMorale) {

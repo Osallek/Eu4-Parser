@@ -12,6 +12,7 @@ import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.AgeAbility;
+import com.osallek.eu4parser.model.game.CenterOfTrade;
 import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.CrownLandBonus;
 import com.osallek.eu4parser.model.game.Culture;
@@ -30,6 +31,7 @@ import com.osallek.eu4parser.model.game.NavalDoctrine;
 import com.osallek.eu4parser.model.game.PersonalDeity;
 import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.ProfessionalismModifier;
+import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.ReligiousReform;
 import com.osallek.eu4parser.model.game.RulerPersonality;
 import com.osallek.eu4parser.model.game.StaticModifier;
@@ -45,6 +47,7 @@ import com.osallek.eu4parser.model.save.Save;
 import com.osallek.eu4parser.model.save.SaveReligion;
 import com.osallek.eu4parser.model.save.TradeLeague;
 import com.osallek.eu4parser.model.save.counters.Counter;
+import com.osallek.eu4parser.model.save.diplomacy.DatableRelation;
 import com.osallek.eu4parser.model.save.province.SaveAdvisor;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.religion.SavePapacy;
@@ -72,6 +75,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -3690,12 +3694,24 @@ public class Country {
 
     public double getGoverningCapacity() {
         return (getModifier(ModifiersUtils.getModifier("governing_capacity")) +
-               getModifier(ModifiersUtils.getModifier("tech_governing_capacity")))
+                getModifier(ModifiersUtils.getModifier("tech_governing_capacity")))
                * (1 + getModifier(ModifiersUtils.getModifier("governing_capacity_modifier"), false));
     }
 
     public double getGoverningCapacityUsedPercent() {
         return getUsedGoverningCapacity() / getGoverningCapacity();
+    }
+
+    public double getYearlyCorruption() {
+        return getModifier(ModifiersUtils.getModifier("YEARLY_CORRUPTION"));
+    }
+
+    public double getLandMorale() {
+        return getModifier(ModifiersUtils.getModifier("tech_land_morale")) * (1 + getModifier(ModifiersUtils.getModifier("land_morale")));
+    }
+
+    public double getNavalMorale() {
+        return getModifier(ModifiersUtils.getModifier("tech_naval_morale")) * (1 + getModifier(ModifiersUtils.getModifier("naval_morale")));
     }
 
     public double getLandForceLimit() {
@@ -3724,8 +3740,24 @@ public class Country {
                getModifier(ModifiersUtils.getModifier("tech_trade_efficiency"));
     }
 
+    public double getTolerance(Religion religion) {
+        if (religion == null) {
+            return 0;
+        } else if (getReligion().getGameReligion().equals(religion)) {
+            return getToleranceOwn();
+        } else if (getReligion().getReligionGroup().equals(religion.getReligionGroup())) {
+            return getToleranceHeretic();
+        } else {
+            return getToleranceHeathen();
+        }
+    }
+
     public double getToleranceOwn() {
         return getModifier(ModifiersUtils.getModifier("tolerance_own"));
+    }
+
+    public double getDiplomaticReputation() {
+        return getModifier(ModifiersUtils.getModifier("DIPLOMATIC_REPUTATION"));
     }
 
     public double getToleranceHeretic() {
@@ -3748,6 +3780,69 @@ public class Country {
         return getModifier(ModifiersUtils.getModifier("vassal_income"));
     }
 
+    public double getNbDiplomaticRelations() {
+        return getModifier(ModifiersUtils.getModifier("DIPLOMATIC_UPKEEP"));
+    }
+
+    public double getNbFreeDiplomaticRelations() {
+        Set<Country> countedCountries = new HashSet<>();
+        Set<Country> tmp;
+
+        double nb = getModifier(ModifiersUtils.getModifier("DIPLOMATIC_UPKEEP"));
+        nb -= getAllies().size();
+        countedCountries.addAll(getAllies());
+
+        tmp = getSubjects().stream().filter(country -> country.getSubjectType().isTakesDiploSlot()).collect(Collectors.toSet());
+        nb -= tmp.size();
+        countedCountries.addAll(tmp);
+
+        tmp = this.save.getDiplomacy()
+                       .getGuarantees()
+                       .stream()
+                       .filter(rel -> rel.getFirst().equals(this))
+                       .map(DatableRelation::getSecond)
+                       .filter(Predicate.not(countedCountries::contains))
+                       .collect(Collectors.toSet());
+
+        nb -= tmp.size();
+        countedCountries.addAll(tmp);
+
+        tmp = this.save.getDiplomacy()
+                       .getRoyalMarriage()
+                       .stream()
+                       .filter(rel -> rel.getFirst().equals(this))
+                       .map(DatableRelation::getSecond)
+                       .filter(Predicate.not(countedCountries::contains))
+                       .collect(Collectors.toSet());
+
+        nb -= tmp.size();
+        countedCountries.addAll(tmp);
+
+        tmp = this.save.getDiplomacy()
+                       .getMilitaryAccesses()
+                       .stream()
+                       .filter(rel -> rel.getFirst().equals(this))
+                       .map(DatableRelation::getSecond)
+                       .filter(Predicate.not(countedCountries::contains))
+                       .collect(Collectors.toSet());
+
+        nb -= tmp.size();
+        countedCountries.addAll(tmp);
+
+        tmp = this.save.getDiplomacy()
+                       .getSupportIndependence()
+                       .stream()
+                       .filter(rel -> rel.getFirst().equals(this))
+                       .map(DatableRelation::getSecond)
+                       .filter(Predicate.not(countedCountries::contains))
+                       .collect(Collectors.toSet());
+
+        nb -= tmp.size();
+        countedCountries.addAll(tmp);
+
+        return nb;
+    }
+
     public Double getModifier(Modifier modifier) {
         return getModifier(modifier, true);
     }
@@ -3765,6 +3860,79 @@ public class Country {
 
         if (getIdeaGroups() != null) {
             getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(key.getModifier(value, modifier)));
+        }
+
+        //Todo neighbours
+
+        if ("ADM_TECH_COST_MODIFIER".equalsIgnoreCase(modifier.getName())) {
+            if (getIdeaGroups() != null) {
+                list.add(getIdeaGroups().getIdeaGroups()
+                                        .entrySet()
+                                        .stream()
+                                        .filter(entry -> Power.ADM.equals(entry.getKey().getCategory()))
+                                        .mapToInt(Map.Entry::getValue)
+                                        .sum()
+                         * this.save.getGame().getIdeaToTech());
+            }
+
+            if (CollectionUtils.isNotEmpty(getOurSpyNetwork())) {
+                getOurSpyNetwork().stream().max(Comparator.comparing(o -> o.getTech().getAdm())).ifPresent(country -> {
+                    if (country.getTech().getAdm() > getTech().getAdm()) {
+                        double mult = Math.max(this.save.getGame().getSpyNetworkTechEffectMax(),
+                                               (country.getTech().getAdm() - getTech().getAdm()) * this.save.getGame().getSpyNetworkTechEffect());
+                        list.add(mult * NumbersUtils.intOrDefault(getActiveRelation(country).getSpyNetwork()));
+                    }
+                });
+            }
+        } else if ("DIP_TECH_COST_MODIFIER".equalsIgnoreCase(modifier.getName())) {
+            if (getIdeaGroups() != null) {
+                list.add(getIdeaGroups().getIdeaGroups()
+                                        .entrySet()
+                                        .stream()
+                                        .filter(entry -> Power.DIP.equals(entry.getKey().getCategory()))
+                                        .mapToInt(Map.Entry::getValue)
+                                        .sum()
+                         * this.save.getGame().getIdeaToTech());
+            }
+
+            if (CollectionUtils.isNotEmpty(getOurSpyNetwork())) {
+                getOurSpyNetwork().stream().max(Comparator.comparing(o -> o.getTech().getDip())).ifPresent(country -> {
+                    if (country.getTech().getDip() > getTech().getDip()) {
+                        double mult = Math.max(this.save.getGame().getSpyNetworkTechEffectMax(),
+                                               (country.getTech().getDip() - getTech().getDip()) * this.save.getGame().getSpyNetworkTechEffect());
+                        list.add(mult * NumbersUtils.intOrDefault(getActiveRelation(country).getSpyNetwork()));
+                    }
+                });
+            }
+        } else if ("MIL_TECH_COST_MODIFIER".equalsIgnoreCase(modifier.getName())) {
+            if (getIdeaGroups() != null) {
+                list.add(getIdeaGroups().getIdeaGroups()
+                                        .entrySet()
+                                        .stream()
+                                        .filter(entry -> Power.MIL.equals(entry.getKey().getCategory()))
+                                        .mapToInt(Map.Entry::getValue)
+                                        .sum()
+                         * this.save.getGame().getIdeaToTech());
+            }
+
+            if (CollectionUtils.isNotEmpty(getOurSpyNetwork())) {
+                getOurSpyNetwork().stream().max(Comparator.comparing(o -> o.getTech().getMil())).ifPresent(country -> {
+                    if (country.getTech().getMil() > getTech().getMil()) {
+                        double mult = Math.max(this.save.getGame().getSpyNetworkTechEffectMax(),
+                                               (country.getTech().getMil() - getTech().getMil()) * this.save.getGame().getSpyNetworkTechEffect());
+                        list.add(mult * NumbersUtils.intOrDefault(getActiveRelation(country).getSpyNetwork()));
+                    }
+                });
+            }
+        } else if ("yearly_army_professionalism".equalsIgnoreCase(modifier.getName())) {
+            list.add((getArmies().values().stream().filter(Army::isDrilling).mapToInt(army -> army.getRegiments().size()).sum() / getLandForceLimit()) * 0.01);
+        } else if ("navy_tradition".equalsIgnoreCase(modifier.getName())) {
+            list.add((2 * getNavies().values()
+                                     .stream()
+                                     .filter(navy -> navy.isPrivateering() || navy.isProtecting())
+                                     .mapToLong(navy -> navy.getShips().stream().filter(ship -> UnitType.LIGHT_SHIP.equals(ship.getUnitType())).count())
+                                     .sum() / getNavalForceLimit())
+                     * (1 + getModifier(ModifiersUtils.getModifier("naval_tradition_from_trade"))));
         }
 
         if (getChurch() != null && CollectionUtils.isNotEmpty(getChurch().getAspects())) {
@@ -3982,6 +4150,15 @@ public class Country {
                                        .map(SaveInvestment::getInvestments)
                                        .flatMap(Collection::stream)
                                        .map(Investment::getOwnerModifier)
+                                       .filter(Objects::nonNull)
+                                       .filter(m -> m.hasModifier(modifier))
+                                       .map(m -> m.getModifier(modifier))
+                                       .collect(Collectors.toList()));
+
+        list.addAll(getOwnedProvinces().stream()
+                                       .map(SaveProvince::getCenterOfTrade)
+                                       .filter(Objects::nonNull)
+                                       .map(CenterOfTrade::getGlobalModifiers)
                                        .filter(Objects::nonNull)
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))

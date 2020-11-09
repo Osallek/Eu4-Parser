@@ -221,6 +221,7 @@ public class SubjectType {
 
     public SubjectType(ClausewitzItem item, Set<SubjectType> subjectTypes) {
         subjectTypes.stream()
+                    .filter(subjectType -> StringUtils.isNotBlank(subjectType.getSprite()))
                     .filter(subjectType -> subjectType.getName().equalsIgnoreCase(item.getVarAsString("copy_from")))
                     .findFirst()
                     .ifPresent(this::copy);

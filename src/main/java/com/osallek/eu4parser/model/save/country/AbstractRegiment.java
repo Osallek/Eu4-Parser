@@ -46,7 +46,7 @@ public abstract class AbstractRegiment {
     }
 
     public Unit getType() {
-        return this.save.getGame().getUnit(getTypeName());
+        return this.save.getGame().getUnit(ClausewitzUtils.removeQuotes(getTypeName()));
     }
 
     public String getTypeName() {

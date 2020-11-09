@@ -729,6 +729,26 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_MAX_INFLUENCE_FROM_DEV").value.todouble();
     }
 
+    public double getIdeaToTech() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("IDEA_TO_TECH").value.todouble();
+    }
+
+    public double getNeighbourBonus() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NEIGHBOURBONUS").value.todouble();
+    }
+
+    public double getNeighbourBonusCap() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NEIGHBOURBONUS_CAP").value.todouble();
+    }
+
+    public double getSpyNetworkTechEffect() {
+        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("SPY_NETWORK_TECH_EFFECT").value.todouble();
+    }
+
+    public double getSpyNetworkTechEffectMax() {
+        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("SPY_NETWORK_TECH_EFFECT_MAX").value.todouble();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.keySet()
                                .stream()
@@ -2020,7 +2040,7 @@ public class Game {
                  .forEach(path -> {
                      ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
                      unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
-                     unitItem.getChildren().forEach(item -> this.units.put(new Unit(item, this::getLocalisation), path));
+                     this.units.put(new Unit(unitItem, this::getLocalisation), path);
                  });
         } catch (IOException e) {
         }

@@ -61,9 +61,9 @@ public class CenterOfTrade implements Comparable<CenterOfTrade> {
         return globalModifiers;
     }
 
-    //Fixme do inland/coastal
     public boolean isValid(SaveProvince province) {
-        return province.getCenterOfTrade() != null && province.getCenterOfTrade().equals(this.level);
+        return province.getCenterOfTradeLevel() != null && province.getCenterOfTradeLevel().equals(this.level)
+               && (province.isPort() ? CenterOfTradeType.COASTAL.equals(this.type) : CenterOfTradeType.INLAND.equals(this.type));
     }
 
     @Override

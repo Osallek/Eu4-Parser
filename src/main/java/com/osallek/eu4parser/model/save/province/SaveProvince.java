@@ -9,6 +9,7 @@ import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
 import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Building;
+import com.osallek.eu4parser.model.game.CenterOfTrade;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.GreatProject;
 import com.osallek.eu4parser.model.game.ImperialReform;
@@ -1153,8 +1154,20 @@ public class SaveProvince extends Province {
         this.item.setVariable("last_native_uprising", ClausewitzUtils.addQuotes(lastNativeUprising));
     }
 
-    public Integer getCenterOfTrade() {
+    public Integer getCenterOfTradeLevel() {
         return this.item.getVarAsInt("center_of_trade");
+    }
+
+    public CenterOfTrade getCenterOfTrade() {
+        return this.save.getGame().getCentersOfTrade().stream().filter(centerOfTrade -> centerOfTrade.isValid(this)).findFirst().orElse(null);
+    }
+
+    public void setCenterOfTrade(CenterOfTrade centerOfTrade) {
+        if (centerOfTrade == null) {
+            this.item.removeVariable("center_of_trade");
+        } else {
+            this.item.setVariable("center_of_trade", centerOfTrade.getLevel());
+        }
     }
 
     public void setCenterOfTrade(Integer centerOfTrade) {
@@ -1341,6 +1354,12 @@ public class SaveProvince extends Province {
                                                                        .collect(Collectors.toList())));
                 }
             }
+
+            getSaveArea().getProvinces().stream().filter(saveProvince -> saveProvince.getCenterOfTrade() != null).findFirst().ifPresent(saveProvince -> {
+                if (saveProvince.getCenterOfTrade().getStateModifiers().hasModifier(modifier)) {
+                    list.add(saveProvince.getCenterOfTrade().getStateModifiers().getModifier(modifier));
+                }
+            });
         }
 
         if (getOwner() != null) {
@@ -1355,6 +1374,10 @@ public class SaveProvince extends Province {
                     list.add(tradePolicy.getTradePower().getProvinceModifiers().getModifier(modifier));
                 }
             }
+        }
+
+        if (getCenterOfTrade() != null && getCenterOfTrade().getProvinceModifiers().hasModifier(modifier)) {
+            list.add(getCenterOfTrade().getProvinceModifiers().getModifier(modifier));
         }
 
         return ModifiersUtils.sumModifiers(modifier, list);

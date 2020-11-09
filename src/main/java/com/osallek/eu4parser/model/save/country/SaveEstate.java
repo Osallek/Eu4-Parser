@@ -114,8 +114,9 @@ public class SaveEstate {
                                       }
 
                                       if (privilege.getModifierByLandOwnership().hasModifier(modifier)) {
-                                          modifiers.add(privilege.getModifierByLandOwnership().getModifier(modifier) * NumbersUtils.doubleOrDefault(getTerritory())
-                                                        / 100);
+                                          modifiers.add(
+                                                  privilege.getModifierByLandOwnership().getModifier(modifier) * NumbersUtils.doubleOrDefault(getTerritory())
+                                                  / 100);
                                       }
                                       modifiers.addAll(privilege.getConditionalModifiers()
                                                                 .stream()
@@ -131,8 +132,13 @@ public class SaveEstate {
     }
 
     public Double getInfluence() {
-        return NumbersUtils.doubleOrDefault(getEstateGame().getBaseInfluence()) + getInfluenceModifiers().stream().mapToDouble(SaveEstateModifier::getValue).sum()
-               + getGrantedPrivileges().stream().map(EstateInteraction::getPrivilege).mapToDouble(EstatePrivilege::getInfluence).sum()
+        return NumbersUtils.doubleOrDefault(getEstateGame().getBaseInfluence())
+               + getInfluenceModifiers().stream().mapToDouble(SaveEstateModifier::getValue).sum()
+               + (getGrantedPrivileges() == null ? 0
+                                                 : getGrantedPrivileges().stream()
+                                                                         .map(EstateInteraction::getPrivilege)
+                                                                         .mapToDouble(EstatePrivilege::getInfluence)
+                                                                         .sum())
                + getInfluenceFromTerritory()
                + this.estateGame.getInfluenceModifiers()
                                 .values()
