@@ -347,6 +347,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("LOCAL_MANPOWER", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("LOCAL_MANPOWER_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("LOCAL_REGIMENT_COST", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_spy_defence", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("REGIMENT_RECRUIT_SPEED", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("SUPPLY_LIMIT", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("SUPPLY_LIMIT_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
@@ -445,6 +446,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("different_religion_war_multiplier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY); //Ai
         ModifiersUtils.addModifier("building_budget_multiplier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY); //Ai
         ModifiersUtils.addModifier("accept_vassalization_reasons", ModifierType.ADDITIVE, ModifierScope.COUNTRY); //Ai
+        ModifiersUtils.addModifier("transfer_trade_power_reasons", ModifierType.ADDITIVE, ModifierScope.COUNTRY); //Ai
         ModifiersUtils.addModifier("heretic_ally_acceptance", ModifierType.ADDITIVE, ModifierScope.COUNTRY); //Ai
         ModifiersUtils.addModifier("heathen_ally_acceptance", ModifierType.ADDITIVE, ModifierScope.COUNTRY); //Ai
         ModifiersUtils.addModifier("trade_league_acceptance", ModifierType.ADDITIVE, ModifierScope.COUNTRY); //Ai

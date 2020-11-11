@@ -32,9 +32,9 @@ public class Estate {
 
     private final double baseInfluence;
 
-    private final Map<String, EstateModifier> influenceModifiers;
+    private final List<EstateModifier> influenceModifiers;
 
-    private final Map<String, EstateModifier> loyaltyModifiers;
+    private final List<EstateModifier> loyaltyModifiers;
 
     private final List<Names> names;
 
@@ -75,12 +75,12 @@ public class Estate {
         items = item.getChildren("influence_modifier");
         this.influenceModifiers = items.stream()
                                        .map(i -> new EstateModifier(i, "influence"))
-                                       .collect(Collectors.toMap(EstateModifier::getDesc, Function.identity()));
+                                       .collect(Collectors.toList());
 
         items = item.getChildren("loyalty_modifier");
         this.loyaltyModifiers = items.stream()
                                      .map(i -> new EstateModifier(i, "loyalty"))
-                                     .collect(Collectors.toMap(EstateModifier::getDesc, Function.identity()));
+                                     .collect(Collectors.toList());
 
         ClausewitzList list = item.getList("color");
         this.color = child == null ? null : new Color(list);
@@ -143,11 +143,11 @@ public class Estate {
         return baseInfluence;
     }
 
-    public Map<String, EstateModifier> getInfluenceModifiers() {
+    public List<EstateModifier> getInfluenceModifiers() {
         return influenceModifiers;
     }
 
-    public Map<String, EstateModifier> getLoyaltyModifiers() {
+    public List<EstateModifier> getLoyaltyModifiers() {
         return loyaltyModifiers;
     }
 

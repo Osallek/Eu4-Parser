@@ -12,8 +12,10 @@ import org.luaj.vm2.ast.TableField;
 import org.luaj.vm2.parser.LuaParser;
 import org.luaj.vm2.parser.ParseException;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +24,11 @@ public final class LuaUtils {
 
     private LuaUtils() {}
 
-    public static Map<String, Map<String, Exp.Constant>> luaFileToMap(String file) throws FileNotFoundException, ParseException {
+    public static Map<String, Map<String, Exp.Constant>> luaFileToMap(File file) throws FileNotFoundException, ParseException {
+        if (file == null) {
+            return new HashMap<>();
+        }
+
         LuaParser luaParser = new LuaParser(new FileInputStream(file));
 
         Chunk chunk = luaParser.Chunk();

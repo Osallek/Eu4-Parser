@@ -122,23 +122,23 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    public Save(String name, String gameFolderPath, ClausewitzItem item) throws IOException, ParseException {
-        this(name, gameFolderPath, item, item, item, false);
+    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem item) throws IOException, ParseException {
+        this(name, gameFolderPath, modFolder, item, item, item, false);
     }
 
-    public Save(String name, String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
+    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
                 ClausewitzItem metaItem) throws IOException, ParseException {
-        this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true);
+        this(name, gameFolderPath, modFolder, gamestateItem, aiItem, metaItem, true);
     }
 
-    private Save(String name, String gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
+    private Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
                  boolean compressed) throws IOException, ParseException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
-        this.game = new Game(gameFolderPath);
+        this.game = new Game(gameFolderPath, modFolder, this.getModEnabled());
         refreshAttributes();
     }
 
@@ -755,17 +755,17 @@ public class Save {
             this.provinces = new HashMap<>();
             provincesItems.getChildren()
                           .forEach(provinceItem -> {
-                              SaveProvince saveProvince = new SaveProvince(provinceItem,
-                                                                           this.game.getProvince(Math.abs(Integer.parseInt(provinceItem
-                                                                                                                                   .getName()))),
-                                                                           this);
-                              this.provinces.put(saveProvince.getId(), saveProvince);
-                              this.game.getProvinces()
-                                       .compute(saveProvince.getId(), (integer, province) -> province = saveProvince);
-                              this.game.getProvincesByColor()
-                                       .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince
-                                                        .getBlue()),
-                                                (color, province) -> province = saveProvince);
+                              Province province = this.game.getProvince(Math.abs(Integer.parseInt(provinceItem.getName())));
+                              if (province != null) {
+                                  SaveProvince saveProvince = new SaveProvince(provinceItem,
+                                                                               province,
+                                                                               this);
+                                  this.provinces.put(saveProvince.getId(), saveProvince);
+                                  this.game.getProvinces().compute(saveProvince.getId(), (integer, p) -> p = saveProvince);
+                                  this.game.getProvincesByColor()
+                                           .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
+                                                    (color, p) -> p = saveProvince);
+                              }
                           });
             this.cities = this.provinces.values()
                                         .stream()

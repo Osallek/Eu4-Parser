@@ -4,14 +4,17 @@ import com.osallek.clausewitzparser.ClausewitzParser;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.LuaUtils;
 import com.osallek.eu4parser.common.ModifierScope;
 import com.osallek.eu4parser.common.ModifierType;
 import com.osallek.eu4parser.common.ModifiersUtils;
+import com.osallek.eu4parser.common.TreeNode;
 import com.osallek.eu4parser.model.Power;
 import com.osallek.eu4parser.model.game.localisation.Eu4Language;
 import com.osallek.eu4parser.model.save.country.Country;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.luaj.vm2.ast.Exp;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.time.Duration;
 import java.time.Instant;
@@ -41,6 +45,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -50,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,6 +66,8 @@ public class Game {
     private final Collator collator;
 
     private final String gameFolderPath;
+
+    private final String modFolderPath;
 
     private final String mapFolderPath;
 
@@ -72,6 +80,10 @@ public class Game {
     private final String interfaceFolderPath;
 
     private final String missionsFolderPath;
+
+    private File provincesImage;
+
+    private TreeNode<FileNode> filesNode;
 
     private Map<Integer, Province> provinces;
 
@@ -195,20 +207,25 @@ public class Game {
 
     private Map<TriggeredModifier, Path> triggeredModifiers;
 
-    public Game(String gameFolderPath) throws IOException, ParseException {
+    public Game(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException, ParseException {
         this.collator = Collator.getInstance();
         this.collator.setStrength(Collator.NO_DECOMPOSITION);
 
         this.gameFolderPath = gameFolderPath;
-        this.mapFolderPath = this.gameFolderPath + File.separator + "map";
-        this.commonFolderPath = this.gameFolderPath + File.separator + "common";
-        this.gfxFolderPath = this.gameFolderPath + File.separator + "gfx";
-        this.localisationFolderPath = this.gameFolderPath + File.separator + "localisation";
-        this.interfaceFolderPath = this.gameFolderPath + File.separator + "interface";
-        this.missionsFolderPath = this.gameFolderPath + File.separator + "missions";
-        this.defines = LuaUtils.luaFileToMap(this.commonFolderPath + File.separator + "defines.lua");
+        this.modFolderPath = modFolderPath;
 
         Instant start = Instant.now();
+
+        readMods(modEnabled);
+
+        this.mapFolderPath = "map";
+        this.commonFolderPath = "common";
+        this.gfxFolderPath = "gfx";
+        this.localisationFolderPath = "localisation";
+        this.interfaceFolderPath = "interface";
+        this.missionsFolderPath = "missions";
+        this.defines = LuaUtils.luaFileToMap(getAbsoluteFile(this.commonFolderPath + File.separator + "defines.lua"));
+        this.provincesImage = getAbsoluteFile(this.mapFolderPath + File.separator + "provinces.bmp");
 
         loadLocalisations();
         readSpriteTypes();
@@ -273,6 +290,33 @@ public class Game {
         }
     }
 
+    private TreeNode<FileNode> getTreeNode(String relativePath) {
+        return this.filesNode.getRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath().toString()));
+    }
+
+    private FileNode getFileNode(String relativePath) {
+        return this.filesNode.getDataRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath().toString()));
+    }
+
+    @SafeVarargs
+    private Stream<Path> getPaths(String relativePath, Predicate<FileNode>... predicates) {
+        TreeNode<FileNode> treeNode = getTreeNode(relativePath);
+        return treeNode == null ? Stream.empty() : treeNode.getLeaves(predicates)
+                                                           .stream()
+                                                           .map(TreeNode::getData)
+                                                           .map(FileNode::getPath);
+    }
+
+    private Path getAbsolutePath(String relativePath) {
+        FileNode node = getFileNode(relativePath);
+        return node == null ? null : node.getPath();
+    }
+
+    private File getAbsoluteFile(String relativePath) {
+        Path path = getAbsolutePath(relativePath);
+        return path == null ? null : path.toFile();
+    }
+
     public Collator getCollator() {
         return collator;
     }
@@ -281,36 +325,16 @@ public class Game {
         return gameFolderPath;
     }
 
-    public String getMapFolderPath() {
-        return mapFolderPath;
-    }
-
-    public String getCommonFolderPath() {
-        return commonFolderPath;
-    }
-
-    public String getGfxFolderPath() {
-        return gfxFolderPath;
-    }
-
-    public String getLocalisationFolderPath() {
-        return localisationFolderPath;
-    }
-
-    public String getInterfaceFolderPath() {
-        return interfaceFolderPath;
-    }
-
     public File getProvincesImage() {
-        return new File(this.mapFolderPath + File.separator + "provinces.bmp");
+        return this.provincesImage;
     }
 
     public File getNormalCursorImage() {
-        return new File(this.gfxFolderPath + File.separator + "cursors" + File.separator + "normal.png");
+        return getAbsoluteFile(this.gfxFolderPath + File.separator + "cursors" + File.separator + "normal.png");
     }
 
     public File getSelectedCursorImage() {
-        return new File(this.gfxFolderPath + File.separator + "cursors" + File.separator + "selected.png");
+        return getAbsoluteFile(this.gfxFolderPath + File.separator + "cursors" + File.separator + "selected.png");
     }
 
     public File getGoldImage() {
@@ -318,7 +342,7 @@ public class Game {
     }
 
     public File getCountryFlagImage(Country country) {
-        return country == null ? null : new File(this.gfxFolderPath + File.separator + "flags" + File.separator + country.getTag() + ".tga");
+        return country == null ? null : getAbsoluteFile(this.gfxFolderPath + File.separator + "flags" + File.separator + country.getTag() + ".tga");
     }
 
     public Map<Integer, Province> getProvinces() {
@@ -434,18 +458,18 @@ public class Game {
             return null;
         }
 
-        File file = new File(getGameFolderPath() + File.separator
-                             + ClausewitzUtils.removeQuotes(spriteType.getTextureFile()));
+        String relativePath = Path.of(ClausewitzUtils.removeQuotes(spriteType.getTextureFile())).toString();
+        File file = getAbsoluteFile(relativePath);
 
-        if (file.exists()) {
+        if (file != null && file.exists()) {
             return file;
         }
 
         //Fix some time files are not rightly registered (I don't know how the game loads them...)
-        if (file.toString().endsWith(".tga")) {
-            return new File(file.toString().replace(".tga", ".dds"));
-        } else if (file.toString().endsWith(".dds")) {
-            return new File(file.toString().replace(".dds", ".tga"));
+        if (relativePath.endsWith(".tga")) {
+            return getAbsoluteFile(relativePath.replace(".tga", ".dds"));
+        } else if (relativePath.endsWith(".dds")) {
+            return getAbsoluteFile(relativePath.replace(".dds", ".tga"));
         }
 
         return null;
@@ -1553,112 +1577,141 @@ public class Game {
                                  this::getTriggeredModifier);
     }
 
-    public void loadLocalisations() throws IOException {
+    private void readMods(List<String> modsEnabled) {
+        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath)), FileNode::getChildren);
+
+        if (CollectionUtils.isNotEmpty(modsEnabled)) {
+            Map<Path, List<String>> mods = modsEnabled.stream()
+                                                      .map(ClausewitzUtils::removeQuotes)
+                                                      .map(s -> s.replaceAll("^mod/", ""))
+                                                      .map(s -> this.modFolderPath + File.separator + s)
+                                                      .map(File::new)
+                                                      .filter(File::exists)
+                                                      .filter(File::canRead)
+                                                      .map(file -> ClausewitzParser.parse(file, 0))
+                                                      .filter(Objects::nonNull)
+                                                      .collect(Collectors.toMap(item -> new File(ClausewitzUtils.removeQuotes(item.getVarAsString("path"))),
+                                                                                //Compare with path so replace with system separator
+                                                                                item -> item.getVars("replace_path")
+                                                                                            .stream()
+                                                                                            .map(ClausewitzVariable::getValue)
+                                                                                            .map(ClausewitzUtils::removeQuotes)
+                                                                                            .map(s -> Path.of(s).toString())
+                                                                                            .collect(Collectors.toList())))
+                                                      .entrySet()
+                                                      .stream()
+                                                      .filter(Objects::nonNull)
+                                                      .filter(entry -> entry.getKey().exists() && entry.getKey().canRead())
+                                                      .collect(Collectors.toMap(entry -> entry.getKey().toPath(), Map.Entry::getValue));
+
+            mods.forEach((path, replacePaths) -> { //This technique replace only folders, so don't check for files
+                this.filesNode.removeChildrenIf(fileNode -> fileNode.getPath().toFile().isDirectory()
+                                                            && replacePaths.contains(fileNode.getRelativePath().toString()));
+                this.filesNode.merge(new TreeNode<>(null, new FileNode(path), FileNode::getChildren));
+            });
+        }
+    }
+
+    public void loadLocalisations() {
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
     }
 
-    private void loadLocalisations(Eu4Language eu4Language) throws IOException {
-        File localisationFolder = new File(this.localisationFolderPath);
+    private void loadLocalisations(Eu4Language eu4Language) {
+        this.localisations = new HashMap<>();
 
-        if (localisationFolder.canRead()) {
-            File[] files = localisationFolder.listFiles((dir, fileName) -> fileName.endsWith(eu4Language.fileEndWith + ".yml"));
-            if (files != null) {
-                this.localisations = new HashMap<>();
+        getPaths(this.localisationFolderPath,
+                 fileNode -> Files.isRegularFile(fileNode.getPath()),
+                 fileNode -> fileNode.getPath().toString().endsWith(eu4Language.fileEndWith + ".yml"))
+                .forEach(path -> {
+                    try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                        String line;
+                        reader.readLine(); //Skip first line language
 
-                for (File file : files) {
-                    if (Files.isRegularFile(file.toPath())) {
-                        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-                            String line;
-                            reader.readLine(); //Skip first line language
-
-                            while ((line = reader.readLine()) != null) {
-                                if (ClausewitzUtils.isBlank(line)) {
-                                    continue;
-                                }
-
-                                int indexOf;
-                                if ((indexOf = line.indexOf('#')) >= 0) { //If has comments
-                                    if (line.indexOf('"') < 0) { //If has no data
-                                        continue;
-                                    }
-
-                                    if (line.indexOf('"') < indexOf) { //If data is before comment
-                                        line = line.substring(0, indexOf);
-
-                                        if (ClausewitzUtils.isBlank(line)) {
-                                            continue;
-                                        }
-                                    } else {
-                                        continue;
-                                    }
-                                }
-
-                                String[] keys = line.split(":", 2);
-                                String key = keys[0].trim();
-                                String value = keys[1];
-                                int start = value.indexOf('"') + 1;
-                                int end = value.lastIndexOf('"');
-
-                                if (start > end) {
-                                    continue;
-                                }
-
-                                this.localisations.put(key, value.substring(start, end).trim());
+                        while ((line = reader.readLine()) != null) {
+                            if (ClausewitzUtils.isBlank(line)) {
+                                continue;
                             }
+
+                            int indexOf;
+                            if ((indexOf = line.indexOf('#')) >= 0) { //If has comments
+                                if (line.indexOf('"') < 0) { //If has no data
+                                    continue;
+                                }
+
+                                if (line.indexOf('"') < indexOf) { //If data is before comment
+                                    line = line.substring(0, indexOf);
+
+                                    if (ClausewitzUtils.isBlank(line)) {
+                                        continue;
+                                    }
+                                } else {
+                                    continue;
+                                }
+                            }
+
+                            String[] keys = line.split(":", 2);
+                            String key = keys[0].trim();
+                            String value = keys[1];
+                            int start = value.indexOf('"') + 1;
+                            int end = value.lastIndexOf('"');
+
+                            if (start > end) {
+                                continue;
+                            }
+
+                            this.localisations.put(key, value.substring(start, end).trim());
                         }
+                    } catch (IOException e) {
+                        LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
                     }
-                }
-            }
-        }
+                });
     }
 
     private void readSpriteTypes() {
-        File interfaceFolder = new File(this.interfaceFolderPath);
+        this.spriteTypes = new HashMap<>();
 
-        if (interfaceFolder.canRead()) {
-            try (Stream<Path> paths = Files.walk(interfaceFolder.toPath())) {
-                this.spriteTypes = new HashMap<>();
+        getPaths(this.interfaceFolderPath,
+                 fileNode -> Files.isRegularFile(fileNode.getPath()),
+                 fileNode -> fileNode.getPath().toString().endsWith(".gfx"))
+                .forEach(path -> {
+                    ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
+                    ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
 
-                paths.filter(Files::isRegularFile)
-                     .filter(path -> path.toString().endsWith(".gfx"))
-                     .forEach(path -> {
-                         ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
-                         ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
-
-                         if (spriteTypesItem != null) {
-                             this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
-                                                                    .stream()
-                                                                    .map(SpriteType::new)
-                                                                    .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
-                                                                                              Function.identity(),
-                                                                                              (a, b) -> a)));
-                         }
-                     });
-            } catch (IOException e) {
-            }
-        }
-
+                    if (spriteTypesItem != null) {
+                        this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
+                                                               .stream()
+                                                               .map(SpriteType::new)
+                                                               .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
+                                                                                         Function.identity(),
+                                                                                         (a, b) -> a)));
+                    }
+                });
     }
 
     private void readProvinces() throws IOException {
-        File provincesDefinitionFile = new File(this.mapFolderPath + File.separator + "definition.csv");
+        File provincesDefinitionFile = getAbsoluteFile(this.mapFolderPath + File.separator + "definition.csv");
 
-        if (provincesDefinitionFile.canRead()) {
+        if (provincesDefinitionFile != null && provincesDefinitionFile.canRead()) {
             this.provinces = new HashMap<>();
             this.provincesByColor = new HashMap<>();
             try (BufferedReader reader = Files.newBufferedReader(provincesDefinitionFile.toPath(), ClausewitzUtils.CHARSET)) {
                 String line;
                 reader.readLine(); //Skip csv headers
                 while ((line = reader.readLine()) != null) {
-                    Province province = new Province(line.split(";"));
-                    this.provinces.put(province.getId(), province);
-                    this.provincesByColor.put(Eu4Utils.rgbToColor(province.getRed(), province.getGreen(), province.getBlue()), province);
+                    if (StringUtils.isNotBlank(line)) {
+                        Province province = new Province(line.split(";", -1));
+                        this.provinces.put(province.getId(), province);
+
+                        if (province.getColor() != null) {
+                            this.provincesByColor.put(province.getColor(), province);
+                        }
+                    }
                 }
             }
 
-            File provincesMapFile = new File(this.mapFolderPath + File.separator + "default.map");
+            File provincesMapFile = getAbsoluteFile(this.mapFolderPath + File.separator + "default.map");
 
-            if (provincesMapFile.canRead()) {
+            if (provincesMapFile != null && provincesMapFile.canRead()) {
                 ClausewitzItem provinceMapItem = ClausewitzParser.parse(provincesMapFile, 0, StandardCharsets.UTF_8);
                 ClausewitzList seaList = provinceMapItem.getList("sea_starts");
 
@@ -1673,9 +1726,9 @@ public class Game {
                 }
             }
 
-            File climateFile = new File(this.mapFolderPath + File.separator + "climate.txt");
+            File climateFile = getAbsoluteFile(this.mapFolderPath + File.separator + "climate.txt");
 
-            if (climateFile.canRead()) {
+            if (climateFile != null && climateFile.canRead()) {
                 ClausewitzItem climateItem = ClausewitzParser.parse(climateFile, 0, StandardCharsets.UTF_8);
                 climateItem.getLists()
                            .forEach(list -> {
@@ -1689,52 +1742,57 @@ public class Game {
                            });
             }
 
-            File continentFile = new File(this.mapFolderPath + File.separator + "continent.txt");
+            File continentFile = getAbsoluteFile(this.mapFolderPath + File.separator + "continent.txt");
 
-            if (continentFile.canRead()) {
+            if (continentFile != null && continentFile.canRead()) {
                 ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile, 0, StandardCharsets.UTF_8);
 
                 this.continents = new LinkedHashMap<>();
                 continentsItem.getListsNot("island_check_provinces").forEach(item -> this.continents.put(new Continent(item), continentFile.toPath()));
+
                 this.continents.keySet().forEach(continent -> {
                     continent.setLocalizedName(this.getLocalisation(continent.getName()));
                     continent.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setContinent(continent));
                 });
             }
 
-            if (getProvincesImage().canRead()) {
-                BufferedImage provinceImage = ImageIO.read(getProvincesImage());
+            if (this.provincesImage != null && this.provincesImage.canRead()) {
+                BufferedImage provinceImage = ImageIO.read(this.provincesImage);
 
                 for (int x = 0; x < provinceImage.getWidth(); x++) {
                     for (int y = 0; y < provinceImage.getHeight(); y++) {
                         int[] rgb = provinceImage.getRaster().getPixel(x, y, (int[]) null);
                         Province province = getProvinceByColor(rgb[0], rgb[1], rgb[2]);
+                        Province other;
 
-                        if (province.isColonizable() && !province.isPort()) {
+                        if (province != null && province.isColonizable() && !province.isPort()) {
                             if (x > 0) {
                                 int[] leftRgb = provinceImage.getRaster().getPixel(x - 1, y, (int[]) null);
-                                if (!Arrays.equals(leftRgb, rgb) && getProvinceByColor(leftRgb[0], leftRgb[1], leftRgb[2]).isOcean()) {
+                                if (!Arrays.equals(leftRgb, rgb) && (other = getProvinceByColor(leftRgb[0], leftRgb[1], leftRgb[2])) != null
+                                    && other.isOcean()) {
                                     province.setPort(true);
                                 }
                             }
 
                             if (x < provinceImage.getWidth() - 1) {
                                 int[] rightRgb = provinceImage.getRaster().getPixel(x + 1, y, (int[]) null);
-                                if (!Arrays.equals(rightRgb, rgb) && getProvinceByColor(rightRgb[0], rightRgb[1], rightRgb[2]).isOcean()) {
+                                if (!Arrays.equals(rightRgb, rgb) && (other = getProvinceByColor(rightRgb[0], rightRgb[1], rightRgb[2])) != null
+                                    && other.isOcean()) {
                                     province.setPort(true);
                                 }
                             }
 
                             if (y > 0) {
                                 int[] topRgb = provinceImage.getRaster().getPixel(x, y - 1, (int[]) null);
-                                if (!Arrays.equals(topRgb, rgb) && getProvinceByColor(topRgb[0], topRgb[1], topRgb[2]).isOcean()) {
+                                if (!Arrays.equals(topRgb, rgb) && (other = getProvinceByColor(topRgb[0], topRgb[1], topRgb[2])) != null && other.isOcean()) {
                                     province.setPort(true);
                                 }
                             }
 
                             if (y < provinceImage.getHeight() - 1) {
                                 int[] bottomRgb = provinceImage.getRaster().getPixel(x, y + 1, (int[]) null);
-                                if (!Arrays.equals(bottomRgb, rgb) && getProvinceByColor(bottomRgb[0], bottomRgb[1], bottomRgb[2]).isOcean()) {
+                                if (!Arrays.equals(bottomRgb, rgb) && (other = getProvinceByColor(bottomRgb[0], bottomRgb[1], bottomRgb[2])) != null
+                                    && other.isOcean()) {
                                     province.setPort(true);
                                 }
                             }
@@ -1746,328 +1804,280 @@ public class Game {
     }
 
     private void readCultures() {
-        File culturesFolder = new File(this.commonFolderPath + File.separator + "cultures");
+        this.cultureGroups = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(culturesFolder.toPath())) {
-            this.cultureGroups = new HashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "cultures",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
+                    this.cultureGroups.put(path, cultureGroupsItem.getChildren()
+                                                                  .stream()
+                                                                  .map(CultureGroup::new)
+                                                                  .collect(Collectors.toList()));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
-                     this.cultureGroups.put(path, cultureGroupsItem.getChildren()
-                                                                   .stream()
-                                                                   .map(CultureGroup::new)
-                                                                   .collect(Collectors.toList()));
-                 });
-            this.cultureGroups.values().forEach(groups -> groups.forEach(cultureGroup -> {
-                cultureGroup.setLocalizedName(this.getLocalisation(cultureGroup.getName()));
-                cultureGroup.getCultures().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
-            }));
-        } catch (IOException e) {
-        }
+        this.cultureGroups.values().forEach(groups -> groups.forEach(cultureGroup -> {
+            cultureGroup.setLocalizedName(this.getLocalisation(cultureGroup.getName()));
+            cultureGroup.getCultures().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
+        }));
     }
 
     private void readReligion() {
-        File culturesFolder = new File(this.commonFolderPath + File.separator + "religions");
+        this.religionGroups = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(culturesFolder.toPath())) {
-            this.religionGroups = new HashMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     this.religionGroups.put(path, religionGroupsItem.getChildren()
-                                                                     .stream()
-                                                                     .map(ReligionGroup::new)
-                                                                     .collect(Collectors.toList()));
-                 });
-            this.religionGroups.values().forEach(groups -> groups.forEach(religionGroup -> {
-                religionGroup.setLocalizedName(this.getLocalisation(religionGroup.getName()));
-                religionGroup.getReligions().forEach(religion -> {
-                    religion.setLocalizedName(this.getLocalisation(religion.getName()));
-
-                    if (religion.getPapacy() != null) {
-                        religion.getPapacy().getConcessions().forEach(papacyConcession -> {
-                            papacyConcession.setConcilatoryLocalizedName(papacyConcession.getName() + "_concilatory");
-                            papacyConcession.setHarshLocalizedName(papacyConcession.getName() + "_harsh");
-                        });
-                    }
+        getPaths(this.commonFolderPath + File.separator + "religions",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    this.religionGroups.put(path, religionGroupsItem.getChildren()
+                                                                    .stream()
+                                                                    .map(ReligionGroup::new)
+                                                                    .collect(Collectors.toList()));
                 });
-            }));
-        } catch (IOException e) {
-        }
+
+        this.religionGroups.values().forEach(groups -> groups.forEach(religionGroup -> {
+            religionGroup.setLocalizedName(this.getLocalisation(religionGroup.getName()));
+            religionGroup.getReligions().forEach(religion -> {
+                religion.setLocalizedName(this.getLocalisation(religion.getName()));
+
+                if (religion.getPapacy() != null) {
+                    religion.getPapacy().getConcessions().forEach(papacyConcession -> {
+                        papacyConcession.setConcilatoryLocalizedName(papacyConcession.getName() + "_concilatory");
+                        papacyConcession.setHarshLocalizedName(papacyConcession.getName() + "_harsh");
+                    });
+                }
+            });
+        }));
     }
 
     private void readInstitutions() {
-        File institutionsFolder = new File(this.commonFolderPath + File.separator + "institutions");
+        this.institutions = new HashMap<>();
+        AtomicInteger i = new AtomicInteger();
 
-        try (Stream<Path> paths = Files.walk(institutionsFolder.toPath())) {
-            this.institutions = new HashMap<>();
-            AtomicInteger i = new AtomicInteger();
+        getPaths(this.commonFolderPath + File.separator + "institutions",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    this.institutions.put(path, institutionsItem.getChildren()
+                                                                .stream()
+                                                                .map(child -> new Institution(child, i.getAndIncrement()))
+                                                                .collect(Collectors.toCollection(TreeSet::new)));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     this.institutions.put(path, institutionsItem.getChildren()
-                                                                 .stream()
-                                                                 .map(child -> new Institution(child, i.getAndIncrement()))
-                                                                 .collect(Collectors.toCollection(TreeSet::new)));
-                 });
-            this.institutions.values().forEach(institutionList -> institutionList.forEach(institution -> {
-                institution.setLocalizedName(this.getLocalisation(institution.getName()));
-            }));
-        } catch (IOException e) {
-        }
+        this.institutions.values().forEach(institutionList ->
+                                                   institutionList.forEach(
+                                                           institution -> institution.setLocalizedName(this.getLocalisation(institution.getName()))));
     }
 
     private void readTradeGoods() {
-        File tradeGoodsFolder = new File(this.commonFolderPath + File.separator + "tradegoods");
-        File pricesFolder = new File(this.commonFolderPath + File.separator + "prices");
+        this.tradeGoods = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(tradeGoodsFolder.toPath())) {
-            this.tradeGoods = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "tradegoods",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    tradeGoodsItem.getChildren()
+                                  .forEach(tradeGoodItem -> this.tradeGoods.put(new TradeGood(tradeGoodItem),
+                                                                                new AbstractMap.SimpleEntry<>(path, null)));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     tradeGoodsItem.getChildren()
-                                   .forEach(tradeGoodItem -> this.tradeGoods.put(new TradeGood(tradeGoodItem),
-                                                                                 new AbstractMap.SimpleEntry<>(path, null)));
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "prices",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    pricesItem.getChildren().forEach(priceItem -> {
+                        for (Map.Entry<TradeGood, Map.Entry<Path, Path>> entry : this.tradeGoods.entrySet()) {
+                            if (entry.getKey().getName().equals(priceItem.getName())) {
+                                entry.getKey().setPriceItem(priceItem);
+                                entry.getValue().setValue(path);
+                            }
+                        }
+                    });
+                });
 
-        try (Stream<Path> paths = Files.walk(pricesFolder.toPath())) {
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     pricesItem.getChildren().forEach(priceItem -> {
-                         for (Map.Entry<TradeGood, Map.Entry<Path, Path>> entry : this.tradeGoods.entrySet()) {
-                             if (entry.getKey().getName().equals(priceItem.getName())) {
-                                 entry.getKey().setPriceItem(priceItem);
-                                 entry.getValue().setValue(path);
-                             }
-                         }
-
-                     });
-                 });
-            this.tradeGoods.keySet()
-                           .forEach(tradeGood -> tradeGood.setLocalizedName(this.getLocalisation(tradeGood.getName())));
-        } catch (IOException e) {
-        }
+        this.tradeGoods.keySet().forEach(tradeGood -> tradeGood.setLocalizedName(this.getLocalisation(tradeGood.getName())));
     }
 
     private void readBuildings() {
-        File tradeGoodsFolder = new File(this.commonFolderPath + File.separator + "buildings");
+        this.buildings = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(tradeGoodsFolder.toPath())) {
-            this.buildings = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "buildings",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    buildingsItem.getChildrenNot("manufactory")
+                                 .forEach(
+                                         tradeGoodItem -> this.buildings.put(new Building(tradeGoodItem, this), path));
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     buildingsItem.getChildrenNot("manufactory")
-                                  .forEach(
-                                          tradeGoodItem -> this.buildings.put(new Building(tradeGoodItem, this), path));
+                    if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
+                        Building manufactoryBuilding = new Building(buildingsItem, this);
+                        this.buildings.keySet().forEach(building -> {
+                            building.setInternalCost(manufactoryBuilding.getCost());
+                            building.setInternalTime(manufactoryBuilding.getTime());
+                            building.setInternalModifiers(manufactoryBuilding.getModifiers());
+                        });
+                    }
+                });
 
-                     if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
-                         Building manufactoryBuilding = new Building(buildingsItem, this);
-                         this.buildings.keySet().forEach(building -> {
-                             building.setInternalCost(manufactoryBuilding.getCost());
-                             building.setInternalTime(manufactoryBuilding.getTime());
-                             building.setInternalModifiers(manufactoryBuilding.getModifiers());
-                         });
-                     }
-                 });
-
-            this.buildings.keySet()
-                          .forEach(building -> building.setLocalizedName(this.getLocalisation(
-                                  "building_" + building.getName())));
-        } catch (IOException e) {
-        }
+        this.buildings.keySet().forEach(building -> building.setLocalizedName(this.getLocalisation("building_" + building.getName())));
     }
 
     private void readImperialReforms() {
-        File imperialReformsFolder = new File(this.commonFolderPath + File.separator + "imperial_reforms");
+        this.imperialReforms = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(imperialReformsFolder.toPath())) {
-            this.imperialReforms = new HashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "imperial_reforms",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    imperialReformsItem.getChildren().forEach(item -> this.imperialReforms.put(new ImperialReform(item, this), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     imperialReformsItem.getChildren().forEach(item -> this.imperialReforms.put(new ImperialReform(item, this), path));
-                 });
-
-            this.imperialReforms.keySet()
-                                .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
-        } catch (IOException e) {
-        }
+        this.imperialReforms.keySet()
+                            .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
     }
 
     private void readDecrees() {
-        File decreesFolder = new File(this.commonFolderPath + File.separator + "decrees");
+        this.decrees = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(decreesFolder.toPath())) {
-            this.decrees = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "imperial_reforms",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    decreesItem.getChildren().forEach(item -> this.decrees.put(new Decree(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     decreesItem.getChildren().forEach(item -> this.decrees.put(new Decree(item), path));
-                 });
-
-            this.decrees.keySet().forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(saveDecree.getName() + "_title")));
-        } catch (IOException e) {
-        }
+        this.decrees.keySet().forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(saveDecree.getName() + "_title")));
     }
 
     private void readGoldenBulls() {
-        File goldenBullsFolder = new File(this.commonFolderPath + File.separator + "golden_bulls");
+        this.goldenBulls = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(goldenBullsFolder.toPath())) {
-            this.goldenBulls = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "golden_bulls",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    goldenBullsItem.getChildren().forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     goldenBullsItem.getChildren().forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
-                 });
-
-            this.goldenBulls.keySet()
-                            .forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
-        } catch (IOException e) {
-        }
+        this.goldenBulls.keySet().forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
     }
 
     private void readEvents() {
-        File eventsFolder = new File(this.gameFolderPath + File.separator + "events");
+        this.events = new ConcurrentHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(eventsFolder.toPath())) {
-            this.events = new ConcurrentHashMap<>();
+        getPaths(this.gameFolderPath + File.separator + "events",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    eventsItem.getChildren().forEach(item -> this.events.put(new Event(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .parallel()
-                 .forEach(path -> {
-                     ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     eventsItem.getChildren().forEach(item -> this.events.put(new Event(item), path));
-                 });
-
-            this.events.keySet()
-                       .parallelStream()
-                       .forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
-        } catch (IOException e) {
-        }
+        this.events.keySet()
+                   .parallelStream()
+                   .forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
     }
 
     private void readGovernments() {
-        File eventsFolder = new File(this.commonFolderPath + File.separator + "governments");
+        this.governments = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(eventsFolder.toPath())) {
-            this.governments = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "governments",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item), path));
-                 });
-
-            this.governments.keySet().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
-        } catch (IOException e) {
-        }
+        this.governments.keySet().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
     }
 
     private void readGovernmentRanks() {
-        File governmentRanksFolder = new File(this.commonFolderPath + File.separator + "government_ranks");
+        this.governmentRanks = new TreeMap<>();
 
-        try (Stream<Path> paths = Files.walk(governmentRanksFolder.toPath())) {
-            this.governmentRanks = new TreeMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem governmentRanksItem = ClausewitzParser.parse(path.toFile(), 0);
-                     governmentRanksItem.getChildren().forEach(item -> this.governmentRanks.put(new GovernmentRank(item), path));
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "government_ranks",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem governmentRanksItem = ClausewitzParser.parse(path.toFile(), 0);
+                    governmentRanksItem.getChildren().forEach(item -> this.governmentRanks.put(new GovernmentRank(item), path));
+                });
     }
 
     private void readGovernmentNames() {
-        File govnmentNamesFolder = new File(this.commonFolderPath + File.separator + "government_names");
+        this.governmentNames = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(govnmentNamesFolder.toPath())) {
-            this.governmentNames = new LinkedHashMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     governmentsItem.getChildren().forEach(item -> this.governmentNames.put(new GovernmentName(item, this), path));
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "government_names",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    governmentsItem.getChildren().forEach(item -> this.governmentNames.put(new GovernmentName(item, this), path));
+                });
     }
 
     private void readGovernmentReforms() {
-        File governmentReformsFolder = new File(this.commonFolderPath + File.separator + "government_reforms");
+        this.governmentReforms = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(governmentReformsFolder.toPath())) {
-            this.governmentReforms = new LinkedHashMap<>();
+        Map<ClausewitzItem, Path> reformsItems = getPaths(this.commonFolderPath + File.separator + "government_reforms",
+                                                          fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .collect(Collectors.toMap(path -> ClausewitzParser.parse(path.toFile(), 0), Function.identity()));
 
-            Map<ClausewitzItem, Path> reformsItems = paths.filter(Files::isRegularFile)
-                                                          .collect(Collectors.toMap(path -> ClausewitzParser.parse(path.toFile(), 0), Function.identity()));
+        AtomicReference<GovernmentReform> defaultReform = new AtomicReference<>();
 
-            AtomicReference<GovernmentReform> defaultReform = new AtomicReference<>();
-            reformsItems.keySet().stream().filter(item -> item.hasChild("defaults_reform")).findFirst().ifPresent(item -> {
-                defaultReform.set(new GovernmentReform(item.getChild("defaults_reform"), this, null));
-            });
+        reformsItems.keySet().stream().filter(item -> item.hasChild("defaults_reform")).findFirst().ifPresent(item -> {
+            defaultReform.set(new GovernmentReform(item.getChild("defaults_reform"), this, null));
+        });
 
-            reformsItems.forEach((key, value) -> key
-                    .getChildrenNot("defaults_reform")
-                    .forEach(item -> this.governmentReforms.put(new GovernmentReform(item, this, defaultReform.get()), value)));
+        reformsItems.forEach((key, value) -> key.getChildrenNot("defaults_reform")
+                                                .forEach(item -> this.governmentReforms.put(new GovernmentReform(item, this, defaultReform.get()), value)));
 
-            this.governmentReforms.keySet().forEach(governmentReform -> governmentReform.setLocalizedName(this.getLocalisation(governmentReform.getName())));
-        } catch (IOException e) {
-        }
+        this.governmentReforms.keySet().forEach(governmentReform -> governmentReform.setLocalizedName(this.getLocalisation(governmentReform.getName())));
     }
 
     private void readUnits() {
-        File unitsFolder = new File(this.commonFolderPath + File.separator + "units");
+        this.units = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(unitsFolder.toPath())) {
-            this.units = new HashMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
-                     unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
-                     this.units.put(new Unit(unitItem, this::getLocalisation), path);
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "units",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
+                    unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
+                    this.units.put(new Unit(unitItem, this::getLocalisation), path);
+                });
     }
 
     private void readAreas() {
-        File areasFile = new File(this.mapFolderPath + File.separator + "area.txt");
         this.areas = new HashMap<>();
-        ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
-        areasItem.getLists().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
-        areasItem.getChildren().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
+        File areasFile = getAbsoluteFile(this.mapFolderPath + File.separator + "area.txt");
+
+        if (areasFile != null && areasFile.canRead()) {
+            ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
+
+            areasItem.getLists().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
+            areasItem.getChildren().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
+        }
+
         this.areas.keySet().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
     }
 
     private void readRegions() {
-        File regionsFile = new File(this.mapFolderPath + File.separator + "region.txt");
         this.regions = new HashMap<>();
-        ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
-        regionsItem.getChildren().forEach(item -> this.regions.put(new Region(item, this), regionsFile.toPath()));
+        File regionsFile = getAbsoluteFile(this.mapFolderPath + File.separator + "region.txt");
+
+        if (regionsFile != null && regionsFile.canRead()) {
+            ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
+            regionsItem.getChildren().forEach(item -> this.regions.put(new Region(item, this), regionsFile.toPath()));
+        }
+
         this.regions.keySet().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
     }
 
     private void readSuperRegions() {
-        File regionsFile = new File(this.mapFolderPath + File.separator + "superregion.txt");
         this.superRegions = new HashMap<>();
-        ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
-        regionsItem.getLists().forEach(item -> this.superRegions.put(new SuperRegion(item, this), regionsFile.toPath()));
+        File regionsFile = getAbsoluteFile(this.mapFolderPath + File.separator + "superregion.txt");
+
+        if (regionsFile != null && regionsFile.canRead()) {
+            ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
+            regionsItem.getLists().forEach(item -> this.superRegions.put(new SuperRegion(item, this), regionsFile.toPath()));
+        }
+
         this.superRegions.keySet()
                          .stream()
                          .filter(superRegion -> superRegion.getRegions() != null)
@@ -2075,686 +2085,539 @@ public class Game {
     }
 
     private void readTechGroups() {
-        File techGroupsFile = new File(this.commonFolderPath + File.separator + "technology.txt");
         this.techGroups = new HashMap<>();
-        ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile, 0);
-        techGroupsItem.getChild("groups").getChildren().forEach(item -> this.techGroups.put(new TechGroup(item), techGroupsFile.toPath()));
+        File techGroupsFile = getAbsoluteFile(this.commonFolderPath + File.separator + "technology.txt");
+
+        if (techGroupsFile != null && techGroupsFile.canRead()) {
+            ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile, 0);
+            techGroupsItem.getChild("groups").getChildren().forEach(item -> this.techGroups.put(new TechGroup(item), techGroupsFile.toPath()));
+        }
+
         this.techGroups.keySet().forEach(techGroup -> techGroup.setLocalizedName(this.getLocalisation(techGroup.getName())));
     }
 
     private void readAdvisors() {
-        File advisorsFolder = new File(this.commonFolderPath + File.separator + "advisortypes");
+        this.advisors = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(advisorsFolder.toPath())) {
-            this.advisors = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "advisortypes",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    advisorsItem.getChildren().forEach(item -> this.advisors.put(new Advisor(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.advisors.put(new Advisor(item), path));
-                 });
-
-            this.advisors.keySet().forEach(advisor -> advisor.setLocalizedName(this.getLocalisation(advisor.getName())));
-        } catch (IOException e) {
-        }
+        this.advisors.keySet().forEach(advisor -> advisor.setLocalizedName(this.getLocalisation(advisor.getName())));
     }
 
     private void readIdeaGroups() {
-        File ideaGroupsFolder = new File(this.commonFolderPath + File.separator + "ideas");
+        this.ideaGroups = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(ideaGroupsFolder.toPath())) {
-            this.ideaGroups = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "ideas",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem ideasItem = ClausewitzParser.parse(path.toFile(), 0);
+                    ideasItem.getChildren().forEach(item -> this.ideaGroups.put(new IdeaGroup(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.ideaGroups.put(new IdeaGroup(item), path));
-                 });
-
-            this.ideaGroups.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
-        } catch (IOException e) {
-        }
+        this.ideaGroups.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
     }
 
     private void readCasusBelli() {
-        File casusBelliFolder = new File(this.commonFolderPath + File.separator + "cb_types");
+        this.casusBelli = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(casusBelliFolder.toPath())) {
-            this.casusBelli = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "cb_types",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem cbItem = ClausewitzParser.parse(path.toFile(), 0);
+                    cbItem.getChildren().forEach(item -> this.casusBelli.put(new CasusBelli(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.casusBelli.put(new CasusBelli(item), path));
-                 });
-
-            this.casusBelli.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
-        } catch (IOException e) {
-        }
+        this.casusBelli.keySet().forEach(casusBelli -> casusBelli.setLocalizedName(this.getLocalisation(casusBelli.getName())));
     }
 
     private void readColonialRegions() {
-        File casusBelliFolder = new File(this.commonFolderPath + File.separator + "colonial_regions");
+        this.colonialRegions = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(casusBelliFolder.toPath())) {
-            this.colonialRegions = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "colonial_regions",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem colonialRegionsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    colonialRegionsItem.getChildren().forEach(item -> this.colonialRegions.put(new ColonialRegion(item, this), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.colonialRegions.put(new ColonialRegion(item, this), path));
-                 });
-
-            this.colonialRegions.keySet().forEach(colonialRegion -> colonialRegion.setLocalizedName(this.getLocalisation(colonialRegion.getName())));
-        } catch (IOException e) {
-        }
+        this.colonialRegions.keySet().forEach(colonialRegion -> colonialRegion.setLocalizedName(this.getLocalisation(colonialRegion.getName())));
     }
 
     private void readTradeCompanies() {
-        File casusBelliFolder = new File(this.commonFolderPath + File.separator + "trade_companies");
+        this.tradeCompanies = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(casusBelliFolder.toPath())) {
-            this.tradeCompanies = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "trade_companies",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem tradeCompaniesItem = ClausewitzParser.parse(path.toFile(), 0);
+                    tradeCompaniesItem.getChildren().forEach(item -> this.tradeCompanies.put(new TradeCompany(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.tradeCompanies.put(new TradeCompany(item), path));
-                 });
-
-            this.tradeCompanies.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
-        } catch (IOException e) {
-        }
+        this.tradeCompanies.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
     }
 
     private void readSubjectTypes() {
-        File subjectTypesFolder = new File(this.commonFolderPath + File.separator + "subject_types");
+        this.subjectTypes = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(subjectTypesFolder.toPath())) {
-            this.subjectTypes = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "subject_types",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem subjectTypesItem = ClausewitzParser.parse(path.toFile(), 0);
+                    subjectTypesItem.getChildren().forEach(item -> this.subjectTypes.put(new SubjectType(item, this.subjectTypes.keySet()), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.subjectTypes.put(new SubjectType(item, this.subjectTypes.keySet()), path));
-                 });
-
-            this.subjectTypes.entrySet().removeIf(entry -> StringUtils.isBlank(entry.getKey().getSprite()));
-
-            this.subjectTypes.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
-        } catch (IOException e) {
-        }
+        this.subjectTypes.entrySet().removeIf(entry -> StringUtils.isBlank(entry.getKey().getSprite()));
+        this.subjectTypes.keySet().forEach(subjectType -> subjectType.setLocalizedName(this.getLocalisation(subjectType.getName())));
     }
 
     private void readFetishistCults() {
-        File fetishistCultsFolder = new File(this.commonFolderPath + File.separator + "fetishist_cults");
+        this.fetishistCults = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(fetishistCultsFolder.toPath())) {
-            this.fetishistCults = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "fetishist_cults",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem cultsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    cultsItem.getChildren().forEach(item -> this.fetishistCults.put(new FetishistCult(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.fetishistCults.put(new FetishistCult(item), path));
-                 });
-
-            this.fetishistCults.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
-        } catch (IOException e) {
-        }
+        this.fetishistCults.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
     }
 
     private void readChurchAspects() {
-        File churchAspectsFolder = new File(this.commonFolderPath + File.separator + "church_aspects");
+        this.churchAspects = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(churchAspectsFolder.toPath())) {
-            this.churchAspects = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "church_aspects",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem aspectsItems = ClausewitzParser.parse(path.toFile(), 0);
+                    aspectsItems.getChildren().forEach(item -> this.churchAspects.put(new ChurchAspect(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem aspectsItems = ClausewitzParser.parse(path.toFile(), 0);
-                     aspectsItems.getChildren().forEach(item -> this.churchAspects.put(new ChurchAspect(item), path));
-                 });
-
-            this.churchAspects.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
-        } catch (IOException e) {
-        }
+        this.churchAspects.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
     }
 
     private void readMissionTrees() {
-        File missionTreesFolder = new File(this.missionsFolderPath);
+        this.missionTrees = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(missionTreesFolder.toPath())) {
-            this.missionTrees = new LinkedHashMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.missionTrees.put(new MissionTree(item, this), path));
-                 });
-
-            this.missionTrees.keySet().forEach(missionTree -> {
-                missionTree.setLocalizedName(this.getLocalisation(missionTree.getName()));
-                missionTree.getMissions().values().forEach(mission -> {
-                    mission.setLocalizedName(this.getLocalisation(mission.getName()));
-                    mission.setRequiredMissions(this);
+        getPaths(this.missionsFolderPath,
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    advisorsItem.getChildren().forEach(item -> this.missionTrees.put(new MissionTree(item, this), path));
                 });
+
+        this.missionTrees.keySet().forEach(missionTree -> {
+            missionTree.setLocalizedName(this.getLocalisation(missionTree.getName()));
+            missionTree.getMissions().values().forEach(mission -> {
+                mission.setLocalizedName(this.getLocalisation(mission.getName()));
+                mission.setRequiredMissions(this);
             });
-        } catch (IOException e) {
-        }
+        });
     }
 
     private void readEstates() {
         //Read estates modifiers before necessary for privileges
-        File estatesPreloadFolder = new File(this.commonFolderPath + File.separator + "estates_preload");
         Map<String, List<ModifierDefinition>> modifierDefinitions = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(estatesPreloadFolder.toPath())) {
+        getPaths(this.commonFolderPath + File.separator + "estates_preload",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem estatePreloadItem = ClausewitzParser.parse(path.toFile(), 0);
+                    estatePreloadItem.getChildren().forEach(item -> modifierDefinitions.put(item.getName(),
+                                                                                            item.getChildren("modifier_definition")
+                                                                                                .stream()
+                                                                                                .map(ModifierDefinition::new)
+                                                                                                .collect(Collectors.toList())));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> modifierDefinitions.put(item.getName(),
-                                                                                        item.getChildren("modifier_definition")
-                                                                                            .stream()
-                                                                                            .map(ModifierDefinition::new)
-                                                                                            .collect(Collectors.toList())));
-                 });
+        modifierDefinitions.values()
+                           .stream()
+                           .flatMap(Collection::stream)
+                           .forEach(modifierDefinition -> ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE,
+                                                                                     ModifierScope.COUNTRY));
 
-            modifierDefinitions.values()
-                               .stream()
-                               .flatMap(Collection::stream)
-                               .forEach(modifierDefinition -> ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE,
-                                                                                         ModifierScope.COUNTRY));
-        } catch (IOException e) {
-        }
+        this.estatePrivileges = new HashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "estate_privileges",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem estatePrivilegesItem = ClausewitzParser.parse(path.toFile(), 0);
+                    estatePrivilegesItem.getChildren().forEach(item -> this.estatePrivileges.put(new EstatePrivilege(item), path));
+                });
 
-        File estatePrivilegesFolder = new File(this.commonFolderPath + File.separator + "estate_privileges");
+        this.estatePrivileges.keySet().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
 
-        try (Stream<Path> paths = Files.walk(estatePrivilegesFolder.toPath())) {
-            this.estatePrivileges = new LinkedHashMap<>();
+        this.estates = new HashMap<>();
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.estatePrivileges.put(new EstatePrivilege(item), path));
-                 });
+        getPaths(this.commonFolderPath + File.separator + "estates",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem estatesItem = ClausewitzParser.parse(path.toFile(), 0);
+                    estatesItem.getChildren().forEach(item -> this.estates.put(new Estate(item, modifierDefinitions.get(item.getName()), this), path));
+                });
 
-            this.estatePrivileges.keySet().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
-        } catch (IOException e) {
-        }
-
-        File estatesFolder = new File(this.commonFolderPath + File.separator + "estates");
-
-        try (Stream<Path> paths = Files.walk(estatesFolder.toPath())) {
-            this.estates = new LinkedHashMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.estates.put(new Estate(item, modifierDefinitions.get(item.getName()), this), path));
-                 });
-
-            this.estates.keySet().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
-        } catch (IOException e) {
-        }
+        this.estates.keySet().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
     }
 
     private void readTechnologies() {
-        File technologiesFolder = new File(this.commonFolderPath + File.separator + "technologies");
+        this.technologies = new EnumMap<>(Power.class);
+        Map<Technology, Path> techs = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(technologiesFolder.toPath())) {
-            this.technologies = new EnumMap<>(Power.class);
-            Map<Technology, Path> techs = new HashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "technologies",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
+                    Power power = Power.byName(techItem.getVarAsString("monarch_power"));
+                    Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time"));
 
-                     Power power = Power.byName(techItem.getVarAsString("monarch_power"));
-                     Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time"));
+                    techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
+                });
 
-                     techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
-                 });
-
-            this.technologies = techs.entrySet()
-                                     .stream()
-                                     .collect(Collectors.groupingBy(entry -> entry.getKey().getType(),
-                                                                    Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, TreeMap::new)));
-        } catch (IOException e) {
-        }
+        this.technologies = techs.entrySet()
+                                 .stream()
+                                 .collect(Collectors.groupingBy(entry -> entry.getKey().getType(),
+                                                                Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, TreeMap::new)));
     }
 
     private void readRulerPersonalities() {
-        File rulerPersonalitiesFolder = new File(this.commonFolderPath + File.separator + "ruler_personalities");
+        this.rulerPersonalities = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(rulerPersonalitiesFolder.toPath())) {
-            this.rulerPersonalities = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "ruler_personalities",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    rulerPersonalityItem.getChildren().forEach(item -> this.rulerPersonalities.put(new RulerPersonality(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     rulerPersonalityItem.getChildren().forEach(item -> this.rulerPersonalities.put(new RulerPersonality(item), path));
-                 });
-
-            this.rulerPersonalities.keySet()
-                                   .forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
-        } catch (IOException e) {
-        }
+        this.rulerPersonalities.keySet()
+                               .forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
     }
 
     private void readProfessionalismModifiers() {
-        File professionalismModifiersFolder = new File(this.commonFolderPath + File.separator + "professionalism");
+        this.professionalismModifiers = new TreeMap<>();
 
-        try (Stream<Path> paths = Files.walk(professionalismModifiersFolder.toPath())) {
-            this.professionalismModifiers = new TreeMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     advisorsItem.getChildren().forEach(item -> this.professionalismModifiers.put(new ProfessionalismModifier(item), path));
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "professionalism",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    advisorsItem.getChildren().forEach(item -> this.professionalismModifiers.put(new ProfessionalismModifier(item), path));
+                });
     }
 
     private void readStaticModifiers() {
-        File staticModifiersFolder = new File(this.commonFolderPath + File.separator + "static_modifiers");
+        this.staticModifiers = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(staticModifiersFolder.toPath())) {
-            this.staticModifiers = new LinkedHashMap<>();
-
-            paths.filter(Files::isRegularFile).forEach(path -> {
-                ClausewitzItem modifiersItem = ClausewitzParser.parse(path.toFile(), 0);
-                modifiersItem.getChildrenNot("null_modifier").forEach(item -> {
-                    if (StaticModifiers.value(item.getName()) != null) {
-                        StaticModifiers.value(item.getName()).setModifiers(new Modifiers(item));
-                        this.staticModifiers.put(new StaticModifier(item), path);
-                    }
+        getPaths(this.commonFolderPath + File.separator + "static_modifiers",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem modifiersItem = ClausewitzParser.parse(path.toFile(), 0);
+                    modifiersItem.getChildrenNot("null_modifier").forEach(item -> {
+                        if (StaticModifiers.value(item.getName()) != null) {
+                            StaticModifiers.value(item.getName()).setModifiers(new Modifiers(item));
+                            this.staticModifiers.put(new StaticModifier(item), path);
+                        }
+                    });
                 });
-            });
 
-            this.staticModifiers.keySet().forEach(staticModifier -> staticModifier.setLocalizedName(this.getLocalisation(staticModifier.getName())));
-        } catch (IOException e) {
-        }
+        this.staticModifiers.keySet().forEach(staticModifier -> staticModifier.setLocalizedName(this.getLocalisation(staticModifier.getName())));
     }
 
     private void readInvestments() {
-        File investmentsFolder = new File(this.commonFolderPath + File.separator + "tradecompany_investments");
+        this.investments = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(investmentsFolder.toPath())) {
-            this.investments = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "tradecompany_investments",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    investmentsItem.getChildren().forEach(item -> this.investments.put(new Investment(item, this), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     investmentsItem.getChildren().forEach(item -> this.investments.put(new Investment(item, this), path));
-                 });
-
-            this.investments.keySet().forEach(investment -> investment.setLocalizedName(this.getLocalisation(investment.getName())));
-        } catch (IOException e) {
-        }
+        this.investments.keySet().forEach(investment -> investment.setLocalizedName(this.getLocalisation(investment.getName())));
     }
 
     private void readPolicies() {
-        File policiesFolder = new File(this.commonFolderPath + File.separator + "policies");
+        this.policies = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(policiesFolder.toPath())) {
-            this.policies = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "policies",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    investmentsItem.getChildren().forEach(item -> this.policies.put(new Policy(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     investmentsItem.getChildren().forEach(item -> this.policies.put(new Policy(item), path));
-                 });
-
-            this.policies.keySet().forEach(policy -> policy.setLocalizedName(this.getLocalisation(policy.getName())));
-        } catch (IOException e) {
-        }
+        this.policies.keySet().forEach(policy -> policy.setLocalizedName(this.getLocalisation(policy.getName())));
     }
 
     private void readHegemons() {
-        File hegemonsFolder = new File(this.commonFolderPath + File.separator + "hegemons");
+        this.hegemons = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(hegemonsFolder.toPath())) {
-            this.hegemons = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "hegemons",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    hegemonsItem.getChildren().forEach(item -> this.hegemons.put(new Hegemon(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     hegemonsItem.getChildren().forEach(item -> this.hegemons.put(new Hegemon(item), path));
-                 });
-
-            this.hegemons.keySet().forEach(hegemon -> hegemon.setLocalizedName(this.getLocalisation(hegemon.getName())));
-        } catch (IOException e) {
-        }
+        this.hegemons.keySet().forEach(hegemon -> hegemon.setLocalizedName(this.getLocalisation(hegemon.getName())));
     }
 
     private void readFactions() {
-        File factionsFolder = new File(this.commonFolderPath + File.separator + "factions");
+        this.factions = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(factionsFolder.toPath())) {
-            this.factions = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "factions",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    hegemonsItem.getChildren().forEach(item -> this.factions.put(new Faction(item), path));
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     hegemonsItem.getChildren().forEach(item -> this.factions.put(new Faction(item), path));
-                 });
+                });
 
-            this.factions.keySet().forEach(faction -> {
-                faction.setLocalizedName(this.getLocalisation(faction.getName()));
-                ModifiersUtils.addModifier(ClausewitzUtils.removeQuotes(faction.getName()) + "_influence", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-            });
-        } catch (IOException e) {
-        }
+        this.factions.keySet().forEach(faction -> {
+            faction.setLocalizedName(this.getLocalisation(faction.getName()));
+            ModifiersUtils.addModifier(ClausewitzUtils.removeQuotes(faction.getName()) + "_influence", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        });
     }
 
     private void readAges() {
-        File agesFolder = new File(this.commonFolderPath + File.separator + "ages");
+        this.ages = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(agesFolder.toPath())) {
-            this.ages = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "ages",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    agesItem.getChildren().forEach(item -> this.ages.put(new Age(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     agesItem.getChildren().forEach(item -> this.ages.put(new Age(item), path));
-                 });
-
-            this.ages.keySet().forEach(age -> age.setLocalizedName(this.getLocalisation(age.getName())));
-        } catch (IOException e) {
-        }
+        this.ages.keySet().forEach(age -> age.setLocalizedName(this.getLocalisation(age.getName())));
     }
 
     private void readDefenderOfFaith() {
-        File defenderOfFaithFolder = new File(this.commonFolderPath + File.separator + "defender_of_faith");
+        this.defenderOfFaith = new TreeMap<>();
 
-        try (Stream<Path> paths = Files.walk(defenderOfFaithFolder.toPath())) {
-            this.defenderOfFaith = new TreeMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
-                     defenderOfFaithItem.getChildren().forEach(item -> this.defenderOfFaith.put(new DefenderOfFaith(item), path));
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "defender_of_faith",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
+                    defenderOfFaithItem.getChildren().forEach(item -> this.defenderOfFaith.put(new DefenderOfFaith(item), path));
+                });
     }
 
     private void readCentersOfTrade() {
-        File centersOfTradeFolder = new File(this.commonFolderPath + File.separator + "centers_of_trade");
+        this.centersOfTrade = new TreeMap<>();
 
-        try (Stream<Path> paths = Files.walk(centersOfTradeFolder.toPath())) {
-            this.centersOfTrade = new TreeMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem centersOfTradeItem = ClausewitzParser.parse(path.toFile(), 0);
-                     centersOfTradeItem.getChildren().forEach(item -> this.centersOfTrade.put(new CenterOfTrade(item), path));
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "centers_of_trade",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem centersOfTradeItem = ClausewitzParser.parse(path.toFile(), 0);
+                    centersOfTradeItem.getChildren().forEach(item -> this.centersOfTrade.put(new CenterOfTrade(item), path));
+                });
     }
 
     private void readFervors() {
-        File fervorsFolder = new File(this.commonFolderPath + File.separator + "fervor");
+        this.fervors = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(fervorsFolder.toPath())) {
-            this.fervors = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "fervor",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem fervorsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    fervorsItem.getChildren().forEach(item -> this.fervors.put(new Fervor(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem fervorsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     fervorsItem.getChildren().forEach(item -> this.fervors.put(new Fervor(item), path));
-                 });
-
-            this.fervors.keySet().forEach(fervor -> fervor.setLocalizedName(this.getLocalisation(fervor.getName())));
-        } catch (IOException e) {
-        }
+        this.fervors.keySet().forEach(fervor -> fervor.setLocalizedName(this.getLocalisation(fervor.getName())));
     }
 
     private void readGreatProjects() {
-        File greatProjectsFolder = new File(this.commonFolderPath + File.separator + "great_projects");
+        this.greatProjects = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(greatProjectsFolder.toPath())) {
-            this.greatProjects = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "great_projects",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    greatProjectsItem.getChildren().forEach(item -> this.greatProjects.put(new GreatProject(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     greatProjectsItem.getChildren().forEach(item -> this.greatProjects.put(new GreatProject(item), path));
-                 });
-
-            this.greatProjects.keySet().forEach(greatProject -> greatProject.setLocalizedName(this.getLocalisation(greatProject.getName())));
-        } catch (IOException e) {
-        }
+        this.greatProjects.keySet().forEach(greatProject -> greatProject.setLocalizedName(this.getLocalisation(greatProject.getName())));
     }
 
     private void readHolyOrders() {
-        File holyOrdersFolder = new File(this.commonFolderPath + File.separator + "holy_orders");
+        this.holyOrders = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(holyOrdersFolder.toPath())) {
-            this.holyOrders = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "holy_orders",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem holyOrdersItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    holyOrdersItem.getChildren().forEach(item -> this.holyOrders.put(new HolyOrder(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem holyOrdersItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                     holyOrdersItem.getChildren().forEach(item -> this.holyOrders.put(new HolyOrder(item), path));
-                 });
-
-            this.holyOrders.keySet().forEach(holyOrder -> holyOrder.setLocalizedName(this.getLocalisation(holyOrder.getName())));
-        } catch (IOException e) {
-        }
+        this.holyOrders.keySet().forEach(holyOrder -> holyOrder.setLocalizedName(this.getLocalisation(holyOrder.getName())));
     }
 
     private void readIsolationism() {
-        File isolationismFolder = new File(this.commonFolderPath + File.separator + "isolationism");
+        this.isolationisms = new TreeMap<>();
 
-        try (Stream<Path> paths = Files.walk(isolationismFolder.toPath())) {
-            this.isolationisms = new TreeMap<>();
+        getPaths(this.commonFolderPath + File.separator + "isolationism",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem isolationismItem = ClausewitzParser.parse(path.toFile(), 0);
+                    isolationismItem.getChildren().forEach(item -> this.isolationisms.put(new Isolationism(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem isolationismItem = ClausewitzParser.parse(path.toFile(), 0);
-                     isolationismItem.getChildren().forEach(item -> this.isolationisms.put(new Isolationism(item), path));
-                 });
-
-            this.isolationisms.keySet().forEach(isolationism -> isolationism.setLocalizedName(this.getLocalisation(isolationism.getName())));
-        } catch (IOException e) {
-        }
+        this.isolationisms.keySet().forEach(isolationism -> isolationism.setLocalizedName(this.getLocalisation(isolationism.getName())));
     }
 
     private void readNativeAdvancements() {
-        File nativeAdvancementFolder = new File(this.commonFolderPath + File.separator + "native_advancement");
+        this.nativeAdvancements = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(nativeAdvancementFolder.toPath())) {
-            this.nativeAdvancements = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "native_advancement",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem nativeAdvancementItem = ClausewitzParser.parse(path.toFile(), 0);
+                    nativeAdvancementItem.getChildren().forEach(item -> this.nativeAdvancements.put(new NativeAdvancements(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem nativeAdvancementItem = ClausewitzParser.parse(path.toFile(), 0);
-                     nativeAdvancementItem.getChildren().forEach(item -> this.nativeAdvancements.put(new NativeAdvancements(item), path));
-                 });
-
-            this.nativeAdvancements.keySet().forEach(advancements -> {
-                advancements.setLocalizedName(this.getLocalisation(advancements.getName()));
-                advancements.getNativeAdvancements()
-                            .forEach(nativeAdvancement -> nativeAdvancement.setLocalizedName(this.getLocalisation(nativeAdvancement.getName())));
-            });
-        } catch (IOException e) {
-        }
+        this.nativeAdvancements.keySet().forEach(advancements -> {
+            advancements.setLocalizedName(this.getLocalisation(advancements.getName()));
+            advancements.getNativeAdvancements()
+                        .forEach(nativeAdvancement -> nativeAdvancement.setLocalizedName(this.getLocalisation(nativeAdvancement.getName())));
+        });
     }
 
     private void readNavalDoctrine() {
-        File navalDoctrineFolder = new File(this.commonFolderPath + File.separator + "naval_doctrines");
+        this.navalDoctrines = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(navalDoctrineFolder.toPath())) {
-            this.navalDoctrines = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "naval_doctrines",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem navalDoctrineItem = ClausewitzParser.parse(path.toFile(), 0);
+                    navalDoctrineItem.getChildren().forEach(item -> this.navalDoctrines.put(new NavalDoctrine(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem navalDoctrineItem = ClausewitzParser.parse(path.toFile(), 0);
-                     navalDoctrineItem.getChildren().forEach(item -> this.navalDoctrines.put(new NavalDoctrine(item), path));
-                 });
-
-            this.navalDoctrines.keySet().forEach(navalDoctrine -> navalDoctrine.setLocalizedName(this.getLocalisation(navalDoctrine.getName())));
-        } catch (IOException e) {
-        }
+        this.navalDoctrines.keySet().forEach(navalDoctrine -> navalDoctrine.setLocalizedName(this.getLocalisation(navalDoctrine.getName())));
     }
 
     private void readParliamentIssue() {
-        File parliamentIssueFolder = new File(this.commonFolderPath + File.separator + "parliament_issues");
+        this.parliamentIssues = new LinkedHashMap<>();
 
-        try (Stream<Path> paths = Files.walk(parliamentIssueFolder.toPath())) {
-            this.parliamentIssues = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "parliament_issues",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem parliamentIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                    parliamentIssueItem.getChildren().forEach(item -> this.parliamentIssues.put(new ParliamentIssue(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem parliamentIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                     parliamentIssueItem.getChildren().forEach(item -> this.parliamentIssues.put(new ParliamentIssue(item), path));
-                 });
-
-            this.parliamentIssues.keySet().forEach(parliamentIssue -> parliamentIssue.setLocalizedName(this.getLocalisation(parliamentIssue.getName())));
-        } catch (IOException e) {
-        }
+        this.parliamentIssues.keySet().forEach(parliamentIssue -> parliamentIssue.setLocalizedName(this.getLocalisation(parliamentIssue.getName())));
     }
 
     private void readPersonalDeities() {
-        File personalDeitiesFolder = new File(this.commonFolderPath + File.separator + "personal_deities");
+        this.personalDeities = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(personalDeitiesFolder.toPath())) {
-            this.personalDeities = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "personal_deities",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem personalIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                    personalIssueItem.getChildren().forEach(item -> this.personalDeities.put(new PersonalDeity(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem personalIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                     personalIssueItem.getChildren().forEach(item -> this.personalDeities.put(new PersonalDeity(item), path));
-                 });
-
-            this.personalDeities.keySet().forEach(personalIssue -> personalIssue.setLocalizedName(this.getLocalisation(personalIssue.getName())));
-        } catch (IOException e) {
-        }
+        this.personalDeities.keySet().forEach(personalIssue -> personalIssue.setLocalizedName(this.getLocalisation(personalIssue.getName())));
     }
 
     private void readReligiousReforms() {
-        File religiousReformFolder = new File(this.commonFolderPath + File.separator + "religious_reforms");
+        this.religiousReforms = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(religiousReformFolder.toPath())) {
-            this.religiousReforms = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "religious_reforms",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem religiousReformItem = ClausewitzParser.parse(path.toFile(), 0);
+                    religiousReformItem.getChildren().forEach(item -> this.religiousReforms.put(new ReligiousReforms(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem religiousReformItem = ClausewitzParser.parse(path.toFile(), 0);
-                     religiousReformItem.getChildren().forEach(item -> this.religiousReforms.put(new ReligiousReforms(item), path));
-                 });
-
-            this.religiousReforms.keySet().forEach(reforms -> {
-                reforms.setLocalizedName(this.getLocalisation(reforms.getName()));
-                reforms.getReforms().forEach(religiousReform -> religiousReform.setLocalizedName(this.getLocalisation(religiousReform.getName())));
-            });
-        } catch (IOException e) {
-        }
+        this.religiousReforms.keySet().forEach(reforms -> {
+            reforms.setLocalizedName(this.getLocalisation(reforms.getName()));
+            reforms.getReforms().forEach(religiousReform -> religiousReform.setLocalizedName(this.getLocalisation(religiousReform.getName())));
+        });
     }
 
     private void readCrownLandBonuses() {
-        File estateCrownLandFolder = new File(this.commonFolderPath + File.separator + "estate_crown_land");
+        this.crownLandBonuses = new TreeMap<>();
 
-        try (Stream<Path> paths = Files.walk(estateCrownLandFolder.toPath())) {
-            this.crownLandBonuses = new TreeMap<>();
-
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
-                     defenderOfFaithItem.getChildren("bonus").forEach(item -> this.crownLandBonuses.put(new CrownLandBonus(item), path));
-                 });
-        } catch (IOException e) {
-        }
+        getPaths(this.commonFolderPath + File.separator + "estate_crown_land",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
+                    defenderOfFaithItem.getChildren("bonus").forEach(item -> this.crownLandBonuses.put(new CrownLandBonus(item), path));
+                });
     }
 
     private void readStateEdicts() {
-        File stateEdictsFolder = new File(this.commonFolderPath + File.separator + "state_edicts");
+        this.stateEdicts = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(stateEdictsFolder.toPath())) {
-            this.stateEdicts = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "state_edicts",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem stateEdictsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    stateEdictsItem.getChildren().forEach(item -> this.stateEdicts.put(new StateEdict(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem stateEdictsItem = ClausewitzParser.parse(path.toFile(), 0);
-                     stateEdictsItem.getChildren().forEach(item -> this.stateEdicts.put(new StateEdict(item), path));
-                 });
-
-            this.stateEdicts.keySet().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
-        } catch (IOException e) {
-        }
+        this.stateEdicts.keySet().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
     }
 
     private void readTradePolicies() {
-        File tradePoliciesFolder = new File(this.commonFolderPath + File.separator + "trading_policies");
+        this.tradePolicies = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(tradePoliciesFolder.toPath())) {
-            this.tradePolicies = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "trading_policies",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem tradePoliciesItem = ClausewitzParser.parse(path.toFile(), 0);
+                    tradePoliciesItem.getChildren().forEach(item -> this.tradePolicies.put(new TradePolicy(item), path));
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem tradePoliciesItem = ClausewitzParser.parse(path.toFile(), 0);
-                     tradePoliciesItem.getChildren().forEach(item -> this.tradePolicies.put(new TradePolicy(item), path));
-                 });
+                });
 
-            this.tradePolicies.keySet().forEach(tradePolicy -> tradePolicy.setLocalizedName(this.getLocalisation(tradePolicy.getName())));
-        } catch (IOException e) {
-        }
+        this.tradePolicies.keySet().forEach(tradePolicy -> tradePolicy.setLocalizedName(this.getLocalisation(tradePolicy.getName())));
     }
 
     private void readEventModifiers() {
-        File eventModifiersFolder = new File(this.commonFolderPath + File.separator + "event_modifiers");
+        this.eventModifiers = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(eventModifiersFolder.toPath())) {
-            this.eventModifiers = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "event_modifiers",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem eventModifierItem = ClausewitzParser.parse(path.toFile(), 0);
+                    eventModifierItem.getChildren().forEach(item -> this.eventModifiers.put(new EventModifier(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem eventModifierItem = ClausewitzParser.parse(path.toFile(), 0);
-                     eventModifierItem.getChildren().forEach(item -> this.eventModifiers.put(new EventModifier(item), path));
-                 });
-
-            this.eventModifiers.keySet().forEach(eventModifier -> eventModifier.setLocalizedName(this.getLocalisation(eventModifier.getName())));
-        } catch (IOException e) {
-        }
+        this.eventModifiers.keySet().forEach(eventModifier -> eventModifier.setLocalizedName(this.getLocalisation(eventModifier.getName())));
     }
 
     private void readProvinceTriggeredModifiers() {
-        File provinceTriggeredModifiersFolder = new File(this.commonFolderPath + File.separator + "province_triggered_modifiers");
+        this.provinceTriggeredModifiers = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(provinceTriggeredModifiersFolder.toPath())) {
-            this.provinceTriggeredModifiers = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "province_triggered_modifiers",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem provinceTriggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                    provinceTriggeredIssueItem.getChildren().forEach(item -> this.provinceTriggeredModifiers.put(new TriggeredModifier(item), path));
+                });
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem provinceTriggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                     provinceTriggeredIssueItem.getChildren().forEach(item -> this.provinceTriggeredModifiers.put(new TriggeredModifier(item), path));
-                 });
-
-            this.provinceTriggeredModifiers.keySet()
-                                           .forEach(provinceTriggered -> provinceTriggered.setLocalizedName(this.getLocalisation(provinceTriggered.getName())));
-        } catch (IOException e) {
-        }
+        this.provinceTriggeredModifiers.keySet()
+                                       .forEach(provinceTriggered -> provinceTriggered.setLocalizedName(this.getLocalisation(provinceTriggered.getName())));
     }
 
     private void readTriggeredModifiers() {
-        File triggeredModifiersFolder = new File(this.commonFolderPath + File.separator + "triggered_modifiers");
+        this.triggeredModifiers = new HashMap<>();
 
-        try (Stream<Path> paths = Files.walk(triggeredModifiersFolder.toPath())) {
-            this.triggeredModifiers = new LinkedHashMap<>();
+        getPaths(this.commonFolderPath + File.separator + "triggered_modifiers",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem triggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
+                    triggeredIssueItem.getChildren().forEach(item -> this.triggeredModifiers.put(new TriggeredModifier(item), path));
 
-            paths.filter(Files::isRegularFile)
-                 .forEach(path -> {
-                     ClausewitzItem triggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                     triggeredIssueItem.getChildren().forEach(item -> this.triggeredModifiers.put(new TriggeredModifier(item), path));
-                 });
+                });
 
-            this.triggeredModifiers.keySet()
-                                   .forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
-        } catch (IOException e) {
-        }
+        this.triggeredModifiers.keySet().forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
     }
 }

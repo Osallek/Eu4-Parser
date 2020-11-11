@@ -22,18 +22,19 @@ public class Eu4Parser {
 
     private Eu4Parser() {}
 
-    public static Save loadSave(String gameFolderPath, String path) throws IOException, ParseException {
+    public static Save loadSave(String gameFolderPath, String modFolder, String path) throws IOException, ParseException {
         File file = new File(path);
         Save save = null;
 
         if (file.canRead()) {
             try {
                 ZipFile zipFile = new ZipFile(path);
-                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, ClausewitzUtils.CHARSET),
+                save = new Save(file.getName(), gameFolderPath, modFolder,
+                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, ClausewitzUtils.CHARSET),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, ClausewitzUtils.CHARSET),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET));
             } catch (ZipException e) {
-                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, ClausewitzUtils.CHARSET));
+                save = new Save(file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, ClausewitzUtils.CHARSET));
             }
         }
 

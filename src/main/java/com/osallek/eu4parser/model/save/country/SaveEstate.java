@@ -141,7 +141,6 @@ public class SaveEstate {
                                                                          .sum())
                + getInfluenceFromTerritory()
                + this.estateGame.getInfluenceModifiers()
-                                .values()
                                 .stream()
                                 .filter(estateModifier -> estateModifier.getTrigger().apply(this.country, this.country))
                                 .mapToDouble(EstateModifier::getAmount)

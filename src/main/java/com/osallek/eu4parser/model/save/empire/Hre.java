@@ -159,11 +159,11 @@ public class Hre extends Empire {
             return new ArrayList<>();
         }
 
-        return this.item.getList("electors")
-                        .getValues()
-                        .stream()
-                        .map(this.save::getCountry)
-                        .collect(Collectors.toList());
+        ClausewitzList list = this.item.getList("electors");
+        return list == null ? new ArrayList<>() : list.getValues()
+                                                      .stream()
+                                                      .map(this.save::getCountry)
+                                                      .collect(Collectors.toList());
     }
 
     public void setElectors(List<Country> electors) {

@@ -1,14 +1,15 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.eu4parser.common.Eu4Utils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Province {
 
     private final int id;
 
-    private final int color;
+    private Integer color;
 
-    private final String name;
+    private String name;
 
     private boolean isOcean = false;
 
@@ -28,8 +29,14 @@ public class Province {
 
     public Province(String[] csvLine) {
         this.id = Integer.parseInt(csvLine[0]);
-        this.color = Eu4Utils.rgbToColor(Integer.parseInt(csvLine[1]), Integer.parseInt(csvLine[2]), Integer.parseInt(csvLine[3]));
-        this.name = csvLine[4];
+
+        if (StringUtils.isNoneBlank(csvLine[1], csvLine[2], csvLine[3])) {
+            this.color = Eu4Utils.rgbToColor(Integer.parseInt(csvLine[1]), Integer.parseInt(csvLine[2]), Integer.parseInt(csvLine[3]));
+        }
+
+        if (csvLine.length >= 5) {
+            this.name = csvLine[4];
+        }
     }
 
     public Province(Province other) {
@@ -50,16 +57,20 @@ public class Province {
         return id;
     }
 
-    public int getRed() {
-        return (this.color >> 16) & 0xFF;
+    public Integer getColor() {
+        return color;
     }
 
-    public int getGreen() {
-        return (this.color >> 8) & 0xFF;
+    public Integer getRed() {
+        return this.color == null ? null : ((this.color >> 16) & 0xFF);
     }
 
-    public int getBlue() {
-        return (this.color) & 0xFF;
+    public Integer getGreen() {
+        return this.color == null ? null : ((this.color >> 8) & 0xFF);
+    }
+
+    public Integer getBlue() {
+        return this.color == null ? null : ((this.color) & 0xFF);
     }
 
     public String getName() {

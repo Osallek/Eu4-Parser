@@ -21,6 +21,8 @@ public class Religion {
 
     private final Color color;
 
+    private final Integer icon;
+
     private final boolean hreReligion;
 
     private final boolean hreHereticReligion;
@@ -78,6 +80,7 @@ public class Religion {
         this.name = item.getName();
         ClausewitzList list = item.getList("color");
         this.color = list == null ? null : new Color(list);
+        this.icon = item.getVarAsInt("icon");
         this.hreReligion = BooleanUtils.toBoolean(item.getVarAsBool("hre_religion"));
         this.hreHereticReligion = BooleanUtils.toBoolean(item.getVarAsBool("hre_heretic_religion"));
         this.useAuthority = BooleanUtils.toBoolean(item.getVarAsBool("authority"));
@@ -131,6 +134,10 @@ public class Religion {
 
     public Color getColor() {
         return this.color;
+    }
+
+    public Integer getIcon() {
+        return icon;
     }
 
     public boolean hreReligion() {

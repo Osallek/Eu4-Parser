@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.game;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.Color;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Objects;
 
@@ -18,6 +19,8 @@ public class TradeGood {
 
     private Modifiers provinceModifiers;
 
+    private boolean goldType;
+
     private Double basePrice;
 
     public TradeGood(ClausewitzItem item) {
@@ -30,6 +33,7 @@ public class TradeGood {
 
     void setPriceItem(ClausewitzItem priceItem) {
         this.basePrice = priceItem.getVarAsDouble("base_price");
+        this.goldType = BooleanUtils.toBoolean(priceItem.getVarAsBool("goldtype"));
     }
 
     public String getName() {
@@ -98,6 +102,14 @@ public class TradeGood {
 
     public void setBasePrice(double basePrice) {
         this.basePrice = basePrice;
+    }
+
+    public boolean isGoldType() {
+        return goldType;
+    }
+
+    public void setGoldType(boolean goldType) {
+        this.goldType = goldType;
     }
 
     @Override
