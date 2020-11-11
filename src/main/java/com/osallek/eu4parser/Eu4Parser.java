@@ -2,6 +2,7 @@ package com.osallek.eu4parser;
 
 import com.osallek.clausewitzparser.ClausewitzParser;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
+import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.save.Save;
 import org.luaj.vm2.parser.ParseException;
@@ -13,6 +14,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -23,6 +28,10 @@ public class Eu4Parser {
     private Eu4Parser() {}
 
     public static Save loadSave(String gameFolderPath, String modFolder, String path) throws IOException, ParseException {
+        return loadSave(gameFolderPath, modFolder, path, new HashMap<>());
+    }
+
+    public static Save loadSave(String gameFolderPath, String modFolder, String path, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners) throws IOException, ParseException {
         File file = new File(path);
         Save save = null;
 
@@ -30,9 +39,9 @@ public class Eu4Parser {
             try {
                 ZipFile zipFile = new ZipFile(path);
                 save = new Save(file.getName(), gameFolderPath, modFolder,
-                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, ClausewitzUtils.CHARSET),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, ClausewitzUtils.CHARSET),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET));
+                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, ClausewitzUtils.CHARSET, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, ClausewitzUtils.CHARSET, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET, listeners));
             } catch (ZipException e) {
                 save = new Save(file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, ClausewitzUtils.CHARSET));
             }
