@@ -26,9 +26,9 @@ public class Government {
 
     private final List<String> exclusiveReforms;
 
-    private Map<String, List<String>> reformLevels;
+    private Map<String, List<GovernmentReform>> reformLevels;
 
-    public Government(ClausewitzItem item) {
+    public Government(ClausewitzItem item, Game game) {
         this.name = item.getName();
         this.basicReform = item.getVarAsString("basic_reform");
 
@@ -41,10 +41,15 @@ public class Government {
 
         ClausewitzItem child = item.getChild("reform_levels");
         if (child != null) {
-            this.reformLevels = child.getChildren().stream().collect(Collectors.toMap(ClausewitzObject::getName, clausewitzItem -> {
-                ClausewitzList reformsList = clausewitzItem.getList("reforms");
-                return reformsList == null ? new ArrayList<>() : reformsList.getValues();
-            }, (strings, strings2) -> strings, LinkedHashMap::new));
+            this.reformLevels = child.getChildren()
+                                     .stream()
+                                     .collect(Collectors.toMap(ClausewitzObject::getName, clausewitzItem -> {
+                                         ClausewitzList reformsList = clausewitzItem.getList("reforms");
+                                         return reformsList == null ? new ArrayList<>() : reformsList.getValues()
+                                                                                                     .stream()
+                                                                                                     .map(game::getGovernmentReform)
+                                                                                                     .collect(Collectors.toList());
+                                     }, (reforms, reforms1) -> reforms, LinkedHashMap::new));
         }
     }
 
@@ -76,7 +81,7 @@ public class Government {
         return exclusiveReforms;
     }
 
-    public Map<String, List<String>> getReformLevels() {
+    public Map<String, List<GovernmentReform>> getReformLevels() {
         return reformLevels;
     }
 }

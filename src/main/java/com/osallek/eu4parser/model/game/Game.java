@@ -244,10 +244,10 @@ public class Game {
         readDecrees();
         readGoldenBulls();
         readEvents();
-        readGovernments();
         readGovernmentRanks();
         readGovernmentNames();
         readGovernmentReforms();
+        readGovernments();
         readUnits();
         readTechGroups();
         readAdvisors();
@@ -1984,7 +1984,7 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item), path));
+                    governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item, this), path));
                 });
 
         this.governments.keySet().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));

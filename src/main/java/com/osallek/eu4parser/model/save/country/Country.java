@@ -166,7 +166,7 @@ public class Country {
 
     private SaveNativeAdvancements nativeAdvancements;
 
-    private Government government;
+    private SaveGovernment government;
 
     private List<Envoy> colonists;
 
@@ -2995,7 +2995,7 @@ public class Country {
         return nativeAdvancements;
     }
 
-    public Government getGovernment() {
+    public SaveGovernment getGovernment() {
         return government;
     }
 
@@ -4460,7 +4460,7 @@ public class Country {
         ClausewitzItem governmentItem = this.item.getChild("government");
 
         if (governmentItem != null) {
-            this.government = new Government(governmentItem, this.save.getGame());
+            this.government = new SaveGovernment(governmentItem, this.save.getGame());
         }
 
         ClausewitzItem colonistsItem = this.item.getChild("colonists");

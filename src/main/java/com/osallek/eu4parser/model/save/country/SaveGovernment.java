@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.game.Government;
 import com.osallek.eu4parser.model.game.GovernmentReform;
 
 import java.util.ArrayList;
@@ -11,23 +12,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Government {
+public class SaveGovernment {
 
     private final Game game;
 
     private final ClausewitzItem item;
 
-    public Government(ClausewitzItem item, Game game) {
+    public SaveGovernment(ClausewitzItem item, Game game) {
         this.game = game;
         this.item = item;
     }
 
-    public String getType() {
-        return this.item.getVarAsString("government");
+    public Government getType() {
+        return this.game.getGovernment(ClausewitzUtils.removeQuotes(this.item.getVarAsString("government")));
     }
 
-    public void setType(String type) {
-        this.item.setVariable("government", type);
+    public void setType(Government type) {
+        this.item.setVariable("government", ClausewitzUtils.addQuotes(type.getName()));
     }
 
     public List<GovernmentReform> getReforms() {
