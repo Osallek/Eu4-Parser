@@ -4460,7 +4460,7 @@ public class Country {
         ClausewitzItem governmentItem = this.item.getChild("government");
 
         if (governmentItem != null) {
-            this.government = new SaveGovernment(governmentItem, this.save.getGame());
+            this.government = new SaveGovernment(governmentItem, this.save.getGame(), this);
         }
 
         ClausewitzItem colonistsItem = this.item.getChild("colonists");

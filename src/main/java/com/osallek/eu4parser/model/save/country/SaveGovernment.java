@@ -6,9 +6,12 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.Government;
 import com.osallek.eu4parser.model.game.GovernmentReform;
+import org.luaj.vm2.ast.Str;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -16,11 +19,14 @@ public class SaveGovernment {
 
     private final Game game;
 
+    private final Country country;
+
     private final ClausewitzItem item;
 
-    public SaveGovernment(ClausewitzItem item, Game game) {
+    public SaveGovernment(ClausewitzItem item, Game game, Country country) {
         this.game = game;
         this.item = item;
+        this.country = country;
     }
 
     public Government getType() {
@@ -48,6 +54,37 @@ public class SaveGovernment {
         }
 
         return new ArrayList<>();
+    }
+
+    public void setReforms(List<GovernmentReform> reforms) {
+        ClausewitzItem reformStack = this.item.getChild("reform_stack");
+
+        if (reformStack == null) {
+            reformStack = this.item.addChild("reform_stack");
+        }
+
+        ClausewitzList list = reformStack.getList("reforms");
+
+        if (list == null) {
+            reformStack.addList("reforms", reforms.stream().map(reform -> ClausewitzUtils.addQuotes(reform.getName())).toArray(String[]::new));
+        } else {
+            list.clear();
+            list.addAll(reforms.stream().map(reform -> ClausewitzUtils.addQuotes(reform.getName())).toArray(String[]::new));
+        }
+    }
+
+    public Map<String, List<GovernmentReform>> getAvailableReforms() {
+        return getType().getReformLevels()
+                        .entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey,
+                                                  entry -> entry.getValue()
+                                                                .stream()
+                                                                .filter(governmentReform -> governmentReform.getPotential() == null
+                                                                                            || governmentReform.getPotential().apply(country, country))
+                                                                .collect(Collectors.toList()),
+                                                  (governmentReforms, governmentReforms2) -> governmentReforms,
+                                                  LinkedHashMap::new));
     }
 
     public List<GovernmentReform> getHistory() {

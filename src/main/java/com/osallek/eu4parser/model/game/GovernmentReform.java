@@ -1,5 +1,6 @@
 package com.osallek.eu4parser.model.game;
 
+import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzObject;
@@ -8,6 +9,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,8 @@ public class GovernmentReform {
     private Condition nationDesignerTrigger;
 
     private List<String> governmentAbilities;
+
+    private Pair<String, Condition> icon;
 
     private Pair<String, Condition> legacyEquivalent;
 
@@ -195,6 +199,7 @@ public class GovernmentReform {
             return;
         }
 
+        this.icon = other.icon;
         this.validForNewCountry = other.validForNewCountry;
         this.allowConvert = other.allowConvert;
         this.rulersCanBeGenerals = other.rulersCanBeGenerals;
@@ -289,6 +294,7 @@ public class GovernmentReform {
         this.legacyGovernment = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("legacy_government")), condition);
         this.legacyEquivalent = Pair.of(item.getVarAsString("legacy_equivalent"), condition);
         this.lockLevelWhenSelected = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("lock_level_when_selected")), condition);
+        this.icon = StringUtils.isBlank(s = item.getVarAsString("icon")) ? this.icon : Pair.of(s, condition);
         this.validForNewCountry = (aBoolean = item.getVarAsBool("valid_for_new_country")) == null ? this.validForNewCountry : Pair.of(aBoolean, condition);
         this.allowConvert = (aBoolean = item.getVarAsBool("allow_convert")) == null ? this.allowConvert : Pair.of(aBoolean, condition);
         this.rulersCanBeGenerals = (aBoolean = item.getVarAsBool("rulers_can_be_generals")) == null ? this.rulersCanBeGenerals : Pair.of(aBoolean, condition);
@@ -384,6 +390,14 @@ public class GovernmentReform {
 
     public Pair<Boolean, Condition> isLegacyGovernment() {
         return legacyGovernment;
+    }
+
+    public Pair<String, Condition> getIcon() {
+        return icon;
+    }
+
+    public File getImageFile() {
+        return this.game.getSpriteTypeImageFile("government_reform_" + ClausewitzUtils.removeQuotes(this.icon.getKey()));
     }
 
     public Pair<GovernmentReform, Condition> getLegacyEquivalent() {
