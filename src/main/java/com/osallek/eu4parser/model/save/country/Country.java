@@ -1163,8 +1163,50 @@ public class Country {
         }
     }
 
+    public void setOverlord(Country overlord, SubjectType subjectType, LocalDate startDate) {
+        if (!Objects.equals(this.getOverlord(), overlord) || !Objects.equals(this.subjectType, subjectType)
+            || !Objects.equals(this.subjectStartDate, startDate)) {
+            if (Objects.equals(this.getOverlord(), overlord)) {
+                this.subjectType = subjectType;
+                this.subjectStartDate = startDate;
+                this.getSave()
+                    .getDiplomacy()
+                    .getDependencies()
+                    .stream()
+                    .filter(dependency -> dependency.getSubjectType().equals(this.subjectType) && dependency.getSecond().equals(this))
+                    .findFirst()
+                    .ifPresent(dependency -> {
+                        dependency.setStartDate(startDate);
+                        dependency.setSubjectType(subjectType);
+                    });
+            } else if (this.getOverlord() != null) {
+                this.getSave()
+                    .getDiplomacy()
+                    .getDependencies()
+                    .stream()
+                    .filter(dependency -> dependency.getSubjectType().equals(this.subjectType) && dependency.getSecond().equals(this))
+                    .findFirst()
+                    .ifPresent(dependency -> {
+                        dependency.setFirst(overlord);
+                        dependency.setStartDate(startDate);
+                        dependency.setSubjectType(subjectType);
+                    });
+                overlord.addSubject(this);
+                this.getOverlord().removeSubject(this);
+
+                this.setOverlord(overlord);
+                this.subjectType = subjectType;
+                this.subjectStartDate = startDate;
+            } else {
+                this.save.getDiplomacy().addDependency(overlord, this, startDate, subjectType);
+            }
+        }
+    }
+
     public void removeOverlord() {
         this.item.removeVariable("overlord");
+        this.subjectType = null;
+        this.subjectStartDate = null;
     }
 
     public List<Country> getEnemies() {

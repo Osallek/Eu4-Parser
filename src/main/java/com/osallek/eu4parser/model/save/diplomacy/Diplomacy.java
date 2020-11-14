@@ -56,6 +56,8 @@ public class Diplomacy {
             Dependency.addToItem(this.item, first.getTag(), second.getTag(), startDate, subjectType);
             first.addSubject(second);
             second.setOverlord(first);
+            second.setSubjectStartDate(startDate);
+            second.setSubjectType(subjectType);
             refreshAttributes();
         }
     }

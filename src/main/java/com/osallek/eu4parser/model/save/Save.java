@@ -708,7 +708,7 @@ public class Save {
                                                    .stream()
                                                    .filter(Country::isPlayable)
                                                    .peek(country -> country.setLocalizedName(this.game.getLocalisation(country.getTag())))
-                                                   .sorted(Comparator.comparing(Country::getLocalizedName, this.game.getCollator()))
+                                                   .sorted(Comparator.comparing(Country::getLocalizedName, Eu4Utils.COLLATOR))
                                                    .collect(Collectors.toList());
         }
 
@@ -770,7 +770,7 @@ public class Save {
             this.cities = this.provinces.values()
                                         .stream()
                                         .filter(SaveProvince::isCity)
-                                        .sorted((o1, o2) -> this.game.getCollator().compare(o1.getName(), o2.getName()))
+                                        .sorted((o1, o2) -> Eu4Utils.COLLATOR.compare(o1.getName(), o2.getName()))
                                         .collect(Collectors.toList());
         }
 

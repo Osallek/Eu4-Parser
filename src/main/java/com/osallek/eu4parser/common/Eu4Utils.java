@@ -4,6 +4,7 @@ import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.save.country.Country;
 
+import java.text.Collator;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import java.util.function.Function;
 public final class Eu4Utils {
 
     private Eu4Utils() {}
+
+    public static final Collator COLLATOR = Collator.getInstance();
 
     public static final String MAGIC_WORD = "EU4txt";
 
@@ -77,6 +80,10 @@ public final class Eu4Utils {
     public static final String SUBJECT_TYPE_CLIENT_VASSAL = "client_vassal";
 
     public static final String SUBJECT_TYPE_PERSONAL_UNION = "personal_union";
+
+    static {
+        COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
+    }
 
     public static boolean isTag(String s) {
         return Country.CUSTOM_COUNTRY_PATTERN.matcher(s).matches() || Country.COLONY_PATTERN.matcher(s).matches()

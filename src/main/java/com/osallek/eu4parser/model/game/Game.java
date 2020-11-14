@@ -63,8 +63,6 @@ public class Game {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
-    private final Collator collator;
-
     private final String gameFolderPath;
 
     private final String modFolderPath;
@@ -208,9 +206,6 @@ public class Game {
     private Map<TriggeredModifier, Path> triggeredModifiers;
 
     public Game(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException, ParseException {
-        this.collator = Collator.getInstance();
-        this.collator.setStrength(Collator.NO_DECOMPOSITION);
-
         this.gameFolderPath = gameFolderPath;
         this.modFolderPath = modFolderPath;
 
@@ -317,10 +312,6 @@ public class Game {
         return path == null ? null : path.toFile();
     }
 
-    public Collator getCollator() {
-        return collator;
-    }
-
     public String getGameFolderPath() {
         return gameFolderPath;
     }
@@ -364,7 +355,7 @@ public class Game {
     public List<Continent> getContinents() {
         return this.continents.keySet()
                               .stream()
-                              .sorted(Comparator.comparing(Continent::getLocalizedName, this.collator))
+                              .sorted(Comparator.comparing(Continent::getLocalizedName, Eu4Utils.COLLATOR))
                               .collect(Collectors.toList());
     }
 
@@ -387,7 +378,7 @@ public class Game {
     }
 
     public String getLocalisation(String key) {
-        return this.localisations.getOrDefault(key, key);
+        return this.localisations.getOrDefault(key.toLowerCase(), key);
     }
 
     public String getLocalisationClean(String key) {
@@ -395,7 +386,7 @@ public class Game {
             return null;
         }
 
-        String localisationString = this.localisations.get(key);
+        String localisationString = getLocalisation(key);
 
         if (localisationString == null) {
             return key;
@@ -484,7 +475,7 @@ public class Game {
                                  .flatMap(Collection::stream)
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
-                                 .sorted(Comparator.comparing(Culture::getLocalizedName, collator))
+                                 .sorted(Comparator.comparing(Culture::getLocalizedName, Eu4Utils.COLLATOR))
                                  .collect(Collectors.toList());
     }
 
@@ -510,7 +501,7 @@ public class Game {
         return getReligionGroups().stream()
                                   .map(ReligionGroup::getReligions)
                                   .flatMap(Collection::stream)
-                                  .sorted(Comparator.comparing(Religion::getLocalizedName, this.collator))
+                                  .sorted(Comparator.comparing(Religion::getLocalizedName, Eu4Utils.COLLATOR))
                                   .collect(Collectors.toList());
     }
 
@@ -554,7 +545,7 @@ public class Game {
     public List<TradeGood> getTradeGoods() {
         return this.tradeGoods.keySet()
                               .stream()
-                              .sorted(Comparator.comparing(TradeGood::getLocalizedName, this.collator))
+                              .sorted(Comparator.comparing(TradeGood::getLocalizedName, Eu4Utils.COLLATOR))
                               .collect(Collectors.toList());
     }
 
@@ -651,7 +642,7 @@ public class Game {
     public List<Event> getEvents() {
         return this.events.keySet()
                           .stream()
-                          .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
+                          .sorted(Comparator.comparing(Event::getLocalizedName, Eu4Utils.COLLATOR))
                           .collect(Collectors.toList());
     }
 
@@ -659,7 +650,7 @@ public class Game {
         return this.events.keySet()
                           .stream()
                           .filter(Event::fireOnlyOnce)
-                          .sorted(Comparator.comparing(Event::getLocalizedName, this.collator))
+                          .sorted(Comparator.comparing(Event::getLocalizedName, Eu4Utils.COLLATOR))
                           .collect(Collectors.toList());
     }
 
@@ -776,7 +767,7 @@ public class Game {
     public List<Government> getGovernments() {
         return this.governments.keySet()
                                .stream()
-                               .sorted(Comparator.comparing(Government::getLocalizedName, this.collator))
+                               .sorted(Comparator.comparing(Government::getLocalizedName, Eu4Utils.COLLATOR))
                                .collect(Collectors.toList());
     }
 
@@ -1650,7 +1641,7 @@ public class Game {
                             }
 
                             String[] keys = line.split(":", 2);
-                            String key = keys[0].trim();
+                            String key = keys[0].trim().toLowerCase();
                             String value = keys[1];
                             int start = value.indexOf('"') + 1;
                             int end = value.lastIndexOf('"');
@@ -2172,7 +2163,7 @@ public class Game {
                 });
 
         this.subjectTypes.entrySet().removeIf(entry -> StringUtils.isBlank(entry.getKey().getSprite()));
-        this.subjectTypes.keySet().forEach(subjectType -> subjectType.setLocalizedName(this.getLocalisation(subjectType.getName())));
+        this.subjectTypes.keySet().forEach(subjectType -> subjectType.setLocalizedName(this.getLocalisation(subjectType.getName() + "_title")));
     }
 
     private void readFetishistCults() {

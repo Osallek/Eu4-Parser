@@ -22,8 +22,16 @@ public class DatableRelation {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("first")));
     }
 
+    public void setFirst(Country country) {
+        this.item.setVariable("first", ClausewitzUtils.addQuotes(country.getTag()));
+    }
+
     public Country getSecond() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("second")));
+    }
+
+    public void setSecond(Country country) {
+        this.item.setVariable("second", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
     public LocalDate getStartDate() {

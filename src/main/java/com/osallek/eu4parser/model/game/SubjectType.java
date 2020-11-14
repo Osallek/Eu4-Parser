@@ -481,7 +481,7 @@ public class SubjectType {
     }
 
     void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+        this.localizedName = StringUtils.capitalize(localizedName);
     }
 
     public Condition isPotentialOverlord() {
