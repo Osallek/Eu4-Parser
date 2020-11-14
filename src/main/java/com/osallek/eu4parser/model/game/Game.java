@@ -31,9 +31,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.Collator;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -714,6 +714,14 @@ public class Game {
 
     public double getHighArmyProfessionalismMaxRange() {
         return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("HIGH_ARMY_PROFESSIONALISM_MAX_RANGE").value.todouble();
+    }
+
+    public LocalDate getStartDate() {
+        return LocalDate.parse(this.defines.get(Eu4Utils.DEFINE_GAME_KEY).get("START_DATE").value.toString(), ClausewitzUtils.DATE_FORMAT);
+    }
+
+    public LocalDate getEndDate() {
+        return LocalDate.parse(this.defines.get(Eu4Utils.DEFINE_GAME_KEY).get("END_DATE").value.toString(), ClausewitzUtils.DATE_FORMAT);
     }
 
     public double getEstateAngryThreshold() {
