@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.clausewitzparser.model.ClausewitzPObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.model.game.Game;
@@ -45,7 +46,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -577,35 +580,35 @@ public class Save {
         return province == null ? null : (SaveProvince) province;
     }
 
-    public void writeAi(BufferedWriter bufferedWriter) throws IOException {
+    public void writeAi(BufferedWriter bufferedWriter, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (this.compressed) {
             bufferedWriter.write(Eu4Utils.MAGIC_WORD);
             bufferedWriter.newLine();
-            this.aiItem.write(bufferedWriter, 0);
+            this.aiItem.write(bufferedWriter, 0, listeners);
         }
     }
 
-    public void writeGamestate(BufferedWriter bufferedWriter) throws IOException {
+    public void writeGamestate(BufferedWriter bufferedWriter, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (this.compressed) {
             bufferedWriter.write(Eu4Utils.MAGIC_WORD);
             bufferedWriter.newLine();
-            this.gamestateItem.write(bufferedWriter, 0);
+            this.gamestateItem.write(bufferedWriter, 0, listeners);
         }
     }
 
-    public void writeMeta(BufferedWriter bufferedWriter) throws IOException {
+    public void writeMeta(BufferedWriter bufferedWriter, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (this.compressed) {
             bufferedWriter.write(Eu4Utils.MAGIC_WORD);
             bufferedWriter.newLine();
-            this.metaItem.write(bufferedWriter, 0);
+            this.metaItem.write(bufferedWriter, 0, listeners);
         }
     }
 
-    public void writeAll(BufferedWriter bufferedWriter) throws IOException {
+    public void writeAll(BufferedWriter bufferedWriter, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (!this.compressed) {
             bufferedWriter.write(Eu4Utils.MAGIC_WORD);
             bufferedWriter.newLine();
-            this.gamestateItem.write(bufferedWriter, 0);
+            this.gamestateItem.write(bufferedWriter, 0, listeners);
         }
     }
 
