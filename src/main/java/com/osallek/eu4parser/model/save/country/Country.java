@@ -1163,12 +1163,10 @@ public class Country {
         }
     }
 
-    public void setOverlord(Country overlord, SubjectType subjectType, LocalDate startDate) {
+    public void setOverlord(Country overlord, SubjectType subjectType, LocalDate startDate) { //Todo add/remove from wars
         if (!Objects.equals(this.getOverlord(), overlord) || !Objects.equals(this.subjectType, subjectType)
             || !Objects.equals(this.subjectStartDate, startDate)) {
             if (Objects.equals(this.getOverlord(), overlord)) {
-                this.subjectType = subjectType;
-                this.subjectStartDate = startDate;
                 this.getSave()
                     .getDiplomacy()
                     .getDependencies()
@@ -1179,6 +1177,8 @@ public class Country {
                         dependency.setStartDate(startDate);
                         dependency.setSubjectType(subjectType);
                     });
+                this.subjectType = subjectType;
+                this.subjectStartDate = startDate;
             } else if (this.getOverlord() != null) {
                 this.getSave()
                     .getDiplomacy()
@@ -3042,23 +3042,23 @@ public class Country {
     }
 
     public List<Envoy> getColonists() {
-        return colonists;
+        return this.colonists == null ? new ArrayList<>() : this.colonists;
     }
 
     public List<Envoy> getMerchants() {
-        return merchants;
+        return this.merchants == null ? new ArrayList<>() : this.merchants;
     }
 
     public List<Envoy> getMissionaries() {
-        return missionaries;
+        return this.missionaries == null ? new ArrayList<>() : this.missionaries;
     }
 
     public List<Envoy> getDiplomats() {
-        return diplomats;
+        return this.diplomats == null ? new ArrayList<>() : this.diplomats;
     }
 
     public List<SaveModifier> getModifiers() {
-        return modifiers;
+        return this.modifiers == null ? new ArrayList<>() : this.modifiers;
     }
 
     public void addModifier(String modifier, LocalDate date) {
