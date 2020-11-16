@@ -80,6 +80,14 @@ public class Loan {
         this.item.setVariable("spawned", spawned);
     }
 
+    public Boolean getEstateLoan() {
+        return this.item.getVarAsBool("estate_loan");
+    }
+
+    public void setEstateLoan(boolean estateLoan) {
+        this.item.setVariable("estate_loan", estateLoan);
+    }
+
     private void refreshAttributes() {
         ClausewitzItem idItem = this.item.getChild("id");
 
@@ -93,7 +101,8 @@ public class Loan {
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String lender, double interest, boolean fixedInterest, int amount, LocalDate expiryDate) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "loan", parent.getOrder() + 1);
+        ClausewitzItem otherLoan = parent.getLastChild("loan");
+        ClausewitzItem toItem = new ClausewitzItem(parent, "loan", otherLoan == null ? parent.getOrder() + 1 : otherLoan.getOrder() + 1);
         Id.addToItem(toItem, id, 4713);
 
         if (lender == null) {
@@ -106,8 +115,9 @@ public class Loan {
         toItem.addVariable("amount", amount);
         toItem.addVariable("expiry_date", expiryDate);
         toItem.addVariable("spawned", false);
+        toItem.addVariable("estate_loan", false);
 
-        parent.addChild(toItem);
+        parent.addChild(toItem, otherLoan != null);
 
         return toItem;
     }

@@ -2658,22 +2658,25 @@ public class Country {
     }
 
     public void addLoan(double interest, int amount, LocalDate expiryDate) {
-        Loan.addToItem(this.item, this.save.getCountries()
-                                           .values()
-                                           .stream()
-                                           .map(Country::getLoans)
-                                           .flatMap(Collection::stream)
-                                           .map(Loan::getAmount)
-                                           .max(Comparator.naturalOrder())
-                                           .map(i -> i + 1)
-                                           .orElse(1),
-                       interest, true, amount, expiryDate);
+        Loan.addToItem(this.item, this.save.getIds().get(4713).incrementId(2), interest, true, amount, expiryDate);
         refreshAttributes();
     }
 
-    public void removeLoan(int index) {
-        this.item.removeChild("loan", index);
-        refreshAttributes();
+    public void removeLoan(int id) {
+        Integer index = null;
+        List<Loan> list = getLoans();
+
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId().getId().equals(id)) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != null) {
+            this.item.removeChild("loan", index);
+            refreshAttributes();
+        }
     }
 
     public Double getReligiousUnity() {
@@ -4321,14 +4324,13 @@ public class Country {
             list.add(getCrownLandBonus().getModifiers().getModifier(modifier));
         }
 
-        //        LOGGER.info(getTag());
-        //        LOGGER.info(list.stream().map(String::valueOf).collect(Collectors.joining("\n")));
-
         return ModifiersUtils.sumModifiers(modifier, list);
     }
 
     private void refreshAttributes() {
-        this.localizedName = ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+        if (this.isPlayable) {
+            setLocalizedName(this.save.getGame().getLocalisation(getTag()));
+        }
 
         String governmentNameVar = this.item.getVarAsString("government_name");
         if (StringUtils.isNotBlank(governmentNameVar)) {

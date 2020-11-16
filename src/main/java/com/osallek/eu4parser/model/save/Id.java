@@ -16,6 +16,17 @@ public class Id {
         return this.item.getVarAsInt("id");
     }
 
+    public Integer incrementId() {
+        return incrementId(1);
+    }
+
+    public Integer incrementId(int step) {
+        int id = getId() + step;
+        this.item.setVariable("id", id);
+
+        return id;
+    }
+
     public Integer getType() {
         return this.item.getVarAsInt("type");
     }

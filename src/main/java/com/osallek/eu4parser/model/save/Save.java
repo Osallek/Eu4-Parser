@@ -87,6 +87,8 @@ public class Save {
 
     private ChangePrices changePrices;
 
+    private Map<Integer, Id> ids;
+
     private Map<Id, RebelFaction> rebelFactions;
 
     private Hre hre;
@@ -347,6 +349,10 @@ public class Save {
 
     public ChangePrices getChangePrices() {
         return changePrices;
+    }
+
+    public Map<Integer, Id> getIds() {
+        return ids;
     }
 
     public Map<Id, RebelFaction> getRebelFactions() {
@@ -663,6 +669,9 @@ public class Save {
         if (changePricesItem != null) {
             this.changePrices = new ChangePrices(changePricesItem, this.game);
         }
+
+        List<ClausewitzItem> idsItems = this.gamestateItem.getChildren("id");
+        this.ids = idsItems.stream().map(Id::new).collect(Collectors.toMap(Id::getType, Function.identity()));
 
         List<ClausewitzItem> rebelFactionItems = this.gamestateItem.getChildren("rebel_faction");
         this.rebelFactions = rebelFactionItems.stream()
