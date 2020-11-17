@@ -149,8 +149,16 @@ public class SaveProvince extends Province {
     }
 
     public void setOwner(Country owner) {
-        this.item.setVariable("owner", ClausewitzUtils.addQuotes(owner.getTag()));
-        this.country = owner;
+        if (!Objects.equals(this.country, owner)) {
+            if (this.country != null) {
+                this.country.removeOwnedProvince(this);
+            }
+
+            this.item.setVariable("owner", ClausewitzUtils.addQuotes(owner.getTag()));
+            this.country = owner;
+            this.country.addOwnedProvince(this);
+            this.history.addEvent(this.save.getDate(), "owner", ClausewitzUtils.addQuotes(owner.getTag()));
+        }
     }
 
     public String getControllerTag() {
@@ -162,11 +170,14 @@ public class SaveProvince extends Province {
     }
 
     public void setController(Country controller) {
-        if (getPreviousController() != null) {
-            setPreviousController(controller);
+        if (getController() != null) {
+            getController().removeControlledProvince(this);
+            setPreviousController(getController());
         }
 
         this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
+        controller.addControlledProvince(this);
+        this.history.addEvent(this.save.getDate(), "controller", "tag", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
     public String getPreviousControllerTag() {
@@ -259,28 +270,30 @@ public class SaveProvince extends Province {
         return getCoresTags().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void setCores(List<String> tags) {
-        ClausewitzList list = this.item.getList("cores");
-        list.clear();
+    public void setCores(List<Country> countries) {
+        getCores().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
+                                                                                                              () -> removeCore(core)));
 
-        tags.stream().map(ClausewitzUtils::removeQuotes).filter(tag -> tag.length() == 3).forEach(list::add);
+        countries.forEach(this::addCore);
     }
 
-    public void addCore(String tag) {
+    public void addCore(Country country) {
         ClausewitzList list = this.item.getList("cores");
 
-        tag = ClausewitzUtils.addQuotes(tag);
-
-        if (tag.length() == 5 && !list.contains(tag)) {
-            list.add(tag);
+        if (!list.contains(country.getTag())) {
+            list.add(country.getTag());
+            country.addCoreProvince(this);
+            this.history.addEvent(this.save.getDate(), "add_core", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
-    public void removeCore(String tag) {
+    public void removeCore(Country country) {
         ClausewitzList list = this.item.getList("cores");
 
         if (list != null) {
-            list.remove(tag);
+            list.remove(country.getTag());
+            country.removeCoreProvince(this);
+            this.history.addEvent(this.save.getDate(), "remove_core", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
@@ -298,28 +311,30 @@ public class SaveProvince extends Province {
         return getClaimsTags().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void setClaims(List<String> tags) {
-        ClausewitzList list = this.item.getList("claims");
-        list.clear();
+    public void setClaims(List<Country> countries) {
+        getClaims().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
+                                                                                                               () -> removeClaim(core)));
 
-        tags.stream().map(ClausewitzUtils::removeQuotes).filter(tag -> tag.length() == 3).forEach(list::add);
+        countries.forEach(this::addClaim);
     }
 
-    public void addClaim(String tag) {
+    public void addClaim(Country country) {
         ClausewitzList list = this.item.getList("claims");
 
-        tag = ClausewitzUtils.removeQuotes(tag);
-
-        if (tag.length() == 3 && !list.contains(tag)) {
-            list.add(tag);
+        if (!list.contains(country.getTag())) {
+            list.add(country.getTag());
+            country.addClaimProvince(this);
+            this.history.addEvent(this.save.getDate(), "add_claim", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
-    public void removeClaim(String tag) {
+    public void removeClaim(Country country) {
         ClausewitzList list = this.item.getList("claims");
 
         if (list != null) {
-            list.remove(ClausewitzUtils.removeQuotes(tag));
+            list.remove(country.getTag());
+            country.removeClaimProvince(this);
+            this.history.addEvent(this.save.getDate(), "remove_claim", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
@@ -693,7 +708,11 @@ public class SaveProvince extends Province {
             devastation = 100d;
         }
 
-        this.item.setVariable("devastation", devastation);
+        if (devastation == 0) {
+            this.item.removeVariable("devastation");
+        } else {
+            this.item.setVariable("devastation", devastation);
+        }
     }
 
     public Double getLocalAutonomy() { //Fixme get country modifier min_autonomy
@@ -866,18 +885,28 @@ public class SaveProvince extends Province {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void addDiscoveredBy(String countryId) {
+    public void setDiscoveredBy(List<Country> countries) {
+        getDiscoveredBy().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
+                                                                                                                     () -> removeDiscoveredBy(core)));
+
+        countries.forEach(this::addDiscoveredBy);
+    }
+
+    public void addDiscoveredBy(Country country) {
         ClausewitzList list = this.item.getList("discovered_by");
 
-        if (!list.contains(countryId)) {
-            list.add(countryId);
+        if (!list.contains(country.getTag())) {
+            list.add(country.getTag());
+            this.history.addEvent(this.save.getDate(), "discovered_by", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
-    public void removeDiscoveredBy(String countryId) {
+    public void removeDiscoveredBy(Country country) {
         ClausewitzList list = this.item.getList("discovered_by");
 
-        list.remove(countryId);
+        if (list != null) {
+            list.remove(country.getTag());
+        }
     }
 
     public Map<Country, Integer> getImproveCount() {

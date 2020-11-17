@@ -73,6 +73,15 @@ public class History {
         }
     }
 
+    public void addEvent(LocalDate date, String objectKey, String key, String value) {
+        if (date != null) {
+            ClausewitzItem eventItem = this.item.addChild(ClausewitzUtils.dateToString(date));
+            ClausewitzItem child = eventItem.addChild(objectKey);
+            child.addVariable(key, value);
+            refreshAttributes();
+        }
+    }
+
     public void addEvent(LocalDate date, String key, boolean value) {
         if (date != null) {
             ClausewitzItem eventItem = this.item.addChild(ClausewitzUtils.dateToString(date));
