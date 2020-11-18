@@ -378,7 +378,7 @@ public class Game {
     }
 
     public String getLocalisation(String key) {
-        return this.localisations.getOrDefault(key.toLowerCase(), key);
+        return this.localisations.getOrDefault(key, key);
     }
 
     public String getLocalisationClean(String key) {
@@ -698,6 +698,10 @@ public class Game {
 
     public int getFortPerDevRatio() {
         return this.defines.get(Eu4Utils.DEFINE_MILITARY_KEY).get("FORT_PER_DEV_RATIO").value.toint();
+    }
+
+    public double getMaxArmyProfessionalism() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_ARMY_PROFESSIONALISM").value.todouble();
     }
 
     public double getLowArmyProfessionalismMinRange() {
@@ -1649,7 +1653,7 @@ public class Game {
                             }
 
                             String[] keys = line.split(":", 2);
-                            String key = keys[0].trim().toLowerCase();
+                            String key = keys[0].trim();
                             String value = keys[1];
                             int start = value.indexOf('"') + 1;
                             int end = value.lastIndexOf('"');
@@ -1964,7 +1968,7 @@ public class Game {
     private void readEvents() {
         this.events = new ConcurrentHashMap<>();
 
-        getPaths(this.gameFolderPath + File.separator + "events",
+        getPaths("events",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
