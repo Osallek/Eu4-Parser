@@ -34,7 +34,6 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,9 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -87,23 +84,23 @@ public class Game {
 
     private Map<Integer, Province> provincesByColor;
 
-    private Map<Continent, Path> continents;
+    private Map<String, Continent> continents;
 
-    private Map<Path, List<CultureGroup>> cultureGroups;
+    private Map<String, CultureGroup> cultureGroups;
 
-    private Map<Path, List<ReligionGroup>> religionGroups;
+    private Map<String, ReligionGroup> religionGroups;
 
-    private Map<Path, SortedSet<Institution>> institutions;
+    private Map<String, Institution> institutions;
 
-    private Map<TradeGood, Map.Entry<Path, Path>> tradeGoods;
+    private Map<String, TradeGood> tradeGoods;
 
-    private Map<Building, Path> buildings;
+    private Map<String, Building> buildings;
 
     private Map<String, String> localisations;
 
     private Map<String, SpriteType> spriteTypes;
 
-    private Map<ImperialReform, Path> imperialReforms;
+    private Map<String, ImperialReform> imperialReforms;
 
     private Map<Decree, Path> decrees;
 
@@ -353,28 +350,18 @@ public class Game {
     }
 
     public List<Continent> getContinents() {
-        return this.continents.keySet()
+        return this.continents.values()
                               .stream()
                               .sorted(Comparator.comparing(Continent::getLocalizedName, Eu4Utils.COLLATOR))
                               .collect(Collectors.toList());
     }
 
     public Continent getContinent(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Continent continent : this.continents.keySet()) {
-            if (continent.getName().equalsIgnoreCase(name)) {
-                return continent;
-            }
-        }
-
-        return null;
+        return this.continents.get(name);
     }
 
     public Continent getContinent(int i) {
-        return new ArrayList<>(this.continents.keySet()).get(i);
+        return new ArrayList<>(this.continents.values()).get(i);
     }
 
     public String getLocalisation(String key) {
@@ -467,12 +454,12 @@ public class Game {
     }
 
     public Collection<CultureGroup> getCultureGroups() {
-        return this.cultureGroups.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return this.cultureGroups.values();
     }
 
     public List<Culture> getCultures() {
-        return this.cultureGroups.values().stream()
-                                 .flatMap(Collection::stream)
+        return this.cultureGroups.values()
+                                 .stream()
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
                                  .sorted(Comparator.comparing(Culture::getLocalizedName, Eu4Utils.COLLATOR))
@@ -484,8 +471,8 @@ public class Game {
             return null;
         }
 
-        return this.cultureGroups.values().stream()
-                                 .flatMap(Collection::stream)
+        return this.cultureGroups.values()
+                                 .stream()
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
                                  .filter(culture -> culture.getName().equalsIgnoreCase(name))
@@ -494,7 +481,7 @@ public class Game {
     }
 
     public Collection<ReligionGroup> getReligionGroups() {
-        return this.religionGroups.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return this.religionGroups.values();
     }
 
     public List<Religion> getReligions() {
@@ -521,7 +508,6 @@ public class Game {
     public List<Institution> getInstitutions() {
         return this.institutions.values()
                                 .stream()
-                                .flatMap(Collection::stream)
                                 .sorted(Comparator.comparingInt(Institution::getIndex))
                                 .collect(Collectors.toList());
     }
@@ -531,76 +517,38 @@ public class Game {
     }
 
     public Institution getInstitution(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        return this.institutions.values().stream()
-                                .flatMap(Collection::stream)
-                                .filter(institution -> institution.getName().equalsIgnoreCase(name))
-                                .findFirst()
-                                .orElse(null);
+        return this.institutions.get(name);
     }
 
     public List<TradeGood> getTradeGoods() {
-        return this.tradeGoods.keySet()
+        return this.tradeGoods.values()
                               .stream()
                               .sorted(Comparator.comparing(TradeGood::getLocalizedName, Eu4Utils.COLLATOR))
                               .collect(Collectors.toList());
     }
 
     public TradeGood getTradeGood(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (TradeGood tradeGood : this.tradeGoods.keySet()) {
-            if (tradeGood.getName().equalsIgnoreCase(name)) {
-                return tradeGood;
-            }
-        }
-
-        return null;
+        return this.tradeGoods.get(name);
     }
 
     public TradeGood getTradeGood(int i) {
-        return new ArrayList<>(this.tradeGoods.keySet()).get(i);
+        return new ArrayList<>(this.tradeGoods.values()).get(i);
     }
 
     public List<Building> getBuildings() {
-        return new ArrayList<>(this.buildings.keySet());
+        return new ArrayList<>(this.buildings.values());
     }
 
     public Building getBuilding(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Building building : this.buildings.keySet()) {
-            if (building.getName().equalsIgnoreCase(name)) {
-                return building;
-            }
-        }
-
-        return null;
+        return this.buildings.get(name);
     }
 
     public List<ImperialReform> getImperialReforms() {
-        return new ArrayList<>(this.imperialReforms.keySet());
+        return new ArrayList<>(this.imperialReforms.values());
     }
 
     public ImperialReform getImperialReform(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (ImperialReform imperialReform : this.imperialReforms.keySet()) {
-            if (imperialReform.getName().equalsIgnoreCase(name)) {
-                return imperialReform;
-            }
-        }
-
-        return null;
+        return this.imperialReforms.get(name);
     }
 
     public List<Decree> getDecrees() {
@@ -1750,10 +1698,12 @@ public class Game {
             if (continentFile != null && continentFile.canRead()) {
                 ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile, 0, StandardCharsets.UTF_8);
 
-                this.continents = new LinkedHashMap<>();
-                continentsItem.getListsNot("island_check_provinces").forEach(item -> this.continents.put(new Continent(item), continentFile.toPath()));
+                this.continents = continentsItem.getListsNot("island_check_provinces")
+                                                .stream()
+                                                .map(Continent::new)
+                                                .collect(Collectors.toMap(Continent::getName, Function.identity(), (a, b) -> a, LinkedHashMap::new));
 
-                this.continents.keySet().forEach(continent -> {
+                this.continents.values().forEach(continent -> {
                     continent.setLocalizedName(this.getLocalisation(continent.getName()));
                     continent.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setContinent(continent));
                 });
@@ -1808,37 +1758,35 @@ public class Game {
 
     private void readCultures() {
         this.cultureGroups = new HashMap<>();
-
         getPaths(this.commonFolderPath + File.separator + "cultures",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
-                    this.cultureGroups.put(path, cultureGroupsItem.getChildren()
-                                                                  .stream()
-                                                                  .map(CultureGroup::new)
-                                                                  .collect(Collectors.toList()));
+                    this.cultureGroups.putAll(cultureGroupsItem.getChildren()
+                                                               .stream()
+                                                               .map(CultureGroup::new)
+                                                               .collect(Collectors.toMap(AbstractCulture::getName, Function.identity())));
                 });
 
-        this.cultureGroups.values().forEach(groups -> groups.forEach(cultureGroup -> {
+        this.cultureGroups.values().forEach(cultureGroup -> {
             cultureGroup.setLocalizedName(this.getLocalisation(cultureGroup.getName()));
             cultureGroup.getCultures().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
-        }));
+        });
     }
 
     private void readReligion() {
         this.religionGroups = new HashMap<>();
-
         getPaths(this.commonFolderPath + File.separator + "religions",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    this.religionGroups.put(path, religionGroupsItem.getChildren()
-                                                                    .stream()
-                                                                    .map(ReligionGroup::new)
-                                                                    .collect(Collectors.toList()));
+                    this.religionGroups.putAll(religionGroupsItem.getChildren()
+                                                                 .stream()
+                                                                 .map(ReligionGroup::new)
+                                                                 .collect(Collectors.toMap(ReligionGroup::getName, Function.identity())));
                 });
 
-        this.religionGroups.values().forEach(groups -> groups.forEach(religionGroup -> {
+        this.religionGroups.values().forEach(religionGroup -> {
             religionGroup.setLocalizedName(this.getLocalisation(religionGroup.getName()));
             religionGroup.getReligions().forEach(religion -> {
                 religion.setLocalizedName(this.getLocalisation(religion.getName()));
@@ -1850,7 +1798,7 @@ public class Game {
                     });
                 }
             });
-        }));
+        });
     }
 
     private void readInstitutions() {
@@ -1861,15 +1809,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    this.institutions.put(path, institutionsItem.getChildren()
-                                                                .stream()
-                                                                .map(child -> new Institution(child, i.getAndIncrement()))
-                                                                .collect(Collectors.toCollection(TreeSet::new)));
+                    this.institutions.putAll(institutionsItem.getChildren()
+                                                             .stream()
+                                                             .map(child -> new Institution(child, i.getAndIncrement()))
+                                                             .collect(Collectors.toMap(Institution::getName, Function.identity())));
                 });
 
-        this.institutions.values().forEach(institutionList ->
-                                                   institutionList.forEach(
-                                                           institution -> institution.setLocalizedName(this.getLocalisation(institution.getName()))));
+        this.institutions.values().forEach(institution -> institution.setLocalizedName(this.getLocalisation(institution.getName())));
     }
 
     private void readTradeGoods() {
@@ -1879,9 +1825,10 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    tradeGoodsItem.getChildren()
-                                  .forEach(tradeGoodItem -> this.tradeGoods.put(new TradeGood(tradeGoodItem),
-                                                                                new AbstractMap.SimpleEntry<>(path, null)));
+                    this.tradeGoods.putAll(tradeGoodsItem.getChildren()
+                                                         .stream()
+                                                         .map(TradeGood::new)
+                                                         .collect(Collectors.toMap(TradeGood::getName, Function.identity())));
                 });
 
         getPaths(this.commonFolderPath + File.separator + "prices",
@@ -1889,16 +1836,13 @@ public class Game {
                 .forEach(path -> {
                     ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                     pricesItem.getChildren().forEach(priceItem -> {
-                        for (Map.Entry<TradeGood, Map.Entry<Path, Path>> entry : this.tradeGoods.entrySet()) {
-                            if (entry.getKey().getName().equals(priceItem.getName())) {
-                                entry.getKey().setPriceItem(priceItem);
-                                entry.getValue().setValue(path);
-                            }
+                        if (this.tradeGoods.containsKey(priceItem.getName())) {
+                            this.tradeGoods.get(priceItem.getName()).setPriceItem(priceItem);
                         }
                     });
                 });
 
-        this.tradeGoods.keySet().forEach(tradeGood -> tradeGood.setLocalizedName(this.getLocalisation(tradeGood.getName())));
+        this.tradeGoods.values().forEach(tradeGood -> tradeGood.setLocalizedName(this.getLocalisation(tradeGood.getName())));
     }
 
     private void readBuildings() {
@@ -1908,13 +1852,14 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    buildingsItem.getChildrenNot("manufactory")
-                                 .forEach(
-                                         tradeGoodItem -> this.buildings.put(new Building(tradeGoodItem, this), path));
+                    this.buildings.putAll(buildingsItem.getChildrenNot("manufactory")
+                                                       .stream()
+                                                       .map(item -> new Building(item, this))
+                                                       .collect(Collectors.toMap(Building::getName, Function.identity())));
 
                     if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
                         Building manufactoryBuilding = new Building(buildingsItem, this);
-                        this.buildings.keySet().forEach(building -> {
+                        this.buildings.values().forEach(building -> {
                             building.setInternalCost(manufactoryBuilding.getCost());
                             building.setInternalTime(manufactoryBuilding.getTime());
                             building.setInternalModifiers(manufactoryBuilding.getModifiers());
@@ -1922,7 +1867,7 @@ public class Game {
                     }
                 });
 
-        this.buildings.keySet().forEach(building -> building.setLocalizedName(this.getLocalisation("building_" + building.getName())));
+        this.buildings.values().forEach(building -> building.setLocalizedName(this.getLocalisation("building_" + building.getName())));
     }
 
     private void readImperialReforms() {
@@ -1932,11 +1877,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    imperialReformsItem.getChildren().forEach(item -> this.imperialReforms.put(new ImperialReform(item, this), path));
+                    this.imperialReforms.putAll(imperialReformsItem.getChildren()
+                                                                   .stream()
+                                                                   .map(item -> new ImperialReform(item, this))
+                                                                   .collect(Collectors.toMap(ImperialReform::getName, Function.identity())));
                 });
 
-        this.imperialReforms.keySet()
-                            .forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
+        this.imperialReforms.values().forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
     }
 
     private void readDecrees() {
