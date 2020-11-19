@@ -7,6 +7,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -219,7 +220,7 @@ public class SubjectType {
 
     private String subjectOpinionModifier;
 
-    public SubjectType(ClausewitzItem item, Set<SubjectType> subjectTypes) {
+    public SubjectType(ClausewitzItem item, Collection<SubjectType> subjectTypes) {
         subjectTypes.stream()
                     .filter(subjectType -> StringUtils.isNotBlank(subjectType.getSprite()))
                     .filter(subjectType -> subjectType.getName().equalsIgnoreCase(item.getVarAsString("copy_from")))

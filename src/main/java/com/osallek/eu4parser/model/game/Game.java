@@ -45,10 +45,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -76,7 +76,7 @@ public class Game {
 
     private final String missionsFolderPath;
 
-    private File provincesImage;
+    private final File provincesImage;
 
     private TreeNode<FileNode> filesNode;
 
@@ -102,105 +102,105 @@ public class Game {
 
     private Map<String, ImperialReform> imperialReforms;
 
-    private Map<Decree, Path> decrees;
+    private Map<String, Decree> decrees;
 
-    private Map<GoldenBull, Path> goldenBulls;
+    private Map<String, GoldenBull> goldenBulls;
 
-    private Map<Event, Path> events;
+    private Map<String, Event> events;
 
-    private Map<Government, Path> governments;
+    private Map<String, Government> governments;
 
-    private Map<GovernmentRank, Path> governmentRanks;
+    private SortedMap<Integer, GovernmentRank> governmentRanks;
 
-    private Map<GovernmentName, Path> governmentNames;
+    private Map<String, GovernmentName> governmentNames;
 
-    private Map<GovernmentReform, Path> governmentReforms;
+    private Map<String, GovernmentReform> governmentReforms;
 
-    private Map<Unit, Path> units;
+    private Map<String, Unit> units;
 
-    private Map<Area, Path> areas;
+    private Map<String, Area> areas;
 
-    private Map<Advisor, Path> advisors;
+    private Map<String, Advisor> advisors;
 
-    private Map<IdeaGroup, Path> ideaGroups;
+    private Map<String, IdeaGroup> ideaGroups;
 
-    private Map<CasusBelli, Path> casusBelli;
+    private Map<String, CasusBelli> casusBelli;
 
-    private Map<ColonialRegion, Path> colonialRegions;
+    private Map<String, ColonialRegion> colonialRegions;
 
-    private Map<TradeCompany, Path> tradeCompanies;
+    private Map<String, TradeCompany> tradeCompanies;
 
-    private Map<Region, Path> regions;
+    private Map<String, Region> regions;
 
-    private Map<SuperRegion, Path> superRegions;
+    private Map<String, SuperRegion> superRegions;
 
-    private Map<TechGroup, Path> techGroups;
+    private Map<String, TechGroup> techGroups;
 
-    private Map<SubjectType, Path> subjectTypes;
+    private Map<String, SubjectType> subjectTypes;
 
-    private Map<FetishistCult, Path> fetishistCults;
+    private Map<String, FetishistCult> fetishistCults;
 
-    private Map<ChurchAspect, Path> churchAspects;
+    private Map<String, ChurchAspect> churchAspects;
 
-    private Map<MissionTree, Path> missionTrees;
+    private Map<String, MissionTree> missionTrees;
 
-    private Map<EstatePrivilege, Path> estatePrivileges;
+    private Map<String, EstatePrivilege> estatePrivileges;
 
-    private Map<Estate, Path> estates;
+    private Map<String, Estate> estates;
 
-    private Map<Power, SortedMap<Technology, Path>> technologies;
+    private Map<Power, TreeSet<Technology>> technologies;
 
-    private SortedMap<ProfessionalismModifier, Path> professionalismModifiers;
+    private SortedSet<ProfessionalismModifier> professionalismModifiers;
 
     private final Map<String, Map<String, Exp.Constant>> defines;
 
-    private Map<RulerPersonality, Path> rulerPersonalities;
+    private Map<String, RulerPersonality> rulerPersonalities;
 
-    private Map<Investment, Path> investments;
+    private Map<String, Investment> investments;
 
-    private Map<Policy, Path> policies;
+    private Map<String, Policy> policies;
 
-    private Map<Hegemon, Path> hegemons;
+    private Map<String, Hegemon> hegemons;
 
-    private Map<Faction, Path> factions;
+    private Map<String, Faction> factions;
 
-    private Map<Age, Path> ages;
+    private Map<String, Age> ages;
 
-    private SortedMap<DefenderOfFaith, Path> defenderOfFaith;
+    private SortedMap<String, DefenderOfFaith> defenderOfFaith;
 
-    private SortedMap<CenterOfTrade, Path> centersOfTrade;
+    private SortedMap<String, CenterOfTrade> centersOfTrade;
 
-    private Map<Fervor, Path> fervors;
+    private Map<String, Fervor> fervors;
 
-    private Map<GreatProject, Path> greatProjects;
+    private Map<String, GreatProject> greatProjects;
 
-    private Map<HolyOrder, Path> holyOrders;
+    private Map<String, HolyOrder> holyOrders;
 
-    private SortedMap<Isolationism, Path> isolationisms;
+    private SortedMap<String, Isolationism> isolationisms;
 
-    private Map<NativeAdvancements, Path> nativeAdvancements;
+    private Map<String, NativeAdvancements> nativeAdvancements;
 
-    private Map<NavalDoctrine, Path> navalDoctrines;
+    private Map<String, NavalDoctrine> navalDoctrines;
 
-    private Map<ParliamentIssue, Path> parliamentIssues;
+    private Map<String, ParliamentIssue> parliamentIssues;
 
-    private Map<PersonalDeity, Path> personalDeities;
+    private Map<String, PersonalDeity> personalDeities;
 
-    private Map<ReligiousReforms, Path> religiousReforms;
+    private Map<String, ReligiousReforms> religiousReforms;
 
-    private Map<CrownLandBonus, Path> crownLandBonuses;
+    private Map<String, CrownLandBonus> crownLandBonuses;
 
-    private Map<StateEdict, Path> stateEdicts;
+    private Map<String, StateEdict> stateEdicts;
 
-    private Map<TradePolicy, Path> tradePolicies;
+    private Map<String, TradePolicy> tradePolicies;
 
-    private Map<StaticModifier, Path> staticModifiers;
+    private Map<String, StaticModifier> staticModifiers;
 
-    private Map<EventModifier, Path> eventModifiers;
+    private Map<String, EventModifier> eventModifiers;
 
-    private Map<TriggeredModifier, Path> provinceTriggeredModifiers;
+    private Map<String, TriggeredModifier> provinceTriggeredModifiers;
 
-    private Map<TriggeredModifier, Path> triggeredModifiers;
+    private Map<String, TriggeredModifier> triggeredModifiers;
 
     public Game(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException, ParseException {
         this.gameFolderPath = gameFolderPath;
@@ -552,50 +552,30 @@ public class Game {
     }
 
     public List<Decree> getDecrees() {
-        return new ArrayList<>(this.decrees.keySet());
+        return new ArrayList<>(this.decrees.values());
     }
 
     public Decree getDecree(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Decree saveDecree : this.decrees.keySet()) {
-            if (saveDecree.getName().equalsIgnoreCase(name)) {
-                return saveDecree;
-            }
-        }
-
-        return null;
+        return this.decrees.get(name);
     }
 
     public List<GoldenBull> getGoldenBulls() {
-        return new ArrayList<>(this.goldenBulls.keySet());
+        return new ArrayList<>(this.goldenBulls.values());
     }
 
     public GoldenBull getGoldenBull(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (GoldenBull saveGoldenBull : this.goldenBulls.keySet()) {
-            if (saveGoldenBull.getName().equalsIgnoreCase(name)) {
-                return saveGoldenBull;
-            }
-        }
-
-        return null;
+        return this.goldenBulls.get(name);
     }
 
     public List<Event> getEvents() {
-        return this.events.keySet()
+        return this.events.values()
                           .stream()
                           .sorted(Comparator.comparing(Event::getLocalizedName, Eu4Utils.COLLATOR))
                           .collect(Collectors.toList());
     }
 
     public List<Event> getFireOnlyOnceEvents() {
-        return this.events.keySet()
+        return this.events.values()
                           .stream()
                           .filter(Event::fireOnlyOnce)
                           .sorted(Comparator.comparing(Event::getLocalizedName, Eu4Utils.COLLATOR))
@@ -603,17 +583,7 @@ public class Game {
     }
 
     public Event getEvent(String id) {
-        if (id == null) {
-            return null;
-        }
-
-        for (Event event : this.events.keySet()) {
-            if (event.getId().equalsIgnoreCase(id)) {
-                return event;
-            }
-        }
-
-        return null;
+        return this.events.get(id);
     }
 
     public int getMaxGovRank() {
@@ -725,320 +695,150 @@ public class Game {
     }
 
     public List<Government> getGovernments() {
-        return this.governments.keySet()
+        return this.governments.values()
                                .stream()
                                .sorted(Comparator.comparing(Government::getLocalizedName, Eu4Utils.COLLATOR))
                                .collect(Collectors.toList());
     }
 
     public Government getGovernment(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Government government : this.governments.keySet()) {
-            if (government.getName().equalsIgnoreCase(name)) {
-                return government;
-            }
-        }
-
-        return null;
+        return this.governments.get(name);
     }
 
-    public Set<GovernmentRank> getGovernmentRanks() {
-        return this.governmentRanks.keySet();
+    public Collection<GovernmentRank> getGovernmentRanks() {
+        return this.governmentRanks.values();
     }
 
     public GovernmentRank getGovernmentRank(int level) {
-        return this.governmentRanks.keySet().stream().filter(governmentRank -> governmentRank.getLevel() == level).findFirst().orElse(null);
+        return this.governmentRanks.get(level);
     }
 
-    public Set<GovernmentName> getGovernmentNames() {
-        return this.governmentNames.keySet();
+    public Collection<GovernmentName> getGovernmentNames() {
+        return this.governmentNames.values();
     }
 
     public GovernmentName getGovernmentName(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        for (GovernmentName governmentName : this.governmentNames.keySet()) {
-            if (governmentName.getName().equalsIgnoreCase(name)) {
-                return governmentName;
-            }
-        }
-
-        return null;
+        return this.governmentNames.get(name);
     }
 
-    public Set<GovernmentReform> getGovernmentReforms() {
-        return this.governmentReforms.keySet();
+    public Collection<GovernmentReform> getGovernmentReforms() {
+        return this.governmentReforms.values();
     }
 
     public GovernmentReform getGovernmentReform(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        for (GovernmentReform governmentReform : this.governmentReforms.keySet()) {
-            if (governmentReform.getName().equalsIgnoreCase(name)) {
-                return governmentReform;
-            }
-        }
-
-        return null;
+        return this.governmentReforms.get(name);
     }
 
-    public Set<Unit> getUnits() {
-        return this.units.keySet();
+    public Collection<Unit> getUnits() {
+        return this.units.values();
     }
 
     public Unit getUnit(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        for (Unit unit : this.units.keySet()) {
-            if (unit.getName().equalsIgnoreCase(name)) {
-                return unit;
-            }
-        }
-
-        return null;
+        return this.units.get(name);
     }
 
-    public Set<Area> getAreas() {
-        return this.areas.keySet();
+    public Collection<Area> getAreas() {
+        return this.areas.values();
     }
 
     public Area getArea(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        for (Area area : this.areas.keySet()) {
-            if (area.getName().equalsIgnoreCase(name)) {
-                return area;
-            }
-        }
-
-        return null;
+        return this.areas.get(name);
     }
 
-    public Set<Region> getRegions() {
-        return this.regions.keySet();
+    public Collection<Region> getRegions() {
+        return this.regions.values();
     }
 
     public Region getRegion(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        for (Region region : this.regions.keySet()) {
-            if (region.getName().equalsIgnoreCase(name)) {
-                return region;
-            }
-        }
-
-        return null;
+        return this.regions.get(name);
     }
 
-    public Set<SuperRegion> getSuperRegions() {
-        return this.superRegions.keySet();
+    public Collection<SuperRegion> getSuperRegions() {
+        return this.superRegions.values();
     }
 
     public SuperRegion getSuperRegion(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        for (SuperRegion superRegion : this.superRegions.keySet()) {
-            if (superRegion.getName().equalsIgnoreCase(name)) {
-                return superRegion;
-            }
-        }
-
-        return null;
+        return this.superRegions.get(name);
     }
 
-    public Set<TechGroup> getTechGroups() {
-        return this.techGroups.keySet();
+    public Collection<TechGroup> getTechGroups() {
+        return this.techGroups.values();
     }
 
     public TechGroup getTechGroup(String name) {
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
-
-        for (TechGroup techGroup : this.techGroups.keySet()) {
-            if (techGroup.getName().equalsIgnoreCase(name)) {
-                return techGroup;
-            }
-        }
-
-        return null;
+        return this.techGroups.get(name);
     }
 
     public List<Advisor> getAdvisors() {
-        return new ArrayList<>(this.advisors.keySet());
+        return new ArrayList<>(this.advisors.values());
     }
 
     public Advisor getAdvisor(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Advisor advisor : this.advisors.keySet()) {
-            if (advisor.getName().equalsIgnoreCase(name)) {
-                return advisor;
-            }
-        }
-
-        return null;
+        return this.advisors.get(name);
     }
 
     public List<IdeaGroup> getIdeaGroups() {
-        return new ArrayList<>(this.ideaGroups.keySet());
+        return new ArrayList<>(this.ideaGroups.values());
     }
 
     public IdeaGroup getIdeaGroup(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (IdeaGroup ideaGroup : this.ideaGroups.keySet()) {
-            if (ideaGroup.getName().equalsIgnoreCase(name)) {
-                return ideaGroup;
-            }
-        }
-
-        return null;
+        return this.ideaGroups.get(name);
     }
 
     public List<CasusBelli> getCasusBelli() {
-        return new ArrayList<>(this.casusBelli.keySet());
+        return new ArrayList<>(this.casusBelli.values());
     }
 
     public CasusBelli getCasusBelli(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (CasusBelli cb : this.casusBelli.keySet()) {
-            if (cb.getName().equalsIgnoreCase(name)) {
-                return cb;
-            }
-        }
-
-        return null;
+        return this.casusBelli.get(name);
     }
 
     public List<ColonialRegion> getColonialRegions() {
-        return new ArrayList<>(this.colonialRegions.keySet());
+        return new ArrayList<>(this.colonialRegions.values());
     }
 
     public ColonialRegion getColonialRegion(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (ColonialRegion colonialRegion : this.colonialRegions.keySet()) {
-            if (colonialRegion.getName().equalsIgnoreCase(name)) {
-                return colonialRegion;
-            }
-        }
-
-        return null;
+        return this.colonialRegions.get(name);
     }
 
     public List<TradeCompany> getTradeCompanies() {
-        return new ArrayList<>(this.tradeCompanies.keySet());
+        return new ArrayList<>(this.tradeCompanies.values());
     }
 
     public TradeCompany getTradeCompany(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (TradeCompany tradeCompany : this.tradeCompanies.keySet()) {
-            if (tradeCompany.getName().equalsIgnoreCase(name)) {
-                return tradeCompany;
-            }
-        }
-
-        return null;
+        return this.tradeCompanies.get(name);
     }
 
     public List<SubjectType> getSubjectTypes() {
-        return new ArrayList<>(this.subjectTypes.keySet());
+        return new ArrayList<>(this.subjectTypes.values());
     }
 
     public SubjectType getSubjectType(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (SubjectType subjectType : this.subjectTypes.keySet()) {
-            if (subjectType.getName().equalsIgnoreCase(name)) {
-                return subjectType;
-            }
-        }
-
-        return null;
+        return this.subjectTypes.get(name);
     }
 
     public List<FetishistCult> getFetishistCults() {
-        return new ArrayList<>(this.fetishistCults.keySet());
+        return new ArrayList<>(this.fetishistCults.values());
     }
 
     public FetishistCult getFetishistCult(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (FetishistCult fetishistCult : this.fetishistCults.keySet()) {
-            if (fetishistCult.getName().equalsIgnoreCase(name)) {
-                return fetishistCult;
-            }
-        }
-
-        return null;
+        return this.fetishistCults.get(name);
     }
 
     public List<ChurchAspect> getChurchAspects() {
-        return new ArrayList<>(this.churchAspects.keySet());
+        return new ArrayList<>(this.churchAspects.values());
     }
 
     public ChurchAspect getChurchAspect(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (ChurchAspect churchAspect : this.churchAspects.keySet()) {
-            if (churchAspect.getName().equalsIgnoreCase(name)) {
-                return churchAspect;
-            }
-        }
-
-        return null;
+        return this.churchAspects.get(name);
     }
 
     public List<MissionTree> getMissionTrees() {
-        return new ArrayList<>(this.missionTrees.keySet());
+        return new ArrayList<>(this.missionTrees.values());
     }
 
     public MissionTree getMissionTree(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (MissionTree missionTree : this.missionTrees.keySet()) {
-            if (missionTree.getName().equalsIgnoreCase(name)) {
-                return missionTree;
-            }
-        }
-
-        return null;
+        return this.missionTrees.get(name);
     }
 
     public Mission getMission(String name) {
@@ -1046,7 +846,7 @@ public class Game {
             return null;
         }
 
-        for (MissionTree missionTree : this.missionTrees.keySet()) {
+        for (MissionTree missionTree : this.missionTrees.values()) {
             if (missionTree.getMissions().containsKey(name)) {
                 return missionTree.getMissions().get(name);
             }
@@ -1056,159 +856,79 @@ public class Game {
     }
 
     public List<EstatePrivilege> getEstatePrivileges() {
-        return new ArrayList<>(this.estatePrivileges.keySet());
+        return new ArrayList<>(this.estatePrivileges.values());
     }
 
     public EstatePrivilege getEstatePrivilege(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (EstatePrivilege estatePrivilege : this.estatePrivileges.keySet()) {
-            if (estatePrivilege.getName().equalsIgnoreCase(name)) {
-                return estatePrivilege;
-            }
-        }
-
-        return null;
+        return this.estatePrivileges.get(name);
     }
 
     public List<Estate> getEstates() {
-        return new ArrayList<>(this.estates.keySet());
+        return new ArrayList<>(this.estates.values());
     }
 
     public Estate getEstate(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Estate estate : this.estates.keySet()) {
-            if (estate.getName().equalsIgnoreCase(name)) {
-                return estate;
-            }
-        }
-
-        return null;
+        return this.estates.get(name);
     }
 
-    public Set<Technology> getTechnologies(Power power) {
-        return this.technologies.get(power).keySet();
+    public SortedSet<Technology> getTechnologies(Power power) {
+        return this.technologies.get(power);
     }
 
     public Technology getTechnology(Power power, int i) {
-        return new ArrayList<>(this.technologies.get(power).keySet()).get(i);
+        return new ArrayList<>(this.technologies.get(power)).get(i);
     }
 
-    public Set<ProfessionalismModifier> getProfessionalismModifiers() {
-        return this.professionalismModifiers.keySet();
+    public SortedSet<ProfessionalismModifier> getProfessionalismModifiers() {
+        return this.professionalismModifiers;
     }
 
     public List<RulerPersonality> getRulerPersonalities() {
-        return new ArrayList<>(this.rulerPersonalities.keySet());
+        return new ArrayList<>(this.rulerPersonalities.values());
     }
 
     public RulerPersonality getRulerPersonality(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (RulerPersonality personality : this.rulerPersonalities.keySet()) {
-            if (personality.getName().equalsIgnoreCase(name)) {
-                return personality;
-            }
-        }
-
-        return null;
+        return this.rulerPersonalities.get(name);
     }
 
     public List<Investment> getInvestments() {
-        return new ArrayList<>(this.investments.keySet());
+        return new ArrayList<>(this.investments.values());
     }
 
     public Investment getInvestment(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Investment investment : this.investments.keySet()) {
-            if (investment.getName().equalsIgnoreCase(name)) {
-                return investment;
-            }
-        }
-
-        return null;
+        return this.investments.get(name);
     }
 
     public List<Policy> getPolicies() {
-        return new ArrayList<>(this.policies.keySet());
+        return new ArrayList<>(this.policies.values());
     }
 
     public Policy getPolicy(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Policy policy : this.policies.keySet()) {
-            if (policy.getName().equalsIgnoreCase(name)) {
-                return policy;
-            }
-        }
-
-        return null;
+        return this.policies.get(name);
     }
 
     public List<Hegemon> getHegemons() {
-        return new ArrayList<>(this.hegemons.keySet());
+        return new ArrayList<>(this.hegemons.values());
     }
 
     public Hegemon getHegemon(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Hegemon hegemon : this.hegemons.keySet()) {
-            if (hegemon.getName().equalsIgnoreCase(name)) {
-                return hegemon;
-            }
-        }
-
-        return null;
+        return this.hegemons.get(name);
     }
 
     public List<Faction> getFactions() {
-        return new ArrayList<>(this.factions.keySet());
+        return new ArrayList<>(this.factions.values());
     }
 
     public Faction getFaction(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Faction faction : this.factions.keySet()) {
-            if (faction.getName().equalsIgnoreCase(name)) {
-                return faction;
-            }
-        }
-
-        return null;
+        return this.factions.get(name);
     }
 
     public List<Age> getAges() {
-        return new ArrayList<>(this.ages.keySet());
+        return new ArrayList<>(this.ages.values());
     }
 
     public Age getAge(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Age age : this.ages.keySet()) {
-            if (age.getName().equalsIgnoreCase(name)) {
-                return age;
-            }
-        }
-
-        return null;
+        return this.ages.get(name);
     }
 
     public AgeAbility getAgeAbility(String name) {
@@ -1216,7 +936,8 @@ public class Game {
             return null;
         }
 
-        return this.ages.keySet().stream()
+        return this.ages.values()
+                        .stream()
                         .map(Age::getAbilities)
                         .map(Map::values)
                         .flatMap(Collection::stream)
@@ -1230,7 +951,8 @@ public class Game {
             return null;
         }
 
-        return this.ages.keySet().stream()
+        return this.ages.values()
+                        .stream()
                         .map(Age::getObjectives)
                         .map(Map::values)
                         .flatMap(Collection::stream)
@@ -1239,70 +961,40 @@ public class Game {
                         .orElse(null);
     }
 
-    public Set<DefenderOfFaith> getDefenderOfFaith() {
-        return this.defenderOfFaith.keySet();
+    public Collection<DefenderOfFaith> getDefenderOfFaith() {
+        return this.defenderOfFaith.values();
     }
 
-    public Set<CenterOfTrade> getCentersOfTrade() {
-        return this.centersOfTrade.keySet();
+    public Collection<CenterOfTrade> getCentersOfTrade() {
+        return this.centersOfTrade.values();
     }
 
     public List<Fervor> getFervors() {
-        return new ArrayList<>(this.fervors.keySet());
+        return new ArrayList<>(this.fervors.values());
     }
 
     public Fervor getFervor(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (Fervor fervor : this.fervors.keySet()) {
-            if (fervor.getName().equalsIgnoreCase(name)) {
-                return fervor;
-            }
-        }
-
-        return null;
+        return this.fervors.get(name);
     }
 
     public List<GreatProject> getGreatProjects() {
-        return new ArrayList<>(this.greatProjects.keySet());
+        return new ArrayList<>(this.greatProjects.values());
     }
 
     public GreatProject getGreatProject(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (GreatProject greatProject : this.greatProjects.keySet()) {
-            if (greatProject.getName().equalsIgnoreCase(name)) {
-                return greatProject;
-            }
-        }
-
-        return null;
+        return this.greatProjects.get(name);
     }
 
     public List<HolyOrder> getHolyOrders() {
-        return new ArrayList<>(this.holyOrders.keySet());
+        return new ArrayList<>(this.holyOrders.values());
     }
 
     public HolyOrder getHolyOrder(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (HolyOrder holyOrder : this.holyOrders.keySet()) {
-            if (holyOrder.getName().equalsIgnoreCase(name)) {
-                return holyOrder;
-            }
-        }
-
-        return null;
+        return this.holyOrders.get(name);
     }
 
     public List<Isolationism> getIsolationisms() {
-        return new ArrayList<>(this.isolationisms.keySet());
+        return new ArrayList<>(this.isolationisms.values());
     }
 
     public Isolationism getIsolationism(Integer level) {
@@ -1310,7 +1002,7 @@ public class Game {
             return null;
         }
 
-        for (Isolationism isolationism : this.isolationisms.keySet()) {
+        for (Isolationism isolationism : this.isolationisms.values()) {
             if (isolationism.getIsolationValue() == level) {
                 return isolationism;
             }
@@ -1320,205 +1012,95 @@ public class Game {
     }
 
     public List<NativeAdvancements> getNativeAdvancements() {
-        return new ArrayList<>(this.nativeAdvancements.keySet());
+        return new ArrayList<>(this.nativeAdvancements.values());
     }
 
     public NativeAdvancements getNativeAdvancements(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (NativeAdvancements advancements : this.nativeAdvancements.keySet()) {
-            if (advancements.getName().equalsIgnoreCase(name)) {
-                return advancements;
-            }
-        }
-
-        return null;
+        return this.nativeAdvancements.get(name);
     }
 
     public List<NavalDoctrine> getNavalDoctrines() {
-        return new ArrayList<>(this.navalDoctrines.keySet());
+        return new ArrayList<>(this.navalDoctrines.values());
     }
 
     public NavalDoctrine getNavalDoctrine(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (NavalDoctrine navalDoctrine : this.navalDoctrines.keySet()) {
-            if (navalDoctrine.getName().equalsIgnoreCase(name)) {
-                return navalDoctrine;
-            }
-        }
-
-        return null;
+        return this.navalDoctrines.get(name);
     }
 
     public List<ParliamentIssue> getParliamentIssues() {
-        return new ArrayList<>(this.parliamentIssues.keySet());
+        return new ArrayList<>(this.parliamentIssues.values());
     }
 
     public ParliamentIssue getParliamentIssue(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (ParliamentIssue parliamentIssue : this.parliamentIssues.keySet()) {
-            if (parliamentIssue.getName().equalsIgnoreCase(name)) {
-                return parliamentIssue;
-            }
-        }
-
-        return null;
+        return this.parliamentIssues.get(name);
     }
 
     public List<PersonalDeity> getPersonalDeities() {
-        return new ArrayList<>(this.personalDeities.keySet());
+        return new ArrayList<>(this.personalDeities.values());
     }
 
     public PersonalDeity getPersonalDeity(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (PersonalDeity personalDeity : this.personalDeities.keySet()) {
-            if (personalDeity.getName().equalsIgnoreCase(name)) {
-                return personalDeity;
-            }
-        }
-
-        return null;
+        return this.personalDeities.get(name);
     }
 
     public List<ReligiousReforms> getReligiousReforms() {
-        return new ArrayList<>(this.religiousReforms.keySet());
+        return new ArrayList<>(this.religiousReforms.values());
     }
 
     public ReligiousReforms getReligiousReforms(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (ReligiousReforms reforms : this.religiousReforms.keySet()) {
-            if (reforms.getName().equalsIgnoreCase(name)) {
-                return reforms;
-            }
-        }
-
-        return null;
+        return this.religiousReforms.get(name);
     }
 
-    public Set<CrownLandBonus> getCrownLandBonuses() {
-        return this.crownLandBonuses.keySet();
+    public Collection<CrownLandBonus> getCrownLandBonuses() {
+        return this.crownLandBonuses.values();
     }
 
     public List<StateEdict> getStateEdicts() {
-        return new ArrayList<>(this.stateEdicts.keySet());
+        return new ArrayList<>(this.stateEdicts.values());
     }
 
     public StateEdict getStateEdict(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (StateEdict stateEdict : this.stateEdicts.keySet()) {
-            if (stateEdict.getName().equalsIgnoreCase(name)) {
-                return stateEdict;
-            }
-        }
-
-        return null;
+        return this.stateEdicts.get(name);
     }
 
     public List<TradePolicy> getTradePolicies() {
-        return new ArrayList<>(this.tradePolicies.keySet());
+        return new ArrayList<>(this.tradePolicies.values());
     }
 
     public TradePolicy getTradePolicy(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (TradePolicy tradePolicy : this.tradePolicies.keySet()) {
-            if (tradePolicy.getName().equalsIgnoreCase(name)) {
-                return tradePolicy;
-            }
-        }
-
-        return null;
+        return this.tradePolicies.get(name);
     }
 
     public List<StaticModifier> getStaticModifiers() {
-        return new ArrayList<>(this.staticModifiers.keySet());
+        return new ArrayList<>(this.staticModifiers.values());
     }
 
     public StaticModifier getStaticModifier(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (StaticModifier staticModifier : this.staticModifiers.keySet()) {
-            if (staticModifier.getName().equalsIgnoreCase(name)) {
-                return staticModifier;
-            }
-        }
-
-        return null;
+        return this.staticModifiers.get(name);
     }
 
     public List<EventModifier> getEventModifiers() {
-        return new ArrayList<>(this.eventModifiers.keySet());
+        return new ArrayList<>(this.eventModifiers.values());
     }
 
     public EventModifier getEventModifier(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (EventModifier eventModifier : this.eventModifiers.keySet()) {
-            if (eventModifier.getName().equalsIgnoreCase(name)) {
-                return eventModifier;
-            }
-        }
-
-        return null;
+        return this.eventModifiers.get(name);
     }
 
     public List<TriggeredModifier> getProvinceTriggeredModifiers() {
-        return new ArrayList<>(this.provinceTriggeredModifiers.keySet());
+        return new ArrayList<>(this.provinceTriggeredModifiers.values());
     }
 
     public TriggeredModifier getProvinceTriggeredModifier(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (TriggeredModifier triggeredModifier : this.provinceTriggeredModifiers.keySet()) {
-            if (triggeredModifier.getName().equalsIgnoreCase(name)) {
-                return triggeredModifier;
-            }
-        }
-
-        return null;
+        return this.provinceTriggeredModifiers.get(name);
     }
 
     public List<TriggeredModifier> getTriggeredModifiers() {
-        return new ArrayList<>(this.triggeredModifiers.keySet());
+        return new ArrayList<>(this.triggeredModifiers.values());
     }
 
     public TriggeredModifier getTriggeredModifier(String name) {
-        if (name == null) {
-            return null;
-        }
-
-        for (TriggeredModifier triggeredModifier : this.triggeredModifiers.keySet()) {
-            if (triggeredModifier.getName().equalsIgnoreCase(name)) {
-                return triggeredModifier;
-            }
-        }
-
-        return null;
+        return this.triggeredModifiers.get(name);
     }
 
     public GameModifier getModifier(String modifier) {
@@ -1610,7 +1192,7 @@ public class Game {
                                 continue;
                             }
 
-                            this.localisations.put(key, value.substring(start, end).trim());
+                            this.localisations.put(key, StringUtils.capitalize(value.substring(start, end).trim()));
                         }
                     } catch (IOException e) {
                         LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
@@ -1765,7 +1347,7 @@ public class Game {
                     this.cultureGroups.putAll(cultureGroupsItem.getChildren()
                                                                .stream()
                                                                .map(CultureGroup::new)
-                                                               .collect(Collectors.toMap(AbstractCulture::getName, Function.identity())));
+                                                               .collect(Collectors.toMap(AbstractCulture::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.cultureGroups.values().forEach(cultureGroup -> {
@@ -1783,7 +1365,7 @@ public class Game {
                     this.religionGroups.putAll(religionGroupsItem.getChildren()
                                                                  .stream()
                                                                  .map(ReligionGroup::new)
-                                                                 .collect(Collectors.toMap(ReligionGroup::getName, Function.identity())));
+                                                                 .collect(Collectors.toMap(ReligionGroup::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.religionGroups.values().forEach(religionGroup -> {
@@ -1812,7 +1394,7 @@ public class Game {
                     this.institutions.putAll(institutionsItem.getChildren()
                                                              .stream()
                                                              .map(child -> new Institution(child, i.getAndIncrement()))
-                                                             .collect(Collectors.toMap(Institution::getName, Function.identity())));
+                                                             .collect(Collectors.toMap(Institution::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.institutions.values().forEach(institution -> institution.setLocalizedName(this.getLocalisation(institution.getName())));
@@ -1828,7 +1410,7 @@ public class Game {
                     this.tradeGoods.putAll(tradeGoodsItem.getChildren()
                                                          .stream()
                                                          .map(TradeGood::new)
-                                                         .collect(Collectors.toMap(TradeGood::getName, Function.identity())));
+                                                         .collect(Collectors.toMap(TradeGood::getName, Function.identity(), (a, b) -> b)));
                 });
 
         getPaths(this.commonFolderPath + File.separator + "prices",
@@ -1855,7 +1437,7 @@ public class Game {
                     this.buildings.putAll(buildingsItem.getChildrenNot("manufactory")
                                                        .stream()
                                                        .map(item -> new Building(item, this))
-                                                       .collect(Collectors.toMap(Building::getName, Function.identity())));
+                                                       .collect(Collectors.toMap(Building::getName, Function.identity(), (a, b) -> b)));
 
                     if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
                         Building manufactoryBuilding = new Building(buildingsItem, this);
@@ -1880,7 +1462,7 @@ public class Game {
                     this.imperialReforms.putAll(imperialReformsItem.getChildren()
                                                                    .stream()
                                                                    .map(item -> new ImperialReform(item, this))
-                                                                   .collect(Collectors.toMap(ImperialReform::getName, Function.identity())));
+                                                                   .collect(Collectors.toMap(ImperialReform::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.imperialReforms.values().forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
@@ -1889,14 +1471,14 @@ public class Game {
     private void readDecrees() {
         this.decrees = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "imperial_reforms",
+        getPaths(this.commonFolderPath + File.separator + "decrees",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    decreesItem.getChildren().forEach(item -> this.decrees.put(new Decree(item), path));
+                    this.decrees.putAll(decreesItem.getChildren().stream().map(Decree::new).collect(Collectors.toMap(Decree::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.decrees.keySet().forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(saveDecree.getName() + "_title")));
+        this.decrees.values().forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(saveDecree.getName() + "_title")));
     }
 
     private void readGoldenBulls() {
@@ -1906,25 +1488,24 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    goldenBullsItem.getChildren().forEach(item -> this.goldenBulls.put(new GoldenBull(item), path));
+                    this.goldenBulls.putAll(
+                            goldenBullsItem.getChildren().stream().map(GoldenBull::new).collect(Collectors.toMap(GoldenBull::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.goldenBulls.keySet().forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
+        this.goldenBulls.values().forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
     }
 
     private void readEvents() {
-        this.events = new ConcurrentHashMap<>();
+        this.events = new HashMap<>();
 
         getPaths("events",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    eventsItem.getChildren().forEach(item -> this.events.put(new Event(item), path));
+                    this.events.putAll(eventsItem.getChildren().stream().map(Event::new).collect(Collectors.toMap(Event::getId, Function.identity())));
                 });
 
-        this.events.keySet()
-                   .parallelStream()
-                   .forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
+        this.events.values().forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
     }
 
     private void readGovernments() {
@@ -1934,10 +1515,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    governmentsItem.getChildrenNot("pre_dharma_mapping").forEach(item -> this.governments.put(new Government(item, this), path));
+                    this.governments.putAll(governmentsItem.getChildrenNot("pre_dharma_mapping")
+                                                           .stream()
+                                                           .map(item -> new Government(item, this))
+                                                           .collect(Collectors.toMap(Government::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.governments.keySet().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
+        this.governments.values().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
     }
 
     private void readGovernmentRanks() {
@@ -1947,7 +1531,10 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem governmentRanksItem = ClausewitzParser.parse(path.toFile(), 0);
-                    governmentRanksItem.getChildren().forEach(item -> this.governmentRanks.put(new GovernmentRank(item), path));
+                    this.governmentRanks.putAll(governmentRanksItem.getChildren()
+                                                                   .stream()
+                                                                   .map(GovernmentRank::new)
+                                                                   .collect(Collectors.toMap(GovernmentRank::getLevel, Function.identity())));
                 });
     }
 
@@ -1958,38 +1545,45 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    governmentsItem.getChildren().forEach(item -> this.governmentNames.put(new GovernmentName(item, this), path));
+                    this.governmentNames.putAll(governmentsItem.getChildren()
+                                                               .stream()
+                                                               .map(item -> new GovernmentName(item, this))
+                                                               .collect(Collectors.toMap(GovernmentName::getName, Function.identity(), (a, b) -> b)));
                 });
     }
 
     private void readGovernmentReforms() {
         this.governmentReforms = new HashMap<>();
 
-        Map<ClausewitzItem, Path> reformsItems = getPaths(this.commonFolderPath + File.separator + "government_reforms",
-                                                          fileNode -> Files.isRegularFile(fileNode.getPath()))
-                .collect(Collectors.toMap(path -> ClausewitzParser.parse(path.toFile(), 0), Function.identity()));
+        List<ClausewitzItem> reformsItems = getPaths(this.commonFolderPath + File.separator + "government_reforms",
+                                                     fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .map(path -> ClausewitzParser.parse(path.toFile(), 0))
+                .collect(Collectors.toList());
 
         AtomicReference<GovernmentReform> defaultReform = new AtomicReference<>();
 
-        reformsItems.keySet().stream().filter(item -> item.hasChild("defaults_reform")).findFirst().ifPresent(item -> {
+        reformsItems.stream().filter(item -> item.hasChild("defaults_reform")).findFirst().ifPresent(item -> {
             defaultReform.set(new GovernmentReform(item.getChild("defaults_reform"), this, null));
         });
 
-        reformsItems.forEach((key, value) -> key.getChildrenNot("defaults_reform")
-                                                .forEach(item -> this.governmentReforms.put(new GovernmentReform(item, this, defaultReform.get()), value)));
+        this.governmentReforms.putAll(reformsItems.stream()
+                                                  .map(item -> item.getChildrenNot("defaults_reform"))
+                                                  .flatMap(Collection::stream)
+                                                  .map(item -> new GovernmentReform(item, this, defaultReform.get()))
+                                                  .collect(Collectors.toMap(GovernmentReform::getName, Function.identity(), (a, b) -> b)));
 
-        this.governmentReforms.keySet().forEach(governmentReform -> governmentReform.setLocalizedName(this.getLocalisation(governmentReform.getName())));
+        this.governmentReforms.values().forEach(governmentReform -> governmentReform.setLocalizedName(this.getLocalisation(governmentReform.getName())));
     }
 
     private void readUnits() {
         this.units = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "units",
-                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+        getPaths(this.commonFolderPath + File.separator + "units", fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
                     unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
-                    this.units.put(new Unit(unitItem, this::getLocalisation), path);
+                    Unit unit = new Unit(unitItem, this::getLocalisation);
+                    this.units.put(unit.getName(), unit);
                 });
     }
 
@@ -2000,11 +1594,11 @@ public class Game {
         if (areasFile != null && areasFile.canRead()) {
             ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
 
-            areasItem.getLists().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
-            areasItem.getChildren().forEach(item -> this.areas.put(new Area(item), areasFile.toPath()));
+            this.areas.putAll(areasItem.getLists().stream().map(Area::new).collect(Collectors.toMap(Area::getName, Function.identity(), (a, b) -> b)));
+            this.areas.putAll(areasItem.getChildren().stream().map(Area::new).collect(Collectors.toMap(Area::getName, Function.identity(), (a, b) -> b)));
         }
 
-        this.areas.keySet().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
+        this.areas.values().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
     }
 
     private void readRegions() {
@@ -2013,10 +1607,13 @@ public class Game {
 
         if (regionsFile != null && regionsFile.canRead()) {
             ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
-            regionsItem.getChildren().forEach(item -> this.regions.put(new Region(item, this), regionsFile.toPath()));
+            this.regions.putAll(regionsItem.getChildren()
+                                           .stream()
+                                           .map(item -> new Region(item, this))
+                                           .collect(Collectors.toMap(Region::getName, Function.identity(), (a, b) -> b)));
         }
 
-        this.regions.keySet().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
+        this.regions.values().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
     }
 
     private void readSuperRegions() {
@@ -2025,10 +1622,13 @@ public class Game {
 
         if (regionsFile != null && regionsFile.canRead()) {
             ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
-            regionsItem.getLists().forEach(item -> this.superRegions.put(new SuperRegion(item, this), regionsFile.toPath()));
+            this.superRegions.putAll(regionsItem.getLists()
+                                                .stream()
+                                                .map(list -> new SuperRegion(list, this))
+                                                .collect(Collectors.toMap(SuperRegion::getName, Function.identity(), (a, b) -> b)));
         }
 
-        this.superRegions.keySet()
+        this.superRegions.values()
                          .stream()
                          .filter(superRegion -> superRegion.getRegions() != null)
                          .forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
@@ -2040,10 +1640,14 @@ public class Game {
 
         if (techGroupsFile != null && techGroupsFile.canRead()) {
             ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile, 0);
-            techGroupsItem.getChild("groups").getChildren().forEach(item -> this.techGroups.put(new TechGroup(item), techGroupsFile.toPath()));
+            this.techGroups.putAll(techGroupsItem.getChild("groups")
+                                                 .getChildren()
+                                                 .stream()
+                                                 .map(TechGroup::new)
+                                                 .collect(Collectors.toMap(TechGroup::getName, Function.identity(), (a, b) -> b)));
         }
 
-        this.techGroups.keySet().forEach(techGroup -> techGroup.setLocalizedName(this.getLocalisation(techGroup.getName())));
+        this.techGroups.values().forEach(techGroup -> techGroup.setLocalizedName(this.getLocalisation(techGroup.getName())));
     }
 
     private void readAdvisors() {
@@ -2053,10 +1657,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    advisorsItem.getChildren().forEach(item -> this.advisors.put(new Advisor(item), path));
+                    this.advisors.putAll(advisorsItem.getChildren()
+                                                     .stream()
+                                                     .map(Advisor::new)
+                                                     .collect(Collectors.toMap(Advisor::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.advisors.keySet().forEach(advisor -> advisor.setLocalizedName(this.getLocalisation(advisor.getName())));
+        this.advisors.values().forEach(advisor -> advisor.setLocalizedName(this.getLocalisation(advisor.getName())));
     }
 
     private void readIdeaGroups() {
@@ -2066,10 +1673,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem ideasItem = ClausewitzParser.parse(path.toFile(), 0);
-                    ideasItem.getChildren().forEach(item -> this.ideaGroups.put(new IdeaGroup(item), path));
+                    this.ideaGroups.putAll(ideasItem.getChildren()
+                                                    .stream()
+                                                    .map(IdeaGroup::new)
+                                                    .collect(Collectors.toMap(IdeaGroup::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.ideaGroups.keySet().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
+        this.ideaGroups.values().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
     }
 
     private void readCasusBelli() {
@@ -2079,10 +1689,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem cbItem = ClausewitzParser.parse(path.toFile(), 0);
-                    cbItem.getChildren().forEach(item -> this.casusBelli.put(new CasusBelli(item), path));
+                    this.casusBelli.putAll(cbItem.getChildren()
+                                                 .stream()
+                                                 .map(CasusBelli::new)
+                                                 .collect(Collectors.toMap(CasusBelli::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.casusBelli.keySet().forEach(casusBelli -> casusBelli.setLocalizedName(this.getLocalisation(casusBelli.getName())));
+        this.casusBelli.values().forEach(cb -> cb.setLocalizedName(this.getLocalisation(cb.getName())));
     }
 
     private void readColonialRegions() {
@@ -2092,10 +1705,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem colonialRegionsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    colonialRegionsItem.getChildren().forEach(item -> this.colonialRegions.put(new ColonialRegion(item, this), path));
+                    this.colonialRegions.putAll(colonialRegionsItem.getChildren()
+                                                                   .stream()
+                                                                   .map(item -> new ColonialRegion(item, this))
+                                                                   .collect(Collectors.toMap(ColonialRegion::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.colonialRegions.keySet().forEach(colonialRegion -> colonialRegion.setLocalizedName(this.getLocalisation(colonialRegion.getName())));
+        this.colonialRegions.values().forEach(colonialRegion -> colonialRegion.setLocalizedName(this.getLocalisation(colonialRegion.getName())));
     }
 
     private void readTradeCompanies() {
@@ -2105,10 +1721,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem tradeCompaniesItem = ClausewitzParser.parse(path.toFile(), 0);
-                    tradeCompaniesItem.getChildren().forEach(item -> this.tradeCompanies.put(new TradeCompany(item), path));
+                    this.tradeCompanies.putAll(tradeCompaniesItem.getChildren()
+                                                                 .stream()
+                                                                 .map(TradeCompany::new)
+                                                                 .collect(Collectors.toMap(TradeCompany::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.tradeCompanies.keySet().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
+        this.tradeCompanies.values().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
     }
 
     private void readSubjectTypes() {
@@ -2118,11 +1737,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem subjectTypesItem = ClausewitzParser.parse(path.toFile(), 0);
-                    subjectTypesItem.getChildren().forEach(item -> this.subjectTypes.put(new SubjectType(item, this.subjectTypes.keySet()), path));
+                    this.subjectTypes.putAll(subjectTypesItem.getChildren()
+                                                             .stream()
+                                                             .map(item -> new SubjectType(item, this.subjectTypes.values()))
+                                                             .collect(Collectors.toMap(SubjectType::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.subjectTypes.entrySet().removeIf(entry -> StringUtils.isBlank(entry.getKey().getSprite()));
-        this.subjectTypes.keySet().forEach(subjectType -> subjectType.setLocalizedName(this.getLocalisation(subjectType.getName() + "_title")));
+        this.subjectTypes.values().forEach(subjectType -> subjectType.setLocalizedName(this.getLocalisation(subjectType.getName() + "_title")));
     }
 
     private void readFetishistCults() {
@@ -2132,10 +1753,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem cultsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    cultsItem.getChildren().forEach(item -> this.fetishistCults.put(new FetishistCult(item), path));
+                    this.fetishistCults.putAll(cultsItem.getChildren()
+                                                        .stream()
+                                                        .map(FetishistCult::new)
+                                                        .collect(Collectors.toMap(FetishistCult::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.fetishistCults.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
+        this.fetishistCults.values().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
     }
 
     private void readChurchAspects() {
@@ -2145,10 +1769,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem aspectsItems = ClausewitzParser.parse(path.toFile(), 0);
-                    aspectsItems.getChildren().forEach(item -> this.churchAspects.put(new ChurchAspect(item), path));
+                    this.churchAspects.putAll(aspectsItems.getChildren()
+                                                          .stream()
+                                                          .map(ChurchAspect::new)
+                                                          .collect(Collectors.toMap(ChurchAspect::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.churchAspects.keySet().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
+        this.churchAspects.values().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
     }
 
     private void readMissionTrees() {
@@ -2158,10 +1785,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    advisorsItem.getChildren().forEach(item -> this.missionTrees.put(new MissionTree(item, this), path));
+                    this.missionTrees.putAll(advisorsItem.getChildren()
+                                                         .stream()
+                                                         .map(item -> new MissionTree(item, this))
+                                                         .collect(Collectors.toMap(MissionTree::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.missionTrees.keySet().forEach(missionTree -> {
+        this.missionTrees.values().forEach(missionTree -> {
             missionTree.setLocalizedName(this.getLocalisation(missionTree.getName()));
             missionTree.getMissions().values().forEach(mission -> {
                 mission.setLocalizedName(this.getLocalisation(mission.getName()));
@@ -2196,10 +1826,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem estatePrivilegesItem = ClausewitzParser.parse(path.toFile(), 0);
-                    estatePrivilegesItem.getChildren().forEach(item -> this.estatePrivileges.put(new EstatePrivilege(item), path));
+                    this.estatePrivileges.putAll(estatePrivilegesItem.getChildren()
+                                                                     .stream()
+                                                                     .map(EstatePrivilege::new)
+                                                                     .collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.estatePrivileges.keySet().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
+        this.estatePrivileges.values().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
 
         this.estates = new HashMap<>();
 
@@ -2207,15 +1840,18 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem estatesItem = ClausewitzParser.parse(path.toFile(), 0);
-                    estatesItem.getChildren().forEach(item -> this.estates.put(new Estate(item, modifierDefinitions.get(item.getName()), this), path));
+                    this.estates.putAll(estatesItem.getChildren()
+                                                   .stream()
+                                                   .map(item -> new Estate(item, modifierDefinitions.get(item.getName()), this))
+                                                   .collect(Collectors.toMap(Estate::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.estates.keySet().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
+        this.estates.values().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
     }
 
     private void readTechnologies() {
         this.technologies = new EnumMap<>(Power.class);
-        Map<Technology, Path> techs = new HashMap<>();
+        List<Technology> techs = new ArrayList<>();
 
         getPaths(this.commonFolderPath + File.separator + "technologies",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
@@ -2225,13 +1861,10 @@ public class Game {
                     Power power = Power.byName(techItem.getVarAsString("monarch_power"));
                     Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time"));
 
-                    techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.put(new Technology(item, power, aheadOfTime), path));
+                    techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.add(new Technology(item, power, aheadOfTime)));
                 });
 
-        this.technologies = techs.entrySet()
-                                 .stream()
-                                 .collect(Collectors.groupingBy(entry -> entry.getKey().getType(),
-                                                                Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, TreeMap::new)));
+        this.technologies = techs.stream().collect(Collectors.groupingBy(Technology::getType, TreeMap::new, Collectors.toCollection(TreeSet::new)));
     }
 
     private void readRulerPersonalities() {
@@ -2241,21 +1874,26 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    rulerPersonalityItem.getChildren().forEach(item -> this.rulerPersonalities.put(new RulerPersonality(item), path));
+                    this.rulerPersonalities.putAll(rulerPersonalityItem.getChildren()
+                                                                       .stream()
+                                                                       .map(RulerPersonality::new)
+                                                                       .collect(Collectors.toMap(RulerPersonality::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.rulerPersonalities.keySet()
-                               .forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
+        this.rulerPersonalities.values().forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
     }
 
     private void readProfessionalismModifiers() {
-        this.professionalismModifiers = new TreeMap<>();
+        this.professionalismModifiers = new TreeSet<>();
 
         getPaths(this.commonFolderPath + File.separator + "professionalism",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    advisorsItem.getChildren().forEach(item -> this.professionalismModifiers.put(new ProfessionalismModifier(item), path));
+                    this.professionalismModifiers.addAll(advisorsItem.getChildren()
+                                                                     .stream()
+                                                                     .map(ProfessionalismModifier::new)
+                                                                     .collect(Collectors.toSet()));
                 });
     }
 
@@ -2269,12 +1907,13 @@ public class Game {
                     modifiersItem.getChildrenNot("null_modifier").forEach(item -> {
                         if (StaticModifiers.value(item.getName()) != null) {
                             StaticModifiers.value(item.getName()).setModifiers(new Modifiers(item));
-                            this.staticModifiers.put(new StaticModifier(item), path);
+                            StaticModifier staticModifier = new StaticModifier(item);
+                            this.staticModifiers.put(staticModifier.name, staticModifier);
                         }
                     });
                 });
 
-        this.staticModifiers.keySet().forEach(staticModifier -> staticModifier.setLocalizedName(this.getLocalisation(staticModifier.getName())));
+        this.staticModifiers.values().forEach(staticModifier -> staticModifier.setLocalizedName(this.getLocalisation(staticModifier.getName())));
     }
 
     private void readInvestments() {
@@ -2284,10 +1923,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    investmentsItem.getChildren().forEach(item -> this.investments.put(new Investment(item, this), path));
+                    this.investments.putAll(investmentsItem.getChildren()
+                                                           .stream()
+                                                           .map(item -> new Investment(item, this))
+                                                           .collect(Collectors.toMap(Investment::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.investments.keySet().forEach(investment -> investment.setLocalizedName(this.getLocalisation(investment.getName())));
+        this.investments.values().forEach(investment -> investment.setLocalizedName(this.getLocalisation(investment.getName())));
     }
 
     private void readPolicies() {
@@ -2297,10 +1939,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    investmentsItem.getChildren().forEach(item -> this.policies.put(new Policy(item), path));
+                    this.policies.putAll(investmentsItem.getChildren()
+                                                        .stream()
+                                                        .map(Policy::new)
+                                                        .collect(Collectors.toMap(Policy::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.policies.keySet().forEach(policy -> policy.setLocalizedName(this.getLocalisation(policy.getName())));
+        this.policies.values().forEach(policy -> policy.setLocalizedName(this.getLocalisation(policy.getName())));
     }
 
     private void readHegemons() {
@@ -2310,10 +1955,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    hegemonsItem.getChildren().forEach(item -> this.hegemons.put(new Hegemon(item), path));
+                    this.hegemons.putAll(hegemonsItem.getChildren()
+                                                     .stream()
+                                                     .map(Hegemon::new)
+                                                     .collect(Collectors.toMap(Hegemon::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.hegemons.keySet().forEach(hegemon -> hegemon.setLocalizedName(this.getLocalisation(hegemon.getName())));
+        this.hegemons.values().forEach(hegemon -> hegemon.setLocalizedName(this.getLocalisation(hegemon.getName())));
     }
 
     private void readFactions() {
@@ -2323,11 +1971,14 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    hegemonsItem.getChildren().forEach(item -> this.factions.put(new Faction(item), path));
+                    this.factions.putAll(hegemonsItem.getChildren()
+                                                     .stream()
+                                                     .map(Faction::new)
+                                                     .collect(Collectors.toMap(Faction::getName, Function.identity(), (a, b) -> b)));
 
                 });
 
-        this.factions.keySet().forEach(faction -> {
+        this.factions.values().forEach(faction -> {
             faction.setLocalizedName(this.getLocalisation(faction.getName()));
             ModifiersUtils.addModifier(ClausewitzUtils.removeQuotes(faction.getName()) + "_influence", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         });
@@ -2340,10 +1991,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    agesItem.getChildren().forEach(item -> this.ages.put(new Age(item), path));
+                    this.ages.putAll(agesItem.getChildren()
+                                             .stream()
+                                             .map(Age::new)
+                                             .collect(Collectors.toMap(Age::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.ages.keySet().forEach(age -> age.setLocalizedName(this.getLocalisation(age.getName())));
+        this.ages.values().forEach(age -> age.setLocalizedName(this.getLocalisation(age.getName())));
     }
 
     private void readDefenderOfFaith() {
@@ -2353,7 +2007,10 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
-                    defenderOfFaithItem.getChildren().forEach(item -> this.defenderOfFaith.put(new DefenderOfFaith(item), path));
+                    this.defenderOfFaith.putAll(defenderOfFaithItem.getChildren()
+                                                                   .stream()
+                                                                   .map(DefenderOfFaith::new)
+                                                                   .collect(Collectors.toMap(DefenderOfFaith::getName, Function.identity(), (a, b) -> b)));
                 });
     }
 
@@ -2364,7 +2021,10 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem centersOfTradeItem = ClausewitzParser.parse(path.toFile(), 0);
-                    centersOfTradeItem.getChildren().forEach(item -> this.centersOfTrade.put(new CenterOfTrade(item), path));
+                    this.centersOfTrade.putAll(centersOfTradeItem.getChildren()
+                                                                 .stream()
+                                                                 .map(CenterOfTrade::new)
+                                                                 .collect(Collectors.toMap(CenterOfTrade::getName, Function.identity(), (a, b) -> b)));
                 });
     }
 
@@ -2375,10 +2035,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem fervorsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    fervorsItem.getChildren().forEach(item -> this.fervors.put(new Fervor(item), path));
+                    this.fervors.putAll(fervorsItem.getChildren()
+                                                   .stream()
+                                                   .map(Fervor::new)
+                                                   .collect(Collectors.toMap(Fervor::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.fervors.keySet().forEach(fervor -> fervor.setLocalizedName(this.getLocalisation(fervor.getName())));
+        this.fervors.values().forEach(fervor -> fervor.setLocalizedName(this.getLocalisation(fervor.getName())));
     }
 
     private void readGreatProjects() {
@@ -2388,10 +2051,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    greatProjectsItem.getChildren().forEach(item -> this.greatProjects.put(new GreatProject(item), path));
+                    this.greatProjects.putAll(greatProjectsItem.getChildren()
+                                                               .stream()
+                                                               .map(GreatProject::new)
+                                                               .collect(Collectors.toMap(GreatProject::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.greatProjects.keySet().forEach(greatProject -> greatProject.setLocalizedName(this.getLocalisation(greatProject.getName())));
+        this.greatProjects.values().forEach(greatProject -> greatProject.setLocalizedName(this.getLocalisation(greatProject.getName())));
     }
 
     private void readHolyOrders() {
@@ -2401,10 +2067,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem holyOrdersItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    holyOrdersItem.getChildren().forEach(item -> this.holyOrders.put(new HolyOrder(item), path));
+                    this.holyOrders.putAll(holyOrdersItem.getChildren()
+                                                         .stream()
+                                                         .map(HolyOrder::new)
+                                                         .collect(Collectors.toMap(HolyOrder::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.holyOrders.keySet().forEach(holyOrder -> holyOrder.setLocalizedName(this.getLocalisation(holyOrder.getName())));
+        this.holyOrders.values().forEach(holyOrder -> holyOrder.setLocalizedName(this.getLocalisation(holyOrder.getName())));
     }
 
     private void readIsolationism() {
@@ -2414,10 +2083,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem isolationismItem = ClausewitzParser.parse(path.toFile(), 0);
-                    isolationismItem.getChildren().forEach(item -> this.isolationisms.put(new Isolationism(item), path));
+                    this.isolationisms.putAll(isolationismItem.getChildren()
+                                                              .stream()
+                                                              .map(Isolationism::new)
+                                                              .collect(Collectors.toMap(Isolationism::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.isolationisms.keySet().forEach(isolationism -> isolationism.setLocalizedName(this.getLocalisation(isolationism.getName())));
+        this.isolationisms.values().forEach(isolationism -> isolationism.setLocalizedName(this.getLocalisation(isolationism.getName())));
     }
 
     private void readNativeAdvancements() {
@@ -2427,10 +2099,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem nativeAdvancementItem = ClausewitzParser.parse(path.toFile(), 0);
-                    nativeAdvancementItem.getChildren().forEach(item -> this.nativeAdvancements.put(new NativeAdvancements(item), path));
+                    this.nativeAdvancements.putAll(nativeAdvancementItem.getChildren()
+                                                                        .stream()
+                                                                        .map(NativeAdvancements::new)
+                                                                        .collect(Collectors.toMap(NativeAdvancements::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.nativeAdvancements.keySet().forEach(advancements -> {
+        this.nativeAdvancements.values().forEach(advancements -> {
             advancements.setLocalizedName(this.getLocalisation(advancements.getName()));
             advancements.getNativeAdvancements()
                         .forEach(nativeAdvancement -> nativeAdvancement.setLocalizedName(this.getLocalisation(nativeAdvancement.getName())));
@@ -2444,10 +2119,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem navalDoctrineItem = ClausewitzParser.parse(path.toFile(), 0);
-                    navalDoctrineItem.getChildren().forEach(item -> this.navalDoctrines.put(new NavalDoctrine(item), path));
+                    this.navalDoctrines.putAll(navalDoctrineItem.getChildren()
+                                                                .stream()
+                                                                .map(NavalDoctrine::new)
+                                                                .collect(Collectors.toMap(NavalDoctrine::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.navalDoctrines.keySet().forEach(navalDoctrine -> navalDoctrine.setLocalizedName(this.getLocalisation(navalDoctrine.getName())));
+        this.navalDoctrines.values().forEach(navalDoctrine -> navalDoctrine.setLocalizedName(this.getLocalisation(navalDoctrine.getName())));
     }
 
     private void readParliamentIssue() {
@@ -2457,10 +2135,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem parliamentIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                    parliamentIssueItem.getChildren().forEach(item -> this.parliamentIssues.put(new ParliamentIssue(item), path));
+                    this.parliamentIssues.putAll(parliamentIssueItem.getChildren()
+                                                                    .stream()
+                                                                    .map(ParliamentIssue::new)
+                                                                    .collect(Collectors.toMap(ParliamentIssue::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.parliamentIssues.keySet().forEach(parliamentIssue -> parliamentIssue.setLocalizedName(this.getLocalisation(parliamentIssue.getName())));
+        this.parliamentIssues.values().forEach(parliamentIssue -> parliamentIssue.setLocalizedName(this.getLocalisation(parliamentIssue.getName())));
     }
 
     private void readPersonalDeities() {
@@ -2470,10 +2151,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem personalIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                    personalIssueItem.getChildren().forEach(item -> this.personalDeities.put(new PersonalDeity(item), path));
+                    this.personalDeities.putAll(personalIssueItem.getChildren()
+                                                                 .stream()
+                                                                 .map(PersonalDeity::new)
+                                                                 .collect(Collectors.toMap(PersonalDeity::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.personalDeities.keySet().forEach(personalIssue -> personalIssue.setLocalizedName(this.getLocalisation(personalIssue.getName())));
+        this.personalDeities.values().forEach(personalIssue -> personalIssue.setLocalizedName(this.getLocalisation(personalIssue.getName())));
     }
 
     private void readReligiousReforms() {
@@ -2483,10 +2167,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem religiousReformItem = ClausewitzParser.parse(path.toFile(), 0);
-                    religiousReformItem.getChildren().forEach(item -> this.religiousReforms.put(new ReligiousReforms(item), path));
+                    this.religiousReforms.putAll(religiousReformItem.getChildren()
+                                                                    .stream()
+                                                                    .map(ReligiousReforms::new)
+                                                                    .collect(Collectors.toMap(ReligiousReforms::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.religiousReforms.keySet().forEach(reforms -> {
+        this.religiousReforms.values().forEach(reforms -> {
             reforms.setLocalizedName(this.getLocalisation(reforms.getName()));
             reforms.getReforms().forEach(religiousReform -> religiousReform.setLocalizedName(this.getLocalisation(religiousReform.getName())));
         });
@@ -2499,7 +2186,10 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
-                    defenderOfFaithItem.getChildren("bonus").forEach(item -> this.crownLandBonuses.put(new CrownLandBonus(item), path));
+                    this.crownLandBonuses.putAll(defenderOfFaithItem.getChildren()
+                                                                    .stream()
+                                                                    .map(CrownLandBonus::new)
+                                                                    .collect(Collectors.toMap(CrownLandBonus::getName, Function.identity(), (a, b) -> b)));
                 });
     }
 
@@ -2510,10 +2200,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem stateEdictsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    stateEdictsItem.getChildren().forEach(item -> this.stateEdicts.put(new StateEdict(item), path));
+                    this.stateEdicts.putAll(stateEdictsItem.getChildren()
+                                                           .stream()
+                                                           .map(StateEdict::new)
+                                                           .collect(Collectors.toMap(StateEdict::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.stateEdicts.keySet().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
+        this.stateEdicts.values().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
     }
 
     private void readTradePolicies() {
@@ -2523,11 +2216,14 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem tradePoliciesItem = ClausewitzParser.parse(path.toFile(), 0);
-                    tradePoliciesItem.getChildren().forEach(item -> this.tradePolicies.put(new TradePolicy(item), path));
+                    this.tradePolicies.putAll(tradePoliciesItem.getChildren()
+                                                               .stream()
+                                                               .map(TradePolicy::new)
+                                                               .collect(Collectors.toMap(TradePolicy::getName, Function.identity(), (a, b) -> b)));
 
                 });
 
-        this.tradePolicies.keySet().forEach(tradePolicy -> tradePolicy.setLocalizedName(this.getLocalisation(tradePolicy.getName())));
+        this.tradePolicies.values().forEach(tradePolicy -> tradePolicy.setLocalizedName(this.getLocalisation(tradePolicy.getName())));
     }
 
     private void readEventModifiers() {
@@ -2537,10 +2233,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem eventModifierItem = ClausewitzParser.parse(path.toFile(), 0);
-                    eventModifierItem.getChildren().forEach(item -> this.eventModifiers.put(new EventModifier(item), path));
+                    this.eventModifiers.putAll(eventModifierItem.getChildren()
+                                                     .stream()
+                                                     .map(EventModifier::new)
+                                                     .collect(Collectors.toMap(EventModifier::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.eventModifiers.keySet().forEach(eventModifier -> eventModifier.setLocalizedName(this.getLocalisation(eventModifier.getName())));
+        this.eventModifiers.values().forEach(eventModifier -> eventModifier.setLocalizedName(this.getLocalisation(eventModifier.getName())));
     }
 
     private void readProvinceTriggeredModifiers() {
@@ -2550,10 +2249,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem provinceTriggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                    provinceTriggeredIssueItem.getChildren().forEach(item -> this.provinceTriggeredModifiers.put(new TriggeredModifier(item), path));
+                    this.provinceTriggeredModifiers.putAll(provinceTriggeredIssueItem.getChildren()
+                                                     .stream()
+                                                     .map(TriggeredModifier::new)
+                                                     .collect(Collectors.toMap(TriggeredModifier::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.provinceTriggeredModifiers.keySet()
+        this.provinceTriggeredModifiers.values()
                                        .forEach(provinceTriggered -> provinceTriggered.setLocalizedName(this.getLocalisation(provinceTriggered.getName())));
     }
 
@@ -2564,10 +2266,13 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem triggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
-                    triggeredIssueItem.getChildren().forEach(item -> this.triggeredModifiers.put(new TriggeredModifier(item), path));
+                    this.triggeredModifiers.putAll(triggeredIssueItem.getChildren()
+                                                                     .stream()
+                                                                     .map(TriggeredModifier::new)
+                                                                     .collect(Collectors.toMap(GameModifier::getName, Function.identity(), (a, b) -> b)));
 
                 });
 
-        this.triggeredModifiers.keySet().forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
+        this.triggeredModifiers.values().forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
     }
 }
