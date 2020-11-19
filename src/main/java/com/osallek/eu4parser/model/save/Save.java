@@ -6,6 +6,7 @@ import com.osallek.clausewitzparser.model.ClausewitzList;
 import com.osallek.clausewitzparser.model.ClausewitzPObject;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.Age;
 import com.osallek.eu4parser.model.game.Game;
 import com.osallek.eu4parser.model.game.Province;
 import com.osallek.eu4parser.model.game.TradeGood;
@@ -251,8 +252,8 @@ public class Save {
         return this.gamestateItem.getVarAsInt("unit");
     }
 
-    public String getCurrentAge() {
-        return this.gamestateItem.getVarAsString("current_age");
+    public Age getCurrentAge() {
+        return this.game.getAge(ClausewitzUtils.removeQuotes(this.gamestateItem.getVarAsString("current_age")));
     }
 
     public Double getNextAgeProgress() {
