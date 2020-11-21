@@ -36,11 +36,11 @@ public class IdeaGroups {
                         .collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getAsInt, (a, b) -> b, LinkedHashMap::new));
     }
 
-    public void addIdeaGroup(IdeaGroup ideaGroup, int level) {
+    public void setIdeaGroup(IdeaGroup ideaGroup, int level) {
         if (level < 0) {
             level = 0;
-        } else if (level > 7) {
-            level = 7;
+        } else if (level > ideaGroup.getIdeas().size()) {
+            level = ideaGroup.getIdeas().size();
         }
 
         this.item.setVariable(ideaGroup.getName(), level);

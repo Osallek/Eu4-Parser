@@ -698,6 +698,10 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_PRIVILEGES_MAX_CONCURRENT").value.todouble();
     }
 
+    public double getInnovativenessMax() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("INNOVATIVENESS_MAX").value.todouble();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.values()
                                .stream()
