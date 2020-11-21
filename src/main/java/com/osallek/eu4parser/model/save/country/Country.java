@@ -3797,6 +3797,10 @@ public class Country {
         }
     }
 
+    public double getAllowedIdeaGroups() {
+        return getModifier(ModifiersUtils.getModifier("tech_allowed_idea_groups"));
+    }
+
     public double getToleranceOwn() {
         return getModifier(ModifiersUtils.getModifier("tolerance_own"));
     }
