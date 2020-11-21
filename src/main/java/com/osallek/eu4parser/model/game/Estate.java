@@ -90,6 +90,9 @@ public class Estate {
                                                                                                                                  Function.identity(),
                                                                                                                                  (a, b) -> b,
                                                                                                                                  LinkedHashMap::new));
+        if (this.privileges != null) {
+            this.privileges.values().forEach(privilege -> privilege.setEstate(this));
+        }
 
         list = item.getList("agendas");
         this.agendas = list == null ? null : list.getValues();

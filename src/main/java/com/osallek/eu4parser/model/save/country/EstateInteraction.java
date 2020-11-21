@@ -32,6 +32,6 @@ public class EstateInteraction {
     }
 
     public static ClausewitzList addToItem(ClausewitzItem parent, String name, LocalDate date) {
-        return parent.addList(null, name, ClausewitzUtils.dateToString(date));
+        return parent.addList(null, true, name, ClausewitzUtils.dateToString(date));
     }
 }

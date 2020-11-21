@@ -694,6 +694,10 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("SPY_NETWORK_TECH_EFFECT_MAX").value.todouble();
     }
 
+    public double getEstatePrivilegesMaxConcurrent() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_PRIVILEGES_MAX_CONCURRENT").value.todouble();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.values()
                                .stream()
@@ -1832,8 +1836,6 @@ public class Game {
                                                                      .collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b)));
                 });
 
-        this.estatePrivileges.values().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
-
         this.estates = new HashMap<>();
 
         getPaths(this.commonFolderPath + File.separator + "estates",
@@ -1847,6 +1849,7 @@ public class Game {
                 });
 
         this.estates.values().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
+        this.estatePrivileges.values().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
     }
 
     private void readTechnologies() {

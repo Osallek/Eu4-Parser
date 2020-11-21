@@ -2,14 +2,20 @@ package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzList;
+import com.osallek.eu4parser.common.Eu4Utils;
 import com.osallek.eu4parser.common.ModifiersUtils;
 import com.osallek.eu4parser.common.NumbersUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class EstatePrivilege {
+public class EstatePrivilege implements Comparable<EstatePrivilege> {
+
+    private Estate estate;
 
     private final String name;
 
@@ -83,7 +89,16 @@ public class EstatePrivilege {
     }
 
     void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+        this.localizedName = localizedName.replace("[Root.Get" + StringUtils.capitalize(this.estate.getLocalizedName()) + "Name]",
+                                                   this.estate.getLocalizedName()).replace("$ESTATE_NAME$", this.estate.getLocalizedName());
+    }
+
+    public Estate getEstate() {
+        return estate;
+    }
+
+    void setEstate(Estate estate) {
+        this.estate = estate;
     }
 
     public String getIcon() {
@@ -128,6 +143,11 @@ public class EstatePrivilege {
 
     public int getCooldownYears() {
         return cooldownYears;
+    }
+
+    @Override
+    public int compareTo(@NotNull EstatePrivilege o) {
+        return Comparator.comparing(EstatePrivilege::getLocalizedName, Eu4Utils.COLLATOR).compare(this, o);
     }
 
     @Override

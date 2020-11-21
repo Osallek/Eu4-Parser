@@ -167,19 +167,44 @@ public class SaveEstate {
         return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("territory"));
     }
 
-    public List<EstateInteraction> getGrantedPrivileges() {
-        return grantedPrivileges;
+    public void setTerritory(Double territory) {
+        this.item.setVariable("territory", territory);
     }
 
-    public void addGrantedPrivilege(String name, LocalDate date) {
+    public List<EstateInteraction> getGrantedPrivileges() {
+        return this.grantedPrivileges == null ? new ArrayList<>() : this.grantedPrivileges;
+    }
+
+    public void addGrantedPrivilege(EstatePrivilege privilege, LocalDate date) {
         ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
 
         if (grantedPrivilegesItem == null) {
             grantedPrivilegesItem = this.item.addChild("granted_privileges");
         }
 
-        EstateInteraction.addToItem(grantedPrivilegesItem, name, date);
+        EstateInteraction.addToItem(grantedPrivilegesItem, privilege.getName(), date);
         refreshAttributes();
+    }
+
+    public void removeGrantedPrivilege(EstatePrivilege privilege) {
+        ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
+
+        if (grantedPrivilegesItem == null) {
+            return;
+        }
+
+        Integer index = null;
+        List<ClausewitzList> lists = grantedPrivilegesItem.getLists();
+        for (int i = 0; i < lists.size(); i++) {
+            if (privilege.getName().equals(lists.get(i).get(0))) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != null) {
+            grantedPrivilegesItem.removeList(index);
+        }
     }
 
     public void addInteraction(String name, LocalDate date) {
