@@ -26,6 +26,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -152,7 +153,7 @@ public class Game {
 
     private SortedSet<ProfessionalismModifier> professionalismModifiers;
 
-    private final Map<String, Map<String, Exp.Constant>> defines;
+    private Map<String, Map<String, Exp.Constant>> defines;
 
     private Map<String, RulerPersonality> rulerPersonalities;
 
@@ -216,9 +217,9 @@ public class Game {
         this.localisationFolderPath = "localisation";
         this.interfaceFolderPath = "interface";
         this.missionsFolderPath = "missions";
-        this.defines = LuaUtils.luaFileToMap(getAbsoluteFile(this.commonFolderPath + File.separator + "defines.lua"));
         this.provincesImage = getAbsoluteFile(this.mapFolderPath + File.separator + "provinces.bmp");
 
+        loadDefines();
         loadLocalisations();
         readSpriteTypes();
         readEstates();
@@ -702,6 +703,22 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("INNOVATIVENESS_MAX").value.todouble();
     }
 
+    public int getMonarchMaxSkill() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MONARCH_MAX_SKILL").value.toint();
+    }
+
+    public int getMonarchMinSkill() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MONARCH_MIN_SKILL").value.toint();
+    }
+
+    public int getMaxExtraPersonalities() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_EXTRA_PERSONALITIES").value.toint();
+    }
+
+    public int getAgeOfAdulthood() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("AGE_OF_ADULTHOOD").value.toint();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.values()
                                .stream()
@@ -1151,6 +1168,29 @@ public class Game {
                 this.filesNode.merge(new TreeNode<>(null, new FileNode(path), FileNode::getChildren));
             });
         }
+    }
+
+    public void loadDefines() throws FileNotFoundException, ParseException {
+        this.defines = LuaUtils.luaFileToMap(getAbsoluteFile(this.commonFolderPath + File.separator + "defines.lua"));
+
+        getPaths(this.commonFolderPath + File.separator + "defines", fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    try {
+                        Map<String, Map<String, Exp.Constant>> map = LuaUtils.luaFileToMap(path.toFile());
+
+                        map.forEach((rootName, values) -> this.defines.compute(rootName, (root, defines) -> {
+                            if (defines == null) {
+                                defines = new HashMap<>();
+                            }
+
+                            defines.putAll(values);
+
+                            return defines;
+                        }));
+                    } catch (FileNotFoundException | ParseException e) {
+                        LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
+                    }
+                });
     }
 
     public void loadLocalisations() {
