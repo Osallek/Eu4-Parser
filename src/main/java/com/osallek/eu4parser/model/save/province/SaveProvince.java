@@ -724,6 +724,10 @@ public class SaveProvince extends Province {
         return this.localAutonomy;
     }
 
+    public Double getTrueLocalAutonomy() {
+        return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("local_autonomy"));
+    }
+
     public void setLocalAutonomy(double localAutonomy) {
         this.item.setVariable("local_autonomy", localAutonomy);
     }

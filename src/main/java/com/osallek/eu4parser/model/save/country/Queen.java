@@ -5,8 +5,8 @@ import com.osallek.eu4parser.model.save.Save;
 
 public class Queen extends Monarch {
 
-    public Queen(ClausewitzItem item, Save save) {
-        super(item, save);
+    public Queen(ClausewitzItem item, Save save, Country country) {
+        super(item, save, country);
     }
 
     public Boolean getConsort() {

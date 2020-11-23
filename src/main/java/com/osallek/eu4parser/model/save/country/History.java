@@ -19,6 +19,8 @@ public class History {
 
     private final Save save;
 
+    private final Country country;
+
     private final ClausewitzItem item;
 
     private Map<Integer, Monarch> monarchs;
@@ -31,9 +33,10 @@ public class History {
 
     private SortedMap<LocalDate, String> changedTagFrom;
 
-    public History(ClausewitzItem item, Save save) {
+    public History(ClausewitzItem item, Save save, Country country) {
         this.save = save;
         this.item = item;
+        this.country = country;
         refreshAttributes();
     }
 
@@ -103,13 +106,17 @@ public class History {
                                      }
 
                                      if (monarchItem == null) {
+                                         monarchItem = child.getChild("monarch_consort");
+                                     }
+
+                                     if (monarchItem == null) {
                                          monarchItem = child.getChild("monarch_foreign_heir");
                                      }
 
                                      return monarchItem;
                                  })
                                  .filter(Objects::nonNull)
-                                 .map(child -> new Monarch(child, this.save, Eu4Utils.stringToDate(child.getName())))
+                                 .map(child -> new Monarch(child, this.save, this.country, Eu4Utils.stringToDate(child.getName())))
                                  .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity(), (monarch, monarch2) -> monarch2));
 
         this.leaders = this.item.getChildren()
@@ -132,14 +139,14 @@ public class History {
                                   return monarchItem;
                               })
                               .filter(Objects::nonNull)
-                              .map(child -> new Heir(child, this.save))
+                              .map(child -> new Heir(child, this.save, this.country))
                               .collect(Collectors.toMap(heir -> heir.getId().getId(), Function.identity(), (heir, heir2) -> heir2));
 
         this.queens = this.item.getChildren()
                                .stream()
                                .map(child -> child.getChild("queen"))
                                .filter(Objects::nonNull)
-                               .map(child -> new Queen(child, this.save))
+                               .map(child -> new Queen(child, this.save, this.country))
                                .collect(Collectors.toMap(queen -> queen.getId().getId(), Function.identity(), (queen, queen2) -> queen2));
 
         this.leaders.putAll(this.monarchs.values()

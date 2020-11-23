@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.RulerPersonality;
 import com.osallek.eu4parser.model.save.Id;
 import com.osallek.eu4parser.model.save.ListOfDates;
 import com.osallek.eu4parser.model.save.Save;
@@ -14,7 +15,9 @@ public class Monarch {
 
     protected final Save save;
 
-    protected final ClausewitzItem item;
+    protected final Country country;
+
+    final ClausewitzItem item;
 
     protected LocalDate monarchDate;
 
@@ -30,15 +33,17 @@ public class Monarch {
 
     private Leader leader;
 
-    public Monarch(ClausewitzItem item, Save save) {
+    public Monarch(ClausewitzItem item, Save save, Country country) {
         this.save = save;
         this.item = item;
+        this.country = country;
         refreshAttributes();
     }
 
-    public Monarch(ClausewitzItem item, Save save, LocalDate date) {
+    public Monarch(ClausewitzItem item, Save save, Country country, LocalDate date) {
         this.save = save;
         this.item = item;
+        this.country = country;
         this.monarchDate = date;
         refreshAttributes();
     }
@@ -151,6 +156,37 @@ public class Monarch {
         return personalities;
     }
 
+    public void addPersonality(RulerPersonality personality) {
+        if (this.personalities == null) {
+            this.item.addChild("personalities");
+            refreshAttributes();
+        }
+
+        this.personalities.addPersonality(personality);
+    }
+
+    public void removePersonality(int index) {
+        if (this.personalities != null) {
+            this.personalities.removePersonality(index);
+
+            if (this.personalities.item.getAllOrdered().isEmpty()) {
+                this.item.removeChild("personalities");
+                refreshAttributes();
+            }
+        }
+    }
+
+    public void removePersonality(RulerPersonality personality) {
+        if (this.personalities != null) {
+            this.personalities.removePersonality(personality);
+
+            if (this.personalities.item.getAllOrdered().isEmpty()) {
+                this.item.removeChild("personalities");
+                refreshAttributes();
+            }
+        }
+    }
+
     public HasDeclaredWar getHasDeclaredWar() {
         return hasDeclaredWar;
     }
@@ -203,7 +239,7 @@ public class Monarch {
         ClausewitzItem personalitiesItem = this.item.getChild("personalities");
 
         if (personalitiesItem != null) {
-            this.personalities = new Personalities(personalitiesItem, this.save);
+            this.personalities = new Personalities(personalitiesItem, this.save, this);
         }
 
         ClausewitzItem hasDeclaredWarItem = this.item.getChild("has_declared_war");

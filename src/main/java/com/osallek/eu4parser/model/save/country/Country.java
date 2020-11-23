@@ -858,20 +858,28 @@ public class Country {
         return this.item.getVarsAsStrings("accepted_culture").stream().map(s -> this.save.getGame().getCulture(s)).collect(Collectors.toList());
     }
 
-    public void addAcceptedCulture(Culture culture) {
-        List<String> ignoreDecisions = this.item.getVarsAsStrings("accepted_culture");
+    public void setAcceptedCulture(List<Culture> cultures) {
+        getAcceptedCultures().forEach(acceptedCulture -> cultures.stream()
+                                                                 .filter(culture -> culture.equals(acceptedCulture))
+                                                                 .findFirst()
+                                                                 .ifPresentOrElse(cultures::remove, () -> removeAcceptedCulture(acceptedCulture)));
 
-        if (!ignoreDecisions.contains(culture.getName())) {
-            this.item.addVariable("accepted_culture", culture.getName());
+        cultures.forEach(this::addAcceptedCulture);
+    }
+
+    public void addAcceptedCulture(Culture culture) {
+        List<String> acceptedCultures = this.item.getVarsAsStrings("accepted_culture");
+
+        if (!acceptedCultures.contains(culture.getName())) {
+            this.item.addVariable("accepted_culture", culture.getName(), this.item.getVar("dominant_culture").getOrder() + 1);
+            this.history.addEvent(this.save.getDate(), "add_accepted_culture", culture.getName());
         }
     }
 
-    public void removeAcceptedCulture(int index) {
-        this.item.removeVariable("accepted_culture", index);
-    }
-
     public void removeAcceptedCulture(Culture culture) {
-        this.item.removeVariable("accepted_culture", culture.getName());
+        if (this.item.removeVariable("accepted_culture", culture.getName())) {
+            this.history.addEvent(this.save.getDate(), "remove_accepted_culture", culture.getName());
+        }
     }
 
     public String getReligionName() {
@@ -4362,7 +4370,7 @@ public class Country {
         ClausewitzItem historyItem = this.item.getChild("history");
 
         if (historyItem != null) {
-            this.history = new History(historyItem, this.save);
+            this.history = new History(historyItem, this.save, this);
         }
 
         ClausewitzItem flagsItem = this.item.getChild("flags");

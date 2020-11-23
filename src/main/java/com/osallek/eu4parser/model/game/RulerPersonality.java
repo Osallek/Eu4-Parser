@@ -1,6 +1,9 @@
 package com.osallek.eu4parser.model.game;
 
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.save.country.Heir;
+import com.osallek.eu4parser.model.save.country.Monarch;
+import com.osallek.eu4parser.model.save.country.Queen;
 
 import java.util.Objects;
 
@@ -28,6 +31,16 @@ public class RulerPersonality {
         this.heirAllow = item.getChild("heir_allow") == null ? null : new Condition(item.getChild("heir_allow"));
         this.consortAllow = item.getChild("consort_allow") == null ? null : new Condition(item.getChild("consort_allow"));
         this.modifiers = new Modifiers(item);
+    }
+
+    public RulerPersonality(RulerPersonality other) {
+        this.name = other.name;
+        this.localizedName = other.localizedName;
+        this.rulerAllow = other.rulerAllow;
+        this.heirAllow = other.heirAllow;
+        this.consortAllow = other.consortAllow;
+        this.allow = other.allow;
+        this.modifiers = other.modifiers;
     }
 
     public Condition getRulerAllow() {
@@ -62,6 +75,25 @@ public class RulerPersonality {
         this.localizedName = localizedName;
     }
 
+    public boolean isMonarchValid(Monarch monarch) {
+        if (getAllow() != null && !getAllow().apply(monarch.getCountry(), monarch.getCountry())) {
+            return false;
+        }
+
+        if (Monarch.class.equals(monarch.getClass()) && (getRulerAllow() == null || getRulerAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+            return false;
+        }
+
+        if (Heir.class.equals(monarch.getClass()) && (getHeirAllow() == null || getHeirAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+            return false;
+        }
+
+        if (Queen.class.equals(monarch.getClass()) && (getConsortAllow() == null || getConsortAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+            return false;
+        }
+
+        return true;
+    }
 
     @Override
     public boolean equals(Object o) {

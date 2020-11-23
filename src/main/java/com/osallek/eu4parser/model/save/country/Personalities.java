@@ -12,11 +12,14 @@ public class Personalities {
 
     private final Save save;
 
-    private final ClausewitzItem item;
+    final ClausewitzItem item;
 
-    public Personalities(ClausewitzItem item, Save save) {
+    private final Monarch monarch;
+
+    public Personalities(ClausewitzItem item, Save save, Monarch monarch) {
         this.save = save;
         this.item = item;
+        this.monarch = monarch;
     }
 
     public List<RulerPersonality> getPersonalities() {
@@ -27,19 +30,37 @@ public class Personalities {
                         .collect(Collectors.toList());
     }
 
-    public void addPersonality(RulerPersonality rulerPersonality) {
-        this.item.addVariable(rulerPersonality.getName(), true);
+    void addPersonality(RulerPersonality personality) {
+        this.item.addVariable(personality.getName(), true);
+
+        if (this.monarch.item.getName().endsWith("_heir")) {
+            this.monarch.getCountry().getHistory().getHeir(this.monarch.getId().getId()).addPersonality(personality);
+        } else if (this.monarch.item.getName().endsWith("_consort")) {
+            this.monarch.getCountry().getHistory().getQueen(this.monarch.getId().getId()).addPersonality(personality);
+        }
     }
 
-    public void changePersonality(int index, String name) {
+    void changePersonality(int index, String name) {
         this.item.setVariable(index, name);
     }
 
-    public void removePersonality(int index) {
+    void removePersonality(int index) {
         this.item.removeVariable(index);
+
+        if (this.monarch.item.getName().endsWith("_heir")) {
+            this.monarch.getCountry().getHistory().getHeir(this.monarch.getId().getId()).removePersonality(index);
+        } else if (this.monarch.item.getName().endsWith("_consort")) {
+            this.monarch.getCountry().getHistory().getQueen(this.monarch.getId().getId()).removePersonality(index);
+        }
     }
 
-    public void removePersonality(RulerPersonality personality) {
+    void removePersonality(RulerPersonality personality) {
         this.item.removeVariable(personality.getName());
+
+        if (this.monarch.item.getName().endsWith("_heir")) {
+            this.monarch.getCountry().getHistory().getHeir(this.monarch.getId().getId()).removePersonality(personality);
+        } else if (this.monarch.item.getName().endsWith("_consort")) {
+            this.monarch.getCountry().getHistory().getQueen(this.monarch.getId().getId()).removePersonality(personality);
+        }
     }
 }

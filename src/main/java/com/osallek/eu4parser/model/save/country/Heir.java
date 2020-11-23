@@ -5,8 +5,8 @@ import com.osallek.eu4parser.model.save.Save;
 
 public class Heir extends Monarch {
 
-    public Heir(ClausewitzItem item, Save save) {
-        super(item, save);
+    public Heir(ClausewitzItem item, Save save, Country country) {
+        super(item, save, country);
     }
 
     public Integer getClaim() {
