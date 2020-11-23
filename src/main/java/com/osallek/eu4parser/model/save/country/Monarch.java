@@ -17,7 +17,7 @@ public class Monarch {
 
     protected final Country country;
 
-    final ClausewitzItem item;
+    protected final ClausewitzItem item;
 
     protected LocalDate monarchDate;
 
@@ -58,6 +58,12 @@ public class Monarch {
 
     public void setName(String name) {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setName(name);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setName(name);
+        }
     }
 
     public LocalDate getMonarchDate() {
@@ -74,6 +80,12 @@ public class Monarch {
 
     public void setAdm(int adm) {
         this.item.setVariable("ADM", adm);
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setAdm(adm);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setAdm(adm);
+        }
     }
 
     public Integer getDip() {
@@ -82,6 +94,12 @@ public class Monarch {
 
     public void setDip(int dip) {
         this.item.setVariable("DIP", dip);
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setDip(dip);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setDip(dip);
+        }
     }
 
     public Integer getMil() {
@@ -90,6 +108,12 @@ public class Monarch {
 
     public void setMil(int mil) {
         this.item.setVariable("MIL", mil);
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setMil(mil);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setMil(mil);
+        }
     }
 
     public Boolean getFemale() {
@@ -106,6 +130,12 @@ public class Monarch {
 
     public void setCulture(Culture culture) {
         this.item.setVariable("culture", culture.getName());
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setCulture(culture);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setCulture(culture);
+        }
     }
 
     public SaveReligion getReligion() {
@@ -114,6 +144,12 @@ public class Monarch {
 
     public void setReligion(SaveReligion religion) {
         this.item.setVariable("religion", religion.getName());
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setReligion(religion);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setReligion(religion);
+        }
     }
 
     public String getDynasty() {
@@ -122,6 +158,12 @@ public class Monarch {
 
     public void setDynasty(String dynasty) {
         this.item.setVariable("dynasty", ClausewitzUtils.addQuotes(dynasty));
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setDynasty(dynasty);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setDynasty(dynasty);
+        }
     }
 
     public LocalDate getBirthDate() {
@@ -130,6 +172,12 @@ public class Monarch {
 
     public void setBirthDate(LocalDate birthDate) {
         this.item.setVariable("birth_date", birthDate);
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setBirthDate(birthDate);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setBirthDate(birthDate);
+        }
     }
 
     public LocalDate getDeathDate() {
@@ -138,6 +186,12 @@ public class Monarch {
 
     public void setDeathDate(LocalDate deathDate) {
         this.item.setVariable("death_date", deathDate);
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setDeathDate(deathDate);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setDeathDate(deathDate);
+        }
     }
 
     public Boolean getSucceeded() {
@@ -150,6 +204,12 @@ public class Monarch {
 
     public void setMonarchName(String monarchName) {
         this.item.setVariable("monarch_name", ClausewitzUtils.addQuotes(monarchName));
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).setMonarchName(monarchName);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).setMonarchName(monarchName);
+        }
     }
 
     public Personalities getPersonalities() {
@@ -163,11 +223,23 @@ public class Monarch {
         }
 
         this.personalities.addPersonality(personality);
+
+        if (this.item.getName().endsWith("_heir")) {
+            this.getCountry().getHistory().getHeir(this.getId().getId()).addPersonality(personality);
+        } else if (this.item.getName().endsWith("_consort")) {
+            this.getCountry().getHistory().getQueen(this.getId().getId()).addPersonality(personality);
+        }
     }
 
     public void removePersonality(int index) {
         if (this.personalities != null) {
             this.personalities.removePersonality(index);
+
+            if (this.item.getName().endsWith("_heir")) {
+                this.getCountry().getHistory().getHeir(this.getId().getId()).removePersonality(index);
+            } else if (this.item.getName().endsWith("_consort")) {
+                this.getCountry().getHistory().getQueen(this.getId().getId()).removePersonality(index);
+            }
 
             if (this.personalities.item.getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
@@ -179,6 +251,12 @@ public class Monarch {
     public void removePersonality(RulerPersonality personality) {
         if (this.personalities != null) {
             this.personalities.removePersonality(personality);
+
+            if (this.item.getName().endsWith("_heir")) {
+                this.getCountry().getHistory().getHeir(this.getId().getId()).removePersonality(personality);
+            } else if (this.item.getName().endsWith("_consort")) {
+                this.getCountry().getHistory().getQueen(this.getId().getId()).removePersonality(personality);
+            }
 
             if (this.personalities.item.getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
@@ -239,7 +317,7 @@ public class Monarch {
         ClausewitzItem personalitiesItem = this.item.getChild("personalities");
 
         if (personalitiesItem != null) {
-            this.personalities = new Personalities(personalitiesItem, this.save, this);
+            this.personalities = new Personalities(personalitiesItem, this.save);
         }
 
         ClausewitzItem hasDeclaredWarItem = this.item.getChild("has_declared_war");

@@ -14,12 +14,9 @@ public class Personalities {
 
     final ClausewitzItem item;
 
-    private final Monarch monarch;
-
-    public Personalities(ClausewitzItem item, Save save, Monarch monarch) {
+    public Personalities(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        this.monarch = monarch;
     }
 
     public List<RulerPersonality> getPersonalities() {
@@ -32,12 +29,6 @@ public class Personalities {
 
     void addPersonality(RulerPersonality personality) {
         this.item.addVariable(personality.getName(), true);
-
-        if (this.monarch.item.getName().endsWith("_heir")) {
-            this.monarch.getCountry().getHistory().getHeir(this.monarch.getId().getId()).addPersonality(personality);
-        } else if (this.monarch.item.getName().endsWith("_consort")) {
-            this.monarch.getCountry().getHistory().getQueen(this.monarch.getId().getId()).addPersonality(personality);
-        }
     }
 
     void changePersonality(int index, String name) {
@@ -46,21 +37,9 @@ public class Personalities {
 
     void removePersonality(int index) {
         this.item.removeVariable(index);
-
-        if (this.monarch.item.getName().endsWith("_heir")) {
-            this.monarch.getCountry().getHistory().getHeir(this.monarch.getId().getId()).removePersonality(index);
-        } else if (this.monarch.item.getName().endsWith("_consort")) {
-            this.monarch.getCountry().getHistory().getQueen(this.monarch.getId().getId()).removePersonality(index);
-        }
     }
 
     void removePersonality(RulerPersonality personality) {
         this.item.removeVariable(personality.getName());
-
-        if (this.monarch.item.getName().endsWith("_heir")) {
-            this.monarch.getCountry().getHistory().getHeir(this.monarch.getId().getId()).removePersonality(personality);
-        } else if (this.monarch.item.getName().endsWith("_consort")) {
-            this.monarch.getCountry().getHistory().getQueen(this.monarch.getId().getId()).removePersonality(personality);
-        }
     }
 }
