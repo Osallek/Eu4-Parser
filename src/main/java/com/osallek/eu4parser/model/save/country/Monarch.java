@@ -341,7 +341,7 @@ public class Monarch {
         ClausewitzItem leaderChild = this.item.getChild("leader");
 
         if (leaderChild != null) {
-            this.leader = new Leader(leaderChild);
+            this.leader = new Leader(leaderChild, this.country);
         }
     }
 }

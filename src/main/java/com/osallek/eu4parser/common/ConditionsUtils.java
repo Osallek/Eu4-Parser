@@ -1233,7 +1233,7 @@ public class ConditionsUtils {
                     return country.getLeadersOfType(LeaderType.ADMIRAL).size() >= other.getLeadersOfType(LeaderType.ADMIRAL).size();
                 }
             case "num_of_admirals_with_traits":
-                return country.getLeadersOfType(LeaderType.ADMIRAL).stream().filter(leader -> StringUtils.isNotBlank(leader.getPersonality())).count()
+                return country.getLeadersOfType(LeaderType.ADMIRAL).stream().filter(leader -> leader.getPersonality() != null).count()
                        >= NumbersUtils.toInt(value);
             case "num_of_age_objectives":
                 return NumbersUtils.intOrDefault(country.getNumOfAgeObjectives()) >= NumbersUtils.toInt(value);
@@ -1375,7 +1375,7 @@ public class ConditionsUtils {
                     return country.getLeadersOfType(LeaderType.GENERAL).size() >= other.getLeadersOfType(LeaderType.GENERAL).size();
                 }
             case "num_of_generals_with_traits":
-                return country.getLeadersOfType(LeaderType.GENERAL).stream().filter(leader -> StringUtils.isNotBlank(leader.getPersonality())).count()
+                return country.getLeadersOfType(LeaderType.GENERAL).stream().filter(leader -> leader.getPersonality() != null).count()
                        >= NumbersUtils.toInt(value);
             case "num_of_harmonized":
                 return country.getHarmonizedReligionGroups().size() >= NumbersUtils.toInt(value);

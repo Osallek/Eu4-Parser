@@ -24,6 +24,7 @@ import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.game.Institution;
 import com.osallek.eu4parser.model.game.Investment;
 import com.osallek.eu4parser.model.game.Isolationism;
+import com.osallek.eu4parser.model.game.LeaderPersonality;
 import com.osallek.eu4parser.model.game.Mission;
 import com.osallek.eu4parser.model.game.Modifiers;
 import com.osallek.eu4parser.model.game.NativeAdvancement;
@@ -3275,10 +3276,10 @@ public class Country {
         return this.leaders.values().stream().filter(leader -> leaderType.equals(leader.getType())).collect(Collectors.toList());
     }
 
-    public void addLeader(LocalDate date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality) {
+    public void addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege, LeaderPersonality personality) {
         int leaderId = this.save.getIdCounters().getAndIncrement(Counter.LEADER);
-        Id.addToItem(this.item, "leader", leaderId, 49);
-        this.history.addLeader(date, name, type, manuever, fire, shock, siege, personality, leaderId);
+        Id.addToItem(this.item, "leader", leaderId, 49, this.item.getChild("active_relations").getOrder() + 1);
+        this.history.addLeader(date, birthDate, name, type, manuever, fire, shock, siege, personality, leaderId);
         refreshAttributes();
     }
 
@@ -3289,12 +3290,13 @@ public class Country {
             this.armies.values()
                        .stream()
                        .filter(army -> army.getLeader().getId().equals(id))
-                       .findFirst().ifPresent(AbstractArmy::removeLeader);
+                       .findFirst()
+                       .ifPresent(AbstractArmy::removeLeader);
 
             List<Id> leadersIds = this.item.getChildren("leader").stream().map(Id::new).collect(Collectors.toList());
 
             for (int i = 0; i < leadersIds.size(); i++) {
-                if (leadersIds.get(i).getId().equals(id)) {
+                if (leadersIds.get(i).equals(leader.getId())) {
                     this.item.removeChild("leader", i);
                     break;
                 }

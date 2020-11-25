@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.NumbersUtils;
+import com.osallek.eu4parser.model.game.LeaderPersonality;
 import com.osallek.eu4parser.model.save.Id;
 
 import java.math.BigDecimal;
@@ -13,13 +14,20 @@ public class Leader {
 
     private final ClausewitzItem item;
 
+    private final Country country;
+
     private Id id;
 
     private Id monarchId;
 
-    public Leader(ClausewitzItem item) {
+    public Leader(ClausewitzItem item, Country country) {
         this.item = item;
+        this.country = country;
         refreshAttributes();
+    }
+
+    public Country getCountry() {
+        return country;
     }
 
     public Id getId() {
@@ -88,12 +96,12 @@ public class Leader {
         this.item.setVariable("siege", siege);
     }
 
-    public String getPersonality() {
-        return this.item.getVarAsString("personality");
+    public LeaderPersonality getPersonality() {
+        return this.country.getSave().getGame().getLeaderPersonality(this.item.getVarAsString("personality"));
     }
 
-    public void setPersonality(String personality) {
-        this.item.setVariable("personality", personality);
+    public void setPersonality(LeaderPersonality personality) {
+        this.item.setVariable("personality", personality.getName());
     }
 
     public LocalDate getActivation() {
@@ -152,22 +160,27 @@ public class Leader {
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, Leader leader) {
-        return addToItem(parent, leader.getName(), leader.getType(), leader.getManuever(), leader.getFire(),
-                         leader.getShock(), leader.getSiege(), leader.getPersonality(), leader.getActivation(),
-                         leader.getId().getId());
+        return addToItem(parent, leader.getName(), leader.getType(), leader.getManuever(), leader.getFire(), leader.getShock(), leader.getSiege(),
+                         leader.getPersonality(), leader.getActivation(), leader.getBirthDate(), leader.getId().getId(), leader.getCountry());
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege,
-                                           String personality, LocalDate activation, int id) {
+                                           LeaderPersonality personality, LocalDate activation, LocalDate birthDate, int id, Country country) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "leader", parent.getOrder() + 1);
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
-        toItem.addVariable("type", type.name());
+        toItem.addVariable("type", type.name().toLowerCase());
         toItem.addVariable("manuever", manuever);
         toItem.addVariable("fire", fire);
         toItem.addVariable("shock", shock);
         toItem.addVariable("siege", siege);
-        toItem.addVariable("personality", personality);
+        toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
+
+        if (personality != null) {
+            toItem.addVariable("personality", personality.getName().toLowerCase());
+        }
+
         toItem.addVariable("activation", activation);
+        toItem.addVariable("birth_date", birthDate);
         Id.addToItem(toItem, id, 49);
 
         parent.addChild(toItem);

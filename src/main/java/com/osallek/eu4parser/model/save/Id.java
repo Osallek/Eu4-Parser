@@ -36,11 +36,15 @@ public class Id {
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, int id, int type) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, name, parent.getOrder() + 1);
+        return addToItem(parent, name, id, type, parent.getOrder() + 1);
+    }
+
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, int id, int type, int order) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, name, order);
         toItem.addVariable("id", id);
         toItem.addVariable("type", type);
 
-        parent.addChild(toItem);
+        parent.addChild(toItem, true);
 
         return toItem;
     }

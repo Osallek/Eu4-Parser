@@ -143,7 +143,7 @@ public class RebelFaction {
         ClausewitzItem generalItem = this.item.getChild("general");
 
         if (generalItem != null) {
-            this.general = new Leader(generalItem);
+            this.general = new Leader(generalItem, null);
         }
     }
 }

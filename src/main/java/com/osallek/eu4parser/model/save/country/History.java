@@ -3,6 +3,7 @@ package com.osallek.eu4parser.model.save.country;
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.eu4parser.common.Eu4Utils;
+import com.osallek.eu4parser.model.game.LeaderPersonality;
 import com.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
@@ -89,10 +90,20 @@ public class History {
         variables.forEach(child::addVariable);
     }
 
-    public void addLeader(LocalDate date, String name, LeaderType type, int manuever, int fire, int shock, int siege, String personality, int id) {
+    public void addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege,
+                          LeaderPersonality personality, int id) {
         ClausewitzItem child = this.item.addChild(ClausewitzUtils.dateToString(date));
-        Leader.addToItem(child, name, type, manuever, fire, shock, siege, personality, date, id);
+        Leader.addToItem(child, name, type, manuever, fire, shock, siege, personality, date, birthDate, id, this.country);
         refreshAttributes();
+    }
+
+    public void removeLeader(Leader leader) {
+        this.item.getChildren()
+                 .stream()
+                 .filter(child -> child.hasChild("leader"))
+                .filter(child -> new Leader(child.getChild("leader"), this.country).getId().equals(leader.getId()))
+                .findFirst()
+                .ifPresent(this.item::removeChild);
     }
 
     private void refreshAttributes() {
@@ -124,7 +135,7 @@ public class History {
                                 .map(child -> child.getChildren("leader"))
                                 .flatMap(Collection::stream)
                                 .filter(Objects::nonNull)
-                                .map(Leader::new)
+                                .map(item1 -> new Leader(item1, this.country))
                                 .collect(Collectors.toMap(leader -> leader.getId().getId(), Function.identity(), (leader, leader2) -> leader2));
 
         this.heirs = this.item.getChildren()

@@ -157,6 +157,8 @@ public class Game {
 
     private Map<String, RulerPersonality> rulerPersonalities;
 
+    private Map<String, LeaderPersonality> leaderPersonalities;
+
     private Map<String, Investment> investments;
 
     private Map<String, Policy> policies;
@@ -253,6 +255,7 @@ public class Game {
         readMissionTrees();
         readTechnologies();
         readRulerPersonalities();
+        readLeaderPersonalities();
         readProfessionalismModifiers();
         readStaticModifiers();
         readInvestments();
@@ -914,6 +917,14 @@ public class Game {
 
     public RulerPersonality getRulerPersonality(String name) {
         return this.rulerPersonalities.get(name);
+    }
+
+    public List<LeaderPersonality> getLeaderPersonalities() {
+        return new ArrayList<>(this.leaderPersonalities.values());
+    }
+
+    public LeaderPersonality getLeaderPersonality(String name) {
+        return this.leaderPersonalities.get(name);
     }
 
     public List<Investment> getInvestments() {
@@ -1928,6 +1939,22 @@ public class Game {
                 });
 
         this.rulerPersonalities.values().forEach(rulerPersonality -> rulerPersonality.setLocalizedName(this.getLocalisation(rulerPersonality.getName())));
+    }
+
+    private void readLeaderPersonalities() {
+        this.leaderPersonalities = new HashMap<>();
+
+        getPaths(this.commonFolderPath + File.separator + "leader_personalities",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem leaderPersonalityItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    this.leaderPersonalities.putAll(leaderPersonalityItem.getChildren()
+                                                                       .stream()
+                                                                       .map(LeaderPersonality::new)
+                                                                       .collect(Collectors.toMap(LeaderPersonality::getName, Function.identity(), (a, b) -> b)));
+                });
+
+        this.leaderPersonalities.values().forEach(leaderPersonality -> leaderPersonality.setLocalizedName(this.getLocalisation(leaderPersonality.getName())));
     }
 
     private void readProfessionalismModifiers() {

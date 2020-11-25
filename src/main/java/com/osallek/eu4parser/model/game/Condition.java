@@ -4,6 +4,8 @@ import com.osallek.clausewitzparser.model.ClausewitzItem;
 import com.osallek.clausewitzparser.model.ClausewitzVariable;
 import com.osallek.eu4parser.common.ConditionsUtils;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4parser.model.save.country.Leader;
+import com.osallek.eu4parser.model.save.country.LeaderType;
 import com.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -91,6 +93,17 @@ public class Condition {
         }
 
         return true;
+    }
+
+    public boolean apply(Leader leader) {
+        if (this.conditions != null && getCondition("is_admiral") != null) {
+            if ("yes".equalsIgnoreCase(getCondition("is_admiral")) && !LeaderType.ADMIRAL.equals(leader.getType())
+                || "no".equalsIgnoreCase(getCondition("is_admiral")) && LeaderType.ADMIRAL.equals(leader.getType())) {
+                return false;
+            }
+        }
+
+        return leader.getCountry() == null || apply(leader.getCountry(), leader.getCountry());
     }
 
     public void removeCondition(String condition, String value) {
