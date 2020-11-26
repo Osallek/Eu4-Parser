@@ -33,12 +33,12 @@ public class Rival {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, LocalDate date) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "rival", parent.getOrder() + 1);
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, LocalDate date, int order) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, "rival", order);
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addVariable("date", date);
 
-        parent.addChild(toItem);
+        parent.addChild(toItem, true);
 
         return toItem;
     }

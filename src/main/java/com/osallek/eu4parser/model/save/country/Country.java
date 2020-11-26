@@ -994,7 +994,8 @@ public class Country {
 
     public void addRival(Country country, LocalDate date) {
         if (!this.rivals.containsKey(ClausewitzUtils.addQuotes(country.getTag()))) {
-            Rival.addToItem(this.item, country, date);
+            int order = this.item.getVar("highest_possible_fort").getOrder();
+            Rival.addToItem(this.item, country, date, order);
             refreshAttributes();
         }
     }
@@ -1005,20 +1006,9 @@ public class Country {
     }
 
     public void removeRival(Country rival) {
-        Integer index = null;
-        List<Rival> rivalList = new ArrayList<>(this.rivals.values());
-
-        for (int i = 0; i < rivalList.size(); i++) {
-            if (rivalList.get(i).getRival().equals(rival)) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index != null) {
-            this.item.removeVariable("rival", index);
-            refreshAttributes();
-        }
+        this.item.removeChildIf(child -> "rival".equalsIgnoreCase(child.getName())
+                                         && ClausewitzUtils.addQuotes(rival.getTag()).equalsIgnoreCase(child.getVarAsString("country")));
+        refreshAttributes();
     }
 
     public Double getStatistsVsMonarchists() {

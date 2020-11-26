@@ -722,6 +722,10 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("AGE_OF_ADULTHOOD").value.toint();
     }
 
+    public int getNumPossibleRivals() {
+        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("NUM_POSSIBLE_RIVALS").value.toint();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.values()
                                .stream()
