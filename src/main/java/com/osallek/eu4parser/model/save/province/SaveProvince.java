@@ -11,6 +11,7 @@ import com.osallek.eu4parser.model.UnitType;
 import com.osallek.eu4parser.model.game.Building;
 import com.osallek.eu4parser.model.game.CenterOfTrade;
 import com.osallek.eu4parser.model.game.Culture;
+import com.osallek.eu4parser.model.game.GameModifier;
 import com.osallek.eu4parser.model.game.GreatProject;
 import com.osallek.eu4parser.model.game.ImperialReform;
 import com.osallek.eu4parser.model.game.Institution;
@@ -1054,12 +1055,17 @@ public class SaveProvince extends Province {
         refreshAttributes();
     }
 
+    public void removeModifier(GameModifier modifier) {
+        removeModifier(modifier.getName());
+    }
+
     public void removeModifier(String modifier) {
         Integer index = null;
         modifier = ClausewitzUtils.addQuotes(modifier);
+        List<SaveModifier> saveModifiers = new ArrayList<>(this.modifiers.values());
 
-        for (int i = 0; i < this.modifiers.size(); i++) {
-            if (this.modifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
+        for (int i = 0; i < saveModifiers.size(); i++) {
+            if (saveModifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
                 index = i;
                 break;
             }

@@ -17,6 +17,7 @@ import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.CrownLandBonus;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.Fervor;
+import com.osallek.eu4parser.model.game.GameModifier;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.GovernmentRank;
 import com.osallek.eu4parser.model.game.GovernmentReform;
@@ -3075,6 +3076,10 @@ public class Country {
     public void removeModifier(int index) {
         this.item.removeChild("modifier", index);
         refreshAttributes();
+    }
+
+    public void removeModifier(GameModifier modifier) {
+        removeModifier(modifier.getName());
     }
 
     public void removeModifier(String modifier) {
