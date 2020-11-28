@@ -38,12 +38,12 @@ public class ActivePolicy {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Policy policy, LocalDate date) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, "active_policy", parent.getOrder() + 1);
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Policy policy, LocalDate date, int order) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, "active_policy", order);
         toItem.addVariable("policy", ClausewitzUtils.addQuotes(policy.getName()));
         toItem.addVariable("date", date);
 
-        parent.addChild(toItem);
+        parent.addChild(toItem, true);
 
         return toItem;
     }

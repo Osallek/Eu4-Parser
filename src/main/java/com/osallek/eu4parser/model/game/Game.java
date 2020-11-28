@@ -730,6 +730,14 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_RELIGION_KEY).get("MAX_CHRISTIAN_RELIGIOUS_CENTERS").value.toint();
     }
 
+    public int getMaxActivePolicies() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_ACTIVE_POLICIES").value.toint();
+    }
+
+    public int getBasePossiblePolicies() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("BASE_POSSIBLE_POLICIES").value.toint();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.values()
                                .stream()

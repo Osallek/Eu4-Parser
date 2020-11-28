@@ -1386,7 +1386,7 @@ public class Country {
 
     public void addActivePolicy(Policy policy, LocalDate date) {
         if (getActivePolicies().stream().noneMatch(activePolicy -> activePolicy.getPolicy().equals(policy))) {
-            ActivePolicy.addToItem(this.item, policy, date);
+            ActivePolicy.addToItem(this.item, policy, date, this.item.getVar("last_election").getOrder() + 1);
             refreshAttributes();
         }
     }
@@ -1398,16 +1398,17 @@ public class Country {
 
     public void removeActivePolicy(Policy policy) {
         Integer index = null;
+        List<ActivePolicy> activePolicies = getActivePolicies();
 
-        for (int i = 0; i < getActivePolicies().size(); i++) {
-            if (getActivePolicies().get(i).getPolicy().equals(policy)) {
+        for (int i = 0; i < activePolicies.size(); i++) {
+            if (activePolicies.get(i).getPolicy().equals(policy)) {
                 index = i;
                 break;
             }
         }
 
         if (index != null) {
-            this.item.removeVariable("active_policy", index);
+            this.item.removeChild("active_policy", index);
             refreshAttributes();
         }
     }
