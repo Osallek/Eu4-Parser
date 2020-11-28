@@ -2,21 +2,28 @@ package com.osallek.eu4parser.model.save.religion;
 
 import com.osallek.clausewitzparser.common.ClausewitzUtils;
 import com.osallek.clausewitzparser.model.ClausewitzItem;
+import com.osallek.eu4parser.model.game.Game;
+import com.osallek.eu4parser.model.save.Save;
+import com.osallek.eu4parser.model.save.SaveReligion;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 
 public class ReformationCenter {
 
+    private final Save save;
+
     private final ClausewitzItem item;
 
-    public ReformationCenter(ClausewitzItem item) {
+    public ReformationCenter(Save save, ClausewitzItem item) {
+        this.save = save;
         this.item = item;
     }
 
-    public Integer getProvinceId() {
-        return this.item.getVarAsInt("province_id");
+    public SaveProvince getProvince() {
+        return this.save.getProvince(this.item.getVarAsInt("province_id"));
     }
 
-    public void setProvinceId(Integer provinceId) {
-        this.item.setVariable("province_id", provinceId);
+    public void setProvinceId(SaveProvince province) {
+        this.item.setVariable("province_id", province.getId());
     }
 
     public Integer getCurrentlyConverting() {
@@ -35,8 +42,8 @@ public class ReformationCenter {
         this.item.setVariable("missionary_progress", conversionProgress);
     }
 
-    public String getReligion() {
-        return this.item.getVarAsString("protestant");
+    public SaveReligion getReligion() {
+        return this.save.getReligions().getReligion(this.item.getVarAsString("religion"));
     }
 
     public Double getMaxSpeed() {
@@ -47,11 +54,11 @@ public class ReformationCenter {
         return this.item.getVarAsString("type");
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Integer provinceId, String religion, String type) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, Integer provinceId, SaveReligion religion) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "reformation_center", parent.getOrder() + 1);
         toItem.addVariable("province_id", provinceId);
-        toItem.addVariable("religion", religion);
-        toItem.addVariable("type", ClausewitzUtils.hasQuotes(type) ? type : ClausewitzUtils.addQuotes(type));
+        toItem.addVariable("religion", religion.getName());
+        toItem.addVariable("type", ClausewitzUtils.addQuotes(religion.getName() + "_center_of_reformation"));
 
         parent.addChild(toItem);
 

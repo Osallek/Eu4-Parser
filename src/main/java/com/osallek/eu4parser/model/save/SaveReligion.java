@@ -7,6 +7,7 @@ import com.osallek.eu4parser.model.game.DefenderOfFaith;
 import com.osallek.eu4parser.model.game.Religion;
 import com.osallek.eu4parser.model.game.ReligionGroup;
 import com.osallek.eu4parser.model.save.country.Country;
+import com.osallek.eu4parser.model.save.province.SaveProvince;
 import com.osallek.eu4parser.model.save.religion.MuslimRelation;
 import com.osallek.eu4parser.model.save.religion.MuslimRelationSchool;
 import com.osallek.eu4parser.model.save.religion.MuslimRelationValue;
@@ -218,18 +219,30 @@ public class SaveReligion {
         return this.reformationCenters;
     }
 
-    public void addReformationCenter(Integer provinceId) {
+    public void addReformationCenter(SaveProvince saveProvince) {
         if (this.religionInstanceDataItem != null) {
-            ReformationCenter.addToItem(this.religionInstanceDataItem, provinceId, this.getName(),
-                                        this.getName() + "_center_of_reformation");
+            ReformationCenter.addToItem(this.religionInstanceDataItem, saveProvince.getId(), this);
+            saveProvince.setCenterOfReligion(true);
             refreshAttributes();
         }
     }
 
-    public void removeReformationCenter(Integer index) {
+    public void removeReformationCenter(ReformationCenter reformationCenter) {
         if (this.religionInstanceDataItem != null) {
-            this.religionInstanceDataItem.removeChild("reformation_center", index);
-            refreshAttributes();
+            Integer index = null;
+
+            for (int i = 0; i < this.reformationCenters.size(); i++) {
+                if (this.reformationCenters.get(i).getProvince().equals(reformationCenter.getProvince())) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index != null) {
+                this.religionInstanceDataItem.removeChild("reformation_center", index);
+                reformationCenter.getProvince().setCenterOfReligion(false);
+                refreshAttributes();
+            }
         }
     }
 
@@ -246,7 +259,7 @@ public class SaveReligion {
 
             List<ClausewitzItem> reformationCentersItems = this.religionInstanceDataItem.getChildren("reformation_center");
             this.reformationCenters = reformationCentersItems.stream()
-                                                             .map(ReformationCenter::new)
+                                                             .map(item -> new ReformationCenter(this.save, item))
                                                              .collect(Collectors.toList());
         }
     }

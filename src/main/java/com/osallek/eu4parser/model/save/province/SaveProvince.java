@@ -460,8 +460,8 @@ public class SaveProvince extends Province {
         this.item.setVariable("active_trade_company", activeTradeCompany);
     }
 
-    public Boolean centerOfReligion() {
-        return this.item.getVarAsBool("center_of_religion");
+    public boolean centerOfReligion() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("center_of_religion"));
     }
 
     public void setCenterOfReligion(boolean centerOfReligion) {

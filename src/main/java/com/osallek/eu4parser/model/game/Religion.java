@@ -59,6 +59,8 @@ public class Religion {
 
     private final boolean doom;
 
+    private final List<String> allowedCenterConversion;
+
     private final List<String> aspects;
 
     private final List<String> blessings;
@@ -74,6 +76,8 @@ public class Religion {
     private final Modifiers country;
 
     private final Modifiers countryAsSecondary;
+
+    private final Condition willGetCenter;
 
     public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
         this.religionGroup = religionGroup;
@@ -99,6 +103,8 @@ public class Religion {
         this.usesHarmony = BooleanUtils.toBoolean(item.getVarAsBool("uses_harmony"));
         this.canHaveSecondaryReligion = BooleanUtils.toBoolean(item.getVarAsBool("can_have_secondary_religion"));
         this.doom = BooleanUtils.toBoolean(item.getVarAsBool("doom"));
+        list = item.getList("allowed_center_conversion");
+        this.allowedCenterConversion = list == null ? null : list.getValues();
         list = item.getList("aspects");
         this.aspects = list == null ? null : list.getValues();
         list = item.getList("heretic");
@@ -114,6 +120,8 @@ public class Religion {
         this.icons = child == null ? null : child.getChildren().stream().map(Icon::new).collect(Collectors.toList());
         this.country = new Modifiers(item.getChild("country"));
         this.countryAsSecondary = new Modifiers(item.getChild("country_as_secondary"));
+        child = item.getChild("will_get_center");
+        this.willGetCenter = child == null ? null : new Condition(child);
     }
 
     public String getLocalizedName() {
@@ -212,6 +220,10 @@ public class Religion {
         return doom;
     }
 
+    public List<String> getAllowedCenterConversion() {
+        return allowedCenterConversion;
+    }
+
     public List<String> getAspects() {
         return aspects;
     }
@@ -250,5 +262,9 @@ public class Religion {
 
     public Modifiers getCountryAsSecondary() {
         return countryAsSecondary;
+    }
+
+    public Condition getWillGetCenter() {
+        return willGetCenter;
     }
 }

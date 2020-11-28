@@ -726,6 +726,10 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("NUM_POSSIBLE_RIVALS").value.toint();
     }
 
+    public int getMaxChristianReligiousCenters() {
+        return this.defines.get(Eu4Utils.DEFINE_RELIGION_KEY).get("MAX_CHRISTIAN_RELIGIOUS_CENTERS").value.toint();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.values()
                                .stream()
