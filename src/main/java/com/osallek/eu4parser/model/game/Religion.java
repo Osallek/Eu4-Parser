@@ -79,6 +79,8 @@ public class Religion {
 
     private final Condition willGetCenter;
 
+    private final String harmonizedModifier;
+
     public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
         this.religionGroup = religionGroup;
         this.name = item.getName();
@@ -122,6 +124,7 @@ public class Religion {
         this.countryAsSecondary = new Modifiers(item.getChild("country_as_secondary"));
         child = item.getChild("will_get_center");
         this.willGetCenter = child == null ? null : new Condition(child);
+        this.harmonizedModifier = item.getVarAsString("harmonized_modifier");
     }
 
     public String getLocalizedName() {
@@ -266,5 +269,9 @@ public class Religion {
 
     public Condition getWillGetCenter() {
         return willGetCenter;
+    }
+
+    public String getHarmonizedModifier() {
+        return harmonizedModifier;
     }
 }

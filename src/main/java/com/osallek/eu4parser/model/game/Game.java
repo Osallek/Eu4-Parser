@@ -496,6 +496,13 @@ public class Game {
                                   .collect(Collectors.toList());
     }
 
+    public List<Religion> getReligionsNotOrdered() {
+        return getReligionGroups().stream()
+                                  .map(ReligionGroup::getReligions)
+                                  .flatMap(Collection::stream)
+                                  .collect(Collectors.toList());
+    }
+
     public Religion getReligion(String name) {
         if (name == null) {
             return null;
@@ -1432,7 +1439,7 @@ public class Game {
     }
 
     private void readReligion() {
-        this.religionGroups = new HashMap<>();
+        this.religionGroups = new LinkedHashMap<>();
         getPaths(this.commonFolderPath + File.separator + "religions",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
@@ -1440,7 +1447,7 @@ public class Game {
                     this.religionGroups.putAll(religionGroupsItem.getChildren()
                                                                  .stream()
                                                                  .map(ReligionGroup::new)
-                                                                 .collect(Collectors.toMap(ReligionGroup::getName, Function.identity(), (a, b) -> b)));
+                                                                 .collect(Collectors.toMap(ReligionGroup::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
                 });
 
         this.religionGroups.values().forEach(religionGroup -> {

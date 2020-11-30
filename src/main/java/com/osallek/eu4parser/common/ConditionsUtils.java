@@ -408,7 +408,7 @@ public class ConditionsUtils {
             case "has_active_policy":
                 return country.getActivePolicies().stream().map(ActivePolicy::getPolicy).map(Policy::getName).anyMatch(value::equals);
             case "has_adopted_cult":
-                return country.getFetishistCults().contains(ClausewitzUtils.addQuotes(value));
+                return country.getFetishistCult() != null && country.getFetishistCult().getName().equalsIgnoreCase(value);
             case "has_advisor":
                 return !country.getAdvisors().isEmpty();
             case "has_age_ability":
@@ -512,10 +512,8 @@ public class ConditionsUtils {
             case "has_government_mechanic":
                 return country.getGovernment().hasMechanic(value);
             case "has_harmonized_with":
-                return country.getHarmonizedReligionGroups()
-                              .stream()
-                              .map(index -> country.getSave().getGame().getReligions().get(index))
-                              .anyMatch(rel -> value.equalsIgnoreCase(rel.getName()));
+                return country.getHarmonizedReligionGroups().stream().anyMatch(rel -> value.equalsIgnoreCase(rel.getName()))
+                        || country.getHarmonizedReligions().stream().anyMatch(rel -> value.equalsIgnoreCase(rel.getName()));
             case "has_horde_unity":
                 return "yes".equalsIgnoreCase(value) == (country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isTribal().getKey()
                                                                                                                           && (reform.isTribal().getValue()
@@ -850,7 +848,7 @@ public class ConditionsUtils {
             case "is_great_power":
                 return "yes".equalsIgnoreCase(value) == country.isGreatPower();
             case "is_harmonizing_with":
-                return value.equalsIgnoreCase(ClausewitzUtils.removeQuotes(country.getHarmonyWithReligion()));
+                return country.getHarmonizingWithReligion() != null && value.equalsIgnoreCase(country.getHarmonizingWithReligion().getName());
             case "is_heir_leader":
                 return "yes".equalsIgnoreCase(value) == (country.getHeir() != null && country.getHeir().getLeader() != null);
             case "is_hegemon":
@@ -1546,7 +1544,7 @@ public class ConditionsUtils {
             case "personal_union":
                 return country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION) >= NumbersUtils.toInt(value);
             case "num_of_unlocked_cults":
-                return country.getFetishistCults().size() >= NumbersUtils.toInt(value);
+                return country.getUnlockedFetishistCults().size() >= NumbersUtils.toInt(value);
             case "num_of_vassals":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_VASSAL) >= integer;

@@ -17,6 +17,7 @@ import com.osallek.eu4parser.model.game.Continent;
 import com.osallek.eu4parser.model.game.CrownLandBonus;
 import com.osallek.eu4parser.model.game.Culture;
 import com.osallek.eu4parser.model.game.Fervor;
+import com.osallek.eu4parser.model.game.FetishistCult;
 import com.osallek.eu4parser.model.game.GameModifier;
 import com.osallek.eu4parser.model.game.GovernmentName;
 import com.osallek.eu4parser.model.game.GovernmentRank;
@@ -34,6 +35,7 @@ import com.osallek.eu4parser.model.game.PersonalDeity;
 import com.osallek.eu4parser.model.game.Policy;
 import com.osallek.eu4parser.model.game.ProfessionalismModifier;
 import com.osallek.eu4parser.model.game.Religion;
+import com.osallek.eu4parser.model.game.ReligionGroup;
 import com.osallek.eu4parser.model.game.ReligiousReform;
 import com.osallek.eu4parser.model.game.RulerPersonality;
 import com.osallek.eu4parser.model.game.StaticModifier;
@@ -694,12 +696,22 @@ public class Country {
         return this.save.getGame().getIsolationism(this.item.getVarAsInt("isolationism"));
     }
 
+    public void setIsolationism(Isolationism isolationism) {
+        this.item.setVariable("isolationism", isolationism.getIsolationValue());
+    }
+
     public Integer getIsolationismLevel() {
         return getIsolationism() == null ? null : getIsolationism().getIsolationValue();
     }
 
-    public void setIsolationism(Isolationism isolationism) {
-        this.item.setVariable("isolationism", isolationism.getIsolationValue());
+    public void setIsolationismLevel(int level) {
+        if (level < 0) {
+            level = 0;
+        } else if (level > 4) {
+            level = 4;
+        }
+
+        this.item.setVariable("isolationism", level);
     }
 
     public Integer getNumExpandedAdministration() {
@@ -734,16 +746,21 @@ public class Country {
         this.item.setVariable("harmony", harmony);
     }
 
-    public String getHarmonyWithReligion() {
-        return this.item.getVarAsString("harmonizing_with_religion");
+    public SaveReligion getHarmonizingWithReligion() {
+        return this.save.getReligions().getReligion(this.item.getVarAsString("harmonizing_with_religion"));
     }
 
-    public void setHarmonizingWithReligion(String harmonizingWithReligion) {
-        this.item.setVariable("harmonizing_with_religion", harmonizingWithReligion);
+    public void setHarmonizingWithReligion(SaveReligion harmonizingWithReligion) {
+        if (harmonizingWithReligion == null) {
+            this.item.removeVariable("harmonizing_with_religion");
+        } else {
+            this.item.setVariable("harmonizing_with_religion", harmonizingWithReligion.getName());
 
-        if (getHarmonyProgress() == null) {
-            setHarmonyProgress(0d);
+            if (getHarmonyProgress() == null) {
+                setHarmonyProgress(0d);
+            }
         }
+
     }
 
     public Double getHarmonyProgress() {
@@ -751,36 +768,112 @@ public class Country {
     }
 
     public void setHarmonyProgress(Double harmonizationProgress) {
-        if (getHarmonyWithReligion() != null) {
+        if (getHarmonizingWithReligion() != null) {
             this.item.setVariable("harmonization_progress", harmonizationProgress);
         }
     }
 
-    public List<Integer> getHarmonizedReligionGroups() {
+    public List<ReligionGroup> getHarmonizedReligionGroups() {
         ClausewitzList list = this.item.getList("harmonized_religion_groups");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt();
+        List<ReligionGroup> religionGroups = new ArrayList<>(this.save.getGame().getReligionGroups());
+        return list.getValuesAsInt().stream().map(integer -> integer - 1).map(religionGroups::get).collect(Collectors.toList());
     }
 
-    public void addHarmonizedReligionGroup(Integer religionGroup) {
+    public void addHarmonizedReligionGroup(ReligionGroup religionGroup) {
         ClausewitzList list = this.item.getList("harmonized_religion_groups");
+        Integer index = null;
+        List<ReligionGroup> religionGroups = new ArrayList<>(this.save.getGame().getReligionGroups());
 
-        if (list == null) {
-            this.item.addList("harmonized_religion_groups", religionGroup);
-        } else {
-            list.add(religionGroup);
+        for (int i = 0; i < religionGroups.size(); i++) {
+            if (religionGroups.get(i).equals(religionGroup)) {
+                index = i + 1;
+                break;
+            }
+        }
+
+        if (index != null) {
+            if (list == null) {
+                this.item.addList("harmonized_religion_groups", index);
+            } else {
+                list.add(index);
+            }
         }
     }
 
-    public void removeHarmonizedReligionGroup(Integer religionGroup) {
+    public void removeHarmonizedReligionGroup(ReligionGroup religionGroup) {
         ClausewitzList list = this.item.getList("harmonized_religion_groups");
 
         if (list != null) {
-            list.remove(religionGroup);
+            Integer index = null;
+            List<ReligionGroup> religionGroups = new ArrayList<>(this.save.getGame().getReligionGroups());
+
+            for (int i = 0; i < religionGroups.size(); i++) {
+                if (religionGroups.get(i).equals(religionGroup)) {
+                    index = i + 1;
+                    break;
+                }
+            }
+
+            if (index != null) {
+                list.remove(index.toString());
+            }
+        }
+    }
+
+    public List<SaveReligion> getHarmonizedReligions() {
+        ClausewitzList list = this.item.getList("harmonized_religions");
+
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        List<SaveReligion> religions = new ArrayList<>(this.save.getReligions().getReligions().values());
+        return list.getValuesAsInt().stream().map(integer -> integer - 1).map(religions::get).collect(Collectors.toList());
+    }
+
+    public void addHarmonizedReligion(Religion religion) {
+        ClausewitzList list = this.item.getList("harmonized_religions");
+        Integer index = null;
+        List<Religion> religions = this.save.getGame().getReligionsNotOrdered();
+
+        for (int i = 0; i < religions.size(); i++) {
+            if (religions.get(i).equals(religion)) {
+                index = i + 1;
+                break;
+            }
+        }
+
+        if (index != null) {
+            if (list == null) {
+                this.item.addList("harmonized_religions", index);
+            } else {
+                list.add(index);
+            }
+        }
+    }
+
+    public void removeHarmonizedReligion(Religion religion) {
+        ClausewitzList list = this.item.getList("harmonized_religions");
+
+        if (list != null) {
+            Integer index = null;
+            List<Religion> religions = this.save.getGame().getReligionsNotOrdered();
+
+            for (int i = 0; i < religions.size(); i++) {
+                if (religions.get(i).equals(religion)) {
+                    index = i + 1;
+                    break;
+                }
+            }
+
+            if (index != null) {
+                list.remove(index.toString());
+            }
         }
     }
 
@@ -904,12 +997,30 @@ public class Country {
         this.item.setVariable("religious_school", ClausewitzUtils.addQuotes(religiousSchool));
     }
 
+    public Set<SaveReligion> getAvailableSecondaryReligions() {
+        if (!getReligion().getGameReligion().canHaveSecondaryReligion()) {
+            return new HashSet<>();
+        }
+
+        Set<SaveReligion> religions = new HashSet<>();
+        religions.add(getSecondaryReligion());
+        religions.addAll(getOwnedProvinces().stream().map(SaveProvince::getReligion).collect(Collectors.toList()));
+        //Todo adjacent provinces
+
+        religions.removeIf(Objects::isNull);
+        return religions;
+    }
+
     public SaveReligion getSecondaryReligion() {
         return this.save.getReligions().getReligion(this.item.getVarAsString("secondary_religion"));
     }
 
     public void setSecondaryReligion(SaveReligion religion) {
-        this.item.setVariable("secondary_religion", religion.getName());
+        if (religion == null) {
+            this.item.removeVariable("secondary_religion");
+        } else {
+            this.item.setVariable("secondary_religion", religion.getName());
+        }
     }
 
     public SaveReligion getDominantReligion() {
@@ -2727,10 +2838,11 @@ public class Country {
     }
 
     public Double getPiety() {
-        return this.item.getVarAsDouble("piety");
+        return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("piety")) * 100;
     }
 
-    public void setPiety(Double piety) {
+    public void setPiety(double piety) {
+        piety = piety / 100;
         if (piety < 0d) {
             piety = 0d;
         } else if (piety > 1d) {
@@ -2741,10 +2853,12 @@ public class Country {
     }
 
     public Double getPatriarchAuthority() {
-        return this.item.getVarAsDouble("patriarch_authority");
+        return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("patriarch_authority")) * 100;
     }
 
-    public void setPatriarchAuthority(Double patriarchAuthority) {
+    public void setPatriarchAuthority(double patriarchAuthority) {
+        patriarchAuthority = patriarchAuthority / 100;
+
         if (patriarchAuthority < 0d) {
             patriarchAuthority = 0d;
         } else if (patriarchAuthority > 1d) {
@@ -2844,40 +2958,47 @@ public class Country {
         this.item.setVariable("doom", doom);
     }
 
+    public List<PersonalDeity> getUnlockedPersonalDeities() {
+        return this.save.getGame()
+                        .getPersonalDeities()
+                        .stream()
+                        .filter(PersonalDeity -> PersonalDeity.getAllow() == null || PersonalDeity.getAllow().apply(this, this))
+                        .collect(Collectors.toList());
+    }
+
     public PersonalDeity getPersonalDeity() {
-        return this.save.getGame().getPersonalDeity(ClausewitzUtils.removeQuotes(this.item.getVarAsString("personal_deity")));
+        ClausewitzVariable variable = this.item.getVar("personal_deity");
+
+        return variable == null ? null : this.save.getGame().getPersonalDeity(ClausewitzUtils.removeQuotes(variable.getValue()));
     }
 
     public void setPersonalDeity(PersonalDeity personalDeity) {
-        this.item.setVariable("personal_deity", ClausewitzUtils.addQuotes(personalDeity.getName()));
-    }
-
-    public List<String> getFetishistCults() {
-        ClausewitzList list = this.item.getList("fetishist_cult");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues();
-    }
-
-    public void addFetishistCult(String fetishistCult) {
-        ClausewitzList list = this.item.getList("fetishist_cult");
-        fetishistCult = ClausewitzUtils.addQuotes(fetishistCult);
-
-        if (list == null) {
-            this.item.addList("fetishist_cult", fetishistCult);
+        if (personalDeity == null) {
+            this.item.removeVariable("personal_deity");
         } else {
-            list.add(fetishistCult);
+            this.item.setVariable("personal_deity", ClausewitzUtils.addQuotes(personalDeity.getName()));
         }
     }
 
-    public void removeFetishistCult(String fetishistCult) {
-        ClausewitzList list = this.item.getList("fetishist_cult");
+    public List<FetishistCult> getUnlockedFetishistCults() {
+        return this.save.getGame()
+                        .getFetishistCults()
+                        .stream()
+                        .filter(fetishistCult -> fetishistCult.getAllow() == null || fetishistCult.getAllow().apply(this, this))
+                        .collect(Collectors.toList());
+    }
 
-        if (list != null) {
-            list.remove(fetishistCult);
+    public FetishistCult getFetishistCult() {
+        ClausewitzVariable variable = this.item.getVar("fetishist_cult");
+
+        return variable == null ? null : this.save.getGame().getFetishistCult(ClausewitzUtils.removeQuotes(variable.getValue()));
+    }
+
+    public void setFetishistCult(FetishistCult fetishistCult) {
+        if (fetishistCult == null) {
+            this.item.removeVariable("fetishist_cult");
+        } else {
+            this.item.setVariable("fetishist_cult", ClausewitzUtils.addQuotes(fetishistCult.getName()));
         }
     }
 
