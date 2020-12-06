@@ -37,6 +37,14 @@ public class IdeaGroups {
     }
 
     public void setIdeaGroup(IdeaGroup ideaGroup, int level) {
+        setIdeaGroup(ideaGroup, level, false);
+    }
+
+    private void setIdeaGroup(IdeaGroup ideaGroup, int level, boolean forceFree) {
+        if (!forceFree && ideaGroup.isFree()) {
+            return;
+        }
+
         if (level < 0) {
             level = 0;
         } else if (level > ideaGroup.getIdeas().size()) {
@@ -44,14 +52,20 @@ public class IdeaGroups {
         }
 
         this.item.setVariable(ideaGroup.getName(), level);
+
+        if (!ideaGroup.isFree()) {
+            computeFreeGroupLevel();
+        }
     }
 
     public void removeIdeaGroup(int index) {
         this.item.removeVariable(index);
+        computeFreeGroupLevel();
     }
 
     public void removeIdeaGroup(IdeaGroup ideaGroup) {
         this.item.removeVariable(ideaGroup.getName());
+        computeFreeGroupLevel();
     }
 
     public boolean hasIdea(String name) {
@@ -60,5 +74,12 @@ public class IdeaGroups {
                    .stream()
                    .anyMatch(entry -> entry.getKey().getIdeas().containsKey(name)
                                       && entry.getKey().getIdeas().keySet().stream().limit(entry.getValue()).anyMatch(name::equals));
+    }
+
+    private void computeFreeGroupLevel() {
+        int totalLevel = getIdeaGroups().entrySet().stream().filter(entry -> !entry.getKey().isFree()).mapToInt(Map.Entry::getValue).sum();
+        int freeLevel = totalLevel / this.save.getGame().getFreeIdeaGroupCost();
+
+        getIdeaGroups().keySet().stream().filter(IdeaGroup::isFree).forEach(ideaGroup -> setIdeaGroup(ideaGroup, freeLevel, true));
     }
 }

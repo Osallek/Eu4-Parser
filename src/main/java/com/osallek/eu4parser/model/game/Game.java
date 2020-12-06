@@ -745,6 +745,10 @@ public class Game {
         return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("BASE_POSSIBLE_POLICIES").value.toint();
     }
 
+    public int getFreeIdeaGroupCost() {
+        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("FREE_IDEA_GROUP_COST").value.toint();
+    }
+
     public List<Government> getGovernments() {
         return this.governments.values()
                                .stream()
