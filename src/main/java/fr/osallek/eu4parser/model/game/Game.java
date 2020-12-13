@@ -7,6 +7,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.LuaUtils;
+import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.ModifierScope;
 import fr.osallek.eu4parser.common.ModifierType;
 import fr.osallek.eu4parser.common.ModifiersUtils;
@@ -1177,28 +1178,35 @@ public class Game {
         this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath)), FileNode::getChildren);
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
-            Map<Path, List<String>> mods = modsEnabled.stream()
-                                                      .map(ClausewitzUtils::removeQuotes)
-                                                      .map(s -> s.replaceAll("^mod/", ""))
-                                                      .map(s -> this.modFolderPath + File.separator + s)
-                                                      .map(File::new)
-                                                      .filter(File::exists)
-                                                      .filter(File::canRead)
-                                                      .map(file -> ClausewitzParser.parse(file, 0))
-                                                      .filter(Objects::nonNull)
-                                                      .collect(Collectors.toMap(item -> new File(ClausewitzUtils.removeQuotes(item.getVarAsString("path"))),
-                                                                                //Compare with path so replace with system separator
-                                                                                item -> item.getVars("replace_path")
-                                                                                            .stream()
-                                                                                            .map(ClausewitzVariable::getValue)
-                                                                                            .map(ClausewitzUtils::removeQuotes)
-                                                                                            .map(s -> Path.of(s).toString())
-                                                                                            .collect(Collectors.toList())))
-                                                      .entrySet()
-                                                      .stream()
-                                                      .filter(Objects::nonNull)
-                                                      .filter(entry -> entry.getKey().exists() && entry.getKey().canRead())
-                                                      .collect(Collectors.toMap(entry -> entry.getKey().toPath(), Map.Entry::getValue));
+            //Compare with path so replace with system separator
+            Map<File, List<String>> map = new HashMap<>();
+
+            for (String mod : modsEnabled) {
+                String modPath = this.modFolderPath + File.separator + ClausewitzUtils.removeQuotes(mod).replaceAll("^mod/", "");
+                File file = new File(modPath);
+
+                if (file.exists() && file.canRead()) {
+                    ClausewitzItem item = ClausewitzParser.parse(file, 0);
+
+                    if (item != null) {
+                        map.put(new File(ClausewitzUtils.removeQuotes(item.getVarAsString("path"))),
+                                item.getVars("replace_path")
+                                    .stream()
+                                    .map(ClausewitzVariable::getValue)
+                                    .map(ClausewitzUtils::removeQuotes)
+                                    .map(s -> Path.of(s).toString())
+                                    .collect(Collectors.toList()));
+                    }
+                } else {
+                    throw new ModNotFoundException(mod);
+                }
+            }
+
+            Map<Path, List<String>> mods = map.entrySet()
+                                              .stream()
+                                              .filter(Objects::nonNull)
+                                              .filter(entry -> entry.getKey().exists() && entry.getKey().canRead())
+                                              .collect(Collectors.toMap(entry -> entry.getKey().toPath(), Map.Entry::getValue));
 
             mods.forEach((path, replacePaths) -> { //This technique replace only folders, so don't check for files
                 this.filesNode.removeChildrenIf(fileNode -> fileNode.getPath().toFile().isDirectory()
