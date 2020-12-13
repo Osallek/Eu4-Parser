@@ -175,7 +175,7 @@ public class GameplayOptions {
     }
 
     public void setOnlyHostCanPause(boolean onlyHostCanPause) {
-        this.list.set(23, onlyHostCanPause ? 1 : 0);
+        this.list.set(26, onlyHostCanPause ? 1 : 0);
     }
 
     public boolean getShowLoadingScreen() {
