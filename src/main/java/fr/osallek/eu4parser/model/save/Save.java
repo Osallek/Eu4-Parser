@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -319,6 +320,10 @@ public class Save {
 
     public TradeNode getTradeNode(String name) {
         return this.tradeNodes.get(name);
+    }
+
+    public TradeNode getTradeNode(int index) {
+        return this.tradeNodes.values().stream().filter(tradeNode -> tradeNode.getIndex() == index).findFirst().orElse(null);
     }
 
     public Map<TradeGood, Country> getProductionLeaders() {
@@ -658,9 +663,10 @@ public class Save {
         ClausewitzItem tradeItem = this.gamestateItem.getChild("trade");
 
         if (tradeItem != null) {
+            AtomicInteger i = new AtomicInteger(1);
             this.tradeNodes = tradeItem.getChildren("node")
                                        .stream()
-                                       .map(item -> new TradeNode(item, this))
+                                       .map(item -> new TradeNode(item, this, i.getAndIncrement()))
                                        .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()),
                                                                  Function.identity()));
         }

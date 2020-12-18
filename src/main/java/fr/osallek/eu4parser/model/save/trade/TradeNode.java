@@ -22,20 +22,29 @@ public class TradeNode {
 
     private final Save save;
 
+    private final int index;
+
     private Map<String, TradeNodeCountry> countries;
+
+    private List<TradeNodeIncoming> incoming;
 
     private Map<String, Double> topProvinces;
 
     private Map<String, Double> topPower;
 
-    public TradeNode(ClausewitzItem item, Save save) {
+    public TradeNode(ClausewitzItem item, Save save, int index) {
         this.item = item;
         this.save = save;
+        this.index = index;
         refreshAttributes();
     }
 
     public String getName() {
         return this.item.getVarAsString("definitions");
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     public Double getCurrent() {
@@ -140,6 +149,10 @@ public class TradeNode {
         return this.countries.get(country.getTag());
     }
 
+    public List<TradeNodeIncoming> getIncoming() {
+        return incoming;
+    }
+
     private void refreshAttributes() {
         this.countries = this.item.getChildren()
                                   .stream()
@@ -167,5 +180,7 @@ public class TradeNode {
                 this.topPower.put(ClausewitzUtils.removeQuotes(topPowerList.get(i)), topPowerValuesList.getAsDouble(i));
             }
         }
+
+        this.incoming = this.item.getChildren("incoming").stream().map(child -> new TradeNodeIncoming(child, this.save)).collect(Collectors.toList());
     }
 }
