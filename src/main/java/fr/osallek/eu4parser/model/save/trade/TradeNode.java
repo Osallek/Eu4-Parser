@@ -116,7 +116,7 @@ public class TradeNode {
 
         if (tradeGoodsSizeList != null) {
             for (int i = 0; i < tradeGoodsSizeList.size(); i++) {
-                productionLeaders.put(this.save.getGame().getTradeGood(i), tradeGoodsSizeList.getAsDouble(i));
+                productionLeaders.put(this.save.getGame().getTradeGood(i - 1), tradeGoodsSizeList.getAsDouble(i));
             }
         }
 

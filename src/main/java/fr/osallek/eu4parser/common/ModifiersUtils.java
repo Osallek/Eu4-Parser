@@ -782,7 +782,9 @@ public class ModifiersUtils {
                                                                              .stream()
                                                                              .anyMatch(reform -> reform.isFreeCity().getKey()
                                                                                                  && (reform.isFreeCity().getValue() == null
-                                                                                                     || reform.isFreeCity().getValue().apply(country, country))))
+                                                                                                     || reform.isFreeCity()
+                                                                                                              .getValue()
+                                                                                                              .apply(country, country))))
                                                                .count());
     }
 
@@ -1046,7 +1048,9 @@ public class ModifiersUtils {
 
     public static Modifiers scaleWithMaintainedForts(Country country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers,
-                                             country.getTotalFortLevel() / (country.getRawDevelopment() / country.getSave().getGame().getFortPerDevRatio())
+                                             NumbersUtils.intOrDefault(country.getTotalFortLevel())
+                                             / (NumbersUtils.doubleOrDefault(country.getRawDevelopment())
+                                                / country.getSave().getGame().getFortPerDevRatio())
                                              / country.getHighestPossibleFort());
     }
 }

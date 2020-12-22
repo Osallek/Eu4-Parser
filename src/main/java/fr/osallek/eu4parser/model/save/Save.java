@@ -346,7 +346,7 @@ public class Save {
 
         if (totalProducedList != null) {
             for (int i = 0; i < totalProducedList.size(); i++) {
-                productionLeaders.put(this.game.getTradeGood(i), totalProducedList.get(i));
+                productionLeaders.put(this.game.getTradeGood(i - 1), totalProducedList.get(i));
             }
         }
 
@@ -766,6 +766,8 @@ public class Save {
                 Country country = this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("country")));
                 getInternalGreatPowers().put(child.getVarAsInt("rank"), country);
             });
+
+            this.greatPowers.forEach((key, value) -> value.setGreatPowerRank(key));
         }
 
         ClausewitzItem provincesItems = this.gamestateItem.getChild("provinces");

@@ -35,6 +35,7 @@ import fr.osallek.eu4parser.model.save.country.SaveArea;
 import fr.osallek.eu4parser.model.save.country.SaveInvestment;
 import fr.osallek.eu4parser.model.save.country.SaveModifier;
 import fr.osallek.eu4parser.model.save.country.Ship;
+import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -1238,7 +1239,7 @@ public class SaveProvince extends Province {
     }
 
     public double getTolerance() {
-        if (getOwner() == null) {
+        if (getOwner() == null || !getOwner().isAlive()) {
             return 0;
         } else if (getReligion().equals(getOwner().getReligion())) {
             return getOwner().getToleranceOwn();
@@ -1250,7 +1251,7 @@ public class SaveProvince extends Province {
     }
 
     public double getLandForceLimit() {
-        if (getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
+        if (getOwner() != null && getOwner().isAlive() && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
             if (getTradeGood().getProvinceModifiers().hasModifier(ModifiersUtils.getModifier("land_forcelimit"))) {
                 return getTradeGood().getProvinceModifiers().getModifier(ModifiersUtils.getModifier("land_forcelimit"));
             } else {
@@ -1263,7 +1264,7 @@ public class SaveProvince extends Province {
     }
 
     public double getNavalForceLimit() {
-        if (!isPort() || getOwner() != null && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
+        if (!isPort() || getOwner() != null && getOwner().isAlive() && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
             if (getTradeGood().getProvinceModifiers().hasModifier(ModifiersUtils.getModifier("naval_forcelimit"))) {
                 return getTradeGood().getProvinceModifiers().getModifier(ModifiersUtils.getModifier("naval_forcelimit"));
             } else {
@@ -1316,7 +1317,7 @@ public class SaveProvince extends Province {
                                  .collect(Collectors.toList()));
         }
 
-        if (getOwner() != null && !this.save.getCelestialEmpire().dismantled() && this.save.getCelestialEmpire().getEmperor().equals(getOwner())) {
+        if (getOwner() != null && getOwner().isAlive() && !this.save.getCelestialEmpire().dismantled() && this.save.getCelestialEmpire().getEmperor().equals(getOwner())) {
             list.addAll(this.save.getCelestialEmpire()
                                  .getPassedReforms()
                                  .stream()
@@ -1336,7 +1337,7 @@ public class SaveProvince extends Province {
                                           .collect(Collectors.toList()));
         }
 
-        if (getSaveArea() != null && getOwner() != null) {
+        if (getSaveArea() != null && getOwner() != null && getOwner().isAlive()) {
             if (getSaveArea().getCountriesStates() != null) {
                 CountryState countryState = getSaveArea().getCountryState(getOwner());
 
@@ -1401,16 +1402,20 @@ public class SaveProvince extends Province {
             });
         }
 
-        if (getOwner() != null) {
-            TradePolicy tradePolicy = this.save.getTradeNode(ClausewitzUtils.removeQuotes(getTrade())).getCountry(getOwner()).getTradePolicy();
+        if (getOwner() != null && getOwner().isAlive()) {
+            TradeNodeCountry tradeNodeCountry = this.save.getTradeNode(ClausewitzUtils.removeQuotes(getTrade())).getCountry(getOwner());
 
-            if (tradePolicy != null) {
-                if (tradePolicy.getNodeProvinceModifier().getProvinceModifiers().hasModifier(modifier)) {
-                    list.add(tradePolicy.getNodeProvinceModifier().getProvinceModifiers().getModifier(modifier));
-                }
+            if (tradeNodeCountry != null) {
+                TradePolicy tradePolicy = tradeNodeCountry.getTradePolicy();
 
-                if (tradePolicy.getTradePower().getProvinceModifiers().hasModifier(modifier)) {
-                    list.add(tradePolicy.getTradePower().getProvinceModifiers().getModifier(modifier));
+                if (tradePolicy != null) {
+                    if (tradePolicy.getNodeProvinceModifier().getProvinceModifiers().hasModifier(modifier)) {
+                        list.add(tradePolicy.getNodeProvinceModifier().getProvinceModifiers().getModifier(modifier));
+                    }
+
+                    if (tradePolicy.getTradePower().getProvinceModifiers().hasModifier(modifier)) {
+                        list.add(tradePolicy.getTradePower().getProvinceModifiers().getModifier(modifier));
+                    }
                 }
             }
         }

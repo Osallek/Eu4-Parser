@@ -9,6 +9,7 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.Modifier;
 import fr.osallek.eu4parser.common.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
+import fr.osallek.eu4parser.model.Color;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.UnitType;
 import fr.osallek.eu4parser.model.game.AgeAbility;
@@ -616,6 +617,10 @@ public class Country {
         return colors;
     }
 
+    public Color getColor() {
+        return this.equals(this.save.getRevolution().getRevolutionTarget()) ? this.colors.getRevolutionaryColors() : this.colors.getMapColor();
+    }
+
     public List<String> getIgnoreDecision() {
         return this.item.getVarsAsStrings("ignore_decision");
     }
@@ -998,7 +1003,7 @@ public class Country {
     }
 
     public Set<SaveReligion> getAvailableSecondaryReligions() {
-        if (!getReligion().getGameReligion().canHaveSecondaryReligion()) {
+        if (getReligion() == null || !getReligion().getGameReligion().canHaveSecondaryReligion()) {
             return new HashSet<>();
         }
 
@@ -1594,67 +1599,67 @@ public class Country {
     }
 
     public Integer getNumOwnedHomeCores() {
-        return this.item.getVarAsInt("num_owned_home_cores");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_owned_home_cores"));
     }
 
     public Double getNonOverseasDevelopment() {
-        return this.item.getVarAsDouble("non_overseas_development");
+        return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("non_overseas_development"));
     }
 
     public Integer getNumShipsPrivateering() {
-        return this.item.getVarAsInt("num_ships_privateering");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_ships_privateering"));
     }
 
     public Integer getNumOfControlledCities() {
-        return this.item.getVarAsInt("num_of_controlled_cities");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_controlled_cities"));
     }
 
     public Integer getNumOfPorts() {
-        return this.item.getVarAsInt("num_of_ports");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_ports"));
     }
 
     public Integer getNumOfCorePorts() {
-        return this.item.getVarAsInt("num_of_core_ports");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_core_ports"));
     }
 
     public Integer getNumOfTotalPorts() {
-        return this.item.getVarAsInt("num_of_total_ports");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_total_ports"));
     }
 
     public Integer getNumOfCardinals() {
-        return this.item.getVarAsInt("num_of_cardinals");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_cardinals"));
     }
 
     public Integer getNumOfMercenaries() {
-        return this.item.getVarAsInt("num_of_mercenaries");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_mercenaries"));
     }
 
     public Integer getNumOfRegulars() {
-        return this.item.getVarAsInt("num_of_regulars");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_regulars"));
     }
 
     public Integer getNumOfCities() {
-        return this.item.getVarAsInt("num_of_cities");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_cities"));
     }
 
     public Integer getNumOfProvincesInStates() {
-        return this.item.getVarAsInt("num_of_provinces_in_states");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_provinces_in_states"));
     }
 
     public Integer getNumOfProvincesInTerritories() {
-        return this.item.getVarAsInt("num_of_provinces_in_territories");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_provinces_in_territories"));
     }
 
     public Integer getNumOfForts() {
-        return this.item.getVarAsInt("forts");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("forts"));
     }
 
     public Integer getNumOfAllies() {
-        return this.item.getVarAsInt("num_of_allies");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_allies"));
     }
 
     public Integer getNumOfRoyalMarriages() {
-        return this.item.getVarAsInt("num_of_royal_marriages");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_royal_marriages"));
     }
 
     public void addRoyalMarriage(Country country) {
@@ -1678,11 +1683,11 @@ public class Country {
     }
 
     public Integer getNumOfSubjects() {
-        return this.item.getVarAsInt("num_of_subjects");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_subjects"));
     }
 
     public Integer getNumOfHeathenProvs() {
-        return this.item.getVarAsInt("num_of_heathen_provs");
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_heathen_provs"));
     }
 
     public Double getInlandSeaRatio() {
@@ -1755,8 +1760,8 @@ public class Country {
             return map;
         }
 
-        for (int i = 0; i < list.size(); i++) {
-            map.put(this.save.getGame().getTradeGood(i), list.getAsDouble(i));
+        for (int i = 1; i < list.size(); i++) {
+            map.put(this.save.getGame().getTradeGood(i - 1), list.getAsDouble(i));
         }
 
         return map;
@@ -1770,8 +1775,8 @@ public class Country {
             return map;
         }
 
-        for (int i = 0; i < list.size(); i++) {
-            map.put(this.save.getGame().getTradeGood(i), list.getAsInt(i));
+        for (int i = 1; i < list.size(); i++) {
+            map.put(this.save.getGame().getTradeGood(i - 1), list.getAsInt(i));
         }
 
         return map;
@@ -1785,8 +1790,8 @@ public class Country {
             return map;
         }
 
-        for (int i = 0; i < list.size(); i++) {
-            map.put(this.save.getGame().getTradeGood(i), list.getAsDouble(i));
+        for (int i = 1; i < list.size(); i++) {
+            map.put(this.save.getGame().getTradeGood(i - 1), list.getAsDouble(i));
         }
 
         return map;
@@ -2873,7 +2878,7 @@ public class Country {
     }
 
     public void setPatriarchAuthority(int icon) {
-        if (getReligion().getGameReligion().getIcons() != null && icon >= 0 && icon < getReligion().getGameReligion().getIcons().size()) {
+        if (getReligion() != null && getReligion().getGameReligion().getIcons() != null && icon >= 0 && icon < getReligion().getGameReligion().getIcons().size()) {
             this.item.setVariable("current_icon", icon);
         }
     }
@@ -3305,28 +3310,28 @@ public class Country {
     public long getNbHeavyShips() {
         return this.navies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType())).count())
+                          .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbLightShips() {
-        return this.armies.values()
+        return this.navies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType())).count())
+                          .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbGalleys() {
-        return this.armies.values()
+        return this.navies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType())).count())
+                          .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbTransports() {
-        return this.armies.values()
+        return this.navies.values()
                           .stream()
-                          .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType())).count())
+                          .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
@@ -3913,7 +3918,7 @@ public class Country {
     }
 
     public double getTolerance(Religion religion) {
-        if (religion == null) {
+        if (religion == null || getReligion() == null) {
             return 0;
         } else if (getReligion().getGameReligion().equals(religion)) {
             return getToleranceOwn();
@@ -4029,6 +4034,7 @@ public class Country {
 
         if (CollectionUtils.isNotEmpty(getModifiers())) {
             list.addAll(getModifiers().stream()
+                                      .filter(m -> m .getModifier() != null)
                                       .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
                                       .map(m -> m.getModifiers(this, modifier))
                                       .collect(Collectors.toList()));
@@ -4402,7 +4408,7 @@ public class Country {
             list.add(getHegemon().getModifiers().getModifier(modifier));
         }
 
-        if (getReligion().getGameReligion().getCountry() != null && getReligion().getGameReligion().getCountry().hasModifier(modifier)) {
+        if (getReligion() != null && getReligion().getGameReligion().getCountry() != null && getReligion().getGameReligion().getCountry().hasModifier(modifier)) {
             list.add(getReligion().getGameReligion().getCountry().getModifier(modifier));
         }
 
@@ -4412,7 +4418,7 @@ public class Country {
         }
 
         SavePapacy papacy;
-        if ((papacy = getReligion().getPapacy()) != null && BooleanUtils.toBoolean(papacy.getPapacyActive())) {
+        if (getReligion() != null && (papacy = getReligion().getPapacy()) != null && BooleanUtils.toBoolean(papacy.getPapacyActive())) {
             if (papacy.getGoldenBull() != null && papacy.getGoldenBull().getModifiers().hasModifier(modifier)) {
                 list.add(papacy.getGoldenBull().getModifiers().getModifier(modifier));
             }
