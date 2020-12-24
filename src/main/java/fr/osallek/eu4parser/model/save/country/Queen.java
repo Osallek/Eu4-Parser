@@ -3,10 +3,16 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
+import java.time.LocalDate;
+
 public class Queen extends Monarch {
 
     public Queen(ClausewitzItem item, Save save, Country country) {
         super(item, save, country);
+    }
+
+    public Queen(ClausewitzItem item, Save save, Country country, LocalDate date) {
+        super(item, save, country, date);
     }
 
     public Boolean getConsort() {

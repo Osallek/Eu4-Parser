@@ -5,6 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.LeaderPersonality;
 import fr.osallek.eu4parser.model.save.Save;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -124,10 +125,10 @@ public class History {
                                          monarchItem = child.getChild("monarch_foreign_heir");
                                      }
 
-                                     return monarchItem;
+                                     return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
                                  })
                                  .filter(Objects::nonNull)
-                                 .map(child -> new Monarch(child, this.save, this.country, Eu4Utils.stringToDate(child.getName())))
+                                 .map(child -> new Monarch(child.getKey(), this.save, this.country, child.getValue()))
                                  .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity(), (monarch, monarch2) -> monarch2));
 
         this.leaders = this.item.getChildren()
@@ -147,17 +148,21 @@ public class History {
                                       monarchItem = child.getChild("foreign_heir");
                                   }
 
-                                  return monarchItem;
+                                  return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
                               })
                               .filter(Objects::nonNull)
-                              .map(child -> new Heir(child, this.save, this.country))
+                              .map(child -> new Heir(child.getKey(), this.save, this.country, child.getValue()))
                               .collect(Collectors.toMap(heir -> heir.getId().getId(), Function.identity(), (heir, heir2) -> heir2));
 
         this.queens = this.item.getChildren()
                                .stream()
-                               .map(child -> child.getChild("queen"))
+                               .map(child -> {
+                                   ClausewitzItem monarchItem = child.getChild("queen");
+
+                                   return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
+                               })
                                .filter(Objects::nonNull)
-                               .map(child -> new Queen(child, this.save, this.country))
+                               .map(child -> new Queen(child.getKey(), this.save, this.country, child.getValue()))
                                .collect(Collectors.toMap(queen -> queen.getId().getId(), Function.identity(), (queen, queen2) -> queen2));
 
         this.leaders.putAll(this.monarchs.values()
