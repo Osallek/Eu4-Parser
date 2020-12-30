@@ -48,6 +48,12 @@ public class ReligionGroup {
         this.crusadeName = item.getVarAsString("crusade_name");
     }
 
+    public ReligionGroup merge(ReligionGroup other) {
+        this.religions.addAll(other.religions);
+
+        return this;
+    }
+
     public String getName() {
         return this.name;
     }

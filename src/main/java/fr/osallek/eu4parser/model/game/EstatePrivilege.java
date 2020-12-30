@@ -89,7 +89,8 @@ public class EstatePrivilege implements Comparable<EstatePrivilege> {
     }
 
     void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName.replace("[Root.Get" + StringUtils.capitalize(this.estate.getLocalizedName()) + "Name]",
+        this.localizedName = this.estate == null ? localizedName :
+                             localizedName.replace("[Root.Get" + StringUtils.capitalize(this.estate.getLocalizedName()) + "Name]",
                                                    this.estate.getLocalizedName()).replace("$ESTATE_NAME$", this.estate.getLocalizedName());
     }
 

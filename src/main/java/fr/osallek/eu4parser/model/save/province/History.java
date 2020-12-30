@@ -143,11 +143,15 @@ public class History {
         this.cultures = this.item.getChildrenNot("advisor")
                                  .stream()
                                  .filter(child -> child.hasVar("culture"))
+                                 .filter(child -> this.province.getSave().getGame().getCulture(child.getVarAsString("culture")) != null)
                                  .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
                                                            child -> this.province.getSave().getGame().getCulture(child.getVarAsString("culture")),
                                                            (a, b) -> b,
                                                            TreeMap::new));
-        this.cultures.put(this.province.getSave().getStartDate(), this.province.getSave().getGame().getCulture(this.item.getVarAsString("culture")));
+
+        if (this.province.getSave().getGame().getCulture(this.item.getVarAsString("culture")) != null) {
+            this.cultures.put(this.province.getSave().getStartDate(), this.province.getSave().getGame().getCulture(this.item.getVarAsString("culture")));
+        }
 
         this.advisors = this.item.getChildren()
                                  .stream()

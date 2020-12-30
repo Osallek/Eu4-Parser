@@ -1456,10 +1456,10 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
-                    this.religionGroups.putAll(religionGroupsItem.getChildren()
-                                                                 .stream()
-                                                                 .map(ReligionGroup::new)
-                                                                 .collect(Collectors.toMap(ReligionGroup::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
+                    religionGroupsItem.getChildren()
+                                      .stream()
+                                      .map(ReligionGroup::new)
+                                      .forEach(religionGroup -> this.religionGroups.merge(religionGroup.getName(), religionGroup, ReligionGroup::merge));
                 });
 
         this.religionGroups.values().forEach(religionGroup -> {

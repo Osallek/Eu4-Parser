@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SubjectType {
@@ -126,13 +125,13 @@ public class SubjectType {
 
     private int diplomacyViewClass;
 
-    private Map<SubjectTypeRelation, String> canFight;
+    private Map<SubjectTypeRelation, List<String>> canFight;
 
-    private Map<SubjectTypeRelation, String> canRival;
+    private Map<SubjectTypeRelation, List<String>> canRival;
 
-    private Map<SubjectTypeRelation, String> canAlly;
+    private Map<SubjectTypeRelation, List<String>> canAlly;
 
-    private Map<SubjectTypeRelation, String> canMarry;
+    private Map<SubjectTypeRelation, List<String>> canMarry;
 
     private boolean embargoRivals;
 
@@ -337,26 +336,26 @@ public class SubjectType {
         child = item.getChild("can_fight");
         this.canFight = child == null ? null : child.getVariables()
                                                     .stream()
-                                                    .collect(Collectors.toMap(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
-                                                                              ClausewitzVariable::getValue));
+                                                    .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
+                                                                              Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         child = item.getChild("can_rival");
         this.canRival = child == null ? null : child.getVariables()
                                                     .stream()
-                                                    .collect(Collectors.toMap(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
-                                                                              ClausewitzVariable::getValue));
+                                                    .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
+                                                                                   Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         child = item.getChild("can_ally");
         this.canAlly = child == null ? null : child.getVariables()
                                                    .stream()
-                                                   .collect(Collectors.toMap(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
-                                                                             ClausewitzVariable::getValue));
+                                                   .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
+                                                                                  Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         child = item.getChild("can_marry");
         this.canMarry = child == null ? null : child.getVariables()
                                                     .stream()
-                                                    .collect(Collectors.toMap(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
-                                                                              ClausewitzVariable::getValue));
+                                                    .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
+                                                                                   Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         if ("clear".equalsIgnoreCase(item.getVarAsString("modifier_subject"))) {
             this.modifierSubjects.clear();
@@ -697,19 +696,19 @@ public class SubjectType {
         return diplomacyViewClass;
     }
 
-    public Map<SubjectTypeRelation, String> getCanFight() {
+    public Map<SubjectTypeRelation, List<String>> getCanFight() {
         return canFight;
     }
 
-    public Map<SubjectTypeRelation, String> getCanRival() {
+    public Map<SubjectTypeRelation, List<String>> getCanRival() {
         return canRival;
     }
 
-    public Map<SubjectTypeRelation, String> getCanAlly() {
+    public Map<SubjectTypeRelation, List<String>> getCanAlly() {
         return canAlly;
     }
 
-    public Map<SubjectTypeRelation, String> getCanMarry() {
+    public Map<SubjectTypeRelation, List<String>> getCanMarry() {
         return canMarry;
     }
 
