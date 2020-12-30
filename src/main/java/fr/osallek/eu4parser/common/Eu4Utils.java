@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.common;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.save.country.Country;
+import org.apache.commons.collections4.iterators.ReverseListIterator;
 
 import java.text.Collator;
 import java.time.DateTimeException;
@@ -136,7 +137,8 @@ public final class Eu4Utils {
         }
 
         while (!queue.isEmpty()) {
-            iterator = queue.iterator();
+            int size = queue.size();
+            iterator = new ReverseListIterator<>(queue); //Reverse iterator, so if we have multiple buildings replacing the same, we keep the last as the game
             while (iterator.hasNext()) {
                 Building building = iterator.next();
                 for (List<Building> buildingList : tree) {
@@ -145,6 +147,10 @@ public final class Eu4Utils {
                         iterator.remove();
                     }
                 }
+            }
+
+            if (queue.size() == size) { //Did not remove an building, meaning weird behaviour (multiple buildings replacing the same)
+                queue.clear();
             }
         }
 
