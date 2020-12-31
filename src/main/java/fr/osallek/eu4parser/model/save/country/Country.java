@@ -3870,9 +3870,9 @@ public class Country {
     }
 
     public double getGoverningCapacity() {
-        return (getModifier(ModifiersUtils.getModifier("governing_capacity")) +
-                getModifier(ModifiersUtils.getModifier("tech_governing_capacity")))
-               * (1 + getModifier(ModifiersUtils.getModifier("governing_capacity_modifier"), false));
+        return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("governing_capacity"))) +
+                                             NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_governing_capacity"))))
+               * (1 + NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("governing_capacity_modifier"), false)));
     }
 
     public double getGoverningCapacityUsedPercent() {
@@ -3880,21 +3880,22 @@ public class Country {
     }
 
     public double getYearlyCorruption() {
-        return getModifier(ModifiersUtils.getModifier("YEARLY_CORRUPTION"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("YEARLY_CORRUPTION")));
     }
 
     public double getLandMorale() {
-        return getModifier(ModifiersUtils.getModifier("tech_land_morale")) * (1 + getModifier(ModifiersUtils.getModifier("land_morale")));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_land_morale")) * (1 + getModifier(ModifiersUtils.getModifier("land_morale"))));
     }
 
     public double getNavalMorale() {
-        return getModifier(ModifiersUtils.getModifier("tech_naval_morale")) * (1 + getModifier(ModifiersUtils.getModifier("naval_morale")));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_naval_morale")) * (1 + getModifier(ModifiersUtils.getModifier("naval_morale"))));
     }
 
     public double getLandForceLimit() {
-        return Math.max(5, (getModifier(ModifiersUtils.getModifier("land_forcelimit"), false)
+        return Math.max(5,
+                        (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit"), false))
                             + getOwnedProvinces().stream().mapToDouble(SaveProvince::getLandForceLimit).sum()))
-               * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier"), false));
+               * (1 + NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier"), false)));
     }
 
     public double getNavalForceLimit() {
@@ -3902,19 +3903,19 @@ public class Country {
             return 0;
         }
 
-        return (getModifier(ModifiersUtils.getModifier("naval_forcelimit"), false)
-                + getOwnedProvinces().stream().mapToDouble(SaveProvince::getNavalForceLimit).sum())
-               * (1 + getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier"), false));
+        return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit"), false))
+                + NumbersUtils.doubleOrDefault(getOwnedProvinces().stream().mapToDouble(SaveProvince::getNavalForceLimit).sum()))
+               * (1 + NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier"), false)));
     }
 
     public double getProductionEfficiency() {
-        return getModifier(ModifiersUtils.getModifier("production_efficiency")) +
-               getModifier(ModifiersUtils.getModifier("tech_production_efficiency"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("production_efficiency"))) +
+               NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_production_efficiency")));
     }
 
     public double getTradeEfficiency() {
-        return getModifier(ModifiersUtils.getModifier("trade_efficiency")) +
-               getModifier(ModifiersUtils.getModifier("tech_trade_efficiency"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("trade_efficiency"))) +
+               NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_trade_efficiency")));
     }
 
     public double getTolerance(Religion religion) {
@@ -3930,46 +3931,46 @@ public class Country {
     }
 
     public double getAllowedIdeaGroups() {
-        return getModifier(ModifiersUtils.getModifier("tech_allowed_idea_groups"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_allowed_idea_groups")));
     }
 
     public double getToleranceOwn() {
-        return getModifier(ModifiersUtils.getModifier("tolerance_own"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tolerance_own")));
     }
 
     public double getDiplomaticReputation() {
-        return getModifier(ModifiersUtils.getModifier("DIPLOMATIC_REPUTATION"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("DIPLOMATIC_REPUTATION")));
     }
 
     public double getToleranceHeretic() {
-        return getModifier(ModifiersUtils.getModifier("tolerance_heretic"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tolerance_heretic")));
     }
 
     public double getToleranceHeathen() {
-        return getModifier(ModifiersUtils.getModifier("tolerance_heathen"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tolerance_heathen")));
     }
 
     public double getTaxModifier() {
-        return getModifier(ModifiersUtils.getModifier("global_tax_modifier"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("global_tax_modifier")));
     }
 
     public double getTariffs() {
-        return getModifier(ModifiersUtils.getModifier("global_tariffs"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("global_tariffs")));
     }
 
     public double getVassalIncome() {
-        return getModifier(ModifiersUtils.getModifier("vassal_income"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("vassal_income")));
     }
 
     public double getNbDiplomaticRelations() {
-        return getModifier(ModifiersUtils.getModifier("DIPLOMATIC_UPKEEP"));
+        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("DIPLOMATIC_UPKEEP")));
     }
 
     public double getNbFreeDiplomaticRelations() {
         Set<Country> countedCountries = new HashSet<>();
         Set<Country> tmp;
 
-        double nb = getModifier(ModifiersUtils.getModifier("DIPLOMATIC_UPKEEP"));
+        double nb = NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("DIPLOMATIC_UPKEEP")));
         nb -= getAllies().size();
         countedCountries.addAll(getAllies());
 

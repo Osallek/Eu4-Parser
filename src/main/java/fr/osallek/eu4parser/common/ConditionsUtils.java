@@ -818,10 +818,10 @@ public class ConditionsUtils {
                                                                                                             .getElectors()
                                                                                                             .contains(country));
             case "is_emperor":
-                return "yes".equalsIgnoreCase(value) == (!country.getSave().getHre().dismantled() && country.getSave().getHre().getEmperor().equals(country));
+                return "yes".equalsIgnoreCase(value) == (!country.getSave().getHre().dismantled() && country.equals(country.getSave().getHre().getEmperor()));
             case "is_emperor_of_china":
                 return "yes".equalsIgnoreCase(value) == (!country.getSave().getCelestialEmpire().dismantled()
-                                                         && country.getSave().getCelestialEmpire().getEmperor().equals(country));
+                                                         && country.equals(country.getSave().getCelestialEmpire().getEmperor()));
             case "is_enemy":
                 other = country.getSave().getCountry(value);
                 return "yes".equalsIgnoreCase(value) == country.getEnemies().contains(other);
@@ -898,7 +898,7 @@ public class ConditionsUtils {
                        && country.getReligion().getInLeague().contains(other);
             case "is_league_leader":
                 return country.isAlive() && ("yes".equalsIgnoreCase(value) == (BooleanUtils.toBoolean(country.getSave().getHreLeaguesActive())
-                                                                               && (country.getSave().getHre().getEmperor().equals(country)
+                                                                               && (country.equals(country.getSave().getHre().getEmperor())
                                                                                    || CollectionUtils.isNotEmpty(country.getReligion().getInLeague()) && country
                         .getReligion()
                         .getInLeague()

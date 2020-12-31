@@ -1317,7 +1317,8 @@ public class SaveProvince extends Province {
                                  .collect(Collectors.toList()));
         }
 
-        if (getOwner() != null && getOwner().isAlive() && !this.save.getCelestialEmpire().dismantled() && this.save.getCelestialEmpire().getEmperor().equals(getOwner())) {
+        if (getOwner() != null && getOwner().isAlive() && !this.save.getCelestialEmpire().dismantled()
+            && getOwner().equals(this.save.getCelestialEmpire().getEmperor())) {
             list.addAll(this.save.getCelestialEmpire()
                                  .getPassedReforms()
                                  .stream()
