@@ -44,7 +44,7 @@ public class Eu4Parser {
                                 ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, ClausewitzUtils.CHARSET, listeners),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET, listeners));
             } catch (ZipException e) {
-                save = new Save(file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, ClausewitzUtils.CHARSET));
+                save = new Save(file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, ClausewitzUtils.CHARSET, listeners));
             }
         }
 

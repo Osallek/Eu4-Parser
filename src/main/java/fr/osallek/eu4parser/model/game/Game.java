@@ -1202,11 +1202,16 @@ public class Game {
                 }
             }
 
-            Map<Path, List<String>> mods = map.entrySet()
-                                              .stream()
-                                              .filter(Objects::nonNull)
-                                              .filter(entry -> entry.getKey().exists() && entry.getKey().canRead())
-                                              .collect(Collectors.toMap(entry -> entry.getKey().toPath(), Map.Entry::getValue));
+            Map<Path, List<String>> mods = new HashMap<>();
+            map.forEach((key, value) -> {
+                    if (!key.isAbsolute()) {
+                        key = new File(this.modFolderPath + File.separator + key.getPath().replaceFirst("^mod\\\\", ""));
+                    }
+
+                    if (key.exists() && key.canRead()) {
+                        mods.put(key.toPath(), value);
+                    }
+            });
 
             mods.forEach((path, replacePaths) -> { //This technique replace only folders, so don't check for files
                 this.filesNode.removeChildrenIf(fileNode -> fileNode.getPath().toFile().isDirectory()
