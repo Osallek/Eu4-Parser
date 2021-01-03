@@ -1509,7 +1509,7 @@ public class Game {
                     this.tradeGoods.putAll(tradeGoodsItem.getChildren()
                                                          .stream()
                                                          .map(TradeGood::new)
-                                                         .collect(Collectors.toMap(TradeGood::getName, Function.identity(), (a, b) -> b)));
+                                                         .collect(Collectors.toMap(TradeGood::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
                 });
 
         getPaths(this.commonFolderPath + File.separator + "prices",

@@ -33,6 +33,17 @@ public class Colors {
         return mapColor;
     }
 
+    public void setMapColor(int red, int green, int blue) {
+        if (this.mapColor != null) {
+            this.mapColor.setRed(red);
+            this.mapColor.setGreen(green);
+            this.mapColor.setBlue(blue);
+        } else {
+            Color.addToItem(this.item, "map_color", red, green, blue);
+            refreshAttributes();
+        }
+    }
+
     public Color getCountryColor() {
         return countryColor;
     }

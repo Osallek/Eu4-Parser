@@ -645,9 +645,9 @@ public class Country {
         return this.save.getProvince(getCapitalId());
     }
 
-    public void setCapital(int provinceId) {
-        if (this.save.getProvince(provinceId).getOwner().equals(this)) {
-            this.item.setVariable("capital", provinceId);
+    public void setCapital(SaveProvince saveProvince) {
+        if (saveProvince != null && saveProvince.getOwner().equals(this)) {
+            this.item.setVariable("capital", saveProvince.getId());
         }
     }
 
