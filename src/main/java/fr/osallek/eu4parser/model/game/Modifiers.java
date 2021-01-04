@@ -47,6 +47,7 @@ public class Modifiers {
                                                  && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
                                                  && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
                                                  && NumbersUtils.toDouble(var.getValue()) != null)
+                                  .filter(var -> ModifiersUtils.getModifier(var) != null)
                                   .collect(Collectors.toMap(var -> ModifiersUtils.getModifier(prefix + var.getName()), ClausewitzVariable::getAsDouble,
                                                             (a, b) -> b));
     }
@@ -64,6 +65,7 @@ public class Modifiers {
                                               && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
                                               && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
                                               && NumbersUtils.toDouble(var.getValue()) != null)
+                               .filter(var -> ModifiersUtils.getModifier(var) != null)
                                .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getAsDouble, (a, b) -> b));
     }
 

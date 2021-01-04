@@ -36,7 +36,7 @@ public class IdeaGroup {
     public IdeaGroup(ClausewitzItem item) {
         this.name = item.getName();
         ClausewitzVariable var = item.getVar("category");
-        this.category = var == null ? null : Power.valueOf(var.getValue().toUpperCase());
+        this.category = var == null ? null : Power.byName(var.getValue());
         this.free = BooleanUtils.toBoolean(item.getVarAsBool("free"));
         this.ideas = item.getChildrenNot("start", "bonus", "trigger", "ai_will_do")
                          .stream()

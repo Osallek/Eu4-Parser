@@ -20,7 +20,7 @@ public class NativeAdvancements {
 
     public NativeAdvancements(ClausewitzItem item) {
         this.name = item.getName();
-        this.category = Power.valueOf(item.getVarAsString("category").toUpperCase());
+        this.category = Power.byName(item.getVarAsString("category"));
 
         AtomicInteger i = new AtomicInteger();
         this.nativeAdvancements = item.getChildrenNot("ai_will_do")

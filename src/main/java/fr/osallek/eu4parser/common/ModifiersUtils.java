@@ -607,6 +607,10 @@ public class ModifiersUtils {
     }
 
     public static void sumModifiers(Modifier modifier, Double value, Modifiers modifiers) {
+        if (modifier == null) {
+            return;
+        }
+
         switch (modifier.getType()) {
             case ADDITIVE:
             case MULTIPLICATIVE:

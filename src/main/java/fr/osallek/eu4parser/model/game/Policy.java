@@ -23,7 +23,7 @@ public class Policy {
     public Policy(ClausewitzItem item) {
         this.name = item.getName();
         ClausewitzVariable var = item.getVar("monarch_power");
-        this.category = var == null ? null : Power.valueOf(var.getValue().toUpperCase());
+        this.category = var == null ? null : Power.byName(var.getValue());
         this.modifiers = new Modifiers(item.getVarsNot("monarch_power"));
 
         ClausewitzItem child = item.getChild("potential");

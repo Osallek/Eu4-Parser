@@ -24,7 +24,7 @@ public class Advisor {
 
     public Advisor(ClausewitzItem item) {
         this.name = item.getName();
-        this.power = Power.valueOf(item.getVarAsString("monarch_power").toUpperCase());
+        this.power = Power.byName(item.getVarAsString("monarch_power"));
         this.allowOnlyMale = BooleanUtils.toBoolean(item.getVarAsBool("allow_only_male"));
         this.allowOnlyFemale = BooleanUtils.toBoolean(item.getVarAsBool("allow_only_female"));
         this.modifiers = new Modifiers(item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female"));

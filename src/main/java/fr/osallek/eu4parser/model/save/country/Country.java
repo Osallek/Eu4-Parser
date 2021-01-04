@@ -458,7 +458,7 @@ public class Country {
     public Power getNationalFocus() {
         String var = this.item.getVarAsString("national_focus");
 
-        return var == null ? null : Power.valueOf(var.toUpperCase());
+        return var == null ? null : Power.byName(var);
     }
 
     public void setNationalFocus(Power power, LocalDate date) {
@@ -503,7 +503,7 @@ public class Country {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            return 1 == list.getAsInt(institution.getIndex());
+            return 1 == list.getAsInt(institution.getIndex() - 1);
         }
 
         return false;

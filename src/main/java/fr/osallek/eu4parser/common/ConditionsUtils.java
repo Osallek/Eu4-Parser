@@ -957,12 +957,9 @@ public class ConditionsUtils {
             case "is_random_new_world":
                 return "yes".equalsIgnoreCase(value) == country.getSave().isRandomNewWorld();
             case "is_religion_enabled":
-                return country.getSave().getReligions().getReligion(rawValueToReligion(rawValue, root, from)) != null
-                       && country.getSave()
-                                 .getReligions()
-                                 .getReligion(rawValueToReligion(rawValue, root, from))
-                                 .getEnable()
-                                 .isBefore(country.getSave().getDate());
+                SaveReligion saveReligion = country.getSave().getReligions().getReligion(rawValueToReligion(rawValue, root, from));
+                return saveReligion != null && (saveReligion.getGameReligion().getDate() == null
+                           || (saveReligion.getEnable() != null && country.getSave().getDate().isAfter(saveReligion.getEnable())));
             case "is_religion_reformed":
                 return "yes".equalsIgnoreCase(value) == (BooleanUtils.toBoolean(country.hasReformedReligion()));
             case "is_republic":
@@ -1175,7 +1172,7 @@ public class ConditionsUtils {
                                                  country.getHistory().getMonarch(country.getMonarch().getId().getId()).getMonarchDate())
                        >= NumbersUtils.toInt(value);
             case "national_focus":
-                return country.getNationalFocus().equals(Power.valueOf(value.toUpperCase()));
+                return country.getNationalFocus().equals(Power.byName(value));
             case "nation_designer_points":
                 return country.getCustomNationPoints() != null && country.getCustomNationPoints() >= NumbersUtils.toDouble(value);
             case "native_policy":
@@ -1602,7 +1599,7 @@ public class ConditionsUtils {
                 return country.getOwnedProvinces().contains(saveProvince) ||
                        country.getSubjects().stream().anyMatch(subject -> subject.getOwnedProvinces().contains(saveProvince));
             case "papacy_active":
-                return country.getSave().getReligions().getReligions().values().stream().anyMatch(saveReligion -> saveReligion.getPapacy() != null);
+                return country.getSave().getReligions().getReligions().values().stream().anyMatch(rel -> rel.getPapacy() != null);
             case "papal_influence":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getPapalInfluence() != null && country.getPapalInfluence() >= integer;
@@ -1674,8 +1671,7 @@ public class ConditionsUtils {
                               .getReligions()
                               .values()
                               .stream()
-                              .anyMatch(saveReligion -> saveReligion.getPapacy() != null
-                                                        && saveReligion.getPapacy().getReformDesire() >= NumbersUtils.toDouble(value));
+                              .anyMatch(rel -> rel.getPapacy() != null && rel.getPapacy().getReformDesire() >= NumbersUtils.toDouble(value));
             case "religion":
                 return country.getReligionName() != null && rawValueToReligion(rawValue, root, from).equalsIgnoreCase(country.getReligionName());
             case "religion_group":
@@ -1795,8 +1791,7 @@ public class ConditionsUtils {
                               .getReligions()
                               .values()
                               .stream()
-                              .anyMatch(saveReligion -> saveReligion.getPapacy() != null
-                                                        && saveReligion.getPapacy().getCardinals().size() >= NumbersUtils.toInt(value));
+                              .anyMatch(rel -> rel.getPapacy() != null && rel.getPapacy().getCardinals().size() >= NumbersUtils.toInt(value));
             case "trade_league_embargoed_by":
                 other = country.getSave().getCountry(value);
                 Optional<TradeLeague> tradeLeague = country.getSave()
@@ -1949,6 +1944,7 @@ public class ConditionsUtils {
                        || (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToCountry(root, from, scope)));
             case "and":
             case "if":
+            case "hidden_trigger":
                 return (condition.getConditions() == null || condition.getConditions().entrySet()
                                                                       .stream()
                                                                       .allMatch(entry -> entry.getValue()
@@ -2707,8 +2703,9 @@ public class ConditionsUtils {
             case "is_reformation_center":
                 return "yes".equalsIgnoreCase(value) == BooleanUtils.toBoolean(province.centerOfReligion());
             case "is_religion_enabled":
-                return province.getSave().getReligions().getReligion(value) != null
-                       && province.getSave().getReligions().getReligion(value).getEnable().isBefore(province.getSave().getDate());
+                SaveReligion saveReligion = province.getSave().getReligions().getReligion(rawValueToReligion(rawValue, province));
+                return saveReligion != null && (saveReligion.getGameReligion().getDate() == null
+                                                || (saveReligion.getEnable() != null && province.getSave().getDate().isAfter(saveReligion.getEnable())));
             case "is_religion_grant_colonial_claim":
                 if (province.getSave().getCountry(value) != null) {
                     return !province.getSave()
@@ -2987,6 +2984,7 @@ public class ConditionsUtils {
                                                                                                                                           value))))
                        || (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToProvince(province, scope)));
             case "and":
+            case "hidden_trigger":
                 return (condition.getConditions() == null || condition.getConditions().entrySet()
                                                                       .stream()
                                                                       .allMatch(entry -> entry.getValue()
