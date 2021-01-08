@@ -1483,7 +1483,7 @@ public class Game {
     }
 
     private void readInstitutions() {
-        this.institutions = new HashMap<>();
+        this.institutions = new LinkedHashMap<>();
         AtomicInteger i = new AtomicInteger();
 
         getPaths(this.commonFolderPath + File.separator + "institutions",
@@ -1492,11 +1492,14 @@ public class Game {
                     ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
                     this.institutions.putAll(institutionsItem.getChildren()
                                                              .stream()
-                                                             .map(child -> new Institution(child, i.getAndIncrement()))
-                                                             .collect(Collectors.toMap(Institution::getName, Function.identity(), (a, b) -> b)));
+                                                             .map(Institution::new)
+                                                             .collect(Collectors.toMap(Institution::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
                 });
 
-        this.institutions.values().forEach(institution -> institution.setLocalizedName(this.getLocalisation(institution.getName())));
+        this.institutions.values().forEach(institution -> {
+            institution.setLocalizedName(this.getLocalisation(institution.getName()));
+            institution.setIndex(i.getAndIncrement());
+        });
     }
 
     private void readTradeGoods() {

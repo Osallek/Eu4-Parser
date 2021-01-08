@@ -34,11 +34,17 @@ public final class LuaUtils {
 
         Chunk chunk = luaParser.Chunk();
 
-        if (chunk.block.stats.size() == 1) {
-            return readFromTable((TableConstructor) ((Stat.Assign) chunk.block.stats.get(0)).exps.get(0));
-        } else {
-            return readFromList(chunk.block.stats);
+        if (CollectionUtils.isNotEmpty(chunk.block.stats)) {
+            if (CollectionUtils.isNotEmpty(((Stat.Assign) chunk.block.stats.get(0)).exps)) {
+                if (((Stat.Assign) chunk.block.stats.get(0)).exps.get(0) instanceof TableConstructor) {
+                    return readFromTable((TableConstructor) ((Stat.Assign) chunk.block.stats.get(0)).exps.get(0));
+                } else {
+                    return readFromList(chunk.block.stats);
+                }
+            }
         }
+
+        return new HashMap<>();
     }
 
     private static Map<String, Map<String, Exp.Constant>> readFromTable(TableConstructor tableConstructor) {

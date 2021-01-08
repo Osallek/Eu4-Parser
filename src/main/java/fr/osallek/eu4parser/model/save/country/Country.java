@@ -503,7 +503,7 @@ public class Country {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            return 1 == list.getAsInt(institution.getIndex() - 1);
+            return 1 == list.getAsInt(institution.getIndex());
         }
 
         return false;
@@ -4182,7 +4182,7 @@ public class Country {
                                              .map(m -> m.getModifier(modifier))
                                              .collect(Collectors.toList()));
 
-        if (getCapital().inHre() && !this.save.getHre().dismantled()) {
+        if (getCapital() != null && getCapital().inHre() && !this.save.getHre().dismantled()) {
             list.addAll(this.save.getHre()
                                  .getPassedReforms()
                                  .stream()

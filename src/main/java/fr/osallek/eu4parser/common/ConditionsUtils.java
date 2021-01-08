@@ -255,7 +255,8 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return other.getOwnedProvinces()
                             .stream()
-                            .anyMatch(province -> province.getCulture().getCultureGroup().equals(country.getPrimaryCulture().getCultureGroup()));
+                            .anyMatch(province -> province.getCulture() != null
+                                                  && province.getCulture().getCultureGroup().equals(country.getPrimaryCulture().getCultureGroup()));
             case "current_age":
                 return country.getSave().getCurrentAge().getName().equals(value);
             case "current_debate":
@@ -482,7 +483,7 @@ public class ConditionsUtils {
             case "has_friendly_reformation_center":
                 return country.getOwnedProvinces()
                               .stream()
-                              .filter(province -> province.getReligion().equals(country.getReligion()))
+                              .filter(province -> province.getReligion() != null && province.getReligion().equals(country.getReligion()))
                               .anyMatch(province -> BooleanUtils.toBoolean(province.centerOfReligion()));
             case "has_game_started":
                 return !country.getSave().getDate().equals(country.getSave().getStartDate());
@@ -536,7 +537,7 @@ public class ConditionsUtils {
             case "has_hostile_reformation_center":
                 return country.getOwnedProvinces()
                               .stream()
-                              .filter(province -> !province.getReligion().equals(country.getReligion()))
+                              .filter(province -> province.getReligion() != null && !province.getReligion().equals(country.getReligion()))
                               .anyMatch(province -> BooleanUtils.toBoolean(province.centerOfReligion()));
             case "has_idea":
                 return country.getIdeaGroups().hasIdea(value);
@@ -652,7 +653,8 @@ public class ConditionsUtils {
                               .getProvinces()
                               .values()
                               .stream()
-                              .filter(province -> province.getCulture().getCultureGroup().equals(country.getPrimaryCulture().getCultureGroup()))
+                              .filter(province ->  province.getCulture() != null
+                                                   && province.getCulture().getCultureGroup().equals(country.getPrimaryCulture().getCultureGroup()))
                               .allMatch(province -> province.getOwner().equals(country));
             case "has_unit_type":
                 return country.getUnitType().equals(value);
@@ -942,7 +944,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getPapacy() != null
                                                          && country.equals(country.getReligion().getPapacy().getController()));
             case "is_part_of_hre":
-                return "yes".equalsIgnoreCase(value) == country.getCapital().inHre();
+                return "yes".equalsIgnoreCase(value) == (country.getCapital() != null && country.getCapital().inHre());
             case "is_playing_custom_nation":
                 return "yes".equalsIgnoreCase(value) == country.isCustom();
             case "is_possible_march":
@@ -1055,7 +1057,7 @@ public class ConditionsUtils {
                                                                .anyMatch(knowledgeSharing -> knowledgeSharing.getFirst().equals(country));
             case "knows_country":
                 other = country.getSave().getCountry(value);
-                return other.getCapital().getDiscoveredBy().contains(country);
+                return (other.getCapitalId() != null && other.getCapital().getDiscoveredBy().contains(country));
             case "land_forcelimit":
                 return country.getLandForceLimit() > NumbersUtils.toDouble(value);
             case "land_maintenance":
@@ -1565,7 +1567,7 @@ public class ConditionsUtils {
                     return country.getNumShipsPrivateering() >= other.getNumShipsPrivateering();
                 }
             case "occupied_imperial":
-                return country.getCapital().inHre()
+                return country.getCapital() != null && country.getCapital().inHre()
                        && country.getOwnedProvinces().stream().filter(province -> province.inHre() && !province.getCores().contains(country)).count()
                           >= NumbersUtils.toInt(value);
             case "offensive_war_with":
@@ -2424,7 +2426,7 @@ public class ConditionsUtils {
             case "culture":
                 return province.getCulture() != null && rawValueToCulture(rawValue, province).equalsIgnoreCase(province.getCultureName());
             case "culture_group":
-                return province.getCulture().getCultureGroup().getName().equals(rawValueToCultureGroup(rawValue, province));
+                return  province.getCulture() != null && province.getCulture().getCultureGroup().getName().equals(rawValueToCultureGroup(rawValue, province));
             case "current_age":
                 return province.getSave().getCurrentAge().equals(value);
             case "current_institution_growth": //Todo (global + local)
@@ -2513,13 +2515,14 @@ public class ConditionsUtils {
                 other = province.getSave().getCountry(value);
                 return other.equals(province.getSave().getTradeNodes().get(province.getTrade()).getTopProvinces().entrySet().iterator().next().getKey());
             case "has_owner_accepted_culture":
-                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getOwner()
-                                                                                                .getAcceptedCultures()
-                                                                                                .contains(province.getCulture()));
+                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null  && province.getCulture() != null
+                                                         && province.getOwner().getAcceptedCultures().contains(province.getCulture()));
             case "has_owner_culture":
-                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getOwner().getPrimaryCulture().equals(province.getCulture()));
+                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getCulture() != null
+                                                         && province.getOwner().getPrimaryCulture().equals(province.getCulture()));
             case "has_owner_culture_group":
-                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null
+
+                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getCulture() != null
                                                          && province.getOwner()
                                                                     .getPrimaryCulture()
                                                                     .getCultureGroup()
@@ -2825,6 +2828,7 @@ public class ConditionsUtils {
                 return province.getTotalImproveCount() >= NumbersUtils.toInt(value);
             case "non_accepted_culture_republic":
                 return province.getOwner() != null
+                       && province.getCulture() != null
                        && province.getOwner()
                                   .getGovernment()
                                   .getReforms()
@@ -2886,9 +2890,9 @@ public class ConditionsUtils {
             case "region":
                 return value.equalsIgnoreCase(province.getArea().getRegion().getName());
             case "religion":
-                return rawValueToReligion(rawValue, province).equalsIgnoreCase(province.getReligionName());
+                return province.getReligion() != null && rawValueToReligion(rawValue, province).equalsIgnoreCase(province.getReligionName());
             case "religion_group":
-                return rawValueToReligionGroup(rawValue, province).equalsIgnoreCase(province.getReligion().getReligionGroup().getName());
+                return province.getReligion() != null && rawValueToReligionGroup(rawValue, province).equalsIgnoreCase(province.getReligion().getReligionGroup().getName());
             case "revolution_target_exists":
                 return "yes".equalsIgnoreCase(value) == (province.getSave().getRevolution().getRevolutionTarget() != null);
             case "sieged_by":
@@ -3125,7 +3129,9 @@ public class ConditionsUtils {
     }
 
     public static String rawValueToReligion(String rawValue, SaveProvince province) {
-        if ("ROOT".equalsIgnoreCase(rawValue)) {
+        if (province.getReligion() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
             return province.getReligion().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
             return province.getReligion().getName();
@@ -3135,7 +3141,9 @@ public class ConditionsUtils {
     }
 
     public static String rawValueToReligionGroup(String rawValue, SaveProvince province) {
-        if ("ROOT".equalsIgnoreCase(rawValue)) {
+        if (province.getReligion() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
             return province.getReligion().getGameReligion().getReligionGroup().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
             return province.getReligion().getGameReligion().getReligionGroup().getName();
@@ -3145,7 +3153,9 @@ public class ConditionsUtils {
     }
 
     public static String rawValueToCulture(String rawValue, SaveProvince province) {
-        if ("ROOT".equalsIgnoreCase(rawValue)) {
+        if (province.getCulture() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
             return province.getCulture().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
             return province.getCulture().getName();
@@ -3155,7 +3165,9 @@ public class ConditionsUtils {
     }
 
     public static String rawValueToCultureGroup(String rawValue, SaveProvince province) {
-        if ("ROOT".equalsIgnoreCase(rawValue)) {
+        if (province.getCulture() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
             return province.getCulture().getCultureGroup().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
             return province.getCulture().getCultureGroup().getName();

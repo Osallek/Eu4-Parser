@@ -13,7 +13,7 @@ public class Institution implements Comparable<Institution> {
 
     private String localizedName;
 
-    private final int index;
+    private int index;
 
     private final Double penalty;
 
@@ -25,9 +25,8 @@ public class Institution implements Comparable<Institution> {
 
     private final Integer historicalStartProvince;
 
-    public Institution(ClausewitzItem item, int index) {
+    public Institution(ClausewitzItem item) {
         this.name = item.getName();
-        this.index = index;
         this.penalty = item.getVarAsDouble("penalty");
         this.tradeCompanyEfficiency = item.getVarAsDouble("trade_company_efficiency");
         this.bonus = new Modifiers(item.getChild("bonus"));
@@ -45,6 +44,10 @@ public class Institution implements Comparable<Institution> {
 
     void setLocalizedName(String localizedName) {
         this.localizedName = localizedName;
+    }
+
+    void setIndex(int index) {
+        this.index = index;
     }
 
     public int getIndex() {
