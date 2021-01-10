@@ -6,7 +6,7 @@
 
   <groupId>fr.osallek</groupId>
   <artifactId>eu4-parser</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
 
   <name>Eu4 Parser</name>
 
@@ -18,7 +18,7 @@
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-    <clausewitz-parser.version>1.0.2</clausewitz-parser.version>
+    <clausewitz-parser.version>1.0.3</clausewitz-parser.version>
     <luaj-jse.version>3.0.1</luaj-jse.version>
     <commons-lang3.version>3.11</commons-lang3.version>
     <commons-collections4.version>4.4</commons-collections4.version>
