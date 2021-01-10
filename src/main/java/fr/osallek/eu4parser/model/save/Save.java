@@ -5,6 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.Eu4Parser;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Age;
 import fr.osallek.eu4parser.model.game.Game;
@@ -145,7 +146,7 @@ public class Save {
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
-        this.game = new Game(gameFolderPath, modFolder, this.getModEnabled());
+        this.game = Eu4Parser.parseGame(gameFolderPath, modFolder, this.getModEnabled());
         refreshAttributes();
     }
 

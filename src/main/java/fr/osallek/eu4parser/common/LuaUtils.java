@@ -34,13 +34,11 @@ public final class LuaUtils {
 
         Chunk chunk = luaParser.Chunk();
 
-        if (CollectionUtils.isNotEmpty(chunk.block.stats)) {
-            if (CollectionUtils.isNotEmpty(((Stat.Assign) chunk.block.stats.get(0)).exps)) {
-                if (((Stat.Assign) chunk.block.stats.get(0)).exps.get(0) instanceof TableConstructor) {
-                    return readFromTable((TableConstructor) ((Stat.Assign) chunk.block.stats.get(0)).exps.get(0));
-                } else {
-                    return readFromList(chunk.block.stats);
-                }
+        if (CollectionUtils.isNotEmpty(chunk.block.stats) && CollectionUtils.isNotEmpty(((Stat.Assign) chunk.block.stats.get(0)).exps)) {
+            if (((Stat.Assign) chunk.block.stats.get(0)).exps.get(0) instanceof TableConstructor) {
+                return readFromTable((TableConstructor) ((Stat.Assign) chunk.block.stats.get(0)).exps.get(0));
+            } else {
+                return readFromList(chunk.block.stats);
             }
         }
 

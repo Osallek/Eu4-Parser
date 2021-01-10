@@ -20,15 +20,19 @@ public class FileNode implements Comparable<FileNode> {
 
     private final Path relativePath;
 
-    public FileNode(Path path) {
+    private final boolean fromMod;
+
+    public FileNode(Path path, boolean fromMod) {
         this.root = path;
         this.path = path;
+        this.fromMod = fromMod;
         this.relativePath = this.root.relativize(this.path);
     }
 
-    public FileNode(Path root, Path path) {
+    public FileNode(Path root, Path path, boolean fromMod) {
         this.root = root;
         this.path = path;
+        this.fromMod = fromMod;
         this.relativePath = this.root.relativize(this.path);
     }
 
@@ -46,10 +50,14 @@ public class FileNode implements Comparable<FileNode> {
 
     public static List<FileNode> getChildren(FileNode fileNode) {
         try (Stream<Path> stream = Files.list(fileNode.path)) {
-            return stream.map(p -> new FileNode(fileNode.root, p)).collect(Collectors.toList());
+            return stream.map(p -> new FileNode(fileNode.root, p, fileNode.fromMod)).collect(Collectors.toList());
         } catch (IOException e) {
             return new ArrayList<>();
         }
+    }
+
+    public boolean isFromMod() {
+        return fromMod;
     }
 
     @Override

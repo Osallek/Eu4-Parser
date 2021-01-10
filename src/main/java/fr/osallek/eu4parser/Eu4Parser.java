@@ -3,8 +3,11 @@ package fr.osallek.eu4parser;
 import fr.osallek.clausewitzparser.ClausewitzParser;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.save.Save;
 import org.luaj.vm2.parser.ParseException;
 
@@ -15,7 +18,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -37,8 +42,7 @@ public class Eu4Parser {
         Save save = null;
 
         if (file.canRead()) {
-            try {
-                ZipFile zipFile = new ZipFile(path);
+            try (ZipFile zipFile = new ZipFile(path)) {
                 save = new Save(file.getName(), gameFolderPath, modFolder,
                                 ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, ClausewitzUtils.CHARSET, listeners),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, ClausewitzUtils.CHARSET, listeners),
@@ -51,6 +55,28 @@ public class Eu4Parser {
         return save;
     }
 
+    public static List<String> getMods(String path) throws IOException {
+        File file = new File(path);
+        ClausewitzObject object;
+
+        if (file.canRead()) {
+            try (ZipFile zipFile = new ZipFile(path)) {
+                object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET, "mod_enabled");
+            } catch (ZipException e) {
+                object = ClausewitzParser.readSingleObject(file, 1, ClausewitzUtils.CHARSET, "mod_enabled");
+            }
+
+            if (object != null && ClausewitzList.class.equals(object.getClass())) {
+                return ((ClausewitzList) object).getValues();
+            }
+        }
+
+        return new ArrayList<>();
+    }
+
+    public static Game parseGame(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException, ParseException {
+        return new Game(gameFolderPath, modFolderPath, modEnabled);
+    }
 
     public static void writeSave(Save save, String path) throws IOException {
         writeSave(save, path, new HashMap<>());
@@ -58,7 +84,8 @@ public class Eu4Parser {
 
     public static void writeSave(Save save, String path, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (save.isCompressed()) {
-            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))), ClausewitzUtils.CHARSET)) {
+            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))),
+                                                                    ClausewitzUtils.CHARSET)) {
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.AI_FILE));
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, ClausewitzUtils.CHARSET));
                 save.writeAi(writer, listeners);

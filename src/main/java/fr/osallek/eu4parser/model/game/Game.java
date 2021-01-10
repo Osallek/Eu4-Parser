@@ -19,6 +19,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.luaj.vm2.ast.Exp;
+import org.luaj.vm2.ast.Str;
 import org.luaj.vm2.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -206,6 +206,8 @@ public class Game {
 
     private Map<String, TriggeredModifier> triggeredModifiers;
 
+    private Map<String, String> countryTags;
+
     public Game(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException, ParseException {
         this.gameFolderPath = gameFolderPath;
         this.modFolderPath = modFolderPath;
@@ -280,6 +282,7 @@ public class Game {
         readEventModifiers();
         readProvinceTriggeredModifiers();
         readTriggeredModifiers();
+        readCountryTags();
         readColonialRegions();
 
         if (LOGGER.isDebugEnabled()) {
@@ -296,12 +299,15 @@ public class Game {
     }
 
     @SafeVarargs
-    private Stream<Path> getPaths(String relativePath, Predicate<FileNode>... predicates) {
+    private Stream<FileNode> getFileNodes(String relativePath, Predicate<FileNode>... predicates) {
         TreeNode<FileNode> treeNode = getTreeNode(relativePath);
-        return treeNode == null ? Stream.empty() : treeNode.getLeaves(predicates)
-                                                           .stream()
-                                                           .map(TreeNode::getData)
-                                                           .map(FileNode::getPath);
+        return treeNode == null ? Stream.empty() : treeNode.getLeaves(predicates).stream().map(TreeNode::getData);
+    }
+
+    @SafeVarargs
+    private Stream<Path> getPaths(String relativePath, Predicate<FileNode>... predicates) {
+        Stream<FileNode> treeNode = getFileNodes(relativePath, predicates);
+        return treeNode == null ? Stream.empty() : treeNode.map(FileNode::getPath);
     }
 
     private Path getAbsolutePath(String relativePath) {
@@ -335,7 +341,11 @@ public class Game {
     }
 
     public File getCountryFlagImage(Country country) {
-        return country == null ? null : getAbsoluteFile(this.gfxFolderPath + File.separator + "flags" + File.separator + country.getTag() + ".tga");
+        return country == null ? null : getCountryFlagImage(country.getTag());
+    }
+
+    public File getCountryFlagImage(String country) {
+        return country == null ? null : getAbsoluteFile(this.gfxFolderPath + File.separator + "flags" + File.separator + country + ".tga");
     }
 
     public Map<Integer, Province> getProvinces() {
@@ -1167,6 +1177,10 @@ public class Game {
         return this.triggeredModifiers.get(name);
     }
 
+    public List<String> getCountryTags() {
+        return new ArrayList<>(this.countryTags.keySet());
+    }
+
     public GameModifier getModifier(String modifier) {
         modifier = ClausewitzUtils.removeQuotes(modifier).toLowerCase();
 
@@ -1174,12 +1188,18 @@ public class Game {
                                  this::getTriggeredModifier);
     }
 
+    public Stream<FileNode> getFlagsFileNodes() {
+        return getFileNodes(this.gfxFolderPath + File.separator + "flags",
+                            fileNode -> Files.isRegularFile(fileNode.getPath()),
+                            fileNode -> fileNode.getPath().toString().endsWith(".tga"));
+    }
+
     private void readMods(List<String> modsEnabled) {
-        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath)), FileNode::getChildren);
+        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath), false), FileNode::getChildren);
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator
-            Map<File, List<String>> map = new HashMap<>();
+            Map<File, List<String>> map = new LinkedHashMap<>();
 
             for (String mod : modsEnabled) {
                 String modPath = this.modFolderPath + File.separator + ClausewitzUtils.removeQuotes(mod).replaceAll("^mod/", "");
@@ -1202,7 +1222,7 @@ public class Game {
                 }
             }
 
-            Map<Path, List<String>> mods = new HashMap<>();
+            Map<Path, List<String>> mods = new LinkedHashMap<>();
             map.forEach((key, value) -> {
                     if (!key.isAbsolute()) {
                         key = new File(this.modFolderPath + File.separator + key.getPath().replaceFirst("^mod\\\\", ""));
@@ -1216,7 +1236,7 @@ public class Game {
             mods.forEach((path, replacePaths) -> { //This technique replace only folders, so don't check for files
                 this.filesNode.removeChildrenIf(fileNode -> fileNode.getPath().toFile().isDirectory()
                                                             && replacePaths.contains(fileNode.getRelativePath().toString()));
-                this.filesNode.merge(new TreeNode<>(null, new FileNode(path), FileNode::getChildren));
+                this.filesNode.merge(new TreeNode<>(null, new FileNode(path, true), FileNode::getChildren));
             });
         }
     }
@@ -2391,5 +2411,19 @@ public class Game {
                 });
 
         this.triggeredModifiers.values().forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
+    }
+
+    private void readCountryTags() {
+        this.countryTags = new HashMap<>();
+
+        getPaths(this.commonFolderPath + File.separator + "country_tags",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem countryTagsItem = ClausewitzParser.parse(path.toFile(), 0);
+                    this.countryTags.putAll(countryTagsItem.getVariables()
+                                                           .stream()
+                                                           .collect(Collectors.toMap(var -> var.getName().toUpperCase(), var -> ClausewitzUtils.removeQuotes(var.getValue()), (a, b) -> b)));
+
+                });
     }
 }
