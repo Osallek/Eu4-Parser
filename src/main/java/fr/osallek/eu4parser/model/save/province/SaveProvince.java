@@ -20,6 +20,7 @@ import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.game.StaticModifier;
 import fr.osallek.eu4parser.model.game.StaticModifiers;
 import fr.osallek.eu4parser.model.game.TradeGood;
+import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.TradePolicy;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
@@ -344,10 +345,12 @@ public class SaveProvince extends Province {
         return this.item.getVarAsString("trade");
     }
 
-    public void setTrade(String trade) {
-        trade = ClausewitzUtils.addQuotes(trade);
+    public TradeNode getTradeNode() {
+        return this.save.getGame().getTradeNode(ClausewitzUtils.removeQuotes(getTrade()));
+    }
 
-        this.item.setVariable("trade", trade);
+    public void setTradeNode(TradeNode tradeNode) {
+        this.item.setVariable("trade", ClausewitzUtils.addQuotes(tradeNode.getName()));
     }
 
     public List<Army> getArmies() {

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class TradeNode {
+public class SaveTradeNode {
 
     private final ClausewitzItem item;
 
@@ -32,7 +32,7 @@ public class TradeNode {
 
     private Map<String, Double> topPower;
 
-    public TradeNode(ClausewitzItem item, Save save, int index) {
+    public SaveTradeNode(ClausewitzItem item, Save save, int index) {
         this.item = item;
         this.save = save;
         this.index = index;

@@ -30,7 +30,7 @@ import fr.osallek.eu4parser.model.save.province.SaveAdvisor;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.religion.Religions;
 import fr.osallek.eu4parser.model.save.revolution.Revolution;
-import fr.osallek.eu4parser.model.save.trade.TradeNode;
+import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import fr.osallek.eu4parser.model.save.war.PreviousWar;
 import org.apache.commons.lang3.BooleanUtils;
@@ -86,7 +86,7 @@ public class Save {
 
     private List<SaveHegemon> hegemons;
 
-    private Map<String, TradeNode> tradeNodes;
+    private Map<String, SaveTradeNode> tradeNodes;
 
     private ChangePrices changePrices;
 
@@ -315,15 +315,15 @@ public class Save {
         return hegemons;
     }
 
-    public Map<String, TradeNode> getTradeNodes() {
+    public Map<String, SaveTradeNode> getTradeNodes() {
         return tradeNodes;
     }
 
-    public TradeNode getTradeNode(String name) {
+    public SaveTradeNode getTradeNode(String name) {
         return this.tradeNodes.get(name);
     }
 
-    public TradeNode getTradeNode(int index) {
+    public SaveTradeNode getTradeNode(int index) {
         return this.tradeNodes.values().stream().filter(tradeNode -> tradeNode.getIndex() == index).findFirst().orElse(null);
     }
 
@@ -667,7 +667,7 @@ public class Save {
             AtomicInteger i = new AtomicInteger(1);
             this.tradeNodes = tradeItem.getChildren("node")
                                        .stream()
-                                       .map(item -> new TradeNode(item, this, i.getAndIncrement()))
+                                       .map(item -> new SaveTradeNode(item, this, i.getAndIncrement()))
                                        .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()),
                                                                  Function.identity()));
         }

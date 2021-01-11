@@ -19,7 +19,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.luaj.vm2.ast.Exp;
-import org.luaj.vm2.ast.Str;
 import org.luaj.vm2.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +94,8 @@ public class Game {
     private Map<String, Institution> institutions;
 
     private Map<String, TradeGood> tradeGoods;
+
+    private Map<String, TradeNode> tradeNodes;
 
     private Map<String, Building> buildings;
 
@@ -237,6 +238,7 @@ public class Game {
         readReligion();
         readInstitutions();
         readTradeGoods();
+        readTradeNodes();
         readBuildings();
         readImperialReforms();
         readDecrees();
@@ -555,6 +557,17 @@ public class Game {
 
     public TradeGood getTradeGood(int i) {
         return new ArrayList<>(this.tradeGoods.values()).get(i);
+    }
+
+    public List<TradeNode> getTradeNodes() {
+        return this.tradeNodes.values()
+                              .stream()
+                              .sorted(Comparator.comparing(TradeNode::getLocalizedName, Eu4Utils.COLLATOR))
+                              .collect(Collectors.toList());
+    }
+
+    public TradeNode getTradeNode(String name) {
+        return this.tradeNodes.get(name);
     }
 
     public List<Building> getBuildings() {
@@ -1194,19 +1207,32 @@ public class Game {
                             fileNode -> fileNode.getPath().toString().endsWith(".tga"));
     }
 
-    private void readMods(List<String> modsEnabled) {
+    private void readMods(List<String> modsEnabled) throws IOException {
         this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath), false), FileNode::getChildren);
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator
+            Map<String, File> knownMods = new HashMap<>();
+            try (Stream<Path> stream = Files.list(Paths.get(this.modFolderPath))) {
+                stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
+                      .filter(path -> path.toFile().exists() && path.toFile().canRead())
+                      .forEach(path -> {
+                          knownMods.put(path.getFileName().toString(), path.toFile());
+                          if (!Eu4Utils.MOD_FILE_NAME_PATTERN.matcher(path.getFileName().toString()).matches()) {
+                              ClausewitzItem item = ClausewitzParser.parse(path.toFile(), 0);
+                              if (item.hasVar("remote_file_id")) {
+                                  knownMods.put("ugc_" + ClausewitzUtils.removeQuotes(item.getVarAsString("remote_file_id")) + ".mod", path.toFile());
+                              }
+                          }
+                      });
+            }
+
             Map<File, List<String>> map = new LinkedHashMap<>();
 
             for (String mod : modsEnabled) {
-                String modPath = this.modFolderPath + File.separator + ClausewitzUtils.removeQuotes(mod).replaceAll("^mod/", "");
-                File file = new File(modPath);
-
-                if (file.exists() && file.canRead()) {
-                    ClausewitzItem item = ClausewitzParser.parse(file, 0);
+                File modFile = knownMods.get(ClausewitzUtils.removeQuotes(mod).replaceAll("^mod/", ""));
+                if (modFile != null && modFile.exists() && modFile.canRead()) {
+                    ClausewitzItem item = ClausewitzParser.parse(modFile, 0);
 
                     if (item != null) {
                         map.put(new File(ClausewitzUtils.removeQuotes(item.getVarAsString("path"))),
@@ -1547,6 +1573,22 @@ public class Game {
                 });
 
         this.tradeGoods.values().forEach(tradeGood -> tradeGood.setLocalizedName(this.getLocalisation(tradeGood.getName())));
+    }
+
+    private void readTradeNodes() {
+        this.tradeNodes = new LinkedHashMap<>();
+
+        getPaths(this.commonFolderPath + File.separator + "tradenodes",
+                 fileNode -> Files.isRegularFile(fileNode.getPath()))
+                .forEach(path -> {
+                    ClausewitzItem tradeNodesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    this.tradeNodes.putAll(tradeNodesItem.getChildren()
+                                                         .stream()
+                                                         .map(TradeNode::new)
+                                                         .collect(Collectors.toMap(TradeNode::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
+                });
+
+        this.tradeNodes.values().forEach(tradeNode -> tradeNode.setLocalizedName(this.getLocalisation(tradeNode.getName())));
     }
 
     private void readBuildings() {

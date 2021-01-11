@@ -14,7 +14,7 @@ public class TradeNodeIncoming {
         this.save = save;
     }
 
-    public TradeNode getFrom() {
+    public SaveTradeNode getFrom() {
         return this.save.getTradeNode(getFromIndex());
     }
 

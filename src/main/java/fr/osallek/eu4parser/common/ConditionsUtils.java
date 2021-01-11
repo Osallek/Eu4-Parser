@@ -28,7 +28,7 @@ import fr.osallek.eu4parser.model.save.empire.HreReligionStatus;
 import fr.osallek.eu4parser.model.save.gameplayoptions.NationSetup;
 import fr.osallek.eu4parser.model.save.gameplayoptions.ProvinceTaxManpower;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import fr.osallek.eu4parser.model.save.trade.TradeNode;
+import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -1923,7 +1923,7 @@ public class ConditionsUtils {
         Double aDouble;
         Integer integer;
         TradeGood tradeGood;
-        TradeNode tradeNode;
+        SaveTradeNode tradeNode;
         SaveReligion religion;
 
         if ((country = root.getSave().getCountry(condition.getName())) != null) {
@@ -2594,7 +2594,7 @@ public class ConditionsUtils {
                                .getTradeNodes()
                                .values()
                                .stream()
-                               .max(Comparator.comparingDouble(TradeNode::getCurrent))
+                               .max(Comparator.comparingDouble(SaveTradeNode::getCurrent))
                                .get()
                                .equals(province.getSave().getTradeNodes().get(province.getTrade()));
             case "hre_heretic_religion":
@@ -2967,7 +2967,7 @@ public class ConditionsUtils {
 
     public static boolean applyScopeToProvince(SaveProvince province, Condition condition) {
         Country country;
-        TradeNode tradeNode;
+        SaveTradeNode tradeNode;
 
         if ((country = province.getSave().getCountry(condition.getName())) != null) {
             return condition.apply(country, country);

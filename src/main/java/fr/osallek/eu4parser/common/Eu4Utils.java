@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public final class Eu4Utils {
 
@@ -81,6 +82,8 @@ public final class Eu4Utils {
     public static final String SUBJECT_TYPE_CLIENT_VASSAL = "client_vassal";
 
     public static final String SUBJECT_TYPE_PERSONAL_UNION = "personal_union";
+
+    public static final Pattern MOD_FILE_NAME_PATTERN = Pattern.compile("ugc_[0-9]+.mod");
 
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
