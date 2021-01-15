@@ -20,7 +20,7 @@ public class Color {
     }
 
     public int getRed() {
-        return isDouble ? (int) (list.getAsDouble(0) * 255) : this.list.getAsInt(0);
+        return Math.max(0, Math.min(255, isDouble ? (int) (list.getAsDouble(0) * 255) : this.list.getAsInt(0)));
     }
 
     public void setRed(int red) {
@@ -32,7 +32,7 @@ public class Color {
     }
 
     public int getGreen() {
-        return isDouble ? (int) (list.getAsDouble(1) * 255) : this.list.getAsInt(1);
+        return Math.max(0, Math.min(255, isDouble ? (int) (list.getAsDouble(1) * 255) : this.list.getAsInt(1)));
     }
 
     public void setGreen(int green) {
@@ -44,7 +44,7 @@ public class Color {
     }
 
     public int getBlue() {
-        return isDouble ? (int) (list.getAsDouble(2) * 255) : this.list.getAsInt(2);
+        return Math.max(0, Math.min(255, isDouble ? (int) (list.getAsDouble(2) * 255) : this.list.getAsInt(2)));
     }
 
     public void setBlue(int blue) {

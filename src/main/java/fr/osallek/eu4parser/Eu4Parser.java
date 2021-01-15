@@ -43,12 +43,12 @@ public class Eu4Parser {
 
         if (file.canRead()) {
             try (ZipFile zipFile = new ZipFile(path)) {
-                save = new Save(file.getName(), gameFolderPath, modFolder,
-                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, ClausewitzUtils.CHARSET, listeners),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, ClausewitzUtils.CHARSET, listeners),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET, listeners));
+                save = new Save(ClausewitzUtils.getCharset(zipFile, Eu4Utils.GAMESTATE_FILE), file.getName(), gameFolderPath, modFolder,
+                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners));
             } catch (ZipException e) {
-                save = new Save(file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, ClausewitzUtils.CHARSET, listeners));
+                save = new Save(ClausewitzUtils.getCharset(file), file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, listeners));
             }
         }
 
@@ -61,9 +61,9 @@ public class Eu4Parser {
 
         if (file.canRead()) {
             try (ZipFile zipFile = new ZipFile(path)) {
-                object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, ClausewitzUtils.CHARSET, "mod_enabled");
+                object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, "mod_enabled");
             } catch (ZipException e) {
-                object = ClausewitzParser.readSingleObject(file, 1, ClausewitzUtils.CHARSET, "mod_enabled");
+                object = ClausewitzParser.readSingleObject(file, 1, "mod_enabled");
             }
 
             if (object != null && ClausewitzList.class.equals(object.getClass())) {
@@ -84,28 +84,27 @@ public class Eu4Parser {
 
     public static void writeSave(Save save, String path, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (save.isCompressed()) {
-            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))),
-                                                                    ClausewitzUtils.CHARSET)) {
+            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))), save.getCharset())) {
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.AI_FILE));
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, ClausewitzUtils.CHARSET));
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
                 save.writeAi(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.GAMESTATE_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, ClausewitzUtils.CHARSET));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
                 save.writeGamestate(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.META_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, ClausewitzUtils.CHARSET));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
                 save.writeMeta(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
             }
         } else {
-            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get(path), ClausewitzUtils.CHARSET)) {
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get(path), save.getCharset())) {
                 save.writeAll(bufferedWriter, listeners);
             }
         }

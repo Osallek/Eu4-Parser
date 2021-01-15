@@ -2,6 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -21,7 +22,7 @@ public class TradeGood {
 
     private boolean goldType;
 
-    private Double basePrice;
+    private Double basePrice = 1.0;
 
     public TradeGood(ClausewitzItem item) {
         this.name = item.getName();
@@ -32,7 +33,7 @@ public class TradeGood {
     }
 
     void setPriceItem(ClausewitzItem priceItem) {
-        this.basePrice = priceItem.getVarAsDouble("base_price");
+        this.basePrice = NumbersUtils.doubleOrDefault(priceItem.getVarAsDouble("base_price"), 1.0);
         this.goldType = BooleanUtils.toBoolean(priceItem.getVarAsBool("goldtype"));
     }
 

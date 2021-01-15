@@ -1301,7 +1301,7 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()),
                  fileNode -> fileNode.getPath().toString().endsWith(eu4Language.fileEndWith + ".yml"))
                 .forEach(path -> {
-                    try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                    try (BufferedReader reader = Files.newBufferedReader(path, ClausewitzUtils.getCharset(path.toFile()))) {
                         String line;
                         reader.readLine(); //Skip first line language
 
@@ -1352,7 +1352,7 @@ public class Game {
                  fileNode -> Files.isRegularFile(fileNode.getPath()),
                  fileNode -> fileNode.getPath().toString().endsWith(".gfx"))
                 .forEach(path -> {
-                    ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
+                    ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0);
                     ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
 
                     if (spriteTypesItem != null) {
@@ -1372,7 +1372,7 @@ public class Game {
         if (provincesDefinitionFile != null && provincesDefinitionFile.canRead()) {
             this.provinces = new HashMap<>();
             this.provincesByColor = new HashMap<>();
-            try (BufferedReader reader = Files.newBufferedReader(provincesDefinitionFile.toPath(), ClausewitzUtils.CHARSET)) {
+            try (BufferedReader reader = Files.newBufferedReader(provincesDefinitionFile.toPath(), ClausewitzUtils.getCharset(provincesDefinitionFile))) {
                 String line;
                 reader.readLine(); //Skip csv headers
                 while ((line = reader.readLine()) != null) {
@@ -1390,7 +1390,7 @@ public class Game {
             File provincesMapFile = getAbsoluteFile(this.mapFolderPath + File.separator + "default.map");
 
             if (provincesMapFile != null && provincesMapFile.canRead()) {
-                ClausewitzItem provinceMapItem = ClausewitzParser.parse(provincesMapFile, 0, StandardCharsets.UTF_8);
+                ClausewitzItem provinceMapItem = ClausewitzParser.parse(provincesMapFile, 0);
                 ClausewitzList seaList = provinceMapItem.getList("sea_starts");
 
                 if (seaList != null) {
@@ -1407,7 +1407,7 @@ public class Game {
             File climateFile = getAbsoluteFile(this.mapFolderPath + File.separator + "climate.txt");
 
             if (climateFile != null && climateFile.canRead()) {
-                ClausewitzItem climateItem = ClausewitzParser.parse(climateFile, 0, StandardCharsets.UTF_8);
+                ClausewitzItem climateItem = ClausewitzParser.parse(climateFile, 0);
                 climateItem.getLists()
                            .forEach(list -> {
                                if (list.getName().endsWith("_winter")) {
@@ -1423,7 +1423,7 @@ public class Game {
             File continentFile = getAbsoluteFile(this.mapFolderPath + File.separator + "continent.txt");
 
             if (continentFile != null && continentFile.canRead()) {
-                ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile, 0, StandardCharsets.UTF_8);
+                ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile, 0);
 
                 this.continents = continentsItem.getListsNot("island_check_provinces")
                                                 .stream()
@@ -1488,7 +1488,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "cultures",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0, ClausewitzUtils.CHARSET);
+                    ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.cultureGroups.putAll(cultureGroupsItem.getChildren()
                                                                .stream()
                                                                .map(CultureGroup::new)
@@ -1506,7 +1506,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "religions",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
                     religionGroupsItem.getChildren()
                                       .stream()
                                       .map(ReligionGroup::new)
@@ -1535,7 +1535,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "institutions",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.institutions.putAll(institutionsItem.getChildren()
                                                              .stream()
                                                              .map(Institution::new)
@@ -1554,7 +1554,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "tradegoods",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.tradeGoods.putAll(tradeGoodsItem.getChildren()
                                                          .stream()
                                                          .map(TradeGood::new)
@@ -1564,7 +1564,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "prices",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0);
                     pricesItem.getChildren().forEach(priceItem -> {
                         if (this.tradeGoods.containsKey(priceItem.getName())) {
                             this.tradeGoods.get(priceItem.getName()).setPriceItem(priceItem);
@@ -1581,7 +1581,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "tradenodes",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem tradeNodesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem tradeNodesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.tradeNodes.putAll(tradeNodesItem.getChildren()
                                                          .stream()
                                                          .map(TradeNode::new)
@@ -1597,7 +1597,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "buildings",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.buildings.putAll(buildingsItem.getChildrenNot("manufactory")
                                                        .stream()
                                                        .map(item -> new Building(item, this))
@@ -1622,7 +1622,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "imperial_reforms",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.imperialReforms.putAll(imperialReformsItem.getChildren()
                                                                    .stream()
                                                                    .map(item -> new ImperialReform(item, this))
@@ -1638,7 +1638,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "decrees",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.decrees.putAll(decreesItem.getChildren().stream().map(Decree::new).collect(Collectors.toMap(Decree::getName, Function.identity(), (a, b) -> b)));
                 });
 
@@ -1651,7 +1651,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "golden_bulls",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.goldenBulls.putAll(
                             goldenBullsItem.getChildren().stream().map(GoldenBull::new).collect(Collectors.toMap(GoldenBull::getName, Function.identity(), (a, b) -> b)));
                 });
@@ -2036,7 +2036,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "ruler_personalities",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.rulerPersonalities.putAll(rulerPersonalityItem.getChildren()
                                                                        .stream()
                                                                        .map(RulerPersonality::new)
@@ -2052,7 +2052,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "leader_personalities",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem leaderPersonalityItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem leaderPersonalityItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.leaderPersonalities.putAll(leaderPersonalityItem.getChildren()
                                                                        .stream()
                                                                        .map(LeaderPersonality::new)
@@ -2101,7 +2101,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "tradecompany_investments",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.investments.putAll(investmentsItem.getChildren()
                                                            .stream()
                                                            .map(item -> new Investment(item, this))
@@ -2117,7 +2117,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "policies",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.policies.putAll(investmentsItem.getChildren()
                                                         .stream()
                                                         .map(Policy::new)
@@ -2133,7 +2133,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "hegemons",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.hegemons.putAll(hegemonsItem.getChildren()
                                                      .stream()
                                                      .map(Hegemon::new)
@@ -2149,7 +2149,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "factions",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.factions.putAll(hegemonsItem.getChildren()
                                                      .stream()
                                                      .map(Faction::new)
@@ -2169,7 +2169,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "ages",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.ages.putAll(agesItem.getChildren()
                                              .stream()
                                              .map(Age::new)
@@ -2213,7 +2213,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "fervor",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem fervorsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem fervorsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.fervors.putAll(fervorsItem.getChildren()
                                                    .stream()
                                                    .map(Fervor::new)
@@ -2229,7 +2229,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "great_projects",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.greatProjects.putAll(greatProjectsItem.getChildren()
                                                                .stream()
                                                                .map(GreatProject::new)
@@ -2245,7 +2245,7 @@ public class Game {
         getPaths(this.commonFolderPath + File.separator + "holy_orders",
                  fileNode -> Files.isRegularFile(fileNode.getPath()))
                 .forEach(path -> {
-                    ClausewitzItem holyOrdersItem = ClausewitzParser.parse(path.toFile(), 0, StandardCharsets.UTF_8);
+                    ClausewitzItem holyOrdersItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.holyOrders.putAll(holyOrdersItem.getChildren()
                                                          .stream()
                                                          .map(HolyOrder::new)
