@@ -63,6 +63,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.luaj.vm2.ast.Str;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +118,7 @@ public class Country {
 
     private String localizedName;
 
-    private String player;
+    private List<String> players;
 
     private SaveHegemon hegemon;
 
@@ -345,12 +346,20 @@ public class Country {
         this.item.setVariable("was_player", wasPlayer);
     }
 
-    public String getPlayer() {
-        return player;
+    public List<String> getPlayers() {
+        return players;
     }
 
-    public void setPlayer(String player) {
-        this.player = player;
+    public void setPlayers(List<String> players) {
+        this.players = players;
+    }
+
+    public void addPlayer(String player) {
+        if (this.players == null) {
+            this.players = new ArrayList<>();
+        }
+
+        this.players.add(player);
     }
 
     public Integer getGreatPowerRank() {
@@ -4825,6 +4834,6 @@ public class Country {
 
     @Override
     public String toString() {
-        return this.localizedName == null ? getTag() : this.localizedName + (getPlayer() == null ? "" : " (" + getPlayer() + ")");
+        return this.localizedName == null ? getTag() : this.localizedName + (getPlayers() == null ? "" : " (" + String.join("; ", getPlayers()) + ")");
     }
 }

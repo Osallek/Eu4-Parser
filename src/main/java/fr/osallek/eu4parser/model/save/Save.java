@@ -745,7 +745,7 @@ public class Save {
         if (playersCountriesList != null) {
             for (int i = playersCountriesList.getValues().size() - 1; i > 0; i -= 2) {
                 if (this.countries.containsKey(ClausewitzUtils.removeQuotes(playersCountriesList.get(i)))) {
-                    this.getCountry(ClausewitzUtils.removeQuotes(playersCountriesList.get(i))).setPlayer(playersCountriesList.get(i - 1));
+                    this.getCountry(ClausewitzUtils.removeQuotes(playersCountriesList.get(i))).addPlayer(playersCountriesList.get(i - 1));
                 }
             }
         }
