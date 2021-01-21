@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser;
 
 import fr.osallek.clausewitzparser.ClausewitzParser;
-import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
@@ -16,6 +15,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -43,12 +43,12 @@ public class Eu4Parser {
 
         if (file.canRead()) {
             try (ZipFile zipFile = new ZipFile(path)) {
-                save = new Save(ClausewitzUtils.getCharset(zipFile, Eu4Utils.GAMESTATE_FILE), file.getName(), gameFolderPath, modFolder,
+                save = new Save(file.getName(), gameFolderPath, modFolder,
                                 ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners));
             } catch (ZipException e) {
-                save = new Save(ClausewitzUtils.getCharset(file), file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, listeners));
+                save = new Save(file.getName(), gameFolderPath, modFolder, ClausewitzParser.parse(file, 1, listeners));
             }
         }
 
@@ -84,27 +84,27 @@ public class Eu4Parser {
 
     public static void writeSave(Save save, String path, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (save.isCompressed()) {
-            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))), save.getCharset())) {
+            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))), StandardCharsets.ISO_8859_1)) {
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.AI_FILE));
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1));
                 save.writeAi(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.GAMESTATE_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1));
                 save.writeGamestate(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.META_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1));
                 save.writeMeta(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
             }
         } else {
-            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get(path), save.getCharset())) {
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(Paths.get(path), StandardCharsets.ISO_8859_1)) {
                 save.writeAll(bufferedWriter, listeners);
             }
         }

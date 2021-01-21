@@ -28,10 +28,11 @@ public class Province {
     private Continent continent;
 
     public Province(String[] csvLine) {
-        this.id = Integer.parseInt(csvLine[0].trim());
+        this.id = Eu4Utils.cleanStringAndParseToInt(csvLine[0].trim());
 
         if (StringUtils.isNoneBlank(csvLine[1], csvLine[2], csvLine[3])) {
-            this.color = Eu4Utils.rgbToColor(Integer.parseInt(csvLine[1].trim()), Integer.parseInt(csvLine[2].trim()), Integer.parseInt(csvLine[3].trim()));
+            this.color = Eu4Utils.rgbToColor(Eu4Utils.cleanStringAndParseToInt(csvLine[1].trim()), Eu4Utils.cleanStringAndParseToInt(csvLine[2].trim()),
+                                             Eu4Utils.cleanStringAndParseToInt(csvLine[3].trim()));
         }
 
         if (csvLine.length >= 5) {

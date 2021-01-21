@@ -776,7 +776,7 @@ public class SaveProvince extends Province {
         if (this.country != null) {
             this.save.getGame().getBuildings().forEach(building -> {
                 if (building.onlyNative() && this.country != null
-                    && !"native".equals(this.country.getGovernment().getType())) {
+                    && !"native".equals(this.country.getGovernment().getType().getName())) {
                     return;
                 }
 

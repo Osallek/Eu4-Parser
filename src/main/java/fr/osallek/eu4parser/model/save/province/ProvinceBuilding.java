@@ -44,4 +44,9 @@ public class ProvinceBuilding extends Building implements Comparable<ProvinceBui
     public int compareTo(ProvinceBuilding o) {
         return Comparator.nullsLast(LocalDate::compareTo).compare(this.date, o.date);
     }
+
+    @Override
+    public String toString() {
+        return this.getLocalizedName();
+    }
 }

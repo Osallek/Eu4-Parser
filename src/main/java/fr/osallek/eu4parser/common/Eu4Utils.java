@@ -103,6 +103,14 @@ public final class Eu4Utils {
         }
     }
 
+    public static Integer cleanStringAndParseToInt(String s) {
+        return Integer.parseInt(s.replaceAll("[\\D]", ""));
+    }
+
+    public static Integer cleanStringAndParseToDouble(String s) {
+        return Integer.parseInt(s.replaceAll("[\\D.]", ""));
+    }
+
     @SafeVarargs
     public static <K, V> Map<K, V> mergeMaps(Map<K, V>... maps) {
         Map<K, V> map = null;

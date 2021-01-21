@@ -306,6 +306,11 @@ public class Building {
     }
 
     @Override
+    public String toString() {
+        return localizedName;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

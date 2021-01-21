@@ -38,7 +38,6 @@ import org.luaj.vm2.parser.ParseException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +59,6 @@ public class Save {
 
     //Todo in countries:
     //Todo Teams
-
-    private final Charset charset;
 
     private final String name;
 
@@ -133,18 +130,18 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    public Save(Charset charset, String name, String gameFolderPath, String modFolder, ClausewitzItem item) throws IOException, ParseException {
-        this(charset, name, gameFolderPath, modFolder, item, item, item, false);
+    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem item) throws IOException, ParseException {
+        this(name, gameFolderPath, modFolder, item, item, item, false);
     }
 
-    public Save(Charset charset, String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
+    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
                 ClausewitzItem metaItem) throws IOException, ParseException {
-        this(charset, name, gameFolderPath, modFolder, gamestateItem, aiItem, metaItem, true);
+        this(name, gameFolderPath, modFolder, gamestateItem, aiItem, metaItem, true);
     }
 
-    private Save(Charset charset, String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
+    private Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
+                 ClausewitzItem metaItem,
                  boolean compressed) throws IOException, ParseException {
-        this.charset = charset;
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
@@ -152,10 +149,6 @@ public class Save {
         this.compressed = compressed;
         this.game = Eu4Parser.parseGame(gameFolderPath, modFolder, this.getModEnabled());
         refreshAttributes();
-    }
-
-    public Charset getCharset() {
-        return charset;
     }
 
     public String getName() {

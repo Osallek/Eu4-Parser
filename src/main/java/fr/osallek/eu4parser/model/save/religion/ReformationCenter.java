@@ -2,7 +2,6 @@ package fr.osallek.eu4parser.model.save.religion;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;

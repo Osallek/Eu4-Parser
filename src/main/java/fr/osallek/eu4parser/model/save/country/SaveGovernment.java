@@ -6,7 +6,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Government;
 import fr.osallek.eu4parser.model.game.GovernmentReform;
-import org.luaj.vm2.ast.Str;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
