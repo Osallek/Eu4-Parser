@@ -1,7 +1,5 @@
 package fr.osallek.eu4parser.model.game;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,7 +59,7 @@ public class FileNode implements Comparable<FileNode> {
     }
 
     @Override
-    public int compareTo(@NotNull FileNode o) {
+    public int compareTo(FileNode o) {
         return Comparator.comparing(FileNode::getRelativePath).compare(this, o);
     }
 

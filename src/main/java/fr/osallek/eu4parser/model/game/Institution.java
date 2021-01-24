@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -75,7 +74,7 @@ public class Institution implements Comparable<Institution> {
     }
 
     @Override
-    public int compareTo(@NotNull Institution o) {
+    public int compareTo(Institution o) {
         return Comparator.comparingInt(Institution::getIndex).compare(this, o);
     }
 

@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -68,7 +67,7 @@ public class Isolationism implements Comparable<Isolationism> {
     }
 
     @Override
-    public int compareTo(@NotNull Isolationism o) {
+    public int compareTo(Isolationism o) {
         return Comparator.comparingInt(Isolationism::getIsolationValue).compare(this, o);
     }
 }

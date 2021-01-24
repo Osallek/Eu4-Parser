@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -77,7 +76,7 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
     }
 
     @Override
-    public int compareTo(@NotNull DefenderOfFaith o) {
+    public int compareTo(DefenderOfFaith o) {
         return Comparator.comparingInt(DefenderOfFaith::getLevel).compare(this, o);
     }
 }

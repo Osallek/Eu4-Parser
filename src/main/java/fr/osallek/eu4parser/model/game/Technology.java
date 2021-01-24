@@ -2,7 +2,6 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -42,7 +41,7 @@ public class Technology implements Comparable<Technology> {
     }
 
     @Override
-    public int compareTo(@NotNull Technology o) {
+    public int compareTo(Technology o) {
         return Comparator.comparingInt(Technology::getYear).compare(this, o);
     }
 

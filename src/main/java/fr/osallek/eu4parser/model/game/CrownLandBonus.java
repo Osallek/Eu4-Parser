@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -70,7 +69,7 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
     }
 
     @Override
-    public int compareTo(@NotNull CrownLandBonus o) {
+    public int compareTo(CrownLandBonus o) {
         return Comparator.comparingDouble(CrownLandBonus::getRangeFrom).compare(this, o);
     }
 }

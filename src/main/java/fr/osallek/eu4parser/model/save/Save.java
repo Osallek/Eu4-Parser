@@ -34,7 +34,6 @@ import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import fr.osallek.eu4parser.model.save.war.PreviousWar;
 import org.apache.commons.lang3.BooleanUtils;
-import org.luaj.vm2.parser.ParseException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -130,18 +129,17 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem item) throws IOException, ParseException {
+    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem item) throws IOException {
         this(name, gameFolderPath, modFolder, item, item, item, false);
     }
 
     public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
-                ClausewitzItem metaItem) throws IOException, ParseException {
+                ClausewitzItem metaItem) throws IOException {
         this(name, gameFolderPath, modFolder, gamestateItem, aiItem, metaItem, true);
     }
 
     private Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
-                 ClausewitzItem metaItem,
-                 boolean compressed) throws IOException, ParseException {
+                 ClausewitzItem metaItem, boolean compressed) throws IOException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;

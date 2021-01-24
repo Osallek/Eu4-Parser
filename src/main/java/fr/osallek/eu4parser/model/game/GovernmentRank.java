@@ -2,7 +2,6 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.NumbersUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 
@@ -26,7 +25,7 @@ public class GovernmentRank implements Comparable<GovernmentRank> {
     }
 
     @Override
-    public int compareTo(@NotNull GovernmentRank o) {
+    public int compareTo(GovernmentRank o) {
         return Comparator.comparingInt(GovernmentRank::getLevel).compare(this, o);
     }
 }

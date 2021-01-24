@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.List;
@@ -147,7 +146,7 @@ public class EstatePrivilege implements Comparable<EstatePrivilege> {
     }
 
     @Override
-    public int compareTo(@NotNull EstatePrivilege o) {
+    public int compareTo(EstatePrivilege o) {
         return Comparator.comparing(EstatePrivilege::getLocalizedName, Eu4Utils.COLLATOR).compare(this, o);
     }
 

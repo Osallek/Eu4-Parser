@@ -7,7 +7,6 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.country.Losses;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -228,7 +227,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
     }
 
     @Override
-    public int compareTo(@NotNull ActiveWar o) {
+    public int compareTo(ActiveWar o) {
         return Comparator.comparing(ActiveWar::getStartDate).compare(this, o);
     }
 

@@ -1,12 +1,12 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.ClausewitzParser;
+import fr.osallek.clausewitzparser.LuaParser;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
-import fr.osallek.eu4parser.common.LuaUtils;
 import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.ModifierScope;
 import fr.osallek.eu4parser.common.ModifierType;
@@ -18,8 +18,6 @@ import fr.osallek.eu4parser.model.save.country.Country;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.luaj.vm2.ast.Exp;
-import org.luaj.vm2.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +25,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
@@ -159,7 +156,7 @@ public class Game {
 
     private SortedSet<ProfessionalismModifier> professionalismModifiers;
 
-    private Map<String, Map<String, Exp.Constant>> defines;
+    private Map<String, Object> defines;
 
     private Map<String, RulerPersonality> rulerPersonalities;
 
@@ -213,7 +210,7 @@ public class Game {
 
     private Map<String, String> countryTags;
 
-    public Game(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException, ParseException {
+    public Game(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException {
         this.gameFolderPath = gameFolderPath;
         this.modFolderPath = modFolderPath;
 
@@ -292,7 +289,7 @@ public class Game {
         readColonialRegions();
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Time to read game date: {}ms !", Duration.between(start, Instant.now()).toMillis());
+            LOGGER.debug("Time to read game data: {}ms !", Duration.between(start, Instant.now()).toMillis());
         }
     }
 
@@ -625,156 +622,168 @@ public class Game {
         return this.events.get(id);
     }
 
+    private int getDefinesInt(String category, String key) {
+        return (int) ((Map<String, Object>) this.defines.get(category)).get(key);
+    }
+
+    private double getDefinesDouble(String category, String key) {
+        return (double) ((Map<String, Object>) this.defines.get(category)).get(key);
+    }
+
+    private LocalDate getDefinesLocalDate(String category, String key) {
+        return LocalDate.parse(((String) ((Map<String, Object>) this.defines.get(category)).get(key)), ClausewitzUtils.DATE_FORMAT);
+    }
+
     public int getMaxGovRank() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_GOV_RANK").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "MAX_GOV_RANK");
     }
 
     public int getMaxAspects() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_UNLOCKED_ASPECTS").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "MAX_UNLOCKED_ASPECTS");
     }
 
     public int getGoldenEraDuration() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("GOLDEN_ERA_YEARS").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "GOLDEN_ERA_YEARS");
     }
 
     public int getBankruptcyDuration() {
-        return this.defines.get(Eu4Utils.DEFINE_ECONOMY_KEY).get("BANKRUPTCY_DURATION").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_ECONOMY_KEY, "BANKRUPTCY_DURATION");
     }
 
     public int getNbGreatPowers() {
-        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("NUM_OF_GREAT_POWERS").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_DIPLOMACY_KEY, "NUM_OF_GREAT_POWERS");
     }
 
     public int getNomadDevelopmentScale() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NOMAD_DEVELOPMENT_SCALE").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "NOMAD_DEVELOPMENT_SCALE");
     }
 
     public int getLargeColonialNationLimit() {
-        return this.defines.get(Eu4Utils.DEFINE_ECONOMY_KEY).get("LARGE_COLONIAL_NATION_LIMIT").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_ECONOMY_KEY, "LARGE_COLONIAL_NATION_LIMIT");
     }
 
     public int getFortPerDevRatio() {
-        return this.defines.get(Eu4Utils.DEFINE_MILITARY_KEY).get("FORT_PER_DEV_RATIO").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_MILITARY_KEY, "FORT_PER_DEV_RATIO");
     }
 
     public double getMaxArmyProfessionalism() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_ARMY_PROFESSIONALISM").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "MAX_ARMY_PROFESSIONALISM");
     }
 
     public double getLowArmyProfessionalismMinRange() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("LOW_ARMY_PROFESSIONALISM_MIN_RANGE").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "LOW_ARMY_PROFESSIONALISM_MIN_RANGE");
     }
 
     public double getLowArmyProfessionalismMaxRange() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("LOW_ARMY_PROFESSIONALISM_MAX_RANGE").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "LOW_ARMY_PROFESSIONALISM_MAX_RANGE");
     }
 
     public double getHighArmyProfessionalismMinRange() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("HIGH_ARMY_PROFESSIONALISM_MIN_RANGE").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "HIGH_ARMY_PROFESSIONALISM_MIN_RANGE");
     }
 
     public double getHighArmyProfessionalismMaxRange() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("HIGH_ARMY_PROFESSIONALISM_MAX_RANGE").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "HIGH_ARMY_PROFESSIONALISM_MAX_RANGE");
     }
 
     public LocalDate getStartDate() {
-        return LocalDate.parse(this.defines.get(Eu4Utils.DEFINE_GAME_KEY).get("START_DATE").value.toString(), ClausewitzUtils.DATE_FORMAT);
+        return getDefinesLocalDate(Eu4Utils.DEFINE_GAME_KEY, "START_DATE");
     }
 
     public LocalDate getEndDate() {
-        return LocalDate.parse(this.defines.get(Eu4Utils.DEFINE_GAME_KEY).get("END_DATE").value.toString(), ClausewitzUtils.DATE_FORMAT);
+        return getDefinesLocalDate(Eu4Utils.DEFINE_GAME_KEY, "END_DATE");
     }
 
     public double getEstateAngryThreshold() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_ANGRY_THRESHOLD").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_ANGRY_THRESHOLD");
     }
 
     public double getEstateHappyThreshold() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_HAPPY_THRESHOLD").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_HAPPY_THRESHOLD");
     }
 
     public double getEstateInfluenceLevel1() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_LEVEL_1").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_1");
     }
 
     public double getEstateInfluenceLevel2() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_LEVEL_2").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_2");
     }
 
     public double getEstateInfluenceLevel3() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_LEVEL_3").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_3");
     }
 
     public double getEstateInfluencePerDev() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_INFLUENCE_PER_DEV").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_PER_DEV");
     }
 
     public double getEstateMaxInfluenceFromDev() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_MAX_INFLUENCE_FROM_DEV").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_MAX_INFLUENCE_FROM_DEV");
     }
 
     public double getIdeaToTech() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("IDEA_TO_TECH").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "IDEA_TO_TECH");
     }
 
     public double getNeighbourBonus() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NEIGHBOURBONUS").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "NEIGHBOURBONUS");
     }
 
     public double getNeighbourBonusCap() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("NEIGHBOURBONUS_CAP").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "NEIGHBOURBONUS_CAP");
     }
 
     public double getSpyNetworkTechEffect() {
-        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("SPY_NETWORK_TECH_EFFECT").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_DIPLOMACY_KEY, "SPY_NETWORK_TECH_EFFECT");
     }
 
     public double getSpyNetworkTechEffectMax() {
-        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("SPY_NETWORK_TECH_EFFECT_MAX").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_DIPLOMACY_KEY, "SPY_NETWORK_TECH_EFFECT_MAX");
     }
 
     public double getEstatePrivilegesMaxConcurrent() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("ESTATE_PRIVILEGES_MAX_CONCURRENT").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_PRIVILEGES_MAX_CONCURRENT");
     }
 
     public double getInnovativenessMax() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("INNOVATIVENESS_MAX").value.todouble();
+        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "INNOVATIVENESS_MAX");
     }
 
     public int getMonarchMaxSkill() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MONARCH_MAX_SKILL").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "MONARCH_MAX_SKILL");
     }
 
     public int getMonarchMinSkill() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MONARCH_MIN_SKILL").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "MONARCH_MIN_SKILL");
     }
 
     public int getMaxExtraPersonalities() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_EXTRA_PERSONALITIES").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "MAX_EXTRA_PERSONALITIES");
     }
 
     public int getAgeOfAdulthood() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("AGE_OF_ADULTHOOD").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "AGE_OF_ADULTHOOD");
     }
 
     public int getNumPossibleRivals() {
-        return this.defines.get(Eu4Utils.DEFINE_DIPLOMACY_KEY).get("NUM_POSSIBLE_RIVALS").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_DIPLOMACY_KEY, "NUM_POSSIBLE_RIVALS");
     }
 
     public int getMaxChristianReligiousCenters() {
-        return this.defines.get(Eu4Utils.DEFINE_RELIGION_KEY).get("MAX_CHRISTIAN_RELIGIOUS_CENTERS").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_RELIGION_KEY, "MAX_CHRISTIAN_RELIGIOUS_CENTERS");
     }
 
     public int getMaxActivePolicies() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("MAX_ACTIVE_POLICIES").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "MAX_ACTIVE_POLICIES");
     }
 
     public int getBasePossiblePolicies() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("BASE_POSSIBLE_POLICIES").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "BASE_POSSIBLE_POLICIES");
     }
 
     public int getFreeIdeaGroupCost() {
-        return this.defines.get(Eu4Utils.DEFINE_COUNTRY_KEY).get("FREE_IDEA_GROUP_COST").value.toint();
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "FREE_IDEA_GROUP_COST");
     }
 
     public List<Government> getGovernments() {
@@ -1271,27 +1280,29 @@ public class Game {
         }
     }
 
-    public void loadDefines() throws FileNotFoundException, ParseException {
-        this.defines = LuaUtils.luaFileToMap(getAbsoluteFile(this.commonFolderPath + File.separator + "defines.lua"));
+    public void loadDefines() throws IOException {
+        this.defines = LuaParser.parse(getAbsoluteFile(this.commonFolderPath + File.separator + "defines.lua"));
 
         getPaths(this.commonFolderPath + File.separator + "defines", this::isRegularTxtFile)
                 .forEach(path -> {
                     try {
-                        Map<String, Map<String, Exp.Constant>> map = LuaUtils.luaFileToMap(path.toFile());
+                        Map<String, Object> map = LuaParser.parse(path.toFile());
 
-                        map.forEach((rootName, values) -> this.defines.compute(rootName, (root, defines) -> {
-                            if (defines == null) {
-                                defines = new HashMap<>();
+                        map.forEach((rootName, values) -> this.defines.compute(rootName, (root, def) -> {
+                            if (def == null) {
+                                def = new LinkedHashMap<>();
                             }
 
-                            defines.putAll(values);
+                            ((Map<String, Object>) def).putAll((Map<String, Object>) values);
 
-                            return defines;
+                            return def;
                         }));
-                    } catch (FileNotFoundException | ParseException e) {
+                    } catch (IOException e) {
                         LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
                     }
                 });
+
+        this.defines = (Map<String, Object>) this.defines.get("NDefines");
     }
 
     public void loadLocalisations() {

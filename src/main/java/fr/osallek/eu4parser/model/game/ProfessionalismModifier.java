@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -34,7 +33,7 @@ public class ProfessionalismModifier implements Comparable<ProfessionalismModifi
     }
 
     @Override
-    public int compareTo(@NotNull ProfessionalismModifier o) {
+    public int compareTo(ProfessionalismModifier o) {
         return Comparator.comparingDouble(ProfessionalismModifier::getArmyProfessionalism).compare(this, o);
     }
 

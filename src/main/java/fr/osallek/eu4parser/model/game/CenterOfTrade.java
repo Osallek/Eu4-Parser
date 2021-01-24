@@ -2,7 +2,6 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -92,7 +91,7 @@ public class CenterOfTrade implements Comparable<CenterOfTrade> {
     }
 
     @Override
-    public int compareTo(@NotNull CenterOfTrade o) {
+    public int compareTo(CenterOfTrade o) {
         return Comparator.comparing(CenterOfTrade::getType).thenComparingInt(CenterOfTrade::getLevel).compare(this, o);
     }
 }

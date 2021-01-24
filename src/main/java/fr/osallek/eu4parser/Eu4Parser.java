@@ -8,7 +8,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.save.Save;
-import org.luaj.vm2.parser.ParseException;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -33,11 +32,11 @@ public class Eu4Parser {
 
     private Eu4Parser() {}
 
-    public static Save loadSave(String gameFolderPath, String modFolder, String path) throws IOException, ParseException {
+    public static Save loadSave(String gameFolderPath, String modFolder, String path) throws IOException {
         return loadSave(gameFolderPath, modFolder, path, new HashMap<>());
     }
 
-    public static Save loadSave(String gameFolderPath, String modFolder, String path, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners) throws IOException, ParseException {
+    public static Save loadSave(String gameFolderPath, String modFolder, String path, Map<Predicate<ClausewitzItem>, Consumer<String>> listeners) throws IOException {
         File file = new File(path);
         Save save = null;
 
@@ -74,7 +73,7 @@ public class Eu4Parser {
         return new ArrayList<>();
     }
 
-    public static Game parseGame(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException, ParseException {
+    public static Game parseGame(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException {
         return new Game(gameFolderPath, modFolderPath, modEnabled);
     }
 
