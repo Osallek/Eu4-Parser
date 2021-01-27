@@ -1,11 +1,11 @@
 package fr.osallek.eu4parser.model.game;
 
-import fr.osallek.clausewitzparser.ClausewitzParser;
-import fr.osallek.clausewitzparser.LuaParser;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.clausewitzparser.parser.ClausewitzParser;
+import fr.osallek.clausewitzparser.parser.LuaParser;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.ModifierScope;
