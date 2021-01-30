@@ -694,24 +694,24 @@ public class Game {
         return getDefinesLocalDate(Eu4Utils.DEFINE_GAME_KEY, "END_DATE");
     }
 
-    public double getEstateAngryThreshold() {
-        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_ANGRY_THRESHOLD");
+    public int getEstateAngryThreshold() {
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_ANGRY_THRESHOLD");
     }
 
-    public double getEstateHappyThreshold() {
-        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_HAPPY_THRESHOLD");
+    public int getEstateHappyThreshold() {
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_HAPPY_THRESHOLD");
     }
 
-    public double getEstateInfluenceLevel1() {
-        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_1");
+    public int getEstateInfluenceLevel1() {
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_1");
     }
 
-    public double getEstateInfluenceLevel2() {
-        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_2");
+    public int getEstateInfluenceLevel2() {
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_2");
     }
 
-    public double getEstateInfluenceLevel3() {
-        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_3");
+    public int getEstateInfluenceLevel3() {
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_INFLUENCE_LEVEL_3");
     }
 
     public double getEstateInfluencePerDev() {
