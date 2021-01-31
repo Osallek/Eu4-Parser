@@ -11,6 +11,7 @@ import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.ModifierScope;
 import fr.osallek.eu4parser.common.ModifierType;
 import fr.osallek.eu4parser.common.ModifiersUtils;
+import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.common.TreeNode;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
@@ -1448,6 +1449,20 @@ public class Game {
                 this.continents.values().forEach(continent -> {
                     continent.setLocalizedName(this.getLocalisation(continent.getName()));
                     continent.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setContinent(continent));
+                });
+            }
+
+            File positionsFile = getAbsoluteFile(this.mapFolderPath + File.separator + "positions.txt");
+
+            if (positionsFile != null && positionsFile.canRead()) {
+                ClausewitzItem positionsItem = ClausewitzParser.parse(positionsFile, 0);
+
+                positionsItem.getChildren().forEach(child -> {
+                    Integer provinceId = NumbersUtils.toInt(child.getName());
+
+                    if (provinceId != null && this.provinces.containsKey(provinceId) && child.hasList("position")) {
+                        this.provinces.get(provinceId).setPositions(child.getList("position"));
+                    }
                 });
             }
 

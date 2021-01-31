@@ -1,7 +1,10 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.awt.*;
 
 public class Province {
 
@@ -26,6 +29,34 @@ public class Province {
     private Area area;
 
     private Continent continent;
+
+    private double cityX;
+
+    private double cityY;
+
+    private double unitX;
+
+    private double unitY;
+
+    private double nameTextX;
+
+    private double nameTextY;
+
+    private double portX;
+
+    private double portY;
+
+    private double tradeRouteX;
+
+    private double tradeRouteY;
+
+    private double fightingUnitX;
+
+    private double fightingUnitY;
+
+    private double tradeWindX;
+
+    private double tradeWindY;
 
     public Province(String[] csvLine) {
         this.id = Eu4Utils.cleanStringAndParseToInt(csvLine[0].trim());
@@ -52,6 +83,41 @@ public class Province {
         this.isPort = other.isPort;
         this.area = other.area;
         this.continent = other.continent;
+        this.cityX = other.cityX;
+        this.cityY = other.cityY;
+        this.unitX = other.unitX;
+        this.unitY = other.unitY;
+        this.nameTextX = other.nameTextX;
+        this.nameTextY = other.nameTextY;
+        this.portX = other.portX;
+        this.portY = other.portY;
+        this.tradeRouteX = other.tradeRouteX;
+        this.tradeRouteY = other.tradeRouteY;
+        this.fightingUnitX = other.fightingUnitX;
+        this.fightingUnitY = other.fightingUnitY;
+        this.tradeWindX = other.tradeWindX;
+        this.tradeWindY = other.tradeWindY;
+    }
+
+    public void setPositions(ClausewitzList positions) {
+        if (positions == null || positions.isEmpty()) {
+            return;
+        }
+
+        this.cityX = positions.getAsDouble(0);
+        this.cityY = positions.getAsDouble(1);
+        this.unitX = positions.getAsDouble(2);
+        this.unitY = positions.getAsDouble(3);
+        this.nameTextX = positions.getAsDouble(4);
+        this.nameTextY = positions.getAsDouble(5);
+        this.portX = positions.getAsDouble(6);
+        this.portY = positions.getAsDouble(7);
+        this.tradeRouteX = positions.getAsDouble(8);
+        this.tradeRouteY = positions.getAsDouble(9);
+        this.fightingUnitX = positions.getAsDouble(10);
+        this.fightingUnitY = positions.getAsDouble(11);
+        this.tradeWindX = positions.getAsDouble(12);
+        this.tradeWindY = positions.getAsDouble(13);
     }
 
     public int getId() {
@@ -82,23 +148,23 @@ public class Province {
         return isOcean;
     }
 
-    void setOcean(boolean isOcean) {
-        this.isOcean = isOcean;
+    public void setOcean(boolean ocean) {
+        isOcean = ocean;
     }
 
     public boolean isLake() {
         return isLake;
     }
 
-    void setLake(boolean isLake) {
-        this.isLake = isLake;
+    public void setLake(boolean lake) {
+        isLake = lake;
     }
 
     public String getClimate() {
         return climate;
     }
 
-    void setClimate(String climate) {
+    public void setClimate(String climate) {
         this.climate = climate;
     }
 
@@ -106,7 +172,7 @@ public class Province {
         return impassable;
     }
 
-    void setImpassable(boolean impassable) {
+    public void setImpassable(boolean impassable) {
         this.impassable = impassable;
     }
 
@@ -114,7 +180,7 @@ public class Province {
         return winter;
     }
 
-    void setWinter(String winter) {
+    public void setWinter(String winter) {
         this.winter = winter;
     }
 
@@ -126,15 +192,15 @@ public class Province {
         return isPort;
     }
 
-    void setPort(boolean isPort) {
-        this.isPort = isPort;
+    public void setPort(boolean port) {
+        isPort = port;
     }
 
     public Area getArea() {
         return area;
     }
 
-    void setArea(Area area) {
+    public void setArea(Area area) {
         this.area = area;
     }
 
@@ -142,7 +208,119 @@ public class Province {
         return continent;
     }
 
-    void setContinent(Continent continent) {
+    public void setContinent(Continent continent) {
         this.continent = continent;
+    }
+
+    public double getCityX() {
+        return cityX;
+    }
+
+    public void setCityX(double cityX) {
+        this.cityX = cityX;
+    }
+
+    public double getCityY() {
+        return cityY;
+    }
+
+    public void setCityY(double cityY) {
+        this.cityY = cityY;
+    }
+
+    public double getUnitX() {
+        return unitX;
+    }
+
+    public void setUnitX(double unitX) {
+        this.unitX = unitX;
+    }
+
+    public double getUnitY() {
+        return unitY;
+    }
+
+    public void setUnitY(double unitY) {
+        this.unitY = unitY;
+    }
+
+    public double getNameTextX() {
+        return nameTextX;
+    }
+
+    public void setNameTextX(double nameTextX) {
+        this.nameTextX = nameTextX;
+    }
+
+    public double getNameTextY() {
+        return nameTextY;
+    }
+
+    public void setNameTextY(double nameTextY) {
+        this.nameTextY = nameTextY;
+    }
+
+    public double getPortX() {
+        return portX;
+    }
+
+    public void setPortX(double portX) {
+        this.portX = portX;
+    }
+
+    public double getPortY() {
+        return portY;
+    }
+
+    public void setPortY(double portY) {
+        this.portY = portY;
+    }
+
+    public double getTradeRouteX() {
+        return tradeRouteX;
+    }
+
+    public void setTradeRouteX(double tradeRouteX) {
+        this.tradeRouteX = tradeRouteX;
+    }
+
+    public double getTradeRouteY() {
+        return tradeRouteY;
+    }
+
+    public void setTradeRouteY(double tradeRouteY) {
+        this.tradeRouteY = tradeRouteY;
+    }
+
+    public double getFightingUnitX() {
+        return fightingUnitX;
+    }
+
+    public void setFightingUnitX(double fightingUnitX) {
+        this.fightingUnitX = fightingUnitX;
+    }
+
+    public double getFightingUnitY() {
+        return fightingUnitY;
+    }
+
+    public void setFightingUnitY(double fightingUnitY) {
+        this.fightingUnitY = fightingUnitY;
+    }
+
+    public double getTradeWindX() {
+        return tradeWindX;
+    }
+
+    public void setTradeWindX(double tradeWindX) {
+        this.tradeWindX = tradeWindX;
+    }
+
+    public double getTradeWindY() {
+        return tradeWindY;
+    }
+
+    public void setTradeWindY(double tradeWindY) {
+        this.tradeWindY = tradeWindY;
     }
 }
