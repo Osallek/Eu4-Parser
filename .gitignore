@@ -31,3 +31,4 @@ build/
 .vscode/
 /config/
 /src/main/java/fr/osallek/eu4parser/Test.java
+.gradle/
