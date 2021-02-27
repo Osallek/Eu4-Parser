@@ -20,11 +20,11 @@ public class Mod {
     }
 
     public String getName() {
-        return this.item.getVarAsString("name");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
     }
 
     public void setName(String name) {
-        this.item.setVariable("name", name);
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public String getSupportedVersion() {
