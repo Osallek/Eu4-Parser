@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.clausewitzparser.parser.LuaParser;
 import fr.osallek.eu4parser.common.Eu4Utils;
@@ -13,6 +12,7 @@ import fr.osallek.eu4parser.common.ModifierType;
 import fr.osallek.eu4parser.common.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.common.TreeNode;
+import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.country.Country;
@@ -743,8 +743,8 @@ public class Game {
         return getDefinesDouble(Eu4Utils.DEFINE_DIPLOMACY_KEY, "SPY_NETWORK_TECH_EFFECT_MAX");
     }
 
-    public double getEstatePrivilegesMaxConcurrent() {
-        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_PRIVILEGES_MAX_CONCURRENT");
+    public int getEstatePrivilegesMaxConcurrent() {
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_PRIVILEGES_MAX_CONCURRENT");
     }
 
     public double getInnovativenessMax() {
@@ -1226,16 +1226,17 @@ public class Game {
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator
-            Map<String, File> knownMods = new HashMap<>();
+            Map<String, Mod> knownMods = new HashMap<>();
             try (Stream<Path> stream = Files.list(Paths.get(this.modFolderPath))) {
                 stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
                       .filter(path -> path.toFile().exists() && path.toFile().canRead())
                       .forEach(path -> {
-                          knownMods.put(path.getFileName().toString(), path.toFile());
+                          Mod mod = new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0));
+                          knownMods.put(path.getFileName().toString(), mod);
+
                           if (!Eu4Utils.MOD_FILE_NAME_PATTERN.matcher(path.getFileName().toString()).matches()) {
-                              ClausewitzItem item = ClausewitzParser.parse(path.toFile(), 0);
-                              if (item.hasVar("remote_file_id")) {
-                                  knownMods.put("ugc_" + ClausewitzUtils.removeQuotes(item.getVarAsString("remote_file_id")) + ".mod", path.toFile());
+                              if (StringUtils.isNotBlank(mod.getRemoteFileId())) {
+                                  knownMods.put("ugc_" + ClausewitzUtils.removeQuotes(mod.getRemoteFileId()) + ".mod", mod);
                               }
                           }
                       });
@@ -1243,22 +1244,16 @@ public class Game {
 
             Map<File, List<String>> map = new LinkedHashMap<>();
 
-            for (String mod : modsEnabled) {
-                File modFile = knownMods.get(ClausewitzUtils.removeQuotes(mod).replaceAll("^mod/", ""));
-                if (modFile != null && modFile.exists() && modFile.canRead()) {
-                    ClausewitzItem item = ClausewitzParser.parse(modFile, 0);
-
-                    if (item != null) {
-                        map.put(new File(ClausewitzUtils.removeQuotes(item.getVarAsString("path"))),
-                                item.getVars("replace_path")
-                                    .stream()
-                                    .map(ClausewitzVariable::getValue)
-                                    .map(ClausewitzUtils::removeQuotes)
-                                    .map(s -> Path.of(s).toString())
-                                    .collect(Collectors.toList()));
-                    }
+            for (String modName : modsEnabled) {
+                Mod mod = knownMods.get(ClausewitzUtils.removeQuotes(modName).replaceAll("^mod/", ""));
+                if (mod != null) {
+                    map.put(mod.getPath(), mod.getReplacePath()
+                                              .stream()
+                                              .map(ClausewitzUtils::removeQuotes)
+                                              .map(s -> Path.of(s).toString())
+                                              .collect(Collectors.toList()));
                 } else {
-                    throw new ModNotFoundException(mod);
+                    throw new ModNotFoundException(modName);
                 }
             }
 
