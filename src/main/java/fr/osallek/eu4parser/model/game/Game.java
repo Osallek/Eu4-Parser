@@ -743,8 +743,8 @@ public class Game {
         return getDefinesDouble(Eu4Utils.DEFINE_DIPLOMACY_KEY, "SPY_NETWORK_TECH_EFFECT_MAX");
     }
 
-    public double getEstatePrivilegesMaxConcurrent() {
-        return getDefinesDouble(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_PRIVILEGES_MAX_CONCURRENT");
+    public int getEstatePrivilegesMaxConcurrent() {
+        return getDefinesInt(Eu4Utils.DEFINE_COUNTRY_KEY, "ESTATE_PRIVILEGES_MAX_CONCURRENT");
     }
 
     public double getInnovativenessMax() {
