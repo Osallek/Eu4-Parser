@@ -3,12 +3,21 @@ package fr.osallek.eu4parser.model;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Mod {
@@ -143,5 +152,15 @@ public class Mod {
 
     public File getFile() {
         return file;
+    }
+
+    public void save() throws IOException {
+        save(new HashMap<>());
+    }
+
+    public void save(Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(this.file.toPath(), StandardCharsets.UTF_8)) {
+            this.item.write(bufferedWriter, 0, listeners);
+        }
     }
 }
