@@ -32,7 +32,7 @@ public class TradeGood {
         this.provinceModifiers = new Modifiers(item.getChild("province"));
     }
 
-    void setPriceItem(ClausewitzItem priceItem) {
+    public void setPriceItem(ClausewitzItem priceItem) {
         this.basePrice = NumbersUtils.doubleOrDefault(priceItem.getVarAsDouble("base_price"), 1.0);
         this.goldType = BooleanUtils.toBoolean(priceItem.getVarAsBool("goldtype"));
     }

@@ -5,6 +5,11 @@ import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.save.country.Country;
 import org.apache.commons.collections4.iterators.ReverseListIterator;
 
+import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.text.Collator;
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -23,6 +28,8 @@ public final class Eu4Utils {
 
     public static final Collator COLLATOR = Collator.getInstance();
 
+    public static final PathMatcher TXT_PATH_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**.txt");
+
     public static final String MAGIC_WORD = "EU4txt";
 
     public static final String AI_FILE = "ai";
@@ -31,7 +38,19 @@ public final class Eu4Utils {
 
     public static final String META_FILE = "meta";
 
-    public static final LocalDate DEFAULT_DATE = LocalDate.of(1, 1, 1);;
+    public static final String MAP_FOLDER_PATH = "map";
+
+    public static final String COMMON_FOLDER_PATH = "common";
+
+    public static final String GFX_FOLDER_PATH = "gfx";
+
+    public static final String LOCALISATION_FOLDER_PATH = "localisation";
+
+    public static final String INTERFACE_FOLDER_PATH = "interface";
+
+    public static final String MISSIONS_FOLDER_PATH = "missions";
+
+    public static final LocalDate DEFAULT_DATE = LocalDate.of(1, 1, 1);
 
     public static final String DEFAULT_TAG = "---";
 
@@ -172,6 +191,14 @@ public final class Eu4Utils {
 
     public static int rgbToColor(int red, int green, int blue) {
         return ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | ((blue & 0xFF));
+    }
+
+    public static boolean isRegularTxtFile(File file) {
+        return isRegularTxtFile(file.toPath());
+    }
+
+    public static boolean isRegularTxtFile(Path path) {
+        return Files.isRegularFile(path) && TXT_PATH_MATCHER.matches(path);
     }
 
     @SafeVarargs

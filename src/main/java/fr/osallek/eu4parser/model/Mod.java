@@ -4,31 +4,109 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
+import fr.osallek.clausewitzparser.parser.ClausewitzParser;
+import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.game.Building;
+import fr.osallek.eu4parser.model.game.TradeGood;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Mod {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Mod.class);
 
     private final File file;
 
     private final ClausewitzItem item;
 
+    private final Map<Path, List<Building>> buildings = new LinkedHashMap<>();
+
+    private final Map<Path, List<TradeGood>> tradeGoods = new LinkedHashMap<>();
+
     public Mod(File file, ClausewitzItem item) {
         this.file = file;
         this.item = item;
+    }
+
+    public void load() {
+        if (getPath() != null && getPath().exists() && getPath().isDirectory()) {
+            try {
+                Path tradeGoodsPath = getPath().toPath().resolve(Eu4Utils.COMMON_FOLDER_PATH).resolve("tradegoods");
+                if (tradeGoodsPath.toFile().exists() && tradeGoodsPath.toFile().isDirectory()) {
+                    try (Stream<Path> stream = Files.list(tradeGoodsPath)) {
+                        stream.forEach(path -> {
+                            ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0);
+                            this.tradeGoods.put(path,
+                                                tradeGoodsItem.getChildren()
+                                                              .stream()
+                                                              .map(TradeGood::new)
+                                                              .collect(Collectors.toList()));
+                        });
+                    }
+                }
+
+                Path pricesPath = getPath().toPath().resolve(Eu4Utils.COMMON_FOLDER_PATH).resolve("prices");
+                if (pricesPath.toFile().exists() && pricesPath.toFile().isDirectory()) {
+                    try (Stream<Path> stream = Files.list(pricesPath)) {
+                        stream.forEach(path -> {
+                            ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0);
+                            pricesItem.getChildren().forEach(priceItem -> {
+                                TradeGood tradeGood = getTradeGood(pricesItem.getName());
+
+                                if (tradeGood != null) {
+                                    tradeGood.setPriceItem(priceItem);
+                                }
+                            });
+                        });
+                    }
+                }
+
+                Path buildingsPath = getPath().toPath().resolve(Eu4Utils.COMMON_FOLDER_PATH).resolve("buildings");
+
+                if (buildingsPath.toFile().exists() && buildingsPath.toFile().isDirectory()) {
+                    try (Stream<Path> stream = Files.list(buildingsPath)) {
+                        stream.forEach(path -> {
+                            ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0);
+                            this.buildings.put(path,
+                                               buildingsItem.getChildrenNot("manufactory")
+                                                            .stream()
+                                                            .map(buildingItem -> new Building(buildingItem, this::getTradeGood, null))
+                                                            .collect(Collectors.toList()));
+
+                            if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
+                                Building manufactureBuilding = new Building(buildingsItem, this::getTradeGood, null);
+                                this.buildings.values()
+                                              .stream()
+                                              .flatMap(Collection::stream)
+                                              .filter(building -> CollectionUtils.isNotEmpty(building.getManufactoryFor()))
+                                              .forEach(building -> building.updateInternal(manufactureBuilding));
+                            }
+                        });
+                    }
+                }
+            } catch (IOException e) {
+                LOGGER.error("An error occurred while reading files of {}: {}!", getName(), e.getMessage(), e);
+            }
+        }
     }
 
     public String getName() {
@@ -152,6 +230,18 @@ public class Mod {
 
     public File getFile() {
         return file;
+    }
+
+    public Map<Path, List<Building>> getBuildings() {
+        return buildings;
+    }
+
+    public Map<Path, List<TradeGood>> getTradeGoods() {
+        return tradeGoods;
+    }
+
+    public TradeGood getTradeGood(String name) {
+        return this.tradeGoods.values().stream().flatMap(Collection::stream).filter(tradeGood -> tradeGood.getName().equals(name)).findFirst().orElse(null);
     }
 
     public void save() throws IOException {

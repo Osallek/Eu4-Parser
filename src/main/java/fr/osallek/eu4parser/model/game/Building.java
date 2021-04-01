@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Building {
@@ -82,7 +83,7 @@ public class Building {
         this.trigger = other.trigger;
     }
 
-    public Building(ClausewitzItem item, Game game) {
+    public Building(ClausewitzItem item, Function<String, TradeGood> tradeGoodFunction, Game game) {
         this.game = game;
         this.name = item.getName();
         this.cost = item.getVarAsInt("cost");
@@ -96,11 +97,11 @@ public class Building {
 
         ClausewitzList list = item.getList("manufactory");
         this.manufactoryFor = list == null ? new ArrayList<>() :
-                              list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
+                              list.getValues().stream().map(tradeGoodFunction).collect(Collectors.toList());
 
         list = item.getList("bonus_manufactory");
         this.bonusManufactory = list == null ? new ArrayList<>() :
-                                list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
+                                list.getValues().stream().map(tradeGoodFunction).collect(Collectors.toList());
         this.governmentSpecific = BooleanUtils.toBoolean(item.getVarAsBool("government_specific"));
         this.showSeparate = BooleanUtils.toBoolean(item.getVarAsBool("show_separate"));
 
@@ -114,6 +115,12 @@ public class Building {
         this.onlyNatives = child != null
                            && (child = child.getChild("owner")) != null
                            && "native".equals(child.getVarAsString("government"));
+    }
+
+    public void updateInternal(Building building) {
+        this.setInternalCost(building.getCost());
+        this.setInternalTime(building.getTime());
+        this.setInternalModifiers(building.getModifiers());
     }
 
     public String getName() {

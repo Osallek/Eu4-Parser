@@ -59,23 +59,9 @@ public class Game {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
-    private static final PathMatcher TXT_PATH_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**.txt");
-
     private final String gameFolderPath;
 
     private final String modFolderPath;
-
-    private final String mapFolderPath;
-
-    private final String commonFolderPath;
-
-    private final String gfxFolderPath;
-
-    private final String localisationFolderPath;
-
-    private final String interfaceFolderPath;
-
-    private final String missionsFolderPath;
 
     private final File provincesImage;
 
@@ -217,13 +203,7 @@ public class Game {
 
         readMods(modEnabled);
 
-        this.mapFolderPath = "map";
-        this.commonFolderPath = "common";
-        this.gfxFolderPath = "gfx";
-        this.localisationFolderPath = "localisation";
-        this.interfaceFolderPath = "interface";
-        this.missionsFolderPath = "missions";
-        this.provincesImage = getAbsoluteFile(this.mapFolderPath + File.separator + "provinces.bmp");
+        this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
 
         loadDefines();
         loadLocalisations();
@@ -331,11 +311,11 @@ public class Game {
     }
 
     public File getNormalCursorImage() {
-        return getAbsoluteFile(this.gfxFolderPath + File.separator + "cursors" + File.separator + "normal.png");
+        return getAbsoluteFile(Eu4Utils.GFX_FOLDER_PATH + File.separator + "cursors" + File.separator + "normal.png");
     }
 
     public File getSelectedCursorImage() {
-        return getAbsoluteFile(this.gfxFolderPath + File.separator + "cursors" + File.separator + "selected.png");
+        return getAbsoluteFile(Eu4Utils.GFX_FOLDER_PATH + File.separator + "cursors" + File.separator + "selected.png");
     }
 
     public File getGoldImage() {
@@ -347,7 +327,7 @@ public class Game {
     }
 
     public File getCountryFlagImage(String country) {
-        return country == null ? null : getAbsoluteFile(this.gfxFolderPath + File.separator + "flags" + File.separator + country + ".tga");
+        return country == null ? null : getAbsoluteFile(Eu4Utils.GFX_FOLDER_PATH + File.separator + "flags" + File.separator + country + ".tga");
     }
 
     public Map<Integer, Province> getProvinces() {
@@ -1214,7 +1194,7 @@ public class Game {
     }
 
     public Stream<FileNode> getFlagsFileNodes() {
-        return getFileNodes(this.gfxFolderPath + File.separator + "flags",
+        return getFileNodes(Eu4Utils.GFX_FOLDER_PATH + File.separator + "flags",
                             fileNode -> Files.isRegularFile(fileNode.getPath()),
                             fileNode -> fileNode.getPath().toString().endsWith(".tga"));
     }
@@ -1275,9 +1255,9 @@ public class Game {
     }
 
     public void loadDefines() throws IOException {
-        this.defines = LuaParser.parse(getAbsoluteFile(this.commonFolderPath + File.separator + "defines.lua"));
+        this.defines = LuaParser.parse(getAbsoluteFile(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines.lua"));
 
-        getPaths(this.commonFolderPath + File.separator + "defines", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines", this::isRegularTxtFile)
                 .forEach(path -> {
                     try {
                         Map<String, Object> map = LuaParser.parse(path.toFile());
@@ -1306,7 +1286,7 @@ public class Game {
     private void loadLocalisations(Eu4Language eu4Language) {
         this.localisations = new HashMap<>();
 
-        getPaths(this.localisationFolderPath,
+        getPaths(Eu4Utils.LOCALISATION_FOLDER_PATH,
                  fileNode -> Files.isRegularFile(fileNode.getPath()),
                  fileNode -> fileNode.getPath().toString().endsWith(eu4Language.fileEndWith + ".yml"))
                 .forEach(path -> {
@@ -1357,7 +1337,7 @@ public class Game {
     private void readSpriteTypes() {
         this.spriteTypes = new HashMap<>();
 
-        getPaths(this.interfaceFolderPath,
+        getPaths(Eu4Utils.INTERFACE_FOLDER_PATH,
                  fileNode -> Files.isRegularFile(fileNode.getPath()),
                  fileNode -> fileNode.getPath().toString().endsWith(".gfx"))
                 .forEach(path -> {
@@ -1376,7 +1356,7 @@ public class Game {
     }
 
     private void readProvinces() throws IOException {
-        File provincesDefinitionFile = getAbsoluteFile(this.mapFolderPath + File.separator + "definition.csv");
+        File provincesDefinitionFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "definition.csv");
 
         if (provincesDefinitionFile != null && provincesDefinitionFile.canRead()) {
             this.provinces = new HashMap<>();
@@ -1396,7 +1376,7 @@ public class Game {
                 }
             }
 
-            File provincesMapFile = getAbsoluteFile(this.mapFolderPath + File.separator + "default.map");
+            File provincesMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "default.map");
 
             if (provincesMapFile != null && provincesMapFile.canRead()) {
                 ClausewitzItem provinceMapItem = ClausewitzParser.parse(provincesMapFile, 0);
@@ -1413,7 +1393,7 @@ public class Game {
                 }
             }
 
-            File climateFile = getAbsoluteFile(this.mapFolderPath + File.separator + "climate.txt");
+            File climateFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "climate.txt");
 
             if (climateFile != null && climateFile.canRead()) {
                 ClausewitzItem climateItem = ClausewitzParser.parse(climateFile, 0);
@@ -1429,7 +1409,7 @@ public class Game {
                            });
             }
 
-            File continentFile = getAbsoluteFile(this.mapFolderPath + File.separator + "continent.txt");
+            File continentFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "continent.txt");
 
             if (continentFile != null && continentFile.canRead()) {
                 ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile, 0);
@@ -1445,7 +1425,7 @@ public class Game {
                 });
             }
 
-            File positionsFile = getAbsoluteFile(this.mapFolderPath + File.separator + "positions.txt");
+            File positionsFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "positions.txt");
 
             if (positionsFile != null && positionsFile.canRead()) {
                 ClausewitzItem positionsItem = ClausewitzParser.parse(positionsFile, 0);
@@ -1508,7 +1488,7 @@ public class Game {
 
     private void readCultures() {
         this.cultureGroups = new HashMap<>();
-        getPaths(this.commonFolderPath + File.separator + "cultures", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "cultures", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.cultureGroups.putAll(cultureGroupsItem.getChildren()
@@ -1525,7 +1505,7 @@ public class Game {
 
     private void readReligion() {
         this.religionGroups = new LinkedHashMap<>();
-        getPaths(this.commonFolderPath + File.separator + "religions", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "religions", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
                     religionGroupsItem.getChildren()
@@ -1553,7 +1533,7 @@ public class Game {
         this.institutions = new LinkedHashMap<>();
         AtomicInteger i = new AtomicInteger();
 
-        getPaths(this.commonFolderPath + File.separator + "institutions", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "institutions", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.institutions.putAll(institutionsItem.getChildren()
@@ -1571,7 +1551,7 @@ public class Game {
     private void readTradeGoods() {
         this.tradeGoods = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "tradegoods", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "tradegoods", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.tradeGoods.putAll(tradeGoodsItem.getChildren()
@@ -1580,7 +1560,7 @@ public class Game {
                                                          .collect(Collectors.toMap(TradeGood::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
                 });
 
-        getPaths(this.commonFolderPath + File.separator + "prices", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "prices", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem pricesItem = ClausewitzParser.parse(path.toFile(), 0);
                     pricesItem.getChildren().forEach(priceItem -> {
@@ -1596,7 +1576,7 @@ public class Game {
     private void readTradeNodes() {
         this.tradeNodes = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "tradenodes", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "tradenodes", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem tradeNodesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.tradeNodes.putAll(tradeNodesItem.getChildren()
@@ -1611,16 +1591,16 @@ public class Game {
     private void readBuildings() {
         this.buildings = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "buildings", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "buildings", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.buildings.putAll(buildingsItem.getChildrenNot("manufactory")
                                                        .stream()
-                                                       .map(item -> new Building(item, this))
+                                                       .map(item -> new Building(item, this::getTradeGood, this))
                                                        .collect(Collectors.toMap(Building::getName, Function.identity(), (a, b) -> b)));
 
                     if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
-                        Building manufactoryBuilding = new Building(buildingsItem, this);
+                        Building manufactoryBuilding = new Building(buildingsItem, this::getTradeGood, this);
                         this.buildings.values().forEach(building -> {
                             building.setInternalCost(manufactoryBuilding.getCost());
                             building.setInternalTime(manufactoryBuilding.getTime());
@@ -1635,7 +1615,7 @@ public class Game {
     private void readImperialReforms() {
         this.imperialReforms = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "imperial_reforms", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "imperial_reforms", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem imperialReformsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.imperialReforms.putAll(imperialReformsItem.getChildren()
@@ -1650,7 +1630,7 @@ public class Game {
     private void readDecrees() {
         this.decrees = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "decrees", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "decrees", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.decrees.putAll(decreesItem.getChildren().stream().map(Decree::new).collect(Collectors.toMap(Decree::getName, Function.identity(), (a, b) -> b)));
@@ -1662,7 +1642,7 @@ public class Game {
     private void readGoldenBulls() {
         this.goldenBulls = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "golden_bulls", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "golden_bulls", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.goldenBulls.putAll(
@@ -1687,7 +1667,7 @@ public class Game {
     private void readGovernments() {
         this.governments = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "governments", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "governments", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.governments.putAll(governmentsItem.getChildrenNot("pre_dharma_mapping")
@@ -1702,7 +1682,7 @@ public class Game {
     private void readGovernmentRanks() {
         this.governmentRanks = new TreeMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "government_ranks", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "government_ranks", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem governmentRanksItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.governmentRanks.putAll(governmentRanksItem.getChildren()
@@ -1715,7 +1695,7 @@ public class Game {
     private void readGovernmentNames() {
         this.governmentNames = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "government_names", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "government_names", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.governmentNames.putAll(governmentsItem.getChildren()
@@ -1728,7 +1708,7 @@ public class Game {
     private void readGovernmentReforms() {
         this.governmentReforms = new HashMap<>();
 
-        List<ClausewitzItem> reformsItems = getPaths(this.commonFolderPath + File.separator + "government_reforms", this::isRegularTxtFile)
+        List<ClausewitzItem> reformsItems = getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "government_reforms", this::isRegularTxtFile)
                 .map(path -> ClausewitzParser.parse(path.toFile(), 0))
                 .collect(Collectors.toList());
 
@@ -1750,7 +1730,7 @@ public class Game {
     private void readUnits() {
         this.units = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "units", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "units", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem unitItem = ClausewitzParser.parse(path.toFile(), 0);
                     unitItem.setName(FilenameUtils.removeExtension(path.getFileName().toString()));
@@ -1761,7 +1741,7 @@ public class Game {
 
     private void readAreas() {
         this.areas = new HashMap<>();
-        File areasFile = getAbsoluteFile(this.mapFolderPath + File.separator + "area.txt");
+        File areasFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "area.txt");
 
         if (areasFile != null && areasFile.canRead()) {
             ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
@@ -1775,7 +1755,7 @@ public class Game {
 
     private void readRegions() {
         this.regions = new HashMap<>();
-        File regionsFile = getAbsoluteFile(this.mapFolderPath + File.separator + "region.txt");
+        File regionsFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "region.txt");
 
         if (regionsFile != null && regionsFile.canRead()) {
             ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
@@ -1790,7 +1770,7 @@ public class Game {
 
     private void readSuperRegions() {
         this.superRegions = new HashMap<>();
-        File regionsFile = getAbsoluteFile(this.mapFolderPath + File.separator + "superregion.txt");
+        File regionsFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "superregion.txt");
 
         if (regionsFile != null && regionsFile.canRead()) {
             ClausewitzItem regionsItem = ClausewitzParser.parse(regionsFile, 0);
@@ -1808,7 +1788,7 @@ public class Game {
 
     private void readTechGroups() {
         this.techGroups = new HashMap<>();
-        File techGroupsFile = getAbsoluteFile(this.commonFolderPath + File.separator + "technology.txt");
+        File techGroupsFile = getAbsoluteFile(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "technology.txt");
 
         if (techGroupsFile != null && techGroupsFile.canRead()) {
             ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile, 0);
@@ -1825,7 +1805,7 @@ public class Game {
     private void readAdvisors() {
         this.advisors = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "advisortypes", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "advisortypes", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.advisors.putAll(advisorsItem.getChildren()
@@ -1840,7 +1820,7 @@ public class Game {
     private void readIdeaGroups() {
         this.ideaGroups = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "ideas", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "ideas", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem ideasItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.ideaGroups.putAll(ideasItem.getChildren()
@@ -1855,7 +1835,7 @@ public class Game {
     private void readCasusBelli() {
         this.casusBelli = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "cb_types", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "cb_types", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem cbItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.casusBelli.putAll(cbItem.getChildren()
@@ -1870,7 +1850,7 @@ public class Game {
     private void readColonialRegions() {
         this.colonialRegions = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "colonial_regions", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "colonial_regions", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem colonialRegionsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.colonialRegions.putAll(colonialRegionsItem.getChildren()
@@ -1885,7 +1865,7 @@ public class Game {
     private void readTradeCompanies() {
         this.tradeCompanies = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "trade_companies", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "trade_companies", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem tradeCompaniesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.tradeCompanies.putAll(tradeCompaniesItem.getChildren()
@@ -1900,7 +1880,7 @@ public class Game {
     private void readSubjectTypes() {
         this.subjectTypes = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "subject_types", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "subject_types", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem subjectTypesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.subjectTypes.putAll(subjectTypesItem.getChildren()
@@ -1915,7 +1895,7 @@ public class Game {
     private void readFetishistCults() {
         this.fetishistCults = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "fetishist_cults", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "fetishist_cults", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem cultsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.fetishistCults.putAll(cultsItem.getChildren()
@@ -1930,7 +1910,7 @@ public class Game {
     private void readChurchAspects() {
         this.churchAspects = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "church_aspects", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "church_aspects", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem aspectsItems = ClausewitzParser.parse(path.toFile(), 0);
                     this.churchAspects.putAll(aspectsItems.getChildren()
@@ -1945,7 +1925,7 @@ public class Game {
     private void readMissionTrees() {
         this.missionTrees = new HashMap<>();
 
-        getPaths(this.missionsFolderPath, this::isRegularTxtFile)
+        getPaths(Eu4Utils.MISSIONS_FOLDER_PATH, this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.missionTrees.putAll(advisorsItem.getChildren()
@@ -1967,7 +1947,7 @@ public class Game {
         //Read estates modifiers before necessary for privileges
         Map<String, List<ModifierDefinition>> modifierDefinitions = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "estates_preload", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estates_preload", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem estatePreloadItem = ClausewitzParser.parse(path.toFile(), 0);
                     estatePreloadItem.getChildren().forEach(item -> modifierDefinitions.put(item.getName(),
@@ -1984,7 +1964,7 @@ public class Game {
                                                                                      ModifierScope.COUNTRY));
 
         this.estatePrivileges = new HashMap<>();
-        getPaths(this.commonFolderPath + File.separator + "estate_privileges", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estate_privileges", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem estatePrivilegesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.estatePrivileges.putAll(estatePrivilegesItem.getChildren()
@@ -1995,7 +1975,7 @@ public class Game {
 
         this.estates = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "estates", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estates", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem estatesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.estates.putAll(estatesItem.getChildren()
@@ -2012,7 +1992,7 @@ public class Game {
         this.technologies = new EnumMap<>(Power.class);
         List<Technology> techs = new ArrayList<>();
 
-        getPaths(this.commonFolderPath + File.separator + "technologies", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "technologies", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
 
@@ -2028,7 +2008,7 @@ public class Game {
     private void readRulerPersonalities() {
         this.rulerPersonalities = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "ruler_personalities", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "ruler_personalities", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.rulerPersonalities.putAll(rulerPersonalityItem.getChildren()
@@ -2043,7 +2023,7 @@ public class Game {
     private void readLeaderPersonalities() {
         this.leaderPersonalities = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "leader_personalities", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "leader_personalities", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem leaderPersonalityItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.leaderPersonalities.putAll(leaderPersonalityItem.getChildren()
@@ -2058,7 +2038,7 @@ public class Game {
     private void readProfessionalismModifiers() {
         this.professionalismModifiers = new TreeSet<>();
 
-        getPaths(this.commonFolderPath + File.separator + "professionalism", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "professionalism", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.professionalismModifiers.addAll(advisorsItem.getChildren()
@@ -2071,7 +2051,7 @@ public class Game {
     private void readStaticModifiers() {
         this.staticModifiers = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "static_modifiers", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "static_modifiers", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem modifiersItem = ClausewitzParser.parse(path.toFile(), 0);
                     modifiersItem.getChildrenNot("null_modifier").forEach(item -> {
@@ -2089,7 +2069,7 @@ public class Game {
     private void readInvestments() {
         this.investments = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "tradecompany_investments", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "tradecompany_investments", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.investments.putAll(investmentsItem.getChildren()
@@ -2104,7 +2084,7 @@ public class Game {
     private void readPolicies() {
         this.policies = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "policies", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "policies", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem investmentsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.policies.putAll(investmentsItem.getChildren()
@@ -2119,7 +2099,7 @@ public class Game {
     private void readHegemons() {
         this.hegemons = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "hegemons", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "hegemons", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.hegemons.putAll(hegemonsItem.getChildren()
@@ -2134,7 +2114,7 @@ public class Game {
     private void readFactions() {
         this.factions = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "factions", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "factions", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.factions.putAll(hegemonsItem.getChildren()
@@ -2153,7 +2133,7 @@ public class Game {
     private void readAges() {
         this.ages = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "ages", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "ages", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.ages.putAll(agesItem.getChildren()
@@ -2168,7 +2148,7 @@ public class Game {
     private void readDefenderOfFaith() {
         this.defenderOfFaith = new TreeMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "defender_of_faith", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defender_of_faith", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.defenderOfFaith.putAll(defenderOfFaithItem.getChildren()
@@ -2181,7 +2161,7 @@ public class Game {
     private void readCentersOfTrade() {
         this.centersOfTrade = new TreeMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "centers_of_trade", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "centers_of_trade", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem centersOfTradeItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.centersOfTrade.putAll(centersOfTradeItem.getChildren()
@@ -2194,7 +2174,7 @@ public class Game {
     private void readFervors() {
         this.fervors = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "fervor", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "fervor", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem fervorsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.fervors.putAll(fervorsItem.getChildren()
@@ -2209,7 +2189,7 @@ public class Game {
     private void readGreatProjects() {
         this.greatProjects = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "great_projects", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "great_projects", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.greatProjects.putAll(greatProjectsItem.getChildren()
@@ -2224,7 +2204,7 @@ public class Game {
     private void readHolyOrders() {
         this.holyOrders = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "holy_orders", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "holy_orders", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem holyOrdersItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.holyOrders.putAll(holyOrdersItem.getChildren()
@@ -2239,7 +2219,7 @@ public class Game {
     private void readIsolationism() {
         this.isolationisms = new TreeMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "isolationism", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "isolationism", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem isolationismItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.isolationisms.putAll(isolationismItem.getChildren()
@@ -2254,7 +2234,7 @@ public class Game {
     private void readNativeAdvancements() {
         this.nativeAdvancements = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "native_advancement", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "native_advancement", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem nativeAdvancementItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.nativeAdvancements.putAll(nativeAdvancementItem.getChildren()
@@ -2273,7 +2253,7 @@ public class Game {
     private void readNavalDoctrine() {
         this.navalDoctrines = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "naval_doctrines", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "naval_doctrines", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem navalDoctrineItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.navalDoctrines.putAll(navalDoctrineItem.getChildren()
@@ -2288,7 +2268,7 @@ public class Game {
     private void readParliamentIssue() {
         this.parliamentIssues = new LinkedHashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "parliament_issues", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "parliament_issues", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem parliamentIssueItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.parliamentIssues.putAll(parliamentIssueItem.getChildren()
@@ -2303,7 +2283,7 @@ public class Game {
     private void readPersonalDeities() {
         this.personalDeities = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "personal_deities", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "personal_deities", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem personalIssueItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.personalDeities.putAll(personalIssueItem.getChildren()
@@ -2318,7 +2298,7 @@ public class Game {
     private void readReligiousReforms() {
         this.religiousReforms = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "religious_reforms", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "religious_reforms", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem religiousReformItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.religiousReforms.putAll(religiousReformItem.getChildren()
@@ -2336,7 +2316,7 @@ public class Game {
     private void readCrownLandBonuses() {
         this.crownLandBonuses = new TreeMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "estate_crown_land", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estate_crown_land", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem defenderOfFaithItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.crownLandBonuses.putAll(defenderOfFaithItem.getChildren()
@@ -2349,7 +2329,7 @@ public class Game {
     private void readStateEdicts() {
         this.stateEdicts = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "state_edicts", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "state_edicts", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem stateEdictsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.stateEdicts.putAll(stateEdictsItem.getChildren()
@@ -2364,7 +2344,7 @@ public class Game {
     private void readTradePolicies() {
         this.tradePolicies = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "trading_policies", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "trading_policies", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem tradePoliciesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.tradePolicies.putAll(tradePoliciesItem.getChildren()
@@ -2380,7 +2360,7 @@ public class Game {
     private void readEventModifiers() {
         this.eventModifiers = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "event_modifiers", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "event_modifiers", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem eventModifierItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.eventModifiers.putAll(eventModifierItem.getChildren()
@@ -2395,7 +2375,7 @@ public class Game {
     private void readProvinceTriggeredModifiers() {
         this.provinceTriggeredModifiers = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "province_triggered_modifiers", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "province_triggered_modifiers", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem provinceTriggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.provinceTriggeredModifiers.putAll(provinceTriggeredIssueItem.getChildren()
@@ -2411,7 +2391,7 @@ public class Game {
     private void readTriggeredModifiers() {
         this.triggeredModifiers = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "triggered_modifiers", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "triggered_modifiers", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem triggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.triggeredModifiers.putAll(triggeredIssueItem.getChildren()
@@ -2427,7 +2407,7 @@ public class Game {
     private void readCountryTags() {
         this.countryTags = new HashMap<>();
 
-        getPaths(this.commonFolderPath + File.separator + "country_tags", this::isRegularTxtFile)
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "country_tags", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem countryTagsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.countryTags.putAll(countryTagsItem.getVariables()
@@ -2438,6 +2418,6 @@ public class Game {
     }
 
     private boolean isRegularTxtFile(FileNode fileNode) {
-        return Files.isRegularFile(fileNode.getPath()) && TXT_PATH_MATCHER.matches(fileNode.getPath());
+        return Eu4Utils.isRegularTxtFile(fileNode.getPath());
     }
 }
