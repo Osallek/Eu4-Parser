@@ -18,7 +18,7 @@ public class Estate {
 
     private String localizedName;
 
-    private final int icon;
+    private final Integer icon;
 
     private final Condition trigger;
 
@@ -30,7 +30,7 @@ public class Estate {
 
     private final Modifiers landOwnershipModifier;
 
-    private final double baseInfluence;
+    private final Double baseInfluence;
 
     private final List<EstateModifier> influenceModifiers;
 
@@ -46,7 +46,7 @@ public class Estate {
 
     private final List<String> agendas;
 
-    private final double influenceFromDevModifier;
+    private final Double influenceFromDevModifier;
 
     private List<ModifierDefinition> modifierDefinitions;
 

@@ -150,7 +150,7 @@ public class SaveEstate {
 
     public Double getInfluenceFromTerritory() {
         return Math.min(this.game.getEstateMaxInfluenceFromDev(),
-                        getTerritory() * this.estateGame.getInfluenceFromDevModifier() * this.game.getEstateInfluencePerDev());
+                        getTerritory() * NumbersUtils.doubleOrDefault(this.estateGame.getInfluenceFromDevModifier()) * this.game.getEstateInfluencePerDev());
     }
 
     public String getInfluenceModifierName() {

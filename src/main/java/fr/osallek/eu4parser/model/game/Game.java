@@ -1680,7 +1680,7 @@ public class Game {
         getPaths("events", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.events.putAll(eventsItem.getChildren().stream().map(Event::new).collect(Collectors.toMap(Event::getId, Function.identity())));
+                    this.events.putAll(eventsItem.getChildren().stream().map(Event::new).filter(event -> event.getId() != null).collect(Collectors.toMap(Event::getId, Function.identity(), (e1, e2) -> e2)));
                 });
 
         this.events.values().forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
