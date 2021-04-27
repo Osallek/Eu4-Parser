@@ -33,7 +33,7 @@ public class Unit {
 
     private final Integer baseCannons;
 
-    private final Integer sailSpeed;
+    private final Double sailSpeed;
 
     private final Integer spriteLevel;
 
@@ -51,7 +51,7 @@ public class Unit {
         this.defensiveShock = item.getVarAsInt("defensive_shock");
         this.hullSize = item.getVarAsInt("hull_size");
         this.baseCannons = item.getVarAsInt("base_cannons");
-        this.sailSpeed = item.getVarAsInt("sail_speed");
+        this.sailSpeed = item.getVarAsDouble("sail_speed");
         this.spriteLevel = item.getVarAsInt("sprite_level");
     }
 
@@ -107,7 +107,7 @@ public class Unit {
         return baseCannons;
     }
 
-    public Integer getSailSpeed() {
+    public Double getSailSpeed() {
         return sailSpeed;
     }
 

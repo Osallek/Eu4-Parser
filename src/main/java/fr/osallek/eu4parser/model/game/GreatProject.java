@@ -3,7 +3,10 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class GreatProject {
 
@@ -13,22 +16,41 @@ public class GreatProject {
 
     private final String ambientObject;
 
-    private final int province;
+    private final int start;
 
-    private final boolean isCanal;
+    private final LocalDate date;
 
-    private final int time;
+    private Time time;
+
+    private int buildCost;
+
+    private int startingTier;
+
+    private final GreatProjectType type;
+
+    private boolean canBeMoved;
 
     private final Modifiers modifiers;
+
+    private List<GreatProjectTier> tiers;
 
     public GreatProject(ClausewitzItem item) {
         this.name = item.getName();
         this.ambientObject = item.getVarAsString("ambient_object");
-        this.province = item.getVarAsInt("province");
-        this.isCanal = BooleanUtils.toBoolean(item.getVarAsBool("is_canal"));
-        this.time = item.getVarAsInt("time");
+        this.start = item.getVarAsInt("start");
+        this.date = item.getVarAsDate("date");
+        this.buildCost = item.getVarAsInt("build_cost");
+        this.startingTier = item.getVarAsInt("starting_tier");
+        this.type = GreatProjectType.valueOf(item.getVarAsString("type").toUpperCase());
+        this.canBeMoved = BooleanUtils.toBoolean(item.getVarAsBool("can_be_moved"));
+
+        if (item.hasChild("time")) {
+            this.time = new Time(item.getChild("time"));
+        }
 
         this.modifiers = new Modifiers(item.getChild("modifier"));
+
+        this.tiers = item.getChildrenStartWith("tier_").stream().map(GreatProjectTier::new).collect(Collectors.toList());
     }
 
     public String getName() {
@@ -39,7 +61,7 @@ public class GreatProject {
         return localizedName;
     }
 
-    void setLocalizedName(String localizedName) {
+    public void setLocalizedName(String localizedName) {
         this.localizedName = localizedName;
     }
 
@@ -47,20 +69,60 @@ public class GreatProject {
         return ambientObject;
     }
 
-    public int getProvince() {
-        return province;
+    public int getStart() {
+        return start;
     }
 
-    public boolean isCanal() {
-        return isCanal;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public int getTime() {
+    public Time getTime() {
         return time;
+    }
+
+    public void setTime(Time time) {
+        this.time = time;
+    }
+
+    public int getBuildCost() {
+        return buildCost;
+    }
+
+    public void setBuildCost(int buildCost) {
+        this.buildCost = buildCost;
+    }
+
+    public int getStartingTier() {
+        return startingTier;
+    }
+
+    public void setStartingTier(int startingTier) {
+        this.startingTier = startingTier;
+    }
+
+    public GreatProjectType getType() {
+        return type;
+    }
+
+    public boolean isCanBeMoved() {
+        return canBeMoved;
+    }
+
+    public void setCanBeMoved(boolean canBeMoved) {
+        this.canBeMoved = canBeMoved;
     }
 
     public Modifiers getModifiers() {
         return modifiers;
+    }
+
+    public List<GreatProjectTier> getTiers() {
+        return tiers;
+    }
+
+    public void setTiers(List<GreatProjectTier> tiers) {
+        this.tiers = tiers;
     }
 
     @Override

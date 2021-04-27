@@ -14,7 +14,7 @@ public class MissionTree {
 
     private String localizedName;
 
-    private final int slot;
+    private final Integer slot;
 
     private final boolean generic;
 
@@ -59,7 +59,7 @@ public class MissionTree {
         this.localizedName = localizedName;
     }
 
-    public int getSlot() {
+    public Integer getSlot() {
         return slot;
     }
 

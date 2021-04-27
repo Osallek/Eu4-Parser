@@ -674,7 +674,7 @@ public class ConditionsUtils {
             case "heir_dip":
                 return country.getHeir() != null && NumbersUtils.intOrDefault(country.getHeir().getDip()) >= NumbersUtils.toInt(value);
             case "heir_claim":
-                return country.getHeir() != null && NumbersUtils.intOrDefault(country.getHeir().getClaim()) >= NumbersUtils.toInt(value);
+                return country.getHeir() != null && NumbersUtils.doubleOrDefault(country.getHeir().getClaim()) >= NumbersUtils.toInt(value);
             case "heir_culture":
                 return country.getHeir() != null && country.getHeir().getCulture().getName().equals(rawValueToCulture(rawValue, root, from));
             case "heir_has_consort_dynasty":

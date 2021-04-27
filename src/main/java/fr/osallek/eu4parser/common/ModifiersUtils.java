@@ -489,6 +489,12 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("tech_maneuver_value", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("tech_combat_width", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("tech_governing_capacity", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("great_project_upgrade_cost", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_great_project_upgrade_cost", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("monthly_heir_claim_increase_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("naval_engagement_width", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("migration_cost", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_heir_claim_increase", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope... scopes) {

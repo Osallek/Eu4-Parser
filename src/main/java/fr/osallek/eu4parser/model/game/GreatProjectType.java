@@ -1,0 +1,5 @@
+package fr.osallek.eu4parser.model.game;
+
+public enum GreatProjectType {
+    MONUMENT, CANAL
+}

@@ -6,7 +6,7 @@
 
   <groupId>fr.osallek</groupId>
   <artifactId>eu4-parser</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 
   <name>Eu4 Parser</name>
 
@@ -25,7 +25,7 @@
     <commons-collections4.version>4.4</commons-collections4.version>
     <commons-io.version>2.7</commons-io.version>
 
-    <clausewitz-parser.version>1.1.1</clausewitz-parser.version>
+    <clausewitz-parser.version>1.1.2</clausewitz-parser.version>
   </properties>
 
   <dependencies>
