@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,11 +64,11 @@ public class Save {
 
     private final Game game;
 
-    private final ClausewitzItem aiItem;
+    public final ClausewitzItem aiItem;
 
-    private final ClausewitzItem gamestateItem;
+    public final ClausewitzItem gamestateItem;
 
-    private final ClausewitzItem metaItem;
+    public final ClausewitzItem metaItem;
 
     private final boolean compressed;
 
@@ -210,10 +211,10 @@ public class Save {
     }
 
     public List<String> getModEnabled() {
-        ClausewitzList list = this.metaItem.getList("mod_enabled");
+        ClausewitzItem child = this.metaItem.getChild("mods_enabled_names");
 
-        if (list != null) {
-            return list.getValues();
+        if (child != null) {
+            return child.getChildren().stream().map(item -> item.getVarAsString("filename")).filter(Objects::nonNull).collect(Collectors.toList());
         }
 
         return new ArrayList<>();
@@ -803,7 +804,7 @@ public class Save {
                                         .filter(child -> child.getChild("state") != null || child.getChild("investments") != null)
                                         .map(child -> new SaveArea(child, this))
                                         .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()), Function.identity()));
-            this.areas.values().forEach(saveArea -> saveArea.getProvinces().forEach(province -> province.setSaveArea(saveArea)));
+            this.areas.values().forEach(saveArea -> saveArea.getProvinces().stream().filter(Objects::nonNull).forEach(province -> province.setSaveArea(saveArea)));
         }
 
         ClausewitzItem activeAdvisorsItem = this.gamestateItem.getChild("active_advisors");
