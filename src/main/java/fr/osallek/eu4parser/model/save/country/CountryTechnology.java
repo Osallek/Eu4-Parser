@@ -1,8 +1,8 @@
 package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.common.Modifier;
-import fr.osallek.eu4parser.common.ModifiersUtils;
+import fr.osallek.eu4parser.model.game.Modifier;
+import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.Technology;

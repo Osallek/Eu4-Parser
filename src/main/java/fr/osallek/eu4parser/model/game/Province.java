@@ -1,10 +1,15 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.awt.*;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class Province {
 
@@ -58,6 +63,10 @@ public class Province {
 
     private double tradeWindY;
 
+    private ProvinceHistoryItem defaultHistoryItem;
+
+    private SortedMap<LocalDate, ProvinceHistoryItem> historyItems;
+
     public Province(String[] csvLine) {
         this.id = Eu4Utils.cleanStringAndParseToInt(csvLine[0].trim());
 
@@ -97,6 +106,8 @@ public class Province {
         this.fightingUnitY = other.fightingUnitY;
         this.tradeWindX = other.tradeWindX;
         this.tradeWindY = other.tradeWindY;
+        this.defaultHistoryItem = other.defaultHistoryItem;
+        this.historyItems = other.historyItems;
     }
 
     public void setPositions(ClausewitzList positions) {
@@ -118,6 +129,15 @@ public class Province {
         this.fightingUnitY = positions.getAsDouble(11);
         this.tradeWindX = positions.getAsDouble(12);
         this.tradeWindY = positions.getAsDouble(13);
+    }
+
+    public void setHistory(ClausewitzItem item, Map<String, Building> buildings) {
+        this.defaultHistoryItem = new ProvinceHistoryItem(item, buildings);
+        this.historyItems = item.getChildren()
+                                .stream()
+                                .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
+                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()), child -> new ProvinceHistoryItem(child, buildings),
+                                                          (o1, o2) -> o1, TreeMap::new));
     }
 
     public int getId() {
@@ -322,5 +342,32 @@ public class Province {
 
     public void setTradeWindY(double tradeWindY) {
         this.tradeWindY = tradeWindY;
+    }
+
+    public ProvinceHistoryItem getDefaultHistoryItem() {
+        return defaultHistoryItem;
+    }
+
+    public SortedMap<LocalDate, ProvinceHistoryItem> getHistoryItems() {
+        return historyItems;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Province)) {
+            return false;
+        }
+
+        Province province = (Province) o;
+
+        return id == province.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

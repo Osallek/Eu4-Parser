@@ -8,6 +8,7 @@ import fr.osallek.eu4parser.model.game.Condition;
 import fr.osallek.eu4parser.model.game.Continent;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.Institution;
+import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.game.Policy;
 import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.SubjectType;

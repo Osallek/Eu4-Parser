@@ -1,15 +1,15 @@
 package fr.osallek.eu4parser.model.game;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.clausewitzparser.parser.LuaParser;
+import fr.osallek.eu4parser.common.Eu4MapUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ModNotFoundException;
-import fr.osallek.eu4parser.common.ModifierScope;
-import fr.osallek.eu4parser.common.ModifierType;
-import fr.osallek.eu4parser.common.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.common.TreeNode;
 import fr.osallek.eu4parser.model.Mod;
@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -61,11 +63,13 @@ public class Game {
 
     private final String gameFolderPath;
 
-    private final String modFolderPath;
+    private Path modFolderPath;
 
     private final File provincesImage;
 
     private TreeNode<FileNode> filesNode;
+
+    private String version;
 
     private Map<Integer, Province> provinces;
 
@@ -86,6 +90,8 @@ public class Game {
     private Map<String, Building> buildings;
 
     private Map<String, String> localisations;
+
+    private Map<Eu4Language, Map<String, String>> allLocalisations;
 
     private Map<String, SpriteType> spriteTypes;
 
@@ -137,7 +143,7 @@ public class Game {
 
     private Map<String, Estate> estates;
 
-    private Map<Power, TreeSet<Technology>> technologies;
+    private Map<Power, SortedSet<Technology>> technologies;
 
     private SortedSet<ProfessionalismModifier> professionalismModifiers;
 
@@ -195,12 +201,18 @@ public class Game {
 
     private Map<String, String> countryTags;
 
-    public Game(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException {
+    private Map<Province, Map<Polygon, Boolean>> borders = null;
+
+    public Game(String gameFolderPath) throws IOException {
+        this(gameFolderPath, null);
+    }
+
+    public Game(String gameFolderPath, List<String> modEnabled) throws IOException {
         this.gameFolderPath = gameFolderPath;
-        this.modFolderPath = modFolderPath;
 
         Instant start = Instant.now();
 
+        loadSettings();
         readMods(modEnabled);
 
         this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
@@ -210,6 +222,8 @@ public class Game {
         readSpriteTypes();
         readEstates();
         readFactions();
+        readTradeGoods();
+        readBuildings();
         readProvinces();
         readAreas();
         readRegions();
@@ -217,9 +231,7 @@ public class Game {
         readCultures();
         readReligion();
         readInstitutions();
-        readTradeGoods();
         readTradeNodes();
-        readBuildings();
         readImperialReforms();
         readDecrees();
         readGoldenBulls();
@@ -310,6 +322,10 @@ public class Game {
         return this.provincesImage;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
     public File getNormalCursorImage() {
         return getAbsoluteFile(Eu4Utils.GFX_FOLDER_PATH + File.separator + "cursors" + File.separator + "normal.png");
     }
@@ -359,6 +375,10 @@ public class Game {
 
     public Continent getContinent(int i) {
         return new ArrayList<>(this.continents.values()).get(i);
+    }
+
+    public Map<Eu4Language, Map<String, String>> getAllLocalisations() {
+        return allLocalisations;
     }
 
     public String getLocalisation(String key) {
@@ -599,6 +619,10 @@ public class Game {
 
     public Event getEvent(String id) {
         return this.events.get(id);
+    }
+
+    public Map<String, Object> getDefines() {
+        return defines;
     }
 
     private int getDefinesInt(String category, String key) {
@@ -942,6 +966,10 @@ public class Game {
         return this.estates.get(name);
     }
 
+    public Map<Power, SortedSet<Technology>> getTechnologies() {
+        return technologies;
+    }
+
     public SortedSet<Technology> getTechnologies(Power power) {
         return this.technologies.get(power);
     }
@@ -1186,6 +1214,18 @@ public class Game {
         return new ArrayList<>(this.countryTags.keySet());
     }
 
+    public Map<Province, Map<Polygon, Boolean>> getBorders() throws IOException {
+        if (this.borders == null) {
+            this.borders = Eu4MapUtils.imageToBorders(this, ImageIO.read(new File(getProvincesImage().getAbsolutePath())));
+        }
+
+        return this.borders;
+    }
+
+    public void setBorders(Map<Province, Map<Polygon, Boolean>> borders) {
+        this.borders = borders;
+    }
+
     public GameModifier getModifier(String modifier) {
         modifier = ClausewitzUtils.removeQuotes(modifier).toLowerCase();
 
@@ -1205,7 +1245,7 @@ public class Game {
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator
             Map<String, Mod> knownMods = new HashMap<>();
-            try (Stream<Path> stream = Files.list(Paths.get(this.modFolderPath))) {
+            try (Stream<Path> stream = Files.list(this.modFolderPath)) {
                 stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
                       .filter(path -> path.toFile().exists() && path.toFile().canRead())
                       .forEach(path -> {
@@ -1254,6 +1294,13 @@ public class Game {
         }
     }
 
+    public void loadSettings() throws IOException {
+        JsonNode node = new ObjectMapper().readTree(Paths.get(this.gameFolderPath).resolve("launcher-settings.json").toFile());
+        this.version = node.get("rawVersion").asText();
+        this.modFolderPath = Paths.get((node.get("gameDataPath").asText() + File.separator + "mod")
+                                               .replace("%USER_DOCUMENTS%", FileSystemView.getFileSystemView().getDefaultDirectory().getAbsolutePath()));
+    }
+
     public void loadDefines() throws IOException {
         this.defines = LuaParser.parse(getAbsoluteFile(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines.lua"));
 
@@ -1280,12 +1327,18 @@ public class Game {
     }
 
     public void loadLocalisations() {
-        loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()));
+        this.localisations = new HashMap<>();
+        loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()), this.localisations);
+
+        this.allLocalisations = new EnumMap<>(Eu4Language.class);
+        for (Eu4Language language : Eu4Language.values()) {
+            Map<String, String> map = new HashMap<>();
+            this.allLocalisations.put(language, map);
+            loadLocalisations(language, map);
+        }
     }
 
-    private void loadLocalisations(Eu4Language eu4Language) {
-        this.localisations = new HashMap<>();
-
+    private void loadLocalisations(Eu4Language eu4Language, Map<String, String> map) {
         getPaths(Eu4Utils.LOCALISATION_FOLDER_PATH,
                  fileNode -> Files.isRegularFile(fileNode.getPath()),
                  fileNode -> fileNode.getPath().toString().endsWith(eu4Language.fileEndWith + ".yml"))
@@ -1326,7 +1379,7 @@ public class Game {
                                 continue;
                             }
 
-                            this.localisations.put(key, StringUtils.capitalize(value.substring(start, end).trim()));
+                            map.put(key, StringUtils.capitalize(value.substring(start, end).trim()));
                         }
                     } catch (IOException e) {
                         LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
@@ -1483,6 +1536,18 @@ public class Game {
                     }
                 }
             }
+
+            getPaths(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile)
+                    .forEach(path -> {
+                        String[] fileNameSplit = path.getFileName().toString().split("[ -]");
+                        try {
+                            if (fileNameSplit.length >= 1) {
+                                int provinceId = Eu4Utils.cleanStringAndParseToInt(fileNameSplit[0]);
+                                getProvince(provinceId).setHistory(ClausewitzParser.parse(path.toFile(), 0), this.buildings);
+                            }
+                        } catch (NumberFormatException ignored) {
+                        }
+                    });
         }
     }
 
@@ -1989,7 +2054,6 @@ public class Game {
     }
 
     private void readTechnologies() {
-        this.technologies = new EnumMap<>(Power.class);
         List<Technology> techs = new ArrayList<>();
 
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "technologies", this::isRegularTxtFile)
@@ -2002,7 +2066,17 @@ public class Game {
                     techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.add(new Technology(item, power, aheadOfTime)));
                 });
 
-        this.technologies = techs.stream().collect(Collectors.groupingBy(Technology::getType, TreeMap::new, Collectors.toCollection(TreeSet::new)));
+        Map<Power, List<Technology>> t = techs.stream()
+                                              .collect(Collectors.groupingBy(Technology::getType, () -> new EnumMap<>(Power.class), Collectors.toList()));
+        t.values().forEach(technologiesSet -> {
+            int i = 0;
+            for (Technology technology : technologiesSet) {
+                technology.setNumber(i);
+                i++;
+            }
+        });
+
+        this.technologies = t.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> new TreeSet<>(entry.getValue())));
     }
 
     private void readRulerPersonalities() {

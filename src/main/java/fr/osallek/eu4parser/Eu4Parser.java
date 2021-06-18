@@ -72,8 +72,12 @@ public class Eu4Parser {
         return new ArrayList<>();
     }
 
-    public static Game parseGame(String gameFolderPath, String modFolderPath, List<String> modEnabled) throws IOException {
-        return new Game(gameFolderPath, modFolderPath, modEnabled);
+    public static Game parseGame(String gameFolderPath) throws IOException {
+        return new Game(gameFolderPath);
+    }
+
+    public static Game parseGame(String gameFolderPath, List<String> modEnabled) throws IOException {
+        return new Game(gameFolderPath, modEnabled);
     }
 
     public static void writeSave(Save save, String path) throws IOException {

@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.UnitType;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class Unit {
     
@@ -37,7 +38,7 @@ public class Unit {
 
     private final Integer spriteLevel;
 
-    public Unit(ClausewitzItem item, Function<String, String> localizationFunction) {
+    public Unit(ClausewitzItem item, UnaryOperator<String> localizationFunction) {
         this.name = item.getName();
         this.localizedName = localizationFunction.apply(this.name);
         this.unitType = item.getVarAsString("unit_type");

@@ -1,8 +1,9 @@
-package fr.osallek.eu4parser.common;
+package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
-import fr.osallek.eu4parser.model.game.Modifiers;
+import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
@@ -75,7 +76,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("GLOBAL_REGIMENT_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_REGIMENT_RECRUIT_SPEED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_SUPPLY_LIMIT_MODIFIER", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("LAND_FORCELIMIT", ModifierType.ADDITIVE, ModifierScope.COUNTRY, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("LAND_FORCELIMIT", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("LAND_FORCELIMIT_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("LAND_MAINTENANCE_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MERCENARY_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -489,15 +490,23 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("tech_maneuver_value", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("tech_combat_width", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("tech_governing_capacity", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_naval_engagement_width", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("great_project_upgrade_cost", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("local_great_project_upgrade_cost", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("monthly_heir_claim_increase_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("naval_engagement_width", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("migration_cost", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_heir_claim_increase", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_num_of_manufactories", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("tribal_development_growth", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("add_tribal_land_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_federation_favor_growth", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_reform_progress", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_reform_progress_building", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("monthly_reform_progress_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
     }
 
-    public static void addModifier(String name, ModifierType type, ModifierScope... scopes) {
+    public static void addModifier(String name, ModifierType type, ModifierScope scopes) {
         Modifier modifier = new Modifier(name, type, scopes);
         MODIFIERS_MAP.put(modifier.getName(), modifier);
     }

@@ -6,7 +6,7 @@
 
   <groupId>fr.osallek</groupId>
   <artifactId>eu4-parser</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
 
   <name>Eu4 Parser</name>
 
@@ -24,6 +24,8 @@
     <commons-lang3.version>3.11</commons-lang3.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <commons-io.version>2.7</commons-io.version>
+    <jackson.version>2.12.3</jackson.version>
+    <batik.version>1.14</batik.version>
 
     <clausewitz-parser.version>1.1.2</clausewitz-parser.version>
   </properties>
@@ -48,6 +50,22 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons-io.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-svggen</artifactId>
+      <version>${batik.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-dom</artifactId>
+      <version>${batik.version}</version>
     </dependency>
   </dependencies>
 

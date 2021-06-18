@@ -18,14 +18,14 @@ public class TradeNodeOutgoing {
     private final List<Pair<Double, Double>> control = new ArrayList<>();
 
     public TradeNodeOutgoing(ClausewitzItem item) {
-        this.name = ClausewitzUtils.removeQuotes(item.getName());
+        this.name = ClausewitzUtils.removeQuotes(item.getVarAsString("name"));
 
         ClausewitzList list = item.getList("path");
         this.path = list == null ? null : list.getValuesAsInt();
         list = item.getList("control");
 
         if (list != null) {
-            for (int i = 0; i < list.size(); i++) {
+            for (int i = 0; i < list.size(); i += 2) {
                 this.control.add(Pair.of(list.getAsDouble(i), list.getAsDouble(i + 1)));
             }
         }

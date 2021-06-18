@@ -31,10 +31,10 @@ public class TradeNode {
 
     public TradeNode(ClausewitzItem item) {
         this.name = item.getName();
-        this.location = item.getVarAsInt("location");;
+        this.location = item.getVarAsInt("location");
 
         ClausewitzList list = item.getList("color");
-        this.color = list == null ? null : new Color(list, true);
+        this.color = list == null ? null : new Color(list);
         this.inland = BooleanUtils.toBoolean(item.getVarAsBool("inland"));
         this.aiWillPropagateThroughTrade = BooleanUtils.toBoolean(item.getVarAsBool("ai_will_propagate_through_trade"));
         this.end = BooleanUtils.toBoolean(item.getVarAsBool("end"));

@@ -55,6 +55,10 @@ public class Color {
         }
     }
 
+    public java.awt.Color toColor() {
+        return new java.awt.Color(getRed(), getGreen(), getBlue());
+    }
+
     public static ClausewitzList addToItem(ClausewitzItem parent, String name, Color color) {
         return addToItem(parent, name, color.getRed(), color.getGreen(), color.getBlue());
     }

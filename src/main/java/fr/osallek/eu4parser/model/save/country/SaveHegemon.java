@@ -2,7 +2,7 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.common.ModifiersUtils;
+import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.game.Hegemon;
 import fr.osallek.eu4parser.model.game.Modifiers;
 import fr.osallek.eu4parser.model.save.Save;

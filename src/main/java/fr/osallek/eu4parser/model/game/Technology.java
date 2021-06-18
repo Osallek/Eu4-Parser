@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public class Technology implements Comparable<Technology> {
 
+    private int number;
+
     private final Power type;
 
     private final Modifiers aheadOfTime;
@@ -22,6 +24,14 @@ public class Technology implements Comparable<Technology> {
         this.year = item.getVarAsInt("year");
 
         this.modifiers = new Modifiers(item.getVarsNot("year"), "tech_");
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    void setNumber(int number) {
+        this.number = number;
     }
 
     public Power getType() {
@@ -42,7 +52,7 @@ public class Technology implements Comparable<Technology> {
 
     @Override
     public int compareTo(Technology o) {
-        return Comparator.comparingInt(Technology::getYear).compare(this, o);
+        return Comparator.comparingInt(Technology::getNumber).compare(this, o);
     }
 
     @Override
@@ -54,17 +64,17 @@ public class Technology implements Comparable<Technology> {
             return false;
         }
         Technology that = (Technology) o;
-        return year == that.year &&
+        return number == that.number &&
                type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, year);
+        return Objects.hash(type, number);
     }
 
     @Override
     public String toString() {
-        return type + " (" + year + ')';
+        return type + " " + number + " (" + year + ')';
     }
 }

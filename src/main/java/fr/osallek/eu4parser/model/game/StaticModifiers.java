@@ -1,7 +1,5 @@
 package fr.osallek.eu4parser.model.game;
 
-import fr.osallek.eu4parser.common.Modifier;
-import fr.osallek.eu4parser.common.ModifiersUtils;
 import fr.osallek.eu4parser.model.save.country.Country;
 import fr.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;

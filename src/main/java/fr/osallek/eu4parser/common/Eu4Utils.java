@@ -42,6 +42,8 @@ public final class Eu4Utils {
 
     public static final String COMMON_FOLDER_PATH = "common";
 
+    public static final String HISTORY_FOLDER_PATH = "history";
+
     public static final String GFX_FOLDER_PATH = "gfx";
 
     public static final String LOCALISATION_FOLDER_PATH = "localisation";
@@ -104,6 +106,8 @@ public final class Eu4Utils {
 
     public static final Pattern MOD_FILE_NAME_PATTERN = Pattern.compile("ugc_[0-9]+.mod");
 
+    public static final Pattern DATE_PATTERN = Pattern.compile("-?[0-9]{1,4}.[0-9]{1,2}.[0-9]{1,2}");
+
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
     }
@@ -126,8 +130,8 @@ public final class Eu4Utils {
         return Integer.parseInt(s.replaceAll("[\\D]", ""));
     }
 
-    public static Integer cleanStringAndParseToDouble(String s) {
-        return Integer.parseInt(s.replaceAll("[\\D.]", ""));
+    public static Double cleanStringAndParseToDouble(String s) {
+        return Double.parseDouble(s.replaceAll("[\\D.]", ""));
     }
 
     @SafeVarargs

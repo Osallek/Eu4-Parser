@@ -2,8 +2,6 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
-import fr.osallek.eu4parser.common.Modifier;
-import fr.osallek.eu4parser.common.ModifiersUtils;
 import fr.osallek.eu4parser.model.Power;
 import org.apache.commons.lang3.BooleanUtils;
 

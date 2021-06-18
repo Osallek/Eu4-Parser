@@ -3,9 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
-import fr.osallek.eu4parser.common.Modifier;
-import fr.osallek.eu4parser.common.ModifierScope;
-import fr.osallek.eu4parser.common.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -158,14 +155,14 @@ public class Modifiers {
     public Modifiers getCountryModifiers() {
         return new Modifiers(this.enables, this.modifiers.entrySet()
                                                          .stream()
-                                                         .filter(entry -> entry.getKey().getScopes().contains(ModifierScope.COUNTRY))
+                                                         .filter(entry -> ModifierScope.COUNTRY.equals(entry.getKey().getScope()))
                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     public Modifiers getProvinceModifiers() {
         return new Modifiers(this.enables, this.modifiers.entrySet()
                                                          .stream()
-                                                         .filter(entry -> entry.getKey().getScopes().contains(ModifierScope.PROVINCE))
+                                                         .filter(entry -> ModifierScope.PROVINCE.equals(entry.getKey().getScope()))
                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 

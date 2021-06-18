@@ -146,7 +146,7 @@ public class Save {
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
-        this.game = Eu4Parser.parseGame(gameFolderPath, modFolder, this.getModEnabled());
+        this.game = Eu4Parser.parseGame(gameFolderPath, this.getModEnabled());
         refreshAttributes();
     }
 
