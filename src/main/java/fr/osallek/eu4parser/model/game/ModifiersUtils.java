@@ -504,6 +504,8 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("monthly_reform_progress", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_reform_progress_building", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("monthly_reform_progress_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("yearly_doom_reduction", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("global_heathen_missionary_strength", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {
