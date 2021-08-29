@@ -1,12 +1,11 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-
 import java.util.Objects;
 
 public class ReligiousReform {
 
-    private final String name;
+    private final ClausewitzItem item;
 
     private String localizedName;
 
@@ -14,17 +13,18 @@ public class ReligiousReform {
 
     private final int index;
 
-    private final Modifiers modifiers;
-
     public ReligiousReform(ClausewitzItem item, ReligiousReforms religiousReforms, int index) {
-        this.name = item.getName();
+        this.item = item;
         this.nativeAdvancements = religiousReforms;
         this.index = index;
-        this.modifiers = new Modifiers(item.getVariables());
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public String getLocalizedName() {
@@ -44,7 +44,7 @@ public class ReligiousReform {
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getVariables());
     }
 
     @Override
@@ -58,16 +58,16 @@ public class ReligiousReform {
         }
 
         ReligiousReform that = (ReligiousReform) o;
-        return Objects.equals(name, that.name);
+        return Objects.equals(getName(), that.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

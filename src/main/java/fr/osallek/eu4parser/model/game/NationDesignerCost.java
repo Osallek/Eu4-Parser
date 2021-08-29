@@ -4,20 +4,31 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 public class NationDesignerCost {
 
-    private final Condition trigger;
+    private final ClausewitzItem item;
 
-    private final int value;
-
-    public NationDesignerCost(ClausewitzItem item, ClausewitzItem triggerItem) {
-        this.trigger = triggerItem != null ? new Condition(triggerItem) : item.getChild("trigger") == null ? null : new Condition(item.getChild("trigger"));
-        this.value = item.getVarAsInt("value");
+    public NationDesignerCost(ClausewitzItem item) {
+        this.item = item;
     }
 
     public Condition getTrigger() {
-        return trigger;
+        return this.item.getChild("trigger") == null ? null : new Condition(item.getChild("trigger"));
+    }
+
+    public void setTrigger(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("trigger");
+            return;
+        }
+
+        ClausewitzItem triggerChild = this.item.getChild("trigger");
+        //Todo Condition => item
     }
 
     public int getValue() {
-        return value;
+        return this.item.getVarAsInt("value");
+    }
+
+    public void setValue(int value) {
+        this.item.setVariable("value", value);
     }
 }

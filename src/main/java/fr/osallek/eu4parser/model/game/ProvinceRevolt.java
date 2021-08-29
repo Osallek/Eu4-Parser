@@ -1,37 +1,49 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.StringUtils;
 
 public class ProvinceRevolt {
 
-    private final String type;
-
-    private final String leader;
-
-    private Integer size;
+    private final ClausewitzItem item;
 
     public ProvinceRevolt(ClausewitzItem item) {
-        this.type = item.getVarAsString("type");
-        this.leader = item.getVarAsString("leader");
-
-        if (item.hasVar("size")) {
-            this.size = item.getVarAsInt("size");
-        }
+        this.item = item;
     }
 
     public String getType() {
-        return type;
+        return this.item.getVarAsString("type");
+    }
+
+    public void setType(String type) {
+        this.item.setVariable("type", type);
     }
 
     public String getLeader() {
-        return leader;
+        return this.item.getVarAsString("leader");
     }
 
-    public int getSize() {
-        return size;
+    public void setLeader(String leader) {
+        if (StringUtils.isBlank(leader)) {
+            this.item.removeVariable("leader");
+        } else {
+            this.item.setVariable("leader", leader);
+        }
+    }
+
+    public Integer getSize() {
+        return this.item.getVarAsInt("size");
+    }
+
+    public void setSize(Integer size) {
+        if (size == null) {
+            this.item.removeVariable("size");
+        } else {
+            this.item.setVariable("size", size);
+        }
     }
 
     public boolean isClearing() {
-        return this.size == null;
+        return getSize() == null;
     }
 }

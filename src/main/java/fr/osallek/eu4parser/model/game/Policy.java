@@ -8,33 +8,20 @@ import java.util.Objects;
 
 public class Policy {
 
-    private final String name;
+    private final ClausewitzItem item;
 
     private String localizedName;
 
-    private final Power category;
-
-    private final Condition potential;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
-
     public Policy(ClausewitzItem item) {
-        this.name = item.getName();
-        ClausewitzVariable var = item.getVar("monarch_power");
-        this.category = var == null ? null : Power.byName(var.getValue());
-        this.modifiers = new Modifiers(item.getVarsNot("monarch_power"));
-
-        ClausewitzItem child = item.getChild("potential");
-        this.potential = child == null ? null : new Condition(child);
-
-        child = item.getChild("allow");
-        this.allow = child == null ? null : new Condition(child);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public String getLocalizedName() {
@@ -46,19 +33,45 @@ public class Policy {
     }
 
     public Power getCategory() {
-        return category;
+        return Power.byName(this.item.getVarAsString("monarch_power"));
+    }
+
+    public void setCategory(Power category) {
+        this.item.setVariable("monarch_power", category.name());
     }
 
     public Condition getPotential() {
-        return potential;
+        ClausewitzItem child = item.getChild("potential");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setPotential(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("potential");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("potential");
+        //Todo Condition => item
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = item.getChild("allow");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setAllow(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("allow");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("allow");
+        //Todo Condition => item
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     @Override
@@ -71,18 +84,18 @@ public class Policy {
             return false;
         }
 
-        Policy area = (Policy) o;
+        Policy policy = (Policy) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), policy.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

@@ -16,14 +16,6 @@ import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.country.Country;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -56,6 +48,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Game {
 
@@ -143,7 +142,7 @@ public class Game {
 
     private Map<String, Estate> estates;
 
-    private Map<Power, SortedSet<Technology>> technologies;
+    private Map<Power, List<Technology>> technologies;
 
     private SortedSet<ProfessionalismModifier> professionalismModifiers;
 
@@ -241,7 +240,7 @@ public class Game {
         readGovernmentReforms();
         readGovernments();
         readUnits();
-        readTechGroups();
+        readTechnologies();
         readAdvisors();
         readIdeaGroups();
         readCasusBelli();
@@ -250,7 +249,6 @@ public class Game {
         readFetishistCults();
         readChurchAspects();
         readMissionTrees();
-        readTechnologies();
         readRulerPersonalities();
         readLeaderPersonalities();
         readProfessionalismModifiers();
@@ -285,11 +283,19 @@ public class Game {
     }
 
     private TreeNode<FileNode> getTreeNode(String relativePath) {
-        return this.filesNode.getRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath().toString()));
+        return getTreeNode(Path.of(relativePath));
+    }
+
+    private TreeNode<FileNode> getTreeNode(Path relativePath) {
+        return this.filesNode.getRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath()));
     }
 
     private FileNode getFileNode(String relativePath) {
-        return this.filesNode.getDataRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath().toString()));
+        return getFileNode(Path.of(relativePath));
+    }
+
+    private FileNode getFileNode(Path relativePath) {
+        return this.filesNode.getDataRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath()));
     }
 
     @SafeVarargs
@@ -966,16 +972,16 @@ public class Game {
         return this.estates.get(name);
     }
 
-    public Map<Power, SortedSet<Technology>> getTechnologies() {
+    public Map<Power, List<Technology>> getTechnologies() {
         return technologies;
     }
 
-    public SortedSet<Technology> getTechnologies(Power power) {
+    public List<Technology> getTechnologies(Power power) {
         return this.technologies.get(power);
     }
 
     public Technology getTechnology(Power power, int i) {
-        return new ArrayList<>(this.technologies.get(power)).get(i);
+        return this.technologies.get(power).get(i);
     }
 
     public SortedSet<ProfessionalismModifier> getProfessionalismModifiers() {
@@ -1277,13 +1283,13 @@ public class Game {
 
             Map<Path, List<String>> mods = new LinkedHashMap<>();
             map.forEach((key, value) -> {
-                    if (!key.isAbsolute()) {
-                        key = new File(this.modFolderPath + File.separator + key.getPath().replaceFirst("^mod\\\\", ""));
-                    }
+                if (!key.isAbsolute()) {
+                    key = new File(this.modFolderPath + File.separator + key.getPath().replaceFirst("^mod\\\\", ""));
+                }
 
-                    if (key.exists() && key.canRead()) {
-                        mods.put(key.toPath(), value);
-                    }
+                if (key.exists() && key.canRead()) {
+                    mods.put(key.toPath(), value);
+                }
             });
 
             mods.forEach((path, replacePaths) -> { //This technique replace only folders, so don't check for files
@@ -1698,7 +1704,10 @@ public class Game {
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "decrees", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem decreesItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.decrees.putAll(decreesItem.getChildren().stream().map(Decree::new).collect(Collectors.toMap(Decree::getName, Function.identity(), (a, b) -> b)));
+                    this.decrees.putAll(decreesItem.getChildren()
+                                                   .stream()
+                                                   .map(Decree::new)
+                                                   .collect(Collectors.toMap(Decree::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.decrees.values().forEach(saveDecree -> saveDecree.setLocalizedName(this.getLocalisation(saveDecree.getName() + "_title")));
@@ -1711,7 +1720,10 @@ public class Game {
                 .forEach(path -> {
                     ClausewitzItem goldenBullsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.goldenBulls.putAll(
-                            goldenBullsItem.getChildren().stream().map(GoldenBull::new).collect(Collectors.toMap(GoldenBull::getName, Function.identity(), (a, b) -> b)));
+                            goldenBullsItem.getChildren()
+                                           .stream()
+                                           .map(GoldenBull::new)
+                                           .collect(Collectors.toMap(GoldenBull::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.goldenBulls.values().forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
@@ -1723,7 +1735,11 @@ public class Game {
         getPaths("events", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem eventsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.events.putAll(eventsItem.getChildren().stream().map(Event::new).filter(event -> event.getId() != null).collect(Collectors.toMap(Event::getId, Function.identity(), (e1, e2) -> e2)));
+                    this.events.putAll(eventsItem.getChildren()
+                                                 .stream()
+                                                 .map(Event::new)
+                                                 .filter(event -> event.getId() != null)
+                                                 .collect(Collectors.toMap(Event::getId, Function.identity(), (e1, e2) -> e2)));
                 });
 
         this.events.values().forEach(event -> event.setLocalizedName(this.getLocalisation(ClausewitzUtils.removeQuotes(event.getTitle()))));
@@ -1851,8 +1867,9 @@ public class Game {
                          .forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
     }
 
-    private void readTechGroups() {
+    private void readTechnologies() {
         this.techGroups = new HashMap<>();
+        this.technologies = new EnumMap<>(Power.class);
         File techGroupsFile = getAbsoluteFile(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "technology.txt");
 
         if (techGroupsFile != null && techGroupsFile.canRead()) {
@@ -1862,6 +1879,34 @@ public class Game {
                                                  .stream()
                                                  .map(TechGroup::new)
                                                  .collect(Collectors.toMap(TechGroup::getName, Function.identity(), (a, b) -> b)));
+
+            ClausewitzItem technologiesItem = techGroupsItem.getChild("tables");
+
+            if (technologiesItem != null) {
+                for (Power power : Power.values()) {
+                    String filePath = null;
+                    List<Technology> techs = new ArrayList<>();
+                    AtomicInteger i = new AtomicInteger(0);
+
+                    switch (power) { //Don't read others because it is useless, ia can't take them
+                        case ADM -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("adm_tech"));
+                        case DIP -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("dip_tech"));
+                        case MIL -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("mil_tech"));
+                    }
+
+                    if (filePath != null) {
+                        Path path = getAbsolutePath(Eu4Utils.COMMON_FOLDER_PATH + File.separator + filePath);
+
+                        if (path != null && path.toFile().canRead()) {
+                            ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
+                            Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time"));
+
+                            techItem.getChildren("technology").forEach(item -> techs.add(new Technology(item, power, aheadOfTime, i.getAndIncrement())));
+                            this.technologies.put(power, techs);
+                        }
+                    }
+                }
+            }
         }
 
         this.techGroups.values().forEach(techGroup -> techGroup.setLocalizedName(this.getLocalisation(techGroup.getName())));
@@ -2053,32 +2098,6 @@ public class Game {
         this.estatePrivileges.values().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
     }
 
-    private void readTechnologies() {
-        List<Technology> techs = new ArrayList<>();
-
-        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "technologies", this::isRegularTxtFile)
-                .forEach(path -> {
-                    ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
-
-                    Power power = Power.byName(techItem.getVarAsString("monarch_power"));
-                    Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time"));
-
-                    techItem.getChildrenNot("ahead_of_time").forEach(item -> techs.add(new Technology(item, power, aheadOfTime)));
-                });
-
-        Map<Power, List<Technology>> t = techs.stream()
-                                              .collect(Collectors.groupingBy(Technology::getType, () -> new EnumMap<>(Power.class), Collectors.toList()));
-        t.values().forEach(technologiesSet -> {
-            int i = 0;
-            for (Technology technology : technologiesSet) {
-                technology.setNumber(i);
-                i++;
-            }
-        });
-
-        this.technologies = t.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> new TreeSet<>(entry.getValue())));
-    }
-
     private void readRulerPersonalities() {
         this.rulerPersonalities = new HashMap<>();
 
@@ -2101,9 +2120,9 @@ public class Game {
                 .forEach(path -> {
                     ClausewitzItem leaderPersonalityItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.leaderPersonalities.putAll(leaderPersonalityItem.getChildren()
-                                                                       .stream()
-                                                                       .map(LeaderPersonality::new)
-                                                                       .collect(Collectors.toMap(LeaderPersonality::getName, Function.identity(), (a, b) -> b)));
+                                                                         .stream()
+                                                                         .map(LeaderPersonality::new)
+                                                                         .collect(Collectors.toMap(LeaderPersonality::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.leaderPersonalities.values().forEach(leaderPersonality -> leaderPersonality.setLocalizedName(this.getLocalisation(leaderPersonality.getName())));
@@ -2438,9 +2457,9 @@ public class Game {
                 .forEach(path -> {
                     ClausewitzItem eventModifierItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.eventModifiers.putAll(eventModifierItem.getChildren()
-                                                     .stream()
-                                                     .map(EventModifier::new)
-                                                     .collect(Collectors.toMap(EventModifier::getName, Function.identity(), (a, b) -> b)));
+                                                                .stream()
+                                                                .map(EventModifier::new)
+                                                                .collect(Collectors.toMap(EventModifier::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.eventModifiers.values().forEach(eventModifier -> eventModifier.setLocalizedName(this.getLocalisation(eventModifier.getName())));
@@ -2453,9 +2472,9 @@ public class Game {
                 .forEach(path -> {
                     ClausewitzItem provinceTriggeredIssueItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.provinceTriggeredModifiers.putAll(provinceTriggeredIssueItem.getChildren()
-                                                     .stream()
-                                                     .map(TriggeredModifier::new)
-                                                     .collect(Collectors.toMap(TriggeredModifier::getName, Function.identity(), (a, b) -> b)));
+                                                                                     .stream()
+                                                                                     .map(TriggeredModifier::new)
+                                                                                     .collect(Collectors.toMap(TriggeredModifier::getName, Function.identity(), (a, b) -> b)));
                 });
 
         this.provinceTriggeredModifiers.values()
@@ -2486,7 +2505,8 @@ public class Game {
                     ClausewitzItem countryTagsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.countryTags.putAll(countryTagsItem.getVariables()
                                                            .stream()
-                                                           .collect(Collectors.toMap(var -> var.getName().toUpperCase(), var -> ClausewitzUtils.removeQuotes(var.getValue()), (a, b) -> b)));
+                                                           .collect(Collectors.toMap(var -> var.getName()
+                                                                                               .toUpperCase(), var -> ClausewitzUtils.removeQuotes(var.getValue()), (a, b) -> b)));
 
                 });
     }

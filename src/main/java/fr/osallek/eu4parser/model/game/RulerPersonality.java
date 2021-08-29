@@ -9,62 +9,84 @@ import java.util.Objects;
 
 public class RulerPersonality {
 
-    private final String name;
+    private final ClausewitzItem item;
 
     private String localizedName;
 
-    private final Condition rulerAllow;
-
-    private final Condition heirAllow;
-
-    private final Condition consortAllow;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
-
     public RulerPersonality(ClausewitzItem item) {
-        this.name = item.getName();
-
-        this.allow = item.getChild("allow") == null ? null : new Condition(item.getChild("allow"));
-        this.rulerAllow = item.getChild("ruler_allow") == null ? null : new Condition(item.getChild("ruler_allow"));
-        this.heirAllow = item.getChild("heir_allow") == null ? null : new Condition(item.getChild("heir_allow"));
-        this.consortAllow = item.getChild("consort_allow") == null ? null : new Condition(item.getChild("consort_allow"));
-        this.modifiers = new Modifiers(item);
-    }
-
-    public RulerPersonality(RulerPersonality other) {
-        this.name = other.name;
-        this.localizedName = other.localizedName;
-        this.rulerAllow = other.rulerAllow;
-        this.heirAllow = other.heirAllow;
-        this.consortAllow = other.consortAllow;
-        this.allow = other.allow;
-        this.modifiers = other.modifiers;
-    }
-
-    public Condition getRulerAllow() {
-        return rulerAllow;
-    }
-
-    public Condition getHeirAllow() {
-        return heirAllow;
-    }
-
-    public Condition getConsortAllow() {
-        return consortAllow;
-    }
-
-    public Condition getAllow() {
-        return allow;
-    }
-
-    public Modifiers getModifiers() {
-        return modifiers;
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
+    }
+
+    public Condition getRulerAllow() {
+        ClausewitzItem child = item.getChild("ruler_allow");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setRulerAllow(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("ruler_allow");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("ruler_allow");
+        //Todo Condition => item
+    }
+
+    public Condition getHeirAllow() {
+        ClausewitzItem child = item.getChild("heir_allow");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setHeirAllow(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("heir_allow");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("heir_allow");
+        //Todo Condition => item
+    }
+
+    public Condition getConsortAllow() {
+        ClausewitzItem child = item.getChild("consort_allow");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setConsortAllow(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("consort_allow");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("consort_allow");
+        //Todo Condition => item
+    }
+
+    public Condition getAllow() {
+        ClausewitzItem child = item.getChild("allow");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setAllow(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("allow");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("allow");
+        //Todo Condition => item
+    }
+
+    public Modifiers getModifiers() {
+        return new Modifiers(this.item);
     }
 
     public String getLocalizedName() {
@@ -107,16 +129,16 @@ public class RulerPersonality {
 
         RulerPersonality personality = (RulerPersonality) o;
 
-        return Objects.equals(name, personality.name);
+        return Objects.equals(getName(), personality.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

@@ -4,37 +4,24 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 public class TechGroup {
 
-    private final String name;
+    private final ClausewitzItem item;
 
     private String localizedName;
 
-    private final int startLevel;
-
-    private final double startCostModifier;
-
-    private final NationDesignerCost nationDesignerCost;
-
-    private final boolean isPrimitive;
-
-    private final String nationDesignerUnitType;
-
     public TechGroup(ClausewitzItem item) {
-        this.name = item.getName();
-        this.startLevel = item.getVarAsInt("start_level");
-        this.startCostModifier = item.getVarAsDouble("start_cost_modifier");
-        this.isPrimitive = BooleanUtils.toBoolean(item.getVarAsBool("is_primitive"));
-        this.nationDesignerUnitType = item.getVarAsString("nation_designer_unit_type");
-
-        ClausewitzItem triggerChild = item.getChild("nation_designer_trigger");
-        ClausewitzItem costChild = item.getChild("nation_designer_cost");
-        this.nationDesignerCost = costChild == null ? null : new NationDesignerCost(costChild, triggerChild);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public String getLocalizedName() {
@@ -46,23 +33,73 @@ public class TechGroup {
     }
 
     public int getStartLevel() {
-        return startLevel;
+        return this.item.getVarAsInt("start_level");
+    }
+
+    public void setStartLevel(int startLevel) {
+        this.item.setVariable("start_level", startLevel);
     }
 
     public double getStartCostModifier() {
-        return startCostModifier;
+        return this.item.getVarAsDouble("start_cost_modifier");
     }
 
-    public NationDesignerCost getNationDesignerCost() {
-        return nationDesignerCost;
+    public void setStartCostModifier(double startCostModifier) {
+        this.item.setVariable("start_cost_modifier", startCostModifier);
     }
 
     public boolean isPrimitive() {
-        return isPrimitive;
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_primitive"));
+    }
+
+    public void setPrimitive(Boolean primitive) {
+        if (primitive == null) {
+            this.item.removeVariable("is_primitive");
+        } else{
+            this.item.setVariable("is_primitive", primitive);
+        }
     }
 
     public String getNationDesignerUnitType() {
-        return nationDesignerUnitType;
+        return this.item.getVarAsString("nation_designer_unit_type");
+    }
+
+    public void setNationDesignerUnitType(String nationDesignerUnitType) {
+        if (StringUtils.isBlank(nationDesignerUnitType)) {
+            this.item.removeVariable("nation_designer_unit_type");
+        } else{
+            this.item.setVariable("nation_designer_unit_type", nationDesignerUnitType);
+        }
+    }
+
+    public NationDesignerCost getNationDesignerCost() {
+        ClausewitzItem costChild = this.item.getChild("nation_designer_cost");
+        return costChild == null ? null : new NationDesignerCost(costChild);
+    }
+
+    public void setNationDesignerCostValue(NationDesignerCost nationDesignerCost) {
+        if (nationDesignerCost == null) {
+            this.item.removeChild("nation_designer_trigger");
+            return;
+        }
+
+        ClausewitzItem costChild = this.item.getChild("nation_designer_cost");
+        //Todo NationDesignerCost => item
+    }
+
+    public Condition getNationDesignerTrigger() {
+        ClausewitzItem triggerChild = this.item.getChild("nation_designer_trigger");
+        return triggerChild == null ? null : new Condition(triggerChild);
+    }
+
+    public void setNationDesignerTrigger(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("nation_designer_trigger");
+            return;
+        }
+
+        ClausewitzItem triggerChild = this.item.getChild("nation_designer_trigger");
+        //Todo Condition => item
     }
 
     @Override
@@ -75,18 +112,18 @@ public class TechGroup {
             return false;
         }
 
-        TechGroup area = (TechGroup) o;
+        TechGroup techGroup = (TechGroup) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), techGroup.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,24 +8,14 @@ import java.util.stream.Collectors;
 
 public class ReligiousReforms {
 
-    private final String name;
+    private final ClausewitzItem item;
 
     private String localizedName;
-
-    private final Condition canBuyIdea;
-
-    private final Condition trigger;
 
     private final List<ReligiousReform> reforms;
 
     public ReligiousReforms(ClausewitzItem item) {
-        this.name = item.getName();
-
-        ClausewitzItem child = item.getChild("can_buy_idea");
-        this.canBuyIdea = child == null ? null : new Condition(child);
-
-        child = item.getChild("trigger");
-        this.trigger = child == null ? null : new Condition(child);
+        this.item = item;
 
         AtomicInteger i = new AtomicInteger();
         this.reforms = item.getChildrenNot("trigger", "can_buy_idea", "ai_will_do")
@@ -37,7 +26,11 @@ public class ReligiousReforms {
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public String getLocalizedName() {
@@ -49,11 +42,33 @@ public class ReligiousReforms {
     }
 
     public Condition getCanBuyIdea() {
-        return canBuyIdea;
+        ClausewitzItem child = item.getChild("can_buy_idea");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setCanBuyIdea(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("can_buy_idea");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("can_buy_idea");
+        //Todo Condition => item
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = item.getChild("trigger");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setTrigger(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("trigger");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("trigger");
+        //Todo Condition => item
     }
 
     public List<ReligiousReform> getReforms() {
@@ -70,18 +85,18 @@ public class ReligiousReforms {
             return false;
         }
 
-        ReligiousReforms area = (ReligiousReforms) o;
+        ReligiousReforms religiousReforms = (ReligiousReforms) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), religiousReforms.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

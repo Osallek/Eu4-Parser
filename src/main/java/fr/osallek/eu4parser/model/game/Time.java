@@ -4,17 +4,17 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 public class Time {
 
-    private int months;
+    private final ClausewitzItem item;
 
     public Time(ClausewitzItem item) {
-        this.months = item.getVarAsInt("months");
+        this.item = item;
     }
 
     public int getMonths() {
-        return months;
+        return this.item.getVarAsInt("months");
     }
 
     public void setMonths(int months) {
-        this.months = months;
+        this.item.setVariable("months", months);
     }
 }

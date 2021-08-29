@@ -6,32 +6,29 @@ import fr.osallek.eu4parser.model.Power;
 import java.util.Comparator;
 import java.util.Objects;
 
-public class Technology implements Comparable<Technology> {
+/*
+    Todo: list of modifiers: https://eu4.paradoxwikis.com/Technology_modding
+ */
 
-    private int number;
+public class Technology {
+
+    private final ClausewitzItem item;
+
+    private final int number;
 
     private final Power type;
 
     private final Modifiers aheadOfTime;
 
-    private final int year;
-
-    private final Modifiers modifiers;
-
-    public Technology(ClausewitzItem item, Power power, Modifiers aheadOfTime) {
+    public Technology(ClausewitzItem item, Power power, Modifiers aheadOfTime, int number) {
+        this.item = item;
         this.type = power;
         this.aheadOfTime = aheadOfTime;
-        this.year = item.getVarAsInt("year");
-
-        this.modifiers = new Modifiers(item.getVarsNot("year"), "tech_");
+        this.number = number;
     }
 
     public int getNumber() {
         return number;
-    }
-
-    void setNumber(int number) {
-        this.number = number;
     }
 
     public Power getType() {
@@ -43,16 +40,15 @@ public class Technology implements Comparable<Technology> {
     }
 
     public int getYear() {
-        return year;
+        return this.item.getVarAsInt("year");
+    }
+
+    public void setYear(int year) {
+        this.item.setVariable("year", year);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
-    }
-
-    @Override
-    public int compareTo(Technology o) {
-        return Comparator.comparingInt(Technology::getNumber).compare(this, o);
+        return new Modifiers(this.item.getVarsNot("year"), "tech_");
     }
 
     @Override
@@ -75,6 +71,6 @@ public class Technology implements Comparable<Technology> {
 
     @Override
     public String toString() {
-        return type + " " + number + " (" + year + ')';
+        return type + " " + number + " (" + getYear() + ')';
     }
 }

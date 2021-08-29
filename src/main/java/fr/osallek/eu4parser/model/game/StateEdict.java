@@ -8,35 +8,20 @@ import java.util.Objects;
 
 public class StateEdict {
 
-    private final String name;
+    private final ClausewitzItem item;
 
     private String localizedName;
 
-    private final Color color;
-
-    private final Condition potential;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
-
-
     public StateEdict(ClausewitzItem item) {
-        this.name = item.getName();
-        this.modifiers = new Modifiers(item.getChild("modifier"));
-
-        ClausewitzItem child = item.getChild("potential");
-        this.potential = child == null ? null : new Condition(child);
-
-        child = item.getChild("allow");
-        this.allow = child == null ? null : new Condition(child);
-
-        ClausewitzList list = item.getList("color");
-        this.color = list == null ? null : new Color(list);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public String getLocalizedName() {
@@ -48,19 +33,60 @@ public class StateEdict {
     }
 
     public Condition getPotential() {
-        return potential;
+        ClausewitzItem child = item.getChild("potential");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setPotential(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("potential");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("potential");
+        //Todo Condition => item
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = item.getChild("allow");
+        return child == null ? null : new Condition(child);
+    }
+
+    public void setAllow(Condition condition) {
+        if (condition == null) {
+            this.item.removeChild("allow");
+            return;
+        }
+
+        ClausewitzItem child = this.item.getChild("allow");
+        //Todo Condition => item
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public Color getColor() {
-        return color;
+        ClausewitzList list = item.getList("color");
+        return list == null ? null : new Color(list);
+    }
+
+    public void setColor(Color color) {
+        if (color == null) {
+            this.item.removeList("color");
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("color");
+
+        if (list != null) {
+            Color actualColor = new Color(list);
+            actualColor.setRed(color.getRed());
+            actualColor.setGreen(color.getGreen());
+            actualColor.setBlue(color.getBlue());
+        } else {
+            Color.addToItem(this.item, "color", color);
+        }
     }
 
     @Override
@@ -73,18 +99,18 @@ public class StateEdict {
             return false;
         }
 
-        StateEdict ageAbility = (StateEdict) o;
+        StateEdict stateEdict = (StateEdict) o;
 
-        return Objects.equals(name, ageAbility.name);
+        return Objects.equals(getName(), stateEdict.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }
