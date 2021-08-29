@@ -24,11 +24,11 @@ public class ActiveAgendaScope {
         return this.item.getVarAsBool("scope_is_valid");
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.activeAgenda.getCountry().getSave().getCountry(this.item.getVarAsString("country"));
     }
 
-    public void setCountry(Country country) {
+    public void setCountry(SaveCountry country) {
         this.item.setVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
     }
 

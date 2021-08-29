@@ -26,7 +26,7 @@ public class SaveEstate {
 
     private final ClausewitzItem item;
 
-    private final Country country;
+    private final SaveCountry country;
 
     private List<EstateInteraction> grantedPrivileges;
 
@@ -36,7 +36,7 @@ public class SaveEstate {
 
     private final Estate estateGame;
 
-    public SaveEstate(ClausewitzItem item, Country country) {
+    public SaveEstate(ClausewitzItem item, SaveCountry country) {
         this.country = country;
         this.game = this.country.getSave().getGame();
         this.item = item;

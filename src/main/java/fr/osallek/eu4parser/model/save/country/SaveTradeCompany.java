@@ -56,7 +56,7 @@ public class SaveTradeCompany {
         return this.item.getVarAsDouble("power");
     }
 
-    public Country getOwner() {
+    public SaveCountry getOwner() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("owner")));
     }
 

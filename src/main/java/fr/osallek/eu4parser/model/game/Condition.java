@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.ConditionsUtils;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
@@ -62,7 +62,7 @@ public class Condition {
         return scopes;
     }
 
-    public boolean apply(Country root, Country from) {
+    public boolean apply(SaveCountry root, SaveCountry from) {
         if (this.conditions != null && this.conditions.entrySet()
                                                       .stream()
                                                       .anyMatch(entry -> entry.getValue()

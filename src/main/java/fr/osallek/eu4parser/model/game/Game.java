@@ -15,7 +15,15 @@ import fr.osallek.eu4parser.common.TreeNode;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -48,13 +56,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.imageio.ImageIO;
-import javax.swing.filechooser.FileSystemView;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Game {
 
@@ -63,6 +64,8 @@ public class Game {
     private final String gameFolderPath;
 
     private Path modFolderPath;
+
+    private List<Mod> mods;
 
     private final File provincesImage;
 
@@ -198,7 +201,11 @@ public class Game {
 
     private Map<String, TriggeredModifier> triggeredModifiers;
 
-    private Map<String, String> countryTags;
+    private Map<String, Country> countries;
+
+    private Map<LocalDate, HreEmperor> hreEmperors;
+
+    private Map<LocalDate, CelestialEmperor> celestialEmperors;
 
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
@@ -274,8 +281,9 @@ public class Game {
         readEventModifiers();
         readProvinceTriggeredModifiers();
         readTriggeredModifiers();
-        readCountryTags();
+        readCountry();
         readColonialRegions();
+        readDiplomacy();
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Time to read game data: {}ms !", Duration.between(start, Instant.now()).toMillis());
@@ -324,6 +332,10 @@ public class Game {
         return gameFolderPath;
     }
 
+    public List<Mod> getMods() {
+        return mods;
+    }
+
     public File getProvincesImage() {
         return this.provincesImage;
     }
@@ -344,7 +356,7 @@ public class Game {
         return getSpriteTypeImageFile("GFX_icon_gold");
     }
 
-    public File getCountryFlagImage(Country country) {
+    public File getCountryFlagImage(SaveCountry country) {
         return country == null ? null : getCountryFlagImage(country.getTag());
     }
 
@@ -1216,8 +1228,24 @@ public class Game {
         return this.triggeredModifiers.get(name);
     }
 
-    public List<String> getCountryTags() {
-        return new ArrayList<>(this.countryTags.keySet());
+    public List<String> getCountriesTags() {
+        return new ArrayList<>(this.countries.keySet());
+    }
+
+    public List<Country> getCountries() {
+        return new ArrayList<>(this.countries.values());
+    }
+
+    public Country getCountry(String tag) {
+        return this.countries.get(ClausewitzUtils.removeQuotes(tag).toUpperCase());
+    }
+
+    public Map<LocalDate, HreEmperor> getHreEmperors() {
+        return new TreeMap<>(this.hreEmperors);
+    }
+
+    public Map<LocalDate, CelestialEmperor> getCelestialEmperors() {
+        return new TreeMap<>(this.celestialEmperors);
     }
 
     public Map<Province, Map<Polygon, Boolean>> getBorders() throws IOException {
@@ -1246,7 +1274,8 @@ public class Game {
     }
 
     private void readMods(List<String> modsEnabled) throws IOException {
-        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath), false), FileNode::getChildren);
+        this.mods = new ArrayList<>();
+        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath), null), FileNode::getChildren);
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator
@@ -1266,36 +1295,36 @@ public class Game {
                       });
             }
 
-            Map<File, List<String>> map = new LinkedHashMap<>();
+            Map<File, Mod> map = new LinkedHashMap<>();
 
             for (String modName : modsEnabled) {
                 Mod mod = knownMods.get(ClausewitzUtils.removeQuotes(modName).replaceAll("^mod/", ""));
                 if (mod != null) {
-                    map.put(mod.getPath(), mod.getReplacePath()
-                                              .stream()
-                                              .map(ClausewitzUtils::removeQuotes)
-                                              .map(s -> Path.of(s).toString())
-                                              .collect(Collectors.toList()));
+                    map.put(mod.getPath(), mod);
                 } else {
                     throw new ModNotFoundException(modName);
                 }
             }
 
-            Map<Path, List<String>> mods = new LinkedHashMap<>();
+            Map<Mod, List<String>> replaces = new LinkedHashMap<>();
             map.forEach((key, value) -> {
                 if (!key.isAbsolute()) {
                     key = new File(this.modFolderPath + File.separator + key.getPath().replaceFirst("^mod\\\\", ""));
                 }
 
                 if (key.exists() && key.canRead()) {
-                    mods.put(key.toPath(), value);
+                    replaces.put(value, value.getReplacePath()
+                                             .stream()
+                                             .map(ClausewitzUtils::removeQuotes)
+                                             .map(s -> Path.of(s).toString())
+                                             .collect(Collectors.toList()));
                 }
             });
 
-            mods.forEach((path, replacePaths) -> { //This technique replace only folders, so don't check for files
+            replaces.forEach((mod, replacePaths) -> { //This technique replace only folders, so don't check for files
                 this.filesNode.removeChildrenIf(fileNode -> fileNode.getPath().toFile().isDirectory()
                                                             && replacePaths.contains(fileNode.getRelativePath().toString()));
-                this.filesNode.merge(new TreeNode<>(null, new FileNode(path, true), FileNode::getChildren));
+                this.filesNode.merge(new TreeNode<>(null, new FileNode(mod.getPath().toPath(), mod), FileNode::getChildren));
             });
         }
     }
@@ -1543,13 +1572,15 @@ public class Game {
                 }
             }
 
-            getPaths(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile)
-                    .forEach(path -> {
-                        String[] fileNameSplit = path.getFileName().toString().split("[ -]");
+            getFileNodes(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile)
+                    .forEach(fileNode -> {
+                        String[] fileNameSplit = fileNode.getPath().getFileName().toString().split("[ -]");
                         try {
                             if (fileNameSplit.length >= 1) {
                                 int provinceId = Eu4Utils.cleanStringAndParseToInt(fileNameSplit[0]);
-                                getProvince(provinceId).setHistory(ClausewitzParser.parse(path.toFile(), 0), this.buildings);
+                                getProvince(provinceId).setHistory(ClausewitzParser.parse(fileNode.getPath().toFile(), 0), this, fileNode.getMod(),
+                                                                   this.buildings);
+                                //Fixme multiple history files with different names are compatible https://eu4.paradoxwikis.com/History_modding#Compatibility_-_Partial_Overwrites
                             }
                         } catch (NumberFormatException ignored) {
                         }
@@ -2497,17 +2528,50 @@ public class Game {
         this.triggeredModifiers.values().forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
     }
 
-    private void readCountryTags() {
-        this.countryTags = new HashMap<>();
+    private void readCountry() {
+        this.countries = new HashMap<>();
+
+        Map<String, File> countriesHistory = new HashMap<>();
+        getPaths(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "countries", this::isRegularTxtFile)
+                .forEach(path -> countriesHistory.put(path.toFile().getName().substring(0, 3).toUpperCase(), path.toFile()));
 
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "country_tags", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem countryTagsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.countryTags.putAll(countryTagsItem.getVariables()
-                                                           .stream()
-                                                           .collect(Collectors.toMap(var -> var.getName()
-                                                                                               .toUpperCase(), var -> ClausewitzUtils.removeQuotes(var.getValue()), (a, b) -> b)));
+                    countryTagsItem.getVariables()
+                                   .forEach(variable -> this.countries.put(variable.getName(),
+                                                                           new Country(variable.getName().toUpperCase(),
+                                                                                       ClausewitzParser.parse(
+                                                                                               countriesHistory.get(variable.getName().toUpperCase()), 0),
+                                                                                       ClausewitzParser.parse(getAbsoluteFile(Path.of(
+                                                                                                                      Eu4Utils.COMMON_FOLDER_PATH + File.separator
+                                                                                                                      + ClausewitzUtils.removeQuotes(variable.getValue())).toString()),
+                                                                                                              0),
+                                                                                       this)));
+                });
+    }
 
+    private void readDiplomacy() {
+        this.hreEmperors = new HashMap<>();
+        this.celestialEmperors = new HashMap<>();
+
+        getPaths(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "diplomacy", this::isRegularTxtFile)
+                .forEach(path -> {
+                    ClausewitzItem diplomacyItem = ClausewitzParser.parse(path.toFile(), 0);
+
+                    diplomacyItem.getChildren()
+                                 .stream()
+                                 .filter(item -> ClausewitzUtils.DATE_PATTERN.matcher(item.getName()).matches())
+                                 .forEach(item -> {
+                                     if (item.hasVar("emperor")) {
+                                         this.hreEmperors.put(ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(item.getName())), new HreEmperor(item));
+                                     }
+
+                                     if (item.hasVar("celestial_emperor")) {
+                                         this.celestialEmperors.put(ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(item.getName())),
+                                                                    new CelestialEmperor(item));
+                                     }
+                                 });
                 });
     }
 

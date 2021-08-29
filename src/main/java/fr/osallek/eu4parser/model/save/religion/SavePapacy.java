@@ -13,7 +13,7 @@ import fr.osallek.eu4parser.model.game.PapacyConcession;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
@@ -50,7 +50,7 @@ public class SavePapacy {
         return this.save.getGame().getReligion(this.religion.getName()).getPapacy();
     }
 
-    public Country getCrusadeTarget() {
+    public SaveCountry getCrusadeTarget() {
         String target = this.item.getVarAsString("crusade_target");
 
         if (target == null || Eu4Utils.DEFAULT_TAG_QUOTES.equals(target)) {
@@ -70,7 +70,7 @@ public class SavePapacy {
         return date;
     }
 
-    public void setCrusadeTarget(Country target) {
+    public void setCrusadeTarget(SaveCountry target) {
         if (target != getCrusadeTarget()) {
             if (target == null) {
                 removeCrusade();
@@ -98,19 +98,19 @@ public class SavePapacy {
         return this.item.getVarAsString("controller");
     }
 
-    public Country getController() {
+    public SaveCountry getController() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
     }
 
-    public void setController(Country controller) {
+    public void setController(SaveCountry controller) {
         this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
-    public Country getPreviousController() {
+    public SaveCountry getPreviousController() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("previous_controller")));
     }
 
-    public void setPreviousController(Country previousController) {
+    public void setPreviousController(SaveCountry previousController) {
         this.item.setVariable("previous_controller", ClausewitzUtils.addQuotes(previousController.getTag()));
     }
 
@@ -262,7 +262,7 @@ public class SavePapacy {
         return this.coloniesClaims.getColonyClaim(index);
     }
 
-    public void setColonyClaim(int index, Country country) {
+    public void setColonyClaim(int index, SaveCountry country) {
         if (this.coloniesClaims != null) {
             this.coloniesClaims.setColonyClaim(index, country);
         }
@@ -335,19 +335,19 @@ public class SavePapacy {
                                                                             .collect(Collectors.toList()));
     }
 
-    public List<Country> getConcilatory() {
+    public List<SaveCountry> getConcilatory() {
         ClausewitzList list = this.item.getList("concilatory");
 
         return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getNeutral() {
+    public List<SaveCountry> getNeutral() {
         ClausewitzList list = this.item.getList("neutral");
 
         return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getHarsh() {
+    public List<SaveCountry> getHarsh() {
         ClausewitzList list = this.item.getList("harsh");
 
         return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());

@@ -22,7 +22,7 @@ public class SupplyDepot {
         return this.save.getProvince(this.item.getVarAsInt("province"));
     }
 
-    public Country getBuilder() {
+    public SaveCountry getBuilder() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("builder")));
     }
 
@@ -34,7 +34,7 @@ public class SupplyDepot {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, LocalDate date) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country, LocalDate date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "rival", parent.getOrder() + 1);
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addVariable("date", date);

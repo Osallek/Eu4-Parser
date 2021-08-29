@@ -21,7 +21,7 @@ public class History {
 
     private final Save save;
 
-    private final Country country;
+    private final SaveCountry country;
 
     private final ClausewitzItem item;
 
@@ -35,7 +35,7 @@ public class History {
 
     private SortedMap<LocalDate, String> changedTagFrom;
 
-    public History(ClausewitzItem item, Save save, Country country) {
+    public History(ClausewitzItem item, Save save, SaveCountry country) {
         this.save = save;
         this.item = item;
         this.country = country;

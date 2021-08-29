@@ -16,7 +16,7 @@ import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
 import fr.osallek.eu4parser.model.save.country.ActivePolicy;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.Income;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
@@ -58,9 +58,9 @@ public class ConditionsUtils {
 
     private ConditionsUtils() {}
 
-    public static boolean applyConditionToCountry(Country country, Country root, Country from, String condition, String rawValue) {
+    public static boolean applyConditionToCountry(SaveCountry country, SaveCountry root, SaveCountry from, String condition, String rawValue) {
         TradeGood tradeGood;
-        Country other;
+        SaveCountry other;
         SaveProvince saveProvince;
         Integer integer;
         Double aDouble;
@@ -96,7 +96,7 @@ public class ConditionsUtils {
         }
 
         if ((subjectType = country.getSave().getGame().getSubjectType(condition)) != null) {
-            return country.getSubjects().stream().map(Country::getSubjectType).filter(subjectType::equals).count() >= NumbersUtils.toInt(value);
+            return country.getSubjects().stream().map(SaveCountry::getSubjectType).filter(subjectType::equals).count() >= NumbersUtils.toInt(value);
         }
 
         if ((religion = country.getSave().getGame().getReligion(condition)) != null) {
@@ -146,7 +146,7 @@ public class ConditionsUtils {
             case "ai":
                 return "yes".equalsIgnoreCase(value) == !country.isHuman();
             case "alliance_with":
-                return country.getAllies().stream().map(Country::getTag).anyMatch(tag -> tag.equalsIgnoreCase(value));
+                return country.getAllies().stream().map(SaveCountry::getTag).anyMatch(tag -> tag.equalsIgnoreCase(value));
             case "allows_female_emperor":
                 return country.getSave().getHre() != null && BooleanUtils.toBoolean(country.getSave().getHre().getAllowsFemaleEmperor());
             case "always":
@@ -218,7 +218,7 @@ public class ConditionsUtils {
             case "coalition_target":
                 return CollectionUtils.isNotEmpty(country.getSave().getCountry(value).getCoalition());
             case "colony":
-                return country.getSubjects().stream().filter(Country::isColony).count() >= NumbersUtils.toInt(value);
+                return country.getSubjects().stream().filter(SaveCountry::isColony).count() >= NumbersUtils.toInt(value);
             case "colony_claim":
                 return country.getClaimProvinces().stream().anyMatch(province -> province.isColony() && province.getOwner().getTag().equals(value));
             case "consort_adm":
@@ -1312,7 +1312,7 @@ public class ConditionsUtils {
             case "num_of_cossacks":
                 return country.getNbRegimentOfCategory(4) >= NumbersUtils.toInt(value);
             case "num_of_custom_nations":
-                return country.getSave().getCountries().values().stream().filter(Country::isCustom).count() >= NumbersUtils.toInt(value);
+                return country.getSave().getCountries().values().stream().filter(SaveCountry::isCustom).count() >= NumbersUtils.toInt(value);
             case "num_of_daimyos":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getSubjects()
@@ -1914,8 +1914,8 @@ public class ConditionsUtils {
         return false;
     }
 
-    public static boolean applyScopeToCountry(Country root, Country from, Condition condition) {
-        Country country;
+    public static boolean applyScopeToCountry(SaveCountry root, SaveCountry from, Condition condition) {
+        SaveCountry country;
         SaveProvince saveProvince;
         SubjectType subjectType;
         SaveEstate estate;
@@ -2086,7 +2086,7 @@ public class ConditionsUtils {
                               .isBefore(root.getSave().getDate());
             case "has_casus_belli":
                 country = root.getSave().getCountry(condition.getCondition("target"));
-                Country finalCountry = country;
+                SaveCountry finalCountry = country;
                 return root.getSave()
                            .getDiplomacy()
                            .getCasusBellis()
@@ -2247,7 +2247,7 @@ public class ConditionsUtils {
                        + root.getSubjects()
                              .stream()
                              .filter(c -> !c.getSubjectType().isVoluntary())
-                             .map(Country::getOwnedProvinces)
+                             .map(SaveCountry::getOwnedProvinces)
                              .flatMap(Collection::stream)
                              .filter(condition::apply)
                              .count()
@@ -2286,7 +2286,7 @@ public class ConditionsUtils {
             case "overlord":
                 return root.getOverlord() != null && condition.apply(root.getOverlord(), from);
             case "owns_all_provinces":
-                List<Country> countries = new ArrayList<>();
+                List<SaveCountry> countries = new ArrayList<>();
                 countries.add(root);
                 countries.addAll(root.getSubjects().stream().filter(c -> !c.getSubjectType().isVoluntary()).collect(Collectors.toList()));
                 return root.getSave().getProvinces().values().stream().filter(condition::apply).allMatch(province -> countries.contains(province.getOwner()));
@@ -2337,7 +2337,7 @@ public class ConditionsUtils {
                        && root.getActiveRelation(country).getTrustValue() >= NumbersUtils.toInt(condition.getCondition("value"));
             case "war_score_against":
                 country = root.getSave().getCountry(condition.getCondition("who"));
-                Country finalCountry1 = country;
+                SaveCountry finalCountry1 = country;
                 return !CollectionUtils.isNotEmpty(root.getActiveWars())
                        && root.getActiveWars()
                               .stream()
@@ -2362,7 +2362,7 @@ public class ConditionsUtils {
         Institution institution;
         Integer integer;
         Calendar calendar = Calendar.getInstance();
-        Country other;
+        SaveCountry other;
         Building building;
 
         if ("ROOT".equals(rawValue)) {
@@ -2967,7 +2967,7 @@ public class ConditionsUtils {
     }
 
     public static boolean applyScopeToProvince(SaveProvince province, Condition condition) {
-        Country country;
+        SaveCountry country;
         SaveTradeNode tradeNode;
 
         if ((country = province.getSave().getCountry(condition.getName())) != null) {
@@ -3055,7 +3055,7 @@ public class ConditionsUtils {
                        >= NumbersUtils.toInt(condition.getCondition("value"));
             case "num_of_units_in_province":
                 UnitType type = UnitType.value(condition.getCondition("type"));
-                Country finalCountry = province.getSave().getCountry(condition.getCondition("who"));
+                SaveCountry finalCountry = province.getSave().getCountry(condition.getCondition("who"));
 
                 return province.getUnits().stream().filter(regiment -> {
                     if (type != null && !type.equals(regiment.getUnitType())) {
@@ -3089,7 +3089,7 @@ public class ConditionsUtils {
         return false;
     }
 
-    public static String rawValueToReligion(String rawValue, Country root, Country from) {
+    public static String rawValueToReligion(String rawValue, SaveCountry root, SaveCountry from) {
         if ("ROOT".equalsIgnoreCase(rawValue)) {
             return root.getReligion().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
@@ -3099,7 +3099,7 @@ public class ConditionsUtils {
         }
     }
 
-    public static String rawValueToReligionGroup(String rawValue, Country root, Country from) {
+    public static String rawValueToReligionGroup(String rawValue, SaveCountry root, SaveCountry from) {
         if ("ROOT".equalsIgnoreCase(rawValue)) {
             return root.getReligion().getGameReligion().getReligionGroup().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
@@ -3109,7 +3109,7 @@ public class ConditionsUtils {
         }
     }
 
-    public static String rawValueToCulture(String rawValue, Country root, Country from) {
+    public static String rawValueToCulture(String rawValue, SaveCountry root, SaveCountry from) {
         if ("ROOT".equalsIgnoreCase(rawValue)) {
             return root.getPrimaryCulture().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
@@ -3119,7 +3119,7 @@ public class ConditionsUtils {
         }
     }
 
-    public static String rawValueToCultureGroup(String rawValue, Country root, Country from) {
+    public static String rawValueToCultureGroup(String rawValue, SaveCountry root, SaveCountry from) {
         if ("ROOT".equalsIgnoreCase(rawValue)) {
             return root.getPrimaryCulture().getCultureGroup().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {

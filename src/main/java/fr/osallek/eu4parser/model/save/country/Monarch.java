@@ -15,7 +15,7 @@ public class Monarch {
 
     protected final Save save;
 
-    protected final Country country;
+    protected final SaveCountry country;
 
     protected final ClausewitzItem item;
 
@@ -33,14 +33,14 @@ public class Monarch {
 
     private Leader leader;
 
-    public Monarch(ClausewitzItem item, Save save, Country country) {
+    public Monarch(ClausewitzItem item, Save save, SaveCountry country) {
         this.save = save;
         this.item = item;
         this.country = country;
         refreshAttributes();
     }
 
-    public Monarch(ClausewitzItem item, Save save, Country country, LocalDate date) {
+    public Monarch(ClausewitzItem item, Save save, SaveCountry country, LocalDate date) {
         this.save = save;
         this.item = item;
         this.country = country;
@@ -70,7 +70,7 @@ public class Monarch {
         return monarchDate;
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.save.getCountry(this.item.getVarAsString("country"));
     }
 
@@ -281,11 +281,11 @@ public class Monarch {
         return rulerFlags;
     }
 
-    public Country getWho() {
+    public SaveCountry getWho() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("who")));
     }
 
-    public void setWho(Country who) {
+    public void setWho(SaveCountry who) {
         this.item.setVariable("who", ClausewitzUtils.addQuotes(who.getTag()));
     }
 

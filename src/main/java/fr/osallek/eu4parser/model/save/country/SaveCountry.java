@@ -6,6 +6,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
@@ -63,8 +64,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -90,22 +89,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Country {
-
-    //Todo combined countries:
-    // trade_embargoed_by (active_relation: is_embargoing=yes), trade_embargoes
-    // subjects, overlord, diplomacy(dependency)
-
-    //Todo
-    // mercenary_company
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Country.class);
-
-    public static final Pattern COUNTRY_PATTERN = Pattern.compile("[A-Z]{3}");
-    public static final Pattern CUSTOM_COUNTRY_PATTERN = Pattern.compile("D[0-9]{2}");
-    public static final Pattern COLONY_PATTERN = Pattern.compile("C[0-9]{2}");
-    public static final Pattern TRADING_CITY_PATTERN = Pattern.compile("T[0-9]{2}");
-    public static final Pattern CLIENT_STATE_PATTERN = Pattern.compile("K[0-9]{2}");
+public class SaveCountry {
 
     private final ClausewitzItem item;
 
@@ -241,7 +225,7 @@ public class Country {
 
     private TradeLeague tradeLeague;
 
-    public Country(ClausewitzItem item, Save save) {
+    public SaveCountry(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
         this.isPlayable = !"---".equals(getTag()) && !"REB".equals(getTag()) && !"NAT".equals(getTag())
@@ -249,7 +233,7 @@ public class Country {
         refreshAttributes();
     }
 
-    public Country(String tag) {
+    public SaveCountry(String tag) {
         this.item = new ClausewitzItem(null, tag, 0);
     }
 
@@ -298,19 +282,19 @@ public class Country {
     }
 
     public boolean isCustom() {
-        return CUSTOM_COUNTRY_PATTERN.matcher(getTag()).matches();
+        return Country.CUSTOM_COUNTRY_PATTERN.matcher(getTag()).matches();
     }
 
     public boolean isColony() {
-        return COLONY_PATTERN.matcher(getTag()).matches();
+        return Country.COLONY_PATTERN.matcher(getTag()).matches();
     }
 
     public boolean isTradeCity() {
-        return TRADING_CITY_PATTERN.matcher(getTag()).matches();
+        return Country.TRADING_CITY_PATTERN.matcher(getTag()).matches();
     }
 
     public boolean isClientState() {
-        return CLIENT_STATE_PATTERN.matcher(getTag()).matches();
+        return Country.CLIENT_STATE_PATTERN.matcher(getTag()).matches();
     }
 
     public boolean isNameEditable() {
@@ -1117,7 +1101,7 @@ public class Country {
         return rivals;
     }
 
-    public void addRival(Country country, LocalDate date) {
+    public void addRival(SaveCountry country, LocalDate date) {
         if (!this.rivals.containsKey(ClausewitzUtils.addQuotes(country.getTag()))) {
             int order = this.item.getVar("highest_possible_fort").getOrder();
             Rival.addToItem(this.item, country, date, order);
@@ -1130,7 +1114,7 @@ public class Country {
         refreshAttributes();
     }
 
-    public void removeRival(Country rival) {
+    public void removeRival(SaveCountry rival) {
         this.item.removeChildIf(child -> "rival".equalsIgnoreCase(child.getName())
                                          && ClausewitzUtils.addQuotes(rival.getTag()).equalsIgnoreCase(child.getVarAsString("country")));
         refreshAttributes();
@@ -1209,11 +1193,11 @@ public class Country {
         return this.item.getVarAsInt("num_of_war_reparations");
     }
 
-    public Country getCoalitionTarget() {
+    public SaveCountry getCoalitionTarget() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("coalition_target")));
     }
 
-    public void setCoalitionTarget(Country coalitionTarget) {
+    public void setCoalitionTarget(SaveCountry coalitionTarget) {
         this.item.setVariable("coalition_target", ClausewitzUtils.addQuotes(coalitionTarget.getTag()));
         setCoalitionDate(this.save.getDate());
     }
@@ -1228,7 +1212,7 @@ public class Country {
         }
     }
 
-    public void addWarReparations(Country country) {
+    public void addWarReparations(SaveCountry country) {
         Integer nbWarReparations = getNumOfWarReparations();
 
         if (nbWarReparations == null) {
@@ -1238,7 +1222,7 @@ public class Country {
         this.item.setVariable("num_of_war_reparations", nbWarReparations + 1);
     }
 
-    public void removeWarReparations(Country country) {
+    public void removeWarReparations(SaveCountry country) {
         Integer nbWarReparations = getNumOfWarReparations();
 
         if (nbWarReparations == null) {
@@ -1248,7 +1232,7 @@ public class Country {
         this.item.setVariable("num_of_war_reparations", nbWarReparations - 1);
     }
 
-    public Country getOverlord() {
+    public SaveCountry getOverlord() {
         String overlordTag = this.item.getVarAsString("overlord");
 
         return overlordTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(overlordTag));
@@ -1279,7 +1263,7 @@ public class Country {
         }
     }
 
-    public void setOverlord(Country country) {
+    public void setOverlord(SaveCountry country) {
         if (country == null) {
             this.item.removeVariable("overlord");
         } else {
@@ -1287,7 +1271,7 @@ public class Country {
         }
     }
 
-    public void setOverlord(Country overlord, SubjectType subjectType, LocalDate startDate) { //Todo add/remove from wars
+    public void setOverlord(SaveCountry overlord, SubjectType subjectType, LocalDate startDate) { //Todo add/remove from wars
         if (!Objects.equals(this.getOverlord(), overlord) || !Objects.equals(this.subjectType, subjectType)
             || !Objects.equals(this.subjectStartDate, startDate)) {
             if (Objects.equals(this.getOverlord(), overlord)) {
@@ -1333,7 +1317,7 @@ public class Country {
         this.subjectStartDate = null;
     }
 
-    public List<Country> getEnemies() {
+    public List<SaveCountry> getEnemies() {
         return this.item.getVarsAsStrings("enemy")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
@@ -1352,21 +1336,21 @@ public class Country {
         return this.item.getVarAsBool("has_unconditional_surrender");
     }
 
-    public List<Country> gaveAccess() {
+    public List<SaveCountry> gaveAccess() {
         return this.item.getVarsAsStrings("gave_access")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
                         .collect(Collectors.toList());
     }
 
-    public List<Country> getOurSpyNetwork() {
+    public List<SaveCountry> getOurSpyNetwork() {
         return this.item.getVarsAsStrings("our_spy_network")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
                         .collect(Collectors.toList());
     }
 
-    public List<Country> getTheirSpyNetwork() {
+    public List<SaveCountry> getTheirSpyNetwork() {
         return this.item.getVarsAsStrings("their_spy_network")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
@@ -1381,25 +1365,25 @@ public class Country {
         this.item.setVariable("luck", lucky);
     }
 
-    public Country getFederationLeader() {
+    public SaveCountry getFederationLeader() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("federation_leader")));
     }
 
-    public List<Country> getFederationFriends() {
+    public List<SaveCountry> getFederationFriends() {
         return this.item.getVarsAsStrings("federation_friends")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
                         .collect(Collectors.toList());
     }
 
-    public List<Country> getCoalition() {
+    public List<SaveCountry> getCoalition() {
         return this.item.getVarsAsStrings("coalition_against_us")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
                         .collect(Collectors.toList());
     }
 
-    public List<Country> getPreferredCoalition() {
+    public List<SaveCountry> getPreferredCoalition() {
         return this.item.getVarsAsStrings("preferred_coalition_against_us")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
@@ -1448,7 +1432,7 @@ public class Country {
         this.item.setVariable("convert", convert);
     }
 
-    public Country getForceConvert() {
+    public SaveCountry getForceConvert() {
         String forceConverted = ClausewitzUtils.removeQuotes(this.item.getVarAsString("force_converted"));
 
         if (Eu4Utils.DEFAULT_TAG.equals(forceConverted)) {
@@ -1458,12 +1442,12 @@ public class Country {
         return this.save.getCountry(forceConverted);
     }
 
-    public void setForceConvert(Country country) {
+    public void setForceConvert(SaveCountry country) {
         this.item.setVariable("force_converted", ClausewitzUtils.addQuotes(country.getTag()));
         setConvert(true);
     }
 
-    public Country getColonialParent() {
+    public SaveCountry getColonialParent() {
         String colonialParent = ClausewitzUtils.removeQuotes(this.item.getVarAsString("colonial_parent"));
 
         if (Eu4Utils.DEFAULT_TAG.equals(colonialParent)) {
@@ -1473,7 +1457,7 @@ public class Country {
         return this.save.getCountry(colonialParent);
     }
 
-    public void setColonialParent(Country country) {
+    public void setColonialParent(SaveCountry country) {
         this.item.setVariable("colonial_parent", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
@@ -1586,7 +1570,7 @@ public class Country {
         return this.item.getVarAsDouble("navy_strength");
     }
 
-    public Country getPreferredEmperor() {
+    public SaveCountry getPreferredEmperor() {
         return this.save.getCountry(this.item.getVarAsString("preferred_emperor"));
     }
 
@@ -1670,7 +1654,7 @@ public class Country {
         return NumbersUtils.intOrDefault(this.item.getVarAsInt("num_of_royal_marriages"));
     }
 
-    public void addRoyalMarriage(Country country) {
+    public void addRoyalMarriage(SaveCountry country) {
         Integer nbRoyalMarriages = getNumOfRoyalMarriages();
 
         if (nbRoyalMarriages == null) {
@@ -1680,7 +1664,7 @@ public class Country {
         this.item.setVariable("num_of_royal_marriages", nbRoyalMarriages + 1);
     }
 
-    public void removeRoyalMarriage(Country country) {
+    public void removeRoyalMarriage(SaveCountry country) {
         Integer nbRoyalMarriages = getNumOfRoyalMarriages();
 
         if (nbRoyalMarriages == null) {
@@ -1905,7 +1889,7 @@ public class Country {
         return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
-    public List<Country> getNeighbours() {
+    public List<SaveCountry> getNeighbours() {
         ClausewitzList list = this.item.getList("neighbours");
 
         if (list == null) {
@@ -1915,7 +1899,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getHomeNeighbours() {
+    public List<SaveCountry> getHomeNeighbours() {
         ClausewitzList list = this.item.getList("home_neighbours");
 
         if (list == null) {
@@ -1925,7 +1909,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getCoreNeighbours() {
+    public List<SaveCountry> getCoreNeighbours() {
         ClausewitzList list = this.item.getList("core_neighbours");
 
         if (list == null) {
@@ -1935,7 +1919,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getCurrentAtWarWith() {
+    public List<SaveCountry> getCurrentAtWarWith() {
         ClausewitzList list = this.item.getList("current_at_war_with");
 
         if (list == null) {
@@ -1945,7 +1929,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getCurrentWarAllies() {
+    public List<SaveCountry> getCurrentWarAllies() {
         ClausewitzList list = this.item.getList("current_war_allies");
 
         if (list == null) {
@@ -1955,7 +1939,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getCallToArmsFriends() {
+    public List<SaveCountry> getCallToArmsFriends() {
         ClausewitzList list = this.item.getList("call_to_arms_friends");
 
         if (list == null) {
@@ -1965,7 +1949,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getAllies() {
+    public List<SaveCountry> getAllies() {
         ClausewitzList list = this.item.getList("allies");
 
         if (list == null) {
@@ -1975,7 +1959,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void addAlly(Country ally) {
+    public void addAlly(SaveCountry ally) {
         ClausewitzList list = this.item.getList("allies");
 
         if (list == null) {
@@ -1993,7 +1977,7 @@ public class Country {
         this.item.setVariable("num_of_allies", nbAllies + 1);
     }
 
-    public void removeAlly(Country ally) {
+    public void removeAlly(SaveCountry ally) {
         ClausewitzList list = this.item.getList("allies");
 
         if (list != null) {
@@ -2009,7 +1993,7 @@ public class Country {
         }
     }
 
-    public List<Country> getSubjects() {
+    public List<SaveCountry> getSubjects() {
         ClausewitzList list = this.item.getList("subjects");
 
         if (list == null) {
@@ -2019,7 +2003,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void addSubject(Country subject) {
+    public void addSubject(SaveCountry subject) {
         ClausewitzList list = this.item.getList("subjects");
 
         if (list == null) {
@@ -2037,7 +2021,7 @@ public class Country {
         this.item.setVariable("num_of_subjects", nbSubjects + 1);
     }
 
-    public void removeSubject(Country subject) {
+    public void removeSubject(SaveCountry subject) {
         ClausewitzList list = this.item.getList("subjects");
 
         if (list != null) {
@@ -2071,7 +2055,7 @@ public class Country {
         return (int) getTradeCompanies().stream().filter(SaveTradeCompany::strongCompany).count();
     }
 
-    public List<Country> getIndependenceSupportedBy() {
+    public List<SaveCountry> getIndependenceSupportedBy() {
         ClausewitzList list = this.item.getList("support_independence");
 
         if (list == null) {
@@ -2082,7 +2066,7 @@ public class Country {
     }
 
 
-    public void addIndependenceSupportedBy(Country supporter) {
+    public void addIndependenceSupportedBy(SaveCountry supporter) {
         ClausewitzList list = this.item.getList("support_independence");
 
         if (list == null) {
@@ -2092,7 +2076,7 @@ public class Country {
         }
     }
 
-    public void removeIndependenceSupportedBy(Country supporter) {
+    public void removeIndependenceSupportedBy(SaveCountry supporter) {
         ClausewitzList list = this.item.getList("support_independence");
 
         if (list != null) {
@@ -2100,7 +2084,7 @@ public class Country {
         }
     }
 
-    public List<Country> getGuarantees() {
+    public List<SaveCountry> getGuarantees() {
         ClausewitzList list = this.item.getList("guarantees");
 
         if (list == null) {
@@ -2110,7 +2094,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void addGuarantee(Country country) {
+    public void addGuarantee(SaveCountry country) {
         ClausewitzList list = this.item.getList("guarantees");
         String guarantee = country.getTag();
 
@@ -2121,7 +2105,7 @@ public class Country {
         }
     }
 
-    public void removeGuarantee(Country guarantee) {
+    public void removeGuarantee(SaveCountry guarantee) {
         ClausewitzList list = this.item.getList("guarantees");
 
         if (list != null) {
@@ -2129,7 +2113,7 @@ public class Country {
         }
     }
 
-    public List<Country> getWarnings() {
+    public List<SaveCountry> getWarnings() {
         ClausewitzList list = this.item.getList("warnings");
 
         if (list == null) {
@@ -2140,7 +2124,7 @@ public class Country {
     }
 
 
-    public void addWarning(Country country) {
+    public void addWarning(SaveCountry country) {
         ClausewitzList list = this.item.getList("warnings");
         String warning = ClausewitzUtils.removeQuotes(country.getTag());
 
@@ -2151,7 +2135,7 @@ public class Country {
         }
     }
 
-    public void removeWarning(Country warning) {
+    public void removeWarning(SaveCountry warning) {
         ClausewitzList list = this.item.getList("warnings");
 
         if (list != null) {
@@ -2159,7 +2143,7 @@ public class Country {
         }
     }
 
-    public List<Country> getCondottieriClient() {
+    public List<SaveCountry> getCondottieriClient() {
         ClausewitzList list = this.item.getList("condottieri_client");
 
         if (list == null) {
@@ -2169,7 +2153,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getTradeEmbargoedBy() {
+    public List<SaveCountry> getTradeEmbargoedBy() {
         ClausewitzList list = this.item.getList("trade_embargoed_by");
 
         if (list == null) {
@@ -2179,7 +2163,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getTradeEmbargoes() {
+    public List<SaveCountry> getTradeEmbargoes() {
         ClausewitzList list = this.item.getList("trade_embargoes");
 
         if (list == null) {
@@ -2189,7 +2173,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public List<Country> getTransferTradePowerFrom() {
+    public List<SaveCountry> getTransferTradePowerFrom() {
         ClausewitzList list = this.item.getList("transfer_trade_power_from");
 
         if (list == null) {
@@ -2199,7 +2183,7 @@ public class Country {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void addTransferTradePowerFrom(Country country) {
+    public void addTransferTradePowerFrom(SaveCountry country) {
         ClausewitzList list = this.item.getList("transfer_trade_power_from");
 
         if (list == null) {
@@ -2209,7 +2193,7 @@ public class Country {
         }
     }
 
-    public void removeTransferTradePowerFrom(Country country) {
+    public void removeTransferTradePowerFrom(SaveCountry country) {
         ClausewitzList list = this.item.getList("transfer_trade_power_from");
 
         if (list != null) {
@@ -2217,7 +2201,7 @@ public class Country {
         }
     }
 
-    public List<Country> getTransferTradePowerTo() {
+    public List<SaveCountry> getTransferTradePowerTo() {
         ClausewitzList list = this.item.getList("ransfer_trade_power_to");
 
         if (list == null) {
@@ -2228,7 +2212,7 @@ public class Country {
     }
 
 
-    public void addTransferTradePowerTo(Country country) {
+    public void addTransferTradePowerTo(SaveCountry country) {
         ClausewitzList list = this.item.getList("ransfer_trade_power_to");
 
         if (list == null) {
@@ -2238,7 +2222,7 @@ public class Country {
         }
     }
 
-    public void removeTransferTradePowerTo(Country country) {
+    public void removeTransferTradePowerTo(SaveCountry country) {
         ClausewitzList list = this.item.getList("ransfer_trade_power_to");
 
         if (list != null) {
@@ -3394,7 +3378,7 @@ public class Country {
         return activeRelations;
     }
 
-    public ActiveRelation getActiveRelation(Country country) {
+    public ActiveRelation getActiveRelation(SaveCountry country) {
         return this.activeRelations.get(country.getTag());
     }
 
@@ -3594,7 +3578,7 @@ public class Country {
         return list.getValuesAsBool();
     }
 
-    public List<Country> getHistoricalFriends() {
+    public List<SaveCountry> getHistoricalFriends() {
         ClausewitzList list = this.item.getList("historical_friends");
 
         if (list == null) {
@@ -3604,7 +3588,7 @@ public class Country {
         return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getCountry(s)).collect(Collectors.toList());
     }
 
-    public List<Country> getHistoricalRivals() {
+    public List<SaveCountry> getHistoricalRivals() {
         ClausewitzList list = this.item.getList("historical_rivals");
 
         if (list == null) {
@@ -3975,8 +3959,8 @@ public class Country {
     }
 
     public double getNbFreeDiplomaticRelations() {
-        Set<Country> countedCountries = new HashSet<>();
-        Set<Country> tmp;
+        Set<SaveCountry> countedCountries = new HashSet<>();
+        Set<SaveCountry> tmp;
 
         double nb = NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("DIPLOMATIC_UPKEEP")));
         nb -= getAllies().size();
@@ -4818,11 +4802,11 @@ public class Country {
             return true;
         }
 
-        if (!(o instanceof Country)) {
+        if (!(o instanceof SaveCountry)) {
             return false;
         }
 
-        Country country = (Country) o;
+        SaveCountry country = (SaveCountry) o;
         return Objects.equals(getTag(), country.getTag());
     }
 

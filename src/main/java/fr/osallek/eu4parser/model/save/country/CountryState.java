@@ -46,7 +46,7 @@ public class CountryState {
         this.item.setVariable("has_state_pasha", hasStatePatriach);
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.save.getCountry(this.item.getVarAsString("country"));
     }
 
@@ -77,7 +77,7 @@ public class CountryState {
         this.item.setVariable("holy_order", ClausewitzUtils.addQuotes(holyOrder.getName()));
     }
 
-    public Country getHolyOrderFounder() {
+    public SaveCountry getHolyOrderFounder() {
         return this.save.getCountry(this.item.getVarAsString("holy_order_founder"));
     }
 
@@ -89,7 +89,7 @@ public class CountryState {
         }
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "country_state", parent.getOrder() + 1);
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addVariable("prosperity", 0d);

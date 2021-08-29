@@ -2,12 +2,17 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ProvinceHistoryItem {
+
+    private ClausewitzItem item;
+
+    private final Game game;
 
     private final String owner;
 
@@ -53,7 +58,9 @@ public class ProvinceHistoryItem {
 
     private final List<String> buildings;
 
-    public ProvinceHistoryItem(ClausewitzItem item, Map<String, Building> buildings) {
+    public ProvinceHistoryItem(ClausewitzItem item, Game game, Map<String, Building> buildings) {
+        this.item = item;
+        this.game = game;
         this.owner = item.getVarAsString("owner");
         this.controller = item.getVarAsString("controller");
         this.cores = item.getVarsAsStrings("add_core");
@@ -88,12 +95,30 @@ public class ProvinceHistoryItem {
         this.buildings = buildings.keySet().stream().filter(item::hasChild).collect(Collectors.toList());
     }
 
-    public String getOwner() {
-        return owner;
+    public Country getOwner() {
+        ClausewitzVariable variable = this.item.getVar("owner");
+        return variable == null ? null : this.game.getCountry(variable.getValue());
     }
 
-    public String getController() {
-        return controller;
+    public void setOwner(Country owner) {
+        setOwner(owner.getTag());
+    }
+
+    public void setOwner(String owner) {
+        this.item.setVariable("owner", owner);
+    }
+
+    public Country getController() {
+        ClausewitzVariable variable = this.item.getVar("controller");
+        return variable == null ? null : this.game.getCountry(variable.getValue());
+    }
+
+    public void setController(Country controller) {
+        setController(controller.getTag());
+    }
+
+    public void setController(String controller) {
+        this.item.setVariable("controller", controller);
     }
 
     public List<String> getCores() {

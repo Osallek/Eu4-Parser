@@ -5,7 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.Losses;
 
 import java.time.LocalDate;
@@ -28,9 +28,9 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
     protected final ClausewitzItem item;
 
-    private Map<Country, WarParticipant> attackers;
+    private Map<SaveCountry, WarParticipant> attackers;
 
-    private Map<Country, WarParticipant> defenders;
+    private Map<SaveCountry, WarParticipant> defenders;
 
     private WarGoal warGoal;
 
@@ -64,7 +64,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return battles;
     }
 
-    public WarParticipant getAttacker(Country attacker) {
+    public WarParticipant getAttacker(SaveCountry attacker) {
         if (this.attackers != null) {
             return this.attackers.get(attacker);
         }
@@ -72,7 +72,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return null;
     }
 
-    public Map<Country, WarParticipant> getAttackers() {
+    public Map<SaveCountry, WarParticipant> getAttackers() {
         return this.attackers == null ? new HashMap<>() : this.attackers;
     }
 
@@ -92,7 +92,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return new EnumMap<>(Losses.class);
     }
 
-    public WarParticipant getDefender(Country defender) {
+    public WarParticipant getDefender(SaveCountry defender) {
         if (this.defenders != null) {
             return this.defenders.get(defender);
         }
@@ -100,7 +100,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return null;
     }
 
-    public Map<Country, WarParticipant> getDefenders() {
+    public Map<SaveCountry, WarParticipant> getDefenders() {
         return this.defenders == null ? new HashMap<>() : this.defenders;
     }
 
@@ -168,7 +168,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return this.item.getVarAsDouble("defender_score");
     }
 
-    public Double getScore(Country country) {
+    public Double getScore(SaveCountry country) {
         if (getAttacker(country) != null) {
             return -getDefenderScore();
         } else if (getDefender(country) != null) {
@@ -206,7 +206,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return false;
     }
 
-    public Map<Country, WarParticipant> getSide(Country country) {
+    public Map<SaveCountry, WarParticipant> getSide(SaveCountry country) {
         if (getAttacker(country) != null) {
             return this.attackers;
         } else if (getDefender(country) != null) {
@@ -216,7 +216,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         }
     }
 
-    public Map<Country, WarParticipant> getOtherSide(Country country) {
+    public Map<SaveCountry, WarParticipant> getOtherSide(SaveCountry country) {
         if (getAttacker(country) != null) {
             return this.defenders;
         } else if (getDefender(country) != null) {
@@ -286,7 +286,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
             this.defenders = new HashMap<>();
             participantsItems.forEach(participantsItem -> {
                 WarParticipant warParticipant = new WarParticipant(participantsItem);
-                Country country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
+                SaveCountry country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
                 country.addWar(this);
 
                 if (attackersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {

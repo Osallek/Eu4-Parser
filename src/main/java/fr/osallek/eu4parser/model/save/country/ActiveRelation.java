@@ -25,7 +25,7 @@ public class ActiveRelation {
         return this.item.getName();
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.save.getCountry(this.item.getName());
     }
 

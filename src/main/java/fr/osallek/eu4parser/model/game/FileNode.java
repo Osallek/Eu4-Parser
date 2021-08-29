@@ -1,5 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.eu4parser.model.Mod;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,19 +20,19 @@ public class FileNode implements Comparable<FileNode> {
 
     private final Path relativePath;
 
-    private final boolean fromMod;
+    private final Mod mod;
 
-    public FileNode(Path path, boolean fromMod) {
+    public FileNode(Path path, Mod mod) {
         this.root = path;
         this.path = path;
-        this.fromMod = fromMod;
+        this.mod = mod;
         this.relativePath = this.root.relativize(this.path);
     }
 
-    public FileNode(Path root, Path path, boolean fromMod) {
+    public FileNode(Path root, Path path, Mod mod) {
         this.root = root;
         this.path = path;
-        this.fromMod = fromMod;
+        this.mod = mod;
         this.relativePath = this.root.relativize(this.path);
     }
 
@@ -48,14 +50,18 @@ public class FileNode implements Comparable<FileNode> {
 
     public static List<FileNode> getChildren(FileNode fileNode) {
         try (Stream<Path> stream = Files.list(fileNode.path)) {
-            return stream.map(p -> new FileNode(fileNode.root, p, fileNode.fromMod)).collect(Collectors.toList());
+            return stream.map(p -> new FileNode(fileNode.root, p, fileNode.mod)).collect(Collectors.toList());
         } catch (IOException e) {
             return new ArrayList<>();
         }
     }
 
-    public boolean isFromMod() {
-        return fromMod;
+    public boolean fromMod() {
+        return mod != null;
+    }
+
+    public Mod getMod() {
+        return mod;
     }
 
     @Override

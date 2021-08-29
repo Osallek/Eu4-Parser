@@ -23,7 +23,7 @@ public class SaveInvestment {
         this.item = item;
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.save.getCountry(this.item.getVarAsString("tag"));
     }
 
@@ -57,7 +57,7 @@ public class SaveInvestment {
         }
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, Investment... investments) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country, Investment... investments) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "investments", parent.getOrder() + 1);
         toItem.addVariable("tag", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addList("investments", Arrays.stream(investments).map(Investment::getName).collect(Collectors.toList()));

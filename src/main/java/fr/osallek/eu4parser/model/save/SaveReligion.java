@@ -6,7 +6,7 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.DefenderOfFaith;
 import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.ReligionGroup;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.religion.MuslimRelation;
 import fr.osallek.eu4parser.model.save.religion.MuslimRelationSchool;
@@ -90,7 +90,7 @@ public class SaveReligion {
         this.religionsItem.setVariable("enable", enable);
     }
 
-    public List<Country> getInLeague() {
+    public List<SaveCountry> getInLeague() {
         return this.religionsItem.getVarsAsStrings("league")
                                  .stream()
                                  .map(ClausewitzUtils::removeQuotes)
@@ -98,13 +98,13 @@ public class SaveReligion {
                                  .collect(Collectors.toList());
     }
 
-    public void addToLeague(Country country) {
+    public void addToLeague(SaveCountry country) {
         if (!getInLeague().contains(country)) {
             this.religionsItem.addVariable("league", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
-    public void removeFromLeague(Country country) {
+    public void removeFromLeague(SaveCountry country) {
         this.religionsItem.removeVariable("league", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
@@ -132,7 +132,7 @@ public class SaveReligion {
         return this.religionsItem.getVarAsBool("original_hre_heretic_religion");
     }
 
-    public Country getDefender() {
+    public SaveCountry getDefender() {
         String defenderTag = this.religionInstanceDataItem.getVarAsString("defender");
 
         return defenderTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(defenderTag));
@@ -142,7 +142,7 @@ public class SaveReligion {
         return this.religionInstanceDataItem.getVarAsDate("defender_date");
     }
 
-    public void setDefender(Country defender) {
+    public void setDefender(SaveCountry defender) {
         if (defender == null || Eu4Utils.DEFAULT_TAG.equals(defender.getTag())) {
             this.religionInstanceDataItem.removeVariable("defender");
             this.religionInstanceDataItem.removeVariable("defender_date");
@@ -163,7 +163,7 @@ public class SaveReligion {
         }
     }
 
-    public void setDefender(Country defender, LocalDate defenderDate) {
+    public void setDefender(SaveCountry defender, LocalDate defenderDate) {
         if (defender == null || Eu4Utils.DEFAULT_TAG.equals(defender.getTag())) {
             this.religionInstanceDataItem.removeVariable("defender");
             this.religionInstanceDataItem.removeVariable("defender_date");
@@ -174,7 +174,7 @@ public class SaveReligion {
     }
 
     public DefenderOfFaith getDefenderOfFaith() {
-        Country defender = getDefender();
+        SaveCountry defender = getDefender();
 
         if (defender == null) {
             return null;
@@ -183,7 +183,7 @@ public class SaveReligion {
         int nbCountries = (int) this.save.getCountries()
                                          .values()
                                          .stream()
-                                         .filter(Country::isAlive)
+                                         .filter(SaveCountry::isAlive)
                                          .filter(country -> defender.getReligion().equals(country.getReligion()))
                                          .count();
 

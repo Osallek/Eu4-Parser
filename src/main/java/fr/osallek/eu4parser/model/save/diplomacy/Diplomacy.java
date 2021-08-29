@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.save.diplomacy;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.SubjectType;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -51,7 +51,7 @@ public class Diplomacy {
         return dependencies;
     }
 
-    public void addDependency(Country first, Country second, LocalDate startDate, SubjectType subjectType) {
+    public void addDependency(SaveCountry first, SaveCountry second, LocalDate startDate, SubjectType subjectType) {
         if (second.getOverlord() == null) {
             Dependency.addToItem(this.item, first.getTag(), second.getTag(), startDate, subjectType);
             first.addSubject(second);
@@ -62,7 +62,7 @@ public class Diplomacy {
         }
     }
 
-    public void removeDependency(Country first, Country second) {
+    public void removeDependency(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.dependencies.size(); i++) {
             Dependency dependency = this.dependencies.get(i);
             if (dependency.getFirst().equals(first) && dependency.getSecond().equals(second)) {
@@ -80,14 +80,14 @@ public class Diplomacy {
         return alliances;
     }
 
-    public void addAlliance(Country first, Country second, LocalDate startDate) {
+    public void addAlliance(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "alliance", first.getTag(), second.getTag(), startDate);
         first.addAlly(second);
         second.addAlly(first);
         refreshAttributes();
     }
 
-    public void removeAlliance(Country first, Country second) {
+    public void removeAlliance(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.alliances.size(); i++) {
             DatableRelation alliance = this.alliances.get(i);
             if ((alliance.getFirst().equals(first) && alliance.getSecond().equals(second))
@@ -106,13 +106,13 @@ public class Diplomacy {
         return guarantees;
     }
 
-    public void addGuarantee(Country first, Country second, LocalDate startDate) {
+    public void addGuarantee(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "guarantee", first.getTag(), second.getTag(), startDate);
         first.addGuarantee(second);
         refreshAttributes();
     }
 
-    public void removeGuarantee(Country first, Country second) {
+    public void removeGuarantee(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.guarantees.size(); i++) {
             DatableRelation guarantee = this.guarantees.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -129,12 +129,12 @@ public class Diplomacy {
         return knowledgeSharing;
     }
 
-    public void addKnowledgeSharing(Country first, Country second, LocalDate startDate) {
+    public void addKnowledgeSharing(SaveCountry first, SaveCountry second, LocalDate startDate) {
         KnowledgeSharing.addToItem(this.item, first.getTag(), second.getTag(), startDate, startDate.plusYears(10), false);
         refreshAttributes();
     }
 
-    public void removeKnowledgeSharing(Country first, Country second) {
+    public void removeKnowledgeSharing(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.knowledgeSharing.size(); i++) {
             DatableRelation guarantee = this.knowledgeSharing.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -150,12 +150,12 @@ public class Diplomacy {
         return subsidies;
     }
 
-    public void addSubsidies(Country first, Country second, LocalDate startDate, double amount, int duration) {
+    public void addSubsidies(SaveCountry first, SaveCountry second, LocalDate startDate, double amount, int duration) {
         Subsidies.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, duration);
         refreshAttributes();
     }
 
-    public void removeSubsidies(Country first, Country second) {
+    public void removeSubsidies(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.subsidies.size(); i++) {
             DatableRelation guarantee = this.subsidies.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -171,14 +171,14 @@ public class Diplomacy {
         return royalMarriage;
     }
 
-    public void addRoyalMarriage(Country first, Country second, LocalDate startDate) {
+    public void addRoyalMarriage(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "royal_marriage", first.getTag(), second.getTag(), startDate);
         first.addRoyalMarriage(second);
         second.addRoyalMarriage(first);
         refreshAttributes();
     }
 
-    public void removeRoyalMarriage(Country first, Country second) {
+    public void removeRoyalMarriage(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.royalMarriage.size(); i++) {
             DatableRelation guarantee = this.royalMarriage.get(i);
             if ((guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second))
@@ -197,12 +197,12 @@ public class Diplomacy {
         return militaryAccesses;
     }
 
-    public void addMilitaryAccess(Country first, Country second, LocalDate startDate, boolean enforcePeace) {
+    public void addMilitaryAccess(SaveCountry first, SaveCountry second, LocalDate startDate, boolean enforcePeace) {
         MilitaryAccess.addToItem(this.item, "military_access", first.getTag(), second.getTag(), startDate, enforcePeace);
         refreshAttributes();
     }
 
-    public void removeMilitaryAccess(Country first, Country second) {
+    public void removeMilitaryAccess(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.militaryAccesses.size(); i++) {
             DatableRelation guarantee = this.militaryAccesses.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -218,12 +218,12 @@ public class Diplomacy {
         return fleetAccesses;
     }
 
-    public void addFleetAccess(Country first, Country second, LocalDate startDate, boolean enforcePeace) {
+    public void addFleetAccess(SaveCountry first, SaveCountry second, LocalDate startDate, boolean enforcePeace) {
         MilitaryAccess.addToItem(this.item, "fleet_access", first.getTag(), second.getTag(), startDate, enforcePeace);
         refreshAttributes();
     }
 
-    public void removeFleetAccess(Country first, Country second) {
+    public void removeFleetAccess(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.fleetAccesses.size(); i++) {
             DatableRelation guarantee = this.fleetAccesses.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -239,12 +239,12 @@ public class Diplomacy {
         return casusBellis;
     }
 
-    public void addCasusBelli(Country first, Country second, LocalDate startDate, LocalDate endDate, fr.osallek.eu4parser.model.game.CasusBelli type) {
+    public void addCasusBelli(SaveCountry first, SaveCountry second, LocalDate startDate, LocalDate endDate, fr.osallek.eu4parser.model.game.CasusBelli type) {
         CasusBelli.addToItem(this.item, first.getTag(), second.getTag(), startDate, endDate, type);
         refreshAttributes();
     }
 
-    public void removeCasusBelli(Country first, Country second, fr.osallek.eu4parser.model.game.CasusBelli type) {
+    public void removeCasusBelli(SaveCountry first, SaveCountry second, fr.osallek.eu4parser.model.game.CasusBelli type) {
         for (int i = 0; i < this.casusBellis.size(); i++) {
             CasusBelli casusBelli = this.casusBellis.get(i);
             if (casusBelli.getFirst().equals(first) && casusBelli.getSecond().equals(second) && casusBelli.getType().equals(type)) {
@@ -260,13 +260,13 @@ public class Diplomacy {
         return supportIndependence;
     }
 
-    public void addSupportIndependence(Country first, Country second, LocalDate startDate) {
+    public void addSupportIndependence(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "support_independence", first.getTag(), second.getTag(), startDate);
         second.addIndependenceSupportedBy(first);
         refreshAttributes();
     }
 
-    public void removeSupportIndependence(Country first, Country second) {
+    public void removeSupportIndependence(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.supportIndependence.size(); i++) {
             DatableRelation guarantee = this.supportIndependence.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -283,7 +283,7 @@ public class Diplomacy {
         return transferTradePowers;
     }
 
-    public void addTransferTradePower(Country first, Country second, LocalDate startDate, double amount, boolean isEnforced) {
+    public void addTransferTradePower(SaveCountry first, SaveCountry second, LocalDate startDate, double amount, boolean isEnforced) {
         if (second.getTransferTradePowerTo().isEmpty()) {
             TransferTradePower.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, isEnforced);
             second.addTransferTradePowerTo(first);
@@ -292,7 +292,7 @@ public class Diplomacy {
         }
     }
 
-    public void removeTransferTradePower(Country first, Country second) {
+    public void removeTransferTradePower(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.transferTradePowers.size(); i++) {
             DatableRelation guarantee = this.transferTradePowers.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -310,13 +310,13 @@ public class Diplomacy {
         return warReparations;
     }
 
-    public void addWarReparations(Country first, Country second, LocalDate startDate, LocalDate endDate) {
+    public void addWarReparations(SaveCountry first, SaveCountry second, LocalDate startDate, LocalDate endDate) {
         EndDatableRelation.addToItem(this.item, "war_reparations", first.getTag(), second.getTag(), startDate, endDate);
         first.addWarReparations(second);
         refreshAttributes();
     }
 
-    public void removeWarReparations(Country first, Country second) {
+    public void removeWarReparations(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.warReparations.size(); i++) {
             DatableRelation guarantee = this.warReparations.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
@@ -334,13 +334,13 @@ public class Diplomacy {
     }
 
 
-    public void addWarning(Country first, Country second, LocalDate startDate) {
+    public void addWarning(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "warning", first.getTag(), second.getTag(), startDate);
         first.addWarning(second);
         refreshAttributes();
     }
 
-    public void removeWarning(Country first, Country second) {
+    public void removeWarning(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.warnings.size(); i++) {
             DatableRelation guarantee = this.warnings.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {

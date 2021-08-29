@@ -5,7 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -672,7 +672,7 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, province.getTotalImproveCount());
     }
 
-    public static Modifiers scaleCountryDev(Country country, Modifiers modifiers) {
+    public static Modifiers scaleCountryDev(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getDevelopment());
     }
 
@@ -731,7 +731,7 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, nbRegiments);
     }
 
-    public static Modifiers scaleOccupiedImperial(Country country, Modifiers modifiers) {
+    public static Modifiers scaleOccupiedImperial(SaveCountry country, Modifiers modifiers) {
         List<SaveProvince> provinces = country.getOwnedProvinces();
         provinces.retainAll(country.getCoreProvinces());
         provinces.removeIf(Predicate.not(SaveProvince::inHre));
@@ -739,60 +739,60 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, provinces.size());
     }
 
-    public static Modifiers scalePatriarchAuthority(Country country, Modifiers modifiers) {
+    public static Modifiers scalePatriarchAuthority(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getPatriarchAuthority()));
     }
 
-    public static Modifiers scaleWithStability(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithStability(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getStability()));
     }
 
-    public static Modifiers scaleWithInflation(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithInflation(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getInflation()));
     }
 
-    public static Modifiers scaleWithCallForPeace(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithCallForPeace(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getCallForPeace()));
     }
 
-    public static Modifiers scaleWithWarExhaustion(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithWarExhaustion(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getWarExhaustion()));
     }
 
-    public static Modifiers scaleWithDoom(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithDoom(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getDoom()));
     }
 
-    public static Modifiers scaleWithAuthority(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithAuthority(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getAuthority()));
     }
 
-    public static Modifiers scaleWithTradeRefusal(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithTradeRefusal(SaveCountry country, Modifiers modifiers) {
         int tradeRefusal = (int) country.getTradeEmbargoes().stream().filter(c -> !country.getRivals().containsKey(c.getTag())).count();
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(tradeRefusal));
     }
 
-    public static Modifiers scaleWithMercantilism(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithMercantilism(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getMercantilism()) / 100d);
     }
 
-    public static Modifiers scaleWithArmyTradition(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithArmyTradition(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getArmyTradition()) / 100);
     }
 
-    public static Modifiers scaleWithNavyTradition(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNavyTradition(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getNavyTradition()) / 100);
     }
 
-    public static Modifiers scaleWithPositivePiety(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithPositivePiety(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, NumbersUtils.doubleOrDefault(country.getPiety())));
     }
 
-    public static Modifiers scaleWithNegativePiety(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNegativePiety(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, -NumbersUtils.doubleOrDefault(country.getPiety())));
     }
 
-    public static Modifiers scaleWithFreeCitiesInHre(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithFreeCitiesInHre(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getSave().getCountries()
                                                                .values()
                                                                .stream()
@@ -809,169 +809,169 @@ public class ModifiersUtils {
                                                                .count());
     }
 
-    public static Modifiers scaleWithNumOfRoyalMarriages(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNumOfRoyalMarriages(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getNumOfRoyalMarriages()));
     }
 
-    public static Modifiers scaleWithNumOfProvinces(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNumOfProvinces(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getOwnedProvinces().size()));
     }
 
-    public static Modifiers scaleWithTribalAllegiance(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithTribalAllegiance(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getTribalAllegiance()) / 100);
     }
 
-    public static Modifiers scaleWithLegitimacy50(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithLegitimacy50(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (NumbersUtils.doubleOrDefault(country.getLegitimacy()) - 50) / 100);
     }
 
-    public static Modifiers scaleWithHordeUnity50(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithHordeUnity50(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (NumbersUtils.doubleOrDefault(country.getHordeUnity()) - 50) / 100);
     }
 
-    public static Modifiers scaleWithDevotion50(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithDevotion50(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (NumbersUtils.doubleOrDefault(country.getDevotion()) - 50) / 100);
     }
 
-    public static Modifiers scaleWithMeritocracy50(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithMeritocracy50(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (NumbersUtils.doubleOrDefault(country.getMeritocracy()) - 50) / 100);
     }
 
-    public static Modifiers scaleWithMeritocracy50Reverse(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithMeritocracy50Reverse(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (50 - NumbersUtils.doubleOrDefault(country.getMeritocracy())) / 100);
     }
 
-    public static Modifiers scaleWithCorruption(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithCorruption(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getCorruption()) / 100);
     }
 
-    public static Modifiers scaleWithRootOutCorruption(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithRootOutCorruption(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getRootOutCorruptionSlider()));
     }
 
-    public static Modifiers scaleWithRecoveryMotivation(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithRecoveryMotivation(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getRecoveryMotivation()) / 100);
     }
 
-    public static Modifiers scaleWithMilitarisedSociety(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithMilitarisedSociety(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getMilitarisedSociety()) / 100);
     }
 
-    public static Modifiers scaleWithOverextension(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithOverextension(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getOverextensionPercentage()));
     }
 
-    public static Modifiers scaleWithPrestige(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithPrestige(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getPrestige()) / 100);
     }
 
-    public static Modifiers scaleWithRepublicanTradition(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithRepublicanTradition(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getRepublicanTradition()) / 100);
     }
 
-    public static Modifiers scaleWithRepublicanTraditionReverse(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithRepublicanTraditionReverse(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (100 - NumbersUtils.doubleOrDefault(country.getRepublicanTradition())) / 100);
     }
 
-    public static Modifiers scaleWithReligiousUnity(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithReligiousUnity(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getReligiousUnity()));
     }
 
-    public static Modifiers scaleWithReligiousUnityReverse(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithReligiousUnityReverse(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, 1 - NumbersUtils.doubleOrDefault(country.getReligiousUnity()));
     }
 
-    public static Modifiers scaleWithOccupiedProvinces(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithOccupiedProvinces(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getOwnedProvinces()
                                                                .stream()
                                                                .filter(province -> !province.getOwner().equals(province.getController()))
                                                                .count());
     }
 
-    public static Modifiers scaleWithBlockadedProvinces(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithBlockadedProvinces(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getOwnedProvinces()
                                                                .stream()
                                                                .filter(SaveProvince::blockade)
                                                                .count());
     }
 
-    public static Modifiers scaleWithNotControlledCores(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNotControlledCores(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getCoreProvinces().stream().filter(province -> !province.getOwner().equals(country)).count());
     }
 
-    public static Modifiers scaleWithNumOfAgeObjectives(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNumOfAgeObjectives(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getNumOfAgeObjectives()));
     }
 
-    public static Modifiers scaleWithOverlordAdm(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithOverlordAdm(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (Math.max(0, country.getTech().getAdm() - country.getOverlord().getTech().getAdm())));
     }
 
-    public static Modifiers scaleWithOverlordDip(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithOverlordDip(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (Math.max(0, country.getTech().getDip() - country.getOverlord().getTech().getDip())));
     }
 
-    public static Modifiers scaleWithOverlordMil(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithOverlordMil(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, (Math.max(0, country.getTech().getMil() - country.getOverlord().getTech().getMil())));
     }
 
-    public static Modifiers scaleWithLibertyDesire(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithLibertyDesire(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getLibertyDesire()) / 100);
     }
 
-    public static Modifiers scaleWithAbsolutism(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithAbsolutism(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getAbsolutism()) / 100);
     }
 
-    public static Modifiers scaleWithCurrentPowerProjection(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithCurrentPowerProjection(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getCurrentPowerProjection()) / 100);
     }
 
-    public static Modifiers scaleWithStrongCompany(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithStrongCompany(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfStrongCompanies());
     }
 
-    public static Modifiers scaleWithLargeColony(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithLargeColony(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfLargeColonies());
     }
 
-    public static Modifiers scaleWithVassals(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithVassals(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_VASSAL));
     }
 
-    public static Modifiers scaleWithMarches(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithMarches(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_MARCH));
     }
 
-    public static Modifiers scaleWithUnions(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithUnions(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION));
     }
 
-    public static Modifiers scaleWithDaimyos(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithDaimyos(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getNumOfSubjectsOfType(Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL));
     }
 
-    public static Modifiers scaleWithInnovativeness(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithInnovativeness(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getInnovativeness()) / 100);
     }
 
-    public static Modifiers scaleWithNumExpandedAdministration(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNumExpandedAdministration(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getNumExpandedAdministration()));
     }
 
-    public static Modifiers scaleWithNumTradeLeagueMembers(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithNumTradeLeagueMembers(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getTradeLeague().getMembers().size());
     }
 
-    public static Modifiers scaleWithHarmony(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithHarmony(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getHarmony()) / 100);
     }
 
-    public static Modifiers scaleWithHarmonyReverse(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithHarmonyReverse(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, 1 - (NumbersUtils.doubleOrDefault(country.getHarmony()) / 100));
     }
 
-    public static Modifiers scaleWithDaimyosAtPeace(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithDaimyosAtPeace(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.min(10, country.getSubjects()
                                                                             .stream()
                                                                             .filter(subject -> !subject.isAtWar() &&
@@ -980,7 +980,7 @@ public class ModifiersUtils {
                                                                             .count()));
     }
 
-    public static Modifiers scaleWithDaimyosSameIsolationism(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithDaimyosSameIsolationism(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.min(10, country.getSubjects()
                                                                             .stream()
                                                                             .filter(subject ->
@@ -992,7 +992,7 @@ public class ModifiersUtils {
                                                                             .count()));
     }
 
-    public static Modifiers scaleWithDaimyosDifferentIsolationism(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithDaimyosDifferentIsolationism(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.min(10, country.getSubjects()
                                                                             .stream()
                                                                             .filter(subject ->
@@ -1004,7 +1004,7 @@ public class ModifiersUtils {
                                                                             .count()));
     }
 
-    public static Modifiers scaleWithDaimyosSwordHunt(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithDaimyosSwordHunt(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getSubjects()
                                                                .stream()
                                                                .filter(subject -> Eu4Utils.SUBJECT_TYPE_DAIMYO_VASSAL.equalsIgnoreCase(
@@ -1015,17 +1015,17 @@ public class ModifiersUtils {
                                                                .count());
     }
 
-    public static Modifiers scaleWithStreltsyPercent(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithStreltsyPercent(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, BigDecimal.valueOf(country.getNbRegimentOfCategory(3))
                                                                   .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
     }
 
-    public static Modifiers scaleWithCossacksPercent(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithCossacksPercent(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, BigDecimal.valueOf(country.getNbRegimentOfCategory(4))
                                                                   .divide(BigDecimal.valueOf(country.getArmySize()), 0, RoundingMode.HALF_EVEN));
     }
 
-    public static Modifiers scaleWithLowProfessionalism(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithLowProfessionalism(SaveCountry country, Modifiers modifiers) {
         double value = Math.min(country.getSave().getGame().getLowArmyProfessionalismMaxRange(),
                                 (country.getSave().getGame().getLowArmyProfessionalismMaxRange()
                                  - Math.max(0, (NumbersUtils.doubleOrDefault(country.getArmyProfessionalism())
@@ -1035,13 +1035,13 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, value);
     }
 
-    public static Modifiers scaleWithHighProfessionalism(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithHighProfessionalism(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.min(Math.max(0, NumbersUtils.doubleOrDefault(country.getArmyProfessionalism()) -
                                                                              country.getSave().getGame().getHighArmyProfessionalismMinRange()),
                                                                  country.getSave().getGame().getHighArmyProfessionalismMaxRange()));
     }
 
-    public static Modifiers scaleWithActivesFervor(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithActivesFervor(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getFervor() == null ? 0 : country.getFervor().getActives().size());
     }
 
@@ -1049,25 +1049,25 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, save.getCountries()
                                                             .values()
                                                             .stream()
-                                                            .map(Country::getCapital)
+                                                            .map(SaveCountry::getCapital)
                                                             .filter(Objects::nonNull)
                                                             .filter(SaveProvince::inHre)
                                                             .count());
     }
 
-    public static Modifiers scaleWithProductionEfficiency(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithProductionEfficiency(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getProductionEfficiency());
     }
 
-    public static Modifiers scaleWithTradeEfficiency(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithTradeEfficiency(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getTradeEfficiency() * 100);
     }
 
-    public static Modifiers scaleWithOverGoverningCapacity(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithOverGoverningCapacity(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, country.getGoverningCapacityUsedPercent() - 1));
     }
 
-    public static Modifiers scaleWithMaintainedForts(Country country, Modifiers modifiers) {
+    public static Modifiers scaleWithMaintainedForts(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers,
                                              NumbersUtils.intOrDefault(country.getTotalFortLevel())
                                              / (NumbersUtils.doubleOrDefault(country.getRawDevelopment())

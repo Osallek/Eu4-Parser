@@ -23,11 +23,11 @@ public class SavedEventTarget {
         this.item.setVariable("province", province.getId());
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.activeAgendaScope.getActiveAgenda().getCountry().getSave().getCountry(this.item.getVarAsString("country"));
     }
 
-    public void setCountry(Country country) {
+    public void setCountry(SaveCountry country) {
         this.item.setVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
     }
 

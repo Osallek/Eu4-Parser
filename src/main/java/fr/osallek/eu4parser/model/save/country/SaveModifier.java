@@ -28,7 +28,7 @@ public class SaveModifier {
         return this.game.getModifier(this.item.getVarAsString("modifier"));
     }
 
-    public Double getModifiers(Country country, Modifier modifier) {
+    public Double getModifiers(SaveCountry country, Modifier modifier) {
         GameModifier gameModifier = getModifier();
         return gameModifier == null ? null : gameModifier.getModifier(country, modifier);
     }

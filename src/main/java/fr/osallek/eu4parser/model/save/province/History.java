@@ -5,7 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.collections4.MapUtils;
 
 import java.time.LocalDate;
@@ -23,11 +23,11 @@ public class History {
 
     private final SaveProvince province;
 
-    private SortedMap<LocalDate, Country> owners;
+    private SortedMap<LocalDate, SaveCountry> owners;
 
-    private SortedMap<LocalDate, List<Country>> claims;
+    private SortedMap<LocalDate, List<SaveCountry>> claims;
 
-    private SortedMap<LocalDate, Country> controllers;
+    private SortedMap<LocalDate, SaveCountry> controllers;
 
     private SortedMap<LocalDate, SaveReligion> religions;
 
@@ -41,15 +41,15 @@ public class History {
         refreshAttributes();
     }
 
-    public SortedMap<LocalDate, Country> getOwners() {
+    public SortedMap<LocalDate, SaveCountry> getOwners() {
         return owners;
     }
 
-    public SortedMap<LocalDate, List<Country>> getClaims() {
+    public SortedMap<LocalDate, List<SaveCountry>> getClaims() {
         return claims;
     }
 
-    public SortedMap<LocalDate, Country> getControllers() {
+    public SortedMap<LocalDate, SaveCountry> getControllers() {
         return controllers;
     }
 

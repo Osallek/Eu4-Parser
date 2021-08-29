@@ -1,11 +1,22 @@
 package fr.osallek.eu4parser.common;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.clausewitzparser.parser.ClausewitzParser;
+import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.game.Building;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.game.Country;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.iterators.ReverseListIterator;
+import org.apache.commons.lang3.ArchUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,14 +30,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class Eu4Utils {
 
     private Eu4Utils() {}
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Eu4Utils.class);
+
     public static final Collator COLLATOR = Collator.getInstance();
+
+    public static final String DOCUMENTS_FOLDER = FileSystemView.getFileSystemView().getDefaultDirectory().getAbsolutePath();
+
+    public static final File EU4_DOCUMENTS_FOLDER = new File(DOCUMENTS_FOLDER + File.separator + "Paradox Interactive"
+                                                             + File.separator + "Europa Universalis IV");
+
+    public static final File MODS_FOLDER = new File(EU4_DOCUMENTS_FOLDER.getAbsolutePath() + File.separator + "mod");
+
+    public static final String STEAM_COMMON_FOLDER_PATH = "common";
+
+    public static final String STEAM_APPS_FOLDER_PATH = "steamapps";
 
     public static final PathMatcher TXT_PATH_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**.txt");
 
@@ -110,6 +137,126 @@ public final class Eu4Utils {
 
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
+    }
+
+    public static Optional<File> detectInstallationFolder() {
+        Optional<Path> steamFolder = Optional.empty();
+
+        try {
+            if (SystemUtils.IS_OS_WINDOWS) {
+                if (ArchUtils.getProcessor().is64Bit()) {
+                    steamFolder = readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath").map(Path::of);
+                } else {
+                    steamFolder = readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath").map(Path::of);
+                }
+            } else if (SystemUtils.IS_OS_LINUX) {
+                Path steamPath = Path.of(System.getProperty("user.home"), ".steam", "steam");
+
+                if (Files.exists(steamPath) && Files.exists(steamPath.toRealPath()) && Files.isDirectory(steamPath.toRealPath())) {
+                    steamFolder = Optional.of(steamPath.toRealPath());
+                }
+            }
+
+            if (steamFolder.isPresent()) {
+                Path path = steamFolder.get().resolve(STEAM_APPS_FOLDER_PATH);
+
+                if (Files.exists(path) && Files.isDirectory(path)) {
+                    Path manifestPath = path.resolve("appmanifest_236850.acf");
+
+                    if (Files.exists(manifestPath) && Files.isRegularFile(manifestPath)) {
+                        return readManifest(manifestPath);
+                    }
+
+                    Path libraryFoldersPath = path.resolve("libraryfolders.vdf");
+
+                    if (Files.exists(libraryFoldersPath) && Files.isRegularFile(libraryFoldersPath)) {
+                        List<String> lines = Files.readAllLines(libraryFoldersPath);
+
+                        List<String> paths = lines.stream().filter(s -> s.contains("\"path\"")).collect(Collectors.toList());
+                        if (CollectionUtils.isNotEmpty(paths)) {
+                            for (String s : paths) {
+                                String folder = s.replace("\"path\"", "").trim();
+                                folder = folder.substring(1, folder.length() - 1);
+
+                                Path libraryFolder = Path.of(folder).resolve(STEAM_APPS_FOLDER_PATH);
+                                manifestPath = libraryFolder.resolve("appmanifest_236850.acf");
+
+                                if (Files.exists(manifestPath) && Files.isRegularFile(manifestPath)) {
+                                    return readManifest(manifestPath);
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("An error occurred while searching for game installation folder: {}!", e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            return Optional.empty();
+        } catch (Exception e) {
+            LOGGER.error("An error occurred while searching for game installation folder: {}!", e.getMessage(), e);
+            return Optional.empty();
+        }
+
+        File file = new File("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Universalis IV");
+        if (file.exists() && file.canRead()) {
+            return Optional.of(file);
+        }
+
+        return Optional.empty();
+    }
+
+    public static List<Mod> detectOwnMods() {
+        if (MODS_FOLDER.exists() && MODS_FOLDER.isDirectory()) {
+            try (Stream<Path> stream = Files.list(MODS_FOLDER.toPath())) {
+                return stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
+                             .filter(path -> !path.getFileName().toString().startsWith("ugc_"))
+                             .map(path -> new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0)))
+                             .sorted((o1, o2) -> Eu4Utils.COLLATOR.compare(o1.getName(), o2.getName()))
+                             .collect(Collectors.toList());
+            } catch (Exception e) {
+                LOGGER.error("An error occurred while searching for mods: {}!", e.getMessage(), e);
+            }
+        }
+
+        return new ArrayList<>();
+    }
+
+    private static Optional<String> readRegistry(String location, String key) throws InterruptedException, IOException {
+        Process process = new ProcessBuilder("reg", "query", "\"" + location + "\"", "/v", "\"" + key + "\"").start();
+        process.waitFor();
+
+        String text = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+        if (StringUtils.isNotBlank(text)) {
+            if (text.contains("\t")) {
+                return Optional.of(text.substring(text.lastIndexOf("\t")).trim());
+            } else if (text.contains("    ")) {
+                return Optional.of(text.substring(text.lastIndexOf("    ")).trim());
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private static Optional<File> readManifest(Path manifestPath) throws IOException {
+        if (Files.exists(manifestPath) && Files.isRegularFile(manifestPath)) {
+            List<String> lines = Files.readAllLines(manifestPath);
+
+            Optional<String> line = lines.stream().filter(s -> s.contains("\"installdir\"")).findFirst();
+            if (line.isPresent()) {
+                String folder = line.get().replace("\"installdir\"", "").trim();
+                folder = folder.substring(1, folder.length() - 1);
+                Path path = manifestPath.getParent().resolve(STEAM_COMMON_FOLDER_PATH).resolve(folder);
+
+                if (Files.exists(path) && Files.isDirectory(path)) {
+                    return Optional.of(path.toFile());
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     public static boolean isTag(String s) {
@@ -221,5 +368,90 @@ public final class Eu4Utils {
     @SafeVarargs
     public static <T> T coalesce(T... items) {
         return Arrays.stream(items).filter(Objects::nonNull).findFirst().orElse(null);
+    }
+
+    public static List<String> modifierToLocalisationKeys(String s) {
+        List<String> keys = new ArrayList<>();
+
+        if (s.startsWith("tech_")) {
+            s = s.substring(5);
+        }
+
+        keys.add("modifier_" + s);
+        keys.add(("modifier_" + s).toLowerCase());
+        keys.add(("modifier_" + s).toUpperCase());
+        keys.add(s);
+        keys.add(s.toLowerCase());
+        keys.add(s.toUpperCase());
+        keys.add("idea_" + s);
+        keys.add(("idea_" + s).toLowerCase());
+        keys.add(("idea_" + s).toUpperCase());
+
+        if (s.endsWith("_modifier") || s.endsWith("_MODIFIER")) {
+            s = s.substring(0, s.length() - 9);
+            keys.add("modifier_" + s);
+            keys.add(("modifier_" + s).toLowerCase());
+            keys.add(("modifier_" + s).toUpperCase());
+            keys.add(s);
+            keys.add(s.toLowerCase());
+            keys.add(s.toUpperCase());
+            keys.add("idea_" + s);
+            keys.add(("idea_" + s).toLowerCase());
+            keys.add(("idea_" + s).toUpperCase());
+        }
+
+        if (s.endsWith("_modifer") || s.endsWith("_MODIFER")) {
+            s = s.substring(0, s.length() - 8);
+            keys.add("modifier_" + s);
+            keys.add(("modifier_" + s).toLowerCase());
+            keys.add(("modifier_" + s).toUpperCase());
+            keys.add(s);
+            keys.add(s.toLowerCase());
+            keys.add(s.toUpperCase());
+            keys.add("idea_" + s);
+            keys.add(("idea_" + s).toLowerCase());
+            keys.add(("idea_" + s).toUpperCase());
+        }
+
+        if (s.startsWith("num_") || s.startsWith("NUM_")) {
+            s = s.substring(4);
+            keys.add("modifier_" + s);
+            keys.add(("modifier_" + s).toLowerCase());
+            keys.add(("modifier_" + s).toUpperCase());
+            keys.add(s);
+            keys.add(s.toLowerCase());
+            keys.add(s.toUpperCase());
+            keys.add("idea_" + s);
+            keys.add(("idea_" + s).toLowerCase());
+            keys.add(("idea_" + s).toUpperCase());
+        }
+
+        if (s.startsWith("global_") || s.startsWith("GLOBAL_")) {
+            s = s.substring(7);
+            keys.add("modifier_" + s);
+            keys.add(("modifier_" + s).toLowerCase());
+            keys.add(("modifier_" + s).toUpperCase());
+            keys.add(s);
+            keys.add(s.toLowerCase());
+            keys.add(s.toUpperCase());
+            keys.add("idea_" + s);
+            keys.add(("idea_" + s).toLowerCase());
+            keys.add(("idea_" + s).toUpperCase());
+        }
+
+        if (s.endsWith("_speed") || s.endsWith("_SPEED")) {
+            s = s.substring(0, s.length() - 6);
+            keys.add("modifier_" + s);
+            keys.add(("modifier_" + s).toLowerCase());
+            keys.add(("modifier_" + s).toUpperCase());
+            keys.add(s);
+            keys.add(s.toLowerCase());
+            keys.add(s.toUpperCase());
+            keys.add("idea_" + s);
+            keys.add(("idea_" + s).toLowerCase());
+            keys.add(("idea_" + s).toUpperCase());
+        }
+
+        return keys;
     }
 }

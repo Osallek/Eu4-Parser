@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.save.diplomacy;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 
@@ -18,19 +18,19 @@ public class DatableRelation {
         this.item = item;
     }
 
-    public Country getFirst() {
+    public SaveCountry getFirst() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("first")));
     }
 
-    public void setFirst(Country country) {
+    public void setFirst(SaveCountry country) {
         this.item.setVariable("first", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
-    public Country getSecond() {
+    public SaveCountry getSecond() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("second")));
     }
 
-    public void setSecond(Country country) {
+    public void setSecond(SaveCountry country) {
         this.item.setVariable("second", ClausewitzUtils.addQuotes(country.getTag()));
     }
 

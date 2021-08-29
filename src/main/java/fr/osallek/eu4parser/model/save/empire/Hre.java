@@ -6,7 +6,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.game.Continent;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,7 +154,7 @@ public class Hre extends Empire {
         ClausewitzVariable var = this.item.setVariable("allows_female_emperor", allowsFemaleEmperor);
     }
 
-    public List<Country> getElectors() {
+    public List<SaveCountry> getElectors() {
         if (dismantled()) {
             return new ArrayList<>();
         }
@@ -166,7 +166,7 @@ public class Hre extends Empire {
                                                       .collect(Collectors.toList());
     }
 
-    public void setElectors(List<Country> electors) {
+    public void setElectors(List<SaveCountry> electors) {
         ClausewitzList list = this.item.getList("electors");
 
         if (list != null) {
@@ -176,7 +176,7 @@ public class Hre extends Empire {
         electors.forEach(this::addElector);
     }
 
-    public void addElector(Country country) {
+    public void addElector(SaveCountry country) {
         if (dismantled()) {
             return;
         }
@@ -193,7 +193,7 @@ public class Hre extends Empire {
         }
     }
 
-    public void removeElector(Country country) {
+    public void removeElector(SaveCountry country) {
         if (dismantled()) {
             return;
         }

@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.UnitType;
 
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class Unit {

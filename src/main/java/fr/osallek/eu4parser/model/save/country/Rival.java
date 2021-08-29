@@ -21,7 +21,7 @@ public class Rival {
         return this.item.getVarAsString("country");
     }
 
-    public Country getRival() {
+    public SaveCountry getRival() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(getRivalTag()));
     }
 
@@ -33,7 +33,7 @@ public class Rival {
         this.item.setVariable("date", date);
     }
 
-    public static ClausewitzItem addToItem(ClausewitzItem parent, Country country, LocalDate date, int order) {
+    public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country, LocalDate date, int order) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "rival", order);
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addVariable("date", date);

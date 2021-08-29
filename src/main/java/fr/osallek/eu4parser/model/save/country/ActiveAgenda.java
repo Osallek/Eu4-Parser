@@ -7,11 +7,11 @@ import java.time.LocalDate;
 
 public class ActiveAgenda {
 
-    private final Country country;
+    private final SaveCountry country;
 
     private final ClausewitzItem item;
 
-    public ActiveAgenda(ClausewitzItem item, Country country) {
+    public ActiveAgenda(ClausewitzItem item, SaveCountry country) {
         this.country = country;
         this.item = item;
     }
@@ -40,7 +40,7 @@ public class ActiveAgenda {
         this.item.setVariable("expiry_date", expiryDate);
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return country;
     }
 }

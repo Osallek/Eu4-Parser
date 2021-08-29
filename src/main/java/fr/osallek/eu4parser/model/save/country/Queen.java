@@ -7,11 +7,11 @@ import java.time.LocalDate;
 
 public class Queen extends Monarch {
 
-    public Queen(ClausewitzItem item, Save save, Country country) {
+    public Queen(ClausewitzItem item, Save save, SaveCountry country) {
         super(item, save, country);
     }
 
-    public Queen(ClausewitzItem item, Save save, Country country, LocalDate date) {
+    public Queen(ClausewitzItem item, Save save, SaveCountry country, LocalDate date) {
         super(item, save, country, date);
     }
 
@@ -23,11 +23,11 @@ public class Queen extends Monarch {
         return this.item.getVarAsBool("queen_regent");
     }
 
-    public Country getCountryOfOrigin() {
+    public SaveCountry getCountryOfOrigin() {
         return this.save.getCountry(this.item.getVarAsString("country_of_origin"));
     }
 
-    public void setCountryOfOrigin(Country countryOfOrigin) {
+    public void setCountryOfOrigin(SaveCountry countryOfOrigin) {
         this.item.setVariable("country_of_origin", countryOfOrigin.getTag());
     }
 }

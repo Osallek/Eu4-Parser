@@ -13,13 +13,13 @@ public abstract class AbstractArmy {
 
     protected final ClausewitzItem item;
 
-    protected final Country country;
+    protected final SaveCountry country;
 
     protected Id id;
 
     protected Id leader;
 
-    public AbstractArmy(ClausewitzItem item, Country country) {
+    public AbstractArmy(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
         refreshAttributes();
@@ -29,7 +29,7 @@ public abstract class AbstractArmy {
         return id;
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return country;
     }
 

@@ -10,13 +10,13 @@ public class MercenaryCompany {
 
     protected final ClausewitzItem item;
 
-    protected final Country country;
+    protected final SaveCountry country;
 
     protected Id id;
 
     protected Id leader;
 
-    public MercenaryCompany(ClausewitzItem item, Country country) {
+    public MercenaryCompany(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
         refreshAttributes();

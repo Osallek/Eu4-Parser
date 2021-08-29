@@ -26,6 +26,7 @@
     <commons-io.version>2.7</commons-io.version>
     <jackson.version>2.12.3</jackson.version>
     <batik.version>1.14</batik.version>
+    <geojson-jackson.version>1.14</geojson-jackson.version>
 
     <clausewitz-parser.version>1.1.2</clausewitz-parser.version>
   </properties>
@@ -66,6 +67,11 @@
       <groupId>org.apache.xmlgraphics</groupId>
       <artifactId>batik-dom</artifactId>
       <version>${batik.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.grundid.opendatalab</groupId>
+      <artifactId>geojson-jackson</artifactId>
+      <version>${geojson-jackson.version}</version>
     </dependency>
   </dependencies>
 

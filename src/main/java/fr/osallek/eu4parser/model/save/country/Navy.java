@@ -12,7 +12,7 @@ public class Navy extends Army {
 
     private List<Ship> ships;
 
-    public Navy(ClausewitzItem item, Country country) {
+    public Navy(ClausewitzItem item, SaveCountry country) {
         super(item, country);
     }
 

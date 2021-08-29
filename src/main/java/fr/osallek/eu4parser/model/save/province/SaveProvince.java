@@ -28,7 +28,7 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.AbstractRegiment;
 import fr.osallek.eu4parser.model.save.country.Army;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.CountryState;
 import fr.osallek.eu4parser.model.save.country.Navy;
 import fr.osallek.eu4parser.model.save.country.Regiment;
@@ -63,7 +63,7 @@ public class SaveProvince extends Province {
 
     private final Save save;
 
-    private Country country;
+    private SaveCountry country;
 
     private SaveArea area;
 
@@ -113,7 +113,7 @@ public class SaveProvince extends Province {
         return save;
     }
 
-    public Country getOwner() {
+    public SaveCountry getOwner() {
         return country;
     }
 
@@ -151,7 +151,7 @@ public class SaveProvince extends Province {
         return this.item.getVarAsString("owner");
     }
 
-    public void setOwner(Country owner) {
+    public void setOwner(SaveCountry owner) {
         if (!Objects.equals(this.country, owner)) {
             if (this.country != null) {
                 this.country.removeOwnedProvince(this);
@@ -168,11 +168,11 @@ public class SaveProvince extends Province {
         return this.item.getVarAsString("controller");
     }
 
-    public Country getController() {
+    public SaveCountry getController() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
     }
 
-    public void setController(Country controller) {
+    public void setController(SaveCountry controller) {
         if (getController() != null) {
             getController().removeControlledProvince(this);
             setPreviousController(getController());
@@ -187,11 +187,11 @@ public class SaveProvince extends Province {
         return this.item.getVarAsString("previous_controller");
     }
 
-    public Country getPreviousController() {
+    public SaveCountry getPreviousController() {
         return this.save.getCountry(getPreviousControllerTag());
     }
 
-    public void setPreviousController(Country previousController) {
+    public void setPreviousController(SaveCountry previousController) {
         this.item.setVariable("previous_controller", ClausewitzUtils.addQuotes(previousController.getTag()));
     }
 
@@ -199,11 +199,11 @@ public class SaveProvince extends Province {
         return this.item.getVarAsString("original_coloniser");
     }
 
-    public Country getOriginalColoniser() {
+    public SaveCountry getOriginalColoniser() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(getOriginalColoniserTag()));
     }
 
-    public void setOriginalColoniser(Country originalColoniser) {
+    public void setOriginalColoniser(SaveCountry originalColoniser) {
         this.item.setVariable("original_coloniser", ClausewitzUtils.addQuotes(originalColoniser.getTag()));
     }
 
@@ -269,18 +269,18 @@ public class SaveProvince extends Province {
         return list.getValues();
     }
 
-    public List<Country> getCores() {
+    public List<SaveCountry> getCores() {
         return getCoresTags().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void setCores(List<Country> countries) {
+    public void setCores(List<SaveCountry> countries) {
         getCores().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
                                                                                                               () -> removeCore(core)));
 
         countries.forEach(this::addCore);
     }
 
-    public void addCore(Country country) {
+    public void addCore(SaveCountry country) {
         ClausewitzList list = this.item.getList("cores");
 
         if (!list.contains(country.getTag())) {
@@ -290,7 +290,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public void removeCore(Country country) {
+    public void removeCore(SaveCountry country) {
         ClausewitzList list = this.item.getList("cores");
 
         if (list != null) {
@@ -310,18 +310,18 @@ public class SaveProvince extends Province {
         return list.getValues();
     }
 
-    public List<Country> getClaims() {
+    public List<SaveCountry> getClaims() {
         return getClaimsTags().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void setClaims(List<Country> countries) {
+    public void setClaims(List<SaveCountry> countries) {
         getClaims().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
                                                                                                                () -> removeClaim(core)));
 
         countries.forEach(this::addClaim);
     }
 
-    public void addClaim(Country country) {
+    public void addClaim(SaveCountry country) {
         ClausewitzList list = this.item.getList("claims");
 
         if (!list.contains(country.getTag())) {
@@ -331,7 +331,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public void removeClaim(Country country) {
+    public void removeClaim(SaveCountry country) {
         ClausewitzList list = this.item.getList("claims");
 
         if (list != null) {
@@ -542,7 +542,7 @@ public class SaveProvince extends Province {
         return !isCity() && getOwner() != null;
     }
 
-    public void colonize(Country country) {
+    public void colonize(SaveCountry country) {
         if (!isCity() && getColonySize() == null) {
             setOwner(country);
             setController(country);
@@ -884,7 +884,7 @@ public class SaveProvince extends Province {
         return discoveryReligionDates;
     }
 
-    public List<Country> getDiscoveredBy() {
+    public List<SaveCountry> getDiscoveredBy() {
         ClausewitzList list = this.item.getList("discovered_by");
 
         if (list == null) {
@@ -894,14 +894,14 @@ public class SaveProvince extends Province {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void setDiscoveredBy(List<Country> countries) {
+    public void setDiscoveredBy(List<SaveCountry> countries) {
         getDiscoveredBy().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
                                                                                                                      () -> removeDiscoveredBy(core)));
 
         countries.forEach(this::addDiscoveredBy);
     }
 
-    public void addDiscoveredBy(Country country) {
+    public void addDiscoveredBy(SaveCountry country) {
         ClausewitzList list = this.item.getList("discovered_by");
 
         if (!list.contains(country.getTag())) {
@@ -910,7 +910,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public void removeDiscoveredBy(Country country) {
+    public void removeDiscoveredBy(SaveCountry country) {
         ClausewitzList list = this.item.getList("discovered_by");
 
         if (list != null) {
@@ -918,7 +918,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Map<Country, Integer> getImproveCount() {
+    public Map<SaveCountry, Integer> getImproveCount() {
         return this.improveCount.entrySet()
                                 .stream()
                                 .map(entry -> new AbstractMap.SimpleEntry<>(this.save.getCountry(entry.getKey()), entry.getValue()))
@@ -1161,11 +1161,11 @@ public class SaveProvince extends Province {
         this.item.setVariable("last_razed", lastRazed);
     }
 
-    public Country getLastRazedBy() {
+    public SaveCountry getLastRazedBy() {
         return this.save.getCountry(this.item.getVarAsString("last_razed_by"));
     }
 
-    public void setLastRazedBy(Country lastRazedBy) {
+    public void setLastRazedBy(SaveCountry lastRazedBy) {
         this.item.setVariable("last_razed_by", ClausewitzUtils.addQuotes(lastRazedBy.getTag()));
     }
 

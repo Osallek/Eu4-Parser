@@ -1,6 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.lang3.tuple.Pair;
@@ -262,7 +262,7 @@ public enum StaticModifiers {
 
     public Modifiers modifiers;
 
-    public BiFunction<Country, StaticModifiers, Modifiers> applyToCountry;
+    public BiFunction<SaveCountry, StaticModifiers, Modifiers> applyToCountry;
 
     public BiFunction<SaveProvince, StaticModifiers, Modifiers> applyToProvince;
 
@@ -558,7 +558,7 @@ public enum StaticModifiers {
                                     .collect(Collectors.toList());
     }
 
-    StaticModifiers(Condition trigger, BiFunction<Country, StaticModifiers, Modifiers> applyToCountry,
+    StaticModifiers(Condition trigger, BiFunction<SaveCountry, StaticModifiers, Modifiers> applyToCountry,
                     BiFunction<SaveProvince, StaticModifiers, Modifiers> applyToProvince) {
         this.trigger = trigger;
         this.applyToCountry = applyToCountry;
@@ -573,7 +573,7 @@ public enum StaticModifiers {
         return STATIC_MODIFIERS_MAP.get(name.toUpperCase());
     }
 
-    public static Double applyToModifiersCountry(Country country, Modifier modifier) {
+    public static Double applyToModifiersCountry(SaveCountry country, Modifier modifier) {
         return ModifiersUtils.sumModifiers(modifier,
                                            APPLIED_TO_COUNTRY.stream()
                                                              .filter(staticModifiers -> !staticModifiers.modifiers.isEmpty())

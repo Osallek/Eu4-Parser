@@ -21,9 +21,9 @@ public class SaveArea {
 
     private final Save save;
 
-    private Map<Country, CountryState> countriesStates;
+    private Map<SaveCountry, CountryState> countriesStates;
 
-    private Map<Country, SaveInvestment> investments;
+    private Map<SaveCountry, SaveInvestment> investments;
 
     private List<SaveProvince> provinces;
 
@@ -43,15 +43,15 @@ public class SaveArea {
         return provinces;
     }
 
-    public CountryState getCountryState(Country country) {
+    public CountryState getCountryState(SaveCountry country) {
         return this.countriesStates.get(country);
     }
 
-    public Map<Country, CountryState> getCountriesStates() {
+    public Map<SaveCountry, CountryState> getCountriesStates() {
         return countriesStates;
     }
 
-    public void addCountryState(Country country) {
+    public void addCountryState(SaveCountry country) {
         if (!this.countriesStates.containsKey(country)) {
             ClausewitzItem stateItem = this.item.getChild("state");
 
@@ -65,11 +65,11 @@ public class SaveArea {
         }
     }
 
-    public void removeCountryState(Country country) {
-        Iterator<Map.Entry<Country, CountryState>> iterator = this.countriesStates.entrySet().iterator();
+    public void removeCountryState(SaveCountry country) {
+        Iterator<Map.Entry<SaveCountry, CountryState>> iterator = this.countriesStates.entrySet().iterator();
         int i = 0;
         while (iterator.hasNext()) {
-            Map.Entry<Country, CountryState> entry = iterator.next();
+            Map.Entry<SaveCountry, CountryState> entry = iterator.next();
             if (entry.getValue().getCountry().equals(country)) {
                 this.item.getChild("state").removeChild("country_state", i);
                 country.getStates().remove(ClausewitzUtils.removeQuotes(getName()));
@@ -79,15 +79,15 @@ public class SaveArea {
         refreshAttributes();
     }
 
-    public SaveInvestment getInvestment(Country country) {
+    public SaveInvestment getInvestment(SaveCountry country) {
         return this.investments.get(country);
     }
 
-    public Map<Country, SaveInvestment> getInvestments() {
+    public Map<SaveCountry, SaveInvestment> getInvestments() {
         return investments;
     }
 
-    public void addInvestments(Country country, Investment... investments) {
+    public void addInvestments(SaveCountry country, Investment... investments) {
         SaveInvestment investment = this.investments.get(country);
 
         if (investment != null) {
@@ -98,12 +98,12 @@ public class SaveArea {
         }
     }
 
-    public void removeInvestments(Country country) {
-        Iterator<Map.Entry<Country, SaveInvestment>> iterator = this.investments.entrySet().iterator();
+    public void removeInvestments(SaveCountry country) {
+        Iterator<Map.Entry<SaveCountry, SaveInvestment>> iterator = this.investments.entrySet().iterator();
         int i = 0;
 
         while (iterator.hasNext()) {
-            Map.Entry<Country, SaveInvestment> entry = iterator.next();
+            Map.Entry<SaveCountry, SaveInvestment> entry = iterator.next();
             if (entry.getValue().getCountry().equals(country)) {
                 this.item.removeChild("investments", i);
                 break;
@@ -112,7 +112,7 @@ public class SaveArea {
         refreshAttributes();
     }
 
-    public void removeInvestments(Country country, Investment... investments) {
+    public void removeInvestments(SaveCountry country, Investment... investments) {
         SaveInvestment investment = this.investments.get(country);
 
         if (investment != null) {

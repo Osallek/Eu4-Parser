@@ -14,19 +14,19 @@ public class Leader {
 
     private final ClausewitzItem item;
 
-    private final Country country;
+    private final SaveCountry country;
 
     private Id id;
 
     private Id monarchId;
 
-    public Leader(ClausewitzItem item, Country country) {
+    public Leader(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
         refreshAttributes();
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return country;
     }
 
@@ -165,7 +165,7 @@ public class Leader {
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege,
-                                           LeaderPersonality personality, LocalDate activation, LocalDate birthDate, int id, Country country) {
+                                           LeaderPersonality personality, LocalDate activation, LocalDate birthDate, int id, SaveCountry country) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "leader", parent.getOrder() + 1);
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
         toItem.addVariable("type", type.name().toLowerCase());

@@ -18,11 +18,11 @@ public class SaveGovernment {
 
     private final Game game;
 
-    private final Country country;
+    private final SaveCountry country;
 
     private final ClausewitzItem item;
 
-    public SaveGovernment(ClausewitzItem item, Game game, Country country) {
+    public SaveGovernment(ClausewitzItem item, Game game, SaveCountry country) {
         this.game = game;
         this.item = item;
         this.country = country;

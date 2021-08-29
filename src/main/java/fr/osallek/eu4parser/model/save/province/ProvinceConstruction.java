@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.save.province;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Building;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 
@@ -62,11 +62,11 @@ public class ProvinceConstruction {
         }
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.province.getSave().getCountry(this.item.getVarAsString("country"));
     }
 
-    public void setCountry(Country country) {
+    public void setCountry(SaveCountry country) {
         this.item.setVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
     }
 

@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.save.religion;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class ColoniesClaims {
         return null;
     }
 
-    public void setColonyClaim(int index, Country country) {
+    public void setColonyClaim(int index, SaveCountry country) {
         if (this.list != null) {
             this.list.set(index, ClausewitzUtils.isBlank(country.getTag()) ? Eu4Utils.DEFAULT_TAG : country.getTag());
         }

@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.save.war;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.CasusBelli;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 public class WarGoal {
@@ -33,7 +33,7 @@ public class WarGoal {
         return this.save.getGame().getCasusBelli(this.item.getVarAsString("casus_belli"));
     }
 
-    public Country getTag() {
+    public SaveCountry getTag() {
         return this.save.getCountry(this.item.getVarAsString("tag"));
     }
 

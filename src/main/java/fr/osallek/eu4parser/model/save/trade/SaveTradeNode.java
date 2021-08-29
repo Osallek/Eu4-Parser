@@ -7,7 +7,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -123,11 +123,11 @@ public class SaveTradeNode {
         return productionLeaders;
     }
 
-    public Map<Country, Double> getTopProvinces() {
+    public Map<SaveCountry, Double> getTopProvinces() {
         return topProvinces.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
-    public Map<Country, Double> getTopPower() {
+    public Map<SaveCountry, Double> getTopPower() {
         return topPower.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
@@ -141,11 +141,11 @@ public class SaveTradeNode {
         return date;
     }
 
-    public Map<Country, TradeNodeCountry> getCountries() {
+    public Map<SaveCountry, TradeNodeCountry> getCountries() {
         return countries.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
     }
 
-    public TradeNodeCountry getCountry(Country country) {
+    public TradeNodeCountry getCountry(SaveCountry country) {
         return this.countries.get(country.getTag());
     }
 

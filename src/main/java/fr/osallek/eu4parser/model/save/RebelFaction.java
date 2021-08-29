@@ -4,7 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.game.Culture;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
@@ -53,11 +53,11 @@ public class RebelFaction {
         return this.item.getVarAsString("heretic");
     }
 
-    public Country getCountry() {
+    public SaveCountry getCountry() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("country")));
     }
 
-    public Country getIndependence() {
+    public SaveCountry getIndependence() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("independence")));
     }
 
@@ -85,7 +85,7 @@ public class RebelFaction {
         return general;
     }
 
-    public Country getSupportiveCountry() {
+    public SaveCountry getSupportiveCountry() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("supportive_country")));
     }
 
@@ -107,7 +107,7 @@ public class RebelFaction {
         return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
     }
 
-    public List<Country> getFriends() {
+    public List<SaveCountry> getFriends() {
         ClausewitzList list = this.item.getList("friend");
 
         if (list == null) {

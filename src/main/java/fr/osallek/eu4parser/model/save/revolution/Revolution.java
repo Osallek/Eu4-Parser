@@ -4,7 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,11 +21,11 @@ public class Revolution {
         this.item = item;
     }
 
-    public Country getRevolutionTarget() {
+    public SaveCountry getRevolutionTarget() {
         return this.save.getCountry(this.item.getVarAsString("revolution_target"));
     }
 
-    public void setRevolutionTarget(Country country) {
+    public void setRevolutionTarget(SaveCountry country) {
         this.item.setVariable("revolution_target", country.getTag());
         setHasFirstRevolutionStarted(true);
         setDismantleDate(null);
@@ -83,11 +83,11 @@ public class Revolution {
         this.item.setVariable("claimed", claimed);
     }
 
-    public List<Country> getPastTargets() {
+    public List<SaveCountry> getPastTargets() {
         return this.item.getVarsAsStrings("past_targets").stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public void addPastTarget(Country country) {
+    public void addPastTarget(SaveCountry country) {
         ClausewitzList list = this.item.getList("past_targets");
 
         if (list == null) {
@@ -97,7 +97,7 @@ public class Revolution {
         }
     }
 
-    public void removePastTarget(Country country) {
+    public void removePastTarget(SaveCountry country) {
         ClausewitzList list = this.item.getList("past_targets");
 
         if (list != null) {

@@ -25,11 +25,11 @@ public class FlagShip {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public Country getOriginalOwner() {
+    public SaveCountry getOriginalOwner() {
         return this.save.getCountry(this.item.getVarAsString("original_owner"));
     }
 
-    public void setOriginalOwner(Country originalOwner) {
+    public void setOriginalOwner(SaveCountry originalOwner) {
         this.item.setVariable("original_owner", ClausewitzUtils.addQuotes(originalOwner.getTag()));
     }
 

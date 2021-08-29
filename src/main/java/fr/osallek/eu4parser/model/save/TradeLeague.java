@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.save;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class TradeLeague {
         return this.item.getVarAsInt("id");
     }
 
-    public List<Country> getMembers() {
+    public List<SaveCountry> getMembers() {
         ClausewitzList list = this.item.getList("members");
 
         if (list == null) {
@@ -36,11 +36,11 @@ public class TradeLeague {
         return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 
-    public boolean hasMember(Country country) {
+    public boolean hasMember(SaveCountry country) {
         return getMembers().contains(country);
     }
 
-    public void addMember(Country member) {
+    public void addMember(SaveCountry member) {
         ClausewitzList list = this.item.getList("members");
 
         if (!list.contains(member.getTag())) {
@@ -49,7 +49,7 @@ public class TradeLeague {
         }
     }
 
-    public void removeMember(Country member) {
+    public void removeMember(SaveCountry member) {
         ClausewitzList list = this.item.getList("members");
 
         if (list != null) {

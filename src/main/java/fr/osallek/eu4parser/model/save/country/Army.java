@@ -12,7 +12,7 @@ public class Army extends AbstractArmy {
 
     private List<Regiment> regiments;
 
-    public Army(ClausewitzItem item, Country country) {
+    public Army(ClausewitzItem item, SaveCountry country) {
         super(item, country);
         refreshAttributes();
     }

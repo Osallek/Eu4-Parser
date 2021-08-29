@@ -14,7 +14,7 @@ import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import fr.osallek.eu4parser.model.save.combat.Combats;
 import fr.osallek.eu4parser.model.save.counters.IdCounters;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveArea;
 import fr.osallek.eu4parser.model.save.country.SaveHegemon;
 import fr.osallek.eu4parser.model.save.country.SaveTradeCompany;
@@ -110,11 +110,11 @@ public class Save {
 
     private List<SaveProvince> cities;
 
-    private Map<String, Country> countries;
+    private Map<String, SaveCountry> countries;
 
-    private List<Country> playableCountries;
+    private List<SaveCountry> playableCountries;
 
-    private SortedMap<Integer, Country> greatPowers;
+    private SortedMap<Integer, SaveCountry> greatPowers;
 
     private Map<Integer, SaveAdvisor> advisors;
 
@@ -182,7 +182,7 @@ public class Save {
         }
     }
 
-    public Country getPlayedCountry() {
+    public SaveCountry getPlayedCountry() {
         return getCountry(ClausewitzUtils.removeQuotes(getPlayer()));
     }
 
@@ -327,8 +327,8 @@ public class Save {
         return this.tradeNodes.values().stream().filter(tradeNode -> tradeNode.getIndex() == index).findFirst().orElse(null);
     }
 
-    public Map<TradeGood, Country> getProductionLeaders() {
-        Map<TradeGood, Country> productionLeaders = new LinkedHashMap<>();
+    public Map<TradeGood, SaveCountry> getProductionLeaders() {
+        Map<TradeGood, SaveCountry> productionLeaders = new LinkedHashMap<>();
         ClausewitzList productionLeaderList = this.gamestateItem.getList("production_leader_tag");
 
         if (productionLeaderList != null) {
@@ -461,7 +461,7 @@ public class Save {
         return cities;
     }
 
-    public Country getCountry(String tag) {
+    public SaveCountry getCountry(String tag) {
         if (tag == null) {
             return null;
         }
@@ -469,11 +469,11 @@ public class Save {
         return this.countries.get(ClausewitzUtils.removeQuotes(tag));
     }
 
-    public Map<String, Country> getCountries() {
+    public Map<String, SaveCountry> getCountries() {
         return countries;
     }
 
-    public List<Country> getPlayableCountries() {
+    public List<SaveCountry> getPlayableCountries() {
         return playableCountries;
     }
 
@@ -507,7 +507,7 @@ public class Save {
                                                                           promoteCultures, braindead, timeout));
     }
 
-    private SortedMap<Integer, Country> getInternalGreatPowers() {
+    private SortedMap<Integer, SaveCountry> getInternalGreatPowers() {
         if (this.greatPowers == null) {
             this.greatPowers = new TreeMap<>();
         }
@@ -515,7 +515,7 @@ public class Save {
         return this.greatPowers;
     }
 
-    public SortedMap<Integer, Country> getGreatPowers() {
+    public SortedMap<Integer, SaveCountry> getGreatPowers() {
         return this.greatPowers == null ? new TreeMap<>() : this.greatPowers;
     }
 
@@ -722,13 +722,13 @@ public class Save {
         if (countriesItem != null) {
             this.countries = countriesItem.getChildren()
                                           .stream()
-                                          .map(countryItem -> new Country(countryItem, this))
-                                          .collect(Collectors.toMap(Country::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
+                                          .map(countryItem -> new SaveCountry(countryItem, this))
+                                          .collect(Collectors.toMap(SaveCountry::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
             this.playableCountries = this.countries.values()
                                                    .stream()
-                                                   .filter(Country::isPlayable)
+                                                   .filter(SaveCountry::isPlayable)
                                                    .peek(country -> country.setLocalizedName(this.game.getLocalisation(country.getTag())))
-                                                   .sorted(Comparator.comparing(Country::getLocalizedName, Eu4Utils.COLLATOR))
+                                                   .sorted(Comparator.comparing(SaveCountry::getLocalizedName, Eu4Utils.COLLATOR))
                                                    .collect(Collectors.toList());
         }
 
@@ -764,7 +764,7 @@ public class Save {
 
         if (greatPowersItem != null) {
             greatPowersItem.getChildren("original").forEach(child -> {
-                Country country = this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("country")));
+                SaveCountry country = this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("country")));
                 getInternalGreatPowers().put(child.getVarAsInt("rank"), country);
             });
 
@@ -811,7 +811,7 @@ public class Save {
 
         if (activeAdvisorsItem != null) {
             activeAdvisorsItem.getChildren().forEach(child -> {
-                Country country = this.getCountry(ClausewitzUtils.removeQuotes(child.getName()));
+                SaveCountry country = this.getCountry(ClausewitzUtils.removeQuotes(child.getName()));
                 child.getChildren("advisor")
                      .stream()
                      .map(Id::new)

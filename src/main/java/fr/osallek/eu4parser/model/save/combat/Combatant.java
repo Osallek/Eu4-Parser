@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.save.combat;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public abstract class Combatant {
         return this.item.getVarAsDouble("losses");
     }
 
-    public List<Country> getParticipatingCountries() {
+    public List<SaveCountry> getParticipatingCountries() {
         return this.item.getVarsAsStrings("participating_country").stream().map(this.save::getCountry).collect(Collectors.toList());
     }
 

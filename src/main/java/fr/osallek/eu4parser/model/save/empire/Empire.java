@@ -4,7 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Save;
-import fr.osallek.eu4parser.model.save.country.Country;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public abstract class Empire {
         this.item.removeVariables("passed_reform");
     }
 
-    public Country getEmperor() {
+    public SaveCountry getEmperor() {
         if (dismantled()) {
             return null;
         }
@@ -61,7 +61,7 @@ public abstract class Empire {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(emperor));
     }
 
-    public void setEmperor(Country country) {
+    public void setEmperor(SaveCountry country) {
         if (dismantled()) {
             this.item.removeVariable("hre_dismantled");
         }
@@ -192,7 +192,7 @@ public abstract class Empire {
         return oldEmperors;
     }
 
-    public void addOldEmperor(Country country) {
+    public void addOldEmperor(SaveCountry country) {
         String id = Integer.toString(getOldEmperors().stream().map(OldEmperor::getId).max(Integer::compareTo).orElse(new Random().nextInt(9000)));
         OldEmperor.addToItem(this.item, id, country.getTag(), this.save.getDate());
         refreshAttributes();
