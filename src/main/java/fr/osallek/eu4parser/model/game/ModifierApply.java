@@ -4,20 +4,25 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 public class ModifierApply {
 
-    private final String modifier;
-
-    private final int duration;
+    private final ClausewitzItem item;
 
     public ModifierApply(ClausewitzItem item) {
-        this.modifier = item.getVarAsString("name");
-        this.duration = item.getVarAsInt("duration");
+        this.item = item;
     }
 
     public String getModifier() {
-        return modifier;
+        return this.item.getVarAsString("name");
+    }
+
+    public void setModifier(String modifier) {
+        this.item.setVariable("name", modifier);
     }
 
     public int getDuration() {
-        return duration;
+        return this.item.getVarAsInt("duration");
+    }
+
+    public void setDuration(int duration) {
+        this.item.setVariable("duration", duration);
     }
 }

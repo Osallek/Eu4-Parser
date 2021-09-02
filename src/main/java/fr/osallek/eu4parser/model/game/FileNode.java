@@ -5,7 +5,6 @@ import fr.osallek.eu4parser.model.Mod;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -15,13 +14,13 @@ import java.util.stream.Stream;
 
 public class FileNode implements Comparable<FileNode> {
 
-    private final Path root;
+    private Path root;
 
-    private final Path path;
+    private Path path;
 
     private final Path relativePath;
 
-    private final Mod mod;
+    private Mod mod;
 
     public FileNode(Mod mod) {
         this(mod.getPath().toPath(), mod);
@@ -74,6 +73,12 @@ public class FileNode implements Comparable<FileNode> {
 
     public Mod getMod() {
         return mod;
+    }
+
+    public void setMod(Mod mod) {
+        this.mod = mod;
+        this.root = mod.getPath().toPath();
+        this.path = this.root.resolve(relativePath);
     }
 
     @Override

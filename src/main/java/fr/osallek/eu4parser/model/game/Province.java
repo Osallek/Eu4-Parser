@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
-import fr.osallek.eu4parser.model.Mod;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -68,7 +67,7 @@ public class Province {
 
     private SortedMap<LocalDate, ProvinceHistoryItem> historyItems;
 
-    private Mod historyMod;
+    private FileNode historyFileNode;
 
     public Province(String[] csvLine) {
         this.id = Eu4Utils.cleanStringAndParseToInt(csvLine[0].trim());
@@ -111,7 +110,7 @@ public class Province {
         this.tradeWindY = other.tradeWindY;
         this.defaultHistoryItem = other.defaultHistoryItem;
         this.historyItems = other.historyItems;
-        this.historyMod = other.historyMod;
+        this.historyFileNode = other.historyFileNode;
     }
 
     public void setPositions(ClausewitzList positions) {
@@ -135,13 +134,13 @@ public class Province {
         this.tradeWindY = positions.getAsDouble(13);
     }
 
-    public void setHistory(ClausewitzItem item, Game game, Mod historyMod, Map<String, Building> buildings) {
-        this.historyMod = historyMod;
-        this.defaultHistoryItem = new ProvinceHistoryItem(item, game, buildings);
+    public void setHistory(ClausewitzItem item, Game game, FileNode historyMod) {
+        this.historyFileNode = historyMod;
+        this.defaultHistoryItem = new ProvinceHistoryItem(item, game);
         this.historyItems = item.getChildren()
                                 .stream()
                                 .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
-                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()), child -> new ProvinceHistoryItem(child, game, buildings),
+                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()), child -> new ProvinceHistoryItem(child, game),
                                                           (o1, o2) -> o1, TreeMap::new));
     }
 
@@ -357,8 +356,13 @@ public class Province {
         return historyItems;
     }
 
-    public Mod getHistoryMod() {
-        return historyMod;
+    public FileNode getHistoryFileNode() {
+        return historyFileNode;
+    }
+
+    @Override
+    public String toString() {
+        return this.name + " (" + this.id + ")";
     }
 
     @Override

@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.StringUtils;
 
@@ -20,14 +21,14 @@ public class ProvinceRevolt {
     }
 
     public String getLeader() {
-        return this.item.getVarAsString("leader");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("leader"));
     }
 
     public void setLeader(String leader) {
         if (StringUtils.isBlank(leader)) {
             this.item.removeVariable("leader");
         } else {
-            this.item.setVariable("leader", leader);
+            this.item.setVariable("leader", ClausewitzUtils.addQuotes(leader));
         }
     }
 

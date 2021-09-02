@@ -3,96 +3,42 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.common.Eu4Utils;
+import org.apache.commons.lang3.BooleanUtils;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ProvinceHistoryItem {
 
-    private ClausewitzItem item;
+    private final ClausewitzItem item;
 
     private final Game game;
 
-    private final String owner;
+    public ProvinceHistoryItem(Province province, LocalDate date) {
+        Optional<ClausewitzItem> nextHistoryItem = province.getDefaultHistoryItem()
+                .item
+                .getChildren()
+                .stream()
+                .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
+                .sorted(Comparator.comparing(ClausewitzItem::getName))
+                .filter(child -> Eu4Utils.stringToDate(child.getName()).isAfter(date))
+                .findFirst();
+        this.item = new ClausewitzItem(province.getDefaultHistoryItem().item, ClausewitzUtils.dateToString(date),
+                                       nextHistoryItem.map(ClausewitzItem::getOrder).orElse(province.getDefaultHistoryItem().item.getNbObjects()), true, true);
+        this.game = province.getDefaultHistoryItem().game;
+    }
 
-    private final String controller;
-
-    private final List<String> cores;
-
-    private final List<String> removeCores;
-
-    private final Boolean isCity;
-
-    private final String culture;
-
-    private final String religion;
-
-    private final Integer baseTax;
-
-    private final Integer baseProduction;
-
-    private final Integer baseManpower;
-
-    private final String tradeGoods;
-
-    private final Boolean hre;
-
-    private final String capital;
-
-    private final List<String> discoveredBy;
-
-    private final Boolean reformationCenter;
-
-    private final Integer unrest;
-
-    private final Integer centerOfTrade;
-
-    private final Integer extraCost;
-
-    private List<ModifierApply> permanentModifier;
-
-    private List<ModifierApply> removeModifier;
-
-    private ProvinceRevolt revolt;
-
-    private final List<String> buildings;
-
-    public ProvinceHistoryItem(ClausewitzItem item, Game game, Map<String, Building> buildings) {
+    public ProvinceHistoryItem(ClausewitzItem item, Game game) {
         this.item = item;
         this.game = game;
-        this.owner = item.getVarAsString("owner");
-        this.controller = item.getVarAsString("controller");
-        this.cores = item.getVarsAsStrings("add_core");
-        this.removeCores = item.getVarsAsStrings("remove_core");
-        this.isCity = item.getVarAsBool("is_city");
-        this.culture = item.getVarAsString("culture");
-        this.religion = item.getVarAsString("religion");
-        this.baseTax = item.getVarAsInt("base_tax");
-        this.baseProduction = item.getVarAsInt("base_production");
-        this.baseManpower = item.getVarAsInt("base_manpower");
-        this.tradeGoods = item.getVarAsString("trade_goods");
-        this.hre = item.getVarAsBool("hre");
-        this.capital = ClausewitzUtils.removeQuotes(item.getVarAsString("capital"));
-        this.discoveredBy = item.getVarsAsStrings("discovered_by");
-        this.reformationCenter = item.getVarAsBool("reformation_center");
-        this.unrest = item.getVarAsInt("unrest");
-        this.centerOfTrade = item.getVarAsInt("center_of_trade");
-        this.extraCost = item.getVarAsInt("extra_cost");
-
-        if (item.hasChild("add_permanent_province_modifier")) {
-            this.permanentModifier = item.getChildren("add_permanent_province_modifier").stream().map(ModifierApply::new).collect(Collectors.toList());
-        }
-
-        if (item.hasChild("remove_province_modifier")) {
-            this.removeModifier = item.getChildren("remove_province_modifier").stream().map(ModifierApply::new).collect(Collectors.toList());
-        }
-
-        if (item.hasChild("revolt")) {
-            this.revolt = new ProvinceRevolt(item.getChild("revolt"));
-        }
-
-        this.buildings = buildings.keySet().stream().filter(item::hasChild).collect(Collectors.toList());
     }
 
     public Country getOwner() {
@@ -121,83 +67,278 @@ public class ProvinceHistoryItem {
         this.item.setVariable("controller", controller);
     }
 
-    public List<String> getCores() {
-        return cores;
+    public List<Country> getAddCores() {
+        return this.item.getVarsAsStrings("add_core").stream().map(this.game::getCountry).collect(Collectors.toList());
     }
 
-    public List<String> getRemoveCores() {
-        return removeCores;
+    public void addAddCore(String addCore) {
+        this.item.addVariable("add_core", addCore.toUpperCase());
+    }
+
+    public void addAddCore(Country country) {
+        addAddCore(country.getTag());
+    }
+
+    public void removeAddCore(String addCore) {
+        this.item.removeVariable("add_core", addCore.toUpperCase());
+    }
+
+    public void removeAddCore(Country country) {
+        removeAddCore(country.getTag());
+    }
+
+    public List<Country> getRemoveCores() {
+        return this.item.getVarsAsStrings("remove_core").stream().map(this.game::getCountry).collect(Collectors.toList());
+    }
+
+    public void addRemoveCore(String removeCore) {
+        this.item.addVariable("remove_core", removeCore.toUpperCase());
+    }
+
+    public void addRemoveCore(Country country) {
+        addRemoveCore(country.getTag());
+    }
+
+    public void removeRemoveCore(String removeCore) {
+        this.item.removeVariable("remove_core", removeCore.toUpperCase());
+    }
+
+    public void removeRemoveCore(Country country) {
+        removeRemoveCore(country.getTag());
     }
 
     public Boolean getCity() {
-        return isCity;
+        return this.item.getVarAsBool("is_city");
     }
 
-    public String getCulture() {
-        return culture;
+    public void setIsCity(Boolean isCity) {
+        if (isCity == null) {
+            this.item.removeVariable("is_city");
+        } else {
+            this.item.setVariable("is_city", isCity);
+        }
     }
 
-    public String getReligion() {
-        return religion;
+    public Culture getCulture() {
+        return this.game.getCulture(this.item.getVarAsString("culture"));
+    }
+
+    public void setCulture(String culture) {
+        this.item.setVariable("culture", culture);
+    }
+
+    public void setCulture(Culture culture) {
+        setCulture(culture.getName());
+    }
+
+    public Religion getReligion() {
+        return this.game.getReligion(this.item.getVarAsString("religion"));
+    }
+
+    public void setReligion(String religion) {
+        this.item.setVariable("religion", religion);
+    }
+
+    public void setReligion(Religion religion) {
+        setReligion(religion.getName());
     }
 
     public Integer getBaseTax() {
-        return baseTax;
+        return this.item.getVarAsInt("base_tax");
+    }
+
+    public void setBaseTax(Integer baseTax) {
+        if (baseTax == null) {
+            this.item.removeVariable("base_tax");
+        } else {
+            this.item.setVariable("base_tax", baseTax);
+        }
     }
 
     public Integer getBaseProduction() {
-        return baseProduction;
+        return this.item.getVarAsInt("base_production");
+    }
+
+    public void setBaseProduction(Integer baseProduction) {
+        if (baseProduction == null) {
+            this.item.removeVariable("base_production");
+        } else {
+            this.item.setVariable("base_production", baseProduction);
+        }
     }
 
     public Integer getBaseManpower() {
-        return baseManpower;
+        return this.item.getVarAsInt("base_manpower");
     }
 
-    public String getTradeGoods() {
-        return tradeGoods;
+    public void setBaseManpower(Integer baseManpower) {
+        if (baseManpower == null) {
+            this.item.removeVariable("base_manpower");
+        } else {
+            this.item.setVariable("base_manpower", baseManpower);
+        }
+    }
+
+    public TradeGood getTradeGoods() {
+        return this.game.getTradeGood(this.item.getVarAsString("trade_goods"));
+    }
+
+    public void setTradeGood(String tradeGood) {
+        this.item.setVariable("trade_goods", tradeGood);
+    }
+
+    public void setTradeGood(TradeGood tradeGood) {
+        setTradeGood(tradeGood.getName());
     }
 
     public Boolean getHre() {
-        return hre;
+        return this.item.getVarAsBool("hre");
+    }
+
+    public void setHre(Boolean hre) {
+        if (hre == null) {
+            this.item.removeVariable("hre");
+        } else {
+            this.item.setVariable("hre", hre);
+        }
     }
 
     public String getCapital() {
-        return capital;
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("capital"));
     }
 
-    public List<String> getDiscoveredBy() {
-        return discoveredBy;
+    public void setCapital(String capital) {
+        this.item.setVariable("capital", ClausewitzUtils.addQuotes(capital));
+    }
+
+    public List<TechGroup> getDiscoveredBy() {
+        return this.item.getVarsAsStrings("discovered_by").stream().map(this.game::getTechGroup).collect(Collectors.toList());
+    }
+
+    public void addDiscoveredBy(String discoveredBy) {
+        this.item.addVariable("discovered_By", discoveredBy.toUpperCase());
+    }
+
+    public void addDiscoveredBy(Country country) {
+        addDiscoveredBy(country.getTag());
+    }
+
+    public void removeDiscoveredBy(String discoveredBy) {
+        this.item.removeVariable("discovered_By", discoveredBy.toUpperCase());
+    }
+
+    public void removeDiscoveredBy(Country country) {
+        removeDiscoveredBy(country.getTag());
     }
 
     public Boolean getReformationCenter() {
-        return reformationCenter;
+        return this.item.getVarAsBool("reformation_center");
+    }
+
+    public void setReformationCenter(Boolean reformationCenter) {
+        if (reformationCenter == null) {
+            this.item.removeVariable("reformation_center");
+        } else {
+            this.item.setVariable("reformation_center", reformationCenter);
+        }
+    }
+
+    public Boolean getSeatInParliament() {
+        return this.item.getVarAsBool("seat_in_parliament");
+    }
+
+    public void setSeatInParliament(Boolean seatInParliament) {
+        if (seatInParliament == null) {
+            this.item.removeVariable("seat_in_parliament");
+        } else {
+            this.item.setVariable("seat_in_parliament", seatInParliament);
+        }
     }
 
     public Integer getUnrest() {
-        return unrest;
+        return this.item.getVarAsInt("unrest");
+    }
+
+    public void setUnrest(Integer unrest) {
+        if (unrest == null) {
+            this.item.removeVariable("unrest");
+        } else {
+            this.item.setVariable("unrest", unrest);
+        }
     }
 
     public Integer getCenterOfTrade() {
-        return centerOfTrade;
+        return this.item.getVarAsInt("center_of_trade");
+    }
+
+    public void setCenterOfTrade(Integer centerOfTrade) {
+        if (centerOfTrade == null) {
+            this.item.removeVariable("center_of_trade");
+        } else {
+            this.item.setVariable("center_of_trade", centerOfTrade);
+        }
     }
 
     public Integer getExtraCost() {
-        return extraCost;
+        return this.item.getVarAsInt("extra_cost");
+    }
+
+    public void setExtraCost(Integer extraCost) {
+        if (extraCost == null) {
+            this.item.removeVariable("extra_cost");
+        } else {
+            this.item.setVariable("extra_cost", extraCost);
+        }
     }
 
     public List<ModifierApply> getPermanentModifier() {
-        return permanentModifier;
+        if (this.item.hasChild("add_permanent_province_modifier")) {
+            return this.item.getChildren("add_permanent_province_modifier").stream().map(ModifierApply::new).collect(Collectors.toList());
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public List<ModifierApply> getRemoveModifier() {
-        return removeModifier;
+        if (this.item.hasChild("remove_province_modifier")) {
+            return this.item.getChildren("remove_province_modifier").stream().map(ModifierApply::new).collect(Collectors.toList());
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public ProvinceRevolt getRevolt() {
-        return revolt;
+        if (this.item.hasChild("revolt")) {
+            return new ProvinceRevolt(this.item.getChild("revolt"));
+        } else {
+            return null;
+        }
     }
 
-    public List<String> getBuildings() {
-        return buildings;
+    public List<Building> getBuildings() {
+        return this.game.getBuildings()
+                        .stream()
+                        .filter(building -> this.item.hasVar(building.getName()) && BooleanUtils.toBoolean(this.item.getVarAsBool(building.getName())))
+                        .collect(Collectors.toList());
+    }
+
+    public void addBuilding(String building) {
+        this.item.addVariable(building, true);
+    }
+
+    public void addBuilding(Building building) {
+        addBuilding(building);
+    }
+
+    public void removeBuilding(String building) {
+        this.item.addVariable(building, false);
+    }
+
+    public void removeBuilding(Building building) {
+        removeBuilding(building);
+    }
+
+    public void write(BufferedWriter writer) throws IOException {
+        this.item.write(writer, true, 0, new HashMap<>());
     }
 }

@@ -1693,8 +1693,8 @@ public class Game {
                         try {
                             if (fileNameSplit.length >= 1) {
                                 int provinceId = Eu4Utils.cleanStringAndParseToInt(fileNameSplit[0]);
-                                getProvince(provinceId).setHistory(ClausewitzParser.parse(fileNode.getPath().toFile(), 0), this, fileNode.getMod(),
-                                                                   this.buildings);
+                                getProvince(provinceId).setHistory(ClausewitzParser.parse(fileNode.getPath().toFile(), 0), this, fileNode
+                                                                  );
                                 //Fixme multiple history files with different names are compatible https://eu4.paradoxwikis.com/History_modding#Compatibility_-_Partial_Overwrites
                             }
                         } catch (NumberFormatException ignored) {
