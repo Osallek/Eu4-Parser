@@ -3,8 +3,6 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.eu4parser.model.game.Modifier;
-import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.Estate;
 import fr.osallek.eu4parser.model.game.EstateLoyaltyLevel;
@@ -12,7 +10,9 @@ import fr.osallek.eu4parser.model.game.EstateModifier;
 import fr.osallek.eu4parser.model.game.EstatePrivilege;
 import fr.osallek.eu4parser.model.game.EstatePrivilegeModifier;
 import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.ModifierDefinition;
+import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.time.LocalDate;

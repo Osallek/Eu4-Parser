@@ -2,9 +2,9 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.GameModifier;
+import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.time.LocalDate;

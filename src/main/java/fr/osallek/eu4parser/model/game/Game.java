@@ -27,7 +27,9 @@ import javax.swing.filechooser.FileSystemView;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,6 +48,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -149,7 +153,15 @@ public class Game {
 
     private SortedSet<ProfessionalismModifier> professionalismModifiers;
 
-    private Map<String, Object> defines;
+    private Map<String, Map<String, Map<String, Define>>> defines;
+
+    private Map<String, Map<String, Map<String, Define>>> veryEasyDefines;
+
+    private Map<String, Map<String, Map<String, Define>>> easyDefines;
+
+    private Map<String, Map<String, Map<String, Define>>> hardDefines;
+
+    private Map<String, Map<String, Map<String, Define>>> veryHardDefines;
 
     private Map<String, RulerPersonality> rulerPersonalities;
 
@@ -319,6 +331,11 @@ public class Game {
     }
 
     private Path getAbsolutePath(String relativePath) {
+        FileNode node = getFileNode(relativePath);
+        return node == null ? null : node.getPath();
+    }
+
+    private Path getAbsolutePath(Path relativePath) {
         FileNode node = getFileNode(relativePath);
         return node == null ? null : node.getPath();
     }
@@ -639,20 +656,95 @@ public class Game {
         return this.events.get(id);
     }
 
-    public Map<String, Object> getDefines() {
+    public Map<String, Map<String, Map<String, Define>>> getDefines() {
         return defines;
     }
 
-    private int getDefinesInt(String category, String key) {
-        return (int) ((Map<String, Object>) this.defines.get(category)).get(key);
+    public Map<String, Map<String, Map<String, Define>>> getVeryEasyDefines() {
+        return veryEasyDefines;
     }
 
-    private double getDefinesDouble(String category, String key) {
-        return (double) ((Map<String, Object>) this.defines.get(category)).get(key);
+    public Map<String, Map<String, Map<String, Define>>> getEasyDefines() {
+        return easyDefines;
     }
 
-    private LocalDate getDefinesLocalDate(String category, String key) {
-        return LocalDate.parse(((String) ((Map<String, Object>) this.defines.get(category)).get(key)), ClausewitzUtils.DATE_FORMAT);
+    public Map<String, Map<String, Map<String, Define>>> getHardDefines() {
+        return hardDefines;
+    }
+
+    public Map<String, Map<String, Map<String, Define>>> getVeryHardDefines() {
+        return veryHardDefines;
+    }
+
+    public int getDefinesInt(String category, String key) {
+        return this.defines.get(Eu4Utils.DEFINE_KEY).get(category).get(key).getAsInt();
+    }
+
+    public double getDefinesDouble(String category, String key) {
+        return this.defines.get(Eu4Utils.DEFINE_KEY).get(category).get(key).getAsDouble();
+    }
+
+    public LocalDate getDefinesLocalDate(String category, String key) {
+        return this.defines.get(Eu4Utils.DEFINE_KEY).get(category).get(key).getAsLocalDate();
+    }
+
+    public void changeDefine(Mod mod, String category, String key, String value) {
+        Define define = this.defines.get(Eu4Utils.DEFINE_KEY).get(category).get(key);
+
+        if (Objects.equals(define.getFileNode().getMod(), mod)) {
+            define.changeValue(value);
+        } else {
+            if (define.getFileNode().getMod() != null) {
+                throw new UnsupportedOperationException("Can't change define of other mod!");
+            } else {
+                Optional<FileNode> fileNode = this.defines.values()
+                                                          .stream()
+                                                          .map(Map::entrySet)
+                                                          .flatMap(Collection::stream)
+                                                          .map(Map.Entry::getValue)
+                                                          .map(Map::values)
+                                                          .flatMap(Collection::stream)
+                                                          .filter(d -> d.getFileNode().getMod() != null && d.getFileNode().getMod().equals(mod))
+                                                          .findFirst()
+                                                          .map(Define::getFileNode); //First modded for this mod
+
+                if (fileNode.isPresent()) {
+                    define.setFileNode(fileNode.get());
+                } else {
+                    FileNode node = new FileNode(mod, Paths.get(Eu4Utils.COMMON_FOLDER_PATH, "defines", "00_defines.lua"));
+                    define.setFileNode(node);
+                }
+
+                define.changeValue(value);
+            }
+        }
+    }
+
+    public void saveDefines(Mod mod) {
+        List<Define> moddedDefines = this.defines.values()
+                                                 .stream()
+                                                 .map(Map::entrySet)
+                                                 .flatMap(Collection::stream)
+                                                 .map(Map.Entry::getValue)
+                                                 .map(Map::values)
+                                                 .flatMap(Collection::stream)
+                                                 .filter(d -> d.getFileNode().getMod() != null && d.getFileNode().getMod().equals(mod))
+                                                 .collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(moddedDefines)) {
+            Map<FileNode, List<Define>> map = moddedDefines.stream().collect(Collectors.groupingBy(Define::getFileNode));
+
+            map.forEach((fileNode, values) -> {
+                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileNode.getPath().toFile()))) {
+                    for (Define define : values) {
+                        bufferedWriter.write(Eu4Utils.DEFINE_KEY + "." + define.getCategory() + "." + define.getName() + " = " + define.getValue());
+                        bufferedWriter.newLine();
+                    }
+                } catch (IOException e) {
+                    LOGGER.error("An error occurred while writing defines to {}: {}!", fileNode.getPath(), e.getMessage(), e);
+                }
+            });
+        }
     }
 
     public int getMaxGovRank() {
@@ -1301,6 +1393,7 @@ public class Game {
                 Mod mod = knownMods.get(ClausewitzUtils.removeQuotes(modName).replaceAll("^mod/", ""));
                 if (mod != null) {
                     map.put(mod.getPath(), mod);
+                    this.mods.add(mod);
                 } else {
                     throw new ModNotFoundException(modName);
                 }
@@ -1324,7 +1417,7 @@ public class Game {
             replaces.forEach((mod, replacePaths) -> { //This technique replace only folders, so don't check for files
                 this.filesNode.removeChildrenIf(fileNode -> fileNode.getPath().toFile().isDirectory()
                                                             && replacePaths.contains(fileNode.getRelativePath().toString()));
-                this.filesNode.merge(new TreeNode<>(null, new FileNode(mod.getPath().toPath(), mod), FileNode::getChildren));
+                this.filesNode.merge(new TreeNode<>(null, new FileNode(mod), FileNode::getChildren));
             });
         }
     }
@@ -1337,28 +1430,50 @@ public class Game {
     }
 
     public void loadDefines() throws IOException {
-        this.defines = LuaParser.parse(getAbsoluteFile(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines.lua"));
+        this.defines = readDefines(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines.lua"));
 
-        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines", this::isRegularTxtFile)
-                .forEach(path -> {
+        getFileNodes(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines",
+                     fileNode -> !fileNode.getPath().getFileName().toString().startsWith("difficulty") && isRegularLuaFile(fileNode))
+                .forEach(fileNode -> {
                     try {
-                        Map<String, Object> map = LuaParser.parse(path.toFile());
+                        Map<String, Map<String, Map<String, Define>>> definesMap = readDefines(fileNode.getRelativePath());
 
-                        map.forEach((rootName, values) -> this.defines.compute(rootName, (root, def) -> {
-                            if (def == null) {
-                                def = new LinkedHashMap<>();
-                            }
-
-                            ((Map<String, Object>) def).putAll((Map<String, Object>) values);
-
-                            return def;
-                        }));
+                        definesMap.forEach((define, map) -> map.forEach(
+                                (category, categoryMap) -> categoryMap.forEach((key, value) -> this.defines.get(define).get(category).put(key, value))));
                     } catch (IOException e) {
-                        LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
+                        LOGGER.error("Could not read file {} because: {} !", fileNode, e.getMessage(), e);
                     }
                 });
 
-        this.defines = (Map<String, Object>) this.defines.get("NDefines");
+        //Special case for difficulty
+        this.veryEasyDefines = readDefines(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines" + File.separator + "difficulty_very_easy.lua"));
+        this.easyDefines = readDefines(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines" + File.separator + "difficulty_easy.lua"));
+        this.hardDefines = readDefines(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines" + File.separator + "difficulty_hard.lua"));
+        this.veryHardDefines = readDefines(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "defines" + File.separator + "difficulty_very_hard.lua"));
+    }
+
+    private Map<String, Map<String, Map<String, Define>>> readDefines(Path relativePath) throws IOException {
+        Map<String, Map<String, Map<String, Define>>> definesMap = new LinkedHashMap<>();
+        Path definesPath = getAbsolutePath(relativePath);
+        FileNode fileNode = getFileNode(relativePath);
+
+        if (definesPath != null && fileNode != null && Files.exists(definesPath) && Files.isRegularFile(definesPath) && Files.isReadable(definesPath)) {
+            Map<String, Object> luaMap = LuaParser.parse(definesPath.toFile());
+
+            luaMap.forEach((key, value) -> {
+                Map<String, Map<String, Define>> map = new LinkedHashMap<>();
+                definesMap.put(key, map);
+
+                ((Map<String, Map<String, Object>>) value).forEach((subKey, subValue) -> {
+                    Map<String, Define> subMap = new LinkedHashMap<>();
+                    map.put(subKey, subMap);
+                    subValue.forEach((subSubKey, subSubValue) -> subMap.put(subSubKey, new Define(subKey, subSubKey, subSubValue, fileNode)));
+                });
+
+            });
+        }
+
+        return definesMap;
     }
 
     public void loadLocalisations() {
@@ -2577,5 +2692,9 @@ public class Game {
 
     private boolean isRegularTxtFile(FileNode fileNode) {
         return Eu4Utils.isRegularTxtFile(fileNode.getPath());
+    }
+
+    private boolean isRegularLuaFile(FileNode fileNode) {
+        return Eu4Utils.isRegularLuaFile(fileNode.getPath());
     }
 }

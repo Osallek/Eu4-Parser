@@ -57,6 +57,8 @@ public final class Eu4Utils {
 
     public static final PathMatcher TXT_PATH_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**.txt");
 
+    public static final PathMatcher LUA_PATH_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**.lua");
+
     public static final String MAGIC_WORD = "EU4txt";
 
     public static final String AI_FILE = "ai";
@@ -86,6 +88,8 @@ public final class Eu4Utils {
     public static final String DEFAULT_TAG_QUOTES = "\"" + DEFAULT_TAG + "\"";
 
     public static final String IMPASSABLE_CLIMATE = "impassable";
+
+    public static final String DEFINE_KEY = "NDefines";
 
     public static final String DEFINE_GAME_KEY = "NGame";
 
@@ -350,6 +354,14 @@ public final class Eu4Utils {
 
     public static boolean isRegularTxtFile(Path path) {
         return Files.isRegularFile(path) && TXT_PATH_MATCHER.matches(path);
+    }
+
+    public static boolean isRegularLuaFile(File file) {
+        return isRegularLuaFile(file.toPath());
+    }
+
+    public static boolean isRegularLuaFile(Path path) {
+        return Files.isRegularFile(path) && LUA_PATH_MATCHER.matches(path);
     }
 
     @SafeVarargs
