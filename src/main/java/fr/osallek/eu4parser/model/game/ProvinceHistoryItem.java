@@ -51,7 +51,11 @@ public class ProvinceHistoryItem {
     }
 
     public void setOwner(String owner) {
-        this.item.setVariable("owner", owner);
+        if (owner == null) {
+            this.item.removeVariable("owner");
+        } else {
+            this.item.setVariable("owner", owner, 0);
+        }
     }
 
     public Country getController() {
@@ -64,7 +68,11 @@ public class ProvinceHistoryItem {
     }
 
     public void setController(String controller) {
-        this.item.setVariable("controller", controller);
+        if (controller == null) {
+            this.item.removeVariable("controller");
+        } else {
+            this.item.setVariable("controller", controller, 1);
+        }
     }
 
     public List<Country> getAddCores() {
@@ -72,7 +80,8 @@ public class ProvinceHistoryItem {
     }
 
     public void addAddCore(String addCore) {
-        this.item.addVariable("add_core", addCore.toUpperCase());
+        this.item.addVariable("add_core", addCore.toUpperCase(),
+                              this.item.getVars("add_core").stream().mapToInt(ClausewitzVariable::getOrder).max().orElse(this.item.getNbObjects()), true);
     }
 
     public void addAddCore(Country country) {
@@ -92,7 +101,8 @@ public class ProvinceHistoryItem {
     }
 
     public void addRemoveCore(String removeCore) {
-        this.item.addVariable("remove_core", removeCore.toUpperCase());
+        this.item.addVariable("remove_core", removeCore.toUpperCase(),
+                              this.item.getVars("remove_core").stream().mapToInt(ClausewitzVariable::getOrder).max().orElse(this.item.getNbObjects()), true);
     }
 
     public void addRemoveCore(Country country) {
@@ -288,6 +298,42 @@ public class ProvinceHistoryItem {
             this.item.removeVariable("extra_cost");
         } else {
             this.item.setVariable("extra_cost", extraCost);
+        }
+    }
+
+    public Integer getNativeSize() {
+        return this.item.getVarAsInt("native_size");
+    }
+
+    public void setNativeSize(Integer nativeSize) {
+        if (nativeSize == null) {
+            this.item.removeVariable("native_size");
+        } else {
+            this.item.setVariable("native_size", nativeSize, this.item.getVar("base_tax").getOrder());
+        }
+    }
+
+    public Integer getNativeHostileness() {
+        return this.item.getVarAsInt("native_hostileness");
+    }
+
+    public void setNativeHostileness(Integer nativeHostileness) {
+        if (nativeHostileness == null) {
+            this.item.removeVariable("native_hostileness");
+        } else {
+            this.item.setVariable("native_hostileness", nativeHostileness, this.item.getVar("base_tax").getOrder());
+        }
+    }
+
+    public Integer getNativeFerocity() {
+        return this.item.getVarAsInt("native_ferocity");
+    }
+
+    public void setNativeFerocity(Integer nativeFerocity) {
+        if (nativeFerocity == null) {
+            this.item.removeVariable("native_ferocity");
+        } else {
+            this.item.setVariable("native_ferocity", nativeFerocity, this.item.getVar("base_tax").getOrder());
         }
     }
 
