@@ -1793,12 +1793,12 @@ public class Game {
     private void readTradeNodes() {
         this.tradeNodes = new LinkedHashMap<>();
 
-        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "tradenodes", this::isRegularTxtFile)
-                .forEach(path -> {
-                    ClausewitzItem tradeNodesItem = ClausewitzParser.parse(path.toFile(), 0);
+        getFileNodes(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "tradenodes", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem tradeNodesItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
                     this.tradeNodes.putAll(tradeNodesItem.getChildren()
                                                          .stream()
-                                                         .map(TradeNode::new)
+                                                         .map(item -> new TradeNode(item, fileNode))
                                                          .collect(Collectors.toMap(TradeNode::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
                 });
 
