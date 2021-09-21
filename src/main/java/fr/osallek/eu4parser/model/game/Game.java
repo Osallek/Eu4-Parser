@@ -737,7 +737,7 @@ public class Game {
             map.forEach((fileNode, values) -> {
                 try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileNode.getPath().toFile()))) {
                     for (Define define : values) {
-                        bufferedWriter.write(Eu4Utils.DEFINE_KEY + "." + define.getCategory() + "." + define.getName() + " = " + define.getValue());
+                        define.write(bufferedWriter);
                         bufferedWriter.newLine();
                     }
                 } catch (IOException e) {
@@ -1968,13 +1968,19 @@ public class Game {
 
     private void readAreas() {
         this.areas = new HashMap<>();
-        File areasFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "area.txt");
+        FileNode areasFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "area.txt");
 
-        if (areasFile != null && areasFile.canRead()) {
-            ClausewitzItem areasItem = ClausewitzParser.parse(areasFile, 0);
+        if (areasFile != null && areasFile.getPath() != null && areasFile.getPath().toFile().canRead()) {
+            ClausewitzItem areasItem = ClausewitzParser.parse(areasFile.getPath().toFile(), 0);
 
-            this.areas.putAll(areasItem.getLists().stream().map(Area::new).collect(Collectors.toMap(Area::getName, Function.identity(), (a, b) -> b)));
-            this.areas.putAll(areasItem.getChildren().stream().map(Area::new).collect(Collectors.toMap(Area::getName, Function.identity(), (a, b) -> b)));
+            this.areas.putAll(areasItem.getLists()
+                                       .stream()
+                                       .map(list -> new Area(list, areasFile))
+                                       .collect(Collectors.toMap(Area::getName, Function.identity(), (a, b) -> b)));
+            this.areas.putAll(areasItem.getChildren()
+                                       .stream()
+                                       .map(item -> new Area(item, areasFile))
+                                       .collect(Collectors.toMap(Area::getName, Function.identity(), (a, b) -> b)));
         }
 
         this.areas.values().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));

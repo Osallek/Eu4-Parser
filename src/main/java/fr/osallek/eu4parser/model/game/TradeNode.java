@@ -5,29 +5,26 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.logging.log4j.util.PropertySource;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class TradeNode implements Comparable<TradeNode> {
+public class TradeNode extends Noded {
 
     private final ClausewitzItem item;
-
-    private final FileNode fileNode;
 
     private String localizedName;
 
     public TradeNode(ClausewitzItem item, FileNode fileNode) {
+        super(fileNode);
         this.item = item;
-        this.fileNode = fileNode;
     }
 
+    @Override
     public String getName() {
         return this.item.getName();
     }
@@ -119,6 +116,7 @@ public class TradeNode implements Comparable<TradeNode> {
     public void setProvinces(List<Integer> provinces) {
         if (CollectionUtils.isEmpty(provinces)) {
             this.item.removeList("members");
+            return;
         }
 
         ClausewitzList list = this.item.getList("members");
@@ -153,17 +151,9 @@ public class TradeNode implements Comparable<TradeNode> {
         return this.item.getChildren("outgoing").stream().map(TradeNodeOutgoing::new).collect(Collectors.toList());
     }
 
-    public FileNode getFileNode() {
-        return fileNode;
-    }
-
+    @Override
     public void write(BufferedWriter writer) throws IOException {
         this.item.write(writer, true, 0, new HashMap<>());
-    }
-
-    @Override
-    public int compareTo(TradeNode o) {
-        return Comparator.comparing(TradeNode::getName).compare(this, o);
     }
 
     @Override

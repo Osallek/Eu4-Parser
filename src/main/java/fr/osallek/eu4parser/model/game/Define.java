@@ -1,10 +1,13 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.eu4parser.common.Eu4Utils;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 
-public class Define {
+public class Define extends Noded {
 
     private String category;
 
@@ -12,13 +15,11 @@ public class Define {
 
     private Object value;
 
-    private FileNode fileNode;
-
     public Define(String category, String name, Object value, FileNode fileNode) {
+        super(fileNode);
         this.category = category;
         this.name = name;
         this.value = value;
-        this.fileNode = fileNode;
     }
 
     public String getCategory() {
@@ -29,6 +30,7 @@ public class Define {
         this.category = category;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -43,14 +45,6 @@ public class Define {
 
     public void setValue(Object value) {
         this.value = value;
-    }
-
-    public FileNode getFileNode() {
-        return fileNode;
-    }
-
-    public void setFileNode(FileNode fileNode) {
-        this.fileNode = fileNode;
     }
 
     public String getAsString() {
@@ -77,6 +71,11 @@ public class Define {
         } else if (Double.class.equals(this.value.getClass())) {
             this.value = Double.parseDouble(value);
         }
+    }
+
+    @Override
+    public void write(BufferedWriter writer) throws IOException {
+        writer.write(Eu4Utils.DEFINE_KEY + "." + this.category + "." + this.name + " = " + this.value);
     }
 
     @Override
