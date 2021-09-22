@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -23,11 +22,13 @@ public class Province {
 
     private boolean isLake = false;
 
-    private String climate;
+    private String climate = Eu4Utils.DEFAULT_CLIMATE;
+
+    private String monsoon = Eu4Utils.DEFAULT_MONSOON;
 
     private boolean impassable;
 
-    private String winter;
+    private String winter = Eu4Utils.DEFAULT_WINTER;
 
     private boolean isPort;
 
@@ -89,6 +90,7 @@ public class Province {
         this.isOcean = other.isOcean;
         this.isLake = other.isLake;
         this.climate = other.climate;
+        this.monsoon = other.monsoon;
         this.impassable = other.impassable;
         this.winter = other.winter;
         this.isPort = other.isPort;
@@ -190,6 +192,14 @@ public class Province {
 
     public void setClimate(String climate) {
         this.climate = climate;
+    }
+
+    public String getMonsoon() {
+        return monsoon;
+    }
+
+    public void setMonsoon(String monsoon) {
+        this.monsoon = monsoon;
     }
 
     public boolean isImpassable() {

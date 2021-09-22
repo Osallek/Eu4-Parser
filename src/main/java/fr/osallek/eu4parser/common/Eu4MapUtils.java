@@ -57,6 +57,34 @@ public class Eu4MapUtils {
 
     public static final Color IMPASSABLE_COLOR = new Color(94, 94, 94);
 
+    public static Color winterToColor(String winter) {
+        if ("mild_winter".equals(winter)) {
+            return new Color(102, 102, 102);
+        } else if ("normal_winter".equals(winter)) {
+            return new Color(204, 204, 204);
+        } else if ("severe_winter".equals(winter)) {
+            return new Color(255, 255, 255);
+        } else if (Eu4Utils.DEFAULT_WINTER.equals(winter)) {
+            return new Color(34, 34, 34);
+        } else {
+            return EMPTY_COLOR;
+        }
+    }
+
+    public static Color climateToColor(String climate) {
+        if ("tropical".equals(climate)) {
+            return new Color(116, 218, 81);
+        } else if ("arid".equals(climate)) {
+            return new Color(255, 240, 125);
+        } else if ("arctic".equals(climate)) {
+            return new Color(255, 255, 255);
+        } else if (Eu4Utils.DEFAULT_CLIMATE.equals(climate)) {
+            return new Color(76, 134, 71);
+        } else {
+            return EMPTY_COLOR;
+        }
+    }
+
     public static void generateMapSVG(Game game, File file) throws IOException {
         Dimension dimension = getProvinceMapDimension(game);
         Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();

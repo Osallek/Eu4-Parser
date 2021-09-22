@@ -1606,6 +1606,8 @@ public class Game {
                                    list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
                                } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
                                    list.getValuesAsInt().forEach(id -> this.provinces.get(id).setImpassable(true));
+                               } else if (list.getName().endsWith("_monsoon")) {
+                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setMonsoon(list.getName()));
                                } else {
                                    list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
                                }
@@ -2022,14 +2024,14 @@ public class Game {
     private void readTechnologies() {
         this.techGroups = new HashMap<>();
         this.technologies = new EnumMap<>(Power.class);
-        File techGroupsFile = getAbsoluteFile(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "technology.txt");
+        FileNode techGroupsFile = getFileNode(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "technology.txt");
 
-        if (techGroupsFile != null && techGroupsFile.canRead()) {
-            ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile, 0);
+        if (techGroupsFile != null && techGroupsFile.getPath().toFile().canRead()) {
+            ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile.getPath().toFile(), 0);
             this.techGroups.putAll(techGroupsItem.getChild("groups")
                                                  .getChildren()
                                                  .stream()
-                                                 .map(TechGroup::new)
+                                                 .map(item -> new TechGroup(item, techGroupsFile))
                                                  .collect(Collectors.toMap(TechGroup::getName, Function.identity(), (a, b) -> b)));
 
             ClausewitzItem technologiesItem = techGroupsItem.getChild("tables");
@@ -2040,7 +2042,7 @@ public class Game {
                     List<Technology> techs = new ArrayList<>();
                     AtomicInteger i = new AtomicInteger(0);
 
-                    switch (power) { //Don't read others because it is useless, ia can't take them
+                    switch (power) { //Don't read others because it is useless, AI can't take them
                         case ADM -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("adm_tech"));
                         case DIP -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("dip_tech"));
                         case MIL -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("mil_tech"));
@@ -2127,16 +2129,14 @@ public class Game {
     private void readTradeCompanies() {
         this.tradeCompanies = new HashMap<>();
 
-        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "trade_companies", this::isRegularTxtFile)
-                .forEach(path -> {
-                    ClausewitzItem tradeCompaniesItem = ClausewitzParser.parse(path.toFile(), 0);
+        getFileNodes(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "trade_companies", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem tradeCompaniesItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
                     this.tradeCompanies.putAll(tradeCompaniesItem.getChildren()
                                                                  .stream()
-                                                                 .map(TradeCompany::new)
+                                                                 .map(item -> new TradeCompany(item, fileNode))
                                                                  .collect(Collectors.toMap(TradeCompany::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.tradeCompanies.values().forEach(tradeCompany -> tradeCompany.setLocalizedName(this.getLocalisation(tradeCompany.getName())));
     }
 
     private void readSubjectTypes() {
