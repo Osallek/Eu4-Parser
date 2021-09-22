@@ -4,18 +4,23 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Objects;
 
-public class TechGroup {
+public class TechGroup extends Noded {
 
     private final ClausewitzItem item;
 
     private String localizedName;
 
-    public TechGroup(ClausewitzItem item) {
+    public TechGroup(ClausewitzItem item, FileNode fileNode) {
+        super(fileNode);
         this.item = item;
     }
 
+    @Override
     public String getName() {
         return this.item.getName();
     }
@@ -100,6 +105,11 @@ public class TechGroup {
 
         ClausewitzItem triggerChild = this.item.getChild("nation_designer_trigger");
         //Todo Condition => item
+    }
+
+    @Override
+    public void write(BufferedWriter writer) throws IOException {
+        this.item.write(writer, true, 0, new HashMap<>());
     }
 
     @Override
