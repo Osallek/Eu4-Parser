@@ -24,8 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileSystemView;
+import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -80,6 +82,10 @@ public class Game {
     private Map<Integer, Province> provinces;
 
     private Map<Integer, Province> provincesByColor;
+
+    private Map<String, TerrainCategory> terrainCategories;
+
+    private Map<String, Terrain> terrains;
 
     private Map<String, Continent> continents;
 
@@ -503,6 +509,22 @@ public class Game {
         }
 
         return null;
+    }
+
+    public Map<String, TerrainCategory> getTerrainCategories() {
+        return terrainCategories;
+    }
+
+    public TerrainCategory getTerrainCategory(String terrainCategory) {
+        return terrainCategories.get(terrainCategory);
+    }
+
+    public Map<String, Terrain> getTerrains() {
+        return terrains;
+    }
+
+    public Terrain getTerrain(String terrain) {
+        return terrains.get(terrain);
     }
 
     public Collection<CultureGroup> getCultureGroups() {
@@ -1702,6 +1724,45 @@ public class Game {
                         } catch (NumberFormatException ignored) {
                         }
                     });
+
+            File terrainMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.bmp");
+
+            if (terrainMapFile != null && terrainMapFile.canRead()) {
+                BufferedImage terrainMap = ImageIO.read(terrainMapFile);
+                List<Color> colors = new ArrayList<>();
+                IndexColorModel colorModel = (IndexColorModel) terrainMap.getColorModel();
+
+                for (int i = 0; i < colorModel.getMapSize(); i++) {
+                    colors.add(new Color(colorModel.getRGB(i)));
+                }
+
+                FileNode terrainFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.txt");
+
+                if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
+                    ClausewitzItem terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
+                    ClausewitzItem categories = terrainItem.getChild("categories");
+
+                    this.terrainCategories = new HashMap<>();
+                    this.terrainCategories.putAll(categories.getChildren()
+                                                            .stream()
+                                                            .map(item -> new TerrainCategory(item, terrainFile))
+                                                            .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
+                    this.terrainCategories.values()
+                                          .stream()
+                                          .filter(terrainCategory -> CollectionUtils.isNotEmpty(terrainCategory.getProvinces()))
+                                          .forEach(terrainCategory -> terrainCategory.getProvinces()
+                                                                                     .forEach(
+                                                                                             id -> this.provinces.get(id).setTerrainCategory(terrainCategory)));
+
+                    ClausewitzItem terrainsItem = terrainItem.getChild("terrain");
+
+                    this.terrains = new HashMap<>();
+                    this.terrains.putAll(terrainsItem.getChildren()
+                                                     .stream()
+                                                     .map(item -> new Terrain(item, terrainFile, this, colors))
+                                                     .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
+                }
+            }
         }
     }
 

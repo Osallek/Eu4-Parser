@@ -30,6 +30,8 @@ public class Province {
 
     private String winter = Eu4Utils.DEFAULT_WINTER;
 
+    private TerrainCategory terrainCategory;
+
     private boolean isPort;
 
     private Area area;
@@ -93,6 +95,7 @@ public class Province {
         this.monsoon = other.monsoon;
         this.impassable = other.impassable;
         this.winter = other.winter;
+        this.terrainCategory = other.terrainCategory;
         this.isPort = other.isPort;
         this.area = other.area;
         this.continent = other.continent;
@@ -216,6 +219,14 @@ public class Province {
 
     public void setWinter(String winter) {
         this.winter = winter;
+    }
+
+    public TerrainCategory getTerrainCategory() {
+        return terrainCategory;
+    }
+
+    public void setTerrainCategory(TerrainCategory terrainCategory) {
+        this.terrainCategory = terrainCategory;
     }
 
     public boolean isColonizable() {
