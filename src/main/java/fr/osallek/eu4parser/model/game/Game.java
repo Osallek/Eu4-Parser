@@ -1709,58 +1709,102 @@ public class Game {
                         }
                     }
                 }
-            }
 
-            getFileNodes(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile)
-                    .forEach(fileNode -> {
-                        String[] fileNameSplit = fileNode.getPath().getFileName().toString().split("[ -]");
-                        try {
-                            if (fileNameSplit.length >= 1) {
-                                int provinceId = Eu4Utils.cleanStringAndParseToInt(fileNameSplit[0]);
-                                getProvince(provinceId).setHistory(ClausewitzParser.parse(fileNode.getPath().toFile(), 0), this, fileNode
-                                                                  );
-                                //Fixme multiple history files with different names are compatible https://eu4.paradoxwikis.com/History_modding#Compatibility_-_Partial_Overwrites
+
+                getFileNodes(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile)
+                        .forEach(fileNode -> {
+                            String[] fileNameSplit = fileNode.getPath().getFileName().toString().split("[ -]");
+                            try {
+                                if (fileNameSplit.length >= 1) {
+                                    int provinceId = Eu4Utils.cleanStringAndParseToInt(fileNameSplit[0]);
+                                    getProvince(provinceId).setHistory(ClausewitzParser.parse(fileNode.getPath().toFile(), 0), this, fileNode);
+                                    //Fixme multiple history files with different names are compatible https://eu4.paradoxwikis.com/History_modding#Compatibility_-_Partial_Overwrites
+                                }
+                            } catch (NumberFormatException ignored) {
                             }
-                        } catch (NumberFormatException ignored) {
+                        });
+
+                File terrainMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.bmp");
+
+                if (terrainMapFile != null && terrainMapFile.canRead()) {
+                    BufferedImage terrainMap = ImageIO.read(terrainMapFile);
+                    List<Color> colors = new ArrayList<>();
+                    IndexColorModel colorModel = (IndexColorModel) terrainMap.getColorModel();
+
+                    for (int i = 0; i < colorModel.getMapSize() + 1; i++) {
+                        colors.add(new Color(colorModel.getRGB(i)));
+                    }
+
+                    Map<Integer, List<Integer>> provinceTerrainColors = new HashMap<>();
+                    for (int x = 0; x < terrainMap.getWidth(); x++) {
+                        for (int y = 0; y < terrainMap.getHeight(); y++) {
+                            int terrainColor = terrainMap.getRGB(x, y);
+                            int provinceColor = provinceImage.getRGB(x, y);
+
+                            if (!provinceTerrainColors.containsKey(provinceColor)) {
+                                provinceTerrainColors.put(provinceColor, new ArrayList<>());
+                            }
+
+                            provinceTerrainColors.get(provinceColor).add(terrainColor);
                         }
-                    });
+                    }
 
-            File terrainMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.bmp");
+                    Map<Integer, Integer> provinceTerrains = provinceTerrainColors.entrySet()
+                                                                                  .stream()
+                                                                                  .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                                            entry -> {
+                                                                                                                Map<Integer, Long> map = entry.getValue()
+                                                                                                                                              .stream()
+                                                                                                                                              .collect(
+                                                                                                                                                      Collectors.groupingBy(
+                                                                                                                                                              Function.identity(),
+                                                                                                                                                              Collectors.counting()));
+                                                                                                                return map.entrySet()
+                                                                                                                          .stream()
+                                                                                                                          .max(Comparator.comparingLong(
+                                                                                                                                  Map.Entry::getValue))
+                                                                                                                          .get()
+                                                                                                                          .getKey();
+                                                                                                            }));
 
-            if (terrainMapFile != null && terrainMapFile.canRead()) {
-                BufferedImage terrainMap = ImageIO.read(terrainMapFile);
-                List<Color> colors = new ArrayList<>();
-                IndexColorModel colorModel = (IndexColorModel) terrainMap.getColorModel();
+                    FileNode terrainFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.txt");
 
-                for (int i = 0; i < colorModel.getMapSize(); i++) {
-                    colors.add(new Color(colorModel.getRGB(i)));
-                }
+                    if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
+                        ClausewitzItem terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
+                        ClausewitzItem terrainsItem = terrainItem.getChild("terrain");
 
-                FileNode terrainFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.txt");
+                        this.terrains = new HashMap<>();
+                        this.terrains.putAll(terrainsItem.getChildren()
+                                                         .stream()
+                                                         .map(item -> new Terrain(item, terrainFile, this, colors))
+                                                         .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
 
-                if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
-                    ClausewitzItem terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
-                    ClausewitzItem categories = terrainItem.getChild("categories");
+                        ClausewitzItem categories = terrainItem.getChild("categories");
 
-                    this.terrainCategories = new HashMap<>();
-                    this.terrainCategories.putAll(categories.getChildren()
-                                                            .stream()
-                                                            .map(item -> new TerrainCategory(item, terrainFile))
-                                                            .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
-                    this.terrainCategories.values()
-                                          .stream()
-                                          .filter(terrainCategory -> CollectionUtils.isNotEmpty(terrainCategory.getProvinces()))
-                                          .forEach(terrainCategory -> terrainCategory.getProvinces()
-                                                                                     .forEach(
-                                                                                             id -> this.provinces.get(id).setTerrainCategory(terrainCategory)));
+                        this.terrainCategories = new HashMap<>();
+                        this.terrainCategories.putAll(categories.getChildren()
+                                                                .stream()
+                                                                .map(item -> new TerrainCategory(item, terrainFile))
+                                                                .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
 
-                    ClausewitzItem terrainsItem = terrainItem.getChild("terrain");
+                        provinceTerrains.forEach((provinceColor, color) ->
+                                                         this.terrains.values()
+                                                                      .stream()
+                                                                      .filter(t -> t.getColor().equals(new Color(color)))
+                                                                      .findFirst()
+                                                                      .ifPresent(terrain -> {
+                                                                          Color c = new Color(provinceColor);
+                                                                          this.provincesByColor.get(Eu4Utils.rgbToColor(c.getRed(), c.getGreen(), c.getBlue()))
+                                                                                               .setTerrainCategory(terrain.getCategory());
+                                                                      }));
 
-                    this.terrains = new HashMap<>();
-                    this.terrains.putAll(terrainsItem.getChildren()
-                                                     .stream()
-                                                     .map(item -> new Terrain(item, terrainFile, this, colors))
-                                                     .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
+                        this.terrainCategories.values()
+                                              .stream()
+                                              .filter(terrainCategory -> CollectionUtils.isNotEmpty(terrainCategory.getProvinces()))
+                                              .forEach(terrainCategory -> terrainCategory.getProvinces()
+                                                                                         .forEach(id -> this.provinces.get(id)
+                                                                                                                      .setTerrainCategory(terrainCategory)));
+                    }
                 }
             }
         }
