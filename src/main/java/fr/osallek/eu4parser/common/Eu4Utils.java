@@ -89,6 +89,8 @@ public final class Eu4Utils {
 
     public static final String IMPASSABLE_CLIMATE = "impassable";
 
+    public static final String IMPASSABLE_LOCALIZATION = "WASTELAND";
+
     public static final String DEFAULT_CLIMATE = "temperate";
 
     public static final String DEFAULT_MONSOON = "no_monsoon";

@@ -5,11 +5,11 @@ import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.UnitType;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Condition;
-import fr.osallek.eu4parser.model.game.Continent;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.game.Policy;
+import fr.osallek.eu4parser.model.game.ProvinceList;
 import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.SubjectType;
 import fr.osallek.eu4parser.model.game.TradeGood;
@@ -938,7 +938,7 @@ public class ConditionsUtils {
                     return !"yes".equalsIgnoreCase(value);
                 }
 
-                Set<Continent> continents = country.getOwnedProvinces().stream().map(SaveProvince::getContinent).collect(Collectors.toSet());
+                Set<ProvinceList> continents = country.getOwnedProvinces().stream().map(SaveProvince::getContinent).collect(Collectors.toSet());
                 continents.retainAll(country.getOverlord().getOwnedProvinces().stream().map(SaveProvince::getContinent).collect(Collectors.toSet()));
                 return "yes".equalsIgnoreCase(value) == continents.isEmpty();
             case "is_papal_controller":

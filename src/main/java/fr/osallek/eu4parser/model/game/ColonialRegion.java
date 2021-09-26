@@ -4,124 +4,179 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.Color;
-import org.apache.commons.collections4.CollectionUtils;
-
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 
-public class ColonialRegion {
+public class ColonialRegion extends Noded {
 
-    private final String name;
+    private final ClausewitzItem item;
 
-    private String localizedName;
+    private final Game game;
 
-    private final Color color;
-
-    private final Integer taxIncome;
-
-    private final Integer nativeSize;
-
-    private final Integer nativeFerocity;
-
-    private final Integer nativeHostileness;
-
-    private final Map<TradeGood, Integer> tradeGoods;
-
-    private final Map<Culture, Integer> cultures;
-
-    private final Map<Religion, Integer> religions;
-
-    private final List<Names> names;
-
-    private final List<Integer> provinces;
-
-    public ColonialRegion(ClausewitzItem item, Game game) {
-        this.name = item.getName();
-
-        ClausewitzList list = item.getList("color");
-        this.color = list == null ? null : new Color(list);
-        this.taxIncome = item.getVarAsInt("tax_income");
-        this.nativeSize = item.getVarAsInt("native_size");
-        this.nativeFerocity = item.getVarAsInt("native_ferocity");
-        this.nativeHostileness = item.getVarAsInt("native_hostileness");
-
-        ClausewitzItem child = item.getChild("trade_goods");
-        this.tradeGoods = child == null ? null : child.getVariables()
-                                                      .stream()
-                                                      .collect(Collectors.toMap(var -> game.getTradeGood(var.getName()), ClausewitzVariable::getAsInt));
-
-        child = item.getChild("religion");
-        this.religions = child == null ? null : child.getVariables()
-                                                     .stream()
-                                                     .collect(Collectors.toMap(var -> game.getReligion(var.getName()), ClausewitzVariable::getAsInt));
-        child = item.getChild("culture");
-        this.cultures = child == null ? null : child.getVariables()
-                                                    .stream()
-                                                    .collect(Collectors.toMap(var -> game.getCulture(var.getName()), ClausewitzVariable::getAsInt));
-
-        List<ClausewitzItem> names = item.getChildren("names");
-        this.names = names.stream().map(Names::new).collect(Collectors.toList());
-
-        list = item.getList("provinces");
-        this.provinces = list == null ? null : list.getValuesAsInt();
+    public ColonialRegion(ClausewitzItem item, FileNode fileNode, Game game) {
+        super(fileNode);
+        this.item = item;
+        this.game = game;
     }
 
+    @Override
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Color getColor() {
-        return color;
+        ClausewitzList list = this.item.getList("color");
+        return list == null ? null : new Color(list);
     }
 
-    public Integer getTaxIncome() {
-        return taxIncome;
-    }
+    public void setColor(Color color) {
+        if (color == null) {
+            this.item.removeList("color");
+            return;
+        }
 
-    public Integer getNativeSize() {
-        return nativeSize;
-    }
+        ClausewitzList list = this.item.getList("color");
 
-    public Integer getNativeFerocity() {
-        return nativeFerocity;
-    }
-
-    public Integer getNativeHostileness() {
-        return nativeHostileness;
-    }
-
-    public Map<TradeGood, Integer> getTradeGoods() {
-        return tradeGoods;
-    }
-
-    public Map<Culture, Integer> getCultures() {
-        return cultures;
-    }
-
-    public Map<Religion, Integer> getReligions() {
-        return religions;
-    }
-
-    public List<Names> getColonialNames() {
-        return names;
+        if (list != null) {
+            Color actualColor = new Color(list);
+            actualColor.setRed(color.getRed());
+            actualColor.setGreen(color.getGreen());
+            actualColor.setBlue(color.getBlue());
+        } else {
+            Color.addToItem(this.item, "color", color);
+        }
     }
 
     public List<Integer> getProvinces() {
-        return provinces;
+        ClausewitzList list = this.item.getList("provinces");
+        return list == null ? null : list.getValuesAsInt();
+    }
+
+    public void setProvinces(List<Integer> provinces) {
+        if (CollectionUtils.isEmpty(provinces)) {
+            this.item.removeList("provinces");
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("provinces");
+
+        if (list != null) {
+            list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
+        } else {
+            this.item.addList("provinces", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
+        }
+    }
+
+    public void addProvince(int province) {
+        ClausewitzList list = this.item.getList("provinces");
+
+        if (list != null) {
+            list.add(province);
+            list.sortInt();
+        } else {
+            this.item.addList("provinces", province);
+        }
+    }
+
+    public void removeProvince(int province) {
+        ClausewitzList list = this.item.getList("provinces");
+
+        if (list != null) {
+            list.remove(String.valueOf(province));
+        }
+    }
+
+    public Integer getTaxIncome() {
+        return this.item.getVarAsInt("tax_income");
+    }
+
+    public void setTaxIncome(Integer taxIncome) {
+        if (taxIncome == null) {
+            this.item.removeVariable("tax_income");
+        } else {
+            this.item.setVariable("tax_income", taxIncome);
+        }
+    }
+
+    public Integer getNativeSize() {
+        return this.item.getVarAsInt("native_size");
+    }
+
+    public void setNativeSize(Integer nativeSize) {
+        if (nativeSize == null) {
+            this.item.removeVariable("native_size");
+        } else {
+            this.item.setVariable("native_size", nativeSize);
+        }
+    }
+
+    public Integer getNativeFerocity() {
+        return this.item.getVarAsInt("native_ferocity");
+    }
+
+    public void setNativeFerocity(Integer nativeFerocity) {
+        if (nativeFerocity == null) {
+            this.item.removeVariable("native_ferocity");
+        } else {
+            this.item.setVariable("native_ferocity", nativeFerocity);
+        }
+    }
+
+    public Integer getNativeHostileness() {
+        return this.item.getVarAsInt("native_hostileness");
+    }
+
+    public void setNativeHostileness(Integer nativeHostileness) {
+        if (nativeHostileness == null) {
+            this.item.removeVariable("native_hostileness");
+        } else {
+            this.item.setVariable("native_hostileness", nativeHostileness);
+        }
+    }
+
+    public Map<TradeGood, Integer> getTradeGoods() {
+        ClausewitzItem child = item.getChild("trade_goods");
+        return child == null ? null : child.getVariables()
+                                           .stream()
+                                           .collect(Collectors.toMap(var -> game.getTradeGood(var.getName()), ClausewitzVariable::getAsInt));
+    }
+
+    public Map<Culture, Integer> getCultures() {
+        ClausewitzItem child = item.getChild("culture");
+        return child == null ? null : child.getVariables()
+                                           .stream()
+                                           .collect(Collectors.toMap(var -> game.getCulture(var.getName()), ClausewitzVariable::getAsInt));
+    }
+
+    public Map<Religion, Integer> getReligions() {
+        ClausewitzItem child = item.getChild("religion");
+        return child == null ? null : child.getVariables()
+                                           .stream()
+                                           .collect(Collectors.toMap(var -> game.getReligion(var.getName()), ClausewitzVariable::getAsInt));
+    }
+
+    public List<Names> getColonialNames() {
+        List<ClausewitzItem> names = item.getChildren("names");
+        return names.stream().map(Names::new).collect(Collectors.toList());
     }
 
     public boolean isRandom() {
-        return CollectionUtils.isEmpty(this.provinces);
+        return CollectionUtils.isEmpty(getProvinces());
+    }
+
+    @Override
+    public void write(BufferedWriter writer) throws IOException {
+        this.item.write(writer, true, 0, new HashMap<>());
     }
 
     @Override
@@ -136,16 +191,16 @@ public class ColonialRegion {
 
         ColonialRegion area = (ColonialRegion) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), area.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

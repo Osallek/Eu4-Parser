@@ -80,6 +80,22 @@ public class Eu4MapUtils {
             return new Color(255, 255, 255);
         } else if (Eu4Utils.DEFAULT_CLIMATE.equals(climate)) {
             return new Color(76, 134, 71);
+        } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(climate)) {
+            return IMPASSABLE_COLOR;
+        } else {
+            return EMPTY_COLOR;
+        }
+    }
+
+    public static Color monsoonToColor(String monsoon) {
+        if ("mild_monsoon".equals(monsoon)) {
+            return new Color(102, 102, 102);
+        } else if ("normal_monsoon".equals(monsoon)) {
+            return new Color(204, 204, 204);
+        } else if ("severe_monsoon".equals(monsoon)) {
+            return new Color(255, 255, 255);
+        } else if (Eu4Utils.DEFAULT_MONSOON.equals(monsoon)) {
+            return new Color(34, 34, 34);
         } else {
             return EMPTY_COLOR;
         }

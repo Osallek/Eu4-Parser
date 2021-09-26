@@ -22,13 +22,11 @@ public class Province {
 
     private boolean isLake = false;
 
-    private String climate = Eu4Utils.DEFAULT_CLIMATE;
+    private String climate;
 
-    private String monsoon = Eu4Utils.DEFAULT_MONSOON;
+    private String monsoon;
 
-    private boolean impassable;
-
-    private String winter = Eu4Utils.DEFAULT_WINTER;
+    private String winter;
 
     private TerrainCategory terrainCategory;
 
@@ -36,7 +34,7 @@ public class Province {
 
     private Area area;
 
-    private Continent continent;
+    private ProvinceList continent;
 
     private double cityX;
 
@@ -93,7 +91,6 @@ public class Province {
         this.isLake = other.isLake;
         this.climate = other.climate;
         this.monsoon = other.monsoon;
-        this.impassable = other.impassable;
         this.winter = other.winter;
         this.terrainCategory = other.terrainCategory;
         this.isPort = other.isPort;
@@ -206,11 +203,7 @@ public class Province {
     }
 
     public boolean isImpassable() {
-        return impassable;
-    }
-
-    public void setImpassable(boolean impassable) {
-        this.impassable = impassable;
+        return Eu4Utils.IMPASSABLE_CLIMATE.equals(this.climate);
     }
 
     public String getWinter() {
@@ -249,11 +242,11 @@ public class Province {
         this.area = area;
     }
 
-    public Continent getContinent() {
+    public ProvinceList getContinent() {
         return continent;
     }
 
-    public void setContinent(Continent continent) {
+    public void setContinent(ProvinceList continent) {
         this.continent = continent;
     }
 

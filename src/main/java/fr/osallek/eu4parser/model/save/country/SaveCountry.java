@@ -12,7 +12,6 @@ import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.UnitType;
 import fr.osallek.eu4parser.model.game.AgeAbility;
 import fr.osallek.eu4parser.model.game.CenterOfTrade;
-import fr.osallek.eu4parser.model.game.Continent;
 import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.CrownLandBonus;
 import fr.osallek.eu4parser.model.game.Culture;
@@ -36,6 +35,7 @@ import fr.osallek.eu4parser.model.game.NavalDoctrine;
 import fr.osallek.eu4parser.model.game.PersonalDeity;
 import fr.osallek.eu4parser.model.game.Policy;
 import fr.osallek.eu4parser.model.game.ProfessionalismModifier;
+import fr.osallek.eu4parser.model.game.ProvinceList;
 import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.ReligionGroup;
 import fr.osallek.eu4parser.model.game.ReligiousReform;
@@ -431,9 +431,9 @@ public class SaveCountry {
         return this.item.getVarAsDouble("blockade_mission");
     }
 
-    public List<Continent> getContinents() {
+    public List<ProvinceList> getContinents() {
         ClausewitzList list = this.item.getList("continent");
-        List<Continent> continents = new ArrayList<>();
+        List<ProvinceList> continents = new ArrayList<>();
 
         if (list != null) {
             for (int i = 0; i < this.save.getGame().getContinents().size(); i++) {

@@ -2,7 +2,6 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Terrain extends Noded {
+public class Tree extends Noded {
 
     private final ClausewitzItem item;
 
@@ -19,7 +18,7 @@ public class Terrain extends Noded {
 
     private final List<Color> colors;
 
-    public Terrain(ClausewitzItem item, FileNode fileNode, Game game, List<Color> colors) {
+    public Tree(ClausewitzItem item, FileNode fileNode, Game game, List<Color> colors) {
         super(fileNode);
         this.item = item;
         this.game = game;
@@ -47,16 +46,16 @@ public class Terrain extends Noded {
         list.setAll(indexes.toArray(Integer[]::new));
     }
 
-    public String getCategoryName() {
-        return this.item.getVarAsString("type");
+    public String getTerrainName() {
+        return this.item.getVarAsString("terrain");
     }
 
-    public TerrainCategory getCategory() {
-        return this.game.getTerrainCategory(getCategoryName());
+    public TerrainCategory getTerrain() {
+        return this.game.getTerrainCategory(getTerrainName());
     }
 
-    public void setCategory(String category) {
-        this.item.setVariable("type", category);
+    public void setTerrain(String terrain) {
+        this.item.setVariable("terrain", terrain);
     }
 
     @Override
@@ -70,11 +69,11 @@ public class Terrain extends Noded {
             return true;
         }
 
-        if (!(o instanceof Terrain)) {
+        if (!(o instanceof Tree)) {
             return false;
         }
 
-        Terrain area = (Terrain) o;
+        Tree area = (Tree) o;
 
         return Objects.equals(getName(), area.getName());
     }

@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.Color;
+import java.util.ArrayList;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -16,9 +17,12 @@ public class TerrainCategory extends Noded {
 
     private final ClausewitzItem item;
 
+    private final List<Integer> computedProvinces;
+
     public TerrainCategory(ClausewitzItem item, FileNode fileNode) {
         super(fileNode);
         this.item = item;
+        this.computedProvinces = new ArrayList<>();
     }
 
     @Override
@@ -30,12 +34,12 @@ public class TerrainCategory extends Noded {
         this.item.setName(name);
     }
 
-    public fr.osallek.eu4parser.model.Color getColor() {
+    public Color getColor() {
         ClausewitzList list = this.item.getList("color");
-        return list == null ? null : new fr.osallek.eu4parser.model.Color(list);
+        return list == null ? null : new Color(list);
     }
 
-    public void setColor(fr.osallek.eu4parser.model.Color color) {
+    public void setColor(Color color) {
         if (color == null) {
             this.item.removeList("color");
             return;
@@ -44,7 +48,7 @@ public class TerrainCategory extends Noded {
         ClausewitzList list = this.item.getList("color");
 
         if (list != null) {
-            fr.osallek.eu4parser.model.Color actualColor = new fr.osallek.eu4parser.model.Color(list);
+            fr.osallek.eu4parser.model.Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
@@ -206,6 +210,10 @@ public class TerrainCategory extends Noded {
         if (list != null) {
             list.remove(String.valueOf(province));
         }
+    }
+
+    public List<Integer> getComputedProvinces() {
+        return computedProvinces;
     }
 
     @Override
