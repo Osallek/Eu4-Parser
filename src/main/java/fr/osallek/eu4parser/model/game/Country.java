@@ -3,10 +3,17 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -24,191 +31,37 @@ public class Country {
 
     private final Game game;
 
-    private final ClausewitzItem historyItem;
+    private final String tag;
+
+    private final FileNode commonFileNode;
 
     private final ClausewitzItem commonItem;
 
-    private final String tag;
+    private FileNode historyFileNode;
 
-    public Country(String tag, ClausewitzItem historyItem, ClausewitzItem commonItem, Game game) {
+    private CountryHistoryItem defaultHistoryItem;
+
+    private SortedMap<LocalDate, CountryHistoryItem> historyItems;
+
+    public Country(String tag, FileNode commonFileNode, ClausewitzItem commonItem, Game game) {
         this.tag = tag;
         this.game = game;
-        this.historyItem = historyItem;
+        this.commonFileNode = commonFileNode;
         this.commonItem = commonItem;
+    }
+
+    public void setHistory(ClausewitzItem item, FileNode historyMod) {
+        this.historyFileNode = historyMod;
+        this.defaultHistoryItem = new CountryHistoryItem(item, this.game);
+        this.historyItems = item.getChildren()
+                                .stream()
+                                .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
+                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()), child -> new CountryHistoryItem(child, this.game),
+                                                          (o1, o2) -> o1, TreeMap::new));
     }
 
     public String getTag() {
         return tag;
-    }
-
-    public String getName() {
-        return this.game.getLocalisation(this.tag);
-    }
-
-    public TechGroup getTechnologyGroup() {
-        return this.game.getTechGroup(ClausewitzUtils.removeQuotes(this.historyItem.getVarAsString("technology_group")));
-    }
-
-    public void setTechnologyGroup(String technologyGroup) {
-        this.historyItem.setVariable("technology_group", technologyGroup);
-    }
-
-    public String getUnitType() {
-        return this.historyItem.getVarAsString("unit_type");
-    }
-
-    public void setUnitType(String unitType) {
-        this.historyItem.setVariable("unit_type", unitType);
-    }
-
-    public Government getGovernment() {
-        return this.game.getGovernment(ClausewitzUtils.removeQuotes(this.historyItem.getVarAsString("government")));
-    }
-
-    public void setGovernment(Government government) {
-        setGovernment(government.getName());
-    }
-
-    public void setGovernment(String government) {
-        this.historyItem.setVariable("government", ClausewitzUtils.addQuotes(government));
-    }
-
-    public Integer getGovernmentLevel() {
-        return this.historyItem.getVarAsInt("government_rank");
-    }
-
-    public GovernmentRank getGovernmentRank() {
-        return getGovernmentLevel() == null ? null : this.game.getGovernmentRank(getGovernmentLevel());
-    }
-
-    public void setGovernmentRank(Integer governmentRank) {
-        if (governmentRank == null) {
-            this.historyItem.removeVariable("government_rank");
-        } else {
-            if (governmentRank <= 0) {
-                governmentRank = 1;
-            }
-
-            this.historyItem.setVariable("government_rank", governmentRank);
-        }
-    }
-
-    public Culture getPrimaryCulture() {
-        return this.game.getCulture(this.historyItem.getVarAsString("primary_culture"));
-    }
-
-    public void setPrimaryCulture(Culture primaryCulture) {
-        setPrimaryCulture(primaryCulture.getName());
-    }
-
-    public void setPrimaryCulture(String primaryCulture) {
-        this.historyItem.setVariable("primary_culture", primaryCulture);
-    }
-
-    public List<Culture> getAcceptedCultures() {
-        return this.historyItem.getVarsAsStrings("add_accepted_culture").stream().map(this.game::getCulture).collect(Collectors.toList());
-    }
-
-    public void setAcceptedCultures(List<Culture> cultures) {
-        getAcceptedCultures().forEach(acceptedCulture -> cultures.stream()
-                                                                 .filter(culture -> culture.equals(acceptedCulture))
-                                                                 .findFirst()
-                                                                 .ifPresentOrElse(cultures::remove,
-                                                                                  () -> this.historyItem.removeVariable("add_accepted_culture",
-                                                                                                                        acceptedCulture.getName())));
-
-        cultures.forEach(this::addAcceptedCulture);
-    }
-
-    public void addAcceptedCulture(Culture culture) {
-        addAcceptedCulture(culture.getName());
-    }
-
-    public void addAcceptedCulture(String culture) {
-        List<String> acceptedCultures = this.historyItem.getVarsAsStrings("add_accepted_culture");
-
-        if (!acceptedCultures.contains(culture)) {
-            this.historyItem.addVariable("add_accepted_culture", culture, this.historyItem.getVar("primary_culture").getOrder() + 1);
-        }
-    }
-
-    public List<Culture> getRemoveAcceptedCultures() {
-        return this.historyItem.getVarsAsStrings("remove_accepted_culture").stream().map(this.game::getCulture).collect(Collectors.toList());
-    }
-
-    public void setRemoveAcceptedCultures(List<Culture> cultures) {
-        getAcceptedCultures().forEach(acceptedCulture -> cultures.stream()
-                                                                 .filter(culture -> culture.equals(acceptedCulture))
-                                                                 .findFirst()
-                                                                 .ifPresentOrElse(cultures::remove,
-                                                                                  () -> this.historyItem.removeVariable("remove_accepted_culture",
-                                                                                                                        acceptedCulture.getName())));
-
-        cultures.forEach(this::removeAcceptedCulture);
-    }
-
-    public void removeAcceptedCulture(Culture culture) {
-        removeAcceptedCulture(culture.getName());
-    }
-
-    public void removeAcceptedCulture(String culture) {
-        List<String> removeAcceptedCulture = this.historyItem.getVarsAsStrings("remove_accepted_culture");
-
-        if (!removeAcceptedCulture.contains(culture)) {
-            this.historyItem.addVariable("remove_accepted_culture", culture, this.historyItem.getVar("primary_culture").getOrder() + 1);
-        }
-    }
-
-    public List<Country> getHistoricalFriends() {
-        return this.historyItem.getVarsAsStrings("historical_friend").stream().map(this.game::getCountry).collect(Collectors.toList());
-    }
-
-    public void setHistoricalFriends(List<Country> friends) {
-        getHistoricalFriends().forEach(historicalFriend -> friends.stream()
-                                                                  .filter(friend -> friend.equals(historicalFriend))
-                                                                  .findFirst()
-                                                                  .ifPresentOrElse(friends::remove, () -> this.historyItem.removeVariable("historical_friend",
-                                                                                                                                          historicalFriend.getTag())));
-
-        friends.forEach(this::addHistoricalFriend);
-    }
-
-    public void addHistoricalFriend(Country friend) {
-        addHistoricalFriend(friend.getTag());
-    }
-
-    public void addHistoricalFriend(String friend) {
-        List<String> historicalFriends = this.historyItem.getVarsAsStrings("historical_friend");
-
-        if (!historicalFriends.contains(friend)) {
-            this.historyItem.addVariable("historical_friend", friend, this.historyItem.getVar("capital").getOrder() + 1);
-        }
-    }
-
-    public List<Country> getHistoricalEnemies() {
-        return this.historyItem.getVarsAsStrings("historical_rival").stream().map(this.game::getCountry).collect(Collectors.toList());
-    }
-
-    public void setHistoricalEnemies(List<Country> enemies) {
-        getHistoricalEnemies().forEach(historicalEnemy -> enemies.stream()
-                                                                 .filter(enemy -> enemy.equals(historicalEnemy))
-                                                                 .findFirst()
-                                                                 .ifPresentOrElse(enemies::remove, () -> this.historyItem.removeVariable("historical_rival",
-                                                                                                                                         historicalEnemy.getTag())));
-
-        enemies.forEach(this::addHistoricalEnemy);
-    }
-
-    public void addHistoricalEnemy(Country enemy) {
-        addHistoricalEnemy(enemy.getTag());
-    }
-
-    public void addHistoricalEnemy(String enemy) {
-        List<String> historicalEnemies = this.historyItem.getVarsAsStrings("historical_rival");
-
-        if (!historicalEnemies.contains(enemy)) {
-            this.historyItem.addVariable("historical_rival", enemy, this.historyItem.getVar("capital").getOrder() + 1);
-        }
     }
 
     public String getGraphicalCulture() {
@@ -217,6 +70,170 @@ public class Country {
 
     public void setGraphicalCulture(String graphicalCulture) {
         this.commonItem.setVariable("graphical_culture", graphicalCulture);
+    }
+
+    public String getHistoricalCouncil() {
+        return this.commonItem.getVarAsString("historical_council");
+    }
+
+    public void setHistoricalCouncil(String historicalCouncil) {
+        this.commonItem.setVariable("historical_council", historicalCouncil);
+    }
+
+    public Integer getHistoricalScore() {
+        return this.commonItem.getVarAsInt("historical_score");
+    }
+
+    public void setHistoricalScore(Integer historicalScore) {
+        if (historicalScore == null) {
+            this.commonItem.removeVariable("historical_score");
+        } else {
+            this.commonItem.setVariable("historical_score", historicalScore);
+        }
+    }
+
+    public List<IdeaGroup> getHistoricalIdeaGroups() {
+        return this.commonItem.hasList("historical_idea_groups") ? this.commonItem.getList("historical_idea_groups")
+                                                                                  .getValues()
+                                                                                  .stream()
+                                                                                  .map(this.game::getIdeaGroup)
+                                                                                  .collect(Collectors.toList()) : null;
+    }
+
+    public void setHistoricalIdeaGroups(Collection<IdeaGroup> historicalIdeaGroups) {
+        setHistoricalIdeaGroups(historicalIdeaGroups.stream().map(IdeaGroup::getName).collect(Collectors.toList()));
+    }
+
+    public void setHistoricalIdeaGroups(List<String> historicalIdeaGroups) {
+        ClausewitzList list = this.commonItem.getList("historical_idea_groups");
+
+        if (list == null) {
+            this.commonItem.addList("historical_idea_groups", historicalIdeaGroups);
+        } else {
+            list.setAll(historicalIdeaGroups);
+        }
+    }
+
+    public Map<String, Integer> getMonarchNames() {
+        return this.commonItem.hasChild("monarch_names") ? this.commonItem.getChild("monarch_names")
+                                                                          .getVariables()
+                                                                          .stream()
+                                                                          .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt,
+                                                                                                    (i1, i2) -> i1))
+                                                         : null;
+    }
+
+    public void setMonarchNames(Map<String, Integer> monarchNames) {
+        ClausewitzItem item = this.commonItem.getChild("monarch_names");
+
+        if (item == null) {
+            item = this.commonItem.addChild("monarch_names");
+        }
+
+        item.removeAllChildren();
+        monarchNames.forEach(item::addVariable);
+    }
+
+    public List<Unit> getHistoricalUnits() {
+        return this.commonItem.hasList("historical_units") ? this.commonItem.getList("historical_units")
+                                                                            .getValues()
+                                                                            .stream()
+                                                                            .map(this.game::getUnit)
+                                                                            .collect(Collectors.toList()) : null;
+    }
+
+    public void setHistoricalUnits(Collection<Unit> historicalUnits) {
+        setHistoricalUnits(historicalUnits.stream().map(Unit::getName).collect(Collectors.toList()));
+    }
+
+    public void setHistoricalUnits(List<String> historicalUnits) {
+        ClausewitzList list = this.commonItem.getList("historical_units");
+
+        if (list == null) {
+            this.commonItem.addList("historical_units", historicalUnits);
+        } else {
+            list.setAll(historicalUnits);
+        }
+    }
+
+    public List<String> getLeaderNames() {
+        return this.commonItem.hasList("leader_names") ? this.commonItem.getList("leader_names")
+                                                                        .getValues()
+                                                                        .stream()
+                                                                        .map(ClausewitzUtils::removeQuotes)
+                                                                        .collect(Collectors.toList()) : null;
+    }
+
+    public void setLeaderNames(List<String> leaderNames) {
+        ClausewitzList list = this.commonItem.getList("leader_names");
+
+        leaderNames = leaderNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+
+        if (list == null) {
+            this.commonItem.addList("leader_names", leaderNames);
+        } else {
+            list.setAll(leaderNames);
+        }
+    }
+
+    public List<String> getShipNames() {
+        return this.commonItem.hasList("ship_names") ? this.commonItem.getList("ship_names")
+                                                                      .getValues()
+                                                                      .stream()
+                                                                      .map(ClausewitzUtils::removeQuotes)
+                                                                      .collect(Collectors.toList()) : null;
+    }
+
+    public void setShipNames(List<String> shipNames) {
+        ClausewitzList list = this.commonItem.getList("ship_names");
+
+        shipNames = shipNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+
+        if (list == null) {
+            this.commonItem.addList("ship_names", shipNames);
+        } else {
+            list.setAll(shipNames);
+        }
+    }
+
+    public List<String> getArmyNames() {
+        return this.commonItem.hasList("army_names") ? this.commonItem.getList("army_names")
+                                                                      .getValues()
+                                                                      .stream()
+                                                                      .map(ClausewitzUtils::removeQuotes)
+                                                                      .collect(Collectors.toList()) : null;
+    }
+
+    public void setArmyNames(List<String> armyNames) {
+        ClausewitzList list = this.commonItem.getList("army_names");
+
+        armyNames = armyNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+
+        if (list == null) {
+            this.commonItem.addList("army_names", armyNames);
+        } else {
+            list.setAll(armyNames);
+        }
+    }
+
+    public List<String> getFleetNames() {
+        return this.commonItem.hasList("fleet_names") ? this.commonItem.getList("fleet_names")
+                                                                       .getValues()
+                                                                       .stream()
+                                                                       .map(ClausewitzUtils::removeQuotes)
+                                                                       .collect(Collectors.toList()) : null;
+    }
+
+    public void setFleetNames(List<String> fleetNames) {
+        ClausewitzList list = this.commonItem.getList("fleet_names");
+
+        fleetNames = fleetNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+
+        if (list == null) {
+            this.commonItem.addList("fleet_names", fleetNames);
+        } else {
+            list.setAll(fleetNames);
+        }
     }
 
     public Color getColor() {
@@ -242,12 +259,43 @@ public class Country {
         }
     }
 
-    public Boolean getElector() {
-        return this.historyItem.getVarAsBool("elector");
-    } //Move to history
+    public Color getRevolutionaryColor() {
+        ClausewitzList colorList = this.commonItem.getList("revolutionary_colors");
 
-    public void setElector(Boolean elector) {
-        this.historyItem.setVariable("elector", elector);
+        if (colorList == null) {
+            return null;
+        }
+
+        return new Color(colorList);
+    }
+
+    public void setRevolutionaryColor(java.awt.Color color) {
+        ClausewitzList colorList = this.commonItem.getList("revolutionary_colors");
+
+        if (colorList == null) {
+            Color.addToItem(this.commonItem, "revolutionary_colors", color.getRed(), color.getGreen(), color.getBlue());
+        } else {
+            Color c = new Color(colorList);
+            c.setRed(color.getRed());
+            c.setGreen(color.getGreen());
+            c.setBlue(color.getBlue());
+        }
+    }
+
+    public FileNode getCommonFileNode() {
+        return commonFileNode;
+    }
+
+    public FileNode getHistoryFileNode() {
+        return historyFileNode;
+    }
+
+    public CountryHistoryItem getDefaultHistoryItem() {
+        return defaultHistoryItem;
+    }
+
+    public SortedMap<LocalDate, CountryHistoryItem> getHistoryItems() {
+        return historyItems;
     }
 
     @Override

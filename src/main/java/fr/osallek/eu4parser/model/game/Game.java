@@ -16,6 +16,14 @@ import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -54,13 +62,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.imageio.ImageIO;
-import javax.swing.filechooser.FileSystemView;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Game {
 
@@ -2889,23 +2890,23 @@ public class Game {
     private void readCountry() {
         this.countries = new HashMap<>();
 
-        Map<String, File> countriesHistory = new HashMap<>();
-        getPaths(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "countries", this::isRegularTxtFile)
-                .forEach(path -> countriesHistory.put(path.toFile().getName().substring(0, 3).toUpperCase(), path.toFile()));
+        Map<String, FileNode> countriesHistory = new HashMap<>();
+        getFileNodes(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "countries", this::isRegularTxtFile)
+                .forEach(fileNode -> countriesHistory.put(fileNode.getPath().toFile().getName().substring(0, 3).toUpperCase(), fileNode));
 
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "country_tags", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem countryTagsItem = ClausewitzParser.parse(path.toFile(), 0);
                     countryTagsItem.getVariables()
-                                   .forEach(variable -> this.countries.put(variable.getName(),
-                                                                           new Country(variable.getName().toUpperCase(),
-                                                                                       ClausewitzParser.parse(
-                                                                                               countriesHistory.get(variable.getName().toUpperCase()), 0),
-                                                                                       ClausewitzParser.parse(getAbsoluteFile(Path.of(
-                                                                                                                      Eu4Utils.COMMON_FOLDER_PATH + File.separator
-                                                                                                                      + ClausewitzUtils.removeQuotes(variable.getValue())).toString()),
-                                                                                                              0),
-                                                                                       this)));
+                                   .forEach(variable -> {
+                                       FileNode commonFileNode = getFileNode(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator
+                                                                                     + ClausewitzUtils.removeQuotes(variable.getValue())).toString());
+                                       Country country = new Country(variable.getName().toUpperCase(), commonFileNode,
+                                                                     ClausewitzParser.parse(commonFileNode.getPath().toFile(), 0), this);
+                                       FileNode historyFileNode = countriesHistory.get(country.getTag());
+                                       country.setHistory(ClausewitzParser.parse(historyFileNode.getPath().toFile(), 0), historyFileNode);
+                                       this.countries.put(country.getTag(), country);
+                                   });
                 });
     }
 
