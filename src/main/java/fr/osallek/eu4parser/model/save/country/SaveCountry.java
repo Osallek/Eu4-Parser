@@ -68,6 +68,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -262,6 +263,10 @@ public class SaveCountry {
                 this.localizedName = ClausewitzUtils.removeQuotes(localizedName);
             }
         }
+    }
+
+    public String getFlagPath(String extension) {
+        return Path.of(Eu4Utils.GFX_FOLDER_PATH, "flags", getTag() + "." + extension).toString();
     }
 
     public void setName(String name) {

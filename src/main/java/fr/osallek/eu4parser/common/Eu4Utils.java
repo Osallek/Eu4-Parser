@@ -51,6 +51,8 @@ public final class Eu4Utils {
 
     public static final File MODS_FOLDER = new File(EU4_DOCUMENTS_FOLDER.getAbsolutePath() + File.separator + "mod");
 
+    public static final File OSALLEK_DOCUMENTS_FOLDER = new File(DOCUMENTS_FOLDER + File.separator + "Osallek");
+
     public static final String STEAM_COMMON_FOLDER_PATH = "common";
 
     public static final String STEAM_APPS_FOLDER_PATH = "steamapps";

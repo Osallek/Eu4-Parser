@@ -9,6 +9,7 @@ import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.clausewitzparser.parser.LuaParser;
 import fr.osallek.eu4parser.common.Eu4MapUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.common.TreeNode;
@@ -17,6 +18,7 @@ import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -330,6 +332,27 @@ public class Game {
         }
     }
 
+    public void convertImages(String destFolder, String... relativePaths) throws IOException {
+        Instant instant = Instant.now();
+        for (String relativePath : relativePaths) {
+            for (Path path : getPathsList(relativePath, fileNode -> Files.isRegularFile(fileNode.getPath()))) {
+                String fileName = path.getFileName().toString();
+                if (fileName.toLowerCase().endsWith(".tga") || fileName.toLowerCase().endsWith(".dds")) {
+                    File destFile = Path.of(destFolder, relativePath, FilenameUtils.removeExtension(fileName) + ".png").toFile();
+                    FileUtils.forceMkdirParent(destFile);
+                    ImageIO.write(ImageReader.convertFileToImage(path.toFile()), "png", destFile);
+                } else if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg") || fileName.toLowerCase().endsWith("jpeg")) {
+                    LOGGER.warn("png/jpg: {}", fileName);
+                    FileUtils.copyFile(path.toFile(), Path.of(destFolder, fileName).toFile());
+                } else {
+                    LOGGER.warn("Unknown: {}", fileName);
+                }
+            }
+        }
+
+        LOGGER.info("Copy took {}ms", Duration.between(instant, Instant.now()).toMillis());
+    }
+
     private TreeNode<FileNode> getTreeNode(String relativePath) {
         return getTreeNode(Path.of(relativePath));
     }
@@ -356,6 +379,11 @@ public class Game {
     private Stream<Path> getPaths(String relativePath, Predicate<FileNode>... predicates) {
         Stream<FileNode> treeNode = getFileNodes(relativePath, predicates);
         return treeNode == null ? Stream.empty() : treeNode.map(FileNode::getPath);
+    }
+
+    @SafeVarargs
+    private List<Path> getPathsList(String relativePath, Predicate<FileNode>... predicates) {
+        return getPaths(relativePath, predicates).collect(Collectors.toList());
     }
 
     private Path getAbsolutePath(String relativePath) {
@@ -402,11 +430,11 @@ public class Game {
     }
 
     public File getCountryFlagImage(SaveCountry country) {
-        return country == null ? null : getCountryFlagImage(country.getTag());
+        return country == null ? null : getAbsoluteFile(country.getFlagPath("tga"));
     }
 
-    public File getCountryFlagImage(String country) {
-        return country == null ? null : getAbsoluteFile(Eu4Utils.GFX_FOLDER_PATH + File.separator + "flags" + File.separator + country + ".tga");
+    public File getCountryFlagImage(Country country) {
+        return country == null ? null : getAbsoluteFile(country.getFlagPath("tga"));
     }
 
     public Map<Integer, Province> getProvinces() {
@@ -1851,7 +1879,7 @@ public class Game {
                     for (int i = 0; i < colorModel.getMapSize() + 1; i++) {
                         terrainColors.add(new Color(colorModel.getRGB(i)));
                     }
-                    
+
                     BufferedImage treesMap = ImageIO.read(treesMapFile);
                     List<Color> treesColors = new ArrayList<>();
                     colorModel = (IndexColorModel) treesMap.getColorModel();
@@ -1928,7 +1956,8 @@ public class Game {
                                                                       .findFirst()
                                                                       .ifPresent(terrain -> {
                                                                           Color c = new Color(provinceColor);
-                                                                          Province p = this.provincesByColor.get(Eu4Utils.rgbToColor(c.getRed(), c.getGreen(), c.getBlue()));
+                                                                          Province p = this.provincesByColor.get(
+                                                                                  Eu4Utils.rgbToColor(c.getRed(), c.getGreen(), c.getBlue()));
                                                                           p.setTerrainCategory(terrain.getCategory());
                                                                           terrain.getCategory().getComputedProvinces().add(p.getId());
                                                                       }));
@@ -1998,7 +2027,8 @@ public class Game {
                     this.institutions.putAll(institutionsItem.getChildren()
                                                              .stream()
                                                              .map(Institution::new)
-                                                             .collect(Collectors.toMap(Institution::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
+                                                             .collect(Collectors.toMap(Institution::getName, Function.identity(), (a, b) -> b,
+                                                                                       LinkedHashMap::new)));
                 });
 
         this.institutions.values().forEach(institution -> {
@@ -2512,7 +2542,8 @@ public class Game {
                     this.leaderPersonalities.putAll(leaderPersonalityItem.getChildren()
                                                                          .stream()
                                                                          .map(LeaderPersonality::new)
-                                                                         .collect(Collectors.toMap(LeaderPersonality::getName, Function.identity(), (a, b) -> b)));
+                                                                         .collect(Collectors.toMap(LeaderPersonality::getName, Function.identity(),
+                                                                                                   (a, b) -> b)));
                 });
 
         this.leaderPersonalities.values().forEach(leaderPersonality -> leaderPersonality.setLocalizedName(this.getLocalisation(leaderPersonality.getName())));
@@ -2723,7 +2754,8 @@ public class Game {
                     this.nativeAdvancements.putAll(nativeAdvancementItem.getChildren()
                                                                         .stream()
                                                                         .map(NativeAdvancements::new)
-                                                                        .collect(Collectors.toMap(NativeAdvancements::getName, Function.identity(), (a, b) -> b)));
+                                                                        .collect(Collectors.toMap(NativeAdvancements::getName, Function.identity(),
+                                                                                                  (a, b) -> b)));
                 });
 
         this.nativeAdvancements.values().forEach(advancements -> {
@@ -2864,7 +2896,8 @@ public class Game {
                     this.provinceTriggeredModifiers.putAll(provinceTriggeredIssueItem.getChildren()
                                                                                      .stream()
                                                                                      .map(TriggeredModifier::new)
-                                                                                     .collect(Collectors.toMap(TriggeredModifier::getName, Function.identity(), (a, b) -> b)));
+                                                                                     .collect(Collectors.toMap(TriggeredModifier::getName, Function.identity(),
+                                                                                                               (a, b) -> b)));
                 });
 
         this.provinceTriggeredModifiers.values()

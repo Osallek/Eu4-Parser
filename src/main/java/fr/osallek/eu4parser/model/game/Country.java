@@ -7,6 +7,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -62,6 +63,10 @@ public class Country {
 
     public String getTag() {
         return tag;
+    }
+
+    public String getFlagPath(String extension) {
+        return Path.of(Eu4Utils.GFX_FOLDER_PATH, "flags", getTag() + "." + extension).toString();
     }
 
     public String getGraphicalCulture() {
