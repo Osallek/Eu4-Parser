@@ -10,119 +10,89 @@ import java.util.stream.Collectors;
 
 public class GreatProject {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final String ambientObject;
-
-    private final int start;
-
-    private final LocalDate date;
-
-    private Time time;
-
-    private int buildCost;
-
-    private int startingTier;
-
-    private final GreatProjectType type;
-
-    private boolean canBeMoved;
-
-    private final Modifiers modifiers;
-
-    private List<GreatProjectTier> tiers;
+    private final ClausewitzItem item;
 
     public GreatProject(ClausewitzItem item) {
-        this.name = item.getName();
-        this.ambientObject = item.getVarAsString("ambient_object");
-        this.start = item.getVarAsInt("start");
-        this.date = item.getVarAsDate("date");
-        this.buildCost = item.getVarAsInt("build_cost");
-        this.startingTier = item.getVarAsInt("starting_tier");
-        this.type = GreatProjectType.valueOf(item.getVarAsString("type").toUpperCase());
-        this.canBeMoved = BooleanUtils.toBoolean(item.getVarAsBool("can_be_moved"));
-
-        if (item.hasChild("time")) {
-            this.time = new Time(item.getChild("time"));
-        }
-
-        this.modifiers = new Modifiers(item.getChild("modifier"));
-
-        this.tiers = item.getChildrenStartWith("tier_").stream().map(GreatProjectTier::new).collect(Collectors.toList());
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
-    }
-
-    public String getAmbientObject() {
-        return ambientObject;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public int getStart() {
-        return start;
+        return this.item.getVarAsInt("start");
+    }
+
+    public void setStart(int start) {
+        this.item.setVariable("start", start);
     }
 
     public LocalDate getDate() {
-        return date;
+        return this.item.getVarAsDate("date");
+    }
+
+    public void setDate(LocalDate date) {
+        this.item.setVariable("date", date);
     }
 
     public Time getTime() {
-        return time;
+        ClausewitzItem child = item.getChild("time");
+        return child == null ? null : new Time(child);
     }
 
-    public void setTime(Time time) {
-        this.time = time;
+    public void setTime(int months) {
+        ClausewitzItem child = item.getChild("time");
+
+        if (child == null) {
+            child = this.item.addChild("time");
+        }
+
+        new Time(child).setMonths(months);
     }
 
     public int getBuildCost() {
-        return buildCost;
+        return this.item.getVarAsInt("build_cost");
     }
 
     public void setBuildCost(int buildCost) {
-        this.buildCost = buildCost;
+        this.item.setVariable("build_cost", buildCost);
     }
 
     public int getStartingTier() {
-        return startingTier;
+        return this.item.getVarAsInt("starting_tier");
     }
 
     public void setStartingTier(int startingTier) {
-        this.startingTier = startingTier;
+        this.item.setVariable("starting_tier", startingTier);
     }
 
     public GreatProjectType getType() {
-        return type;
+        return GreatProjectType.valueOf(this.item.getVarAsString("type").toUpperCase());
+    }
+
+    public void setType(GreatProjectType type) {
+        this.item.setVariable("type", type.name().toLowerCase());
     }
 
     public boolean isCanBeMoved() {
-        return canBeMoved;
+        return BooleanUtils.toBoolean(item.getVarAsBool("can_be_moved"));
     }
 
     public void setCanBeMoved(boolean canBeMoved) {
-        this.canBeMoved = canBeMoved;
+        this.item.setVariable("can_be_moved", canBeMoved);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public List<GreatProjectTier> getTiers() {
-        return tiers;
-    }
-
-    public void setTiers(List<GreatProjectTier> tiers) {
-        this.tiers = tiers;
+        return this.item.getChildrenStartWith("tier_").stream().map(GreatProjectTier::new).collect(Collectors.toList());
     }
 
     @Override
@@ -135,18 +105,18 @@ public class GreatProject {
             return false;
         }
 
-        GreatProject area = (GreatProject) o;
+        GreatProject greatProject = (GreatProject) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), greatProject.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

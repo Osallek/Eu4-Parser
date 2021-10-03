@@ -6,15 +6,17 @@ import java.util.Objects;
 
 public class EventModifier extends GameModifier {
 
-    private final String picture;
-
     public EventModifier(ClausewitzItem item) {
-        super(item, new Modifiers(item.getVarsNot("picture")));
-        this.picture = item.getVarAsString("picture ");
+        super(item);
+    }
+
+    @Override
+    public Modifiers getModifier() {
+        return new Modifiers(this.item.getVarsNot("picture"));
     }
 
     public String getPicture() {
-        return picture;
+        return this.item.getVarAsString("picture");
     }
 
     @Override
@@ -27,17 +29,18 @@ public class EventModifier extends GameModifier {
             return false;
         }
 
-        EventModifier that = (EventModifier) o;
-        return Objects.equals(name, that.name);
+        EventModifier eventModifier = (EventModifier) o;
+
+        return Objects.equals(getName(), eventModifier.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

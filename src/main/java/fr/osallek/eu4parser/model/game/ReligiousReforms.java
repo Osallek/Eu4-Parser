@@ -11,19 +11,8 @@ public class ReligiousReforms {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
-    private final List<ReligiousReform> reforms;
-
     public ReligiousReforms(ClausewitzItem item) {
         this.item = item;
-
-        AtomicInteger i = new AtomicInteger();
-        this.reforms = item.getChildrenNot("trigger", "can_buy_idea", "ai_will_do")
-                           .stream()
-                           .map(reform -> new ReligiousReform(reform, this, i.getAndIncrement()))
-                           .collect(Collectors.toList());
-
     }
 
     public String getName() {
@@ -32,14 +21,6 @@ public class ReligiousReforms {
 
     public void setName(String name) {
         this.item.setName(name);
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public Condition getCanBuyIdea() {
@@ -73,7 +54,12 @@ public class ReligiousReforms {
     }
 
     public List<ReligiousReform> getReforms() {
-        return reforms;
+        AtomicInteger i = new AtomicInteger();
+
+        return this.item.getChildrenNot("trigger", "can_buy_idea", "ai_will_do")
+                        .stream()
+                        .map(reform -> new ReligiousReform(reform, this, i.getAndIncrement()))
+                        .collect(Collectors.toList());
     }
 
     @Override

@@ -10,61 +10,40 @@ import java.util.stream.Collectors;
 
 public class Faction {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Power category;
-
-    private final Condition trigger;
-
-    private final List<Names> names;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public Faction(ClausewitzItem item) {
-        this.name = item.getName();
-        ClausewitzVariable var = item.getVar("monarch_power");
-        this.category = var == null ? null : Power.byName(var.getValue());
-
-        this.modifiers = new Modifiers(item.getChild("modifier"));
-
-        List<ClausewitzItem> namesItems = item.getChildren("triggered_faction_name");
-        this.names = namesItems.stream().map(Names::new).collect(Collectors.toList());
-
-        item.removeVariable("monarch_power");
-        item.removeChild("modifier");
-        item.removeChild("triggered_faction_name");
-
-        this.trigger = new Condition(item);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Power getCategory() {
-        return category;
+        ClausewitzVariable variable = item.getVar("monarch_power");
+        return variable == null ? null : Power.byName(variable.getValue());
+    }
+
+    public void setCategory(Power category) {
+        this.item.setVariable("monarch_power", category.name());
     }
 
     public Condition getTrigger() {
-        return trigger;
+        return new Condition(this.item, "monarch_power", "modifier", "triggered_faction_name");
     }
 
     public List<Names> getNames() {
-        return names;
+        List<ClausewitzItem> namesItems = this.item.getChildren("triggered_faction_name");
+        return namesItems.stream().map(Names::new).collect(Collectors.toList());
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     @Override
@@ -79,16 +58,16 @@ public class Faction {
 
         Faction area = (Faction) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), area.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

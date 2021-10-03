@@ -5,42 +5,28 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import java.util.Objects;
 
 public class AgeObjective {
-    private final String name;
 
-    private final Condition allow;
-
-    private final Condition trigger;
-
-    private String localizedName;
+    private final ClausewitzItem item;
 
     public AgeObjective(ClausewitzItem item) {
-        this.name = item.getName();
-
-        ClausewitzItem child = item.getChild("allow");
-        this.allow = child == null ? null : new Condition(child);
-
-        item.removeChild("allow");
-        this.trigger = new Condition(item);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = this.item.getChild("allow");
+        return child == null ? null : new Condition(child);
     }
 
     public Condition getTrigger() {
-        return trigger;
+        return new Condition(this.item, "allow");
     }
 
     @Override
@@ -55,16 +41,16 @@ public class AgeObjective {
 
         AgeObjective ageObjective = (AgeObjective) o;
 
-        return Objects.equals(name, ageObjective.name);
+        return Objects.equals(getName(), ageObjective.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

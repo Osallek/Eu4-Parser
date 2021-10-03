@@ -1,12 +1,13 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import org.apache.commons.collections4.CollectionUtils;
 
 public class ProvinceList extends Noded {
 

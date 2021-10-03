@@ -4,27 +4,25 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 public class Icon {
 
-    private final String name;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public Icon(ClausewitzItem item) {
-        this.name = item.getName();
-        this.allow = new Condition(item.getChild("allow"));
-        this.modifiers = new Modifiers(item.getVariables());
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Condition getAllow() {
-        return allow;
+        return new Condition(item.getChild("allow"));
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(item.getVariables());
     }
 }

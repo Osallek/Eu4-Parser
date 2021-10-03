@@ -7,40 +7,50 @@ import java.util.Objects;
 
 public class CrownLandBonus implements Comparable<CrownLandBonus> {
 
-    private final String name;
-
-    private final Double rangeFrom;
-
-    private final Double rangeTo;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public CrownLandBonus(ClausewitzItem item) {
-        this.name = item.getVarAsString("key");
-        this.rangeFrom = item.getVarAsDouble("range_from");
-        this.rangeTo = item.getVarAsDouble("range_to");
-
-        this.modifiers = new Modifiers(item.getChild("modifier"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Double getRangeFrom() {
-        return rangeFrom;
+        return this.item.getVarAsDouble("range_from");
+    }
+
+    public void setRangeFrom(Double rangeFrom) {
+        if (rangeFrom == null) {
+            this.item.removeVariable("range_from");
+        } else {
+            this.item.setVariable("range_from", rangeFrom);
+        }
     }
 
     public Double getRangeTo() {
-        return rangeTo;
+        return this.item.getVarAsDouble("range_to");
+    }
+
+    public void setRangeTo(Double rangeTo) {
+        if (rangeTo == null) {
+            this.item.removeVariable("range_to");
+        } else {
+            this.item.setVariable("range_to", rangeTo);
+        }
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public boolean isInRange(double range) {
-        return (this.rangeFrom == null || this.rangeFrom <= range) && (this.rangeTo == null || this.rangeTo > range);
+        return (getRangeFrom() == null || getRangeFrom() <= range) && (getRangeTo() == null || getRangeTo() > range);
     }
 
     @Override
@@ -53,19 +63,19 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
             return false;
         }
 
-        CrownLandBonus area = (CrownLandBonus) o;
+        CrownLandBonus crownLandBonus = (CrownLandBonus) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), crownLandBonus.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override

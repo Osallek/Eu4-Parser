@@ -4,75 +4,58 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 public class GreatProjectTier {
 
-    private final String name;
-
-    private Time time;
-
-    private Integer buildCost;
-
-    private Modifiers provinceModifiers;
-
-    private Modifiers areaModifier;
-
-    private Modifiers countryModifiers;
+    private final ClausewitzItem item;
 
     public GreatProjectTier(ClausewitzItem item) {
-        this.name = item.getName();
-
-        if (item.hasChild("upgrade_time")) {
-            this.time = new Time(item.getChild("upgrade_time"));
-        }
-
-        if (item.hasChild("cost_to_upgrade")) {
-            this.buildCost = item.getChild("cost_to_upgrade").getVarAsInt("factor");
-        }
-
-        this.provinceModifiers = new Modifiers(item.getChild("province_modifiers"));
-        this.areaModifier = new Modifiers(item.getChild("area_modifier"));
-        this.countryModifiers = new Modifiers(item.getChild("country_modifiers"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Time getTime() {
-        return time;
+        ClausewitzItem child = item.getChild("upgrade_time");
+        return child == null ? null : new Time(child);
     }
 
-    public void setTime(Time time) {
-        this.time = time;
+    public void setTime(int months) {
+        ClausewitzItem child = item.getChild("upgrade_time");
+
+        if (child == null) {
+            child = this.item.addChild("upgrade_time");
+        }
+
+        new Time(child).setMonths(months);
     }
 
-    public Integer getBuildCost() {
-        return buildCost;
+    public int getBuildCost() {
+        return this.item.getChild("cost_to_upgrade").getVarAsInt("factor");
     }
 
-    public void setBuildCost(Integer buildCost) {
-        this.buildCost = buildCost;
+    public void setBuildCost(int buildCost) {
+        ClausewitzItem child = this.item.getChild("cost_to_upgrade");
+
+        if (child == null) {
+            child = this.item.addChild("cost_to_upgrade");
+        }
+
+        child.setVariable("factor", buildCost);
     }
 
     public Modifiers getProvinceModifiers() {
-        return provinceModifiers;
-    }
-
-    public void setProvinceModifiers(Modifiers provinceModifiers) {
-        this.provinceModifiers = provinceModifiers;
+        return new Modifiers(this.item.getChild("province_modifiers"));
     }
 
     public Modifiers getAreaModifier() {
-        return areaModifier;
-    }
-
-    public void setAreaModifier(Modifiers areaModifier) {
-        this.areaModifier = areaModifier;
+        return new Modifiers(this.item.getChild("area_modifier"));
     }
 
     public Modifiers getCountryModifiers() {
-        return countryModifiers;
-    }
-
-    public void setCountryModifiers(Modifiers countryModifiers) {
-        this.countryModifiers = countryModifiers;
+        return new Modifiers(this.item.getChild("country_modifiers"));
     }
 }

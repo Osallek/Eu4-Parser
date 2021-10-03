@@ -643,7 +643,6 @@ public class Game {
                                  .stream()
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
-                                 .sorted(Comparator.comparing(Culture::getLocalizedName, Eu4Utils.COLLATOR))
                                  .collect(Collectors.toList());
     }
 
@@ -1029,10 +1028,7 @@ public class Game {
     }
 
     public List<Government> getGovernments() {
-        return this.governments.values()
-                               .stream()
-                               .sorted(Comparator.comparing(Government::getLocalizedName, Eu4Utils.COLLATOR))
-                               .collect(Collectors.toList());
+        return new ArrayList<>(this.governments.values());
     }
 
     public Government getGovernment(String name) {
@@ -1984,11 +1980,6 @@ public class Game {
                                                                .map(CultureGroup::new)
                                                                .collect(Collectors.toMap(AbstractCulture::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.cultureGroups.values().forEach(cultureGroup -> {
-            cultureGroup.setLocalizedName(this.getLocalisation(cultureGroup.getName()));
-            cultureGroup.getCultures().forEach(culture -> culture.setLocalizedName(this.getLocalisation(culture.getName())));
-        });
     }
 
     private void readReligion() {
@@ -2143,8 +2134,6 @@ public class Game {
                                            .map(GoldenBull::new)
                                            .collect(Collectors.toMap(GoldenBull::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.goldenBulls.values().forEach(bull -> bull.setLocalizedName(this.getLocalisation(bull.getName())));
     }
 
     private void readEvents() {
@@ -2174,8 +2163,6 @@ public class Game {
                                                            .map(item -> new Government(item, this))
                                                            .collect(Collectors.toMap(Government::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.governments.values().forEach(government -> government.setLocalizedName(this.getLocalisation(government.getBasicReform())));
     }
 
     private void readGovernmentRanks() {
@@ -2433,8 +2420,6 @@ public class Game {
                                                         .map(FetishistCult::new)
                                                         .collect(Collectors.toMap(FetishistCult::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.fetishistCults.values().forEach(fetishistCult -> fetishistCult.setLocalizedName(this.getLocalisation(fetishistCult.getName())));
     }
 
     private void readChurchAspects() {
@@ -2572,12 +2557,10 @@ public class Game {
                         if (StaticModifiers.value(item.getName()) != null) {
                             StaticModifiers.value(item.getName()).setModifiers(new Modifiers(item));
                             StaticModifier staticModifier = new StaticModifier(item);
-                            this.staticModifiers.put(staticModifier.name, staticModifier);
+                            this.staticModifiers.put(staticModifier.getName(), staticModifier);
                         }
                     });
                 });
-
-        this.staticModifiers.values().forEach(staticModifier -> staticModifier.setLocalizedName(this.getLocalisation(staticModifier.getName())));
     }
 
     private void readInvestments() {
@@ -2621,8 +2604,6 @@ public class Game {
                                                      .map(Hegemon::new)
                                                      .collect(Collectors.toMap(Hegemon::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.hegemons.values().forEach(hegemon -> hegemon.setLocalizedName(this.getLocalisation(hegemon.getName())));
     }
 
     private void readFactions() {
@@ -2638,10 +2619,9 @@ public class Game {
 
                 });
 
-        this.factions.values().forEach(faction -> {
-            faction.setLocalizedName(this.getLocalisation(faction.getName()));
-            ModifiersUtils.addModifier(ClausewitzUtils.removeQuotes(faction.getName()) + "_influence", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        });
+        this.factions.values()
+                     .forEach(faction -> ModifiersUtils.addModifier(ClausewitzUtils.removeQuotes(faction.getName()) + "_influence", ModifierType.ADDITIVE,
+                                                                    ModifierScope.COUNTRY));
     }
 
     private void readAges() {
@@ -2655,8 +2635,6 @@ public class Game {
                                              .map(Age::new)
                                              .collect(Collectors.toMap(Age::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.ages.values().forEach(age -> age.setLocalizedName(this.getLocalisation(age.getName())));
     }
 
     private void readDefenderOfFaith() {
@@ -2696,8 +2674,6 @@ public class Game {
                                                    .map(Fervor::new)
                                                    .collect(Collectors.toMap(Fervor::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.fervors.values().forEach(fervor -> fervor.setLocalizedName(this.getLocalisation(fervor.getName())));
     }
 
     private void readGreatProjects() {
@@ -2711,8 +2687,6 @@ public class Game {
                                                                .map(GreatProject::new)
                                                                .collect(Collectors.toMap(GreatProject::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.greatProjects.values().forEach(greatProject -> greatProject.setLocalizedName(this.getLocalisation(greatProject.getName())));
     }
 
     private void readHolyOrders() {
@@ -2726,8 +2700,6 @@ public class Game {
                                                          .map(HolyOrder::new)
                                                          .collect(Collectors.toMap(HolyOrder::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.holyOrders.values().forEach(holyOrder -> holyOrder.setLocalizedName(this.getLocalisation(holyOrder.getName())));
     }
 
     private void readIsolationism() {
@@ -2791,8 +2763,6 @@ public class Game {
                                                                     .map(ParliamentIssue::new)
                                                                     .collect(Collectors.toMap(ParliamentIssue::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.parliamentIssues.values().forEach(parliamentIssue -> parliamentIssue.setLocalizedName(this.getLocalisation(parliamentIssue.getName())));
     }
 
     private void readPersonalDeities() {
@@ -2806,8 +2776,6 @@ public class Game {
                                                                  .map(PersonalDeity::new)
                                                                  .collect(Collectors.toMap(PersonalDeity::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.personalDeities.values().forEach(personalIssue -> personalIssue.setLocalizedName(this.getLocalisation(personalIssue.getName())));
     }
 
     private void readReligiousReforms() {
@@ -2821,11 +2789,6 @@ public class Game {
                                                                     .map(ReligiousReforms::new)
                                                                     .collect(Collectors.toMap(ReligiousReforms::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.religiousReforms.values().forEach(reforms -> {
-            reforms.setLocalizedName(this.getLocalisation(reforms.getName()));
-            reforms.getReforms().forEach(religiousReform -> religiousReform.setLocalizedName(this.getLocalisation(religiousReform.getName())));
-        });
     }
 
     private void readCrownLandBonuses() {
@@ -2852,8 +2815,6 @@ public class Game {
                                                            .map(StateEdict::new)
                                                            .collect(Collectors.toMap(StateEdict::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.stateEdicts.values().forEach(stateEdict -> stateEdict.setLocalizedName(this.getLocalisation(stateEdict.getName())));
     }
 
     private void readTradePolicies() {
@@ -2868,8 +2829,6 @@ public class Game {
                                                                .collect(Collectors.toMap(TradePolicy::getName, Function.identity(), (a, b) -> b)));
 
                 });
-
-        this.tradePolicies.values().forEach(tradePolicy -> tradePolicy.setLocalizedName(this.getLocalisation(tradePolicy.getName())));
     }
 
     private void readEventModifiers() {
@@ -2883,8 +2842,6 @@ public class Game {
                                                                 .map(EventModifier::new)
                                                                 .collect(Collectors.toMap(EventModifier::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.eventModifiers.values().forEach(eventModifier -> eventModifier.setLocalizedName(this.getLocalisation(eventModifier.getName())));
     }
 
     private void readProvinceTriggeredModifiers() {
@@ -2899,9 +2856,6 @@ public class Game {
                                                                                      .collect(Collectors.toMap(TriggeredModifier::getName, Function.identity(),
                                                                                                                (a, b) -> b)));
                 });
-
-        this.provinceTriggeredModifiers.values()
-                                       .forEach(provinceTriggered -> provinceTriggered.setLocalizedName(this.getLocalisation(provinceTriggered.getName())));
     }
 
     private void readTriggeredModifiers() {
@@ -2916,8 +2870,6 @@ public class Game {
                                                                      .collect(Collectors.toMap(GameModifier::getName, Function.identity(), (a, b) -> b)));
 
                 });
-
-        this.triggeredModifiers.values().forEach(triggeredModifier -> triggeredModifier.setLocalizedName(this.getLocalisation(triggeredModifier.getName())));
     }
 
     private void readCountry() {

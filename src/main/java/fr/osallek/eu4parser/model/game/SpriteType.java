@@ -1,43 +1,54 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.StringUtils;
 
 public class SpriteType {
 
-    private String name;
-
-    private String textureFile;
-
-    private String loadType;
+    private final ClausewitzItem item;
 
     public SpriteType(ClausewitzItem item) {
-        this.name = item.getVarAsString("name");
-        this.textureFile = item.getVarAsString("texturefile");
-        this.loadType = item.getVarAsString("loadType");
+        this.item = item;
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getVarAsString("name");
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.item.setVariable("name", name);
     }
 
     public String getTextureFile() {
-        return this.textureFile;
+        return this.item.getVarAsString("texturefile");
     }
 
     public void setTextureFile(String textureFile) {
-        this.textureFile = textureFile;
+        this.item.setVariable("texturefile", textureFile);
+    }
+
+    public Boolean getTransparenceCheck() {
+        return this.item.getVarAsBool("transparencecheck");
+    }
+
+    public void setTransparenceCheck(Boolean transparenceCheck) {
+        if (transparenceCheck == null) {
+            this.item.removeVariable("transparencecheck");
+        } else {
+            this.item.setVariable("transparencecheck", transparenceCheck);
+        }
     }
 
     public String getLoadType() {
-        return this.loadType;
+        return this.item.getVarAsString("loadType");
     }
 
     public void setLoadType(String loadType) {
-        this.loadType = loadType;
+        if (StringUtils.isBlank(loadType)) {
+            this.item.removeVariable("loadType");
+        } else {
+            this.item.setVariable("loadType", loadType);
+        }
     }
 
     @Override

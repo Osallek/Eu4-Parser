@@ -104,7 +104,7 @@ public class Investment {
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override
@@ -118,11 +118,11 @@ public class Investment {
         }
 
         Investment that = (Investment) o;
-        return Objects.equals(name, that.name);
+        return Objects.equals(getName(), that.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 }

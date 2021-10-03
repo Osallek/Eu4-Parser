@@ -8,8 +8,6 @@ public class ReligiousReform {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
     private final ReligiousReforms nativeAdvancements;
 
     private final int index;
@@ -26,14 +24,6 @@ public class ReligiousReform {
 
     public void setName(String name) {
         this.item.setName(name);
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public ReligiousReforms getNativeAdvancements() {
@@ -58,8 +48,9 @@ public class ReligiousReform {
             return false;
         }
 
-        ReligiousReform that = (ReligiousReform) o;
-        return Objects.equals(getName(), that.getName());
+        ReligiousReform religiousReform = (ReligiousReform) o;
+
+        return Objects.equals(getName(), religiousReform.getName());
     }
 
     @Override

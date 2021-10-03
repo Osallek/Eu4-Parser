@@ -9,50 +9,32 @@ import java.util.stream.Collectors;
 
 public class AgeAbility {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
-
-    private final List<String> rules;
+    private final ClausewitzItem item;
 
     public AgeAbility(ClausewitzItem item) {
-        this.name = item.getName();
-
-        ClausewitzItem child = item.getChild("allow");
-        this.allow = child == null ? null : new Condition(child);
-
-        this.modifiers = new Modifiers(item.getChild("modifier"));
-
-        child = item.getChild("rule");
-        this.rules = child == null ? null : child.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = item.getChild("allow");
+        return child == null ? null : new Condition(child);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public List<String> getRules() {
-        return rules;
+        ClausewitzItem child = item.getChild("rule");
+        return child == null ? null : child.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
     }
 
     @Override
@@ -67,16 +49,16 @@ public class AgeAbility {
 
         AgeAbility ageAbility = (AgeAbility) o;
 
-        return Objects.equals(name, ageAbility.name);
+        return Objects.equals(getName(), ageAbility.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

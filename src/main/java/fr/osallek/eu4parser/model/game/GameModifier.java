@@ -1,52 +1,35 @@
 package fr.osallek.eu4parser.model.game;
 
-import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.Objects;
 
-public class GameModifier {
+public abstract class GameModifier {
 
-    protected final String name;
-
-    protected String localizedName;
-
-    protected final Modifiers modifiers;
+    protected final ClausewitzItem item;
 
     protected GameModifier(ClausewitzItem item) {
-        this.name = ClausewitzUtils.removeQuotes(item.getName()).toLowerCase();
-        this.modifiers = new Modifiers();
-    }
-
-    public GameModifier(ClausewitzItem item, Modifiers modifiers) {
-        this.name = item.getName();
-        this.modifiers = modifiers;
+        this.item = item;
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
-    }
-
-    public Modifiers getModifier() {
-        return modifiers;
-    }
+    public abstract Modifiers getModifier();
 
     public Double getModifier(SaveCountry country, Modifier modifierName) {
-        return modifiers.hasModifier(modifierName) ? modifiers.getModifier(modifierName) : null;
+        return getModifier().hasModifier(modifierName) ? getModifier().getModifier(modifierName) : null;
     }
 
     public Double getModifier(SaveProvince province, Modifier modifierName) {
-        return modifiers.hasModifier(modifierName) ? modifiers.getModifier(modifierName) : null;
+        return getModifier().hasModifier(modifierName) ? getModifier().getModifier(modifierName) : null;
     }
 
     @Override
@@ -59,17 +42,18 @@ public class GameModifier {
             return false;
         }
 
-        GameModifier that = (GameModifier) o;
-        return Objects.equals(name, that.name);
+        GameModifier gameModifier = (GameModifier) o;
+
+        return Objects.equals(getName(), gameModifier.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

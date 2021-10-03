@@ -7,21 +7,22 @@ import java.util.Comparator;
 
 public class GovernmentRank implements Comparable<GovernmentRank> {
 
-    private final int level;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public GovernmentRank(ClausewitzItem item) {
-        this.level = NumbersUtils.toInt(item.getName());
-        this.modifiers = new Modifiers(item);
+        this.item = item;
     }
 
     public int getLevel() {
-        return level;
+        return NumbersUtils.toInt(this.item.getName());
+    }
+
+    public void setLevel(int level) {
+        this.item.setName(String.valueOf(level));
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item);
     }
 
     @Override

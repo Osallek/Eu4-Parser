@@ -7,29 +7,31 @@ import java.util.Objects;
 
 public class ParliamentIssue extends GameModifier {
 
-    private final Power category;
-
-    private final Condition allow;
-
     public ParliamentIssue(ClausewitzItem item) {
-        super(item, new Modifiers(item.getChild("modifier")));
-        this.category = Power.byParliamentType(item.getVarAsInt("category"));
+        super(item);
+    }
 
-        ClausewitzItem child = item.getChild("allow");
-        this.allow = child == null ? null : new Condition(child);
+    @Override
+    public Modifiers getModifier() {
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public Power getCategory() {
-        return category;
+        return Power.byParliamentType(this.item.getVarAsInt("category"));
+    }
+
+    public void setCategory(Power category) {
+        this.item.setVariable("category", category.name());
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = this.item.getChild("allow");
+        return child == null ? null : new Condition(child);
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override
@@ -42,12 +44,13 @@ public class ParliamentIssue extends GameModifier {
             return false;
         }
 
-        ParliamentIssue that = (ParliamentIssue) o;
-        return Objects.equals(name, that.name);
+        ParliamentIssue parliamentIssue = (ParliamentIssue) o;
+
+        return Objects.equals(getName(), parliamentIssue.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 }

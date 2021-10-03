@@ -51,7 +51,7 @@ public class NavalDoctrine {
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override
@@ -65,11 +65,11 @@ public class NavalDoctrine {
         }
 
         NavalDoctrine that = (NavalDoctrine) o;
-        return Objects.equals(name, that.name);
+        return Objects.equals(getName(), that.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 }

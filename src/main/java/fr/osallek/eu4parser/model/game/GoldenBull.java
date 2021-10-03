@@ -2,76 +2,49 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class GoldenBull {
 
-    private final String name;
-
-    private String localizedName;
-
-    private List<String> mechanics;
-
-    private Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public GoldenBull(ClausewitzItem item) {
-        this.name = item.getName();
-        this.modifiers = new Modifiers(item.getChild("modifier"));
-
-        ClausewitzList list = item.getList("mechanics");
-        this.mechanics = list == null ? null : list.getValues();
-    }
-
-    public GoldenBull(GoldenBull other) {
-        this.name = other.name;
-        this.localizedName = other.localizedName;
-        this.mechanics = other.mechanics;
-        this.modifiers = other.modifiers;
-    }
-
-    public GoldenBull(String name) {
-        this.name = name;
+        this.item = item;
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public List<String> getMechanics() {
-        return this.mechanics == null ? new ArrayList<>() : this.mechanics;
+        ClausewitzList list = this.item.getList("mechanics");
+        return list == null ? null : list.getValues();
     }
 
     public void setMechanics(List<String> mechanics) {
-        this.mechanics = mechanics;
+        if (CollectionUtils.isEmpty(mechanics)) {
+            this.item.removeList("mechanics");
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("mechanics");
+
+        if (list != null) {
+            list.setAll(mechanics.stream().filter(Objects::nonNull).toArray(String[]::new));
+        } else {
+            this.item.addList("mechanics", mechanics.stream().filter(Objects::nonNull).toArray(String[]::new));
+        }
     }
 
     public Modifiers getModifiers() {
-        return this.modifiers;
-    }
-
-    public void addModifier(String modifier, String quantity) {
-        if (modifier == null) {
-            this.modifiers = new Modifiers();
-        }
-
-        this.modifiers.add(modifier, quantity);
-    }
-
-    public void removeModifier(String modifier) {
-        if (this.modifiers != null) {
-            this.modifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     @Override

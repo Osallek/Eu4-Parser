@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -37,13 +38,20 @@ public class Condition {
         this.scopes.add(condition);
     }
 
-    public Condition(ClausewitzItem item) {
+    public Condition(ClausewitzItem item, String... ignore) {
+        List<String> list = Arrays.asList(ignore);
+
         this.name = item.getName();
         this.conditions = item.getVariables()
                               .stream()
-                              .collect(Collectors.groupingBy(var -> var.getName().toLowerCase(),
+                              .filter(variable -> CollectionUtils.isEmpty(list) || !list.contains(variable.getName()))
+                              .collect(Collectors.groupingBy(variable -> variable.getName().toLowerCase(),
                                                              Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-        this.scopes = item.getChildren().stream().map(Condition::new).collect(Collectors.toList());
+        this.scopes = item.getChildren()
+                          .stream()
+                          .filter(child -> CollectionUtils.isEmpty(list) || !list.contains(child.getName()))
+                          .map(Condition::new)
+                          .collect(Collectors.toList());
     }
 
     public String getName() {
@@ -81,10 +89,11 @@ public class Condition {
 
     public boolean apply(SaveProvince province) {
         if (this.conditions != null && this.conditions.entrySet()
-                           .stream()
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
+                                                      .stream()
+                                                      .anyMatch(entry -> entry.getValue()
+                                                                              .stream()
+                                                                              .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(),
+                                                                                                                                       s)))) {
             return false;
         }
 
@@ -139,6 +148,6 @@ public class Condition {
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

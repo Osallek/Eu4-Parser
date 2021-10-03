@@ -6,46 +6,35 @@ import java.util.Objects;
 
 public class PersonalDeity {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final int sprite;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public PersonalDeity(ClausewitzItem item) {
-        this.name = item.getName();
-        this.sprite = item.getVarAsInt("sprite");
-        this.modifiers = new Modifiers(item.getVarsNot("sprite"));
-
-        this.allow = item.getChild("allow") == null ? null : new Condition(item.getChild("allow"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public int getSprite() {
-        return sprite;
+        return this.item.getVarAsInt("sprite");
+    }
+
+    public void setSprite(int sprite) {
+        this.item.setVariable("sprite", sprite);
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = this.item.getChild("allow");
+        return child == null ? null : new Condition(this.item.getChild("allow"));
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getVarsNot("sprite"));
     }
 
     @Override
@@ -58,18 +47,18 @@ public class PersonalDeity {
             return false;
         }
 
-        PersonalDeity area = (PersonalDeity) o;
+        PersonalDeity personalDeity = (PersonalDeity) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), personalDeity.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

@@ -33,36 +33,36 @@ public class Modifiers {
 
     public Modifiers(List<ClausewitzVariable> variables, String prefix) {
         this.enables = variables.stream()
-                                .filter(var -> "enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
-                                               || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                               || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
-                                .map(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()))
+                                .filter(variable -> "enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getName()))
+                                                    || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue()))
+                                                    || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue())))
+                                .map(variable -> ClausewitzUtils.removeQuotes(variable.getName().toLowerCase()))
                                 .collect(Collectors.toSet());
 
         this.modifiers = variables.stream()
-                                  .filter(var -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
-                                                 && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                                 && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                                 && NumbersUtils.toDouble(var.getValue()) != null)
-                                  .filter(var -> ModifiersUtils.getModifier(var) != null)
-                                  .collect(Collectors.toMap(var -> ModifiersUtils.getModifier(prefix + var.getName()), ClausewitzVariable::getAsDouble,
-                                                            (a, b) -> b));
+                                  .filter(variable -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getName()))
+                                                      && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue()))
+                                                      && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue()))
+                                                      && NumbersUtils.toDouble(variable.getValue()) != null)
+                                  .filter(variable -> ModifiersUtils.getModifier(variable) != null)
+                                  .collect(Collectors.toMap(variable -> ModifiersUtils.getModifier(prefix + variable.getName()),
+                                                            ClausewitzVariable::getAsDouble, (a, b) -> b));
     }
 
     public Modifiers(ClausewitzVariable... variables) {
         this.enables = Arrays.stream(variables)
-                             .filter(var -> "enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
-                                            || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                            || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue())))
-                             .map(var -> ClausewitzUtils.removeQuotes(var.getName().toLowerCase()))
+                             .filter(variable -> "enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getName()))
+                                                 || "yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue()))
+                                                 || "no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue())))
+                             .map(variable -> ClausewitzUtils.removeQuotes(variable.getName().toLowerCase()))
                              .collect(Collectors.toSet());
 
         this.modifiers = Arrays.stream(variables)
-                               .filter(var -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getName()))
-                                              && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                              && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(var.getValue()))
-                                              && NumbersUtils.toDouble(var.getValue()) != null)
-                               .filter(var -> ModifiersUtils.getModifier(var) != null)
+                               .filter(variable -> !"enable".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getName()))
+                                                   && !"yes".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue()))
+                                                   && !"no".equalsIgnoreCase(ClausewitzUtils.removeQuotes(variable.getValue()))
+                                                   && NumbersUtils.toDouble(variable.getValue()) != null)
+                               .filter(variable -> ModifiersUtils.getModifier(variable) != null)
                                .collect(Collectors.toMap(ModifiersUtils::getModifier, ClausewitzVariable::getAsDouble, (a, b) -> b));
     }
 

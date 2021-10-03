@@ -6,22 +6,23 @@ import java.util.Objects;
 
 public class TriggeredModifier extends GameModifier {
 
-    private final Condition potential;
-
-    private final Condition trigger;
-
     public TriggeredModifier(ClausewitzItem item) {
-        super(item, new Modifiers(item.getVariables()));
-        this.potential = item.getChild("potential") == null ? null : new Condition(item.getChild("potential"));
-        this.trigger = item.getChild("trigger") == null ? null : new Condition(item.getChild("trigger"));
+        super(item);
+    }
+
+    @Override
+    public Modifiers getModifier() {
+        return new Modifiers(this.item.getVariables());
     }
 
     public Condition getPotential() {
-        return potential;
+        ClausewitzItem child = this.item.getChild("potential");
+        return child == null ? null : new Condition(child);
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     @Override
@@ -34,17 +35,18 @@ public class TriggeredModifier extends GameModifier {
             return false;
         }
 
-        TriggeredModifier that = (TriggeredModifier) o;
-        return Objects.equals(name, that.name);
+        TriggeredModifier triggeredModifier = (TriggeredModifier) o;
+
+        return Objects.equals(getName(), triggeredModifier.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

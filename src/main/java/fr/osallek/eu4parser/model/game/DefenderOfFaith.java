@@ -7,47 +7,58 @@ import java.util.Objects;
 
 public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
 
-    private final String name;
-
-    private final int level;
-
-    private final Integer rangeFrom;
-
-    private final Integer rangeTo;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public DefenderOfFaith(ClausewitzItem item) {
-        this.name = item.getName();
-        this.level = item.getVarAsInt("level");
-        this.rangeFrom = item.getVarAsInt("range_from");
-        this.rangeTo = item.getVarAsInt("range_to");
-
-        this.modifiers = new Modifiers(item.getChild("modifier"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
+    }
+
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public int getLevel() {
-        return level;
+        return this.item.getVarAsInt("level");
     }
 
+    public void setLevel(int level) {
+        this.item.setVariable("level", level);
+    }
+    
     public Integer getRangeFrom() {
-        return rangeFrom;
+        return this.item.getVarAsInt("range_from");
+    }
+
+    public void setRangeFrom(Integer rangeFrom) {
+        if (rangeFrom == null) {
+            this.item.removeVariable("range_from");
+        } else {
+            this.item.setVariable("range_from", rangeFrom);
+        }
     }
 
     public Integer getRangeTo() {
-        return rangeTo;
+        return this.item.getVarAsInt("range_to");
+    }
+
+    public void setRangeTo(Integer rangeTo) {
+        if (rangeTo == null) {
+            this.item.removeVariable("range_to");
+        } else {
+            this.item.setVariable("range_to", rangeTo);
+        }
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public boolean isInRange(int range) {
-        return (this.rangeFrom == null || this.rangeFrom <= range) && (this.rangeTo == null || this.rangeTo > range);
+        return (getRangeFrom() == null || getRangeFrom() <= range) && (getRangeTo() == null || getRangeTo() > range);
     }
 
     @Override
@@ -62,17 +73,17 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
 
         DefenderOfFaith area = (DefenderOfFaith) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), area.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override

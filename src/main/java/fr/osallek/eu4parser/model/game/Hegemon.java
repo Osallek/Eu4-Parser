@@ -6,62 +6,40 @@ import java.util.Objects;
 
 public class Hegemon {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Condition allow;
-
-    private final Modifiers base;
-
-    private final Modifiers scale;
-
-    private final Modifiers max;
+    private final ClausewitzItem item;
 
     public Hegemon(ClausewitzItem item) {
-        this.name = item.getName();
-
-        this.base = new Modifiers(item.getChild("base"));
-
-        this.scale = new Modifiers(item.getChild("scale"));
-
-        this.max = new Modifiers(item.getChild("max"));
-
-        ClausewitzItem child = item.getChild("allow");
-        this.allow = child == null ? null : new Condition(child);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = item.getChild("allow");
+        return child == null ? null : new Condition(child);
     }
 
     public Modifiers getBase() {
-        return base;
+        return new Modifiers(item.getChild("base"));
     }
 
     public Modifiers getScale() {
-        return scale;
+        return new Modifiers(item.getChild("scale"));
     }
 
     public Modifiers getMax() {
-        return max;
+        return new Modifiers(item.getChild("max"));
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override
@@ -75,11 +53,11 @@ public class Hegemon {
         }
 
         Hegemon that = (Hegemon) o;
-        return Objects.equals(name, that.name);
+        return Objects.equals(getName(), that.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 }

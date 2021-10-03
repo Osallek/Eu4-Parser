@@ -6,49 +6,43 @@ import java.util.Objects;
 
 public class FetishistCult {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Modifiers modifiers;
-
-    private final Condition allow;
-
-    private final int sprite;
+    private final ClausewitzItem item;
 
     public FetishistCult(ClausewitzItem item) {
-        this.name = item.getName();
-        this.allow = item.getChild("allow") == null ? null : new Condition(item.getChild("allow"));
-        this.sprite = item.getVarAsInt("sprite");
-        this.modifiers = new Modifiers(item.getVarsNot("sprite"));
-
-        if (this.allow != null) {
-            this.allow.removeCondition("has_unlocked_cult", this.name); //Prevent endless recursive
-        }
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(item.getVarsNot("sprite"));
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = this.item.getChild("allow");
+
+        if (child == null) {
+            return null;
+        } else {
+            Condition allow = new Condition(child);
+            allow.removeCondition("has_unlocked_cult", this.getName()); //Prevent endless recursive
+
+            return allow;
+        }
     }
 
     public int getSprite() {
-        return sprite;
+        return this.item.getVarAsInt("sprite");
+    }
+
+    public void setSprite(int sprite) {
+        this.item.setVariable("sprite", sprite);
     }
 
     @Override
@@ -61,17 +55,18 @@ public class FetishistCult {
             return false;
         }
 
-        FetishistCult that = (FetishistCult) o;
-        return Objects.equals(name, that.name);
+        FetishistCult fetishistCult = (FetishistCult) o;
+
+        return Objects.equals(getName(), fetishistCult.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

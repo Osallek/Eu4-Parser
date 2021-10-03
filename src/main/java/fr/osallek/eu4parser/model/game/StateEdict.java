@@ -10,8 +10,6 @@ public class StateEdict {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
     public StateEdict(ClausewitzItem item) {
         this.item = item;
     }
@@ -22,14 +20,6 @@ public class StateEdict {
 
     public void setName(String name) {
         this.item.setName(name);
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public Condition getPotential() {
@@ -67,7 +57,7 @@ public class StateEdict {
     }
 
     public Color getColor() {
-        ClausewitzList list = item.getList("color");
+        ClausewitzList list = this.item.getList("color");
         return list == null ? null : new Color(list);
     }
 

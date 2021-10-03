@@ -115,7 +115,7 @@ public class TradeGood {
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     @Override
@@ -134,6 +134,6 @@ public class TradeGood {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 }

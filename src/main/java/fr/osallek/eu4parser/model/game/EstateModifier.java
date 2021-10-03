@@ -1,36 +1,44 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
 public class EstateModifier {
 
-    private final String desc;
+    private final ClausewitzItem item;
 
-    private final Condition trigger;
-
-    private final double amount;
+    private final String modifierName;
 
     public EstateModifier(ClausewitzItem item, String modifierName) {
-        this.desc = item.getVarAsString("desc");
-
-        ClausewitzItem child = item.getChild("trigger");
-        this.trigger = child == null ? null : new Condition(child);
-
-        this.amount = item.getVarAsDouble(modifierName);
+        this.item = item;
+        this.modifierName = modifierName;
     }
 
     public String getDesc() {
-        return desc;
+        return this.item.getVarAsString("desc");
+    }
+
+    public void setDesc(String desc) {
+        if (StringUtils.isBlank(desc)) {
+            this.item.removeVariable("desc");
+        } else {
+            this.item.setVariable("desc", desc);
+        }
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     public double getAmount() {
-        return amount;
+        return this.item.getVarAsDouble(this.modifierName);
+    }
+
+    public void setAmount(double amount) {
+        this.item.setVariable(this.modifierName, amount);
     }
 
     @Override
@@ -45,16 +53,16 @@ public class EstateModifier {
 
         EstateModifier names = (EstateModifier) o;
 
-        return Objects.equals(desc, names.desc);
+        return Objects.equals(getDesc(), names.getDesc());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(desc);
+        return Objects.hash(getDesc());
     }
 
     @Override
     public String toString() {
-        return desc;
+        return getDesc();
     }
 }

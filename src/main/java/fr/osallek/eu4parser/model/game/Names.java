@@ -6,23 +6,23 @@ import java.util.Objects;
 
 public class Names {
 
-    private final String name;
-
-    private final Condition trigger;
+    private final ClausewitzItem item;
 
     public Names(ClausewitzItem item) {
-        this.name = item.getVarAsString("name");
-
-        ClausewitzItem child = item.getChild("trigger");
-        this.trigger = child == null ? null : new Condition(child);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getVarAsString("name");
+    }
+
+    public void setName(String name) {
+        this.item.setVariable("name", name);
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     @Override
@@ -37,16 +37,16 @@ public class Names {
 
         Names names = (Names) o;
 
-        return Objects.equals(name, names.name);
+        return Objects.equals(getName(), names.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

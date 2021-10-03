@@ -75,16 +75,16 @@ public class Advisor {
 
         Advisor area = (Advisor) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), area.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

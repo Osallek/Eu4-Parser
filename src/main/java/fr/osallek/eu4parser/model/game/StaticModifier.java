@@ -8,23 +8,27 @@ import java.util.Objects;
 
 public class StaticModifier extends GameModifier {
 
-    private final StaticModifiers staticModifiers;
-
     public StaticModifier(ClausewitzItem item) {
         super(item);
-        this.staticModifiers = StaticModifiers.value(getName());
+    }
+
+    @Override
+    public Modifiers getModifier() {
+        return null;
     }
 
     @Override
     public Double getModifier(SaveCountry country, Modifier modifierName) {
-        return this.staticModifiers.modifiers.hasModifier(modifierName) ? this.staticModifiers.applyToCountry.apply(country, this.staticModifiers)
-                                                                                                             .getModifier(modifierName) : null;
+        StaticModifiers staticModifiers = StaticModifiers.value(getName());
+        return staticModifiers.modifiers.hasModifier(modifierName) ? staticModifiers.applyToCountry.apply(country, staticModifiers).getModifier(modifierName)
+                                                                   : null;
     }
 
     @Override
     public Double getModifier(SaveProvince province, Modifier modifierName) {
-        return this.staticModifiers.modifiers.hasModifier(modifierName) ? this.staticModifiers.applyToProvince.apply(province, this.staticModifiers)
-                                                                                                              .getModifier(modifierName) : null;
+        StaticModifiers staticModifiers = StaticModifiers.value(getName());
+        return staticModifiers.modifiers.hasModifier(modifierName) ? staticModifiers.applyToProvince.apply(province, staticModifiers).getModifier(modifierName)
+                                                                   : null;
     }
 
     @Override
@@ -37,17 +41,18 @@ public class StaticModifier extends GameModifier {
             return false;
         }
 
-        StaticModifier that = (StaticModifier) o;
-        return Objects.equals(name, that.name);
+        StaticModifier staticModifier = (StaticModifier) o;
+
+        return Objects.equals(getName(), staticModifier.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }

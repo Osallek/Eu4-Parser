@@ -6,38 +6,30 @@ import java.util.Objects;
 
 public class Fervor {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final int cost;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public Fervor(ClausewitzItem item) {
-        this.name = item.getName();
-        this.cost = item.getVarAsInt("cost");
-        this.modifiers = new Modifiers(item.getChild("effect"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public int getCost() {
-        return cost;
+        return this.item.getVarAsInt("cost");
+    }
+
+    public void setCost(int cost) {
+        this.item.setVariable("cost", cost);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("effect"));
     }
 
     @Override
@@ -52,16 +44,16 @@ public class Fervor {
 
         Fervor area = (Fervor) o;
 
-        return Objects.equals(name, area.name);
+        return Objects.equals(getName(), area.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(getName());
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 }
