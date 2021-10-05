@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Map;
 import java.util.Objects;
@@ -10,81 +9,86 @@ import java.util.stream.Collectors;
 
 public class MissionTree {
 
-    private final String name;
+    private final ClausewitzItem item;
 
-    private String localizedName;
-
-    private final Integer slot;
-
-    private final boolean generic;
-
-    private final boolean ai;
-
-    private final boolean hasCountryShield;
-
-    private final Condition potentialOnLoad;
-
-    private final Condition potential;
-
-    private final Map<String, Mission> missions;
+    private final Game game;
 
     public MissionTree(ClausewitzItem item, Game game) {
-        this.name = item.getName();
-        this.slot = item.getVarAsInt("slot");
-        this.generic = BooleanUtils.toBoolean(item.getVarAsBool("generic"));
-        this.ai = BooleanUtils.toBoolean(item.getVarAsBool("ai"));
-        this.hasCountryShield = BooleanUtils.toBoolean(item.getVarAsBool("has_country_shield"));
-
-        ClausewitzItem child = item.getChild("potential_on_load");
-        this.potentialOnLoad = child == null ? null : new Condition(child);
-
-        child = item.getChild("potential");
-        this.potential = child == null ? null : new Condition(child);
-
-        this.missions = item.getChildrenNot("potential_on_load", "potential")
-                            .stream()
-                            .map(Mission::new)
-                            .collect(Collectors.toMap(Mission::getName, Function.identity()));
+        this.item = item;
+        this.game = game;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Integer getSlot() {
-        return slot;
+        return this.item.getVarAsInt("slot");
     }
 
-    public boolean isGeneric() {
-        return generic;
+    public void setSlot(Integer slot) {
+        if (slot == null) {
+            this.item.removeVariable("slot");
+        } else {
+            this.item.setVariable("slot", slot);
+        }
     }
 
-    public boolean isAi() {
-        return ai;
+    public Boolean isGeneric() {
+        return this.item.getVarAsBool("generic");
     }
 
-    public boolean isHasCountryShield() {
-        return hasCountryShield;
+    public void setGeneric(Boolean generic) {
+        if (generic == null) {
+            this.item.removeVariable("generic");
+        } else {
+            this.item.setVariable("generic", generic);
+        }
+    }
+
+    public Boolean isAi() {
+        return this.item.getVarAsBool("ai");
+    }
+
+    public void setAi(Boolean ai) {
+        if (ai == null) {
+            this.item.removeVariable("ai");
+        } else {
+            this.item.setVariable("ai", ai);
+        }
+    }
+
+    public Boolean hasCountryShield() {
+        return this.item.getVarAsBool("has_country_shield");
+    }
+
+    public void setHasCountryShield(Boolean hasCountryShield) {
+        if (hasCountryShield == null) {
+            this.item.removeVariable("has_country_shield");
+        } else {
+            this.item.setVariable("has_country_shield", hasCountryShield);
+        }
     }
 
     public Condition getPotentialOnLoad() {
-        return potentialOnLoad;
+        ClausewitzItem child = this.item.getChild("potential_on_load");
+        return child == null ? null : new Condition(child);
     }
 
     public Condition getPotential() {
-        return potential;
+        ClausewitzItem child = this.item.getChild("potential");
+        return child == null ? null : new Condition(child);
     }
 
     public Map<String, Mission> getMissions() {
-        return missions;
+        return this.item.getChildrenNot("potential_on_load", "potential")
+                        .stream()
+                        .map(item1 -> new Mission(item1, game))
+                        .collect(Collectors.toMap(Mission::getName, Function.identity()));
     }
 
     @Override
@@ -97,9 +101,9 @@ public class MissionTree {
             return false;
         }
 
-        MissionTree area = (MissionTree) o;
+        MissionTree missionTree = (MissionTree) o;
 
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), missionTree.getName());
     }
 
     @Override

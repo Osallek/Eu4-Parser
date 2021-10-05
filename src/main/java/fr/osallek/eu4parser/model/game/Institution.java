@@ -8,41 +8,21 @@ import java.util.Objects;
 
 public class Institution implements Comparable<Institution> {
 
-    private final String name;
-
-    private String localizedName;
+    private final ClausewitzItem item;
 
     private int index;
 
-    private final Double penalty;
-
-    private final Modifiers bonus;
-
-    private final Double tradeCompanyEfficiency;
-
-    private final LocalDate historicalStartDate;
-
-    private final Integer historicalStartProvince;
-
-    public Institution(ClausewitzItem item) {
-        this.name = item.getName();
-        this.penalty = item.getVarAsDouble("penalty");
-        this.tradeCompanyEfficiency = item.getVarAsDouble("trade_company_efficiency");
-        this.bonus = new Modifiers(item.getChild("bonus"));
-        this.historicalStartDate = item.getVarAsDate("historical_start_date");
-        this.historicalStartProvince = item.getVarAsInt("historical_start_province");
+    public Institution(ClausewitzItem item, int index) {
+        this.item = item;
+        this.index = index;
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     void setIndex(int index) {
@@ -54,23 +34,55 @@ public class Institution implements Comparable<Institution> {
     }
 
     public Double getPenalty() {
-        return this.penalty;
+        return this.item.getVarAsDouble("penalty");
+    }
+
+    public void setPenalty(Double penalty) {
+        if (penalty == null) {
+            this.item.removeVariable("penalty");
+        } else {
+            this.item.setVariable("penalty", penalty);
+        }
     }
 
     public Modifiers getBonuses() {
-        return this.bonus;
+        return new Modifiers(this.item.getChild("bonus"));
     }
 
     public Double getTradeCompanyEfficiency() {
-        return this.tradeCompanyEfficiency;
+        return this.item.getVarAsDouble("trade_company_efficiency");
     }
 
-    public LocalDate getHistoricalStartDate() {
-        return this.historicalStartDate;
+    public void setTradeCompanyEfficiency(Double tradeCompanyEfficiency) {
+        if (tradeCompanyEfficiency == null) {
+            this.item.removeVariable("trade_company_efficiency");
+        } else {
+            this.item.setVariable("trade_company_efficiency", tradeCompanyEfficiency);
+        }
     }
 
     public Integer getHistoricalStartProvince() {
-        return this.historicalStartProvince;
+        return this.item.getVarAsInt("historical_start_province");
+    }
+
+    public void setHistoricalStartProvince(Integer historicalStartProvince) {
+        if (historicalStartProvince == null) {
+            this.item.removeVariable("historical_start_province");
+        } else {
+            this.item.setVariable("historical_start_province", historicalStartProvince);
+        }
+    }
+
+    public LocalDate getHistoricalStartDate() {
+        return this.item.getVarAsDate("historical_start_date");
+    }
+
+    public void setHistoricalStartDate(LocalDate historicalStartDate) {
+        if (historicalStartDate == null) {
+            this.item.removeVariable("historical_start_date");
+        } else {
+            this.item.setVariable("historical_start_date", historicalStartDate);
+        }
     }
 
     @Override

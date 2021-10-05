@@ -1,69 +1,72 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
 public class Event {
 
-    private final String id;
-
-    private String localizedName;
-
-    private final String title;
-
-    private final String desc;
-
-    private final String picture;
-
-    private final EventType type;
-
-    private final boolean fireOnlyOnce;
+    private final ClausewitzItem item;
 
     public Event(ClausewitzItem item) {
-        this.id = item.getVarAsString("id");
-        this.localizedName = this.id;
-        this.title = item.getVarAsString("title");
-        this.desc = item.getVarAsString("desc");
-        this.picture = item.getVarAsString("picture");
-        this.type = EventType.getByType(item.getName());
-        this.fireOnlyOnce = BooleanUtils.toBoolean(item.getVarAsBool("fire_only_once"));
+        this.item = item;
     }
 
     public String getId() {
-        return this.id;
+        return this.item.getVarAsString("id");
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        if (StringUtils.isNotBlank(localizedName)) {
-            this.localizedName = localizedName;
-        }
+    public void setId(String id) {
+        this.item.setVariable("id", id);
     }
 
     public String getTitle() {
-        return this.title;
+        return this.item.getVarAsString("title");
+    }
+
+    public void setTitle(String title) {
+        this.item.setVariable("id", title);
     }
 
     public String getDesc() {
-        return this.desc;
+        return this.item.getVarAsString("desc");
+    }
+
+    public void setDesc(String desc) {
+        this.item.setVariable("desc", desc);
     }
 
     public String getPicture() {
-        return this.picture;
+        return this.item.getVarAsString("picture");
+    }
+
+    public void setPicture(String picture) {
+        if (StringUtils.isBlank(picture)) {
+            this.item.removeVariable("picture");
+        } else {
+            this.item.setVariable("picture", picture);
+        }
     }
 
     public EventType getType() {
-        return this.type;
+        return EventType.getByType(this.item.getName());
     }
 
-    public boolean fireOnlyOnce() {
-        return this.fireOnlyOnce;
+    public void setType(EventType type) {
+        this.item.setName(type.type);
+    }
+
+    public Boolean fireOnlyOnce() {
+        return this.item.getVarAsBool("fire_only_once");
+    }
+
+    public void setFireOnlyOnce(Boolean fireOnlyOnce) {
+        if (fireOnlyOnce == null) {
+            this.item.removeVariable("fire_only_once");
+        } else {
+            this.item.setVariable("fire_only_once", fireOnlyOnce);
+        }
     }
 
     @Override
@@ -76,8 +79,9 @@ public class Event {
             return false;
         }
 
-        Event tradeGood = (Event) o;
-        return Objects.equals(getId(), tradeGood.getId());
+        Event event = (Event) o;
+
+        return Objects.equals(getId(), event.getId());
     }
 
     @Override
@@ -87,6 +91,6 @@ public class Event {
 
     @Override
     public String toString() {
-        return this.localizedName;
+        return getId();
     }
 }

@@ -1,6 +1,8 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.todo;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.Modifiers;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
@@ -12,27 +14,13 @@ public class ImperialReform implements Comparable<ImperialReform> {
 
     private final Game game;
 
-    private String name;
-
-    private String localizedName;
+    private final ClausewitzItem item;
 
     private final List<String> dlcRequired;
 
     private final List<String> dlcRequiredNot;
 
     private String empire;
-
-    private Modifiers provinceModifiers;
-
-    private Modifiers emperorModifiers;
-
-    private Modifiers allModifiers;
-
-    private Modifiers memberModifiers;
-
-    private Modifiers emperorPerPrinceModifiers;
-
-    private Modifiers electorPerPrinceModifiers;
 
     private String disabledBy;
 
@@ -58,7 +46,7 @@ public class ImperialReform implements Comparable<ImperialReform> {
 
     public ImperialReform(ClausewitzItem item, Game game) {
         this.game = game;
-        this.name = item.getName();
+        this.item = item;
         ClausewitzItem child = item.getChild("potential");
         this.dlcRequired = child == null ? null : child.getVarsAsStrings("has_dlc");
 
@@ -71,13 +59,8 @@ public class ImperialReform implements Comparable<ImperialReform> {
         } else {
             this.dlcRequiredNot = new ArrayList<>();
         }
+
         this.empire = item.getVarAsString("empire");
-        this.provinceModifiers = new Modifiers(item.getChild("province"));
-        this.emperorModifiers = new Modifiers(item.getChild("emperor"));
-        this.allModifiers = new Modifiers(item.getChild("all"));
-        this.memberModifiers = new Modifiers(item.getChild("member"));
-        this.emperorPerPrinceModifiers = new Modifiers(item.getChild("emperor_per_prince"));
-        this.electorPerPrinceModifiers = new Modifiers(item.getChild("elector_per_prince"));
         this.disabledBy = item.getVarAsString("disabled_by");
         this.requiredReform = item.getVarAsString("required_reform");
         this.guiContainer = item.getVarAsString("gui_container");
@@ -97,19 +80,11 @@ public class ImperialReform implements Comparable<ImperialReform> {
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
     public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+        this.item.setName(name);
     }
 
     public List<String> dlcRequired() {
@@ -129,111 +104,27 @@ public class ImperialReform implements Comparable<ImperialReform> {
     }
 
     public Modifiers getProvinceModifiers() {
-        return this.provinceModifiers;
-    }
-
-    public void addProvinceModifier(String modifier, String quantity) {
-        if (this.provinceModifiers == null) {
-            this.provinceModifiers = new Modifiers();
-        }
-
-        this.provinceModifiers.add(modifier, quantity);
-    }
-
-    public void removeProvinceModifier(String modifier) {
-        if (this.provinceModifiers != null) {
-            this.provinceModifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("province"));
     }
 
     public Modifiers getEmperorModifiers() {
-        return this.emperorModifiers;
-    }
-
-    public void addEmperorModifier(String modifier, String quantity) {
-        if (this.emperorModifiers == null) {
-            this.emperorModifiers = new Modifiers();
-        }
-
-        this.emperorModifiers.add(modifier, quantity);
-    }
-
-    public void removeEmperorModifier(String modifier) {
-        if (this.emperorModifiers != null) {
-            this.emperorModifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("emperor"));
     }
 
     public Modifiers getAllModifiers() {
-        return this.allModifiers;
-    }
-
-    public void addAllModifier(String modifier, String quantity) {
-        if (this.allModifiers == null) {
-            this.allModifiers = new Modifiers();
-        }
-
-        this.allModifiers.add(modifier, quantity);
-    }
-
-    public void removeAllModifier(String modifier) {
-        if (this.allModifiers != null) {
-            this.allModifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("all"));
     }
 
     public Modifiers getMemberModifiers() {
-        return this.memberModifiers;
-    }
-
-    public void addMemberModifier(String modifier, String quantity) {
-        if (this.memberModifiers == null) {
-            this.memberModifiers = new Modifiers();
-        }
-
-        this.memberModifiers.add(modifier, quantity);
-    }
-
-    public void removeMemberModifier(String modifier) {
-        if (this.memberModifiers != null) {
-            this.memberModifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("member"));
     }
 
     public Modifiers getEmperorPerPrinceModifiers() {
-        return this.emperorPerPrinceModifiers;
-    }
-
-    public void addEmperorPerPrinceModifier(String modifier, String quantity) {
-        if (this.emperorPerPrinceModifiers == null) {
-            this.emperorPerPrinceModifiers = new Modifiers();
-        }
-
-        this.emperorPerPrinceModifiers.add(modifier, quantity);
-    }
-
-    public void removeEmperorPerPrinceModifier(String modifier) {
-        if (this.emperorPerPrinceModifiers != null) {
-            this.emperorPerPrinceModifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("emperor_per_prince"));
     }
 
     public Modifiers getElectorPerPrinceModifiers() {
-        return this.electorPerPrinceModifiers;
-    }
-
-    public void addElectorPerPrinceModifier(String modifier, String quantity) {
-        if (this.electorPerPrinceModifiers == null) {
-            this.electorPerPrinceModifiers = new Modifiers();
-        }
-
-        this.electorPerPrinceModifiers.add(modifier, quantity);
-    }
-
-    public void removeElectorPerPrinceModifier(String modifier) {
-        if (this.electorPerPrinceModifiers != null) {
-            this.electorPerPrinceModifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("elector_per_prince"));
     }
 
     public ImperialReform getDisabledBy() {

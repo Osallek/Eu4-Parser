@@ -5,42 +5,46 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TradeNodeOutgoing {
 
-    private final String name;
-
-    private final List<Integer> path;
-
-    private final List<Pair<Double, Double>> control = new ArrayList<>();
+    private final ClausewitzItem item;
 
     public TradeNodeOutgoing(ClausewitzItem item) {
-        this.name = ClausewitzUtils.removeQuotes(item.getVarAsString("name"));
-
-        ClausewitzList list = item.getList("path");
-        this.path = list == null ? null : list.getValuesAsInt();
-        list = item.getList("control");
-
-        if (list != null) {
-            for (int i = 0; i < list.size(); i += 2) {
-                this.control.add(Pair.of(list.getAsDouble(i), list.getAsDouble(i + 1)));
-            }
-        }
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+    }
+
+    public void setName(String name) {
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public List<Integer> getPath() {
-        return path;
+        ClausewitzList list = this.item.getList("path");
+        return list == null ? null : list.getValuesAsInt();
+    }
+
+    public void setPath(List<Integer> path) {
+        this.item.getList("path").setAll(path.stream().filter(Objects::nonNull).map(String::valueOf).collect(Collectors.toList()));
     }
 
     public List<Pair<Double, Double>> getControl() {
-        return control;
+        ClausewitzList list = this.item.getList("control");
+
+        if (list != null) {
+            return IntStream.iterate(0, i -> i < list.size(), i -> i + 2)
+                            .mapToObj(i -> Pair.of(list.getAsDouble(i), list.getAsDouble(i + 1)))
+                            .collect(Collectors.toList());
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -53,9 +57,9 @@ public class TradeNodeOutgoing {
             return false;
         }
 
-        TradeNodeOutgoing area = (TradeNodeOutgoing) o;
+        TradeNodeOutgoing tradeNodeOutgoing = (TradeNodeOutgoing) o;
 
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), tradeNodeOutgoing.getName());
     }
 
     @Override

@@ -9,8 +9,6 @@ public class Policy {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
     public Policy(ClausewitzItem item) {
         this.item = item;
     }
@@ -21,14 +19,6 @@ public class Policy {
 
     public void setName(String name) {
         this.item.setName(name);
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public Power getCategory() {

@@ -17,8 +17,6 @@ public class TradeNode extends Noded {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
     public TradeNode(ClausewitzItem item, FileNode fileNode) {
         super(fileNode);
         this.item = item;
@@ -31,14 +29,6 @@ public class TradeNode extends Noded {
 
     public void setName(String name) {
         this.item.setName(name);
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public Integer getLocation() {

@@ -7,38 +7,30 @@ import java.util.Objects;
 
 public class Isolationism implements Comparable<Isolationism> {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final int isolationValue;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public Isolationism(ClausewitzItem item) {
-        this.name = item.getName();
-        this.isolationValue = item.getVarAsInt("isolation_value");
-        this.modifiers = new Modifiers(item.getChild("modifier"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public int getIsolationValue() {
-        return isolationValue;
+        return this.item.getVarAsInt("isolation_value");
+    }
+
+    public void setIsolationValue(int isolationValue) {
+        this.item.setVariable("isolation_value", isolationValue);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     @Override

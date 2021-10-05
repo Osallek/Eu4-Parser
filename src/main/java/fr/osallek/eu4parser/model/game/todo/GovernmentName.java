@@ -1,8 +1,9 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.todo;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
-import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.game.Condition;
+import fr.osallek.eu4parser.model.game.Game;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -12,7 +13,7 @@ import java.util.TreeMap;
 
 public class GovernmentName {
 
-    private final String name;
+    private final ClausewitzItem item;
 
     private Map<Integer, Pair<String, String>> ranks;
 
@@ -31,7 +32,7 @@ public class GovernmentName {
     private Condition trigger;
 
     public GovernmentName(ClausewitzItem item, Game game) {
-        this.name = item.getName();
+        this.item = item;
 
         ClausewitzItem child;
         ClausewitzVariable variable;
@@ -111,18 +112,12 @@ public class GovernmentName {
         }
     }
 
-    public void merge(GovernmentName governmentName) {
-        this.ranks = Eu4Utils.mergeMaps(this.ranks, governmentName.ranks);
-        this.rulersMale = Eu4Utils.mergeMaps(this.rulersMale, governmentName.rulersMale);
-        this.rulersFemale = Eu4Utils.mergeMaps(this.rulersFemale, governmentName.rulersFemale);
-        this.consortsMale = Eu4Utils.mergeMaps(this.consortsMale, governmentName.consortsMale);
-        this.consortsFemale = Eu4Utils.mergeMaps(this.consortsFemale, governmentName.consortsFemale);
-        this.heirsMale = Eu4Utils.mergeMaps(this.heirsMale, governmentName.heirsMale);
-        this.heirsFemale = Eu4Utils.mergeMaps(this.heirsFemale, governmentName.heirsFemale);
+    public String getName() {
+        return this.item.getName();
     }
 
-    public String getName() {
-        return name;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Map<Integer, Pair<String, String>> getRanks() {
@@ -195,8 +190,9 @@ public class GovernmentName {
             return false;
         }
 
-        GovernmentName that = (GovernmentName) o;
-        return Objects.equals(getName(), that.getName());
+        GovernmentName governmentName = (GovernmentName) o;
+
+        return Objects.equals(getName(), governmentName.getName());
     }
 
     @Override

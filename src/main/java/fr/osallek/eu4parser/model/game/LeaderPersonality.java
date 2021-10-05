@@ -7,46 +7,27 @@ import java.util.Objects;
 
 public class LeaderPersonality {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public LeaderPersonality(ClausewitzItem item) {
-        this.name = item.getName();
-
-        this.allow = item.getChild("allow") == null ? null : new Condition(item.getChild("allow"));
-        this.modifiers = new Modifiers(item);
-    }
-
-    public LeaderPersonality(LeaderPersonality other) {
-        this.name = other.name;
-        this.localizedName = other.localizedName;
-        this.allow = other.allow;
-        this.modifiers = other.modifiers;
-    }
-
-    public Condition getAllow() {
-        return allow;
-    }
-
-    public Modifiers getModifiers() {
-        return modifiers;
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public Condition getAllow() {
+        ClausewitzItem child = this.item.getChild("allow");
+        return child == null ? null : new Condition(child);
+    }
+
+    public Modifiers getModifiers() {
+        return new Modifiers(this.item);
     }
 
     public boolean isLeaderValid(Leader leader) {
@@ -65,7 +46,7 @@ public class LeaderPersonality {
 
         LeaderPersonality personality = (LeaderPersonality) o;
 
-        return Objects.equals(name, personality.name);
+        return Objects.equals(getName(), personality.getName());
     }
 
     @Override

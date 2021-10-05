@@ -13,8 +13,6 @@ public class TechGroup extends Noded {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
     public TechGroup(ClausewitzItem item, FileNode fileNode) {
         super(fileNode);
         this.item = item;
@@ -27,14 +25,6 @@ public class TechGroup extends Noded {
 
     public void setName(String name) {
         this.item.setName(name);
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public int getStartLevel() {

@@ -1,7 +1,11 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.todo;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.model.game.Condition;
+import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.Modifiers;
+import fr.osallek.eu4parser.model.game.TradeGood;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.File;

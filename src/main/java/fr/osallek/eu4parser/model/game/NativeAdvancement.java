@@ -6,33 +6,24 @@ import java.util.Objects;
 
 public class NativeAdvancement {
 
-    private final String name;
-
-    private String localizedName;
+    private final ClausewitzItem item;
 
     private final NativeAdvancements nativeAdvancements;
 
     private final int index;
 
-    private final Modifiers modifiers;
-
     public NativeAdvancement(ClausewitzItem item, NativeAdvancements nativeAdvancements, int index) {
-        this.name = item.getName();
-        this.nativeAdvancements = nativeAdvancements;
+        this.item = item;
         this.index = index;
-        this.modifiers = new Modifiers(item.getVariables());
+        this.nativeAdvancements = nativeAdvancements;
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public NativeAdvancements getNativeAdvancements() {
@@ -44,7 +35,7 @@ public class NativeAdvancement {
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(item.getVariables());
     }
 
     @Override
@@ -57,8 +48,9 @@ public class NativeAdvancement {
             return false;
         }
 
-        NativeAdvancement that = (NativeAdvancement) o;
-        return Objects.equals(getName(), that.getName());
+        NativeAdvancement nativeAdvancement = (NativeAdvancement) o;
+
+        return Objects.equals(getName(), nativeAdvancement.getName());
     }
 
     @Override

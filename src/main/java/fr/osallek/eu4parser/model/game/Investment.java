@@ -2,6 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
@@ -9,97 +10,84 @@ public class Investment {
 
     private final Game game;
 
-    private final String name;
-
-    private String localizedName;
-
-    private final String category;
-
-    private final Double cost;
-
-    private final String upgradesTo;
-
-    private final String sprite;
-
-    private final Condition allow;
-
-    private final Modifiers ownerModifier;
-
-    private final Modifiers companyProvinceAreaModifier;
-
-    private final Modifiers areaModifier;
-
-    private final Modifiers ownerCompanyRegionModifier; //Apply to the owner in the region (ie: country modifiers)
-
-    private final Modifiers companyRegionModifier; //Apply to provinces in region (ie: province modifiers)
+    private final ClausewitzItem item;
 
     public Investment(ClausewitzItem item, Game game) {
         this.game = game;
-        this.name = item.getName();
-        this.category = item.getVarAsString("category");
-        this.cost = item.getVarAsDouble("cost");
-        this.upgradesTo = item.getVarAsString("upgrades_to");
-        this.sprite = ClausewitzUtils.removeQuotes(item.getVarAsString("sprite"));
-        this.companyProvinceAreaModifier = new Modifiers(item.getChild("company_province_area_modifier"));
-        this.ownerModifier = new Modifiers(item.getChild("owner_modifier"));
-        this.areaModifier = new Modifiers(item.getChild("area_modifier"));
-        this.ownerCompanyRegionModifier = new Modifiers(item.getChild("owner_company_region_modifier"));
-        this.companyRegionModifier = new Modifiers(item.getChild("company_region_modifier"));
-
-        ClausewitzItem child = item.getChild("allow");
-        this.allow = child == null ? null : new Condition(child);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public String getCategory() {
-        return category;
+        return this.item.getVarAsString("category");
+    }
+
+    public void setCategory(String category) {
+        if (StringUtils.isBlank(category)) {
+            this.item.removeVariable("category");
+        } else {
+            this.item.setVariable("category", category);
+        }
     }
 
     public Double getCost() {
-        return cost;
+        return this.item.getVarAsDouble("cost");
+    }
+
+    public void setCost(Double cost) {
+        if (cost == null) {
+            this.item.removeVariable("cost");
+        } else {
+            this.item.setVariable("cost", cost);
+        }
     }
 
     public Investment getUpgradesTo() {
-        return this.upgradesTo == null ? null : this.game.getInvestment(this.upgradesTo);
+        return this.item.getVarAsString("upgrades_to") == null ? null : this.game.getInvestment(this.item.getVarAsString("upgrades_to"));
     }
 
     public String getSprite() {
-        return sprite;
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("sprite"));
+    }
+
+    public void setSprite(String sprite) {
+        if (StringUtils.isBlank(sprite)) {
+            this.item.removeVariable("sprite");
+        } else {
+            this.item.setVariable("sprite", ClausewitzUtils.addQuotes(sprite));
+        }
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = this.item.getChild("allow");
+        return child == null ? null : new Condition(child);
     }
 
     public Modifiers getOwnerModifier() {
-        return ownerModifier;
+        return new Modifiers(this.item.getChild("owner_modifier"));
     }
 
     public Modifiers getCompanyProvinceAreaModifier() {
-        return companyProvinceAreaModifier;
+        return new Modifiers(this.item.getChild("company_province_area_modifier"));
     }
 
     public Modifiers getAreaModifier() {
-        return areaModifier;
+        return new Modifiers(this.item.getChild("area_modifier"));
     }
 
-    public Modifiers getOwnerCompanyRegionModifier() {
-        return ownerCompanyRegionModifier;
+    public Modifiers getOwnerCompanyRegionModifier() { //Apply to the owner in the region (ie: country modifiers)
+        return new Modifiers(this.item.getChild("owner_company_region_modifier"));
     }
 
-    public Modifiers getCompanyRegionModifier() {
-        return companyRegionModifier;
+    public Modifiers getCompanyRegionModifier() { //Apply to provinces in region (ie: province modifiers)
+        return new Modifiers(this.item.getChild("company_region_modifier"));
     }
 
     @Override
@@ -117,8 +105,9 @@ public class Investment {
             return false;
         }
 
-        Investment that = (Investment) o;
-        return Objects.equals(getName(), that.getName());
+        Investment investment = (Investment) o;
+
+        return Objects.equals(getName(), investment.getName());
     }
 
     @Override

@@ -1,8 +1,13 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.todo;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.Color;
+import fr.osallek.eu4parser.model.game.Condition;
+import fr.osallek.eu4parser.model.game.Icon;
+import fr.osallek.eu4parser.model.game.Modifiers;
+import fr.osallek.eu4parser.model.game.Papacy;
+import fr.osallek.eu4parser.model.game.ReligionGroup;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
@@ -15,11 +20,7 @@ public class Religion {
 
     private final Papacy papacy;
 
-    private String name;
-
-    private String localizedName;
-
-    private final Color color;
+    private final ClausewitzItem item;
 
     private final Integer icon;
 
@@ -73,19 +74,11 @@ public class Religion {
 
     private final LocalDate date;
 
-    private final Modifiers country;
-
-    private final Modifiers countryAsSecondary;
-
-    private final Condition willGetCenter;
-
     private final String harmonizedModifier;
 
     public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
         this.religionGroup = religionGroup;
-        this.name = item.getName();
-        ClausewitzList list = item.getList("color");
-        this.color = list == null ? null : new Color(list);
+        this.item = item;
         this.icon = item.getVarAsInt("icon");
         this.hreReligion = BooleanUtils.toBoolean(item.getVarAsBool("hre_religion"));
         this.hreHereticReligion = BooleanUtils.toBoolean(item.getVarAsBool("hre_heretic_religion"));
@@ -105,7 +98,7 @@ public class Religion {
         this.usesHarmony = BooleanUtils.toBoolean(item.getVarAsBool("uses_harmony"));
         this.canHaveSecondaryReligion = BooleanUtils.toBoolean(item.getVarAsBool("can_have_secondary_religion"));
         this.doom = BooleanUtils.toBoolean(item.getVarAsBool("doom"));
-        list = item.getList("allowed_center_conversion");
+        ClausewitzList list = item.getList("allowed_center_conversion");
         this.allowedCenterConversion = list == null ? null : list.getValues();
         list = item.getList("aspects");
         this.aspects = list == null ? null : list.getValues();
@@ -120,31 +113,42 @@ public class Religion {
         this.papacy = child == null ? null : new Papacy(child);
         child = item.getChild("orthodox_icons");
         this.icons = child == null ? null : child.getChildren().stream().map(Icon::new).collect(Collectors.toList());
-        this.country = new Modifiers(item.getChild("country"));
-        this.countryAsSecondary = new Modifiers(item.getChild("country_as_secondary"));
-        child = item.getChild("will_get_center");
-        this.willGetCenter = child == null ? null : new Condition(child);
         this.harmonizedModifier = item.getVarAsString("harmonized_modifier");
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName.substring(0, 1).toUpperCase() + localizedName.substring(1);
-    }
-
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.item.setName(name);
     }
 
     public Color getColor() {
-        return this.color;
+        if (this.item == null) {
+            return null;
+        }
+
+        ClausewitzList clausewitzList = this.item.getList("color");
+        return clausewitzList == null ? null : new Color(clausewitzList, true);
+    }
+
+    public void setColor(Color color) {
+        if (color == null) {
+            this.item.removeList("color");
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("color");
+
+        if (list != null) {
+            Color actualColor = new Color(list, true);
+            actualColor.setRed(color.getRed());
+            actualColor.setGreen(color.getGreen());
+            actualColor.setBlue(color.getBlue());
+        } else {
+            Color.addToItem(this.item, "color", color);
+        }
     }
 
     public Integer getIcon() {
@@ -260,15 +264,16 @@ public class Religion {
     }
 
     public Modifiers getCountry() {
-        return country;
+        return new Modifiers(this.item.getChild("country"));
     }
 
     public Modifiers getCountryAsSecondary() {
-        return countryAsSecondary;
+        return new Modifiers(item.getChild("country_as_secondary"));
     }
 
     public Condition getWillGetCenter() {
-        return willGetCenter;
+        ClausewitzItem child = this.item.getChild("will_get_center");
+        return child == null ? null : new Condition(child);
     }
 
     public String getHarmonizedModifier() {

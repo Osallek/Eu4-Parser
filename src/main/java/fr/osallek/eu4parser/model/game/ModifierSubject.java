@@ -4,34 +4,38 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 public class ModifierSubject {
 
-    private final String modifier;
-
-    private final Condition trigger;
-
-    private final String expirationMessageOverlord;
-
-    private final String expirationMessageSubject;
+    private final ClausewitzItem item;
 
     public ModifierSubject(ClausewitzItem item) {
-        this.modifier = item.getVarAsString("modifier");
-        this.trigger = item.getChild("trigger") == null ? null : new Condition(item.getChild("trigger"));
-        this.expirationMessageOverlord = item.getVarAsString("expiration_message_overlord");
-        this.expirationMessageSubject = item.getVarAsString("expiration_message_subject");
+        this.item = item;
+    }
+    
+    public String getModifier() {
+        return this.item.getVarAsString("modifier");
     }
 
-    public String getModifier() {
-        return modifier;
+    public void setModifier(String modifier) {
+        this.item.setVariable("modifier", modifier);
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     public String getExpirationMessageOverlord() {
-        return expirationMessageOverlord;
+        return this.item.getVarAsString("expiration_message_overlord");
+    }
+
+    public void setExpirationMessageOverlord(String expirationMessageOverlord) {
+        this.item.setVariable("expiration_message_overlord", expirationMessageOverlord);
     }
 
     public String getExpirationMessageSubject() {
-        return expirationMessageSubject;
+        return this.item.getVarAsString("expiration_message_subject");
+    }
+
+    public void setExpirationMessageSubject(String expirationMessageSubject) {
+        this.item.setVariable("expiration_message_subject", expirationMessageSubject);
     }
 }

@@ -8,13 +8,13 @@ public class ReligiousReform {
 
     private final ClausewitzItem item;
 
-    private final ReligiousReforms nativeAdvancements;
+    private final ReligiousReforms religiousReforms;
 
     private final int index;
 
     public ReligiousReform(ClausewitzItem item, ReligiousReforms religiousReforms, int index) {
         this.item = item;
-        this.nativeAdvancements = religiousReforms;
+        this.religiousReforms = religiousReforms;
         this.index = index;
     }
 
@@ -26,8 +26,8 @@ public class ReligiousReform {
         this.item.setName(name);
     }
 
-    public ReligiousReforms getNativeAdvancements() {
-        return nativeAdvancements;
+    public ReligiousReforms getReligiousReforms() {
+        return religiousReforms;
     }
 
     public int getIndex() {

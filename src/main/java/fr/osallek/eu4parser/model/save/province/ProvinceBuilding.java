@@ -1,6 +1,6 @@
 package fr.osallek.eu4parser.model.save.province;
 
-import fr.osallek.eu4parser.model.game.Building;
+import fr.osallek.eu4parser.model.game.todo.Building;
 
 import java.time.LocalDate;
 import java.util.Comparator;

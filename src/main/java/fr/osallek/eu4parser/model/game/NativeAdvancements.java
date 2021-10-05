@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.Power;
 
 import java.util.List;
@@ -10,43 +11,35 @@ import java.util.stream.Collectors;
 
 public class NativeAdvancements {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Power category;
-
-    private final List<NativeAdvancement> nativeAdvancements;
+    private final ClausewitzItem item;
 
     public NativeAdvancements(ClausewitzItem item) {
-        this.name = item.getName();
-        this.category = Power.byName(item.getVarAsString("category"));
-
-        AtomicInteger i = new AtomicInteger();
-        this.nativeAdvancements = item.getChildrenNot("ai_will_do")
-                                      .stream()
-                                      .map(child -> new NativeAdvancement(child, this, i.getAndIncrement()))
-                                      .collect(Collectors.toList());
+        this.item = item;
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Power getCategory() {
-        return category;
+        ClausewitzVariable variable = item.getVar("category");
+        return variable == null ? null : Power.byName(variable.getValue());
+    }
+
+    public void setCategory(Power power) {
+        this.item.setVariable("category", power.name());
     }
 
     public List<NativeAdvancement> getNativeAdvancements() {
-        return nativeAdvancements;
+        AtomicInteger i = new AtomicInteger();
+        return this.item.getChildrenNot("ai_will_do")
+                        .stream()
+                        .map(child -> new NativeAdvancement(child, this, i.getAndIncrement()))
+                        .collect(Collectors.toList());
     }
 
     @Override
@@ -59,8 +52,9 @@ public class NativeAdvancements {
             return false;
         }
 
-        NativeAdvancements that = (NativeAdvancements) o;
-        return Objects.equals(getName(), that.getName());
+        NativeAdvancements nativeAdvancements = (NativeAdvancements) o;
+
+        return Objects.equals(getName(), nativeAdvancements.getName());
     }
 
     @Override

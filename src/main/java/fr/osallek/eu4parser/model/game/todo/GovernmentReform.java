@@ -1,10 +1,14 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.todo;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.model.game.Condition;
+import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.Modifiers;
+import fr.osallek.eu4parser.model.game.TradeGood;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,17 +24,9 @@ public class GovernmentReform {
 
     private Game game;
 
-    private String name;
-
-    private String localizedName;
-
-    private Modifiers modifiers;
+    private ClausewitzItem item;
 
     private Map<String, String> customAttributes;
-
-    private Condition potential;
-
-    private Condition nationDesignerTrigger;
 
     private List<String> governmentAbilities;
 
@@ -167,9 +163,7 @@ public class GovernmentReform {
     public GovernmentReform(ClausewitzItem item, Game game, GovernmentReform defaultGovernmentReform) {
         this(defaultGovernmentReform);
         this.game = game;
-        this.name = item.getName();
-
-        this.modifiers = new Modifiers(item.getChild("modifiers"));
+        this.item = item;
 
         ClausewitzItem child = item.getChild("custom_attributes");
         this.customAttributes = child == null ? null : child.getVariables()
@@ -179,14 +173,8 @@ public class GovernmentReform {
                                                                                       (a, b) -> b,
                                                                                       LinkedHashMap::new));
 
-        child = item.getChild("potential");
-        this.potential = child == null ? null : new Condition(child);
-
         ClausewitzList list = item.getList("government_abilities");
         this.governmentAbilities = list == null ? null : list.getValues();
-
-        child = item.getChild("nation_designer_trigger");
-        this.nationDesignerTrigger = child == null ? null : new Condition(child);
 
         readAttributes(item);
 
@@ -235,7 +223,6 @@ public class GovernmentReform {
         this.tradeCityReform = other.tradeCityReform;
         this.maintainDynasty = other.maintainDynasty;
         this.allowMigration = other.allowMigration;
-        this.nationDesignerTrigger = other.nationDesignerTrigger;
         this.nationDesignerCost = other.nationDesignerCost;
         this.papacy = other.papacy;
         this.hasHarem = other.hasHarem;
@@ -361,19 +348,15 @@ public class GovernmentReform {
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifiers"));
     }
 
     public Map<String, String> getCustomAttributes() {
@@ -381,7 +364,8 @@ public class GovernmentReform {
     }
 
     public Condition getPotential() {
-        return potential;
+        ClausewitzItem child = this.item.getChild("potential");
+        return child == null ? null : new Condition(child);
     }
 
     public Pair<Boolean, Condition> isBasicReform() {
@@ -549,7 +533,8 @@ public class GovernmentReform {
     }
 
     public Condition getNationDesignerTrigger() {
-        return nationDesignerTrigger;
+        ClausewitzItem child = this.item.getChild("nation_designer_trigger");
+        return child == null ? null : new Condition(child);
     }
 
     public Pair<Integer, Condition> getNationDesignerCost() {
@@ -666,9 +651,9 @@ public class GovernmentReform {
             return false;
         }
 
-        GovernmentReform reform = (GovernmentReform) o;
+        GovernmentReform governmentReform = (GovernmentReform) o;
 
-        return Objects.equals(name, reform.name);
+        return Objects.equals(getName(), governmentReform.getName());
     }
 
     @Override

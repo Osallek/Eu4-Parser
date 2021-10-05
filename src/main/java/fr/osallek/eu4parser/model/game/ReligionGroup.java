@@ -2,6 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.model.game.todo.Religion;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,22 +15,8 @@ public class ReligionGroup {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
-    private final List<Religion> religions;
-
     public ReligionGroup(ClausewitzItem item) {
         this.item = item;
-        this.religions = item.getChildren()
-                             .stream()
-                             .map(child -> new Religion(child, this))
-                             .collect(Collectors.toList());
-    }
-
-    public ReligionGroup merge(ReligionGroup other) {
-        this.religions.addAll(other.religions);
-
-        return this;
     }
 
     public String getName() {
@@ -40,14 +27,6 @@ public class ReligionGroup {
         this.item.setName(name);
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
-    }
-
     public boolean defenderOfFaith() {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("defender_of_faith"));
     }
@@ -55,7 +34,7 @@ public class ReligionGroup {
     public void setDefenderOfFaith(Boolean primitive) {
         if (primitive == null) {
             this.item.removeVariable("defender_of_faith");
-        } else{
+        } else {
             this.item.setVariable("defender_of_faith", primitive);
         }
     }
@@ -67,7 +46,7 @@ public class ReligionGroup {
     public void setCanFormPersonalUnions(Boolean primitive) {
         if (primitive == null) {
             this.item.removeVariable("can_form_personal_unions");
-        } else{
+        } else {
             this.item.setVariable("can_form_personal_unions", primitive);
         }
     }
@@ -79,7 +58,7 @@ public class ReligionGroup {
     public void setCenterOfReligion(Integer centerOfReligion) {
         if (centerOfReligion == null) {
             this.item.removeVariable("center_of_religion");
-        } else{
+        } else {
             this.item.setVariable("center_of_religion", centerOfReligion);
         }
     }
@@ -91,7 +70,7 @@ public class ReligionGroup {
     public void setFlagsWithEmblemPercentage(Integer flagsWithEmblemPercentage) {
         if (flagsWithEmblemPercentage == null) {
             this.item.removeVariable("flags_with_emblem_percentage");
-        } else{
+        } else {
             if (flagsWithEmblemPercentage < 0) {
                 flagsWithEmblemPercentage = 0;
             } else if (flagsWithEmblemPercentage > 100) {
@@ -110,7 +89,7 @@ public class ReligionGroup {
     public void setFlagEmblemIndexRange(Integer flagEmblemIndexRangeMin, Integer flagEmblemIndexRangeMax) {
         if (flagEmblemIndexRangeMin == null || flagEmblemIndexRangeMax == null) {
             this.item.removeList("flag_emblem_index_range");
-        } else{
+        } else {
             ClausewitzList list = this.item.getList("flag_emblem_index_range");
 
             if (list != null) {
@@ -129,7 +108,7 @@ public class ReligionGroup {
     public void setHarmonizedModifier(String harmonizedModifier) {
         if (StringUtils.isBlank(harmonizedModifier)) {
             this.item.removeVariable("harmonized_modifier");
-        } else{
+        } else {
             this.item.setVariable("harmonized_modifier", harmonizedModifier);
         }
     }
@@ -141,13 +120,16 @@ public class ReligionGroup {
     public void setCrusadeName(String crusadeName) {
         if (StringUtils.isBlank(crusadeName)) {
             this.item.removeVariable("crusade_name");
-        } else{
+        } else {
             this.item.setVariable("crusade_name", crusadeName);
         }
     }
 
     public List<Religion> getReligions() {
-        return religions;
+        return this.item.getChildren()
+                        .stream()
+                        .map(child -> new Religion(child, this))
+                        .collect(Collectors.toList());
     }
 
     @Override

@@ -288,9 +288,10 @@ public class SavePapacy {
         }
 
         for (int i = 0; i < list.size(); i++) {
-            String choose = getGamePapacy().getConcession(i).getName() + (list.getAsInt(i) == 1 ? "_harsh" : "_concilatory");
+            String choose = getGamePapacy().getConcessions().get(i).getName() + (list.getAsInt(i) == 1 ? "_harsh" : "_concilatory");
             concessions.put(choose,
-                            Arrays.asList(getGamePapacy().getConcession(i).getName() + "_harsh", getGamePapacy().getConcession(i).getName() + "_concilatory"));
+                            Arrays.asList(getGamePapacy().getConcessions().get(i).getName() + "_harsh",
+                                          getGamePapacy().getConcessions().get(i).getName() + "_concilatory"));
         }
 
         return concessions;
@@ -321,7 +322,7 @@ public class SavePapacy {
             return new LinkedHashMap<>();
         }
 
-        return IntStream.range(0, list.size()).boxed().collect(Collectors.toMap(i -> getGamePapacy().getConcession(i), list::getAsInt));
+        return IntStream.range(0, list.size()).boxed().collect(Collectors.toMap(i -> getGamePapacy().getConcessions().get(i), list::getAsInt));
     }
 
     public Double getConcessionsModifiers(Modifier modifier) {

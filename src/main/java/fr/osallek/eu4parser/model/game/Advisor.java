@@ -2,65 +2,63 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
-import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Objects;
 
 public class Advisor {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Power power;
-
-    private final boolean allowOnlyMale;
-
-    private final boolean allowOnlyFemale;
-
-    private final Modifiers skillScaledModifier;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public Advisor(ClausewitzItem item) {
-        this.name = item.getName();
-        this.power = Power.byName(item.getVarAsString("monarch_power"));
-        this.allowOnlyMale = BooleanUtils.toBoolean(item.getVarAsBool("allow_only_male"));
-        this.allowOnlyFemale = BooleanUtils.toBoolean(item.getVarAsBool("allow_only_female"));
-        this.modifiers = new Modifiers(item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female"));
-        this.skillScaledModifier = new Modifiers(item.getChild("skill_scaled_modifier"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Power getPower() {
-        return power;
+        return Power.byName(this.item.getVarAsString("monarch_power"));
     }
 
-    public boolean allowOnlyMale() {
-        return allowOnlyMale;
+    public void setPower(Power power) {
+        this.item.setVariable("monarch_power", power.name());
     }
 
-    public boolean allowOnlyFemale() {
-        return allowOnlyFemale;
+    public Boolean allowOnlyMale() {
+        return this.item.getVarAsBool("allow_only_male");
+    }
+
+    public void setAllowOnlyMale(Boolean onlyMale) {
+        if (onlyMale == null) {
+            this.item.removeVariable("allow_only_male");
+        } else {
+            this.item.setVariable("allow_only_male", onlyMale);
+        }
+    }
+
+    public Boolean allowOnlyFemale() {
+        return this.item.getVarAsBool("allow_only_female");
+    }
+
+    public void setAllowOnlyFemale(Boolean onlyFemale) {
+        if (onlyFemale == null) {
+            this.item.removeVariable("allow_only_female");
+        } else {
+            this.item.setVariable("allow_only_female", onlyFemale);
+        }
     }
 
     public Modifiers getSkillScaledModifier() {
-        return skillScaledModifier;
+        return new Modifiers(this.item.getChild("skill_scaled_modifier"));
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female"));
     }
 
     @Override

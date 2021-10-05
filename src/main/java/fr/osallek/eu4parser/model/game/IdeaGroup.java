@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.Power;
-import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,83 +14,69 @@ import java.util.stream.Collectors;
 
 public class IdeaGroup {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Power category;
-
-    private final boolean free;
-
-    private final Condition trigger;
-
-    private final Modifiers start;
-
-    private final Modifiers bonus;
-
-    private final Map<String, Modifiers> ideas;
+    private final ClausewitzItem item;
 
     public IdeaGroup(ClausewitzItem item) {
-        this.name = item.getName();
-        ClausewitzVariable var = item.getVar("category");
-        this.category = var == null ? null : Power.byName(var.getValue());
-        this.free = BooleanUtils.toBoolean(item.getVarAsBool("free"));
-        this.ideas = item.getChildrenNot("start", "bonus", "trigger", "ai_will_do")
-                         .stream()
-                         .collect(Collectors.toMap(ClausewitzItem::getName, Modifiers::new, (a, b) -> b, LinkedHashMap::new));
-
-        ClausewitzItem child = item.getChild("trigger");
-        this.trigger = child == null ? null : new Condition(child);
-
-        this.start = new Modifiers(item.getChild("start"));
-        this.bonus = new Modifiers(item.getChild("bonus"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Power getCategory() {
-        return category;
+        ClausewitzVariable variable = item.getVar("category");
+        return variable == null ? null : Power.byName(variable.getValue());
     }
 
-    public boolean isFree() {
-        return free;
+    public void setCategory(Power power) {
+        this.item.setVariable("category", power.name());
+    }
+
+    public Boolean isFree() {
+        return this.item.getVarAsBool("free");
+    }
+
+    public void setFree(Boolean free) {
+        if (free == null) {
+            this.item.removeVariable("free");
+        } else {
+            this.item.setVariable("free", free);
+        }
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     public Modifiers getStart() {
-        return start;
+        return new Modifiers(this.item.getChild("start"));
     }
 
     public Modifiers getBonus() {
-        return bonus;
+        return new Modifiers(this.item.getChild("bonus"));
     }
 
     public Map<String, Modifiers> getIdeas() {
-        return ideas;
+        return this.item.getChildrenNot("start", "bonus", "trigger", "ai_will_do")
+                        .stream()
+                        .collect(Collectors.toMap(ClausewitzItem::getName, Modifiers::new, (a, b) -> b, LinkedHashMap::new));
     }
 
     public Double getModifier(int level, Modifier modifier) {
         List<Double> modifiers = new ArrayList<>();
-        level = Math.min(level, this.ideas.size());
+        level = Math.min(level, getIdeas().size());
 
-        if (level >= 0 && this.start.hasModifier(modifier)) {
-            modifiers.add(this.start.getModifier(modifier));
+        if (level >= 0 && getStart().hasModifier(modifier)) {
+            modifiers.add(getStart().getModifier(modifier));
         }
 
-        Iterator<Modifiers> modifiersIterator = this.ideas.values().iterator();
+        Iterator<Modifiers> modifiersIterator = getIdeas().values().iterator();
         for (int i = level; i > 0; i--) {
             Modifiers m = modifiersIterator.next();
 
@@ -100,8 +85,8 @@ public class IdeaGroup {
             }
         }
 
-        if (level >= this.ideas.size() && this.bonus.hasModifier(modifier)) {
-            modifiers.add(this.bonus.getModifier(modifier));
+        if (level >= getIdeas().size() && getBonus().hasModifier(modifier)) {
+            modifiers.add(getBonus().getModifier(modifier));
         }
 
         return ModifiersUtils.sumModifiers(modifier, modifiers);
@@ -117,9 +102,9 @@ public class IdeaGroup {
             return false;
         }
 
-        IdeaGroup area = (IdeaGroup) o;
+        IdeaGroup ideaGroup = (IdeaGroup) o;
 
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), ideaGroup.getName());
     }
 
     @Override

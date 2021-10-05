@@ -1,8 +1,15 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.todo;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.Color;
+import fr.osallek.eu4parser.model.game.Condition;
+import fr.osallek.eu4parser.model.game.EstateModifier;
+import fr.osallek.eu4parser.model.game.EstatePrivilege;
+import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.ModifierDefinition;
+import fr.osallek.eu4parser.model.game.Modifiers;
+import fr.osallek.eu4parser.model.game.Names;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.LinkedHashMap;
@@ -14,21 +21,11 @@ import java.util.stream.Collectors;
 
 public class Estate {
 
-    private final String name;
+    private final ClausewitzItem item;
 
-    private String localizedName;
+    private final Game game;
 
     private final Integer icon;
-
-    private final Condition trigger;
-
-    private final Modifiers countryModifierHappy;
-
-    private final Modifiers countryModifierNeutral;
-
-    private final Modifiers countryModifierAngry;
-
-    private final Modifiers landOwnershipModifier;
 
     private final Double baseInfluence;
 
@@ -38,11 +35,7 @@ public class Estate {
 
     private final List<Names> names;
 
-    private final Color color;
-
     private final boolean contributesToCuriaTreasury;
-
-    private final Map<String, EstatePrivilege> privileges;
 
     private final List<String> agendas;
 
@@ -51,26 +44,17 @@ public class Estate {
     private List<ModifierDefinition> modifierDefinitions;
 
     public Estate(ClausewitzItem item, List<ModifierDefinition> modifierDefinitions, Game game) {
-        this.name = item.getName();
+        this.item = item;
+        this.game = game;
         this.modifierDefinitions = modifierDefinitions;
         this.icon = item.getVarAsInt("icon");
 
-        ClausewitzItem child = item.getChild("trigger");
-        this.trigger = child == null ? null : new Condition(child);
         this.baseInfluence = item.getVarAsDouble("base_influence");
         this.influenceFromDevModifier = item.getVarAsDouble("influence_from_dev_modifier");
         this.contributesToCuriaTreasury = BooleanUtils.toBoolean(item.getVarAsBool("contributes_to_curia_treasury"));
 
         List<ClausewitzItem> items = item.getChildren("custom_name");
         this.names = items.stream().map(Names::new).collect(Collectors.toList());
-
-        this.countryModifierHappy = new Modifiers(item.getChild("country_modifier_happy"));
-
-        this.countryModifierNeutral = new Modifiers(item.getChild("country_modifier_neutral"));
-
-        this.countryModifierAngry = new Modifiers(item.getChild("country_modifier_angry"));
-
-        this.landOwnershipModifier = new Modifiers(item.getChild("land_ownership_modifier"));
 
         items = item.getChildren("influence_modifier");
         this.influenceModifiers = items.stream()
@@ -82,32 +66,16 @@ public class Estate {
                                      .map(i -> new EstateModifier(i, "loyalty"))
                                      .collect(Collectors.toList());
 
-        ClausewitzList list = item.getList("color");
-        this.color = child == null ? null : new Color(list);
-
-        list = item.getList("privileges");
-        this.privileges = list == null ? null : list.getValues().stream().map(game::getEstatePrivilege).collect(Collectors.toMap(EstatePrivilege::getName,
-                                                                                                                                 Function.identity(),
-                                                                                                                                 (a, b) -> b,
-                                                                                                                                 LinkedHashMap::new));
-        if (this.privileges != null) {
-            this.privileges.values().forEach(privilege -> privilege.setEstate(this));
-        }
-
-        list = item.getList("agendas");
+        ClausewitzList list = item.getList("agendas");
         this.agendas = list == null ? null : list.getValues();
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public List<ModifierDefinition> getModifierDefinitions() {
@@ -123,23 +91,24 @@ public class Estate {
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     public Modifiers getCountryModifierHappy() {
-        return countryModifierHappy;
+        return new Modifiers(this.item.getChild("country_modifier_happy"));
     }
 
     public Modifiers getCountryModifierNeutral() {
-        return countryModifierNeutral;
+        return new Modifiers(this.item.getChild("country_modifier_neutral"));
     }
 
     public Modifiers getCountryModifierAngry() {
-        return countryModifierAngry;
+        return new Modifiers(this.item.getChild("country_modifier_angry"));
     }
 
     public Modifiers getLandOwnershipModifier() {
-        return landOwnershipModifier;
+        return new Modifiers(this.item.getChild("land_ownership_modifier"));
     }
 
     public double getBaseInfluence() {
@@ -159,7 +128,30 @@ public class Estate {
     }
 
     public Color getColor() {
-        return color;
+        if (this.item == null) {
+            return null;
+        }
+
+        ClausewitzList clausewitzList = this.item.getList("color");
+        return clausewitzList == null ? null : new Color(clausewitzList, true);
+    }
+
+    public void setColor(Color color) {
+        if (color == null) {
+            this.item.removeList("color");
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("color");
+
+        if (list != null) {
+            Color actualColor = new Color(list, true);
+            actualColor.setRed(color.getRed());
+            actualColor.setGreen(color.getGreen());
+            actualColor.setBlue(color.getBlue());
+        } else {
+            Color.addToItem(this.item, "color", color);
+        }
     }
 
     public boolean isContributesToCuriaTreasury() {
@@ -167,7 +159,10 @@ public class Estate {
     }
 
     public Map<String, EstatePrivilege> getPrivileges() {
-        return privileges;
+        ClausewitzList list = this.item.getList("privileges");
+        return list == null ? null :
+               list.getValues().stream().map(this.game::getEstatePrivilege).collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(),
+                                                                                                     (a, b) -> b, LinkedHashMap::new));
     }
 
     public List<String> getAgendas() {

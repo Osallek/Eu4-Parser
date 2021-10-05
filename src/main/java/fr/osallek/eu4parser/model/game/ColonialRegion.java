@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.Color;
+import fr.osallek.eu4parser.model.game.todo.Religion;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.BufferedWriter;

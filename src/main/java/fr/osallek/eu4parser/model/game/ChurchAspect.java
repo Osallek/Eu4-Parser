@@ -6,38 +6,34 @@ import java.util.Objects;
 
 public class ChurchAspect {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Modifiers modifiers;
-
-    private final Integer cost;
+    private final ClausewitzItem item;
 
     public ChurchAspect(ClausewitzItem item) {
-        this.name = item.getName();
-        this.cost  = item.getVarAsInt("cost");
-        this.modifiers = new Modifiers(item.getChild("modifier"));
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public Integer getCost() {
-        return cost;
+        return this.item.getVarAsInt("cost");
+    }
+
+    public void setCost(Integer cost) {
+        if (cost == null) {
+            this.item.removeVariable("cost");
+        } else {
+            this.item.setVariable("cost", cost);
+        }
     }
 
     @Override

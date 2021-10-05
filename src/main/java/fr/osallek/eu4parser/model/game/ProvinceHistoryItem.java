@@ -4,6 +4,8 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.game.todo.Building;
+import fr.osallek.eu4parser.model.game.todo.Religion;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.BufferedWriter;

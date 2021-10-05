@@ -6,28 +6,31 @@ import java.util.Objects;
 
 public class ModifierDefinition {
 
-    private final String type;
-
-    private final String key;
-
-    private final Condition trigger;
+    private final ClausewitzItem item;
 
     public ModifierDefinition(ClausewitzItem item) {
-        this.type = item.getVarAsString("type");
-        this.key = item.getVarAsString("key");
-        this.trigger = item.hasChild("trigger") ? new Condition(item.getChild("trigger")) : null;
+        this.item = item;
     }
 
     public String getType() {
-        return type;
+        return this.item.getVarAsString("type");
+    }
+
+    public void setType(String type) {
+        this.item.setVariable("type", type);
     }
 
     public String getKey() {
-        return key;
+        return this.item.getVarAsString("key");
+    }
+
+    public void setKey(String key) {
+        this.item.setVariable("key", key);
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     @Override
@@ -40,18 +43,18 @@ public class ModifierDefinition {
             return false;
         }
 
-        ModifierDefinition area = (ModifierDefinition) o;
+        ModifierDefinition modifierDefinition = (ModifierDefinition) o;
 
-        return Objects.equals(key, area.key);
+        return Objects.equals(getKey(), modifierDefinition.getKey());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key);
+        return Objects.hash(getKey());
     }
 
     @Override
     public String toString() {
-        return key;
+        return getKey();
     }
 }

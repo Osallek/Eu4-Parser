@@ -6,47 +6,39 @@ import java.util.Objects;
 
 public class NavalDoctrine {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Integer buttonGfx;
-
-    private final Condition allow;
-
-    private final Modifiers modifiers;
+    private final ClausewitzItem item;
 
     public NavalDoctrine(ClausewitzItem item) {
-        this.name = item.getName();
-        this.buttonGfx = item.getVarAsInt("button_gfx");
-        this.modifiers = new Modifiers(item.getChild("country_modifier"));
-
-        ClausewitzItem child = item.getChild("can_select");
-        this.allow = child == null ? null : new Condition(child);
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Integer getButtonGfx() {
-        return buttonGfx;
+        return this.item.getVarAsInt("button_gfx");
+    }
+
+    public void setButtonGfx(Integer buttonGfx) {
+        if (buttonGfx == null) {
+            this.item.removeVariable("button_gfx");
+        } else {
+            this.item.setVariable("button_gfx", buttonGfx);
+        }
     }
 
     public Condition getAllow() {
-        return allow;
+        ClausewitzItem child = this.item.getChild("can_select");
+        return child == null ? null : new Condition(child);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("country_modifier"));
     }
 
     @Override
@@ -64,8 +56,9 @@ public class NavalDoctrine {
             return false;
         }
 
-        NavalDoctrine that = (NavalDoctrine) o;
-        return Objects.equals(getName(), that.getName());
+        NavalDoctrine navalDoctrine = (NavalDoctrine) o;
+
+        return Objects.equals(getName(), navalDoctrine.getName());
     }
 
     @Override

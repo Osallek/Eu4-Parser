@@ -1,34 +1,33 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.apache.commons.lang3.BooleanUtils;
 
 public class EstatePrivilegeModifier {
 
-    private final Condition trigger;
-
-    private final Modifiers modifiers;
-
-    private final boolean isBad;
+    private final ClausewitzItem item;
 
     public EstatePrivilegeModifier(ClausewitzItem item) {
-        this.isBad = BooleanUtils.toBoolean(item.getVarAsBool("is_bad"));
-
-        ClausewitzItem child = item.getChild("trigger");
-        this.trigger = child == null ? null : new Condition(child);
-
-        this.modifiers = new Modifiers( item.getChild("modifier"));
+        this.item = item;
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     public Modifiers getModifiers() {
-        return modifiers;
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
-    public boolean isBad() {
-        return isBad;
+    public Boolean isBad() {
+        return this.item.getVarAsBool("is_bad");
+    }
+
+    public void setIsBad(Boolean isBad) {
+        if (isBad == null) {
+            this.item.removeVariable("is_bad");
+        } else {
+            this.item.setVariable("is_bad", isBad);
+        }
     }
 }

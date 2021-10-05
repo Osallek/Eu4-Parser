@@ -2,8 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,87 +11,84 @@ import java.util.stream.Collectors;
 
 public class Mission {
 
-    private final String name;
+    private final ClausewitzItem item;
 
-    private String localizedName;
+    private final Game game;
 
-    private final String icon;
-
-    private final boolean generic;
-
-    private final Integer position;
-
-    private final LocalDate completedBy;
-
-    private final Condition provincesToHighlight;
-
-    private final Condition trigger;
-
-    private final List<String> requiredMissionsNames;
-
-    private List<Mission> requiredMissions;
-
-    public Mission(ClausewitzItem item) {
-        this.name = item.getName();
-        this.icon = item.getVarAsString("icon");
-        this.generic = BooleanUtils.toBoolean(item.getVarAsBool("generic"));
-        this.position = item.getVarAsInt("position");
-        this.completedBy = item.getVarAsDate("completed_by");
-
-        ClausewitzItem child = item.getChild("provinces_to_highlight");
-        this.provincesToHighlight = child == null ? null : new Condition(child);
-
-        child = item.getChild("trigger");
-        this.trigger = child == null ? null : new Condition(child);
-
-        ClausewitzList list = item.getList("required_missions");
-        this.requiredMissionsNames = list == null ? null : list.getValues();
+    public Mission(ClausewitzItem item, Game game) {
+        this.item = item;
+        this.game = game;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public String getIcon() {
-        return icon;
+        return this.item.getVarAsString("icon");
     }
 
-    public boolean isGeneric() {
-        return generic;
+    public void setIcon(String icon) {
+        if (StringUtils.isBlank(icon)) {
+            this.item.removeVariable("icon");
+        } else {
+            this.item.setVariable("icon", icon);
+        }
+    }
+
+    public Boolean isGeneric() {
+        return this.item.getVarAsBool("generic");
+    }
+
+    public void setGeneric(Boolean generic) {
+        if (generic == null) {
+            this.item.removeVariable("generic");
+        } else {
+            this.item.setVariable("generic", generic);
+        }
     }
 
     public Integer getPosition() {
-        return position;
+        return this.item.getVarAsInt("position");
+    }
+
+    public void setPosition(Integer position) {
+        if (position == null) {
+            this.item.removeVariable("position");
+        } else {
+            this.item.setVariable("position", position);
+        }
     }
 
     public LocalDate getCompletedBy() {
-        return completedBy;
+        return this.item.getVarAsDate("completed_by");
+    }
+
+    public void setCompletedBy(LocalDate completedBy) {
+        if (completedBy == null) {
+            this.item.removeVariable("completed_by");
+        } else {
+            this.item.setVariable("completed_by", completedBy);
+        }
     }
 
     public Condition getProvincesToHighlight() {
-        return provincesToHighlight;
+        ClausewitzItem child = this.item.getChild("provinces_to_highlight");
+        return child == null ? null : new Condition(child);
     }
 
     public Condition getTrigger() {
-        return trigger;
+        ClausewitzItem child = this.item.getChild("trigger");
+        return child == null ? null : new Condition(child);
     }
 
     public List<Mission> getRequiredMissions() {
-        return requiredMissions;
-    }
-
-    void setRequiredMissions(Game game) {
-        if (CollectionUtils.isNotEmpty(requiredMissionsNames)) {
-            this.requiredMissions = this.requiredMissionsNames.stream().map(game::getMission).collect(Collectors.toList());
-        }
+        ClausewitzList list = this.item.getList("required_missions");
+        return list == null ? null : list.getValues().stream().map(this.game::getMission).collect(Collectors.toList());
     }
 
     @Override
@@ -105,9 +101,9 @@ public class Mission {
             return false;
         }
 
-        Mission area = (Mission) o;
+        Mission mission = (Mission) o;
 
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), mission.getName());
     }
 
     @Override

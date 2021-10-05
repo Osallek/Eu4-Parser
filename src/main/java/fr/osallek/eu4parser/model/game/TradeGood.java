@@ -2,115 +2,89 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.Color;
-import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Objects;
 
 public class TradeGood {
 
-    private String name;
+    private final ClausewitzItem item;
 
-    private String localizedName;
-
-    private Color color;
-
-    private Modifiers modifiers;
-
-    private Modifiers provinceModifiers;
-
-    private boolean goldType;
-
-    private Double basePrice = 1.0;
+    private ClausewitzItem priceItem;
 
     public TradeGood(ClausewitzItem item) {
-        this.name = item.getName();
-        ClausewitzList list = item.getList("color");
-        this.color = list == null ? null : new Color(list, true);
-        this.modifiers = new Modifiers(item.getChild("modifier"));
-        this.provinceModifiers = new Modifiers(item.getChild("province"));
+        this.item = item;
     }
 
     public void setPriceItem(ClausewitzItem priceItem) {
-        this.basePrice = NumbersUtils.doubleOrDefault(priceItem.getVarAsDouble("base_price"), 1.0);
-        this.goldType = BooleanUtils.toBoolean(priceItem.getVarAsBool("goldtype"));
+        this.priceItem = priceItem;
     }
 
     public String getName() {
-        return this.name;
+        return this.item.getName();
     }
 
     public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+        this.item.setName(name);
     }
 
     public Color getColor() {
-        return this.color;
+        if (this.item == null) {
+            return null;
+        }
+
+        ClausewitzList clausewitzList = this.item.getList("color");
+        return clausewitzList == null ? null : new Color(clausewitzList, true);
     }
 
     public void setColor(Color color) {
-        this.color = color;
+        if (color == null) {
+            this.item.removeList("color");
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("color");
+
+        if (list != null) {
+            Color actualColor = new Color(list, true);
+            actualColor.setRed(color.getRed());
+            actualColor.setGreen(color.getGreen());
+            actualColor.setBlue(color.getBlue());
+        } else {
+            Color.addToItem(this.item, "color", color);
+        }
     }
 
     public Modifiers getModifiers() {
-        return this.modifiers;
-    }
-
-    public void addModifier(String modifier, String quantity) {
-        if (this.modifiers == null) {
-            this.modifiers = new Modifiers();
-        }
-
-        this.modifiers.add(modifier, quantity);
-    }
-
-    public void removeModifier(String modifier) {
-        if (this.modifiers != null) {
-            this.modifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("modifier"));
     }
 
     public Modifiers getProvinceModifiers() {
-        return this.provinceModifiers;
-    }
-
-    public void addProvinceModifier(String modifier, String quantity) {
-        if (this.provinceModifiers == null) {
-            this.provinceModifiers = new Modifiers();
-        }
-
-        this.provinceModifiers.add(modifier, quantity);
-    }
-
-    public void removeProvinceModifier(String modifier) {
-        if (this.provinceModifiers != null) {
-            this.provinceModifiers.removeModifier(modifier);
-        }
+        return new Modifiers(this.item.getChild("province"));
     }
 
     public Double getBasePrice() {
-        return this.basePrice;
+        return this.priceItem.getVarAsDouble("base_price");
     }
 
-    public void setBasePrice(double basePrice) {
-        this.basePrice = basePrice;
+    public void setBasePrice(Double basePrice) {
+        if (basePrice == null) {
+            this.priceItem.removeVariable("base_price");
+        } else {
+            this.priceItem.setVariable("base_price", basePrice);
+        }
     }
 
-    public boolean isGoldType() {
-        return goldType;
+    public Boolean isGoldType() {
+        return this.priceItem.getVarAsBool("goldtype");
     }
 
-    public void setGoldType(boolean goldType) {
-        this.goldType = goldType;
+    public void setGoldType(Boolean goldType) {
+        if (goldType == null) {
+            this.priceItem.removeVariable("goldtype");
+        } else {
+            this.priceItem.setVariable("goldtype", goldType);
+        }
     }
 
     @Override
@@ -129,7 +103,8 @@ public class TradeGood {
         }
 
         TradeGood tradeGood = (TradeGood) o;
-        return Objects.equals(name, tradeGood.name);
+
+        return Objects.equals(getName(), tradeGood.getName());
     }
 
     @Override

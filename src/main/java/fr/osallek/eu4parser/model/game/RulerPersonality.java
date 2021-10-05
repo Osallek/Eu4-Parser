@@ -11,8 +11,6 @@ public class RulerPersonality {
 
     private final ClausewitzItem item;
 
-    private String localizedName;
-
     public RulerPersonality(ClausewitzItem item) {
         this.item = item;
     }
@@ -87,14 +85,6 @@ public class RulerPersonality {
 
     public Modifiers getModifiers() {
         return new Modifiers(this.item);
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
     }
 
     public boolean isMonarchValid(Monarch monarch) {

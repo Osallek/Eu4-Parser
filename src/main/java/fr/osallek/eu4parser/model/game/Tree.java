@@ -17,13 +17,13 @@ public class Tree extends Noded {
 
     private final Game game;
 
-    private final List<Color> colors;
+    private final List<Color> fileColors;
 
-    public Tree(ClausewitzItem item, FileNode fileNode, Game game, List<Color> colors) {
+    public Tree(ClausewitzItem item, FileNode fileNode, Game game, List<Color> fileColors) {
         super(fileNode);
         this.item = item;
         this.game = game;
-        this.colors = colors;
+        this.fileColors = fileColors;
     }
 
     @Override
@@ -35,13 +35,13 @@ public class Tree extends Noded {
         this.item.setName(name);
     }
 
-    public List<Color> getColors() {
+    public List<Color> getFileColors() {
         ClausewitzList list = this.item.getList("color");
-        return list == null ? null : list.getValuesAsInt().stream().map(this.colors::get).collect(Collectors.toList());
+        return list == null ? null : list.getValuesAsInt().stream().map(this.fileColors::get).collect(Collectors.toList());
     }
 
     public void setColor(List<Integer> indexes) {
-        indexes.removeIf(index -> index < 0 || index >= this.colors.size());
+        indexes.removeIf(index -> index < 0 || index >= this.fileColors.size());
 
         ClausewitzList list = this.item.getList("color");
         list.setAll(indexes.toArray(Integer[]::new));

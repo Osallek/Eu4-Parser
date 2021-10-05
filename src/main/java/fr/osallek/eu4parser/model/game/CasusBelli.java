@@ -2,132 +2,194 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
 
 public class CasusBelli {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final boolean validForSubject;
-
-    private final boolean isTriggeredOnly;
-
-    private final boolean exclusive;
-
-    private final boolean independence;
-
-    private final boolean noOpinionHit;
-
-    private final boolean coalition;
-
-    private final boolean supportRebels;
-
-    private final boolean league;
-
-    private final boolean callEmpireMembers;
-
-    private final Integer aiPeaceDesire;
-
-    private final Integer months;
-
-    private final Condition prerequisites;
-
-    private final String warGoal;
-
-    private final List<String> attackerDisabledPo;
+    private final ClausewitzItem item;
 
     public CasusBelli(ClausewitzItem item) {
-        this.name = item.getName();
-        this.validForSubject = BooleanUtils.toBoolean(item.getVarAsBool("valid_for_subject"));
-        this.isTriggeredOnly = BooleanUtils.toBoolean(item.getVarAsBool("is_triggered_only"));
-        this.exclusive = BooleanUtils.toBoolean(item.getVarAsBool("exclusive"));
-        this.independence = BooleanUtils.toBoolean(item.getVarAsBool("independence"));
-        this.noOpinionHit = BooleanUtils.toBoolean(item.getVarAsBool("no_opinion_hit"));
-        this.coalition = BooleanUtils.toBoolean(item.getVarAsBool("coalition"));
-        this.supportRebels = BooleanUtils.toBoolean(item.getVarAsBool("support_rebels"));
-        this.league = BooleanUtils.toBoolean(item.getVarAsBool("league"));
-        this.callEmpireMembers = BooleanUtils.toBoolean(item.getVarAsBool("call_empire_members"));
-        this.aiPeaceDesire = item.getVarAsInt("ai_peace_desire");
-        this.months = item.getVarAsInt("months");
-        ClausewitzItem child = item.getChild("prerequisites");
-        this.prerequisites = child == null ? null : new Condition(child);
-        this.warGoal = item.getVarAsString("war_goal");
-
-        ClausewitzList list = item.getList("attacker_disabled_po");
-        this.attackerDisabledPo = list == null ? null : list.getValues();
+        this.item = item;
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
-    void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
+    public Boolean isValidForSubject() {
+        return this.item.getVarAsBool("valid_for_subject");
     }
 
-    public boolean isValidForSubject() {
-        return validForSubject;
+    public void setValidForSubject(Boolean validForSubject) {
+        if (validForSubject == null) {
+            this.item.removeVariable("valid_for_subject");
+        } else {
+            this.item.setVariable("valid_for_subject", validForSubject);
+        }
     }
 
-    public boolean isTriggeredOnly() {
-        return isTriggeredOnly;
+    public Boolean isTriggeredOnly() {
+        return this.item.getVarAsBool("is_triggered_only");
     }
 
-    public boolean isExclusive() {
-        return exclusive;
+    public void setIsTriggeredOnly(Boolean isTriggeredOnly) {
+        if (isTriggeredOnly == null) {
+            this.item.removeVariable("is_triggered_only");
+        } else {
+            this.item.setVariable("is_triggered_only", isTriggeredOnly);
+        }
     }
 
-    public boolean isIndependence() {
-        return independence;
+    public Boolean isExclusive() {
+        return this.item.getVarAsBool("exclusive");
     }
 
-    public boolean isNoOpinionHit() {
-        return noOpinionHit;
+    public void setExclusive(Boolean exclusive) {
+        if (exclusive == null) {
+            this.item.removeVariable("exclusive");
+        } else {
+            this.item.setVariable("exclusive", exclusive);
+        }
     }
 
-    public boolean isCoalition() {
-        return coalition;
+    public Boolean isIndependence() {
+        return this.item.getVarAsBool("independence");
     }
 
-    public boolean isSupportRebels() {
-        return supportRebels;
+    public void setIndependence(Boolean independence) {
+        if (independence == null) {
+            this.item.removeVariable("independence");
+        } else {
+            this.item.setVariable("independence", independence);
+        }
     }
 
-    public boolean isLeague() {
-        return league;
+    public Boolean isNoOpinionHit() {
+        return this.item.getVarAsBool("no_opinion_hit");
     }
 
-    public boolean isCallEmpireMembers() {
-        return callEmpireMembers;
+    public void setNoOpinionHit(Boolean noOpinionHit) {
+        if (noOpinionHit == null) {
+            this.item.removeVariable("no_opinion_hit");
+        } else {
+            this.item.setVariable("no_opinion_hit", noOpinionHit);
+        }
+    }
+
+    public Boolean isCoalition() {
+        return this.item.getVarAsBool("coalition");
+    }
+
+    public void setCoalition(Boolean coalition) {
+        if (coalition == null) {
+            this.item.removeVariable("coalition");
+        } else {
+            this.item.setVariable("coalition", coalition);
+        }
+    }
+
+    public Boolean supportRebels() {
+        return this.item.getVarAsBool("support_rebels");
+    }
+
+    public void setSupportRebels(Boolean supportRebels) {
+        if (supportRebels == null) {
+            this.item.removeVariable("support_rebels");
+        } else {
+            this.item.setVariable("support_rebels", supportRebels);
+        }
+    }
+
+    public Boolean isLeague() {
+        return this.item.getVarAsBool("league");
+    }
+
+    public void setLeague(Boolean league) {
+        if (league == null) {
+            this.item.removeVariable("league");
+        } else {
+            this.item.setVariable("league", league);
+        }
+    }
+
+    public Boolean isCallEmpireMembers() {
+        return this.item.getVarAsBool("call_empire_members");
+    }
+
+    public void setCallEmpireMembers(Boolean callEmpireMembers) {
+        if (callEmpireMembers == null) {
+            this.item.removeVariable("call_empire_members");
+        } else {
+            this.item.setVariable("call_empire_members", callEmpireMembers);
+        }
     }
 
     public Integer getAiPeaceDesire() {
-        return aiPeaceDesire;
+        return this.item.getVarAsInt("ai_peace_desire");
+    }
+
+    public void setAiPeaceDesire(Integer aiPeaceDesire) {
+        if (aiPeaceDesire == null) {
+            this.item.removeVariable("ai_peace_desire");
+        } else {
+            this.item.setVariable("ai_peace_desire", aiPeaceDesire);
+        }
     }
 
     public Integer getMonths() {
-        return months;
+        return this.item.getVarAsInt("months");
     }
 
-    public Condition getPrerequisites() {
-        return prerequisites;
+    public void setMonths(Integer months) {
+        if (months == null) {
+            this.item.removeVariable("months");
+        } else {
+            this.item.setVariable("months", months);
+        }
     }
 
     public String getWarGoal() {
-        return warGoal;
+        return this.item.getVarAsString("war_goal");
+    }
+
+    public void setWarGoal(Integer warGoal) {
+        if (warGoal == null) {
+            this.item.removeVariable("war_goal");
+        } else {
+            this.item.setVariable("war_goal", warGoal);
+        }
+    }
+
+    public Condition getPrerequisites() {
+        ClausewitzItem child = this.item.getChild("prerequisites");
+        return child == null ? null : new Condition(child);
     }
 
     public List<String> getAttackerDisabledPo() {
-        return attackerDisabledPo;
+        ClausewitzList list = this.item.getList("attacker_disabled_po");
+        return list == null ? null : list.getValues();
+    }
+
+    public void setAttackerDisabledPo(List<String> attackerDisabledPo) {
+        if (CollectionUtils.isEmpty(attackerDisabledPo)) {
+            this.item.removeList("attacker_disabled_po");
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("attacker_disabled_po");
+
+        if (list != null) {
+            list.setAll(attackerDisabledPo.stream().filter(Objects::nonNull).toArray(String[]::new));
+        } else {
+            this.item.addList("attacker_disabled_po", attackerDisabledPo.stream().filter(Objects::nonNull).toArray(String[]::new));
+        }
     }
 
     @Override
@@ -140,9 +202,9 @@ public class CasusBelli {
             return false;
         }
 
-        CasusBelli area = (CasusBelli) o;
+        CasusBelli casusBelli = (CasusBelli) o;
 
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), casusBelli.getName());
     }
 
     @Override

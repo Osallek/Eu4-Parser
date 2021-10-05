@@ -1,8 +1,11 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.todo;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.NumbersUtils;
+import fr.osallek.eu4parser.model.game.Condition;
+import fr.osallek.eu4parser.model.game.ModifierSubject;
+import fr.osallek.eu4parser.model.game.SubjectTypeRelation;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,11 +18,7 @@ import java.util.stream.Collectors;
 
 public class SubjectType {
 
-    private final String name;
-
-    private String localizedName;
-
-    private final Condition isPotentialOverlord;
+    private final ClausewitzItem item;
 
     private String sprite;
 
@@ -226,7 +225,7 @@ public class SubjectType {
                     .findFirst()
                     .ifPresent(this::copy);
 
-        this.name = item.getName();
+        this.item = item;
 
         this.sprite = StringUtils.defaultIfBlank(item.getVarAsString("sprite"), this.sprite);
         this.diplomacyOverlordSprite = StringUtils.defaultIfBlank(item.getVarAsString("diplomacy_overlord_sprite"), this.diplomacyOverlordSprite);
@@ -330,31 +329,28 @@ public class SubjectType {
         this.overlordOpinionModifier = StringUtils.defaultIfBlank(item.getVarAsString("overlord_opinion_modifier"), this.overlordOpinionModifier);
         this.subjectOpinionModifier = StringUtils.defaultIfBlank(item.getVarAsString("subject_opinion_modifier"), this.subjectOpinionModifier);
 
-        ClausewitzItem child = item.getChild("is_potential_overlord");
-        this.isPotentialOverlord = child == null ? null : new Condition(child);
-
-        child = item.getChild("can_fight");
+        ClausewitzItem child = item.getChild("can_fight");
         this.canFight = child == null ? null : child.getVariables()
                                                     .stream()
-                                                    .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
-                                                                              Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+                                                    .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
+                                                                                   Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         child = item.getChild("can_rival");
         this.canRival = child == null ? null : child.getVariables()
                                                     .stream()
-                                                    .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
+                                                    .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         child = item.getChild("can_ally");
         this.canAlly = child == null ? null : child.getVariables()
                                                    .stream()
-                                                   .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
+                                                   .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
                                                                                   Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         child = item.getChild("can_marry");
         this.canMarry = child == null ? null : child.getVariables()
                                                     .stream()
-                                                    .collect(Collectors.groupingBy(var -> SubjectTypeRelation.valueOf(var.getName().toUpperCase()),
+                                                    .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
                                                                                    Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
         if ("clear".equalsIgnoreCase(item.getVarAsString("modifier_subject"))) {
@@ -473,19 +469,16 @@ public class SubjectType {
     }
 
     public String getName() {
-        return name;
+        return this.item.getName();
     }
 
-    public String getLocalizedName() {
-        return localizedName;
-    }
-
-    void setLocalizedName(String localizedName) {
-        this.localizedName = StringUtils.capitalize(localizedName);
+    public void setName(String name) {
+        this.item.setName(name);
     }
 
     public Condition isPotentialOverlord() {
-        return isPotentialOverlord;
+        ClausewitzItem child = this.item.getChild("is_potential_overlord");
+        return child == null ? null : new Condition(child);
     }
 
     public String getSprite() {
@@ -892,18 +885,20 @@ public class SubjectType {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        SubjectType that = (SubjectType) o;
-        return Objects.equals(name, that.name) &&
-               Objects.equals(sprite, that.sprite);
+
+        SubjectType subjectType = (SubjectType) o;
+
+        return Objects.equals(getName(), subjectType.getName()) &&
+               Objects.equals(getSprite(), subjectType.getSprite());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, sprite);
+        return Objects.hash(getName(), getSprite());
     }
 
     @Override
     public String toString() {
-        return this.localizedName;
+        return getName();
     }
 }
