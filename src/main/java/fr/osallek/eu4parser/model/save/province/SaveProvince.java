@@ -21,7 +21,7 @@ import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.TradePolicy;
 import fr.osallek.eu4parser.model.game.todo.Building;
-import fr.osallek.eu4parser.model.game.todo.ImperialReform;
+import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.Save;

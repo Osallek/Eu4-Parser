@@ -11,7 +11,7 @@ import fr.osallek.eu4parser.model.game.Policy;
 import fr.osallek.eu4parser.model.game.ProvinceList;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.todo.Building;
-import fr.osallek.eu4parser.model.game.todo.Religion;
+import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
@@ -1832,7 +1832,7 @@ public class ConditionsUtils {
             case "unit_type":
                 return value.equalsIgnoreCase(country.getUnitType());
             case "uses_authority":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().useAuthority());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().isUseAuthority());
             case "uses_church_aspects":
                 return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().usesChurchPower());
             case "uses_blessings":

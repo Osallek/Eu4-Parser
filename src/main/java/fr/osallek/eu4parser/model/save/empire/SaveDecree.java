@@ -65,10 +65,6 @@ public class SaveDecree {
         return decree;
     }
 
-    public String getLocalizedName() {
-        return this.decree.getLocalizedName();
-    }
-
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LocalDate date) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "decree", parent.getOrder() + 1);
         toItem.addVariable("decree_name", name);

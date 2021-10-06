@@ -12,7 +12,7 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.ModifierDefinition;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
-import fr.osallek.eu4parser.model.game.todo.Estate;
+import fr.osallek.eu4parser.model.game.Estate;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.time.LocalDate;

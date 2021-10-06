@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.todo.Estate;
 
 public class ChangeEstateLandShare {
 

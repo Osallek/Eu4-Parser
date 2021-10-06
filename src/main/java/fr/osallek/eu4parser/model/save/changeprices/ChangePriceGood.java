@@ -43,10 +43,6 @@ public class ChangePriceGood {
         return this.tradeGood.getBasePrice();
     }
 
-    public String getLocalizedName() {
-        return isValid() ? this.tradeGood.getLocalizedName() : getName();
-    }
-
     public void removeChangePrince(int id) {
         this.item.removeChild(id);
         refreshAttributes();

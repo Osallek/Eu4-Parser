@@ -17,11 +17,7 @@ import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.todo.Building;
-import fr.osallek.eu4parser.model.game.todo.Estate;
-import fr.osallek.eu4parser.model.game.todo.GovernmentName;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
-import fr.osallek.eu4parser.model.game.todo.ImperialReform;
-import fr.osallek.eu4parser.model.game.todo.Religion;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.collections4.CollectionUtils;
@@ -673,18 +669,7 @@ public class Game {
     }
 
     public List<Religion> getReligions() {
-        return getReligionGroups().stream()
-                                  .map(ReligionGroup::getReligions)
-                                  .flatMap(Collection::stream)
-                                  .sorted(Comparator.comparing(Religion::getLocalizedName, Eu4Utils.COLLATOR))
-                                  .collect(Collectors.toList());
-    }
-
-    public List<Religion> getReligionsNotOrdered() {
-        return getReligionGroups().stream()
-                                  .map(ReligionGroup::getReligions)
-                                  .flatMap(Collection::stream)
-                                  .collect(Collectors.toList());
+        return getReligionGroups().stream().map(ReligionGroup::getReligions).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public Religion getReligion(String name) {
@@ -2063,8 +2048,6 @@ public class Game {
                         });
                     }
                 });
-
-        this.buildings.values().forEach(building -> building.setLocalizedName(this.getLocalisation("building_" + building.getName())));
     }
 
     private void readImperialReforms() {
@@ -2078,8 +2061,6 @@ public class Game {
                                                                    .map(item -> new ImperialReform(item, this))
                                                                    .collect(Collectors.toMap(ImperialReform::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.imperialReforms.values().forEach(imperialReform -> imperialReform.setLocalizedName(this.getLocalisation(imperialReform.getName() + "_title")));
     }
 
     private void readDecrees() {
@@ -2157,7 +2138,7 @@ public class Game {
                     ClausewitzItem governmentsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.governmentNames.putAll(governmentsItem.getChildren()
                                                                .stream()
-                                                               .map(item -> new GovernmentName(item, this))
+                                                               .map(GovernmentName::new)
                                                                .collect(Collectors.toMap(GovernmentName::getName, Function.identity(), (a, b) -> b)));
                 });
     }
@@ -2180,8 +2161,6 @@ public class Game {
                                                   .flatMap(Collection::stream)
                                                   .map(item -> new GovernmentReform(item, this, defaultReform.get()))
                                                   .collect(Collectors.toMap(GovernmentReform::getName, Function.identity(), (a, b) -> b)));
-
-        this.governmentReforms.values().forEach(governmentReform -> governmentReform.setLocalizedName(this.getLocalisation(governmentReform.getName())));
     }
 
     private void readUnits() {
@@ -2316,8 +2295,6 @@ public class Game {
                                                     .map(IdeaGroup::new)
                                                     .collect(Collectors.toMap(IdeaGroup::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.ideaGroups.values().forEach(ideaGroup -> ideaGroup.setLocalizedName(this.getLocalisation(ideaGroup.getName())));
     }
 
     private void readCasusBelli() {
@@ -2331,8 +2308,6 @@ public class Game {
                                                  .map(CasusBelli::new)
                                                  .collect(Collectors.toMap(CasusBelli::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.casusBelli.values().forEach(cb -> cb.setLocalizedName(this.getLocalisation(cb.getName())));
     }
 
     private void readColonialRegions() {
@@ -2372,8 +2347,6 @@ public class Game {
                                                              .map(item -> new SubjectType(item, this.subjectTypes.values()))
                                                              .collect(Collectors.toMap(SubjectType::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.subjectTypes.values().forEach(subjectType -> subjectType.setLocalizedName(this.getLocalisation(subjectType.getName() + "_title")));
     }
 
     private void readFetishistCults() {
@@ -2455,9 +2428,6 @@ public class Game {
                                                    .map(item -> new Estate(item, modifierDefinitions.get(item.getName()), this))
                                                    .collect(Collectors.toMap(Estate::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.estates.values().forEach(estate -> estate.setLocalizedName(this.getLocalisation(estate.getName())));
-        this.estatePrivileges.values().forEach(estatePrivilege -> estatePrivilege.setLocalizedName(this.getLocalisation(estatePrivilege.getName())));
     }
 
     private void readRulerPersonalities() {
@@ -2527,8 +2497,6 @@ public class Game {
                                                            .map(item -> new Investment(item, this))
                                                            .collect(Collectors.toMap(Investment::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.investments.values().forEach(investment -> investment.setLocalizedName(this.getLocalisation(investment.getName())));
     }
 
     private void readPolicies() {
@@ -2678,10 +2646,6 @@ public class Game {
                                                                         .collect(Collectors.toMap(NativeAdvancements::getName, Function.identity(),
                                                                                                   (a, b) -> b)));
                 });
-
-        this.nativeAdvancements.values().forEach(advancements -> {
-            advancements.setLocalizedName(this.getLocalisation(advancements.getName()));
-        });
     }
 
     private void readNavalDoctrine() {
@@ -2695,8 +2659,6 @@ public class Game {
                                                                 .map(NavalDoctrine::new)
                                                                 .collect(Collectors.toMap(NavalDoctrine::getName, Function.identity(), (a, b) -> b)));
                 });
-
-        this.navalDoctrines.values().forEach(navalDoctrine -> navalDoctrine.setLocalizedName(this.getLocalisation(navalDoctrine.getName())));
     }
 
     private void readParliamentIssue() {

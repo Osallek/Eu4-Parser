@@ -2,7 +2,7 @@ package fr.osallek.eu4parser.model.save.empire;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.todo.ImperialReform;
+import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;

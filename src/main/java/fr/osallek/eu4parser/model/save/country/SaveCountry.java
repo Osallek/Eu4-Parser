@@ -41,10 +41,10 @@ import fr.osallek.eu4parser.model.game.StaticModifiers;
 import fr.osallek.eu4parser.model.game.TechGroup;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradePolicy;
-import fr.osallek.eu4parser.model.game.todo.GovernmentName;
+import fr.osallek.eu4parser.model.game.GovernmentName;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
-import fr.osallek.eu4parser.model.game.todo.ImperialReform;
-import fr.osallek.eu4parser.model.game.todo.Religion;
+import fr.osallek.eu4parser.model.game.ImperialReform;
+import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
@@ -400,7 +400,7 @@ public class SaveCountry {
             rank = this.governmentName.getRanks()
                                       .entrySet()
                                       .stream()
-                                      .filter(entry -> entry.getValue().getKey().equals(governmentRank))
+                                      .filter(entry -> entry.getValue().equals(governmentRank))
                                       .findFirst()
                                       .map(Map.Entry::getKey)
                                       .orElse(null);
@@ -421,7 +421,7 @@ public class SaveCountry {
     }
 
     public String getGovernmentLocalizedName() {
-        return this.governmentName == null ? null : this.governmentName.getRank(getGovernmentLevel()).getValue();
+        return this.governmentName == null ? null : save.getGame().getLocalisation(this.governmentName.getRank(getGovernmentLevel()));
     }
 
     public Integer getSubjectFocus() {
@@ -840,7 +840,7 @@ public class SaveCountry {
     public void addHarmonizedReligion(Religion religion) {
         ClausewitzList list = this.item.getList("harmonized_religions");
         Integer index = null;
-        List<Religion> religions = this.save.getGame().getReligionsNotOrdered();
+        List<Religion> religions = this.save.getGame().getReligions();
 
         for (int i = 0; i < religions.size(); i++) {
             if (religions.get(i).equals(religion)) {
@@ -863,7 +863,7 @@ public class SaveCountry {
 
         if (list != null) {
             Integer index = null;
-            List<Religion> religions = this.save.getGame().getReligionsNotOrdered();
+            List<Religion> religions = this.save.getGame().getReligions();
 
             for (int i = 0; i < religions.size(); i++) {
                 if (religions.get(i).equals(religion)) {

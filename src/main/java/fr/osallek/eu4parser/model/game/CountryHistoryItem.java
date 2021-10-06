@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
-import fr.osallek.eu4parser.model.game.todo.Religion;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;

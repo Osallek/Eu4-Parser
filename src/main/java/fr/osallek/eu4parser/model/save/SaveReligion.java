@@ -5,7 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.DefenderOfFaith;
 import fr.osallek.eu4parser.model.game.ReligionGroup;
-import fr.osallek.eu4parser.model.game.todo.Religion;
+import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.religion.MuslimRelation;
@@ -44,10 +44,6 @@ public class SaveReligion {
 
     public String getName() {
         return this.religionsItem == null ? this.religionInstanceDataItem.getName() : this.religionsItem.getName();
-    }
-
-    public String getLocalizedName() {
-        return this.gameReligion != null ? this.gameReligion.getLocalizedName() : getName();
     }
 
     public Religion getGameReligion() {
