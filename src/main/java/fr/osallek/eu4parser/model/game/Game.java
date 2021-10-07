@@ -16,7 +16,6 @@ import fr.osallek.eu4parser.common.TreeNode;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
-import fr.osallek.eu4parser.model.game.todo.Building;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
@@ -47,7 +46,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -62,6 +60,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -80,6 +79,10 @@ public class Game {
     private List<Mod> mods;
 
     private final File provincesImage;
+
+    private int provinceImageWidth;
+
+    private int provinceImageHeight;
 
     private TreeNode<FileNode> filesNode;
 
@@ -114,8 +117,6 @@ public class Game {
     private Map<String, ProvinceList> monsoons;
 
     private ProvinceList fakeMonsoon;
-
-    private int equatorYOnProvinceImage;
 
     private Map<String, CultureGroup> cultureGroups;
 
@@ -262,99 +263,619 @@ public class Game {
     public Game(String gameFolderPath, List<String> modEnabled) throws IOException {
         this.gameFolderPath = gameFolderPath;
 
-        Instant start = Instant.now();
-
         loadSettings();
         readMods(modEnabled);
 
         this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
 
-        loadDefines();
-        loadLocalisations();
-        readSpriteTypes();
-        readEstates();
-        readFactions();
-        readTradeGoods();
-        readBuildings();
-        readProvinces();
-        readAreas();
-        readRegions();
-        readSuperRegions();
-        readCultures();
-        readReligion();
-        readInstitutions();
-        readTradeNodes();
-        readImperialReforms();
-        readDecrees();
-        readGoldenBulls();
-        readEvents();
-        readGovernmentRanks();
-        readGovernmentNames();
-        readGovernmentReforms();
-        readGovernments();
-        readUnits();
-        readTechnologies();
-        readAdvisors();
-        readIdeaGroups();
-        readCasusBelli();
-        readTradeCompanies();
-        readSubjectTypes();
-        readFetishistCults();
-        readChurchAspects();
-        readMissionTrees();
-        readRulerPersonalities();
-        readLeaderPersonalities();
-        readProfessionalismModifiers();
-        readStaticModifiers();
-        readInvestments();
-        readPolicies();
-        readHegemons();
-        readAges();
-        readDefenderOfFaith();
-        readCentersOfTrade();
-        readFervors();
-        readGreatProjects();
-        readHolyOrders();
-        readIsolationism();
-        readNativeAdvancements();
-        readNavalDoctrine();
-        readParliamentIssue();
-        readPersonalDeities();
-        readReligiousReforms();
-        readCrownLandBonuses();
-        readStateEdicts();
-        readTradePolicies();
-        readEventModifiers();
-        readProvinceTriggeredModifiers();
-        readTriggeredModifiers();
-        readCountry();
-        readColonialRegions();
-        readDiplomacy();
+        CountDownLatch countDownLatch = new CountDownLatch(68);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Time to read game data: {}ms !", Duration.between(start, Instant.now()).toMillis());
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readProvincesDefinition();
+
+                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                    try {
+                        readProvinces();
+                    } catch (IOException e) {
+                        LOGGER.error(e.getMessage(), e);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+
+                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                    try {
+                        readBorders();
+                    } catch (IOException e) {
+                        LOGGER.error(e.getMessage(), e);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+
+                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                    try {
+                        readDefaultMap();
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+
+                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                    try {
+                        readClimate();
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+
+                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                    try {
+                        readContinents();
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+
+                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                    try {
+                        readPositions();
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+
+                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                    try {
+                        readProvinceHistory();
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                loadDefines();
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                loadLocalisations();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readSpriteTypes();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readEstates();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readFactions();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readTradeGoods();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readBuildings();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readAreas();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readRegions();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readSuperRegions();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readCultures();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readReligion();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readInstitutions();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readTradeNodes();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readImperialReforms();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readDecrees();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readGoldenBulls();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readEvents();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readGovernmentRanks();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readGovernmentNames();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readGovernmentReforms();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readGovernments();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readUnits();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readTechnologies();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readAdvisors();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readIdeaGroups();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readCasusBelli();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readTradeCompanies();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readSubjectTypes();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readFetishistCults();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readChurchAspects();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readMissionTrees();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readRulerPersonalities();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readLeaderPersonalities();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readProfessionalismModifiers();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readStaticModifiers();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readInvestments();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readPolicies();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readHegemons();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readAges();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readDefenderOfFaith();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readCentersOfTrade();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readFervors();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readGreatProjects();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readHolyOrders();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readIsolationism();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readNativeAdvancements();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readNavalDoctrine();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readParliamentIssue();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readPersonalDeities();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readReligiousReforms();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readCrownLandBonuses();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readStateEdicts();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readTradePolicies();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readEventModifiers();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readProvinceTriggeredModifiers();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readTriggeredModifiers();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readCountry();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readColonialRegions();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readDiplomacy();
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("An error occurred while waiting for game files reading : {}", e.getMessage(), e);
+            Thread.currentThread().interrupt();
         }
+
+        this.continents.values().forEach(continent -> continent.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setContinent(continent)));
+        this.areas.values().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
+        this.regions.values().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
+        this.superRegions.values()
+                         .stream()
+                         .filter(superRegion -> superRegion.getRegions() != null)
+                         .forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
     }
 
-    public void convertImages(String destFolder, String... relativePaths) throws IOException {
-        Instant instant = Instant.now();
+    public void convertImages(String destFolder, String... relativePaths) {
+        Map<String, List<Path>> paths = new HashMap<>();
+
         for (String relativePath : relativePaths) {
-            for (Path path : getPathsList(relativePath, fileNode -> Files.isRegularFile(fileNode.getPath()))) {
-                String fileName = path.getFileName().toString();
-                if (fileName.toLowerCase().endsWith(".tga") || fileName.toLowerCase().endsWith(".dds")) {
-                    File destFile = Path.of(destFolder, relativePath, FilenameUtils.removeExtension(fileName) + ".png").toFile();
-                    FileUtils.forceMkdirParent(destFile);
-                    ImageIO.write(ImageReader.convertFileToImage(path.toFile()), "png", destFile);
-                } else if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg") || fileName.toLowerCase().endsWith("jpeg")) {
-                    LOGGER.warn("png/jpg: {}", fileName);
-                    FileUtils.copyFile(path.toFile(), Path.of(destFolder, fileName).toFile());
-                } else {
-                    LOGGER.warn("Unknown: {}", fileName);
-                }
-            }
+            paths.put(relativePath, getPathsList(relativePath, fileNode -> Files.isRegularFile(fileNode.getPath())));
         }
 
-        LOGGER.info("Copy took {}ms", Duration.between(instant, Instant.now()).toMillis());
+        CountDownLatch countDownLatch = new CountDownLatch(paths.size());
+
+        for (Map.Entry<String, List<Path>> entry : paths.entrySet()) {
+            entry.getValue().forEach(path -> Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                try {
+                    String fileName = path.getFileName().toString();
+                    if (fileName.toLowerCase().endsWith(".tga") || fileName.toLowerCase().endsWith(".dds")) {
+                        File destFile = Path.of(destFolder, entry.getKey(), FilenameUtils.removeExtension(fileName) + ".png").toFile();
+                        FileUtils.forceMkdirParent(destFile);
+                        ImageIO.write(ImageReader.convertFileToImage(path.toFile()), "png", destFile);
+                    } else if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg")
+                               || fileName.toLowerCase().endsWith("jpeg")) {
+                        LOGGER.warn("png/jpg: {}", fileName);
+                        FileUtils.copyFile(path.toFile(), Path.of(destFolder, fileName).toFile());
+                    } else {
+                        LOGGER.warn("Unknown: {}", fileName);
+                    }
+                } catch (IOException e) {
+                    LOGGER.error("An error occurred while converting image {}: {}", path, e.getMessage(), e);
+                } finally {
+                    countDownLatch.countDown();
+                }
+            }));
+        }
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("An error occurred while waiting for image conversion : {}", e.getMessage(), e);
+            Thread.currentThread().interrupt();
+        }
     }
 
     private TreeNode<FileNode> getTreeNode(String relativePath) {
@@ -377,6 +898,11 @@ public class Game {
     private Stream<FileNode> getFileNodes(String relativePath, Predicate<FileNode>... predicates) {
         TreeNode<FileNode> treeNode = getTreeNode(relativePath);
         return treeNode == null ? Stream.empty() : treeNode.getLeaves(predicates).stream().map(TreeNode::getData);
+    }
+
+    @SafeVarargs
+    private List<FileNode> getFileNodesList(String relativePath, Predicate<FileNode>... predicates) {
+        return getFileNodes(relativePath, predicates).collect(Collectors.toList());
     }
 
     @SafeVarargs
@@ -417,6 +943,14 @@ public class Game {
         return this.provincesImage;
     }
 
+    public int getProvinceImageWidth() {
+        return provinceImageWidth;
+    }
+
+    public int getProvinceImageHeight() {
+        return provinceImageHeight;
+    }
+
     public String getVersion() {
         return version;
     }
@@ -451,10 +985,6 @@ public class Game {
 
     public Map<Integer, Province> getProvincesByColor() {
         return provincesByColor;
-    }
-
-    public Province getProvinceByColor(int red, int green, int blue) {
-        return this.provincesByColor.get(Eu4Utils.rgbToColor(red, green, blue));
     }
 
     public List<ProvinceList> getContinents() {
@@ -507,10 +1037,6 @@ public class Game {
 
     public ProvinceList getFakeMonsoon() {
         return fakeMonsoon;
-    }
-
-    public int getEquatorYOnProvinceImage() {
-        return equatorYOnProvinceImage;
     }
 
     public Map<Eu4Language, Map<String, String>> getAllLocalisations() {
@@ -1448,11 +1974,7 @@ public class Game {
         return new TreeMap<>(this.celestialEmperors);
     }
 
-    public Map<Province, Map<Polygon, Boolean>> getBorders() throws IOException {
-        if (this.borders == null) {
-            this.borders = Eu4MapUtils.imageToBorders(this, ImageIO.read(new File(getProvincesImage().getAbsolutePath())));
-        }
-
+    public Map<Province, Map<Polygon, Boolean>> getBorders() {
         return this.borders;
     }
 
@@ -1666,7 +2188,7 @@ public class Game {
                 });
     }
 
-    private void readProvinces() throws IOException {
+    private void readProvincesDefinition() throws IOException {
         File provincesDefinitionFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "definition.csv");
 
         if (provincesDefinitionFile != null && provincesDefinitionFile.canRead()) {
@@ -1681,276 +2203,288 @@ public class Game {
                         this.provinces.put(province.getId(), province);
 
                         if (province.getColor() != null) {
-                            this.provincesByColor.put(province.getColor(), province);
+                            this.provincesByColor.put(new Color(province.getColor()).getRGB(), province);
                         }
-                    }
-                }
-            }
-
-            File provincesMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "default.map");
-
-            if (provincesMapFile != null && provincesMapFile.canRead()) {
-                ClausewitzItem provinceMapItem = ClausewitzParser.parse(provincesMapFile, 0);
-                ClausewitzList seaList = provinceMapItem.getList("sea_starts");
-
-                if (seaList != null) {
-                    seaList.getValuesAsInt().forEach(id -> this.provinces.get(id).setOcean(true));
-                }
-
-                ClausewitzList lakesList = provinceMapItem.getList("lakes");
-
-                if (lakesList != null) {
-                    lakesList.getValuesAsInt().forEach(id -> this.provinces.get(id).setLake(true));
-                }
-            }
-
-            FileNode climateFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "climate.txt");
-
-            if (climateFile != null && climateFile.getPath().toFile().canRead()) {
-                ClausewitzItem climateItem = ClausewitzParser.parse(climateFile.getPath().toFile(), 0);
-                this.climateItem = climateItem;
-                this.climates = new HashMap<>();
-                this.winters = new HashMap<>();
-                this.monsoons = new HashMap<>();
-
-                climateItem.getLists()
-                           .forEach(list -> {
-                               if (list.getName().endsWith("_winter")) {
-                                   this.winters.put(list.getName(), new ProvinceList(list, climateFile));
-                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
-                               } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
-                                   this.impassableClimate = new ProvinceList(list, Eu4Utils.IMPASSABLE_LOCALIZATION, climateFile);
-                                   this.climates.put(Eu4Utils.IMPASSABLE_CLIMATE, this.impassableClimate);
-                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
-                               } else if (list.getName().endsWith("_monsoon")) {
-                                   this.monsoons.put(list.getName(), new ProvinceList(list, climateFile));
-                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setMonsoon(list.getName()));
-                               } else {
-                                   this.climates.put(list.getName(), new ProvinceList(list, climateFile));
-                                   list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
-                               }
-                           });
-
-                this.fakeClimate = new ProvinceList(Eu4Utils.DEFAULT_CLIMATE,
-                                                    this.provinces.values()
-                                                                  .stream()
-                                                                  .filter(province -> province.getClimate() == null)
-                                                                  .map(Province::getId)
-                                                                  .collect(Collectors.toList()));
-                this.climates.put(Eu4Utils.DEFAULT_CLIMATE, this.fakeClimate);
-
-                this.fakeWinter = new ProvinceList(Eu4Utils.DEFAULT_WINTER,
-                                                   this.provinces.values()
-                                                                 .stream()
-                                                                 .filter(province -> province.getWinter() == null)
-                                                                 .map(Province::getId)
-                                                                 .collect(Collectors.toList()));
-                this.winters.put(Eu4Utils.DEFAULT_WINTER, this.fakeWinter);
-
-                this.fakeMonsoon = new ProvinceList(Eu4Utils.DEFAULT_MONSOON,
-                                                    this.provinces.values()
-                                                                  .stream()
-                                                                  .filter(province -> province.getMonsoon() == null)
-                                                                  .map(Province::getId)
-                                                                  .collect(Collectors.toList()));
-                this.monsoons.put(Eu4Utils.DEFAULT_MONSOON, this.fakeMonsoon);
-
-                if (climateItem.hasVar("equator_y_on_province_image")) {
-                    this.equatorYOnProvinceImage = climateItem.getVarAsInt("equator_y_on_province_image");
-                }
-            }
-
-            FileNode continentFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "continent.txt");
-
-            if (continentFile != null && continentFile.getPath().toFile().canRead()) {
-                ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile.getPath().toFile(), 0);
-
-                this.continents = continentsItem.getListsNot("island_check_provinces")
-                                                .stream()
-                                                .map(list -> new ProvinceList(list, continentFile))
-                                                .collect(Collectors.toMap(ProvinceList::getName, Function.identity(), (a, b) -> a, LinkedHashMap::new));
-
-                this.continents.values().forEach(continent -> {
-                    continent.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setContinent(continent));
-                });
-            }
-
-            File positionsFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "positions.txt");
-
-            if (positionsFile != null && positionsFile.canRead()) {
-                ClausewitzItem positionsItem = ClausewitzParser.parse(positionsFile, 0);
-
-                positionsItem.getChildren().forEach(child -> {
-                    Integer provinceId = NumbersUtils.toInt(child.getName());
-
-                    if (provinceId != null && this.provinces.containsKey(provinceId) && child.hasList("position")) {
-                        this.provinces.get(provinceId).setPositions(child.getList("position"));
-                    }
-                });
-            }
-
-            if (this.provincesImage != null && this.provincesImage.canRead()) {
-                BufferedImage provinceImage = ImageIO.read(this.provincesImage);
-
-                for (int x = 0; x < provinceImage.getWidth(); x++) {
-                    for (int y = 0; y < provinceImage.getHeight(); y++) {
-                        int[] rgb = provinceImage.getRaster().getPixel(x, y, (int[]) null);
-                        Province province = getProvinceByColor(rgb[0], rgb[1], rgb[2]);
-                        Province other;
-
-                        if (province != null && province.isColonizable() && !province.isPort()) {
-                            if (x > 0) {
-                                int[] leftRgb = provinceImage.getRaster().getPixel(x - 1, y, (int[]) null);
-                                if (!Arrays.equals(leftRgb, rgb) && (other = getProvinceByColor(leftRgb[0], leftRgb[1], leftRgb[2])) != null
-                                    && other.isOcean()) {
-                                    province.setPort(true);
-                                }
-                            }
-
-                            if (x < provinceImage.getWidth() - 1) {
-                                int[] rightRgb = provinceImage.getRaster().getPixel(x + 1, y, (int[]) null);
-                                if (!Arrays.equals(rightRgb, rgb) && (other = getProvinceByColor(rightRgb[0], rightRgb[1], rightRgb[2])) != null
-                                    && other.isOcean()) {
-                                    province.setPort(true);
-                                }
-                            }
-
-                            if (y > 0) {
-                                int[] topRgb = provinceImage.getRaster().getPixel(x, y - 1, (int[]) null);
-                                if (!Arrays.equals(topRgb, rgb) && (other = getProvinceByColor(topRgb[0], topRgb[1], topRgb[2])) != null && other.isOcean()) {
-                                    province.setPort(true);
-                                }
-                            }
-
-                            if (y < provinceImage.getHeight() - 1) {
-                                int[] bottomRgb = provinceImage.getRaster().getPixel(x, y + 1, (int[]) null);
-                                if (!Arrays.equals(bottomRgb, rgb) && (other = getProvinceByColor(bottomRgb[0], bottomRgb[1], bottomRgb[2])) != null
-                                    && other.isOcean()) {
-                                    province.setPort(true);
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-                getFileNodes(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile)
-                        .forEach(fileNode -> {
-                            String[] fileNameSplit = fileNode.getPath().getFileName().toString().split("[ -]");
-                            try {
-                                if (fileNameSplit.length >= 1) {
-                                    int provinceId = Eu4Utils.cleanStringAndParseToInt(fileNameSplit[0]);
-                                    getProvince(provinceId).setHistory(ClausewitzParser.parse(fileNode.getPath().toFile(), 0), this, fileNode);
-                                    //Fixme multiple history files with different names are compatible https://eu4.paradoxwikis.com/History_modding#Compatibility_-_Partial_Overwrites
-                                }
-                            } catch (NumberFormatException ignored) {
-                            }
-                        });
-
-                File terrainMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.bmp");
-                File treesMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "trees.bmp");
-
-                if (terrainMapFile != null && terrainMapFile.canRead() && treesMapFile != null && treesMapFile.canRead()) {
-                    BufferedImage terrainMap = ImageIO.read(terrainMapFile);
-                    List<Color> terrainColors = new ArrayList<>();
-                    IndexColorModel colorModel = (IndexColorModel) terrainMap.getColorModel();
-
-                    for (int i = 0; i < colorModel.getMapSize() + 1; i++) {
-                        terrainColors.add(new Color(colorModel.getRGB(i)));
-                    }
-
-                    BufferedImage treesMap = ImageIO.read(treesMapFile);
-                    List<Color> treesColors = new ArrayList<>();
-                    colorModel = (IndexColorModel) treesMap.getColorModel();
-
-                    for (int i = 0; i < colorModel.getMapSize() + 1; i++) {
-                        treesColors.add(new Color(colorModel.getRGB(i)));
-                    }
-
-                    Map<Integer, List<Integer>> provinceTerrainColors = new HashMap<>();
-                    for (int x = 0; x < terrainMap.getWidth(); x++) {
-                        for (int y = 0; y < terrainMap.getHeight(); y++) {
-                            int terrainColor = terrainMap.getRGB(x, y);
-                            int provinceColor = provinceImage.getRGB(x, y);
-
-                            if (!provinceTerrainColors.containsKey(provinceColor)) {
-                                provinceTerrainColors.put(provinceColor, new ArrayList<>());
-                            }
-
-                            provinceTerrainColors.get(provinceColor).add(terrainColor);
-                        }
-                    }
-
-                    Map<Integer, Integer> provinceTerrains = provinceTerrainColors.entrySet()
-                                                                                  .stream()
-                                                                                  .collect(Collectors.toMap(Map.Entry::getKey,
-                                                                                                            entry -> {
-                                                                                                                Map<Integer, Long> map = entry.getValue()
-                                                                                                                                              .stream()
-                                                                                                                                              .collect(
-                                                                                                                                                      Collectors.groupingBy(
-                                                                                                                                                              Function.identity(),
-                                                                                                                                                              Collectors.counting()));
-                                                                                                                return map.entrySet()
-                                                                                                                          .stream()
-                                                                                                                          .max(Comparator.comparingLong(
-                                                                                                                                  Map.Entry::getValue))
-                                                                                                                          .get()
-                                                                                                                          .getKey();
-                                                                                                            }));
-
-                    FileNode terrainFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.txt");
-
-                    if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
-                        ClausewitzItem terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
-                        this.terrainItem = terrainItem;
-                        ClausewitzItem terrainsItem = terrainItem.getChild("terrain");
-
-                        this.terrains = new HashMap<>();
-                        this.terrains.putAll(terrainsItem.getChildren()
-                                                         .stream()
-                                                         .map(item -> new Terrain(item, terrainFile, this, terrainColors))
-                                                         .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
-
-                        ClausewitzItem treesItem = terrainItem.getChild("tree");
-
-                        this.trees = new HashMap<>();
-                        this.trees.putAll(treesItem.getChildren()
-                                                   .stream()
-                                                   .map(item -> new Tree(item, terrainFile, this, treesColors))
-                                                   .collect(Collectors.toMap(Tree::getName, Function.identity(), (a, b) -> b)));
-
-                        ClausewitzItem categories = terrainItem.getChild("categories");
-
-                        this.terrainCategories = new HashMap<>();
-                        this.terrainCategories.putAll(categories.getChildren()
-                                                                .stream()
-                                                                .map(item -> new TerrainCategory(item, terrainFile))
-                                                                .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
-
-                        provinceTerrains.forEach((provinceColor, color) ->
-                                                         this.terrains.values()
-                                                                      .stream()
-                                                                      .filter(t -> t.getFileColors().contains(new Color(color)))
-                                                                      .findFirst()
-                                                                      .ifPresent(terrain -> {
-                                                                          Color c = new Color(provinceColor);
-                                                                          Province p = this.provincesByColor.get(
-                                                                                  Eu4Utils.rgbToColor(c.getRed(), c.getGreen(), c.getBlue()));
-                                                                          p.setTerrainCategory(terrain.getCategory());
-                                                                          terrain.getCategory().getComputedProvinces().add(p.getId());
-                                                                      }));
-
-                        this.terrainCategories.values()
-                                              .stream()
-                                              .filter(terrainCategory -> CollectionUtils.isNotEmpty(terrainCategory.getProvinces()))
-                                              .forEach(terrainCategory -> terrainCategory.getProvinces()
-                                                                                         .forEach(id -> this.provinces.get(id)
-                                                                                                                      .setTerrainCategory(terrainCategory)));
                     }
                 }
             }
         }
+    }
+
+    private void readDefaultMap() {
+        File provincesMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "default.map");
+
+        if (provincesMapFile != null && provincesMapFile.canRead()) {
+            ClausewitzItem provinceMapItem = ClausewitzParser.parse(provincesMapFile, 0);
+            ClausewitzList seaList = provinceMapItem.getList("sea_starts");
+
+            if (seaList != null) {
+                seaList.getValuesAsInt().forEach(id -> this.provinces.get(id).setOcean(true));
+            }
+
+            ClausewitzList lakesList = provinceMapItem.getList("lakes");
+
+            if (lakesList != null) {
+                lakesList.getValuesAsInt().forEach(id -> this.provinces.get(id).setLake(true));
+            }
+        }
+    }
+
+    private void readClimate() {
+        FileNode climateFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "climate.txt");
+
+        if (climateFile != null && climateFile.getPath().toFile().canRead()) {
+            ClausewitzItem climateItem = ClausewitzParser.parse(climateFile.getPath().toFile(), 0);
+            this.climateItem = climateItem;
+            this.climates = new HashMap<>();
+            this.winters = new HashMap<>();
+            this.monsoons = new HashMap<>();
+
+            climateItem.getLists()
+                       .forEach(list -> {
+                           if (list.getName().endsWith("_winter")) {
+                               this.winters.put(list.getName(), new ProvinceList(list, climateFile));
+                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
+                           } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
+                               this.impassableClimate = new ProvinceList(list, Eu4Utils.IMPASSABLE_LOCALIZATION, climateFile);
+                               this.climates.put(Eu4Utils.IMPASSABLE_CLIMATE, this.impassableClimate);
+                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
+                           } else if (list.getName().endsWith("_monsoon")) {
+                               this.monsoons.put(list.getName(), new ProvinceList(list, climateFile));
+                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setMonsoon(list.getName()));
+                           } else {
+                               this.climates.put(list.getName(), new ProvinceList(list, climateFile));
+                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
+                           }
+                       });
+
+            this.fakeClimate = new ProvinceList(Eu4Utils.DEFAULT_CLIMATE,
+                                                this.provinces.values()
+                                                              .stream()
+                                                              .filter(province -> province.getClimate() == null)
+                                                              .map(Province::getId)
+                                                              .collect(Collectors.toList()));
+            this.climates.put(Eu4Utils.DEFAULT_CLIMATE, this.fakeClimate);
+
+            this.fakeWinter = new ProvinceList(Eu4Utils.DEFAULT_WINTER,
+                                               this.provinces.values()
+                                                             .stream()
+                                                             .filter(province -> province.getWinter() == null)
+                                                             .map(Province::getId)
+                                                             .collect(Collectors.toList()));
+            this.winters.put(Eu4Utils.DEFAULT_WINTER, this.fakeWinter);
+
+            this.fakeMonsoon = new ProvinceList(Eu4Utils.DEFAULT_MONSOON,
+                                                this.provinces.values()
+                                                              .stream()
+                                                              .filter(province -> province.getMonsoon() == null)
+                                                              .map(Province::getId)
+                                                              .collect(Collectors.toList()));
+            this.monsoons.put(Eu4Utils.DEFAULT_MONSOON, this.fakeMonsoon);
+        }
+    }
+
+    private void readContinents() {
+        FileNode continentFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "continent.txt");
+
+        if (continentFile != null && continentFile.getPath().toFile().canRead()) {
+            ClausewitzItem continentsItem = ClausewitzParser.parse(continentFile.getPath().toFile(), 0);
+
+            this.continents = continentsItem.getListsNot("island_check_provinces")
+                                            .stream()
+                                            .map(list -> new ProvinceList(list, continentFile))
+                                            .collect(Collectors.toMap(ProvinceList::getName, Function.identity(), (a, b) -> a, LinkedHashMap::new));
+        }
+    }
+
+    private void readPositions() {
+        File positionsFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "positions.txt");
+
+        if (positionsFile != null && positionsFile.canRead()) {
+            ClausewitzItem positionsItem = ClausewitzParser.parse(positionsFile, 0);
+
+            positionsItem.getChildren().forEach(child -> {
+                Integer provinceId = NumbersUtils.toInt(child.getName());
+
+                if (provinceId != null && this.provinces.containsKey(provinceId) && child.hasList("position")) {
+                    this.provinces.get(provinceId).setPositions(child.getList("position"));
+                }
+            });
+        }
+    }
+
+    private void readProvinceHistory() {
+
+        List<FileNode> fileNodes = getFileNodesList(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile);
+        CountDownLatch countDownLatch = new CountDownLatch(fileNodes.size());
+
+        fileNodes.forEach(fileNode -> Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                String[] fileNameSplit = fileNode.getPath().getFileName().toString().split("[ -]");
+                if (fileNameSplit.length >= 1) {
+                    int provinceId = Eu4Utils.cleanStringAndParseToInt(fileNameSplit[0]);
+                    getProvince(provinceId).setHistory(ClausewitzParser.parse(fileNode.getPath().toFile(), 0), this, fileNode);
+                    //Fixme multiple history files with different names are compatible https://eu4.paradoxwikis.com/History_modding#Compatibility_-_Partial_Overwrites
+                }
+            } catch (NumberFormatException ignored) {
+            } finally {
+                countDownLatch.countDown();
+            }
+        }));
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("An error occurred while reading province history : {}", e.getMessage(), e);
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void readProvinces() throws IOException {
+        File terrainMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.bmp");
+        File treesMapFile = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "trees.bmp");
+
+        if (this.provincesImage != null && this.provincesImage.canRead() && terrainMapFile != null && terrainMapFile.canRead()
+            && treesMapFile != null && treesMapFile.canRead()) {
+            BufferedImage provinceImage = ImageIO.read(this.provincesImage);
+            BufferedImage terrainMap = ImageIO.read(terrainMapFile);
+            BufferedImage treesMap = ImageIO.read(treesMapFile);
+            this.provinceImageWidth = provinceImage.getWidth();
+            this.provinceImageHeight = provinceImage.getHeight();
+
+            List<Color> terrainColors = new ArrayList<>();
+            IndexColorModel colorModel = (IndexColorModel) terrainMap.getColorModel();
+
+            for (int i = 0; i < colorModel.getMapSize() + 1; i++) {
+                terrainColors.add(new Color(colorModel.getRGB(i)));
+            }
+
+            List<Color> treesColors = new ArrayList<>();
+            colorModel = (IndexColorModel) treesMap.getColorModel();
+
+            for (int i = 0; i < colorModel.getMapSize() + 1; i++) {
+                treesColors.add(new Color(colorModel.getRGB(i)));
+            }
+
+            Map<Integer, List<Integer>> provinceTerrainColors = new HashMap<>();
+
+            for (int x = 0; x < this.provinceImageWidth; x++) {
+                for (int y = 0; y < this.provinceImageHeight; y++) {
+                    int rgb = provinceImage.getRGB(x, y);
+                    Province province = this.provincesByColor.get(rgb);
+                    Province other;
+
+                    if (province != null && province.isColonizable() && !province.isPort()) {
+                        if (x > 0) {
+                            int leftRgb = provinceImage.getRGB(x - 1, y);
+                            if (leftRgb != rgb && (other = this.provincesByColor.get(leftRgb)) != null && other.isOcean()) {
+                                province.setPort(true);
+                            }
+                        }
+
+                        if (x < provinceImage.getWidth() - 1) {
+                            int rightRgb = provinceImage.getRGB(x + 1, y);
+                            if (rightRgb != rgb && (other = this.provincesByColor.get(rightRgb)) != null && other.isOcean()) {
+                                province.setPort(true);
+                            }
+                        }
+
+                        if (y > 0) {
+                            int topRgb = provinceImage.getRGB(x, y - 1);
+                            if (topRgb != rgb && (other = this.provincesByColor.get(topRgb)) != null && other.isOcean()) {
+                                province.setPort(true);
+                            }
+                        }
+
+                        if (y < provinceImage.getHeight() - 1) {
+                            int bottomRgb = provinceImage.getRGB(x, y + 1);
+                            if (bottomRgb != rgb && (other = this.provincesByColor.get(bottomRgb)) != null && other.isOcean()) {
+                                province.setPort(true);
+                            }
+                        }
+                    }
+
+                    int terrainColor = terrainMap.getRGB(x, y);
+                    int provinceColor = provinceImage.getRGB(x, y);
+
+                    if (!provinceTerrainColors.containsKey(provinceColor)) {
+                        provinceTerrainColors.put(provinceColor, new ArrayList<>());
+                    }
+
+                    provinceTerrainColors.get(provinceColor).add(terrainColor);
+                }
+            }
+
+            Map<Integer, Integer> provinceTerrains = provinceTerrainColors.entrySet()
+                                                                          .stream()
+                                                                          .collect(Collectors.toMap(Map.Entry::getKey,
+                                                                                                    entry -> {
+                                                                                                        Map<Integer, Long> map = entry.getValue()
+                                                                                                                                      .stream()
+                                                                                                                                      .collect(
+                                                                                                                                              Collectors.groupingBy(
+                                                                                                                                                      Function.identity(),
+                                                                                                                                                      Collectors.counting()));
+                                                                                                        return map.entrySet()
+                                                                                                                  .stream()
+                                                                                                                  .max(Comparator.comparingLong(
+                                                                                                                          Map.Entry::getValue))
+                                                                                                                  .get()
+                                                                                                                  .getKey();
+                                                                                                    }));
+
+            FileNode terrainFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.txt");
+
+            if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
+                ClausewitzItem terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
+                this.terrainItem = terrainItem;
+                ClausewitzItem terrainsItem = terrainItem.getChild("terrain");
+
+                this.terrains = new HashMap<>();
+                this.terrains.putAll(terrainsItem.getChildren()
+                                                 .stream()
+                                                 .map(item -> new Terrain(item, terrainFile, this, terrainColors))
+                                                 .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
+
+                ClausewitzItem treesItem = terrainItem.getChild("tree");
+
+                this.trees = new HashMap<>();
+                this.trees.putAll(treesItem.getChildren()
+                                           .stream()
+                                           .map(item -> new Tree(item, terrainFile, this, treesColors))
+                                           .collect(Collectors.toMap(Tree::getName, Function.identity(), (a, b) -> b)));
+
+                ClausewitzItem categories = terrainItem.getChild("categories");
+
+                this.terrainCategories = new HashMap<>();
+                this.terrainCategories.putAll(categories.getChildren()
+                                                        .stream()
+                                                        .map(item -> new TerrainCategory(item, terrainFile))
+                                                        .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
+
+                provinceTerrains.forEach((provinceColor, color) ->
+                                                 this.terrains.values()
+                                                              .stream()
+                                                              .filter(t -> t.getFileColors().contains(new Color(color)))
+                                                              .findFirst()
+                                                              .ifPresent(terrain -> {
+                                                                  Province p = this.provincesByColor.get(provinceColor);
+                                                                  p.setTerrainCategory(terrain.getCategory());
+                                                                  terrain.getCategory().getComputedProvinces().add(p.getId());
+                                                              }));
+
+                this.terrainCategories.values()
+                                      .stream()
+                                      .filter(terrainCategory -> CollectionUtils.isNotEmpty(terrainCategory.getProvinces()))
+                                      .forEach(terrainCategory -> terrainCategory.getProvinces()
+                                                                                 .forEach(id -> this.provinces.get(id)
+                                                                                                              .setTerrainCategory(terrainCategory)));
+            }
+        }
+    }
+
+    private void readBorders() throws IOException {
+        this.borders = Eu4MapUtils.imageToBorders(this, ImageIO.read(new File(getProvincesImage().getAbsolutePath())));
     }
 
     private void readCultures() {
@@ -2034,19 +2568,10 @@ public class Game {
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "buildings", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.buildings.putAll(buildingsItem.getChildrenNot("manufactory")
+                    this.buildings.putAll(buildingsItem.getChildren()
                                                        .stream()
-                                                       .map(item -> new Building(item, this::getTradeGood, this))
+                                                       .map(item -> new Building(item, this))
                                                        .collect(Collectors.toMap(Building::getName, Function.identity(), (a, b) -> b)));
-
-                    if ((buildingsItem = buildingsItem.getChild("manufactory")) != null) {
-                        Building manufactoryBuilding = new Building(buildingsItem, this::getTradeGood, this);
-                        this.buildings.values().forEach(building -> {
-                            building.setInternalCost(manufactoryBuilding.getCost());
-                            building.setInternalTime(manufactoryBuilding.getTime());
-                            building.setInternalModifiers(manufactoryBuilding.getModifiers());
-                        });
-                    }
                 });
     }
 
@@ -2191,8 +2716,6 @@ public class Game {
                                        .map(item -> new Area(item, areasFile))
                                        .collect(Collectors.toMap(Area::getName, Function.identity(), (a, b) -> b)));
         }
-
-        this.areas.values().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
     }
 
     private void readRegions() {
@@ -2206,8 +2729,6 @@ public class Game {
                                            .map(item -> new Region(item, this))
                                            .collect(Collectors.toMap(Region::getName, Function.identity(), (a, b) -> b)));
         }
-
-        this.regions.values().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
     }
 
     private void readSuperRegions() {
@@ -2221,11 +2742,6 @@ public class Game {
                                                 .map(list -> new SuperRegion(list, this))
                                                 .collect(Collectors.toMap(SuperRegion::getName, Function.identity(), (a, b) -> b)));
         }
-
-        this.superRegions.values()
-                         .stream()
-                         .filter(superRegion -> superRegion.getRegions() != null)
-                         .forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
     }
 
     private void readTechnologies() {

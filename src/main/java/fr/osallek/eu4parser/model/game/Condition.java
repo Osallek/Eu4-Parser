@@ -70,6 +70,10 @@ public class Condition {
         return scopes;
     }
 
+    public List<Condition> getScopes(String name) {
+        return this.scopes == null ? null : this.scopes.stream().filter(condition -> name.equals(condition.getName())).collect(Collectors.toList());
+    }
+
     public boolean apply(SaveCountry root, SaveCountry from) {
         if (this.conditions != null && this.conditions.entrySet()
                                                       .stream()

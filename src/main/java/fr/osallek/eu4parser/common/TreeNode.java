@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,10 +32,8 @@ public class TreeNode<T extends Comparable<T>> implements Comparable<TreeNode<T>
     public TreeNode(TreeNode<T> parent, T data, Function<T, Collection<T>> getChildrenFunction) {
         setParent(parent);
         this.data = data;
-        this.children.addAll(getChildrenFunction.apply(data)
-                                                .stream()
-                                                .map(t -> new TreeNode<>(this, t, getChildrenFunction))
-                                                .collect(Collectors.toCollection(TreeSet::new)));
+
+        getChildrenFunction.apply(data).forEach(t -> this.children.add(new TreeNode<>(this, t, getChildrenFunction)));
     }
 
     public boolean isRoot() {

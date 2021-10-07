@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.eu4parser.model.Mod;
+import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,9 +61,13 @@ public class FileNode implements Comparable<FileNode> {
     }
 
     public static List<FileNode> getChildren(FileNode fileNode) {
-        try (Stream<Path> stream = Files.list(fileNode.path)) {
-            return stream.map(p -> new FileNode(fileNode.root, p, fileNode.mod)).collect(Collectors.toList());
-        } catch (IOException e) {
+        if (Files.isDirectory(fileNode.path)) {
+            try (Stream<Path> stream = Files.list(fileNode.path)) {
+                return stream.map(p -> new FileNode(fileNode.root, p, fileNode.mod)).collect(Collectors.toList());
+            } catch (IOException e) {
+                return new ArrayList<>();
+            }
+        } else {
             return new ArrayList<>();
         }
     }

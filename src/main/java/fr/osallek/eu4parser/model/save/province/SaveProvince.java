@@ -6,10 +6,12 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.UnitType;
+import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.CenterOfTrade;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.GameModifier;
 import fr.osallek.eu4parser.model.game.GreatProject;
+import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.Investment;
 import fr.osallek.eu4parser.model.game.Modifier;
@@ -20,8 +22,6 @@ import fr.osallek.eu4parser.model.game.StaticModifiers;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.TradePolicy;
-import fr.osallek.eu4parser.model.game.todo.Building;
-import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.Save;
@@ -1099,7 +1099,7 @@ public class SaveProvince extends Province {
         }
 
         OptionalDouble fortLevel = getBuildings().stream()
-                                                 .map(Building::getModifiers)
+                                                 .map(b -> b.getBuilding().getModifiers())
                                                  .filter(m -> m.getModifier("fort_level") != null)
                                                  .mapToDouble(m -> m.getModifier("fort_level"))
                                                  .max();
@@ -1285,7 +1285,7 @@ public class SaveProvince extends Province {
 
         if (CollectionUtils.isNotEmpty(getBuildings())) {
             list.addAll(getBuildings().stream()
-                                      .map(ProvinceBuilding::getModifiers)
+                                      .map(b -> b.getBuilding().getModifiers())
                                       .filter(Objects::nonNull)
                                       .filter(m -> m.hasModifier(modifier))
                                       .map(m -> m.getModifier(modifier))

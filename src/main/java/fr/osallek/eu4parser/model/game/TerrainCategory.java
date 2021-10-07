@@ -4,7 +4,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -65,8 +64,8 @@ public class TerrainCategory extends Noded {
         this.item.setVariable("sound_type", soundType);
     }
 
-    public boolean isWater() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_water"));
+    public Boolean isWater() {
+        return this.item.getVarAsBool("is_water");
     }
 
     public void setIsWater(Boolean isWater) {
@@ -77,8 +76,8 @@ public class TerrainCategory extends Noded {
         }
     }
 
-    public boolean isInlandSea() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("inland_sea"));
+    public Boolean isInlandSea() {
+        return this.item.getVarAsBool("inland_sea");
     }
 
     public void setInlandSea(Boolean inlandSea) {

@@ -3,15 +3,15 @@ package fr.osallek.eu4parser.common;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.UnitType;
+import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Condition;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.game.Policy;
 import fr.osallek.eu4parser.model.game.ProvinceList;
-import fr.osallek.eu4parser.model.game.TradeGood;
-import fr.osallek.eu4parser.model.game.todo.Building;
 import fr.osallek.eu4parser.model.game.Religion;
+import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
@@ -385,7 +385,7 @@ public class ConditionsUtils {
                        && BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.GOLD))
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))) >= 0;
             case "government":
-                return country.getGovernment().getType().equals(ClausewitzUtils.addQuotes(value));
+                return country.getGovernment().getType().getName().equals(ClausewitzUtils.addQuotes(value));
             case "government_rank":
                 return country.getGovernmentLevel() >= NumbersUtils.toInt(value);
             case "grown_by_development":
@@ -432,7 +432,7 @@ public class ConditionsUtils {
             case "has_changed_nation":
                 return BooleanUtils.toBoolean(country.hasSwitchedNation());
             case "has_church_aspect":
-                return country.getChurch() != null && country.getChurch().getAspects().contains(value);
+                return country.getChurch() != null && country.getChurch().getAspects().stream().anyMatch(churchAspect -> value.equals(churchAspect.getName()));
             case "has_colonial_parent":
                 return country.isColony() && country.getOverlord().getTag().equals(value);
             case "has_commanding_three_star":
@@ -654,8 +654,8 @@ public class ConditionsUtils {
                               .getProvinces()
                               .values()
                               .stream()
-                              .filter(province ->  province.getCulture() != null
-                                                   && province.getCulture().getCultureGroup().equals(country.getPrimaryCulture().getCultureGroup()))
+                              .filter(province -> province.getCulture() != null
+                                                  && province.getCulture().getCultureGroup().equals(country.getPrimaryCulture().getCultureGroup()))
                               .allMatch(province -> province.getOwner().equals(country));
             case "has_unit_type":
                 return country.getUnitType().equals(value);
@@ -812,7 +812,8 @@ public class ConditionsUtils {
                                                                                          && saveReligion.getPapacy().getCrusadeTarget().equals(country));
             case "is_defender_of_faith":
                 return country.isAlive() && country.getReligion() != null
-                       && ("yes".equalsIgnoreCase(value) == (country.getReligion().hasDefenderOfFaith() && country.equals(country.getReligion().getDefender())));
+                       && ("yes".equalsIgnoreCase(value) == (country.getReligion().hasDefenderOfFaith() && country.equals(
+                        country.getReligion().getDefender())));
             case "is_dynamic_tag":
                 return "yes".equalsIgnoreCase(value) == country.isClientState();
             case "is_elector":
@@ -962,7 +963,7 @@ public class ConditionsUtils {
             case "is_religion_enabled":
                 SaveReligion saveReligion = country.getSave().getReligions().getReligion(rawValueToReligion(rawValue, root, from));
                 return saveReligion != null && (saveReligion.getGameReligion().getDate() == null
-                           || (saveReligion.getEnable() != null && country.getSave().getDate().isAfter(saveReligion.getEnable())));
+                                                || (saveReligion.getEnable() != null && country.getSave().getDate().isAfter(saveReligion.getEnable())));
             case "is_religion_reformed":
                 return "yes".equalsIgnoreCase(value) == (BooleanUtils.toBoolean(country.hasReformedReligion()));
             case "is_republic":
@@ -1156,7 +1157,7 @@ public class ConditionsUtils {
             case "mil_tech":
                 return country.getTech().getMil() >= Integer.parseInt(value);
             case "mission_completed":
-                return country.getCompletedMissions().contains(ClausewitzUtils.addQuotes(value));
+                return country.getCompletedMissions().stream().anyMatch(mission -> mission.getName().equals(ClausewitzUtils.removeQuotes(value)));
             case "modifier": //Used for scope has_estate_influence_modifier, has_estate_loyalty_modifier
                 return true;
             case "monthly_income":
@@ -1211,7 +1212,9 @@ public class ConditionsUtils {
                                                                                                                                        .getValue()
                                                                                                                                        .apply(country,
                                                                                                                                               country)))
-                                                         && NumbersUtils.doubleOrDefault(country.getRawDevelopment()) >= country.getSave().getGame().getNomadDevelopmentScale());
+                                                         && NumbersUtils.doubleOrDefault(country.getRawDevelopment()) >= country.getSave()
+                                                                                                                                .getGame()
+                                                                                                                                .getNomadDevelopmentScale());
             case "normal_or_historical_nations":
                 return "yes".equalsIgnoreCase(value) == (NationSetup.NORMAL.equals(country.getSave().getGameplayOptions().getNationSetup())
                                                          || NationSetup.HISTORICAL.equals(country.getSave().getGameplayOptions().getNationSetup()));
@@ -2265,7 +2268,8 @@ public class ConditionsUtils {
                         SaveReligion finalReligion = religion;
                         return root.getOwnedProvinces().stream().filter(province -> finalReligion.equals(province.getReligion())).count() >= integer;
                     } else if (condition.getCondition("heretic") != null) {
-                        return root.getOwnedProvinces().stream().filter(province -> !Objects.equals(root.getReligion(), province.getReligion())).count() >= integer;
+                        return root.getOwnedProvinces().stream().filter(province -> !Objects.equals(root.getReligion(), province.getReligion())).count()
+                               >= integer;
                     } else {
                         return false;
                     }
@@ -2427,9 +2431,9 @@ public class ConditionsUtils {
             case "culture":
                 return province.getCulture() != null && rawValueToCulture(rawValue, province).equalsIgnoreCase(province.getCultureName());
             case "culture_group":
-                return  province.getCulture() != null && province.getCulture().getCultureGroup().getName().equals(rawValueToCultureGroup(rawValue, province));
+                return province.getCulture() != null && province.getCulture().getCultureGroup().getName().equals(rawValueToCultureGroup(rawValue, province));
             case "current_age":
-                return province.getSave().getCurrentAge().equals(value);
+                return province.getSave().getCurrentAge().getName().equals(value);
             case "current_institution_growth": //Todo (global + local)
                 break;
             case "custom_nation_setup":
@@ -2452,8 +2456,8 @@ public class ConditionsUtils {
             case "fort_level":
                 return province.getBuildings()
                                .stream()
-                               .anyMatch(build -> build.getModifiers().hasModifier("fort_level")
-                                                  && build.getModifiers().getModifier("fort_level") >= NumbersUtils.toInt(value));
+                               .anyMatch(build -> build.getBuilding().getModifiers().hasModifier("fort_level")
+                                                  && build.getBuilding().getModifiers().getModifier("fort_level") >= NumbersUtils.toInt(value));
             case "galleys_in_province":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return province.getGalleys().size() >= integer;
@@ -2516,7 +2520,7 @@ public class ConditionsUtils {
                 other = province.getSave().getCountry(value);
                 return other.equals(province.getSave().getTradeNodes().get(province.getTrade()).getTopProvinces().entrySet().iterator().next().getKey());
             case "has_owner_accepted_culture":
-                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null  && province.getCulture() != null
+                return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getCulture() != null
                                                          && province.getOwner().getAcceptedCultures().contains(province.getCulture()));
             case "has_owner_culture":
                 return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getCulture() != null
@@ -2893,7 +2897,8 @@ public class ConditionsUtils {
             case "religion":
                 return province.getReligion() != null && rawValueToReligion(rawValue, province).equalsIgnoreCase(province.getReligionName());
             case "religion_group":
-                return province.getReligion() != null && rawValueToReligionGroup(rawValue, province).equalsIgnoreCase(province.getReligion().getReligionGroup().getName());
+                return province.getReligion() != null && rawValueToReligionGroup(rawValue, province).equalsIgnoreCase(
+                        province.getReligion().getReligionGroup().getName());
             case "revolution_target_exists":
                 return "yes".equalsIgnoreCase(value) == (province.getSave().getRevolution().getRevolutionTarget() != null);
             case "sieged_by":

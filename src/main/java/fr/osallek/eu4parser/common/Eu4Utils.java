@@ -4,7 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.game.Country;
-import fr.osallek.eu4parser.model.game.todo.Building;
+import fr.osallek.eu4parser.model.game.Building;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.iterators.ReverseListIterator;
 import org.apache.commons.lang3.ArchUtils;
@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -41,6 +43,8 @@ public final class Eu4Utils {
     private Eu4Utils() {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Eu4Utils.class);
+
+    public static final ThreadPoolExecutor POOL_EXECUTOR = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     public static final Collator COLLATOR = Collator.getInstance();
 

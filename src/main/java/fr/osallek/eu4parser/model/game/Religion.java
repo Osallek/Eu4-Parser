@@ -36,7 +36,7 @@ public class Religion {
         }
 
         ClausewitzList clausewitzList = this.item.getList("color");
-        return clausewitzList == null ? null : new Color(clausewitzList, true);
+        return clausewitzList == null ? null : new Color(clausewitzList);
     }
 
     public void setColor(Color color) {

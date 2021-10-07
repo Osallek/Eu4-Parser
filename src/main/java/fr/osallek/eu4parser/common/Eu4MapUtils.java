@@ -22,23 +22,21 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +100,6 @@ public class Eu4MapUtils {
     }
 
     public static void generateMapSVG(Game game, File file) throws IOException {
-        Dimension dimension = getProvinceMapDimension(game);
         Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
 
         DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
@@ -112,9 +109,9 @@ public class Eu4MapUtils {
         SVGGraphics2D svgGenerator = new SVGGraphics2D(generatorContext, false);
         SVGPolygon svgPath = new SVGPolygon(generatorContext);
         Element rootElement = document.getDocumentElement();
-        rootElement.setAttributeNS(null, SVGConstants.SVG_WIDTH_ATTRIBUTE, String.valueOf((int) dimension.getWidth()));
-        rootElement.setAttributeNS(null, SVGConstants.SVG_HEIGHT_ATTRIBUTE, String.valueOf((int) dimension.getHeight()));
-        rootElement.setAttributeNS(null, SVGConstants.SVG_VIEW_BOX_ATTRIBUTE, "0 0 " + (int) dimension.getWidth() + " " + (int) dimension.getHeight());
+        rootElement.setAttributeNS(null, SVGConstants.SVG_WIDTH_ATTRIBUTE, String.valueOf(game.getProvinceImageWidth()));
+        rootElement.setAttributeNS(null, SVGConstants.SVG_HEIGHT_ATTRIBUTE, String.valueOf(game.getProvinceImageHeight()));
+        rootElement.setAttributeNS(null, SVGConstants.SVG_VIEW_BOX_ATTRIBUTE, "0 0 " + game.getProvinceImageWidth() + " " + game.getProvinceImageHeight());
         rootElement.setAttributeNS(null, SVGConstants.SVG_FILL_ATTRIBUTE, "#949295");
         rootElement.setAttributeNS(null, SVGConstants.SVG_STROKE_WIDTH_ATTRIBUTE, "1");
         rootElement.setAttributeNS(null, SVGConstants.SVG_FILL_OPACITY_ATTRIBUTE, "1");
@@ -122,8 +119,8 @@ public class Eu4MapUtils {
         rootElement.setAttributeNS(null, SVGConstants.SVG_STROKE_LINECAP_ATTRIBUTE, SVGConstants.SVG_SQUARE_VALUE);
 
         Element rectBackground = document.createElementNS(SVGConstants.SVG_NAMESPACE_URI, SVGConstants.SVG_RECT_TAG);
-        rectBackground.setAttributeNS(null, SVGConstants.SVG_WIDTH_ATTRIBUTE, String.valueOf((int) dimension.getWidth()));
-        rectBackground.setAttributeNS(null, SVGConstants.SVG_HEIGHT_ATTRIBUTE, String.valueOf((int) dimension.getHeight()));
+        rectBackground.setAttributeNS(null, SVGConstants.SVG_WIDTH_ATTRIBUTE, String.valueOf(game.getProvinceImageWidth()));
+        rectBackground.setAttributeNS(null, SVGConstants.SVG_HEIGHT_ATTRIBUTE, String.valueOf(game.getProvinceImageHeight()));
         rectBackground.setAttributeNS(null, SVGConstants.SVG_FILL_ATTRIBUTE, "black");
         rectBackground.setAttributeNS(null, SVGConstants.SVG_X_ATTRIBUTE, "0");
         rectBackground.setAttributeNS(null, SVGConstants.SVG_Y_ATTRIBUTE, "0");
@@ -159,9 +156,8 @@ public class Eu4MapUtils {
     }
 
     public static BufferedImage generateMapPng(Game game, Function<Province, Color> provinceColorFunction) throws IOException {
-        Dimension dimension = getProvinceMapDimension(game);
         Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
-        BufferedImage pngMapImage = new BufferedImage((int) dimension.getWidth(), (int) dimension.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage pngMapImage = new BufferedImage(game.getProvinceImageWidth(), game.getProvinceImageHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D pngMapGraphics = pngMapImage.createGraphics();
 
         borders.forEach((province, polygons) -> {
@@ -201,9 +197,9 @@ public class Eu4MapUtils {
                     int finalX = x;
                     int finalY = y;
 
-                    if (borders.get(game.getProvinceByColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF))
+                    if (borders.get(game.getProvincesByColor().get(new Color(color >> 16 & 0xFF, (color >> 8) & 0xFF, color & 0xFF).getRGB()))
                                .stream().noneMatch(polygon -> polygonContains(polygon, finalX, finalY))) {
-                        borders.get(game.getProvinceByColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF))
+                        borders.get(game.getProvincesByColor().get(new Color(color >> 16 & 0xFF, (color >> 8) & 0xFF, color & 0xFF).getRGB()))
                                .add(generatePath(colors, x, y, image.getWidth(), image.getHeight()));
                     }
                 }
@@ -237,9 +233,8 @@ public class Eu4MapUtils {
     }
 
     public static FeatureCollection generateGeoJson(Game game) throws IOException {
-        Dimension dimension = getProvinceMapDimension(game);
-
         Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
+
         FeatureCollection featureCollection = new FeatureCollection();
 
         borders.forEach((province, polygons) -> {
@@ -254,20 +249,20 @@ public class Eu4MapUtils {
                         case DOWN:
                             switch (previousDirection) {
                                 case UP:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case LEFT:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case RIGHT:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
                             }
                             break;
@@ -275,20 +270,20 @@ public class Eu4MapUtils {
                         case LEFT:
                             switch (previousDirection) {
                                 case RIGHT:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case DOWN:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case UP:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
                             }
                             break;
@@ -296,20 +291,20 @@ public class Eu4MapUtils {
                         case UP:
                             switch (previousDirection) {
                                 case DOWN:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case RIGHT:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case LEFT:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
                             }
                             break;
@@ -317,27 +312,27 @@ public class Eu4MapUtils {
                         case RIGHT:
                             switch (previousDirection) {
                                 case LEFT:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140 / dimension.getHeight() - 70)));
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case UP:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
 
                                 case DOWN:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360 / dimension.getWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
+                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
+                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
                                     break;
                             }
                             break;
 
                         default:
-                            list.add(new LngLatAlt(polygon.xpoints[i] * 360 / dimension.getWidth() - 180,
-                                                   -(polygon.ypoints[i] * 140 / dimension.getHeight() - 70)));
+                            list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
+                                                   -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
                             break;
                     }
                 }
@@ -353,24 +348,6 @@ public class Eu4MapUtils {
         });
 
         return featureCollection;
-    }
-
-    private static Dimension getProvinceMapDimension(Game game) throws IOException {
-        try (ImageInputStream in = ImageIO.createImageInputStream(new FileInputStream(game.getProvincesImage()))) {
-            Iterator<javax.imageio.ImageReader> readers = ImageIO.getImageReaders(in);
-
-            if (readers.hasNext()) {
-                javax.imageio.ImageReader reader = readers.next();
-                try {
-                    reader.setInput(in);
-                    return new Dimension(reader.getWidth(0), reader.getHeight(0));
-                } finally {
-                    reader.dispose();
-                }
-            }
-        }
-
-        throw new IOException("Can't read dimension of " + game.getProvincesImage().getAbsolutePath());
     }
 
     private static boolean sameColor(int rgb, int[] colors, int x, int y, int width, int height) {

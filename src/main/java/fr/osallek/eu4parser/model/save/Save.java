@@ -35,6 +35,7 @@ import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import fr.osallek.eu4parser.model.save.war.PreviousWar;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -588,7 +589,7 @@ public class Save {
     }
 
     public SaveProvince getProvinceByColor(int red, int green, int blue) {
-        Province province = this.game.getProvinceByColor(red, green, blue);
+        Province province = this.game.getProvincesByColor().get(new Color(red, green, blue).getRGB());
 
         return province == null ? null : (SaveProvince) province;
     }

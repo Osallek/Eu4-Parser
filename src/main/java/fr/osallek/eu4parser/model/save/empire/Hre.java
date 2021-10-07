@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.game.ProvinceList;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,19 +37,19 @@ public class Hre extends Empire {
     public void addPassedReform(ImperialReform reform) {
         super.addPassedReform(reform);
 
-        if (reform.enableImperialBanAllowed()) {
+        if (BooleanUtils.toBoolean(reform.getOnEffect().isImperialBanAllowed())) {
             this.setImperialBanAllowed(true);
         }
 
-        if (reform.enableInternalHreCb()) {
+        if (BooleanUtils.toBoolean(reform.getOnEffect().isInternalHreCb())) {
             this.setInternalHreCb(true);
         }
 
-        if (reform.enableHreInheritable()) {
+        if (BooleanUtils.toBoolean(reform.getOnEffect().hreInheritable())) {
             this.setHreInheritable(true);
         }
 
-        if (reform.enableEnableImperialRealmWar()) {
+        if (BooleanUtils.toBoolean(reform.getOnEffect().enableImperialRealmWar())) {
             this.setImperialBanAllowed(true);
         }
     }
@@ -57,19 +58,19 @@ public class Hre extends Empire {
     public void removePassedReform(ImperialReform reform) {
         super.removePassedReform(reform);
 
-        if (reform.disableImperialBanAllowed()) {
+        if (BooleanUtils.isFalse(reform.getOnEffect().isImperialBanAllowed())) {
             this.setImperialBanAllowed(false);
         }
 
-        if (reform.disableInternalHreCb()) {
+        if (BooleanUtils.isFalse(reform.getOnEffect().isInternalHreCb())) {
             this.setInternalHreCb(false);
         }
 
-        if (reform.disableHreInheritable()) {
+        if (BooleanUtils.isFalse(reform.getOnEffect().hreInheritable())) {
             this.setHreInheritable(false);
         }
 
-        if (reform.disableEnableImperialRealmWar()) {
+        if (BooleanUtils.isFalse(reform.getOnEffect().enableImperialRealmWar())) {
             this.setImperialBanAllowed(false);
         }
     }
