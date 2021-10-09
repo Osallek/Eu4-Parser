@@ -42,8 +42,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -261,10 +259,16 @@ public class Game {
     }
 
     public Game(String gameFolderPath, List<String> modEnabled) throws IOException {
+        this(gameFolderPath, modEnabled, () -> {});
+    }
+
+    public Game(String gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
         this.gameFolderPath = gameFolderPath;
 
         loadSettings();
+        runnable.run();
         readMods(modEnabled);
+        runnable.run();
 
         this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
 
@@ -281,6 +285,7 @@ public class Game {
                         LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
+                        runnable.run();
                     }
                 });
 
@@ -291,6 +296,7 @@ public class Game {
                         LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
+                        runnable.run();
                     }
                 });
 
@@ -299,6 +305,7 @@ public class Game {
                         readDefaultMap();
                     } finally {
                         countDownLatch.countDown();
+                        runnable.run();
                     }
                 });
 
@@ -307,6 +314,7 @@ public class Game {
                         readClimate();
                     } finally {
                         countDownLatch.countDown();
+                        runnable.run();
                     }
                 });
 
@@ -315,6 +323,7 @@ public class Game {
                         readContinents();
                     } finally {
                         countDownLatch.countDown();
+                        runnable.run();
                     }
                 });
 
@@ -323,6 +332,7 @@ public class Game {
                         readPositions();
                     } finally {
                         countDownLatch.countDown();
+                        runnable.run();
                     }
                 });
 
@@ -331,12 +341,14 @@ public class Game {
                         readProvinceHistory();
                     } finally {
                         countDownLatch.countDown();
+                        runnable.run();
                     }
                 });
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -347,6 +359,7 @@ public class Game {
                 LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -355,6 +368,7 @@ public class Game {
                 loadLocalisations();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -363,6 +377,7 @@ public class Game {
                 readSpriteTypes();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -371,6 +386,7 @@ public class Game {
                 readEstates();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -379,6 +395,7 @@ public class Game {
                 readFactions();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -387,6 +404,7 @@ public class Game {
                 readTradeGoods();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -395,6 +413,7 @@ public class Game {
                 readBuildings();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -403,6 +422,7 @@ public class Game {
                 readAreas();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -411,6 +431,7 @@ public class Game {
                 readRegions();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -419,6 +440,7 @@ public class Game {
                 readSuperRegions();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -427,6 +449,7 @@ public class Game {
                 readCultures();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -435,6 +458,7 @@ public class Game {
                 readReligion();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -443,6 +467,7 @@ public class Game {
                 readInstitutions();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -451,6 +476,7 @@ public class Game {
                 readTradeNodes();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -459,6 +485,7 @@ public class Game {
                 readImperialReforms();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -467,6 +494,7 @@ public class Game {
                 readDecrees();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -475,6 +503,7 @@ public class Game {
                 readGoldenBulls();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -483,6 +512,7 @@ public class Game {
                 readEvents();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -491,6 +521,7 @@ public class Game {
                 readGovernmentRanks();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -499,6 +530,7 @@ public class Game {
                 readGovernmentNames();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -507,6 +539,7 @@ public class Game {
                 readGovernmentReforms();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -515,6 +548,7 @@ public class Game {
                 readGovernments();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -523,6 +557,7 @@ public class Game {
                 readUnits();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -531,6 +566,7 @@ public class Game {
                 readTechnologies();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -539,6 +575,7 @@ public class Game {
                 readAdvisors();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -547,6 +584,7 @@ public class Game {
                 readIdeaGroups();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -555,6 +593,7 @@ public class Game {
                 readCasusBelli();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -563,6 +602,7 @@ public class Game {
                 readTradeCompanies();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -571,6 +611,7 @@ public class Game {
                 readSubjectTypes();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -579,6 +620,7 @@ public class Game {
                 readFetishistCults();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -587,6 +629,7 @@ public class Game {
                 readChurchAspects();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -595,6 +638,7 @@ public class Game {
                 readMissionTrees();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -603,6 +647,7 @@ public class Game {
                 readRulerPersonalities();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -611,6 +656,7 @@ public class Game {
                 readLeaderPersonalities();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -619,6 +665,7 @@ public class Game {
                 readProfessionalismModifiers();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -627,6 +674,7 @@ public class Game {
                 readStaticModifiers();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -635,6 +683,7 @@ public class Game {
                 readInvestments();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -643,6 +692,7 @@ public class Game {
                 readPolicies();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -651,6 +701,7 @@ public class Game {
                 readHegemons();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -659,6 +710,7 @@ public class Game {
                 readAges();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -667,6 +719,7 @@ public class Game {
                 readDefenderOfFaith();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -675,6 +728,7 @@ public class Game {
                 readCentersOfTrade();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -683,6 +737,7 @@ public class Game {
                 readFervors();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -691,6 +746,7 @@ public class Game {
                 readGreatProjects();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -699,6 +755,7 @@ public class Game {
                 readHolyOrders();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -707,6 +764,7 @@ public class Game {
                 readIsolationism();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -715,6 +773,7 @@ public class Game {
                 readNativeAdvancements();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -723,6 +782,7 @@ public class Game {
                 readNavalDoctrine();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -731,6 +791,7 @@ public class Game {
                 readParliamentIssue();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -739,6 +800,7 @@ public class Game {
                 readPersonalDeities();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -747,6 +809,7 @@ public class Game {
                 readReligiousReforms();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -755,6 +818,7 @@ public class Game {
                 readCrownLandBonuses();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -763,6 +827,7 @@ public class Game {
                 readStateEdicts();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -771,6 +836,7 @@ public class Game {
                 readTradePolicies();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -779,6 +845,7 @@ public class Game {
                 readEventModifiers();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -787,6 +854,7 @@ public class Game {
                 readProvinceTriggeredModifiers();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -795,6 +863,7 @@ public class Game {
                 readTriggeredModifiers();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -803,6 +872,7 @@ public class Game {
                 readCountry();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -811,6 +881,7 @@ public class Game {
                 readColonialRegions();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -819,6 +890,7 @@ public class Game {
                 readDiplomacy();
             } finally {
                 countDownLatch.countDown();
+                runnable.run();
             }
         });
 
@@ -2106,7 +2178,7 @@ public class Game {
         return definesMap;
     }
 
-    public void loadLocalisations() {
+    private void loadLocalisations() {
         this.localisations = new HashMap<>();
         loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()), this.localisations);
 
