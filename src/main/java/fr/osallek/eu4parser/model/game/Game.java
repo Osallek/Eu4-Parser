@@ -86,6 +86,8 @@ public class Game {
 
     private String version;
 
+    private List<String> graphicalCultures;
+
     private Map<Integer, Province> provinces;
 
     private Map<Integer, Province> provincesByColor;
@@ -272,7 +274,7 @@ public class Game {
 
         this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
 
-        CountDownLatch countDownLatch = new CountDownLatch(68);
+        CountDownLatch countDownLatch = new CountDownLatch(69);
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
@@ -371,6 +373,16 @@ public class Game {
                 runnable.run();
             }
         });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readGraphicalCultures();
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
@@ -1170,6 +1182,10 @@ public class Game {
 
     public String getLocalisationCleanNoPunctuation(String key) {
         return getLocalisationClean(key).replaceAll("[\\p{P}]", "").trim();
+    }
+
+    public List<String> getGraphicalCultures() {
+        return graphicalCultures;
     }
 
     public SpriteType getSpriteType(String key) {
@@ -2237,6 +2253,26 @@ public class Game {
                         LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
                     }
                 });
+    }
+
+    private void readGraphicalCultures() {
+        this.graphicalCultures = new ArrayList<>();
+
+        Path graphicalCulturesPath = getAbsolutePath(Path.of(Eu4Utils.COMMON_FOLDER_PATH, Eu4Utils.GRAPHICAL_CULTURES_FILE));
+
+        if (graphicalCulturesPath != null && graphicalCulturesPath.toFile().exists() && graphicalCulturesPath.toFile().canRead()) {
+            try (BufferedReader reader = Files.newBufferedReader(graphicalCulturesPath, StandardCharsets.UTF_8)) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    if(StringUtils.isNotBlank(line)) {
+                        this.graphicalCultures.add(StringUtils.trim(line));
+                    }
+                }
+            } catch (IOException e) {
+                LOGGER.error("Could not read file {} because: {} !", graphicalCulturesPath, e.getMessage(), e);
+            }
+        }
     }
 
     private void readSpriteTypes() {

@@ -3,9 +3,9 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -119,16 +119,16 @@ public class Country {
         }
     }
 
-    public Map<String, Integer> getMonarchNames() {
+    public List<Pair<String, Integer>> getMonarchNames() {
         return this.commonItem.hasChild("monarch_names") ? this.commonItem.getChild("monarch_names")
                                                                           .getVariables()
                                                                           .stream()
-                                                                          .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt,
-                                                                                                    (i1, i2) -> i1))
+                                                                          .map(variable -> Pair.of(variable.getName(), variable.getAsInt()))
+                                                                          .collect(Collectors.toList())
                                                          : null;
     }
 
-    public void setMonarchNames(Map<String, Integer> monarchNames) {
+    public void setMonarchNames(List<Pair<String, Integer>> monarchNames) {
         ClausewitzItem item = this.commonItem.getChild("monarch_names");
 
         if (item == null) {
@@ -136,7 +136,8 @@ public class Country {
         }
 
         item.removeAllChildren();
-        monarchNames.forEach(item::addVariable);
+        ClausewitzItem finalItem = item;
+        monarchNames.forEach(pair -> finalItem.addVariable(pair.getKey(), pair.getValue()));
     }
 
     public List<Unit> getHistoricalUnits() {

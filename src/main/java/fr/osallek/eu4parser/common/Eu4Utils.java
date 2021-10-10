@@ -87,6 +87,8 @@ public final class Eu4Utils {
 
     public static final String MISSIONS_FOLDER_PATH = "missions";
 
+    public static final String GRAPHICAL_CULTURES_FILE = "graphicalculturetype.txt";
+
     public static final LocalDate DEFAULT_DATE = LocalDate.of(1, 1, 1);
 
     public static final String DEFAULT_TAG = "---";
@@ -152,6 +154,8 @@ public final class Eu4Utils {
     public static final Pattern MOD_FILE_NAME_PATTERN = Pattern.compile("ugc_[0-9]+.mod");
 
     public static final Pattern DATE_PATTERN = Pattern.compile("-?[0-9]{1,4}.[0-9]{1,2}.[0-9]{1,2}");
+
+    public static final List<String> HISTORICAL_COUNCILS = List.of("concilatory", "neutral", "harsh");
 
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
