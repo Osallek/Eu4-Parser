@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +74,7 @@ public class Mod {
     }
 
     public File getPath() {
-        return new File(getPathString());
+        return Path.of(getPathString()).isAbsolute() ? new File(getPathString()) : Eu4Utils.EU4_DOCUMENTS_FOLDER.toPath().resolve(getPathString()).toFile();
     }
 
     public void setPath(File path) {

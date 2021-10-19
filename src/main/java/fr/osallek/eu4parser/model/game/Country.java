@@ -7,11 +7,13 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -135,9 +137,9 @@ public class Country {
             item = this.commonItem.addChild("monarch_names");
         }
 
-        item.removeAllChildren();
+        item.removeAllVariables();
         ClausewitzItem finalItem = item;
-        monarchNames.forEach(pair -> finalItem.addVariable(pair.getKey(), pair.getValue()));
+        monarchNames.forEach(pair -> finalItem.addVariable(ClausewitzUtils.addQuotes(pair.getKey()), pair.getValue()));
     }
 
     public List<Unit> getHistoricalUnits() {
@@ -265,26 +267,25 @@ public class Country {
         }
     }
 
-    public Color getRevolutionaryColor() {
+    public List<Integer> getRevolutionaryColors() {
         ClausewitzList colorList = this.commonItem.getList("revolutionary_colors");
 
         if (colorList == null) {
             return null;
         }
 
-        return new Color(colorList);
+        return colorList.getValuesAsInt();
     }
 
-    public void setRevolutionaryColor(java.awt.Color color) {
+    public void setRevolutionaryColor(List<Integer> colors) {
         ClausewitzList colorList = this.commonItem.getList("revolutionary_colors");
 
         if (colorList == null) {
-            Color.addToItem(this.commonItem, "revolutionary_colors", color.getRed(), color.getGreen(), color.getBlue());
+            this.commonItem.addList("revolutionary_colors", colors.stream().filter(Objects::nonNull).toArray(Integer[]::new));
         } else {
-            Color c = new Color(colorList);
-            c.setRed(color.getRed());
-            c.setGreen(color.getGreen());
-            c.setBlue(color.getBlue());
+            colorList.set(0, colors.get(0));
+            colorList.set(1, colors.get(1));
+            colorList.set(2, colors.get(2));
         }
     }
 
@@ -302,6 +303,10 @@ public class Country {
 
     public SortedMap<LocalDate, CountryHistoryItem> getHistoryItems() {
         return historyItems;
+    }
+
+    public void writeCommon(BufferedWriter writer) throws IOException {
+        this.commonItem.write(writer, true, 0, new HashMap<>());
     }
 
     @Override

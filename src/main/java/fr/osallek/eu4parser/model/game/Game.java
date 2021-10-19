@@ -934,20 +934,7 @@ public class Game {
         for (Map.Entry<String, List<Path>> entry : paths.entrySet()) {
             entry.getValue().forEach(path -> Eu4Utils.POOL_EXECUTOR.submit(() -> {
                 try {
-                    String fileName = path.getFileName().toString();
-                    if (fileName.toLowerCase().endsWith(".tga") || fileName.toLowerCase().endsWith(".dds")) {
-                        File destFile = Path.of(destFolder, entry.getKey(), FilenameUtils.removeExtension(fileName) + ".png").toFile();
-                        FileUtils.forceMkdirParent(destFile);
-                        ImageIO.write(ImageReader.convertFileToImage(path.toFile()), "png", destFile);
-                    } else if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg")
-                               || fileName.toLowerCase().endsWith("jpeg")) {
-                        LOGGER.warn("png/jpg: {}", fileName);
-                        FileUtils.copyFile(path.toFile(), Path.of(destFolder, fileName).toFile());
-                    } else {
-                        LOGGER.warn("Unknown: {}", fileName);
-                    }
-                } catch (IOException e) {
-                    LOGGER.error("An error occurred while converting image {}: {}", path, e.getMessage(), e);
+                    convertImage(destFolder, entry.getKey(), path);
                 } finally {
                     countDownLatch.countDown();
                 }
@@ -959,6 +946,36 @@ public class Game {
         } catch (InterruptedException e) {
             LOGGER.error("An error occurred while waiting for image conversion : {}", e.getMessage(), e);
             Thread.currentThread().interrupt();
+        }
+    }
+
+    public Path convertImage(String destFolder, String destPath, Path file) {
+        return convertImage(destFolder, destPath, null, file);
+    }
+
+    public Path convertImage(String destFolder, String destPath, String destName, Path file) {
+        try {
+            String fileName = file.getFileName().toString();
+            String destFileName = StringUtils.isBlank(destName) ? FilenameUtils.removeExtension(fileName) : destName;
+            Path finalPath = null;
+
+            if (fileName.toLowerCase().endsWith(".tga") || fileName.toLowerCase().endsWith(".dds")) {
+                finalPath = Path.of(destFolder, destPath, FilenameUtils.removeExtension(destFileName) + ".png");
+                File destFile = finalPath.toFile();
+                FileUtils.forceMkdirParent(destFile);
+                ImageIO.write(ImageReader.convertFileToImage(file.toFile()), "png", destFile);
+            } else if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg")
+                       || fileName.toLowerCase().endsWith("jpeg")) {
+                finalPath = Path.of(destFolder, destFileName + "." + FilenameUtils.getExtension(fileName));
+                FileUtils.copyFile(file.toFile(), finalPath.toFile());
+            } else {
+                LOGGER.warn("Unknown: {}", fileName);
+            }
+
+            return finalPath == null ? null : Path.of(destFolder).relativize(finalPath);
+        } catch (IOException e) {
+            LOGGER.error("An error occurred while converting image {}: {}", file, e.getMessage(), e);
+            return null;
         }
     }
 
@@ -2265,7 +2282,7 @@ public class Game {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    if(StringUtils.isNotBlank(line)) {
+                    if (StringUtils.isNotBlank(line)) {
                         this.graphicalCultures.add(StringUtils.trim(line));
                     }
                 }
