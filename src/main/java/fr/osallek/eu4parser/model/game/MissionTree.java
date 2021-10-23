@@ -2,22 +2,26 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-import java.util.Map;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MissionTree {
+public class MissionTree extends Noded {
 
     private final ClausewitzItem item;
 
     private final Game game;
 
-    public MissionTree(ClausewitzItem item, Game game) {
+    public MissionTree(ClausewitzItem item, Game game, FileNode fileNode) {
+        super(fileNode);
         this.item = item;
         this.game = game;
     }
 
+    @Override
     public String getName() {
         return this.item.getName();
     }
@@ -84,11 +88,16 @@ public class MissionTree {
         return child == null ? null : new Condition(child);
     }
 
-    public Map<String, Mission> getMissions() {
+    public List<Mission> getMissions() {
         return this.item.getChildrenNot("potential_on_load", "potential")
                         .stream()
-                        .map(item1 -> new Mission(item1, game))
-                        .collect(Collectors.toMap(Mission::getName, Function.identity()));
+                        .map(item1 -> new Mission(item1, game, this))
+                        .collect(Collectors.toList());
+    }
+
+    @Override
+    public void write(BufferedWriter writer) throws IOException {
+        this.item.write(writer, true, 0, new HashMap<>());
     }
 
     @Override

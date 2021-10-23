@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +17,7 @@ public class SpriteType {
     }
 
     public void setName(String name) {
-        this.item.setVariable("name", name);
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public String getTextureFile() {
@@ -24,7 +25,7 @@ public class SpriteType {
     }
 
     public void setTextureFile(String textureFile) {
-        this.item.setVariable("texturefile", textureFile);
+        this.item.setVariable("texturefile", ClausewitzUtils.addQuotes(textureFile));
     }
 
     public Boolean getTransparenceCheck() {
@@ -47,7 +48,7 @@ public class SpriteType {
         if (StringUtils.isBlank(loadType)) {
             this.item.removeVariable("loadType");
         } else {
-            this.item.setVariable("loadType", loadType);
+            this.item.setVariable("loadType", ClausewitzUtils.addQuotes(loadType));
         }
     }
 

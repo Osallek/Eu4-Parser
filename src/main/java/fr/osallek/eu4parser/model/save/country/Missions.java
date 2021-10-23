@@ -9,7 +9,6 @@ import fr.osallek.eu4parser.model.game.MissionTree;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -35,7 +34,7 @@ public class Missions {
     }
 
     public List<Mission> getMissions() {
-        return getMissionTrees().stream().map(MissionTree::getMissions).map(Map::values).flatMap(Collection::stream).collect(Collectors.toList());
+        return getMissionTrees().stream().map(MissionTree::getMissions).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public MissionTree getMissionTree(int slot) {

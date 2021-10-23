@@ -180,6 +180,8 @@ public class Game {
 
     private Map<String, MissionTree> missionTrees;
 
+    private int maxMissionsSlots;
+
     private Map<String, EstatePrivilege> estatePrivileges;
 
     private Map<String, Estate> estates;
@@ -922,23 +924,23 @@ public class Game {
                          .forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
     }
 
-    public void convertImages(String destFolder, String... relativePaths) {
-        Map<String, List<Path>> paths = new HashMap<>();
+    public void convertImages(Path destFolder, Path... relativePaths) {
+        List<FileNode> paths = new ArrayList<>();
 
-        for (String relativePath : relativePaths) {
-            paths.put(relativePath, getPathsList(relativePath, fileNode -> Files.isRegularFile(fileNode.getPath())));
+        for (Path relativePath : relativePaths) {
+            paths.addAll(getFileNodesList(relativePath, fileNode -> Files.isRegularFile(fileNode.getPath())));
         }
 
         CountDownLatch countDownLatch = new CountDownLatch(paths.size());
 
-        for (Map.Entry<String, List<Path>> entry : paths.entrySet()) {
-            entry.getValue().forEach(path -> Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        for (FileNode fileNode : paths) {
+            Eu4Utils.POOL_EXECUTOR.submit(() -> {
                 try {
-                    convertImage(destFolder, entry.getKey(), path);
+                    convertImage(destFolder, fileNode.getRelativePath().getParent(), fileNode.getPath());
                 } finally {
                     countDownLatch.countDown();
                 }
-            }));
+            });
         }
 
         try {
@@ -949,30 +951,35 @@ public class Game {
         }
     }
 
-    public Path convertImage(String destFolder, String destPath, Path file) {
+    public Path convertImage(Path destFolder, Path destPath, Path file) {
         return convertImage(destFolder, destPath, null, file);
     }
 
-    public Path convertImage(String destFolder, String destPath, String destName, Path file) {
+    public Path convertImage(Path destFolder, Path destPath, String destName, Path file) {
         try {
             String fileName = file.getFileName().toString();
             String destFileName = StringUtils.isBlank(destName) ? FilenameUtils.removeExtension(fileName) : destName;
             Path finalPath = null;
 
-            if (fileName.toLowerCase().endsWith(".tga") || fileName.toLowerCase().endsWith(".dds")) {
-                finalPath = Path.of(destFolder, destPath, FilenameUtils.removeExtension(destFileName) + ".png");
+            if ("a.e.i.o.u..dds".equals(file.getFileName().toString())) {
+                LOGGER.info("ff");
+            }
+
+            String extension = FilenameUtils.getExtension(fileName).toLowerCase();
+
+            if ("tga".equals(extension) || "dds".equals(extension)) {
+                finalPath = destFolder.resolve(destPath).resolve(destFileName + ".png");
                 File destFile = finalPath.toFile();
                 FileUtils.forceMkdirParent(destFile);
                 ImageIO.write(ImageReader.convertFileToImage(file.toFile()), "png", destFile);
-            } else if (fileName.toLowerCase().endsWith(".png") || fileName.toLowerCase().endsWith(".jpg")
-                       || fileName.toLowerCase().endsWith("jpeg")) {
-                finalPath = Path.of(destFolder, destFileName + "." + FilenameUtils.getExtension(fileName));
+            } else if ("png".equals(extension) || "jpg".equals(extension) || "jpeg".equals(extension)) {
+                finalPath = destFolder.resolve(destFileName + "." + FilenameUtils.getExtension(fileName));
                 FileUtils.copyFile(file.toFile(), finalPath.toFile());
             } else {
                 LOGGER.warn("Unknown: {}", fileName);
             }
 
-            return finalPath == null ? null : Path.of(destFolder).relativize(finalPath);
+            return finalPath == null ? null : destFolder.relativize(finalPath);
         } catch (IOException e) {
             LOGGER.error("An error occurred while converting image {}: {}", file, e.getMessage(), e);
             return null;
@@ -997,23 +1004,43 @@ public class Game {
 
     @SafeVarargs
     private Stream<FileNode> getFileNodes(String relativePath, Predicate<FileNode>... predicates) {
+        return getFileNodes(Path.of(relativePath), predicates);
+    }
+
+    @SafeVarargs
+    private Stream<FileNode> getFileNodes(Path relativePath, Predicate<FileNode>... predicates) {
         TreeNode<FileNode> treeNode = getTreeNode(relativePath);
         return treeNode == null ? Stream.empty() : treeNode.getLeaves(predicates).stream().map(TreeNode::getData);
     }
 
     @SafeVarargs
     private List<FileNode> getFileNodesList(String relativePath, Predicate<FileNode>... predicates) {
+        return getFileNodesList(Path.of(relativePath), predicates);
+    }
+
+    @SafeVarargs
+    private List<FileNode> getFileNodesList(Path relativePath, Predicate<FileNode>... predicates) {
         return getFileNodes(relativePath, predicates).collect(Collectors.toList());
     }
 
     @SafeVarargs
     private Stream<Path> getPaths(String relativePath, Predicate<FileNode>... predicates) {
+        return getPaths(Path.of(relativePath), predicates);
+    }
+
+    @SafeVarargs
+    private Stream<Path> getPaths(Path relativePath, Predicate<FileNode>... predicates) {
         Stream<FileNode> treeNode = getFileNodes(relativePath, predicates);
         return treeNode == null ? Stream.empty() : treeNode.map(FileNode::getPath);
     }
 
     @SafeVarargs
     private List<Path> getPathsList(String relativePath, Predicate<FileNode>... predicates) {
+        return getPathsList(Path.of(relativePath), predicates);
+    }
+
+    @SafeVarargs
+    private List<Path> getPathsList(Path relativePath, Predicate<FileNode>... predicates) {
         return getPaths(relativePath, predicates).collect(Collectors.toList());
     }
 
@@ -1028,6 +1055,10 @@ public class Game {
     }
 
     private File getAbsoluteFile(String relativePath) {
+        return getAbsoluteFile(Path.of(relativePath));
+    }
+
+    private File getAbsoluteFile(Path relativePath) {
         Path path = getAbsolutePath(relativePath);
         return path == null ? null : path.toFile();
     }
@@ -1786,17 +1817,25 @@ public class Game {
     }
 
     public Mission getMission(String name) {
-        if (name == null) {
+        if (StringUtils.isBlank(name)) {
             return null;
         }
 
-        for (MissionTree missionTree : this.missionTrees.values()) {
-            if (missionTree.getMissions().containsKey(name)) {
-                return missionTree.getMissions().get(name);
-            }
-        }
+        return this.missionTrees.values()
+                                .stream()
+                                .map(MissionTree::getMissions)
+                                .flatMap(Collection::stream)
+                                .filter(mission -> name.equals(mission.getName()))
+                                .findFirst()
+                                .orElse(null);
+    }
 
-        return null;
+    public List<Mission> getMissions() {
+        return this.missionTrees.values().stream().map(MissionTree::getMissions).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    public int getMaxMissionsSlots() {
+        return maxMissionsSlots;
     }
 
     public List<EstatePrivilege> getEstatePrivileges() {
@@ -3019,14 +3058,36 @@ public class Game {
     private void readMissionTrees() {
         this.missionTrees = new HashMap<>();
 
-        getPaths(Eu4Utils.MISSIONS_FOLDER_PATH, this::isRegularTxtFile)
-                .forEach(path -> {
-                    ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+        getFileNodesList(Eu4Utils.MISSIONS_FOLDER_PATH, this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem advisorsItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
                     this.missionTrees.putAll(advisorsItem.getChildren()
                                                          .stream()
-                                                         .map(item -> new MissionTree(item, this))
+                                                         .map(item -> new MissionTree(item, this, fileNode))
                                                          .collect(Collectors.toMap(MissionTree::getName, Function.identity(), (a, b) -> b)));
                 });
+
+        Path guiPath = getAbsolutePath(Eu4Utils.INTERFACE_FOLDER_PATH + File.separator + "countrymissionsview.gui");
+
+        if (guiPath != null && guiPath.toFile().exists() && guiPath.toFile().canRead()) {
+            ClausewitzItem guiItem = ClausewitzParser.parse(guiPath.toFile(), 0);
+
+            if ((guiItem = guiItem.getChild("guiTypes")) != null) {
+                if ((guiItem = guiItem.getChildren("windowType")
+                                      .stream()
+                                      .filter(child -> "\"countrymissionsview_missions_gridbox_listbox_entry\"".equals(child.getVarAsString("name")))
+                                      .findFirst()
+                                      .orElse(null)) != null) {
+                    if ((guiItem = guiItem.getChildren("gridBoxType")
+                                          .stream()
+                                          .filter(child -> "\"countrymissionsview_missions_gridbox\"".equals(child.getVarAsString("name")))
+                                          .findFirst()
+                                          .orElse(null)) != null) {
+                        this.maxMissionsSlots = guiItem.getVarAsInt("max_slots_horizontal");
+                    }
+                }
+            }
+        }
     }
 
     private void readEstates() {

@@ -1,9 +1,13 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.common.Eu4Utils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -15,9 +19,12 @@ public class Mission {
 
     private final Game game;
 
-    public Mission(ClausewitzItem item, Game game) {
+    private final MissionTree missionsTree;
+
+    public Mission(ClausewitzItem item, Game game, MissionTree missionsTree) {
         this.item = item;
         this.game = game;
+        this.missionsTree = missionsTree;
     }
 
     public String getName() {
@@ -26,6 +33,10 @@ public class Mission {
 
     public void setName(String name) {
         this.item.setName(name);
+    }
+
+    public MissionTree getMissionsTree() {
+        return missionsTree;
     }
 
     public String getIcon() {
@@ -38,6 +49,11 @@ public class Mission {
         } else {
             this.item.setVariable("icon", icon);
         }
+    }
+
+    public Path getIconPath(String extension) {
+        SpriteType spriteType = this.game.getSpriteType(getIcon());
+        return Path.of(FilenameUtils.removeExtension(ClausewitzUtils.removeQuotes(spriteType.getTextureFile())) + "." + extension);
     }
 
     public Boolean isGeneric() {
