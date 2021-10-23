@@ -19,9 +19,9 @@ public class Mission {
 
     private final Game game;
 
-    private final MissionTree missionsTree;
+    private final MissionsTree missionsTree;
 
-    public Mission(ClausewitzItem item, Game game, MissionTree missionsTree) {
+    public Mission(ClausewitzItem item, Game game, MissionsTree missionsTree) {
         this.item = item;
         this.game = game;
         this.missionsTree = missionsTree;
@@ -35,7 +35,7 @@ public class Mission {
         this.item.setName(name);
     }
 
-    public MissionTree getMissionsTree() {
+    public MissionsTree getMissionsTree() {
         return missionsTree;
     }
 

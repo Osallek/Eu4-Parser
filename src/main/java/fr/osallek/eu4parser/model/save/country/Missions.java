@@ -5,7 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Mission;
-import fr.osallek.eu4parser.model.game.MissionTree;
+import fr.osallek.eu4parser.model.game.MissionsTree;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,21 +23,21 @@ public class Missions {
         this.item = item;
     }
 
-    public List<MissionTree> getMissionTrees() {
+    public List<MissionsTree> getMissionsTrees() {
         List<ClausewitzList> missions = this.item.getLists("mission_slot");
 
         return missions.stream()
                        .filter(Predicate.not(ClausewitzList::isEmpty))
                        .map(list -> list.get(0))
-                       .map(this.game::getMissionTree)
+                       .map(this.game::getMissionsTree)
                        .collect(Collectors.toList());
     }
 
     public List<Mission> getMissions() {
-        return getMissionTrees().stream().map(MissionTree::getMissions).flatMap(Collection::stream).collect(Collectors.toList());
+        return getMissionsTrees().stream().map(MissionsTree::getMissions).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    public MissionTree getMissionTree(int slot) {
+    public MissionsTree getMissionsTree(int slot) {
         if (slot < 1 || slot > 5) {
             return null;
         }
@@ -48,14 +48,14 @@ public class Missions {
 
         if (missions.size() > slot) {
             if (missions.get(slot) instanceof ClausewitzList) {
-                return this.game.getMissionTree(((ClausewitzList) missions.get(slot)).get(0));
+                return this.game.getMissionsTree(((ClausewitzList) missions.get(slot)).get(0));
             }
         }
 
         return null;
     }
 
-    public void setMissions(MissionTree missions, int slot) {
+    public void setMissions(MissionsTree missions, int slot) {
         if (slot < 1 || slot > 5) {
             return;
         }

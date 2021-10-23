@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class TradeCompany extends Noded {
+public class TradeCompany extends Nodded {
 
     private final ClausewitzItem item;
 

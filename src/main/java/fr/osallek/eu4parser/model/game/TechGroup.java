@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class TechGroup extends Noded {
+public class TechGroup extends Nodded {
 
     private final ClausewitzItem item;
 

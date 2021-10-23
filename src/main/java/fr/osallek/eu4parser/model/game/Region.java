@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Region extends Noded {
+public class Region extends Nodded {
 
     private final ClausewitzItem item;
 

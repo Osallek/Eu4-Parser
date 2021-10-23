@@ -4,14 +4,14 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Comparator;
 
-public abstract class Noded implements Comparable<Noded> {
+public abstract class Nodded implements Comparable<Nodded> {
 
     protected FileNode fileNode;
 
-    protected Noded() {
+    protected Nodded() {
     }
 
-    protected Noded(FileNode fileNode) {
+    protected Nodded(FileNode fileNode) {
         this.fileNode = fileNode;
     }
 
@@ -28,7 +28,7 @@ public abstract class Noded implements Comparable<Noded> {
     public abstract void write(BufferedWriter writer) throws IOException;
 
     @Override
-    public int compareTo(Noded o) {
-        return Comparator.comparing(Noded::getName).compare(this, o);
+    public int compareTo(Nodded o) {
+        return Comparator.comparing(Nodded::getName).compare(this, o);
     }
 }

@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class MissionTree extends Noded {
+public class MissionsTree extends Nodded {
 
     private final ClausewitzItem item;
 
     private final Game game;
 
-    public MissionTree(ClausewitzItem item, Game game, FileNode fileNode) {
+    public MissionsTree(ClausewitzItem item, Game game, FileNode fileNode) {
         super(fileNode);
         this.item = item;
         this.game = game;
@@ -106,13 +106,13 @@ public class MissionTree extends Noded {
             return true;
         }
 
-        if (!(o instanceof MissionTree)) {
+        if (!(o instanceof MissionsTree)) {
             return false;
         }
 
-        MissionTree missionTree = (MissionTree) o;
+        MissionsTree missionsTree = (MissionsTree) o;
 
-        return Objects.equals(getName(), missionTree.getName());
+        return Objects.equals(getName(), missionsTree.getName());
     }
 
     @Override

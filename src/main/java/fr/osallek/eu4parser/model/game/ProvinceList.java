@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class ProvinceList extends Noded {
+public class ProvinceList extends Nodded {
 
     private final ClausewitzList list;
 

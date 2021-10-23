@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Tree extends Noded {
+public class Tree extends Nodded {
 
     private final ClausewitzItem item;
 

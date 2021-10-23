@@ -7,7 +7,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 
-public class Define extends Noded {
+public class Define extends Nodded {
 
     private String category;
 

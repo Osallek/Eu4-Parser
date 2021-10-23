@@ -178,7 +178,7 @@ public class Game {
 
     private Map<String, ChurchAspect> churchAspects;
 
-    private Map<String, MissionTree> missionTrees;
+    private Map<String, MissionsTree> missionsTrees;
 
     private int maxMissionsSlots;
 
@@ -649,7 +649,7 @@ public class Game {
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
-                readMissionTrees();
+                readMissionsTrees();
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -960,10 +960,6 @@ public class Game {
             String fileName = file.getFileName().toString();
             String destFileName = StringUtils.isBlank(destName) ? FilenameUtils.removeExtension(fileName) : destName;
             Path finalPath = null;
-
-            if ("a.e.i.o.u..dds".equals(file.getFileName().toString())) {
-                LOGGER.info("ff");
-            }
 
             String extension = FilenameUtils.getExtension(fileName).toLowerCase();
 
@@ -1808,12 +1804,12 @@ public class Game {
         return this.churchAspects.get(name);
     }
 
-    public List<MissionTree> getMissionTrees() {
-        return new ArrayList<>(this.missionTrees.values());
+    public List<MissionsTree> getMissionsTrees() {
+        return new ArrayList<>(this.missionsTrees.values());
     }
 
-    public MissionTree getMissionTree(String name) {
-        return this.missionTrees.get(name);
+    public MissionsTree getMissionsTree(String name) {
+        return this.missionsTrees.get(name);
     }
 
     public Mission getMission(String name) {
@@ -1821,17 +1817,17 @@ public class Game {
             return null;
         }
 
-        return this.missionTrees.values()
-                                .stream()
-                                .map(MissionTree::getMissions)
-                                .flatMap(Collection::stream)
-                                .filter(mission -> name.equals(mission.getName()))
-                                .findFirst()
-                                .orElse(null);
+        return this.missionsTrees.values()
+                                 .stream()
+                                 .map(MissionsTree::getMissions)
+                                 .flatMap(Collection::stream)
+                                 .filter(mission -> name.equals(mission.getName()))
+                                 .findFirst()
+                                 .orElse(null);
     }
 
     public List<Mission> getMissions() {
-        return this.missionTrees.values().stream().map(MissionTree::getMissions).flatMap(Collection::stream).collect(Collectors.toList());
+        return this.missionsTrees.values().stream().map(MissionsTree::getMissions).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     public int getMaxMissionsSlots() {
@@ -3055,16 +3051,16 @@ public class Game {
                 });
     }
 
-    private void readMissionTrees() {
-        this.missionTrees = new HashMap<>();
+    private void readMissionsTrees() {
+        this.missionsTrees = new HashMap<>();
 
         getFileNodesList(Eu4Utils.MISSIONS_FOLDER_PATH, this::isRegularTxtFile)
                 .forEach(fileNode -> {
-                    ClausewitzItem advisorsItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
-                    this.missionTrees.putAll(advisorsItem.getChildren()
-                                                         .stream()
-                                                         .map(item -> new MissionTree(item, this, fileNode))
-                                                         .collect(Collectors.toMap(MissionTree::getName, Function.identity(), (a, b) -> b)));
+                    ClausewitzItem missionsTreeItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+                    this.missionsTrees.putAll(missionsTreeItem.getChildren()
+                                                              .stream()
+                                                              .map(item -> new MissionsTree(item, this, fileNode))
+                                                              .collect(Collectors.toMap(MissionsTree::getName, Function.identity(), (a, b) -> b)));
                 });
 
         Path guiPath = getAbsolutePath(Eu4Utils.INTERFACE_FOLDER_PATH + File.separator + "countrymissionsview.gui");
@@ -3164,11 +3160,11 @@ public class Game {
 
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "professionalism", this::isRegularTxtFile)
                 .forEach(path -> {
-                    ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.professionalismModifiers.addAll(advisorsItem.getChildren()
-                                                                     .stream()
-                                                                     .map(ProfessionalismModifier::new)
-                                                                     .collect(Collectors.toSet()));
+                    ClausewitzItem professionalismItem = ClausewitzParser.parse(path.toFile(), 0);
+                    this.professionalismModifiers.addAll(professionalismItem.getChildren()
+                                                                            .stream()
+                                                                            .map(ProfessionalismModifier::new)
+                                                                            .collect(Collectors.toSet()));
                 });
     }
 

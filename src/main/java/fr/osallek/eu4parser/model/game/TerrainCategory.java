@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class TerrainCategory extends Noded {
+public class TerrainCategory extends Nodded {
 
     private final ClausewitzItem item;
 
