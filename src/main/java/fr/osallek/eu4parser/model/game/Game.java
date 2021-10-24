@@ -999,62 +999,62 @@ public class Game {
     }
 
     @SafeVarargs
-    private Stream<FileNode> getFileNodes(String relativePath, Predicate<FileNode>... predicates) {
+    public final Stream<FileNode> getFileNodes(String relativePath, Predicate<FileNode>... predicates) {
         return getFileNodes(Path.of(relativePath), predicates);
     }
 
     @SafeVarargs
-    private Stream<FileNode> getFileNodes(Path relativePath, Predicate<FileNode>... predicates) {
+    public final Stream<FileNode> getFileNodes(Path relativePath, Predicate<FileNode>... predicates) {
         TreeNode<FileNode> treeNode = getTreeNode(relativePath);
         return treeNode == null ? Stream.empty() : treeNode.getLeaves(predicates).stream().map(TreeNode::getData);
     }
 
     @SafeVarargs
-    private List<FileNode> getFileNodesList(String relativePath, Predicate<FileNode>... predicates) {
+    public final List<FileNode> getFileNodesList(String relativePath, Predicate<FileNode>... predicates) {
         return getFileNodesList(Path.of(relativePath), predicates);
     }
 
     @SafeVarargs
-    private List<FileNode> getFileNodesList(Path relativePath, Predicate<FileNode>... predicates) {
+    public final List<FileNode> getFileNodesList(Path relativePath, Predicate<FileNode>... predicates) {
         return getFileNodes(relativePath, predicates).collect(Collectors.toList());
     }
 
     @SafeVarargs
-    private Stream<Path> getPaths(String relativePath, Predicate<FileNode>... predicates) {
+    public final Stream<Path> getPaths(String relativePath, Predicate<FileNode>... predicates) {
         return getPaths(Path.of(relativePath), predicates);
     }
 
     @SafeVarargs
-    private Stream<Path> getPaths(Path relativePath, Predicate<FileNode>... predicates) {
+    public final Stream<Path> getPaths(Path relativePath, Predicate<FileNode>... predicates) {
         Stream<FileNode> treeNode = getFileNodes(relativePath, predicates);
         return treeNode == null ? Stream.empty() : treeNode.map(FileNode::getPath);
     }
 
     @SafeVarargs
-    private List<Path> getPathsList(String relativePath, Predicate<FileNode>... predicates) {
+    public final List<Path> getPathsList(String relativePath, Predicate<FileNode>... predicates) {
         return getPathsList(Path.of(relativePath), predicates);
     }
 
     @SafeVarargs
-    private List<Path> getPathsList(Path relativePath, Predicate<FileNode>... predicates) {
+    public final List<Path> getPathsList(Path relativePath, Predicate<FileNode>... predicates) {
         return getPaths(relativePath, predicates).collect(Collectors.toList());
     }
 
-    private Path getAbsolutePath(String relativePath) {
+    public Path getAbsolutePath(String relativePath) {
         FileNode node = getFileNode(relativePath);
         return node == null ? null : node.getPath();
     }
 
-    private Path getAbsolutePath(Path relativePath) {
+    public Path getAbsolutePath(Path relativePath) {
         FileNode node = getFileNode(relativePath);
         return node == null ? null : node.getPath();
     }
 
-    private File getAbsoluteFile(String relativePath) {
+    public File getAbsoluteFile(String relativePath) {
         return getAbsoluteFile(Path.of(relativePath));
     }
 
-    private File getAbsoluteFile(Path relativePath) {
+    public File getAbsoluteFile(Path relativePath) {
         Path path = getAbsolutePath(relativePath);
         return path == null ? null : path.toFile();
     }
@@ -1230,6 +1230,10 @@ public class Game {
 
     public List<String> getGraphicalCultures() {
         return graphicalCultures;
+    }
+
+    public List<SpriteType> getSpriteTypes() {
+        return new ArrayList<>(this.spriteTypes.values());
     }
 
     public SpriteType getSpriteType(String key) {
@@ -3526,11 +3530,11 @@ public class Game {
                 });
     }
 
-    private boolean isRegularTxtFile(FileNode fileNode) {
+    public boolean isRegularTxtFile(FileNode fileNode) {
         return Eu4Utils.isRegularTxtFile(fileNode.getPath());
     }
 
-    private boolean isRegularLuaFile(FileNode fileNode) {
+    public boolean isRegularLuaFile(FileNode fileNode) {
         return Eu4Utils.isRegularLuaFile(fileNode.getPath());
     }
 }

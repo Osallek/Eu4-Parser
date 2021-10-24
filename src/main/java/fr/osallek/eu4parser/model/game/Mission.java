@@ -3,17 +3,20 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.eu4parser.common.Eu4Utils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Mission {
+public class Mission extends Nodded {
 
     private final ClausewitzItem item;
 
@@ -22,6 +25,7 @@ public class Mission {
     private final MissionsTree missionsTree;
 
     public Mission(ClausewitzItem item, Game game, MissionsTree missionsTree) {
+        super(missionsTree.getFileNode());
         this.item = item;
         this.game = game;
         this.missionsTree = missionsTree;
@@ -105,6 +109,33 @@ public class Mission {
     public List<Mission> getRequiredMissions() {
         ClausewitzList list = this.item.getList("required_missions");
         return list == null ? null : list.getValues().stream().map(this.game::getMission).collect(Collectors.toList());
+    }
+
+    public void setRequiredMissions(List<String> requiredMissions) {
+        if (CollectionUtils.isEmpty(requiredMissions)) {
+            ClausewitzList list = this.item.getList("required_missions");
+
+            if (list != null) {
+                list.clear();
+            } else {
+                this.item.addList("required_missions", new ArrayList<>());
+            }
+
+            return;
+        }
+
+        ClausewitzList list = this.item.getList("required_missions");
+
+        if (list != null) {
+            list.setAll(requiredMissions.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+        } else {
+            this.item.addList("required_missions", requiredMissions.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+        }
+    }
+
+    @Override
+    public void write(BufferedWriter writer) throws IOException {
+        this.missionsTree.write(writer);
     }
 
     @Override

@@ -2,7 +2,10 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.nio.file.Path;
 
 public class SpriteType {
 
@@ -22,6 +25,14 @@ public class SpriteType {
 
     public String getTextureFile() {
         return this.item.getVarAsString("texturefile");
+    }
+
+    public Path getTextureFilePath() {
+        return Path.of(ClausewitzUtils.removeQuotes(getTextureFile()));
+    }
+
+    public Path getTextureFilePath(String extension) {
+        return Path.of(FilenameUtils.removeExtension(ClausewitzUtils.removeQuotes(getTextureFile())) + "." + extension);
     }
 
     public void setTextureFile(String textureFile) {
