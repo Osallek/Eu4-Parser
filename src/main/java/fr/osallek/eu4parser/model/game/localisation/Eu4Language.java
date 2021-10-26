@@ -29,4 +29,8 @@ public enum Eu4Language {
     public static Eu4Language getByLocale(Locale locale) {
         return BY_LANGUAGE.getOrDefault(locale.getLanguage(), ENGLISH);
     }
+
+    public static Eu4Language getDefault() {
+        return getByLocale(Locale.getDefault());
+    }
 }

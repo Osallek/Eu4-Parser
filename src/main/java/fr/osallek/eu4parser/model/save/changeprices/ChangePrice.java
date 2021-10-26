@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.save.changeprices;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -20,7 +21,7 @@ public class ChangePrice {
 
     public ChangePrice(ClausewitzItem item, Game game) {
         this.item = item;
-        this.localizedName = game.getLocalisationClean(ClausewitzUtils.removeQuotes(getKey()));
+        this.localizedName = game.getLocalisationClean(ClausewitzUtils.removeQuotes(getKey()), Eu4Language.getDefault());
     }
 
     public String getKey() {

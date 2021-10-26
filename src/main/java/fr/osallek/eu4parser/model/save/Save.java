@@ -11,6 +11,7 @@ import fr.osallek.eu4parser.model.game.Age;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.game.TradeGood;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import fr.osallek.eu4parser.model.save.combat.Combats;
 import fr.osallek.eu4parser.model.save.counters.IdCounters;
@@ -728,7 +729,7 @@ public class Save {
             this.playableCountries = this.countries.values()
                                                    .stream()
                                                    .filter(SaveCountry::isPlayable)
-                                                   .peek(country -> country.setLocalizedName(this.game.getLocalisation(country.getTag())))
+                                                   .peek(country -> country.setLocalizedName(this.game.getLocalisation(country.getTag(), Eu4Language.getDefault()).getValue()))
                                                    .sorted(Comparator.comparing(SaveCountry::getLocalizedName, Eu4Utils.COLLATOR))
                                                    .collect(Collectors.toList());
         }

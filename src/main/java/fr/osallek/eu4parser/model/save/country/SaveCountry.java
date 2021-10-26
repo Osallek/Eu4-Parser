@@ -44,6 +44,7 @@ import fr.osallek.eu4parser.model.game.StaticModifiers;
 import fr.osallek.eu4parser.model.game.TechGroup;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradePolicy;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.Id;
@@ -421,7 +422,7 @@ public class SaveCountry {
     }
 
     public String getGovernmentLocalizedName() {
-        return this.governmentName == null ? null : save.getGame().getLocalisation(this.governmentName.getRank(getGovernmentLevel()));
+        return this.governmentName == null ? null : save.getGame().getLocalisation(this.governmentName.getRank(getGovernmentLevel()), Eu4Language.getDefault()).getValue();
     }
 
     public Integer getSubjectFocus() {
@@ -4463,7 +4464,7 @@ public class SaveCountry {
 
     private void refreshAttributes() {
         if (this.isPlayable) {
-            setLocalizedName(this.save.getGame().getLocalisation(getTag()));
+            setLocalizedName(this.save.getGame().getLocalisation(getTag(), Eu4Language.getDefault()).getValue());
         }
 
         String governmentNameVar = this.item.getVarAsString("government_name");

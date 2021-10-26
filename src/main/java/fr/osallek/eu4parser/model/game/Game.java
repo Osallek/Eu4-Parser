@@ -16,10 +16,12 @@ import fr.osallek.eu4parser.common.TreeNode;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
+import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -50,7 +52,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -130,9 +131,7 @@ public class Game {
 
     private Map<String, Building> buildings;
 
-    private Map<String, String> localisations;
-
-    private Map<Eu4Language, Map<String, String>> allLocalisations;
+    private Map<String, Map<Eu4Language, Localisation>> localisations;
 
     private Map<String, SpriteType> spriteTypes;
 
@@ -179,6 +178,8 @@ public class Game {
     private Map<String, ChurchAspect> churchAspects;
 
     private Map<String, MissionsTree> missionsTrees;
+
+    private Map<String, Mission> missions;
 
     private int maxMissionsSlots;
 
@@ -1167,65 +1168,66 @@ public class Game {
         return fakeMonsoon;
     }
 
-    public Map<Eu4Language, Map<String, String>> getAllLocalisations() {
-        return allLocalisations;
+    public Map<String, Map<Eu4Language, Localisation>> getLocalisations() {
+        return localisations;
     }
 
-    public String getLocalisation(String key) {
-        return this.localisations.getOrDefault(key, key);
+    public Localisation getLocalisation(String key, Eu4Language eu4Language) {
+        Map<Eu4Language, Localisation> map = this.localisations.get(key);
+        return MapUtils.isEmpty(map) ? null : map.get(eu4Language);
     }
 
-    public String getLocalisationClean(String key) {
+    public String getLocalisationClean(String key, Eu4Language eu4Language) {
         if (key == null) {
             return null;
         }
 
-        String localisationString = getLocalisation(key);
+        Localisation localisation = getLocalisation(key, eu4Language);
 
-        if (localisationString == null) {
+        if (localisation == null || StringUtils.isBlank(localisation.getValue())) {
             return key;
         }
 
-        StringBuilder localisation = new StringBuilder(localisationString);
+        StringBuilder localisationBuilder = new StringBuilder(localisation.getValue());
 
-        if (localisation.length() == 0) {
+        if (localisationBuilder.length() == 0) {
             return key;
         }
 
         int indexOf;
-        while (localisation.toString().indexOf('§') >= 0) {
-            for (int i = 0; i < localisation.length(); i++) {
-                if (localisation.charAt(i) == '§') {
-                    localisation.deleteCharAt(i);//Remove char
-                    localisation.deleteCharAt(i);//Remove color code
-                    indexOf = localisation.indexOf("§", i);
-                    localisation.deleteCharAt(indexOf);//Remove closing char
-                    localisation.deleteCharAt(indexOf);//Remove closing code
+        while (localisationBuilder.toString().indexOf('§') >= 0) {
+            for (int i = 0; i < localisationBuilder.length(); i++) {
+                if (localisationBuilder.charAt(i) == '§') {
+                    localisationBuilder.deleteCharAt(i);//Remove char
+                    localisationBuilder.deleteCharAt(i);//Remove color code
+                    indexOf = localisationBuilder.indexOf("§", i);
+                    localisationBuilder.deleteCharAt(indexOf);//Remove closing char
+                    localisationBuilder.deleteCharAt(indexOf);//Remove closing code
                     break;
                 }
             }
         }
 
-        if ((indexOf = localisation.toString().indexOf('$')) >= 0) {
-            if (ClausewitzUtils.hasAtLeast(localisation.toString(), '$', 2)) {
-                String[] splits = localisation.toString().split("\\$");
-                localisation = new StringBuilder();
+        if ((indexOf = localisationBuilder.toString().indexOf('$')) >= 0) {
+            if (ClausewitzUtils.hasAtLeast(localisationBuilder.toString(), '$', 2)) {
+                String[] splits = localisationBuilder.toString().split("\\$");
+                localisationBuilder = new StringBuilder();
                 for (int i = 0; i < splits.length; i += 2) {
-                    localisation.append(splits[i]).append(" ");
+                    localisationBuilder.append(splits[i]).append(" ");
                 }
             } else {
-                localisation = new StringBuilder(localisation.substring(0, indexOf));
+                localisationBuilder = new StringBuilder(localisationBuilder.substring(0, indexOf));
             }
         }
 
-        return localisation.toString().replace("\\r\\n", "")
-                           .replace("\\n", " ")
-                           .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
-                           .trim();
+        return localisationBuilder.toString().replace("\\r\\n", "")
+                                  .replace("\\n", " ")
+                                  .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
+                                  .trim();
     }
 
-    public String getLocalisationCleanNoPunctuation(String key) {
-        return getLocalisationClean(key).replaceAll("[\\p{P}]", "").trim();
+    public String getLocalisationCleanNoPunctuation(String key, Eu4Language eu4Language) {
+        return getLocalisationClean(key, eu4Language).replaceAll("[\\p{P}]", "").trim();
     }
 
     public List<String> getGraphicalCultures() {
@@ -1493,7 +1495,7 @@ public class Game {
         }
     }
 
-    public void saveDefines(Mod mod) {
+    public void saveDefines(Mod mod) throws IOException {
         List<Define> moddedDefines = this.defines.values()
                                                  .stream()
                                                  .map(Map::entrySet)
@@ -1507,16 +1509,17 @@ public class Game {
         if (CollectionUtils.isNotEmpty(moddedDefines)) {
             Map<FileNode, List<Define>> map = moddedDefines.stream().collect(Collectors.groupingBy(Define::getFileNode));
 
-            map.forEach((fileNode, values) -> {
-                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fileNode.getPath().toFile()))) {
-                    for (Define define : values) {
+            for (Map.Entry<FileNode, List<Define>> entry : map.entrySet()) {
+                FileUtils.forceMkdirParent(entry.getKey().getPath().toFile());
+                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(entry.getKey().getPath().toFile()))) {
+                    for (Define define : entry.getValue()) {
                         define.write(bufferedWriter);
                         bufferedWriter.newLine();
                     }
                 } catch (IOException e) {
-                    LOGGER.error("An error occurred while writing defines to {}: {}!", fileNode.getPath(), e.getMessage(), e);
+                    LOGGER.error("An error occurred while writing defines to {}: {}!", entry.getKey().getPath(), e.getMessage(), e);
                 }
-            });
+            }
         }
     }
 
@@ -1821,13 +1824,7 @@ public class Game {
             return null;
         }
 
-        return this.missionsTrees.values()
-                                 .stream()
-                                 .map(MissionsTree::getMissions)
-                                 .flatMap(Collection::stream)
-                                 .filter(mission -> name.equals(mission.getName()))
-                                 .findFirst()
-                                 .orElse(null);
+        return this.missions.get(name);
     }
 
     public List<Mission> getMissions() {
@@ -2251,18 +2248,27 @@ public class Game {
     }
 
     private void loadLocalisations() {
-        this.localisations = new HashMap<>();
-        loadLocalisations(Eu4Language.getByLocale(Locale.getDefault()), this.localisations);
+        List<Localisation> list = new ArrayList<>();
 
-        this.allLocalisations = new EnumMap<>(Eu4Language.class);
         for (Eu4Language language : Eu4Language.values()) {
-            Map<String, String> map = new HashMap<>();
-            this.allLocalisations.put(language, map);
-            loadLocalisations(language, map);
+            list.addAll(loadLocalisations(language));
         }
+
+        this.localisations = list.stream()
+                                 .collect(Collectors.groupingBy(Localisation::getKey))
+                                 .entrySet()
+                                 .stream()
+                                 .collect(Collectors.toMap(Map.Entry::getKey,
+                                                           entry -> entry.getValue()
+                                                                         .stream()
+                                                                         .collect(Collectors.toMap(Localisation::getEu4Language,
+                                                                                                   Function.identity(), (l, l2) -> l,
+                                                                                                   () -> new EnumMap<>(Eu4Language.class)))));
     }
 
-    private void loadLocalisations(Eu4Language eu4Language, Map<String, String> map) {
+    private List<Localisation> loadLocalisations(Eu4Language eu4Language) {
+        List<Localisation> list = new ArrayList<>();
+
         getPaths(Eu4Utils.LOCALISATION_FOLDER_PATH,
                  fileNode -> Files.isRegularFile(fileNode.getPath()),
                  fileNode -> fileNode.getPath().toString().endsWith(eu4Language.fileEndWith + ".yml"))
@@ -2303,12 +2309,14 @@ public class Game {
                                 continue;
                             }
 
-                            map.put(key, StringUtils.capitalize(value.substring(start, end).trim()));
+                            list.add(new Localisation(key, eu4Language, value.substring(start, end).trim(), path));
                         }
                     } catch (IOException e) {
                         LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
                     }
                 });
+
+        return list;
     }
 
     private void readGraphicalCultures() {
@@ -3066,6 +3074,11 @@ public class Game {
                                                               .map(item -> new MissionsTree(item, this, fileNode))
                                                               .collect(Collectors.toMap(MissionsTree::getName, Function.identity(), (a, b) -> b)));
                 });
+
+        this.missionsTrees.values()
+                          .forEach(missionsTree -> this.missions.putAll(missionsTree.getMissions()
+                                                                                    .stream()
+                                                                                    .collect(Collectors.toMap(Mission::getName, Function.identity()))));
 
         Path guiPath = getAbsolutePath(Eu4Utils.INTERFACE_FOLDER_PATH + File.separator + "countrymissionsview.gui");
 
