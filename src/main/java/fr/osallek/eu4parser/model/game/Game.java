@@ -2269,16 +2269,16 @@ public class Game {
     private List<Localisation> loadLocalisations(Eu4Language eu4Language) {
         List<Localisation> list = new ArrayList<>();
 
-        getPaths(Eu4Utils.LOCALISATION_FOLDER_PATH,
-                 fileNode -> Files.isRegularFile(fileNode.getPath()),
-                 fileNode -> fileNode.getPath().toString().endsWith(eu4Language.fileEndWith + ".yml"))
-                .forEach(path -> {
-                    try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+        getFileNodes(Eu4Utils.LOCALISATION_FOLDER_PATH,
+                     fileNode -> Files.isRegularFile(fileNode.getPath()),
+                     fileNode -> fileNode.getPath().toString().endsWith(eu4Language.fileEndWith + ".yml"))
+                .forEach(fileNode -> {
+                    try (BufferedReader reader = Files.newBufferedReader(fileNode.getPath(), StandardCharsets.UTF_8)) {
                         String line;
-                        reader.readLine(); //Skip first line language
+                        reader.readLine(); //Skip first line language (and BOM)
 
                         while ((line = reader.readLine()) != null) {
-                            if (ClausewitzUtils.isBlank(line)) {
+                            if (StringUtils.isBlank(line)) {
                                 continue;
                             }
 
@@ -2301,7 +2301,8 @@ public class Game {
 
                             String[] keys = line.split(":", 2);
                             String key = keys[0].trim();
-                            String value = keys[1];
+                            String version = keys[1].substring(0, 1);
+                            String value = keys[1].substring(1).trim();
                             int start = value.indexOf('"') + 1;
                             int end = value.lastIndexOf('"');
 
@@ -2309,10 +2310,10 @@ public class Game {
                                 continue;
                             }
 
-                            list.add(new Localisation(key, eu4Language, value.substring(start, end).trim(), path));
+                            list.add(new Localisation(fileNode, key, eu4Language, version, value.substring(start, end).trim()));
                         }
                     } catch (IOException e) {
-                        LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
+                        LOGGER.error("Could not read file {} because: {} !", fileNode.getRelativePath(), e.getMessage(), e);
                     }
                 });
 

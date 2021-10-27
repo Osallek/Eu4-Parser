@@ -1,23 +1,35 @@
 package fr.osallek.eu4parser.model.game.localisation;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
+import fr.osallek.eu4parser.model.game.FileNode;
+import fr.osallek.eu4parser.model.game.Nodded;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class Localisation {
+public class Localisation extends Nodded {
 
     private String key;
 
     private Eu4Language eu4Language;
 
+    private String version;
+
     private String value;
 
-    private Path path;
-
-    public Localisation(String key, Eu4Language eu4Language, String value, Path path) {
+    public Localisation(FileNode fileNode, String key, Eu4Language eu4Language, String version, String value) {
+        super(fileNode);
         this.key = key;
         this.eu4Language = eu4Language;
+        this.version = version;
         this.value = value;
-        this.path = path;
+    }
+
+    @Override
+    public String getName() {
+        return this.key;
     }
 
     public String getKey() {
@@ -36,6 +48,14 @@ public class Localisation {
         this.eu4Language = eu4Language;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     public String getValue() {
         return value;
     }
@@ -44,12 +64,14 @@ public class Localisation {
         this.value = value;
     }
 
-    public Path getPath() {
-        return path;
-    }
-
-    public void setPath(Path path) {
-        this.path = path;
+    public void write(BufferedWriter writer) throws IOException {
+        writer.write(this.key);
+        writer.write(':');
+        writer.write(this.version);
+        ClausewitzUtils.printSpace(writer);
+        writer.write('"');
+        writer.write(this.value.replace("\"", "\\\""));
+        writer.write('"');
     }
 
     @Override
@@ -62,14 +84,13 @@ public class Localisation {
             return false;
         }
 
-        Localisation localisation = (Localisation) o;
-
-        return Objects.equals(key, localisation.key);
+        Localisation that = (Localisation) o;
+        return Objects.equals(key, that.key) && eu4Language == that.eu4Language;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key);
+        return Objects.hash(key, eu4Language);
     }
 
     @Override
