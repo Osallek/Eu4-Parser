@@ -19,6 +19,13 @@ public class Localisation extends Nodded {
 
     private String value;
 
+    public Localisation(String key, Eu4Language eu4Language, String version, String value) {
+        this.key = key;
+        this.eu4Language = eu4Language;
+        this.version = version;
+        this.value = value;
+    }
+
     public Localisation(FileNode fileNode, String key, Eu4Language eu4Language, String version, String value) {
         super(fileNode);
         this.key = key;
@@ -65,12 +72,13 @@ public class Localisation extends Nodded {
     }
 
     public void write(BufferedWriter writer) throws IOException {
+        ClausewitzUtils.printSpace(writer);
         writer.write(this.key);
         writer.write(':');
         writer.write(this.version);
         ClausewitzUtils.printSpace(writer);
         writer.write('"');
-        writer.write(this.value.replace("\"", "\\\""));
+        writer.write(ClausewitzUtils.removeQuotes(this.value).replace("\"", "\\\""));
         writer.write('"');
     }
 

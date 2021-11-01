@@ -20,17 +20,6 @@ import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -50,11 +39,13 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -66,6 +57,16 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Game {
 
@@ -130,6 +131,8 @@ public class Game {
     private Map<String, TradeNode> tradeNodes;
 
     private Map<String, Building> buildings;
+
+    private Set<String> nativeLocalisations;
 
     private Map<String, Map<Eu4Language, Localisation>> localisations;
 
@@ -277,7 +280,7 @@ public class Game {
 
         this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
 
-        CountDownLatch countDownLatch = new CountDownLatch(69);
+        CountDownLatch countDownLatch = new CountDownLatch(70);
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
@@ -362,6 +365,15 @@ public class Game {
                 loadDefines();
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                loadNativeLocalisations();
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -1166,6 +1178,10 @@ public class Game {
 
     public ProvinceList getFakeMonsoon() {
         return fakeMonsoon;
+    }
+
+    public Set<String> getNativeLocalisations() {
+        return nativeLocalisations;
     }
 
     public Map<String, Map<Eu4Language, Localisation>> getLocalisations() {
@@ -2245,6 +2261,49 @@ public class Game {
         }
 
         return definesMap;
+    }
+
+    private void loadNativeLocalisations() {
+        this.nativeLocalisations = new HashSet<>();
+
+        try (Stream<Path> stream = Files.list(Path.of(this.gameFolderPath, Eu4Utils.LOCALISATION_FOLDER_PATH))) {
+            stream.filter(Files::isRegularFile).forEach(path -> {
+                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                    String line;
+                    reader.readLine(); //Skip first line language (and BOM)
+
+                    while ((line = reader.readLine()) != null) {
+                        if (StringUtils.isBlank(line)) {
+                            continue;
+                        }
+
+                        int indexOf;
+                        if ((indexOf = line.indexOf('#')) >= 0) { //If has comments
+                            if (line.indexOf('"') < 0) { //If has no data
+                                continue;
+                            }
+
+                            if (line.indexOf('"') < indexOf) { //If data is before comment
+                                line = line.substring(0, indexOf);
+
+                                if (ClausewitzUtils.isBlank(line)) {
+                                    continue;
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+
+                        String[] keys = line.split(":", 2);
+                        this.nativeLocalisations.add(keys[0].trim());
+                    }
+                } catch (IOException e) {
+                    LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
+                }
+            });
+        } catch (IOException e) {
+            LOGGER.error("An error occurred while reading native localisations: {}", e.getMessage(), e);
+        }
     }
 
     private void loadLocalisations() {
