@@ -29,6 +29,6 @@ public abstract class Nodded implements Comparable<Nodded> {
 
     @Override
     public int compareTo(Nodded o) {
-        return Comparator.comparing(Nodded::getName).compare(this, o);
+        return Comparator.comparing(Nodded::getName, String.CASE_INSENSITIVE_ORDER).compare(this, o);
     }
 }

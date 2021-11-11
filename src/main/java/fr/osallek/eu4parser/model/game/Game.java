@@ -20,6 +20,17 @@ import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -57,16 +68,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.imageio.ImageIO;
-import javax.swing.filechooser.FileSystemView;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Game {
 
@@ -1188,6 +1189,10 @@ public class Game {
         return localisations;
     }
 
+    public List<Localisation> getAllLocalisations() {
+        return this.localisations.values().stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
     public Localisation getLocalisation(String key, Eu4Language eu4Language) {
         Map<Eu4Language, Localisation> map = this.localisations.get(key);
         return MapUtils.isEmpty(map) ? null : map.get(eu4Language);
@@ -1244,6 +1249,14 @@ public class Game {
 
     public String getLocalisationCleanNoPunctuation(String key, Eu4Language eu4Language) {
         return getLocalisationClean(key, eu4Language).replaceAll("[\\p{P}]", "").trim();
+    }
+
+    public void addLocalisation(Localisation localisation) {
+        if (!this.localisations.containsKey(localisation.getKey())) {
+            this.localisations.put(localisation.getKey(), new EnumMap<>(Eu4Language.class));
+        }
+
+        this.localisations.get(localisation.getKey()).put(localisation.getEu4Language(), localisation);
     }
 
     public List<String> getGraphicalCultures() {
@@ -2154,7 +2167,7 @@ public class Game {
 
     private void readMods(List<String> modsEnabled) throws IOException {
         this.mods = new ArrayList<>();
-        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath), null), FileNode::getChildren);
+        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath), (Mod) null), FileNode::getChildren);
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator

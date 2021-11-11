@@ -33,6 +33,12 @@ public class FileNode implements Comparable<FileNode> {
         this.relativePath = this.root.relativize(this.path);
     }
 
+    public FileNode(Path root, Path relativePath) {
+        this.root = root;
+        this.relativePath = relativePath;
+        this.path = this.root.resolve(this.relativePath);
+    }
+
     public FileNode(Path root, Path path, Mod mod) {
         this.root = root;
         this.path = path;
