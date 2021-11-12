@@ -14,6 +14,7 @@ import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.common.TreeNode;
 import fr.osallek.eu4parser.model.Mod;
+import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
@@ -2179,7 +2180,7 @@ public class Game {
                           Mod mod = new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0));
                           knownMods.put(path.getFileName().toString(), mod);
 
-                          if (!Eu4Utils.MOD_FILE_NAME_PATTERN.matcher(path.getFileName().toString()).matches()) {
+                          if (!ModType.STEAM.pattern.matcher(path.getFileName().toString()).matches()) {
                               if (StringUtils.isNotBlank(mod.getRemoteFileId())) {
                                   knownMods.put("ugc_" + ClausewitzUtils.removeQuotes(mod.getRemoteFileId()) + ".mod", mod);
                               }
@@ -2192,7 +2193,7 @@ public class Game {
             for (String modName : modsEnabled) {
                 Mod mod = knownMods.get(ClausewitzUtils.removeQuotes(modName).replaceAll("^mod/", ""));
                 if (mod != null) {
-                    map.put(mod.getPath(), mod);
+                    map.put(mod.getPath().toFile(), mod);
                     this.mods.add(mod);
                 } else {
                     throw new ModNotFoundException(modName);

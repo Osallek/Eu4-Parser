@@ -55,6 +55,8 @@ public final class Eu4Utils {
 
     public static final File MODS_FOLDER = new File(EU4_DOCUMENTS_FOLDER.getAbsolutePath() + File.separator + "mod");
 
+    public static final String DESCRIPTOR_FILE = "descriptor.mod";
+
     public static final File OSALLEK_DOCUMENTS_FOLDER = new File(DOCUMENTS_FOLDER + File.separator + "Osallek");
 
     public static final String STEAM_COMMON_FOLDER_PATH = "common";
@@ -233,11 +235,10 @@ public final class Eu4Utils {
         return Optional.empty();
     }
 
-    public static List<Mod> detectOwnMods() {
+    public static List<Mod> detectMods() {
         if (MODS_FOLDER.exists() && MODS_FOLDER.isDirectory()) {
             try (Stream<Path> stream = Files.list(MODS_FOLDER.toPath())) {
                 return stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
-                             .filter(path -> !path.getFileName().toString().startsWith("ugc_"))
                              .map(path -> new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0)))
                              .sorted((o1, o2) -> Eu4Utils.COLLATOR.compare(o1.getName(), o2.getName()))
                              .collect(Collectors.toList());

@@ -23,7 +23,7 @@ public class FileNode implements Comparable<FileNode> {
     private Mod mod;
 
     public FileNode(Mod mod) {
-        this(mod.getPath().toPath(), mod);
+        this(mod.getPath(), mod);
     }
 
     public FileNode(Path path, Mod mod) {
@@ -47,7 +47,7 @@ public class FileNode implements Comparable<FileNode> {
     }
 
     public FileNode(Mod mod, Path relativePath) {
-        this.root = mod.getPath().toPath();
+        this.root = mod.getPath();
         this.path = this.root.resolve(relativePath);
         this.mod = mod;
         this.relativePath = relativePath;
@@ -87,7 +87,7 @@ public class FileNode implements Comparable<FileNode> {
 
     public void setMod(Mod mod) {
         this.mod = mod;
-        this.root = mod.getPath().toPath();
+        this.root = mod.getPath();
         this.path = this.root.resolve(relativePath);
     }
 

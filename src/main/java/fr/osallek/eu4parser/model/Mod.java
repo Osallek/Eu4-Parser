@@ -73,12 +73,32 @@ public class Mod {
         return ClausewitzUtils.removeQuotes(this.item.getVarAsString("path"));
     }
 
-    public File getPath() {
-        return Path.of(getPathString()).isAbsolute() ? new File(getPathString()) : Eu4Utils.EU4_DOCUMENTS_FOLDER.toPath().resolve(getPathString()).toFile();
+    public Path getPath() {
+        return Path.of(getPathString()).isAbsolute() ? Path.of(getPathString()) : Eu4Utils.EU4_DOCUMENTS_FOLDER.toPath().resolve(getPathString());
     }
 
-    public void setPath(File path) {
-        this.item.setVariable("path", ClausewitzUtils.addQuotes(path.getAbsolutePath()));
+    public void setPath(Path path) {
+        this.item.setVariable("path", ClausewitzUtils.addQuotes(path.toFile().getAbsolutePath()));
+    }
+
+    public void setPath(String path) {
+        this.item.setVariable("path", ClausewitzUtils.addQuotes(path));
+    }
+
+    public String getArchiveString() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("archive"));
+    }
+
+    public Path getArchive() {
+        return Path.of(getArchiveString()).isAbsolute() ? Path.of(getArchiveString()) : Eu4Utils.EU4_DOCUMENTS_FOLDER.toPath().resolve(getArchiveString());
+    }
+
+    public void setArchive(Path archive) {
+        this.item.setVariable("archive", ClausewitzUtils.addQuotes(archive.toFile().getAbsolutePath()));
+    }
+
+    public void setArchive(String archive) {
+        this.item.setVariable("archive", ClausewitzUtils.addQuotes(archive));
     }
 
     public List<String> getTags() {
@@ -158,6 +178,10 @@ public class Mod {
 
     public File getFile() {
         return file;
+    }
+
+    public ModType getType() {
+        return ModType.getByFileName(this.file.getName());
     }
 
     public void save() throws IOException {
