@@ -63,6 +63,42 @@ public class SpriteType {
         }
     }
 
+    public String getEffectFile() {
+        return this.item.getVarAsString("effectFile");
+    }
+
+    public void setEffectFile(String effectFile) {
+        if (StringUtils.isBlank(effectFile)) {
+            this.item.removeVariable("effectFile");
+        } else {
+            this.item.setVariable("effectFile", ClausewitzUtils.addQuotes(effectFile));
+        }
+    }
+
+    public Integer getNoOfFrames() {
+        return this.item.getVarAsInt("noofframes");
+    }
+
+    public void setNoOfFrames(Integer noOfFrames) {
+        if (noOfFrames == null) {
+            this.item.removeVariable("effectFile");
+        } else {
+            this.item.setVariable("effectFile", noOfFrames);
+        }
+    }
+
+    public Boolean getNoRefCount() {
+        return this.item.getVarAsBool("norefcount");
+    }
+
+    public void setNoRefCount(Boolean noRefCount) {
+        if (noRefCount == null) {
+            this.item.removeVariable("effectFile");
+        } else {
+            this.item.setVariable("effectFile", noRefCount);
+        }
+    }
+
     @Override
     public String toString() {
         return getName();

@@ -3,14 +3,21 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Objects;
 
-public class Advisor {
+public class Advisor extends Nodded {
 
     private final ClausewitzItem item;
 
-    public Advisor(ClausewitzItem item) {
+    private final Game game;
+
+    public Advisor(ClausewitzItem item, Game game, FileNode fileNode) {
+        super(fileNode);
         this.item = item;
+        this.game = game;
     }
 
     public String getName() {
@@ -59,6 +66,19 @@ public class Advisor {
 
     public Modifiers getModifiers() {
         return new Modifiers(this.item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female"));
+    }
+
+    public String getDefaultSpriteName() {
+        return "GFX_advisor_" + this.getName();
+    }
+
+    public SpriteType getDefaultSprite() {
+        return this.game.getSpriteType(getDefaultSpriteName());
+    }
+
+    @Override
+    public void write(BufferedWriter writer) throws IOException {
+        this.item.write(writer, true, 0, new HashMap<>());
     }
 
     @Override

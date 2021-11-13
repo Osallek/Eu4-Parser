@@ -3036,12 +3036,12 @@ public class Game {
     private void readAdvisors() {
         this.advisors = new LinkedHashMap<>();
 
-        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "advisortypes", this::isRegularTxtFile)
-                .forEach(path -> {
-                    ClausewitzItem advisorsItem = ClausewitzParser.parse(path.toFile(), 0);
+        getFileNodes(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "advisortypes", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem advisorsItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
                     this.advisors.putAll(advisorsItem.getChildren()
                                                      .stream()
-                                                     .map(Advisor::new)
+                                                     .map(item -> new Advisor(item, this, fileNode))
                                                      .collect(Collectors.toMap(Advisor::getName, Function.identity(), (a, b) -> b)));
                 });
     }
