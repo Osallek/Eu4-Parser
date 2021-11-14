@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -393,26 +394,26 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("LOCAL_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("LOCAL_YEARS_OF_NATIONALISM", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("MIN_LOCAL_AUTONOMY", ModifierType.CONSTANT, ModifierScope.PROVINCE);
-        ModifiersUtils.addModifier("ATTACK_BONUS_IN_CAPITAL_TERRAIN", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CAN_BYPASS_FORTS", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CAN_CHAIN_CLAIM", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CAN_COLONY_BOOST_DEVELOPMENT", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CAN_TRANSFER_VASSAL_WARGOAL", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("FORCE_MARCH_FREE", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("FREE_MAINTENANCE_ON_EXPL_CONQ", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("IGNORE_CORING_DISTANCE", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CB_ON_GOVERNMENT_ENEMIES", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CB_ON_PRIMITIVES", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CB_ON_OVERSEAS", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("IDEA_CLAIM_COLONIES", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("MAY_EXPLORE", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("NO_RELIGION_PENALTY", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("REDUCED_STAB_IMPACTS", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("SEA_REPAIR", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("MAY_ESTABLISH_FRONTIER", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("EXTRA_MANPOWER_AT_RELIGIOUS_WAR", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("AUTO_EXPLORE_ADJACENT_TO_COLONY", ModifierType.CONSTANT, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CAN_FABRICATE_FOR_VASSALS", ModifierType.CONSTANT, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("ATTACK_BONUS_IN_CAPITAL_TERRAIN", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CAN_BYPASS_FORTS", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CAN_CHAIN_CLAIM", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CAN_COLONY_BOOST_DEVELOPMENT", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CAN_TRANSFER_VASSAL_WARGOAL", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("FORCE_MARCH_FREE", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("FREE_MAINTENANCE_ON_EXPL_CONQ", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("IGNORE_CORING_DISTANCE", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CB_ON_GOVERNMENT_ENEMIES", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CB_ON_PRIMITIVES", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CB_ON_OVERSEAS", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("IDEA_CLAIM_COLONIES", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("MAY_EXPLORE", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("NO_RELIGION_PENALTY", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("REDUCED_STAB_IMPACTS", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("SEA_REPAIR", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("MAY_ESTABLISH_FRONTIER", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("EXTRA_MANPOWER_AT_RELIGIOUS_WAR", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("AUTO_EXPLORE_ADJACENT_TO_COLONY", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CAN_FABRICATE_FOR_VASSALS", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("HAS_BANNERS", ModifierType.CONSTANT, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("LOCAL_HAS_BANNERS", ModifierType.CONSTANT, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MAY_BUILD_SUPPLY_DEPOT", ModifierType.CONSTANT, ModifierScope.COUNTRY);
@@ -561,6 +562,7 @@ public class ModifiersUtils {
                                           .mapToDouble(Double::doubleValue)
                                           .sum());
             case CONSTANT:
+            case BOOLEAN:
                 return Math.max(value, Arrays.stream(modifiers)
                                              .map(m -> m.getModifier(modifier))
                                              .filter(Objects::nonNull)
@@ -1088,5 +1090,17 @@ public class ModifiersUtils {
                                              / (NumbersUtils.doubleOrDefault(country.getRawDevelopment())
                                                 / country.getSave().getGame().getFortPerDevRatio())
                                              / country.getHighestPossibleFort());
+    }
+
+    public static boolean equals(Map<String, Double> a, Map<Modifier, Double> b) {
+        if (a == null && b == null) {
+            return true;
+        }
+
+        if (a == null || b == null) {
+            return false;
+        }
+
+        return a.equals(b.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().getName(), Map.Entry::getValue)));
     }
 }

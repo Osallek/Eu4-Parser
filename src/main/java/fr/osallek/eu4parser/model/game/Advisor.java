@@ -2,11 +2,14 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
+import org.apache.commons.collections4.MapUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class Advisor extends Nodded {
 
@@ -64,8 +67,32 @@ public class Advisor extends Nodded {
         return new Modifiers(this.item.getChild("skill_scaled_modifier"));
     }
 
+    public void setSkillScaledModifiers(Map<String, Double> modifiers) {
+        if (MapUtils.isEmpty(modifiers)) {
+            this.item.removeChild("skill_scaled_modifier");
+        } else {
+            ClausewitzItem child = this.item.getChild("skill_scaled_modifier");
+
+            if (child == null) {
+                child = this.item.addChild("skill_scaled_modifier");
+            } else {
+                child.removeAllVariables();
+            }
+
+            modifiers.forEach(child::addVariable);
+        }
+    }
+
     public Modifiers getModifiers() {
         return new Modifiers(this.item.getVarsNot("monarch_power", "allow_only_male", "allow_only_female"));
+    }
+
+    public void setModifiers(Map<String, Double> modifiers) {
+        this.item.removeVariableIf(variable -> !Set.of("monarch_power", "allow_only_male", "allow_only_female").contains(variable.getName()));
+
+        if (MapUtils.isNotEmpty(modifiers)) {
+            modifiers.forEach((name, value) -> this.item.addVariable(name, value, this.item.getVar("monarch_power").getOrder() + 1));
+        }
     }
 
     public String getDefaultSpriteName() {
