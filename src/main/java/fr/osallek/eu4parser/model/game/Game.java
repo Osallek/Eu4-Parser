@@ -258,6 +258,8 @@ public class Game {
 
     private Map<String, Country> countries;
 
+    private Map<String, Bookmark> bookmarks;
+
     private Map<LocalDate, HreEmperor> hreEmperors;
 
     private Map<LocalDate, CelestialEmperor> celestialEmperors;
@@ -282,7 +284,7 @@ public class Game {
 
         this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
 
-        CountDownLatch countDownLatch = new CountDownLatch(70);
+        CountDownLatch countDownLatch = new CountDownLatch(71);
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
@@ -917,6 +919,15 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readDiplomacy();
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readBookmarks();
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -2143,6 +2154,14 @@ public class Game {
 
     public Map<LocalDate, CelestialEmperor> getCelestialEmperors() {
         return new TreeMap<>(this.celestialEmperors);
+    }
+
+    public List<Bookmark> getBookmarks() {
+        return new ArrayList<>(this.bookmarks.values());
+    }
+
+    public Bookmark getBookmark(String name) {
+        return this.bookmarks.get(name);
     }
 
     public Map<Province, Map<Polygon, Boolean>> getBorders() {
@@ -3614,6 +3633,19 @@ public class Game {
                                                                     new CelestialEmperor(item));
                                      }
                                  });
+                });
+    }
+
+    private void readBookmarks() {
+        this.bookmarks = new HashMap<>();
+
+        getFileNodes(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "bookmarks", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem investmentsItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+                    this.bookmarks.putAll(investmentsItem.getChildren()
+                                                         .stream()
+                                                         .map(item -> new Bookmark(fileNode, item, this))
+                                                         .collect(Collectors.toMap(Bookmark::getName, Function.identity())));
                 });
     }
 
