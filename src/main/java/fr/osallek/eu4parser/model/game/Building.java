@@ -5,18 +5,21 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Building {
+public class Building extends Nodded {
 
     private final ClausewitzItem item;
 
     private final Game game;
 
-    public Building(ClausewitzItem item, Game game) {
+    public Building(ClausewitzItem item, Game game, FileNode fileNode) {
+        super(fileNode);
         this.item = item;
         this.game = game;
     }
@@ -29,8 +32,12 @@ public class Building {
         this.item.setName(name);
     }
 
-    public File getImageFile() {
-        return this.game.getSpriteTypeImageFile("GFX_" + getName());
+    public String getSpriteName() {
+        return "GFX_" + getName();
+    }
+
+    public SpriteType getSprite() {
+        return this.game.getSpriteType(getSpriteName());
     }
 
     public Integer getCost() {
@@ -137,9 +144,9 @@ public class Building {
         }
     }
 
-    public List<TradeGood> getManufactoryFor() {
+    public List<String> getManufactoryFor() {
         ClausewitzList list = this.item.getList("manufactory");
-        return list == null ? null : list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
+        return list == null ? null : list.getValues();
     }
 
     public void setManufactoryFor(List<String> manufactoryFor) {
@@ -157,9 +164,9 @@ public class Building {
         }
     }
 
-    public List<TradeGood> getBonusManufactory() {
+    public List<String> getBonusManufactory() {
         ClausewitzList list = this.item.getList("bonus_manufactory");
-        return list == null ? null : list.getValues().stream().map(this.game::getTradeGood).collect(Collectors.toList());
+        return list == null ? null : list.getValues();
     }
 
     public void setBonusManufactory(List<String> bonusManufactory) {
@@ -229,6 +236,11 @@ public class Building {
     public Condition getTrigger() {
         ClausewitzItem child = this.item.getChild("build_trigger");
         return child == null ? null : new Condition(child);
+    }
+
+    @Override
+    public void write(BufferedWriter writer) throws IOException {
+        this.item.write(writer, true, 0, new HashMap<>());
     }
 
     @Override

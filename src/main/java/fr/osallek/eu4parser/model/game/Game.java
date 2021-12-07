@@ -2830,12 +2830,12 @@ public class Game {
     private void readBuildings() {
         this.buildings = new LinkedHashMap<>();
 
-        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "buildings", this::isRegularTxtFile)
-                .forEach(path -> {
-                    ClausewitzItem buildingsItem = ClausewitzParser.parse(path.toFile(), 0);
+        getFileNodes(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "buildings", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem buildingsItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
                     this.buildings.putAll(buildingsItem.getChildren()
                                                        .stream()
-                                                       .map(item -> new Building(item, this))
+                                                       .map(item -> new Building(item, this, fileNode))
                                                        .collect(Collectors.toMap(Building::getName, Function.identity(), (a, b) -> b)));
                 });
     }

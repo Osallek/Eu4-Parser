@@ -91,6 +91,8 @@ public final class Eu4Utils {
 
     public static final String ADVISORS_FOLDER_PATH = "advisors";
 
+    public static final String BUILDINGS_FOLDER_PATH = "buildings";
+
     public static final String GRAPHICAL_CULTURES_FILE = "graphicalculturetype.txt";
 
     public static final LocalDate DEFAULT_DATE = LocalDate.of(1, 1, 1);
@@ -166,6 +168,8 @@ public final class Eu4Utils {
     public static final Path MISSIONS_GFX = Path.of(GFX_FOLDER_PATH, INTERFACE_FOLDER_PATH, MISSIONS_FOLDER_PATH);
 
     public static final Path ADVISORS_GFX = Path.of(GFX_FOLDER_PATH, INTERFACE_FOLDER_PATH, ADVISORS_FOLDER_PATH);
+
+    public static final Path BUILDINGS_GFX = Path.of(GFX_FOLDER_PATH, INTERFACE_FOLDER_PATH, BUILDINGS_FOLDER_PATH);
 
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
