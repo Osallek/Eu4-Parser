@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CountryHistoryItem {
 
@@ -190,7 +189,7 @@ public class CountryHistoryItem {
     }
 
     public List<Culture> getAddAcceptedCultures() {
-        return this.item.getVarsAsStrings("add_accepted_culture").stream().map(this.game::getCulture).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("add_accepted_culture").stream().map(this.game::getCulture).toList();
     }
 
     public void setAddAcceptedCultures(List<Culture> cultures) {
@@ -217,7 +216,7 @@ public class CountryHistoryItem {
     }
 
     public List<Culture> getRemoveAcceptedCultures() {
-        return this.item.getVarsAsStrings("remove_accepted_culture").stream().map(this.game::getCulture).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("remove_accepted_culture").stream().map(this.game::getCulture).toList();
     }
 
     public void setRemoveAcceptedCultures(List<Culture> cultures) {
@@ -244,7 +243,7 @@ public class CountryHistoryItem {
     }
 
     public List<Country> getHistoricalFriends() {
-        return this.item.getVarsAsStrings("historical_friend").stream().map(this.game::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("historical_friend").stream().map(this.game::getCountry).toList();
     }
 
     public void setHistoricalFriends(List<Country> friends) {
@@ -265,11 +264,11 @@ public class CountryHistoryItem {
     }
 
     public List<Country> getHistoricalEnemies() {
-        return this.item.getVarsAsStrings("historical_rival").stream().map(this.game::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("historical_rival").stream().map(this.game::getCountry).toList();
     }
 
     public void setHistoricalEnemies(Collection<Country> enemies) {
-        setHistoricalEnemies(enemies.stream().map(Country::getTag).collect(Collectors.toList()));
+        setHistoricalEnemies(enemies.stream().map(Country::getTag).toList());
     }
 
     public void setHistoricalEnemies(List<String> enemies) {
@@ -315,7 +314,7 @@ public class CountryHistoryItem {
 
     public List<ChangeEstateLandShare> getChangeEstateLandShares() {
         List<ClausewitzItem> list = this.item.getChildren("change_estate_land_share");
-        return CollectionUtils.isEmpty(list) ? null : list.stream().map(child -> new ChangeEstateLandShare(child, this.game)).collect(Collectors.toList());
+        return CollectionUtils.isEmpty(list) ? null : list.stream().map(child -> new ChangeEstateLandShare(child, this.game)).toList();
     }
 
     public void setChangeEstateLandShares(Map<String, Double> shares) {
@@ -328,7 +327,7 @@ public class CountryHistoryItem {
     }
 
     public List<RulerPersonality> getAddHeirPersonalities() {
-        return this.item.getVarsAsStrings("add_heir_personality").stream().map(this.game::getRulerPersonality).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("add_heir_personality").stream().map(this.game::getRulerPersonality).toList();
     }
 
     public void setAddHeirPersonalities(List<String> addHeirPersonalities) {
@@ -350,7 +349,7 @@ public class CountryHistoryItem {
     }
 
     public List<RulerPersonality> getAddRulerPersonalities() {
-        return this.item.getVarsAsStrings("add_ruler_personality").stream().map(this.game::getRulerPersonality).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("add_ruler_personality").stream().map(this.game::getRulerPersonality).toList();
     }
 
     public void setAddRulerPersonalities(List<String> addRulerPersonalities) {
@@ -372,7 +371,7 @@ public class CountryHistoryItem {
     }
 
     public List<RulerPersonality> getAddQueenPersonalities() {
-        return this.item.getVarsAsStrings("add_queen_personality").stream().map(this.game::getRulerPersonality).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("add_queen_personality").stream().map(this.game::getRulerPersonality).toList();
     }
 
     public void setAddQueenPersonalities(List<String> addQueenPersonalities) {
@@ -394,7 +393,7 @@ public class CountryHistoryItem {
     }
 
     public List<EstatePrivilege> getSetEstatePrivilege() {
-        return this.item.getVarsAsStrings("set_estate_privilege").stream().map(this.game::getEstatePrivilege).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("set_estate_privilege").stream().map(this.game::getEstatePrivilege).toList();
     }
 
     public void setSetEstatePrivilege(List<String> setEstatePrivilege) {
@@ -416,7 +415,7 @@ public class CountryHistoryItem {
     }
 
     public List<GovernmentReform> getAddGovernmentReform() {
-        return this.item.getVarsAsStrings("add_government_reform").stream().map(this.game::getGovernmentReform).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("add_government_reform").stream().map(this.game::getGovernmentReform).toList();
     }
 
     public void addAddGovernmentReform(List<String> addGovernmentReform) {

@@ -7,13 +7,7 @@ import fr.osallek.eu4parser.model.Power;
 
 import java.time.LocalDate;
 
-public class TechLevelDates {
-
-    private final ClausewitzItem item;
-
-    public TechLevelDates(ClausewitzItem item) {
-        this.item = item;
-    }
+public record TechLevelDates(ClausewitzItem item) {
 
     public LocalDate getTechDate(Power power) {
         return this.item.getVarAsDate(power.ordinal());

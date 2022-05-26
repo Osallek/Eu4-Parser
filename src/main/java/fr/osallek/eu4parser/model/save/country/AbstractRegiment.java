@@ -17,7 +17,7 @@ public abstract class AbstractRegiment {
 
     private Id lastTarget;
 
-    public AbstractRegiment(ClausewitzItem item, Save save) {
+    protected AbstractRegiment(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
         refreshAttributes();

@@ -44,11 +44,9 @@ public class NativeAdvancement {
             return true;
         }
 
-        if (!(o instanceof NativeAdvancement)) {
+        if (!(o instanceof NativeAdvancement nativeAdvancement)) {
             return false;
         }
-
-        NativeAdvancement nativeAdvancement = (NativeAdvancement) o;
 
         return Objects.equals(getName(), nativeAdvancement.getName());
     }

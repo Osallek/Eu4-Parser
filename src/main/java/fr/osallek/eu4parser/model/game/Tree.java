@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Tree extends Nodded {
 
@@ -37,7 +36,7 @@ public class Tree extends Nodded {
 
     public List<Color> getFileColors() {
         ClausewitzList list = this.item.getList("color");
-        return list == null ? null : list.getValuesAsInt().stream().map(this.fileColors::get).collect(Collectors.toList());
+        return list == null ? null : list.getValuesAsInt().stream().map(this.fileColors::get).toList();
     }
 
     public void setColor(List<Integer> indexes) {
@@ -70,13 +69,11 @@ public class Tree extends Nodded {
             return true;
         }
 
-        if (!(o instanceof Tree)) {
+        if (!(o instanceof Tree tree)) {
             return false;
         }
 
-        Tree area = (Tree) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), tree.getName());
     }
 
     @Override

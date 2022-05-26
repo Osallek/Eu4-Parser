@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.model.Power;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Faction {
 
@@ -39,7 +38,7 @@ public class Faction {
 
     public List<Names> getNames() {
         List<ClausewitzItem> namesItems = this.item.getChildren("triggered_faction_name");
-        return namesItems.stream().map(Names::new).collect(Collectors.toList());
+        return namesItems.stream().map(Names::new).toList();
     }
 
     public Modifiers getModifiers() {
@@ -52,13 +51,11 @@ public class Faction {
             return true;
         }
 
-        if (!(o instanceof Faction)) {
+        if (!(o instanceof Faction faction)) {
             return false;
         }
 
-        Faction area = (Faction) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), faction.getName());
     }
 
     @Override

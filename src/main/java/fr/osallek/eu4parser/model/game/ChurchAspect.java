@@ -42,11 +42,10 @@ public class ChurchAspect {
             return true;
         }
 
-        if (!(o instanceof ChurchAspect)) {
+        if (!(o instanceof ChurchAspect that)) {
             return false;
         }
 
-        ChurchAspect that = (ChurchAspect) o;
         return Objects.equals(getName(), that.getName());
     }
 

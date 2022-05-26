@@ -6,21 +6,8 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class Institutions {
-
-    private final ClausewitzList origins;
-
-    private final ClausewitzList available;
-
-    private final Save save;
-
-    public Institutions(ClausewitzList origins, ClausewitzList available, Save save) {
-        this.origins = origins;
-        this.available = available;
-        this.save = save;
-    }
+public record Institutions(ClausewitzList origins, ClausewitzList available, Save save) {
 
     public int getNbInstitutions() {
         return Math.min(this.origins.size(), this.available.size());
@@ -39,7 +26,7 @@ public class Institutions {
     }
 
     public List<SaveProvince> getOrigins() {
-        return this.origins.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return this.origins.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public SaveProvince getOrigin(int institution) {

@@ -57,11 +57,9 @@ public class HolyOrder {
             return true;
         }
 
-        if (!(o instanceof HolyOrder)) {
+        if (!(o instanceof HolyOrder holyOrder)) {
             return false;
         }
-
-        HolyOrder holyOrder = (HolyOrder) o;
 
         return Objects.equals(getName(), holyOrder.getName());
     }

@@ -4,13 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
 
-public class HreIncident {
-
-    private final ClausewitzItem item;
-
-    public HreIncident(ClausewitzItem item) {
-        this.item = item;
-    }
+public record HreIncident(ClausewitzItem item) {
 
     public String getName() {
         return this.item.getVarAsString("incident");

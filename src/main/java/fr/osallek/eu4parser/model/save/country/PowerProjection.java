@@ -2,13 +2,7 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class PowerProjection {
-
-    private final ClausewitzItem item;
-
-    public PowerProjection(ClausewitzItem item) {
-        this.item = item;
-    }
+public record PowerProjection(ClausewitzItem item) {
 
     public String getTarget() {
         return this.item.getVarAsString("target");

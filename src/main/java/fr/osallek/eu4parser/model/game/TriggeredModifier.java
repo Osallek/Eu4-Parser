@@ -31,11 +31,9 @@ public class TriggeredModifier extends GameModifier {
             return true;
         }
 
-        if (!(o instanceof TriggeredModifier)) {
+        if (!(o instanceof TriggeredModifier triggeredModifier)) {
             return false;
         }
-
-        TriggeredModifier triggeredModifier = (TriggeredModifier) o;
 
         return Objects.equals(getName(), triggeredModifier.getName());
     }

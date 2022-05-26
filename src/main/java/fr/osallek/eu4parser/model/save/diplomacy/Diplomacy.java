@@ -7,7 +7,6 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Diplomacy {
 
@@ -357,7 +356,7 @@ public class Diplomacy {
         this.dependencies = this.item.getChildren("dependency")
                                      .stream()
                                      .map(child -> new Dependency(child, this.save))
-                                     .collect(Collectors.toList());
+                                     .toList();
         this.dependencies.forEach(dependency -> {
             dependency.getSecond().setSubjectType(dependency.getSubjectType());
             dependency.getSecond().setSubjectStartDate(dependency.getStartDate());
@@ -366,61 +365,61 @@ public class Diplomacy {
         this.alliances = this.item.getChildren("alliance")
                                   .stream()
                                   .map(child -> new DatableRelation(child, this.save))
-                                  .collect(Collectors.toList());
+                                  .toList();
 
         this.guarantees = this.item.getChildren("guarantee")
                                    .stream()
                                    .map(child -> new DatableRelation(child, this.save))
-                                   .collect(Collectors.toList());
+                                   .toList();
 
         this.knowledgeSharing = this.item.getChildren("knowledge_sharing")
                                          .stream()
                                          .map(child -> new KnowledgeSharing(child, this.save))
-                                         .collect(Collectors.toList());
+                                         .toList();
 
         this.subsidies = this.item.getChildren("subsidies")
                                   .stream()
                                   .map(child -> new Subsidies(child, this.save))
-                                  .collect(Collectors.toList());
+                                  .toList();
 
         this.royalMarriage = this.item.getChildren("royal_marriage")
                                       .stream()
                                       .map(child -> new DatableRelation(child, this.save))
-                                      .collect(Collectors.toList());
+                                      .toList();
 
         this.militaryAccesses = this.item.getChildren("military_access")
                                          .stream()
                                          .map(child -> new MilitaryAccess(child, this.save))
-                                         .collect(Collectors.toList());
+                                         .toList();
 
         this.fleetAccesses = this.item.getChildren("fleet_access")
                                       .stream()
                                       .map(child -> new MilitaryAccess(child, this.save))
-                                      .collect(Collectors.toList());
+                                      .toList();
 
         this.casusBellis = this.item.getChildren("casus_belli")
                                     .stream()
                                     .map(child -> new CasusBelli(child, this.save))
-                                    .collect(Collectors.toList());
+                                    .toList();
 
         this.supportIndependence = this.item.getChildren("support_independence")
                                             .stream()
                                             .map(child -> new DatableRelation(child, save))
-                                            .collect(Collectors.toList());
+                                            .toList();
 
         this.transferTradePowers = this.item.getChildren("transfer_trade_power")
                                             .stream()
                                             .map(child -> new TransferTradePower(child, save))
-                                            .collect(Collectors.toList());
+                                            .toList();
 
         this.warReparations = this.item.getChildren("war_reparations")
                                        .stream()
                                        .map(child -> new EndDatableRelation(child, save))
-                                       .collect(Collectors.toList());
+                                       .toList();
 
         this.warnings = this.item.getChildren("warning")
                                  .stream()
                                  .map(child -> new DatableRelation(child, save))
-                                 .collect(Collectors.toList());
+                                 .toList();
     }
 }

@@ -9,26 +9,16 @@ import fr.osallek.eu4parser.model.save.Id;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class FiredEvents {
-
-    private final ClausewitzItem item;
-
-    private final Game game;
-
-    public FiredEvents(ClausewitzItem item, Game game) {
-        this.item = item;
-        this.game = game;
-    }
+public record FiredEvents(ClausewitzItem item, Game game) {
 
     public List<String> getFiredEvents() {
         List<String> events = new ArrayList<>();
         this.item.getAllOrdered().forEach(clausewitzObject -> {
-            if (clausewitzObject instanceof ClausewitzItem) {
-                events.add(String.valueOf(new Id((ClausewitzItem) clausewitzObject).getId()));
-            } else if (clausewitzObject instanceof ClausewitzVariable) {
-                events.add(((ClausewitzVariable) clausewitzObject).getValue());
+            if (clausewitzObject instanceof ClausewitzItem item) {
+                events.add(String.valueOf(new Id(item).getId()));
+            } else if (clausewitzObject instanceof ClausewitzVariable variable) {
+                events.add((variable).getValue());
             }
         });
 
@@ -38,8 +28,8 @@ public class FiredEvents {
     public List<Event> getEvents() {
         return this.item.getVariables()
                         .stream()
-                        .map(var -> this.game.getEvent(ClausewitzUtils.removeQuotes(var.getValue())))
-                        .collect(Collectors.toList());
+                        .map(variable -> this.game.getEvent(ClausewitzUtils.removeQuotes(variable.getValue())))
+                        .toList();
     }
 
     public void addFiredEvent(Event firedEvent) {
@@ -63,9 +53,9 @@ public class FiredEvents {
     }
 
     public void setEvents(List<Event> events) {
-        List<String> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
+        List<String> eventIds = events.stream().map(Event::getId).toList();
 
-        this.item.removeVariableIf(var -> !eventIds.contains(var.getValue()));
+        this.item.removeVariableIf(variable -> !eventIds.contains(variable.getValue()));
         events.removeIf(event -> this.item.hasVar(event.getId()));
         events.forEach(this::addFiredEvent);
     }

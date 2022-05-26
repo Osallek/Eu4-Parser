@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.model.game.Game;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class SaveFervor {
 
@@ -34,7 +33,7 @@ public class SaveFervor {
     }
 
     public List<Fervor> getActives() {
-        return this.item.getVarsAsStrings("active").stream().map(this.game::getFervor).filter(Objects::nonNull).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("active").stream().map(this.game::getFervor).filter(Objects::nonNull).toList();
     }
 
     public void addActive(Fervor active) {

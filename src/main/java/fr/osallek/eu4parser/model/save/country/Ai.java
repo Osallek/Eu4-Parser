@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Ai {
 
@@ -134,31 +133,31 @@ public class Ai {
         List<ClausewitzItem> conquerProvItems = this.item.getChildren("conquer_prov");
         this.conquerProvs = conquerProvItems.stream()
                                             .map(ConquerProv::new)
-                                            .collect(Collectors.toList());
+                                            .toList();
 
         List<ClausewitzItem> threatItems = this.item.getChildren("threat");
         this.threats = threatItems.stream()
                                   .map(Threat::new)
-                                  .collect(Collectors.toList());
+                                  .toList();
 
         List<ClausewitzItem> antagonizeItems = this.item.getChildren("antagonize");
         this.antagonize = antagonizeItems.stream()
                                          .map(Threat::new)
-                                         .collect(Collectors.toList());
+                                         .toList();
 
         List<ClausewitzItem> befriendItems = this.item.getChildren("befriend");
         this.befriends = befriendItems.stream()
                                       .map(Threat::new)
-                                      .collect(Collectors.toList());
+                                      .toList();
 
         List<ClausewitzItem> rivalsItems = this.item.getChildren("rival");
         this.rivals = rivalsItems.stream()
                                  .map(Threat::new)
-                                 .collect(Collectors.toList());
+                                 .toList();
 
         List<ClausewitzItem> militaryAccessesItems = this.item.getChildren("military_access");
         this.militaryAccesses = militaryAccessesItems.stream()
                                                      .map(Threat::new)
-                                                     .collect(Collectors.toList());
+                                                     .toList();
     }
 }

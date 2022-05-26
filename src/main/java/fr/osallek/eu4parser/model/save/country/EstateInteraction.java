@@ -8,16 +8,7 @@ import fr.osallek.eu4parser.model.game.Game;
 
 import java.time.LocalDate;
 
-public class EstateInteraction {
-
-    private final Game game;
-
-    private final ClausewitzList list;
-
-    public EstateInteraction(Game game, ClausewitzList list) {
-        this.game = game;
-        this.list = list;
-    }
+public record EstateInteraction(Game game, ClausewitzList list) {
 
     public EstatePrivilege getPrivilege() {
         return this.game.getEstatePrivilege(this.list.get(0));

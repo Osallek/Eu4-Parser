@@ -5,7 +5,6 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ActiveRelation {
 
@@ -158,6 +157,6 @@ public class ActiveRelation {
         List<ClausewitzItem> naviesItems = this.item.getChildren("opinion");
         this.opinions = naviesItems.stream()
                                    .map(Opinion::new)
-                                   .collect(Collectors.toList());
+                                   .toList();
     }
 }

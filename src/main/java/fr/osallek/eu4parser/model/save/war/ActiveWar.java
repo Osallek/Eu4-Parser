@@ -247,7 +247,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
                                    if (child.hasVar(action.name().toLowerCase())) {
                                        actions.merge(action,
                                                      Collections.singletonList(child.getVarAsString(action.name().toLowerCase())),
-                                                     (strings, strings2) -> Stream.concat(strings.stream(), strings2.stream()).collect(Collectors.toList()));
+                                                     (strings, strings2) -> Stream.concat(strings.stream(), strings2.stream()).toList());
                                    }
                                }
                            });
@@ -261,7 +261,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
                                       .filter(child -> child.getChild("battle") != null)
                                       .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
                                                                 child -> Collections.singletonList(new Battle(child.getChild("battle"))),
-                                                                (a, b) -> Stream.concat(a.stream(), b.stream()).collect(Collectors.toList()),
+                                                                (a, b) -> Stream.concat(a.stream(), b.stream()).toList(),
                                                                 TreeMap::new));
         }
 

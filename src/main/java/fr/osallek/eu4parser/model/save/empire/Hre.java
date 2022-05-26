@@ -11,7 +11,6 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Hre extends Empire {
 
@@ -164,7 +163,7 @@ public class Hre extends Empire {
         return list == null ? new ArrayList<>() : list.getValues()
                                                       .stream()
                                                       .map(this.save::getCountry)
-                                                      .collect(Collectors.toList());
+                                                      .toList();
     }
 
     public void setElectors(List<SaveCountry> electors) {

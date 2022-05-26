@@ -39,11 +39,9 @@ public class ModifierDefinition {
             return true;
         }
 
-        if (!(o instanceof ModifierDefinition)) {
+        if (!(o instanceof ModifierDefinition modifierDefinition)) {
             return false;
         }
-
-        ModifierDefinition modifierDefinition = (ModifierDefinition) o;
 
         return Objects.equals(getKey(), modifierDefinition.getKey());
     }

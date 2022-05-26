@@ -7,7 +7,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TradeNodeOutgoing {
@@ -32,7 +31,7 @@ public class TradeNodeOutgoing {
     }
 
     public void setPath(List<Integer> path) {
-        this.item.getList("path").setAll(path.stream().filter(Objects::nonNull).map(String::valueOf).collect(Collectors.toList()));
+        this.item.getList("path").setAll(path.stream().filter(Objects::nonNull).map(String::valueOf).toList());
     }
 
     public List<Pair<Double, Double>> getControl() {
@@ -41,7 +40,7 @@ public class TradeNodeOutgoing {
         if (list != null) {
             return IntStream.iterate(0, i -> i < list.size(), i -> i + 2)
                             .mapToObj(i -> Pair.of(list.getAsDouble(i), list.getAsDouble(i + 1)))
-                            .collect(Collectors.toList());
+                            .toList();
         } else {
             return null;
         }
@@ -53,11 +52,9 @@ public class TradeNodeOutgoing {
             return true;
         }
 
-        if (!(o instanceof TradeNodeOutgoing)) {
+        if (!(o instanceof TradeNodeOutgoing tradeNodeOutgoing)) {
             return false;
         }
-
-        TradeNodeOutgoing tradeNodeOutgoing = (TradeNodeOutgoing) o;
 
         return Objects.equals(getName(), tradeNodeOutgoing.getName());
     }

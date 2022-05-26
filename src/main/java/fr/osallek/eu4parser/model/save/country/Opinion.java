@@ -4,13 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
 
-public class Opinion {
-
-    private final ClausewitzItem item;
-
-    public Opinion(ClausewitzItem item) {
-        this.item = item;
-    }
+public record Opinion(ClausewitzItem item) {
 
     public String getModifier() {
         return this.item.getVarAsString("modifier");

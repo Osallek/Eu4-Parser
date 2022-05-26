@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class SuperRegion extends Nodded {
 
@@ -31,7 +30,7 @@ public class SuperRegion extends Nodded {
     }
 
     public List<Region> getRegions() {
-        return this.list.getValues().stream().filter(s -> !s.equalsIgnoreCase("restrict_charter")).map(game::getRegion).collect(Collectors.toList());
+        return this.list.getValues().stream().filter(s -> !s.equalsIgnoreCase("restrict_charter")).map(game::getRegion).toList();
     }
 
     public void setRegions(List<String> regions) {
@@ -77,11 +76,9 @@ public class SuperRegion extends Nodded {
             return true;
         }
 
-        if (!(o instanceof SuperRegion)) {
+        if (!(o instanceof SuperRegion superRegion)) {
             return false;
         }
-
-        SuperRegion superRegion = (SuperRegion) o;
 
         return Objects.equals(getName(), superRegion.getName());
     }

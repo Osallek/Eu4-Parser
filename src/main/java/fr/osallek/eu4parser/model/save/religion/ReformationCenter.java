@@ -6,16 +6,7 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
-public class ReformationCenter {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public ReformationCenter(Save save, ClausewitzItem item) {
-        this.save = save;
-        this.item = item;
-    }
+public record ReformationCenter(Save save, ClausewitzItem item) {
 
     public SaveProvince getProvince() {
         return this.save.getProvince(this.item.getVarAsInt("province_id"));

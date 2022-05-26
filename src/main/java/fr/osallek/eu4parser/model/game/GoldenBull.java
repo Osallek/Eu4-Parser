@@ -57,11 +57,10 @@ public class GoldenBull {
             return true;
         }
 
-        if (!(o instanceof GoldenBull)) {
+        if (!(o instanceof GoldenBull goldenBull)) {
             return false;
         }
-        GoldenBull decree = (GoldenBull) o;
-        return Objects.equals(getName(), decree.getName());
+        return Objects.equals(getName(), goldenBull.getName());
     }
 
     @Override

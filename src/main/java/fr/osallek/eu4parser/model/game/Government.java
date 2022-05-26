@@ -120,7 +120,7 @@ public class Government {
                             return reformsList == null ? new ArrayList<>() : reformsList.getValues()
                                                                                         .stream()
                                                                                         .map(this.game::getGovernmentReform)
-                                                                                        .collect(Collectors.toList());
+                                                                                        .toList();
                         }, (reforms, reforms1) -> reforms, LinkedHashMap::new));
         }
 

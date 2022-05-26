@@ -6,16 +6,7 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
-public class WarGoal {
-
-    protected final Save save;
-
-    protected final ClausewitzItem item;
-
-    public WarGoal(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record WarGoal(ClausewitzItem item, Save save) {
 
     public String getName() {
         return this.item.getVarAsString("name");

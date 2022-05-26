@@ -40,11 +40,9 @@ public class LeaderPersonality {
             return true;
         }
 
-        if (!(o instanceof LeaderPersonality)) {
+        if (!(o instanceof LeaderPersonality personality)) {
             return false;
         }
-
-        LeaderPersonality personality = (LeaderPersonality) o;
 
         return Objects.equals(getName(), personality.getName());
     }

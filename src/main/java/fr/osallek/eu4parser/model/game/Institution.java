@@ -96,12 +96,11 @@ public class Institution implements Comparable<Institution> {
             return true;
         }
 
-        if (!(o instanceof Institution)) {
+        if (!(o instanceof Institution institution)) {
             return false;
         }
 
-        Institution that = (Institution) o;
-        return Objects.equals(getName(), that.getName());
+        return Objects.equals(getName(), institution.getName());
     }
 
     @Override

@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Papacy {
 
@@ -18,7 +17,7 @@ public class Papacy {
         return child == null ? null : child.getChildren()
                                            .stream()
                                            .map(PapacyConcession::new)
-                                           .collect(Collectors.toList());
+                                           .toList();
     }
 
     public String getPapacyTag() {

@@ -18,7 +18,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SaveEstate {
 
@@ -124,7 +123,7 @@ public class SaveEstate {
                                                                 .map(EstatePrivilegeModifier::getModifiers)
                                                                 .filter(m -> m.hasModifier(modifier))
                                                                 .map(m -> m.getModifier(modifier))
-                                                                .collect(Collectors.toList()));
+                                                                .toList());
                                   });
         }
 
@@ -264,7 +263,7 @@ public class SaveEstate {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(Integer::parseInt).collect(Collectors.toList());
+        return list.getValues().stream().map(Integer::parseInt).toList();
     }
 
     public List<Integer> getActiveLoyalties() {
@@ -274,7 +273,7 @@ public class SaveEstate {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(Integer::parseInt).collect(Collectors.toList());
+        return list.getValues().stream().map(Integer::parseInt).toList();
     }
 
     public Estate getEstateGame() {
@@ -283,17 +282,17 @@ public class SaveEstate {
 
     private void refreshAttributes() {
         List<ClausewitzItem> modifierItems = this.item.getChildren("influence_modifier");
-        this.influenceModifiers = modifierItems.stream().map(SaveEstateModifier::new).collect(Collectors.toList());
+        this.influenceModifiers = modifierItems.stream().map(SaveEstateModifier::new).toList();
 
         modifierItems = this.item.getChildren("loyalty_modifier");
-        this.loyaltyModifiers = modifierItems.stream().map(SaveEstateModifier::new).collect(Collectors.toList());
+        this.loyaltyModifiers = modifierItems.stream().map(SaveEstateModifier::new).toList();
 
         ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
 
         if (grantedPrivilegesItem != null) {
             this.grantedPrivileges = grantedPrivilegesItem.getLists().stream()
                                                           .map(list -> new EstateInteraction(game, list))
-                                                          .collect(Collectors.toList());
+                                                          .toList();
         }
     }
 }

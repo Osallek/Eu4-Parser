@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class TradeCompany extends Nodded {
 
@@ -56,7 +55,7 @@ public class TradeCompany extends Nodded {
 
     public List<Names> getNames() {
         List<ClausewitzItem> namesItems = this.item.getChildren("names");
-        return CollectionUtils.isEmpty(namesItems) ? new ArrayList<>() : namesItems.stream().map(Names::new).collect(Collectors.toList());
+        return CollectionUtils.isEmpty(namesItems) ? new ArrayList<>() : namesItems.stream().map(Names::new).toList();
     }
 
     public List<Integer> getProvinces() {
@@ -113,13 +112,11 @@ public class TradeCompany extends Nodded {
             return true;
         }
 
-        if (!(o instanceof TradeCompany)) {
+        if (!(o instanceof TradeCompany tradeCompany)) {
             return false;
         }
 
-        TradeCompany area = (TradeCompany) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), tradeCompany.getName());
     }
 
     @Override

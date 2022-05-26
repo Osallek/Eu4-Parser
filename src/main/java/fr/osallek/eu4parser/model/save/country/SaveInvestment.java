@@ -10,18 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-public class SaveInvestment {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public SaveInvestment(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record SaveInvestment(ClausewitzItem item, Save save) {
 
     public SaveCountry getCountry() {
         return this.save.getCountry(this.item.getVarAsString("tag"));
@@ -31,7 +21,7 @@ public class SaveInvestment {
         ClausewitzList investmentsList = this.item.getList("investments");
 
         if (investmentsList != null) {
-            return investmentsList.getValues().stream().map(s -> this.save.getGame().getInvestment(s)).filter(Objects::nonNull).collect(Collectors.toList());
+            return investmentsList.getValues().stream().map(s -> this.save.getGame().getInvestment(s)).filter(Objects::nonNull).toList();
         }
 
         return new ArrayList<>();
@@ -60,7 +50,7 @@ public class SaveInvestment {
     public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country, Investment... investments) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "investments", parent.getOrder() + 1);
         toItem.addVariable("tag", ClausewitzUtils.addQuotes(country.getTag()));
-        toItem.addList("investments", Arrays.stream(investments).map(Investment::getName).collect(Collectors.toList()));
+        toItem.addList("investments", Arrays.stream(investments).map(Investment::getName).toList());
 
         parent.addChild(toItem);
 

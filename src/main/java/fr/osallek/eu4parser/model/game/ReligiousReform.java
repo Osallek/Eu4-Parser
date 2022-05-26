@@ -44,11 +44,9 @@ public class ReligiousReform {
             return true;
         }
 
-        if (!(o instanceof ReligiousReform)) {
+        if (!(o instanceof ReligiousReform religiousReform)) {
             return false;
         }
-
-        ReligiousReform religiousReform = (ReligiousReform) o;
 
         return Objects.equals(getName(), religiousReform.getName());
     }

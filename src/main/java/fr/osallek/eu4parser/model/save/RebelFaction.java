@@ -11,7 +11,6 @@ import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RebelFaction {
 
@@ -104,7 +103,7 @@ public class RebelFaction {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public List<SaveCountry> getFriends() {
@@ -114,7 +113,7 @@ public class RebelFaction {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public Boolean isActive() {

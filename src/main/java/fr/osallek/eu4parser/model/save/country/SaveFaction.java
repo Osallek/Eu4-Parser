@@ -4,16 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Faction;
 import fr.osallek.eu4parser.model.game.Game;
 
-public class SaveFaction {
-
-    private final Game game;
-
-    private final ClausewitzItem item;
-
-    public SaveFaction(ClausewitzItem item, Game game) {
-        this.game = game;
-        this.item = item;
-    }
+public record SaveFaction(ClausewitzItem item, Game game) {
 
     public Double getInfluence() {
         return this.item.getVarAsDouble("influence");

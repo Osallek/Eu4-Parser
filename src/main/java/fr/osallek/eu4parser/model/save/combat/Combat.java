@@ -21,7 +21,7 @@ public abstract class Combat<C extends Combatant> {
 
     protected C defender;
 
-    public Combat(ClausewitzItem item, Save save, BiFunction<ClausewitzItem, Save, C> supplier) {
+    protected Combat(ClausewitzItem item, Save save, BiFunction<ClausewitzItem, Save, C> supplier) {
         this.save = save;
         this.item = item;
         this.supplier = supplier;

@@ -2,13 +2,7 @@ package fr.osallek.eu4parser.model.save.counters;
 
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 
-public class IdCounters {
-
-    private final ClausewitzList list;
-
-    public IdCounters(ClausewitzList list) {
-        this.list = list;
-    }
+public record IdCounters(ClausewitzList list) {
 
     public Integer getCounter(Counter counter) {
         return this.list.getAsInt(counter.ordinal());

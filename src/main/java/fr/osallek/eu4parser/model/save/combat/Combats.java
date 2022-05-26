@@ -4,7 +4,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Combats {
 
@@ -12,11 +11,11 @@ public class Combats {
 
     private final ClausewitzItem item;
 
-    private List<fr.osallek.eu4parser.model.save.combat.SiegeCombat> siegeCombats;
+    private List<SiegeCombat> siegeCombats;
 
-    private List<fr.osallek.eu4parser.model.save.combat.LandCombat> landCombats;
+    private List<LandCombat> landCombats;
 
-    private List<fr.osallek.eu4parser.model.save.combat.NavalCombat> navalCombats;
+    private List<NavalCombat> navalCombats;
 
     public Combats(ClausewitzItem item, Save save) {
         this.save = save;
@@ -24,15 +23,15 @@ public class Combats {
         refreshAttributes();
     }
 
-    public List<fr.osallek.eu4parser.model.save.combat.SiegeCombat> getSiegeCombats() {
+    public List<SiegeCombat> getSiegeCombats() {
         return siegeCombats;
     }
 
-    public List<fr.osallek.eu4parser.model.save.combat.LandCombat> getLandCombats() {
+    public List<LandCombat> getLandCombats() {
         return landCombats;
     }
 
-    public List<fr.osallek.eu4parser.model.save.combat.NavalCombat> getNavalCombats() {
+    public List<NavalCombat> getNavalCombats() {
         return navalCombats;
     }
 
@@ -40,16 +39,16 @@ public class Combats {
         List<ClausewitzItem> siegeCombatsItems = this.item.getChildren("siege_combat");
         this.siegeCombats = siegeCombatsItems.stream()
                                              .map(child -> new fr.osallek.eu4parser.model.save.combat.SiegeCombat(child, this.save))
-                                             .collect(Collectors.toList());
+                                             .toList();
 
         List<ClausewitzItem> landCombatsItems = this.item.getChildren("land_combat");
         this.landCombats = landCombatsItems.stream()
                                            .map(child -> new fr.osallek.eu4parser.model.save.combat.LandCombat(child, this.save))
-                                           .collect(Collectors.toList());
+                                           .toList();
 
         List<ClausewitzItem> navalCombatsItems = this.item.getChildren("naval_combat");
         this.navalCombats = navalCombatsItems.stream()
                                              .map(child -> new fr.osallek.eu4parser.model.save.combat.NavalCombat(child, this.save))
-                                             .collect(Collectors.toList());
+                                             .toList();
     }
 }

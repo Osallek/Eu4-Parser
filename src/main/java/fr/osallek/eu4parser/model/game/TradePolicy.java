@@ -94,11 +94,9 @@ public class TradePolicy {
             return true;
         }
 
-        if (!(o instanceof TradePolicy)) {
+        if (!(o instanceof TradePolicy tradePolicy)) {
             return false;
         }
-
-        TradePolicy tradePolicy = (TradePolicy) o;
 
         return Objects.equals(getName(), tradePolicy.getName());
     }

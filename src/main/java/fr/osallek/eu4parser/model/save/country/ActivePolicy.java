@@ -7,16 +7,7 @@ import fr.osallek.eu4parser.model.game.Policy;
 
 import java.time.LocalDate;
 
-public class ActivePolicy {
-
-    private final Game game;
-
-    private final ClausewitzItem item;
-
-    public ActivePolicy(ClausewitzItem item, Game game) {
-        this.game = game;
-        this.item = item;
-    }
+public record ActivePolicy(ClausewitzItem item, Game game) {
 
     public Policy getPolicy() {
         return this.game.getPolicy(ClausewitzUtils.removeQuotes(this.item.getVarAsString("policy")));

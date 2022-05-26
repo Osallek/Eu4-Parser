@@ -7,16 +7,7 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 
-public class ProvinceConstruction {
-
-    protected final ClausewitzItem item;
-
-    protected final SaveProvince province;
-
-    public ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
-        this.item = item;
-        this.province = province;
-    }
+public record ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
 
     public LocalDate getStartDate() {
         return this.item.getVarAsDate("start_date");

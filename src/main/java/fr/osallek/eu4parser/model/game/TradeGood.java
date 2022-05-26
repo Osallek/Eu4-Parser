@@ -98,11 +98,9 @@ public class TradeGood {
             return true;
         }
 
-        if (!(o instanceof TradeGood)) {
+        if (!(o instanceof TradeGood tradeGood)) {
             return false;
         }
-
-        TradeGood tradeGood = (TradeGood) o;
 
         return Objects.equals(getName(), tradeGood.getName());
     }

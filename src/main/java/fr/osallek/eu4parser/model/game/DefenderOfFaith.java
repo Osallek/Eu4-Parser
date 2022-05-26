@@ -67,13 +67,11 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
             return true;
         }
 
-        if (!(o instanceof DefenderOfFaith)) {
+        if (!(o instanceof DefenderOfFaith defenderOfFaith)) {
             return false;
         }
 
-        DefenderOfFaith area = (DefenderOfFaith) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), defenderOfFaith.getName());
     }
 
     @Override

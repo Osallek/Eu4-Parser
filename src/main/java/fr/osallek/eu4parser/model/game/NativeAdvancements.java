@@ -7,7 +7,6 @@ import fr.osallek.eu4parser.model.Power;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class NativeAdvancements {
 
@@ -39,7 +38,7 @@ public class NativeAdvancements {
         return this.item.getChildrenNot("ai_will_do")
                         .stream()
                         .map(child -> new NativeAdvancement(child, this, i.getAndIncrement()))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     @Override

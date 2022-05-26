@@ -1,12 +1,12 @@
 package fr.osallek.eu4parser.model.game;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.clausewitzparser.parser.LuaParser;
+import fr.osallek.eu4parser.Eu4Parser;
+import fr.osallek.eu4parser.LauncherSettings;
 import fr.osallek.eu4parser.common.Eu4MapUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -47,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -76,7 +76,7 @@ public class Game {
 
     private final String gameFolderPath;
 
-    private Path modFolderPath;
+    private final LauncherSettings launcherSettings;
 
     private List<Mod> mods;
 
@@ -87,8 +87,6 @@ public class Game {
     private int provinceImageHeight;
 
     private TreeNode<FileNode> filesNode;
-
-    private String version;
 
     private List<String> graphicalCultures;
 
@@ -267,17 +265,29 @@ public class Game {
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
     public Game(String gameFolderPath) throws IOException {
-        this(gameFolderPath, null);
+        this(gameFolderPath, (LauncherSettings) null);
+    }
+
+    public Game(String gameFolderPath, LauncherSettings launcherSettings) throws IOException {
+        this(gameFolderPath, launcherSettings, null);
     }
 
     public Game(String gameFolderPath, List<String> modEnabled) throws IOException {
         this(gameFolderPath, modEnabled, () -> {});
     }
 
-    public Game(String gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
-        this.gameFolderPath = gameFolderPath;
+    public Game(String gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled) throws IOException {
+        this(gameFolderPath, null, modEnabled, () -> {});
+    }
 
-        loadSettings();
+    public Game(String gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
+        this(gameFolderPath, null, modEnabled, runnable);
+    }
+
+    public Game(String gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled, Runnable runnable) throws IOException {
+        this.gameFolderPath = gameFolderPath;
+        this.launcherSettings = Objects.requireNonNullElse(launcherSettings, Eu4Parser.loadSettings(this.gameFolderPath));
+
         runnable.run();
         readMods(modEnabled);
         runnable.run();
@@ -1042,7 +1052,7 @@ public class Game {
 
     @SafeVarargs
     public final List<FileNode> getFileNodesList(Path relativePath, Predicate<FileNode>... predicates) {
-        return getFileNodes(relativePath, predicates).collect(Collectors.toList());
+        return getFileNodes(relativePath, predicates).toList();
     }
 
     @SafeVarargs
@@ -1063,7 +1073,7 @@ public class Game {
 
     @SafeVarargs
     public final List<Path> getPathsList(Path relativePath, Predicate<FileNode>... predicates) {
-        return getPaths(relativePath, predicates).collect(Collectors.toList());
+        return getPaths(relativePath, predicates).toList();
     }
 
     public Path getAbsolutePath(String relativePath) {
@@ -1089,6 +1099,10 @@ public class Game {
         return gameFolderPath;
     }
 
+    public LauncherSettings getLauncherSettings() {
+        return launcherSettings;
+    }
+
     public List<Mod> getMods() {
         return mods;
     }
@@ -1103,10 +1117,6 @@ public class Game {
 
     public int getProvinceImageHeight() {
         return provinceImageHeight;
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     public File getNormalCursorImage() {
@@ -1202,7 +1212,7 @@ public class Game {
     }
 
     public List<Localisation> getAllLocalisations() {
-        return this.localisations.values().stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toList());
+        return this.localisations.values().stream().map(Map::values).flatMap(Collection::stream).toList();
     }
 
     public Localisation getLocalisation(String key, Eu4Language eu4Language) {
@@ -1352,7 +1362,7 @@ public class Game {
                                  .stream()
                                  .map(CultureGroup::getCultures)
                                  .flatMap(Collection::stream)
-                                 .collect(Collectors.toList());
+                                 .toList();
     }
 
     public Culture getCulture(String name) {
@@ -1374,7 +1384,7 @@ public class Game {
     }
 
     public List<Religion> getReligions() {
-        return getReligionGroups().stream().map(ReligionGroup::getReligions).flatMap(Collection::stream).collect(Collectors.toList());
+        return getReligionGroups().stream().map(ReligionGroup::getReligions).flatMap(Collection::stream).toList();
     }
 
     public Religion getReligion(String name) {
@@ -1394,7 +1404,7 @@ public class Game {
         return this.institutions.values()
                                 .stream()
                                 .sorted(Comparator.comparingInt(Institution::getIndex))
-                                .collect(Collectors.toList());
+                                .toList();
     }
 
     public Institution getInstitution(int i) {
@@ -1465,7 +1475,7 @@ public class Game {
         return this.events.values()
                           .stream()
                           .filter(event -> BooleanUtils.isTrue(event.fireOnlyOnce()))
-                          .collect(Collectors.toList());
+                          .toList();
     }
 
     public Event getEvent(String id) {
@@ -1545,7 +1555,7 @@ public class Game {
                                                  .map(Map::values)
                                                  .flatMap(Collection::stream)
                                                  .filter(d -> d.getFileNode().getMod() != null && d.getFileNode().getMod().equals(mod))
-                                                 .collect(Collectors.toList());
+                                                 .toList();
 
         if (CollectionUtils.isNotEmpty(moddedDefines)) {
             Map<FileNode, List<Define>> map = moddedDefines.stream().collect(Collectors.groupingBy(Define::getFileNode));
@@ -1869,7 +1879,7 @@ public class Game {
     }
 
     public List<Mission> getMissions() {
-        return this.missionsTrees.values().stream().map(MissionsTree::getMissions).flatMap(Collection::stream).collect(Collectors.toList());
+        return this.missionsTrees.values().stream().map(MissionsTree::getMissions).flatMap(Collection::stream).toList();
     }
 
     public int getMaxMissionsSlots() {
@@ -2192,11 +2202,11 @@ public class Game {
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator
             Map<String, Mod> knownMods = new HashMap<>();
-            try (Stream<Path> stream = Files.list(this.modFolderPath)) {
+            try (Stream<Path> stream = Files.list(this.launcherSettings.getModFolder())) {
                 stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
                       .filter(path -> path.toFile().exists() && path.toFile().canRead())
                       .forEach(path -> {
-                          Mod mod = new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0));
+                          Mod mod = new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0), this.launcherSettings);
                           knownMods.put(path.getFileName().toString(), mod);
 
                           if (!ModType.STEAM.pattern.matcher(path.getFileName().toString()).matches()) {
@@ -2222,7 +2232,7 @@ public class Game {
             Map<Mod, List<String>> replaces = new LinkedHashMap<>();
             map.forEach((key, value) -> {
                 if (!key.isAbsolute()) {
-                    key = new File(this.modFolderPath + File.separator + key.getPath().replaceFirst("^mod\\\\", ""));
+                    key = this.launcherSettings.getModFolder().resolve(key.getPath().replaceFirst("^mod\\\\", "")).toFile();
                 }
 
                 if (key.exists() && key.canRead()) {
@@ -2230,7 +2240,7 @@ public class Game {
                                              .stream()
                                              .map(ClausewitzUtils::removeQuotes)
                                              .map(s -> Path.of(s).toString())
-                                             .collect(Collectors.toList()));
+                                             .toList());
                 }
             });
 
@@ -2240,13 +2250,6 @@ public class Game {
                 this.filesNode.merge(new TreeNode<>(null, new FileNode(mod), FileNode::getChildren));
             });
         }
-    }
-
-    public void loadSettings() throws IOException {
-        JsonNode node = new ObjectMapper().readTree(Paths.get(this.gameFolderPath).resolve("launcher-settings.json").toFile());
-        this.version = node.get("rawVersion").asText();
-        this.modFolderPath = Paths.get((node.get("gameDataPath").asText() + File.separator + "mod")
-                                               .replace("%USER_DOCUMENTS%", FileSystemView.getFileSystemView().getDefaultDirectory().getAbsolutePath()));
     }
 
     public void loadDefines() throws IOException {
@@ -2464,12 +2467,17 @@ public class Game {
                 reader.readLine(); //Skip csv headers
                 while ((line = reader.readLine()) != null) {
                     if (StringUtils.isNotBlank(line)) {
-                        Province province = new Province(line.split(";", -1));
-                        this.provinces.put(province.getId(), province);
+                        String[] csvLine = line.split(";", -1);
 
-                        if (province.getColor() != null) {
-                            this.provincesByColor.put(new Color(province.getColor()).getRGB(), province);
+                        if (csvLine.length >= 4 && StringUtils.isNoneBlank(Arrays.copyOf(csvLine, 4))) {
+                            Province province = new Province(csvLine);
+                            this.provinces.put(province.getId(), province);
+
+                            if (province.getColor() != null) {
+                                this.provincesByColor.put(new Color(province.getColor()).getRGB(), province);
+                            }
                         }
+
                     }
                 }
             }
@@ -2499,36 +2507,36 @@ public class Game {
         FileNode climateFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "climate.txt");
 
         if (climateFile != null && climateFile.getPath().toFile().canRead()) {
-            ClausewitzItem climateItem = ClausewitzParser.parse(climateFile.getPath().toFile(), 0);
-            this.climateItem = climateItem;
+            ClausewitzItem item = ClausewitzParser.parse(climateFile.getPath().toFile(), 0);
+            this.climateItem = item;
             this.climates = new HashMap<>();
             this.winters = new HashMap<>();
             this.monsoons = new HashMap<>();
 
-            climateItem.getLists()
-                       .forEach(list -> {
-                           if (list.getName().endsWith("_winter")) {
-                               this.winters.put(list.getName(), new ProvinceList(list, climateFile));
-                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
-                           } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
-                               this.impassableClimate = new ProvinceList(list, Eu4Utils.IMPASSABLE_LOCALIZATION, climateFile);
-                               this.climates.put(Eu4Utils.IMPASSABLE_CLIMATE, this.impassableClimate);
-                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
-                           } else if (list.getName().endsWith("_monsoon")) {
-                               this.monsoons.put(list.getName(), new ProvinceList(list, climateFile));
-                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setMonsoon(list.getName()));
-                           } else {
-                               this.climates.put(list.getName(), new ProvinceList(list, climateFile));
-                               list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
-                           }
-                       });
+            item.getLists()
+                .forEach(list -> {
+                    if (list.getName().endsWith("_winter")) {
+                        this.winters.put(list.getName(), new ProvinceList(list, climateFile));
+                        list.getValuesAsInt().forEach(id -> this.provinces.get(id).setWinter(list.getName()));
+                    } else if (Eu4Utils.IMPASSABLE_CLIMATE.equals(list.getName())) {
+                        this.impassableClimate = new ProvinceList(list, Eu4Utils.IMPASSABLE_LOCALIZATION, climateFile);
+                        this.climates.put(Eu4Utils.IMPASSABLE_CLIMATE, this.impassableClimate);
+                        list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
+                    } else if (list.getName().endsWith("_monsoon")) {
+                        this.monsoons.put(list.getName(), new ProvinceList(list, climateFile));
+                        list.getValuesAsInt().forEach(id -> this.provinces.get(id).setMonsoon(list.getName()));
+                    } else {
+                        this.climates.put(list.getName(), new ProvinceList(list, climateFile));
+                        list.getValuesAsInt().forEach(id -> this.provinces.get(id).setClimate(list.getName()));
+                    }
+                });
 
             this.fakeClimate = new ProvinceList(Eu4Utils.DEFAULT_CLIMATE,
                                                 this.provinces.values()
                                                               .stream()
                                                               .filter(province -> province.getClimate() == null)
                                                               .map(Province::getId)
-                                                              .collect(Collectors.toList()));
+                                                              .toList());
             this.climates.put(Eu4Utils.DEFAULT_CLIMATE, this.fakeClimate);
 
             this.fakeWinter = new ProvinceList(Eu4Utils.DEFAULT_WINTER,
@@ -2536,7 +2544,7 @@ public class Game {
                                                              .stream()
                                                              .filter(province -> province.getWinter() == null)
                                                              .map(Province::getId)
-                                                             .collect(Collectors.toList()));
+                                                             .toList());
             this.winters.put(Eu4Utils.DEFAULT_WINTER, this.fakeWinter);
 
             this.fakeMonsoon = new ProvinceList(Eu4Utils.DEFAULT_MONSOON,
@@ -2544,7 +2552,7 @@ public class Game {
                                                               .stream()
                                                               .filter(province -> province.getMonsoon() == null)
                                                               .map(Province::getId)
-                                                              .collect(Collectors.toList()));
+                                                              .toList());
             this.monsoons.put(Eu4Utils.DEFAULT_MONSOON, this.fakeMonsoon);
         }
     }
@@ -2938,7 +2946,7 @@ public class Game {
 
         List<ClausewitzItem> reformsItems = getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "government_reforms", this::isRegularTxtFile)
                 .map(path -> ClausewitzParser.parse(path.toFile(), 0))
-                .collect(Collectors.toList());
+                .toList();
 
         AtomicReference<GovernmentReform> defaultReform = new AtomicReference<>();
 
@@ -3207,7 +3215,7 @@ public class Game {
                                                                                             item.getChildren("modifier_definition")
                                                                                                 .stream()
                                                                                                 .map(ModifierDefinition::new)
-                                                                                                .collect(Collectors.toList())));
+                                                                                                .toList()));
                 });
 
         modifierDefinitions.values()

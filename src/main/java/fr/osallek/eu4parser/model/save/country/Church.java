@@ -6,18 +6,8 @@ import fr.osallek.eu4parser.model.game.Game;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-public class Church {
-
-    private final Game game;
-
-    private final ClausewitzItem item;
-
-    public Church(ClausewitzItem item, Game game) {
-        this.game = game;
-        this.item = item;
-    }
+public record Church(ClausewitzItem item, Game game) {
 
     public Double getPower() {
         return this.item.getVarAsDouble("power");
@@ -28,7 +18,7 @@ public class Church {
     }
 
     public List<ChurchAspect> getAspects() {
-        return this.item.getVarsAsStrings("aspect").stream().map(this.game::getChurchAspect).filter(Objects::nonNull).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("aspect").stream().map(this.game::getChurchAspect).filter(Objects::nonNull).toList();
     }
 
     public void addAspect(ChurchAspect aspect) {

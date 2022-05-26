@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Bookmark extends Nodded {
 
@@ -71,7 +70,7 @@ public class Bookmark extends Nodded {
     }
 
     public List<Country> getCountries() {
-        return this.item.getVarsAsStrings("country").stream().map(this.game::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("country").stream().map(this.game::getCountry).toList();
     }
 
     public void addCountry(String country) {
@@ -92,7 +91,7 @@ public class Bookmark extends Nodded {
     }
 
     public void setCountries(Collection<Country> countries) {
-        setCountries(countries.stream().map(Country::getTag).collect(Collectors.toList()));
+        setCountries(countries.stream().map(Country::getTag).toList());
     }
 
     public void setCountries(List<String> countries) {
@@ -104,7 +103,7 @@ public class Bookmark extends Nodded {
     }
 
     public List<Country> getEasyCountries() {
-        return this.item.getVarsAsStrings("easy_country").stream().map(this.game::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("easy_country").stream().map(this.game::getCountry).toList();
     }
 
     public void addEasyCountry(String country) {
@@ -125,7 +124,7 @@ public class Bookmark extends Nodded {
     }
 
     public void setEasyCountries(Collection<Country> countries) {
-        setEasyCountries(countries.stream().map(Country::getTag).collect(Collectors.toList()));
+        setEasyCountries(countries.stream().map(Country::getTag).toList());
     }
 
     public void setEasyCountries(List<String> countries) {

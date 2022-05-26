@@ -2,13 +2,7 @@ package fr.osallek.eu4parser.model.save.war;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class Combatant {
-
-    private final ClausewitzItem item;
-
-    public Combatant(ClausewitzItem item) {
-        this.item = item;
-    }
+public record Combatant(ClausewitzItem item) {
 
     public Integer getCavalry() {
         return this.item.getVarAsInt("cavalry");

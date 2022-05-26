@@ -2,13 +2,7 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class CustomNationalIdea {
-
-    private final ClausewitzItem item;
-
-    public CustomNationalIdea(ClausewitzItem item) {
-        this.item = item;
-    }
+public record CustomNationalIdea(ClausewitzItem item) {
 
     public Integer getLevel() {
         return this.item.getVarAsInt("level");

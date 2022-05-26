@@ -5,16 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
 
-public class ActiveAgenda {
-
-    private final SaveCountry country;
-
-    private final ClausewitzItem item;
-
-    public ActiveAgenda(ClausewitzItem item, SaveCountry country) {
-        this.country = country;
-        this.item = item;
-    }
+public record ActiveAgenda(ClausewitzItem item, SaveCountry country) {
 
     public String getAgenda() {
         return this.item.getVarAsString("agenda");
@@ -38,9 +29,5 @@ public class ActiveAgenda {
 
     public void setExpiryDate(LocalDate expiryDate) {
         this.item.setVariable("expiry_date", expiryDate);
-    }
-
-    public SaveCountry getCountry() {
-        return country;
     }
 }

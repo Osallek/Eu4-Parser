@@ -16,7 +16,6 @@ import fr.osallek.eu4parser.model.save.religion.SavePapacy;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SaveReligion {
 
@@ -91,7 +90,7 @@ public class SaveReligion {
                                  .stream()
                                  .map(ClausewitzUtils::removeQuotes)
                                  .map(this.save::getCountry)
-                                 .collect(Collectors.toList());
+                                 .toList();
     }
 
     public void addToLeague(SaveCountry country) {
@@ -245,7 +244,7 @@ public class SaveReligion {
     private void refreshAttributes() {
         if (this.religionInstanceDataItem != null) {
             List<ClausewitzItem> relationsItems = this.religionInstanceDataItem.getChildren("relation");
-            this.relations = relationsItems.stream().map(MuslimRelation::new).collect(Collectors.toList());
+            this.relations = relationsItems.stream().map(MuslimRelation::new).toList();
 
             ClausewitzItem papacyItem = this.religionInstanceDataItem.getChild("papacy");
 
@@ -256,7 +255,7 @@ public class SaveReligion {
             List<ClausewitzItem> reformationCentersItems = this.religionInstanceDataItem.getChildren("reformation_center");
             this.reformationCenters = reformationCentersItems.stream()
                                                              .map(item -> new ReformationCenter(this.save, item))
-                                                             .collect(Collectors.toList());
+                                                             .toList();
         }
     }
 }

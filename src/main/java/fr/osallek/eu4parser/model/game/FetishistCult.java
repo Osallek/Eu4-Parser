@@ -51,11 +51,9 @@ public class FetishistCult {
             return true;
         }
 
-        if (!(o instanceof FetishistCult)) {
+        if (!(o instanceof FetishistCult fetishistCult)) {
             return false;
         }
-
-        FetishistCult fetishistCult = (FetishistCult) o;
 
         return Objects.equals(getName(), fetishistCult.getName());
     }

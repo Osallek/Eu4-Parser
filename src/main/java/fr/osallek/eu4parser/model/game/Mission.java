@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Mission extends Nodded {
 
@@ -108,7 +107,7 @@ public class Mission extends Nodded {
 
     public List<Mission> getRequiredMissions() {
         ClausewitzList list = this.item.getList("required_missions");
-        return list == null ? null : list.getValues().stream().map(this.game::getMission).collect(Collectors.toList());
+        return list == null ? null : list.getValues().stream().map(this.game::getMission).toList();
     }
 
     public void setRequiredMissions(List<String> requiredMissions) {
@@ -127,9 +126,9 @@ public class Mission extends Nodded {
         ClausewitzList list = this.item.getList("required_missions");
 
         if (list != null) {
-            list.setAll(requiredMissions.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+            list.setAll(requiredMissions.stream().filter(Objects::nonNull).toList());
         } else {
-            this.item.addList("required_missions", requiredMissions.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+            this.item.addList("required_missions", requiredMissions.stream().filter(Objects::nonNull).toList());
         }
     }
 
@@ -144,11 +143,9 @@ public class Mission extends Nodded {
             return true;
         }
 
-        if (!(o instanceof Mission)) {
+        if (!(o instanceof Mission mission)) {
             return false;
         }
-
-        Mission mission = (Mission) o;
 
         return Objects.equals(getName(), mission.getName());
     }

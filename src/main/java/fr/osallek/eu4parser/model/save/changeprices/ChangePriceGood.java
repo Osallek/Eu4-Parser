@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ChangePriceGood {
 
@@ -72,7 +71,7 @@ public class ChangePriceGood {
         this.changePrices = this.item.getChildren("change_price")
                                      .stream()
                                      .map(changePriceItem -> new ChangePrice(changePriceItem, this.game))
-                                     .collect(Collectors.toList());
+                                     .toList();
 
         if (isValid()) {
             setCurrentPrice();

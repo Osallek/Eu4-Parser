@@ -85,11 +85,9 @@ public class CenterOfTrade implements Comparable<CenterOfTrade> {
             return true;
         }
 
-        if (!(o instanceof CenterOfTrade)) {
+        if (!(o instanceof CenterOfTrade area)) {
             return false;
         }
-
-        CenterOfTrade area = (CenterOfTrade) o;
 
         return Objects.equals(getName(), area.getName());
     }

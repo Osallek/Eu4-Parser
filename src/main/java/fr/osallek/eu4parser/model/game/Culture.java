@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Culture extends AbstractCulture {
@@ -22,19 +21,19 @@ public class Culture extends AbstractCulture {
     @Override
     public List<String> getPossibleMaleNames() {
         return Stream.concat(getMaleNames().stream(), this.cultureGroup.getMaleNames().stream())
-                     .collect(Collectors.toList());
+                     .toList();
     }
 
     @Override
     public List<String> getPossibleFemaleNames() {
         return Stream.concat(getFemaleNames().stream(), this.cultureGroup.getFemaleNames().stream())
-                     .collect(Collectors.toList());
+                     .toList();
     }
 
     @Override
     public List<String> getPossibleDynastyNames() {
         return Stream.concat(getDynastyNames().stream(), this.cultureGroup.getDynastyNames().stream())
-                     .collect(Collectors.toList());
+                     .toList();
     }
 
     @Override

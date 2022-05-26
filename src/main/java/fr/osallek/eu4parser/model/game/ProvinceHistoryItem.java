@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ProvinceHistoryItem {
 
@@ -76,7 +75,7 @@ public class ProvinceHistoryItem {
     }
 
     public List<Country> getAddCores() {
-        return this.item.getVarsAsStrings("add_core").stream().map(this.game::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("add_core").stream().map(this.game::getCountry).toList();
     }
 
     public void addAddCore(String addCore) {
@@ -97,7 +96,7 @@ public class ProvinceHistoryItem {
     }
 
     public List<Country> getRemoveCores() {
-        return this.item.getVarsAsStrings("remove_core").stream().map(this.game::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("remove_core").stream().map(this.game::getCountry).toList();
     }
 
     public void addRemoveCore(String removeCore) {
@@ -222,7 +221,7 @@ public class ProvinceHistoryItem {
     }
 
     public List<TechGroup> getDiscoveredBy() {
-        return this.item.getVarsAsStrings("discovered_by").stream().map(this.game::getTechGroup).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("discovered_by").stream().map(this.game::getTechGroup).toList();
     }
 
     public void addDiscoveredBy(String discoveredBy) {
@@ -339,7 +338,7 @@ public class ProvinceHistoryItem {
 
     public List<ModifierApply> getPermanentModifier() {
         if (this.item.hasChild("add_permanent_province_modifier")) {
-            return this.item.getChildren("add_permanent_province_modifier").stream().map(ModifierApply::new).collect(Collectors.toList());
+            return this.item.getChildren("add_permanent_province_modifier").stream().map(ModifierApply::new).toList();
         } else {
             return new ArrayList<>();
         }
@@ -347,7 +346,7 @@ public class ProvinceHistoryItem {
 
     public List<ModifierApply> getRemoveModifier() {
         if (this.item.hasChild("remove_province_modifier")) {
-            return this.item.getChildren("remove_province_modifier").stream().map(ModifierApply::new).collect(Collectors.toList());
+            return this.item.getChildren("remove_province_modifier").stream().map(ModifierApply::new).toList();
         } else {
             return new ArrayList<>();
         }
@@ -365,7 +364,7 @@ public class ProvinceHistoryItem {
         return this.game.getBuildings()
                         .stream()
                         .filter(building -> this.item.hasVar(building.getName()) && BooleanUtils.toBoolean(this.item.getVarAsBool(building.getName())))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public void addBuilding(String building) {

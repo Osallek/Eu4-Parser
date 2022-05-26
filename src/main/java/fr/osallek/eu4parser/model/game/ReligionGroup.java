@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class ReligionGroup {
 
@@ -128,7 +127,7 @@ public class ReligionGroup {
         return this.item.getChildren()
                         .stream()
                         .map(child -> new Religion(child, this))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     @Override
@@ -136,11 +135,12 @@ public class ReligionGroup {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ReligionGroup)) {
+
+        if (!(o instanceof ReligionGroup religionGroup)) {
             return false;
         }
-        ReligionGroup that = (ReligionGroup) o;
-        return Objects.equals(getName(), that.getName());
+
+        return Objects.equals(getName(), religionGroup.getName());
     }
 
     @Override

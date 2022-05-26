@@ -39,13 +39,11 @@ public class Isolationism implements Comparable<Isolationism> {
             return true;
         }
 
-        if (!(o instanceof Isolationism)) {
+        if (!(o instanceof Isolationism isolationism)) {
             return false;
         }
 
-        Isolationism area = (Isolationism) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), isolationism.getName());
     }
 
     @Override

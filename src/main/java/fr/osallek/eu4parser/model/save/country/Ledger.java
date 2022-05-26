@@ -6,13 +6,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class Ledger {
-
-    private final ClausewitzItem item;
-
-    public Ledger(ClausewitzItem item) {
-        this.item = item;
-    }
+public record Ledger(ClausewitzItem item) {
 
     public Map<Income, Double> getIncome() {
         ClausewitzList list = this.item.getList("income");

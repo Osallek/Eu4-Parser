@@ -2,13 +2,7 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class HistoryStatsCache {
-
-    private final ClausewitzItem item;
-
-    public HistoryStatsCache(ClausewitzItem item) {
-        this.item = item;
-    }
+public record HistoryStatsCache(ClausewitzItem item) {
 
     public Integer getStartingNumOfStates() {
         return this.item.getVarAsInt("starting_num_of_states");

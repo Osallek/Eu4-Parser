@@ -9,7 +9,6 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SaveTradeCompany {
 
@@ -33,7 +32,7 @@ public class SaveTradeCompany {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public void addProvince(SaveProvince province) {

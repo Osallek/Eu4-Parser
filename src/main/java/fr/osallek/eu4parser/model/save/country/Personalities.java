@@ -6,25 +6,15 @@ import fr.osallek.eu4parser.model.game.RulerPersonality;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class Personalities {
-
-    private final Save save;
-
-    final ClausewitzItem item;
-
-    public Personalities(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record Personalities(ClausewitzItem item, Save save) {
 
     public List<RulerPersonality> getPersonalities() {
         return this.item.getVariables()
                         .stream()
                         .map(ClausewitzVariable::getName)
                         .map(s -> this.save.getGame().getRulerPersonality(s))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     void addPersonality(RulerPersonality personality) {

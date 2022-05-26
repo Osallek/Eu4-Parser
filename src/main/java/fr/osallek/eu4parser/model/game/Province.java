@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 public class Province {
 
+    //Todo adjacent province
+    //Todo sea province if port
+
     private final int id;
 
     private Integer color;
@@ -384,11 +387,9 @@ public class Province {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Province)) {
+        if (!(o instanceof Province province)) {
             return false;
         }
-
-        Province province = (Province) o;
 
         return id == province.id;
     }

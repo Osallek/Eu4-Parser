@@ -85,11 +85,9 @@ public class StateEdict {
             return true;
         }
 
-        if (!(o instanceof StateEdict)) {
+        if (!(o instanceof StateEdict stateEdict)) {
             return false;
         }
-
-        StateEdict stateEdict = (StateEdict) o;
 
         return Objects.equals(getName(), stateEdict.getName());
     }

@@ -43,11 +43,9 @@ public class PersonalDeity {
             return true;
         }
 
-        if (!(o instanceof PersonalDeity)) {
+        if (!(o instanceof PersonalDeity personalDeity)) {
             return false;
         }
-
-        PersonalDeity personalDeity = (PersonalDeity) o;
 
         return Objects.equals(getName(), personalDeity.getName());
     }

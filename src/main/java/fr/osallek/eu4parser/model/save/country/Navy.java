@@ -6,7 +6,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Navy extends Army {
 
@@ -119,6 +118,6 @@ public class Navy extends Army {
         List<ClausewitzItem> shipsItems = this.item.getChildren("ship");
         this.ships = shipsItems.stream()
                                .map(child -> new Ship(child, this.country.getSave(), this))
-                               .collect(Collectors.toList());
+                               .toList();
     }
 }

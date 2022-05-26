@@ -2,6 +2,7 @@ package fr.osallek.eu4parser.common;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
+import fr.osallek.eu4parser.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Country;
@@ -35,7 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Eu4Utils {
@@ -49,11 +49,6 @@ public final class Eu4Utils {
     public static final Collator COLLATOR = Collator.getInstance();
 
     public static final String DOCUMENTS_FOLDER = FileSystemView.getFileSystemView().getDefaultDirectory().getAbsolutePath();
-
-    public static final File EU4_DOCUMENTS_FOLDER = new File(DOCUMENTS_FOLDER + File.separator + "Paradox Interactive"
-                                                             + File.separator + "Europa Universalis IV");
-
-    public static final File MODS_FOLDER = new File(EU4_DOCUMENTS_FOLDER.getAbsolutePath() + File.separator + "mod");
 
     public static final String DESCRIPTOR_FILE = "descriptor.mod";
 
@@ -208,7 +203,7 @@ public final class Eu4Utils {
                     if (Files.exists(libraryFoldersPath) && Files.isRegularFile(libraryFoldersPath)) {
                         List<String> lines = Files.readAllLines(libraryFoldersPath);
 
-                        List<String> paths = lines.stream().filter(s -> s.contains("\"path\"")).collect(Collectors.toList());
+                        List<String> paths = lines.stream().filter(s -> s.contains("\"path\"")).toList();
                         if (CollectionUtils.isNotEmpty(paths)) {
                             for (String s : paths) {
                                 String folder = s.replace("\"path\"", "").trim();
@@ -243,13 +238,13 @@ public final class Eu4Utils {
         return Optional.empty();
     }
 
-    public static List<Mod> detectMods() {
-        if (MODS_FOLDER.exists() && MODS_FOLDER.isDirectory()) {
-            try (Stream<Path> stream = Files.list(MODS_FOLDER.toPath())) {
+    public static List<Mod> detectMods(LauncherSettings launcherSettings) {
+        if (launcherSettings.getModFolder().toFile().exists() && launcherSettings.getModFolder().toFile().isDirectory()) {
+            try (Stream<Path> stream = Files.list(launcherSettings.getModFolder())) {
                 return stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
-                             .map(path -> new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0)))
+                             .map(path -> new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0), launcherSettings))
                              .sorted((o1, o2) -> Eu4Utils.COLLATOR.compare(o1.getName(), o2.getName()))
-                             .collect(Collectors.toList());
+                             .toList();
             } catch (Exception e) {
                 LOGGER.error("An error occurred while searching for mods: {}!", e.getMessage(), e);
             }

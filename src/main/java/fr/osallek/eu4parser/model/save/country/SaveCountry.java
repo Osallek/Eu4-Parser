@@ -470,7 +470,7 @@ public class SaveCountry {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            return this.save.getGame().getInstitutions().stream().filter(this::getEmbracedInstitution).collect(Collectors.toList());
+            return this.save.getGame().getInstitutions().stream().filter(this::getEmbracedInstitution).toList();
         }
 
         return new ArrayList<>();
@@ -480,7 +480,7 @@ public class SaveCountry {
         ClausewitzList list = this.item.getList("institutions");
 
         if (list != null) {
-            return this.save.getGame().getInstitutions().stream().filter(index -> !this.getEmbracedInstitution(index)).collect(Collectors.toList());
+            return this.save.getGame().getInstitutions().stream().filter(index -> !this.getEmbracedInstitution(index)).toList();
         }
 
         return new ArrayList<>();
@@ -527,7 +527,7 @@ public class SaveCountry {
 
         return variables.stream()
                         .map(variable -> this.save.getGame().getAgeAbility(ClausewitzUtils.removeQuotes(variable.getValue())))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public void addAgeAbility(String ageAbility) {
@@ -783,7 +783,7 @@ public class SaveCountry {
         }
 
         List<ReligionGroup> religionGroups = new ArrayList<>(this.save.getGame().getReligionGroups());
-        return list.getValuesAsInt().stream().map(integer -> integer - 1).map(religionGroups::get).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(integer -> integer - 1).map(religionGroups::get).toList();
     }
 
     public void addHarmonizedReligionGroup(ReligionGroup religionGroup) {
@@ -835,7 +835,7 @@ public class SaveCountry {
         }
 
         List<SaveReligion> religions = new ArrayList<>(this.save.getReligions().getReligions().values());
-        return list.getValuesAsInt().stream().map(integer -> integer - 1).map(religions::get).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(integer -> integer - 1).map(religions::get).toList();
     }
 
     public void addHarmonizedReligion(Religion religion) {
@@ -952,7 +952,7 @@ public class SaveCountry {
     }
 
     public List<Culture> getAcceptedCultures() {
-        return this.item.getVarsAsStrings("accepted_culture").stream().map(s -> this.save.getGame().getCulture(s)).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("accepted_culture").stream().map(s -> this.save.getGame().getCulture(s)).toList();
     }
 
     public void setAcceptedCulture(List<Culture> cultures) {
@@ -1006,7 +1006,7 @@ public class SaveCountry {
 
         Set<SaveReligion> religions = new HashSet<>();
         religions.add(getSecondaryReligion());
-        religions.addAll(getOwnedProvinces().stream().map(SaveProvince::getReligion).collect(Collectors.toList()));
+        religions.addAll(getOwnedProvinces().stream().map(SaveProvince::getReligion).toList());
         //Todo adjacent provinces
 
         religions.removeIf(Objects::isNull);
@@ -1326,7 +1326,7 @@ public class SaveCountry {
         return this.item.getVarsAsStrings("enemy")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public Integer getGoldType() {
@@ -1345,21 +1345,21 @@ public class SaveCountry {
         return this.item.getVarsAsStrings("gave_access")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<SaveCountry> getOurSpyNetwork() {
         return this.item.getVarsAsStrings("our_spy_network")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<SaveCountry> getTheirSpyNetwork() {
         return this.item.getVarsAsStrings("their_spy_network")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public Boolean isLucky() {
@@ -1378,21 +1378,21 @@ public class SaveCountry {
         return this.item.getVarsAsStrings("federation_friends")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<SaveCountry> getCoalition() {
         return this.item.getVarsAsStrings("coalition_against_us")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<SaveCountry> getPreferredCoalition() {
         return this.item.getVarsAsStrings("preferred_coalition_against_us")
                         .stream()
                         .map(s -> this.save.getCountry(ClausewitzUtils.removeQuotes(s)))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<VictoryCard> getVictoryCards() {
@@ -1891,7 +1891,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public List<SaveCountry> getNeighbours() {
@@ -1901,7 +1901,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getHomeNeighbours() {
@@ -1911,7 +1911,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getCoreNeighbours() {
@@ -1921,7 +1921,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getCurrentAtWarWith() {
@@ -1931,7 +1931,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getCurrentWarAllies() {
@@ -1941,7 +1941,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getCallToArmsFriends() {
@@ -1951,7 +1951,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getAllies() {
@@ -1961,7 +1961,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public void addAlly(SaveCountry ally) {
@@ -2005,7 +2005,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public void addSubject(SaveCountry subject) {
@@ -2067,7 +2067,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
 
@@ -2096,7 +2096,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public void addGuarantee(SaveCountry country) {
@@ -2125,7 +2125,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
 
@@ -2155,7 +2155,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getTradeEmbargoedBy() {
@@ -2165,7 +2165,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getTradeEmbargoes() {
@@ -2175,7 +2175,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getTransferTradePowerFrom() {
@@ -2185,7 +2185,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public void addTransferTradePowerFrom(SaveCountry country) {
@@ -2213,7 +2213,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
 
@@ -2457,7 +2457,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public void addOwnedProvince(SaveProvince province) {
@@ -2493,7 +2493,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public void addControlledProvince(SaveProvince province) {
@@ -2529,7 +2529,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public void addCoreProvince(SaveProvince province) {
@@ -2565,7 +2565,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).collect(Collectors.toList());
+        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
     public void addClaimProvince(SaveProvince province) {
@@ -2965,7 +2965,7 @@ public class SaveCountry {
                         .getPersonalDeities()
                         .stream()
                         .filter(PersonalDeity -> PersonalDeity.getAllow() == null || PersonalDeity.getAllow().apply(this, this))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public PersonalDeity getPersonalDeity() {
@@ -2987,7 +2987,7 @@ public class SaveCountry {
                         .getFetishistCults()
                         .stream()
                         .filter(fetishistCult -> fetishistCult.getAllow() == null || fetishistCult.getAllow().apply(this, this))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public FetishistCult getFetishistCult() {
@@ -3392,7 +3392,7 @@ public class SaveCountry {
     }
 
     public List<Leader> getLeadersOfType(LeaderType leaderType) {
-        return this.leaders.values().stream().filter(leader -> leaderType.equals(leader.getType())).collect(Collectors.toList());
+        return this.leaders.values().stream().filter(leader -> leaderType.equals(leader.getType())).toList();
     }
 
     public void addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege, LeaderPersonality personality) {
@@ -3412,7 +3412,7 @@ public class SaveCountry {
                        .findFirst()
                        .ifPresent(AbstractArmy::removeLeader);
 
-            List<Id> leadersIds = this.item.getChildren("leader").stream().map(Id::new).collect(Collectors.toList());
+            List<Id> leadersIds = this.item.getChildren("leader").stream().map(Id::new).toList();
 
             for (int i = 0; i < leadersIds.size(); i++) {
                 if (leadersIds.get(i).equals(leader.getId())) {
@@ -3537,7 +3537,7 @@ public class SaveCountry {
         ClausewitzList list = this.item.getList("traded_bonus");
 
         if (list != null) {
-            return list.getValuesAsInt().stream().map(integer -> this.save.getGame().getTradeGood(integer - 1)).collect(Collectors.toList());
+            return list.getValuesAsInt().stream().map(integer -> this.save.getGame().getTradeGood(integer - 1)).toList();
         }
 
         return new ArrayList<>();
@@ -3590,7 +3590,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getCountry(s)).collect(Collectors.toList());
+        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getCountry(s)).toList();
     }
 
     public List<SaveCountry> getHistoricalRivals() {
@@ -3600,7 +3600,7 @@ public class SaveCountry {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getCountry(s)).collect(Collectors.toList());
+        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getCountry(s)).toList();
     }
 
     public List<Integer> getInterestingCountries() {
@@ -3717,7 +3717,7 @@ public class SaveCountry {
         List<Mission> reforms = new ArrayList<>();
 
         if (list != null) {
-            return list.getValues().stream().map(s -> this.save.getGame().getMission(ClausewitzUtils.removeQuotes(s))).collect(Collectors.toList());
+            return list.getValues().stream().map(s -> this.save.getGame().getMission(ClausewitzUtils.removeQuotes(s))).toList();
         }
 
         return reforms;
@@ -4035,7 +4035,7 @@ public class SaveCountry {
                                       .filter(m -> m .getModifier() != null)
                                       .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
                                       .map(m -> m.getModifiers(this, modifier))
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
 
         if (getIdeaGroups() != null) {
@@ -4120,7 +4120,7 @@ public class SaveCountry {
                                    .stream()
                                    .filter(churchAspect -> churchAspect.getModifiers().hasModifier(modifier))
                                    .map(churchAspect -> churchAspect.getModifiers().getModifier(modifier))
-                                   .collect(Collectors.toList()));
+                                   .toList());
         }
 
         list.add(getTech().getModifier(Power.ADM, getTech().getAdm(), modifier));
@@ -4137,7 +4137,7 @@ public class SaveCountry {
                            .filter(Objects::nonNull)
                            .filter(m -> m.hasModifier(modifier))
                            .map(m -> m.getModifier(modifier))
-                           .collect(Collectors.toList()));
+                           .toList());
         }
 
         list.addAll(this.save.getGame()
@@ -4148,14 +4148,14 @@ public class SaveCountry {
                              .filter(Objects::nonNull)
                              .filter(m -> m.hasModifier(modifier))
                              .map(m -> m.getModifier(modifier))
-                             .collect(Collectors.toList()));
+                             .toList());
 
         list.addAll(getTradedBonus().stream()
                                     .map(TradeGood::getModifiers)
                                     .filter(Objects::nonNull)
                                     .filter(m -> m.hasModifier(modifier))
                                     .map(m -> m.getModifier(modifier))
-                                    .collect(Collectors.toList()));
+                                    .toList());
 
         list.addAll(getActivePolicies().stream()
                                        .map(ActivePolicy::getPolicy)
@@ -4163,21 +4163,21 @@ public class SaveCountry {
                                        .filter(Objects::nonNull)
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))
-                                       .collect(Collectors.toList()));
+                                       .toList());
 
         list.addAll(getActiveAgeAbility().stream()
                                          .map(AgeAbility::getModifiers)
                                          .filter(Objects::nonNull)
                                          .filter(m -> m.hasModifier(modifier))
                                          .map(m -> m.getModifier(modifier))
-                                         .collect(Collectors.toList()));
+                                         .toList());
 
         list.addAll(getEmbracedInstitutions().stream()
                                              .map(Institution::getBonuses)
                                              .filter(Objects::nonNull)
                                              .filter(m -> m.hasModifier(modifier))
                                              .map(m -> m.getModifier(modifier))
-                                             .collect(Collectors.toList()));
+                                             .toList());
 
         if (getCapital() != null && getCapital().inHre() && !this.save.getHre().dismantled()) {
             list.addAll(this.save.getHre()
@@ -4188,7 +4188,7 @@ public class SaveCountry {
                                  .filter(m -> m.hasModifier(modifier))
                                  .map(m -> m.getModifier(modifier))
                                  .filter(Objects::nonNull)
-                                 .collect(Collectors.toList()));
+                                 .toList());
 
             if (this.equals(this.save.getHre().getEmperor())) {
                 list.addAll(this.save.getHre()
@@ -4199,7 +4199,7 @@ public class SaveCountry {
                                      .filter(m -> m.hasModifier(modifier))
                                      .map(m -> m.getModifier(modifier))
                                      .filter(Objects::nonNull)
-                                     .collect(Collectors.toList()));
+                                     .toList());
                 list.addAll(this.save.getHre()
                                      .getPassedReforms()
                                      .stream()
@@ -4210,7 +4210,7 @@ public class SaveCountry {
                                      .filter(Objects::nonNull)
                                      .map(m -> ModifiersUtils.scaleWithPrinces(this.save, m))
                                      .map(m -> m.getModifier(modifier))
-                                     .collect(Collectors.toList()));
+                                     .toList());
             } else {
                 list.addAll(this.save.getHre()
                                      .getPassedReforms()
@@ -4219,7 +4219,7 @@ public class SaveCountry {
                                      .filter(Objects::nonNull)
                                      .filter(m -> m.hasModifier(modifier))
                                      .map(m -> m.getModifier(modifier))
-                                     .collect(Collectors.toList()));
+                                     .toList());
             }
 
             if (this.save.getHre().getElectors().contains(this)) {
@@ -4233,7 +4233,7 @@ public class SaveCountry {
                                      .filter(Objects::nonNull)
                                      .map(modif -> ModifiersUtils.scaleWithPrinces(this.save, modif))
                                      .map(m -> m.getModifier(modifier))
-                                     .collect(Collectors.toList()));
+                                     .toList());
             }
         }
 
@@ -4245,7 +4245,7 @@ public class SaveCountry {
                                  .filter(Objects::nonNull)
                                  .filter(m -> m.hasModifier(modifier))
                                  .map(m -> m.getModifier(modifier))
-                                 .collect(Collectors.toList()));
+                                 .toList());
         }
 
         if (getFervor() != null) {
@@ -4255,7 +4255,7 @@ public class SaveCountry {
                                    .filter(Objects::nonNull)
                                    .filter(m -> m.hasModifier(modifier))
                                    .map(m -> m.getModifier(modifier))
-                                   .collect(Collectors.toList()));
+                                   .toList());
 
             if (modifier.getName().equalsIgnoreCase("MONTHLY_FERVOR_INCREASE")) {
                 list.add(ModifiersUtils.scaleWithActivesFervor(this, new Modifiers(new HashSet<>(),
@@ -4276,7 +4276,7 @@ public class SaveCountry {
                                                .filter(Objects::nonNull)
                                                .filter(m -> m.hasModifier(modifier))
                                                .map(m -> m.getModifier(modifier))
-                                               .collect(Collectors.toList()));
+                                               .toList());
         }
 
         if (getNavalDoctrine() != null && getNavalDoctrine().getModifiers().hasModifier(modifier)) {
@@ -4294,7 +4294,7 @@ public class SaveCountry {
                                              .filter(Objects::nonNull)
                                              .filter(m -> m.hasModifier(modifier))
                                              .map(m -> m.getModifier(modifier))
-                                             .collect(Collectors.toList()));
+                                             .toList());
         }
 
         list.addAll(this.save.getTradeNodes()
@@ -4309,7 +4309,7 @@ public class SaveCountry {
                              .filter(Objects::nonNull)
                              .filter(m -> m.hasModifier(modifier))
                              .map(m -> m.getModifier(modifier))
-                             .collect(Collectors.toList()));
+                             .toList());
 
         if (MapUtils.isNotEmpty(getAdvisors())) {
             list.addAll(getAdvisors().values()
@@ -4318,7 +4318,7 @@ public class SaveCountry {
                                      .filter(Objects::nonNull)
                                      .filter(m -> m.hasModifier(modifier))
                                      .map(m -> m.getModifier(modifier))
-                                     .collect(Collectors.toList()));
+                                     .toList());
         }
 
         list.addAll(getOwnedProvinces().stream()
@@ -4333,7 +4333,7 @@ public class SaveCountry {
                                        .filter(Objects::nonNull)
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))
-                                       .collect(Collectors.toList()));
+                                       .toList());
 
         list.addAll(getOwnedProvinces().stream()
                                        .map(SaveProvince::getCenterOfTrade)
@@ -4342,12 +4342,12 @@ public class SaveCountry {
                                        .filter(Objects::nonNull)
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))
-                                       .collect(Collectors.toList()));
+                                       .toList());
 
         if (includeProvinces) {
             list.addAll(getOwnedProvinces().stream()
                                            .map(province -> province.getModifier(modifier))
-                                           .collect(Collectors.toList()));
+                                           .toList());
         }
 
         if (getFactions() != null) {
@@ -4367,7 +4367,7 @@ public class SaveCountry {
                                        .filter(Objects::nonNull)
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))
-                                       .collect(Collectors.toList()));
+                                       .toList());
         }
 
         if (isStatistsInPower()) {
@@ -4382,7 +4382,7 @@ public class SaveCountry {
                                        .map(m -> m.get(0))
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))
-                                       .collect(Collectors.toList()));
+                                       .toList());
         } else if (isMonarchistsInPower()) {
             list.addAll(getGovernment().getReforms()
                                        .stream()
@@ -4395,7 +4395,7 @@ public class SaveCountry {
                                        .map(m -> m.get(1))
                                        .filter(m -> m.hasModifier(modifier))
                                        .map(m -> m.getModifier(modifier))
-                                       .collect(Collectors.toList()));
+                                       .toList());
         }
 
         if (getGovernmentRank() != null && getGovernmentRank().getModifiers().hasModifier(modifier)) {
@@ -4452,7 +4452,7 @@ public class SaveCountry {
         if (CollectionUtils.isNotEmpty(getEstates())) {
             list.addAll(getEstates().stream()
                                     .map(estate -> estate.getModifiers(modifier))
-                                    .collect(Collectors.toList()));
+                                    .toList());
         }
 
         if (getCrownLandBonus() != null && getCrownLandBonus().getModifiers().hasModifier(modifier)) {
@@ -4529,7 +4529,7 @@ public class SaveCountry {
         List<ClausewitzItem> estateItems = this.item.getChildren("estate");
         this.estates = estateItems.stream()
                                   .map(i -> new SaveEstate(i, this))
-                                  .collect(Collectors.toList());
+                                  .toList();
 
         ClausewitzItem activeAgendaItem = this.item.getChild("active_agenda");
         if (activeAgendaItem != null) {
@@ -4541,13 +4541,13 @@ public class SaveCountry {
         if (interactionsLastUsedItem != null) {
             this.interactionsLastUsed = interactionsLastUsedItem.getLists().stream()
                                                                 .map(list -> new EstateInteraction(this.save.getGame(), list))
-                                                                .collect(Collectors.toList());
+                                                                .toList();
         }
 
         List<ClausewitzItem> factionItems = this.item.getChildren("faction");
         this.factions = factionItems.stream()
                                     .map(child -> new SaveFaction(child, this.save.getGame()))
-                                    .collect(Collectors.toList());
+                                    .toList();
 
         List<ClausewitzItem> rivalItems = this.item.getChildren("rival");
         this.rivals = rivalItems.stream()
@@ -4557,17 +4557,17 @@ public class SaveCountry {
         List<ClausewitzItem> victoryCardItems = this.item.getChildren("victory_card");
         this.victoryCards = victoryCardItems.stream()
                                             .map(VictoryCard::new)
-                                            .collect(Collectors.toList());
+                                            .toList();
 
         List<ClausewitzItem> activePolicyItems = this.item.getChildren("active_policy");
         this.activePolicies = activePolicyItems.stream()
                                                .map(child -> new ActivePolicy(child, this.save.getGame()))
-                                               .collect(Collectors.toList());
+                                               .toList();
 
         List<ClausewitzItem> powerProjectionItems = this.item.getChildren("power_projection");
         this.powerProjections = powerProjectionItems.stream()
                                                     .map(PowerProjection::new)
-                                                    .collect(Collectors.toList());
+                                                    .toList();
 
         Double powerProjection = null;
 
@@ -4610,7 +4610,7 @@ public class SaveCountry {
 
         this.loans = this.item.getChildren("loan").stream()
                               .map(Loan::new)
-                              .collect(Collectors.toList());
+                              .toList();
 
         ClausewitzItem churchItem = this.item.getChild("church");
 
@@ -4648,7 +4648,7 @@ public class SaveCountry {
             this.colonists = colonistsItem.getChildren("envoy")
                                           .stream()
                                           .map(Envoy::new)
-                                          .collect(Collectors.toList());
+                                          .toList();
         }
 
         ClausewitzItem merchantsItem = this.item.getChild("merchants");
@@ -4657,7 +4657,7 @@ public class SaveCountry {
             this.merchants = merchantsItem.getChildren("envoy")
                                           .stream()
                                           .map(Envoy::new)
-                                          .collect(Collectors.toList());
+                                          .toList();
         }
 
         ClausewitzItem missionariesItem = this.item.getChild("missionaries");
@@ -4666,7 +4666,7 @@ public class SaveCountry {
             this.missionaries = missionariesItem.getChildren("envoy")
                                                 .stream()
                                                 .map(Envoy::new)
-                                                .collect(Collectors.toList());
+                                                .toList();
         }
 
         ClausewitzItem diplomatsItem = this.item.getChild("diplomats");
@@ -4675,13 +4675,13 @@ public class SaveCountry {
             this.diplomats = diplomatsItem.getChildren("envoy")
                                           .stream()
                                           .map(Envoy::new)
-                                          .collect(Collectors.toList());
+                                          .toList();
         }
 
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
         this.modifiers = modifierItems.stream()
                                       .map(child -> new SaveModifier(child, this.save.getGame()))
-                                      .collect(Collectors.toList());
+                                      .toList();
 
         ClausewitzItem subUnitItem = this.item.getChild("sub_unit");
 
@@ -4716,12 +4716,12 @@ public class SaveCountry {
         List<ClausewitzItem> previousMonarchsItems = this.item.getChildren("previous_monarch");
         this.previousMonarchs = previousMonarchsItems.stream()
                                                      .map(Id::new)
-                                                     .collect(Collectors.toList());
+                                                     .toList();
 
         List<ClausewitzItem> advisorsItems = this.item.getChildren("advisor");
         this.advisorsIds = advisorsItems.stream()
                                         .map(Id::new)
-                                        .collect(Collectors.toList());
+                                        .toList();
 
         if (this.history != null) {
             if (this.history.getMonarchs() != null) {
@@ -4791,7 +4791,7 @@ public class SaveCountry {
         ClausewitzItem customNationalIdeasItem = this.item.getChild("custom_national_ideas");
 
         if (customNationalIdeasItem != null) {
-            this.customNationalIdeas = customNationalIdeasItem.getChildren().stream().map(CustomNationalIdea::new).collect(Collectors.toList());
+            this.customNationalIdeas = customNationalIdeasItem.getChildren().stream().map(CustomNationalIdea::new).toList();
         }
 
         ClausewitzItem countryMissionsItem = this.item.getChild("country_missions");
@@ -4807,11 +4807,10 @@ public class SaveCountry {
             return true;
         }
 
-        if (!(o instanceof SaveCountry)) {
+        if (!(o instanceof SaveCountry country)) {
             return false;
         }
 
-        SaveCountry country = (SaveCountry) o;
         return Objects.equals(getTag(), country.getTag());
     }
 

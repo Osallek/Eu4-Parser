@@ -103,19 +103,19 @@ public class Estate {
         return this.item.getChildren("influence_modifier")
                         .stream()
                         .map(child -> new EstateModifier(child, "influence"))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<EstateModifier> getLoyaltyModifiers() {
         return this.item.getChildren("loyalty_modifier")
                         .stream()
                         .map(child -> new EstateModifier(child, "loyalty"))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<Names> getColonialNames() {
         List<ClausewitzItem> names = item.getChildren("custom_name");
-        return names.stream().map(Names::new).collect(Collectors.toList());
+        return names.stream().map(Names::new).toList();
     }
 
     public Color getColor() {
@@ -190,11 +190,9 @@ public class Estate {
             return true;
         }
 
-        if (!(o instanceof Estate)) {
+        if (!(o instanceof Estate estate)) {
             return false;
         }
-
-        Estate estate = (Estate) o;
 
         return Objects.equals(getName(), estate.getName());
     }

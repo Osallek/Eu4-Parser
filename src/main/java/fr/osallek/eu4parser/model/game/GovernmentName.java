@@ -294,11 +294,9 @@ public class GovernmentName {
             return true;
         }
 
-        if (!(o instanceof GovernmentName)) {
+        if (!(o instanceof GovernmentName governmentName)) {
             return false;
         }
-
-        GovernmentName governmentName = (GovernmentName) o;
 
         return Objects.equals(getName(), governmentName.getName());
     }

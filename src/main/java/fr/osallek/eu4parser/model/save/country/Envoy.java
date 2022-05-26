@@ -3,13 +3,7 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class Envoy {
-
-    private final ClausewitzItem item;
-
-    public Envoy(ClausewitzItem item) {
-        this.item = item;
-    }
+public record Envoy(ClausewitzItem item) {
 
     public Integer getType() {
         return this.item.getVarAsInt("type");

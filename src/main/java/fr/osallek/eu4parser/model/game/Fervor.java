@@ -38,13 +38,11 @@ public class Fervor {
             return true;
         }
 
-        if (!(o instanceof Fervor)) {
+        if (!(o instanceof Fervor fervor)) {
             return false;
         }
 
-        Fervor area = (Fervor) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), fervor.getName());
     }
 
     @Override

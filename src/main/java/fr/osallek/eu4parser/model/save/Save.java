@@ -5,7 +5,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
-import fr.osallek.eu4parser.Eu4Parser;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.Age;
 import fr.osallek.eu4parser.model.game.Game;
@@ -141,14 +140,14 @@ public class Save {
         this(name, gameFolderPath, modFolder, gamestateItem, aiItem, metaItem, true);
     }
 
-    private Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
-                 ClausewitzItem metaItem, boolean compressed) throws IOException {
+    private Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
+                 boolean compressed) throws IOException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
-        this.game = Eu4Parser.parseGame(gameFolderPath, this.getModEnabled());
+        this.game = new Game(gameFolderPath, this.getModEnabled());
         refreshAttributes();
     }
 
@@ -216,7 +215,7 @@ public class Save {
         ClausewitzItem child = this.metaItem.getChild("mods_enabled_names");
 
         if (child != null) {
-            return child.getChildren().stream().map(item -> item.getVarAsString("filename")).filter(Objects::nonNull).collect(Collectors.toList());
+            return child.getChildren().stream().map(item -> item.getVarAsString("filename")).filter(Objects::nonNull).toList();
         }
 
         return new ArrayList<>();
@@ -479,34 +478,58 @@ public class Save {
         return playableCountries;
     }
 
-    public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties,
-                                                  boolean quickPeace, boolean moveTraders, boolean takeDecisions,
-                                                  boolean embraceInstitutions, boolean developProvinces,
-                                                  boolean disbandUnits, boolean changeFleetMissions,
-                                                  boolean sendMissionaries, boolean convertCultures,
-                                                  boolean promoteCultures, boolean braindead) {
-        setAiPrefsForNotConfiguredPlayers(startWars, keepAlliances, keepTreaties, quickPeace, moveTraders,
-                                          takeDecisions, embraceInstitutions, developProvinces, disbandUnits,
-                                          changeFleetMissions, sendMissionaries, convertCultures, promoteCultures,
-                                          braindead, -1);
+    public List<SaveTeam> getTeams() {
+        ClausewitzItem teamsItem = this.gamestateItem.getChild("teams");
+
+        if (teamsItem != null) {
+            return teamsItem.getChildren("team").stream().map(item -> new SaveTeam(item, this)).toList();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
-    public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties,
-                                                  boolean quickPeace, boolean moveTraders, boolean takeDecisions,
-                                                  boolean embraceInstitutions, boolean developProvinces,
-                                                  boolean disbandUnits, boolean changeFleetMissions,
-                                                  boolean sendMissionaries, boolean convertCultures,
-                                                  boolean promoteCultures, boolean braindead, int timeout) {
+    public void addTeam(String name, List<String> members) {
+        ClausewitzItem teamsItem = this.gamestateItem.getChild("teams");
+
+        if (teamsItem == null) {
+            teamsItem = new ClausewitzItem(this.gamestateItem, "teams", this.gamestateItem.getChild("players_countries").getOrder());
+            this.gamestateItem.addChild(teamsItem, true);
+        }
+
+        ClausewitzItem teamItem = teamsItem.addChild("team");
+        SaveTeam team = new SaveTeam(teamItem, this);
+        team.setName(name);
+        members.forEach(team::addCountry);
+    }
+
+    public void removeTeam(String name) {
+        ClausewitzItem teamsItem = this.gamestateItem.getChild("teams");
+
+        if (teamsItem == null) {
+            return;
+        }
+
+        getTeams().stream().filter(saveTeam -> name.equals(saveTeam.name())).findFirst().ifPresent(saveTeam -> teamsItem.removeChild(saveTeam.item()));
+    }
+
+    public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties, boolean quickPeace, boolean moveTraders,
+                                                  boolean takeDecisions, boolean embraceInstitutions, boolean developProvinces, boolean disbandUnits,
+                                                  boolean changeFleetMissions, boolean sendMissionaries, boolean convertCultures, boolean promoteCultures,
+                                                  boolean braindead) {
+        setAiPrefsForNotConfiguredPlayers(startWars, keepAlliances, keepTreaties, quickPeace, moveTraders, takeDecisions, embraceInstitutions, developProvinces,
+                                          disbandUnits, changeFleetMissions, sendMissionaries, convertCultures, promoteCultures, braindead, -1);
+    }
+
+    public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties, boolean quickPeace, boolean moveTraders,
+                                                  boolean takeDecisions, boolean embraceInstitutions, boolean developProvinces, boolean disbandUnits,
+                                                  boolean changeFleetMissions, boolean sendMissionaries, boolean convertCultures, boolean promoteCultures,
+                                                  boolean braindead, int timeout) {
         this.countries.values()
                       .stream()
-                      .filter(country -> country.getPlayerAiPrefsCommand() == null
-                                         && BooleanUtils.toBoolean(country.isHuman()))
-                      .forEach(country -> country.setPlayerAiPrefsCommand(startWars, keepAlliances, keepTreaties,
-                                                                          quickPeace, moveTraders, takeDecisions,
-                                                                          embraceInstitutions, developProvinces,
-                                                                          disbandUnits, changeFleetMissions,
-                                                                          sendMissionaries, convertCultures,
-                                                                          promoteCultures, braindead, timeout));
+                      .filter(country -> country.getPlayerAiPrefsCommand() == null && BooleanUtils.toBoolean(country.isHuman()))
+                      .forEach(country -> country.setPlayerAiPrefsCommand(startWars, keepAlliances, keepTreaties, quickPeace, moveTraders, takeDecisions,
+                                                                          embraceInstitutions, developProvinces, disbandUnits, changeFleetMissions,
+                                                                          sendMissionaries, convertCultures, promoteCultures, braindead, timeout));
     }
 
     private SortedMap<Integer, SaveCountry> getInternalGreatPowers() {
@@ -561,9 +584,7 @@ public class Save {
         owner = ClausewitzUtils.addQuotes(owner);
 
         String finalOwner = owner;
-        provinces = Arrays.stream(provinces)
-                          .filter(province -> getProvince(province).getOwner().equals(finalOwner))
-                          .toArray(Integer[]::new);
+        provinces = Arrays.stream(provinces).filter(province -> getProvince(province).getOwner().equals(finalOwner)).toArray(Integer[]::new);
 
         if (provinces.length > 0) {
             ClausewitzItem tradeCompanyManagerItem = this.gamestateItem.getChild("trade_company_manager");
@@ -670,8 +691,7 @@ public class Save {
             this.tradeNodes = tradeItem.getChildren("node")
                                        .stream()
                                        .map(item -> new SaveTradeNode(item, this, i.getAndIncrement()))
-                                       .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()),
-                                                                 Function.identity()));
+                                       .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()), Function.identity()));
         }
 
         ClausewitzItem changePricesItem = this.gamestateItem.getChild("change_price");
@@ -729,9 +749,10 @@ public class Save {
             this.playableCountries = this.countries.values()
                                                    .stream()
                                                    .filter(SaveCountry::isPlayable)
-                                                   .peek(country -> country.setLocalizedName(this.game.getLocalisation(country.getTag(), Eu4Language.getDefault()).getValue()))
+                                                   .peek(country -> country.setLocalizedName(
+                                                           this.game.getLocalisation(country.getTag(), Eu4Language.getDefault()).getValue()))
                                                    .sorted(Comparator.comparing(SaveCountry::getLocalizedName, Eu4Utils.COLLATOR))
-                                                   .collect(Collectors.toList());
+                                                   .toList();
         }
 
         ClausewitzList playersCountriesList = this.gamestateItem.getList("players_countries");
@@ -754,12 +775,10 @@ public class Save {
             }
 
             return Stream.empty();
-        }).collect(Collectors.toList());
+        }).toList();
 
         List<ClausewitzItem> tradeLeaguesItems = this.gamestateItem.getChildren("trade_league");
-        this.tradeLeagues = tradeLeaguesItems.stream()
-                                             .map(child -> new TradeLeague(child, this))
-                                             .collect(Collectors.toList());
+        this.tradeLeagues = tradeLeaguesItems.stream().map(child -> new TradeLeague(child, this)).toList();
         this.tradeLeagues.forEach(tradeLeague -> tradeLeague.getMembers().forEach(member -> member.setTradeLeague(tradeLeague)));
 
         ClausewitzItem greatPowersItem = this.gamestateItem.getChild("great_powers");
@@ -777,25 +796,22 @@ public class Save {
 
         if (provincesItems != null) {
             this.provinces = new HashMap<>();
-            provincesItems.getChildren()
-                          .forEach(provinceItem -> {
-                              Province province = this.game.getProvince(Math.abs(Integer.parseInt(provinceItem.getName())));
-                              if (province != null) {
-                                  SaveProvince saveProvince = new SaveProvince(provinceItem,
-                                                                               province,
-                                                                               this);
-                                  this.provinces.put(saveProvince.getId(), saveProvince);
-                                  this.game.getProvinces().compute(saveProvince.getId(), (integer, p) -> p = saveProvince);
-                                  this.game.getProvincesByColor()
-                                           .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
-                                                    (color, p) -> p = saveProvince);
-                              }
-                          });
+            provincesItems.getChildren().forEach(provinceItem -> {
+                Province province = this.game.getProvince(Math.abs(Integer.parseInt(provinceItem.getName())));
+                if (province != null) {
+                    SaveProvince saveProvince = new SaveProvince(provinceItem, province, this);
+                    this.provinces.put(saveProvince.getId(), saveProvince);
+                    this.game.getProvinces().compute(saveProvince.getId(), (integer, p) -> p = saveProvince);
+                    this.game.getProvincesByColor()
+                             .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
+                                      (color, p) -> p = saveProvince);
+                }
+            });
             this.cities = this.provinces.values()
                                         .stream()
                                         .filter(SaveProvince::isCity)
                                         .sorted((o1, o2) -> Eu4Utils.COLLATOR.compare(o1.getName(), o2.getName()))
-                                        .collect(Collectors.toList());
+                                        .toList();
         }
 
         ClausewitzItem mapAreaDataItem = this.gamestateItem.getChild("map_area_data");
@@ -806,7 +822,8 @@ public class Save {
                                         .filter(child -> child.getChild("state") != null || child.getChild("investments") != null)
                                         .map(child -> new SaveArea(child, this))
                                         .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()), Function.identity()));
-            this.areas.values().forEach(saveArea -> saveArea.getProvinces().stream().filter(Objects::nonNull).forEach(province -> province.setSaveArea(saveArea)));
+            this.areas.values()
+                      .forEach(saveArea -> saveArea.getProvinces().stream().filter(Objects::nonNull).forEach(province -> province.setSaveArea(saveArea)));
         }
 
         ClausewitzItem activeAdvisorsItem = this.gamestateItem.getChild("active_advisors");
@@ -834,14 +851,10 @@ public class Save {
         }
 
         List<ClausewitzItem> activeWarsItems = this.gamestateItem.getChildren("active_war");
-        this.activeWars = activeWarsItems.stream()
-                                         .map(item -> new ActiveWar(item, this))
-                                         .collect(Collectors.toList());
+        this.activeWars = activeWarsItems.stream().map(item -> new ActiveWar(item, this)).toList();
 
         List<ClausewitzItem> previousWarsItems = this.gamestateItem.getChildren("previous_war");
-        this.previousWars = previousWarsItems.stream()
-                                             .map(item -> new PreviousWar(item, this))
-                                             .collect(Collectors.toList());
+        this.previousWars = previousWarsItems.stream().map(item -> new PreviousWar(item, this)).toList();
 
         ClausewitzItem incomeStatisticsItem = this.gamestateItem.getChild("income_statistics");
 

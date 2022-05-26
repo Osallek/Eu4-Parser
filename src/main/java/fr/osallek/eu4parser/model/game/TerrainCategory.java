@@ -226,13 +226,11 @@ public class TerrainCategory extends Nodded {
             return true;
         }
 
-        if (!(o instanceof TerrainCategory)) {
+        if (!(o instanceof TerrainCategory terrainCategory)) {
             return false;
         }
 
-        TerrainCategory area = (TerrainCategory) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), terrainCategory.getName());
     }
 
     @Override

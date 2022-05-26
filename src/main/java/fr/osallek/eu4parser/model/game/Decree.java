@@ -58,10 +58,10 @@ public class Decree {
             return true;
         }
 
-        if (!(o instanceof Decree)) {
+        if (!(o instanceof Decree decree)) {
             return false;
         }
-        Decree decree = (Decree) o;
+
         return Objects.equals(getName(), decree.getName());
     }
 

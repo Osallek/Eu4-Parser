@@ -4,13 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Objects;
 
-public class Id {
-
-    private final ClausewitzItem item;
-
-    public Id(ClausewitzItem item) {
-        this.item = item;
-    }
+public record Id(ClausewitzItem item) {
 
     public Integer getId() {
         return this.item.getVarAsInt("id");

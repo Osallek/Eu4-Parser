@@ -51,7 +51,7 @@ public class Condition {
                           .stream()
                           .filter(child -> CollectionUtils.isEmpty(list) || !list.contains(child.getName()))
                           .map(Condition::new)
-                          .collect(Collectors.toList());
+                          .toList();
     }
 
     public String getName() {
@@ -71,7 +71,7 @@ public class Condition {
     }
 
     public List<Condition> getScopes(String name) {
-        return this.scopes == null ? null : this.scopes.stream().filter(condition -> name.equals(condition.getName())).collect(Collectors.toList());
+        return this.scopes == null ? null : this.scopes.stream().filter(condition -> name.equals(condition.getName())).toList();
     }
 
     public boolean apply(SaveCountry root, SaveCountry from) {
@@ -135,11 +135,10 @@ public class Condition {
             return true;
         }
 
-        if (!(o instanceof Condition)) {
+        if (!(o instanceof Condition condition)) {
             return false;
         }
 
-        Condition condition = (Condition) o;
         return Objects.equals(name, condition.name) &&
                Objects.equals(conditions, condition.conditions) &&
                Objects.equals(scopes, condition.scopes);

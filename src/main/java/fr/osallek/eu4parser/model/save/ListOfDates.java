@@ -8,16 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ListOfDates {
-
-    private final ClausewitzItem item;
-
-    public ListOfDates(ClausewitzItem item) {
-        this.item = item;
-    }
+public record ListOfDates(ClausewitzItem item) {
 
     public List<String> getNames() {
-        return this.item.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
+        return this.item.getVariables().stream().map(ClausewitzVariable::getName).toList();
     }
 
     public Map<String, LocalDate> getAll() {

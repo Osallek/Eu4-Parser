@@ -19,7 +19,7 @@ public abstract class AbstractArmy {
 
     protected Id leader;
 
-    public AbstractArmy(ClausewitzItem item, SaveCountry country) {
+    protected AbstractArmy(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
         refreshAttributes();

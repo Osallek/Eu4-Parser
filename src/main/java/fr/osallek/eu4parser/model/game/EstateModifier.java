@@ -47,13 +47,11 @@ public class EstateModifier {
             return true;
         }
 
-        if (!(o instanceof EstateModifier)) {
+        if (!(o instanceof EstateModifier estateModifier)) {
             return false;
         }
 
-        EstateModifier names = (EstateModifier) o;
-
-        return Objects.equals(getDesc(), names.getDesc());
+        return Objects.equals(getDesc(), estateModifier.getDesc());
     }
 
     @Override

@@ -6,7 +6,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class GreatProject {
 
@@ -92,7 +91,7 @@ public class GreatProject {
     }
 
     public List<GreatProjectTier> getTiers() {
-        return this.item.getChildrenStartWith("tier_").stream().map(GreatProjectTier::new).collect(Collectors.toList());
+        return this.item.getChildrenStartWith("tier_").stream().map(GreatProjectTier::new).toList();
     }
 
     @Override
@@ -101,11 +100,9 @@ public class GreatProject {
             return true;
         }
 
-        if (!(o instanceof GreatProject)) {
+        if (!(o instanceof GreatProject greatProject)) {
             return false;
         }
-
-        GreatProject greatProject = (GreatProject) o;
 
         return Objects.equals(getName(), greatProject.getName());
     }

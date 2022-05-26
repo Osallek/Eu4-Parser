@@ -49,7 +49,7 @@ public class Region extends Nodded {
 
     public List<Area> getAreas() {
         ClausewitzList list = this.item.getList("areas");
-        return list == null ? null : list.getValues().stream().map(this.game::getArea).collect(Collectors.toList());
+        return list == null ? null : list.getValues().stream().map(this.game::getArea).toList();
     }
 
     public void setAreas(List<String> areas) {
@@ -138,11 +138,9 @@ public class Region extends Nodded {
             return true;
         }
 
-        if (!(o instanceof Region)) {
+        if (!(o instanceof Region region)) {
             return false;
         }
-
-        Region region = (Region) o;
 
         return Objects.equals(getName(), region.getName());
     }

@@ -3,13 +3,7 @@ package fr.osallek.eu4parser.model.save.trade;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class TradeNodeModifier {
-
-    private final ClausewitzItem item;
-
-    public TradeNodeModifier(ClausewitzItem item) {
-        this.item = item;
-    }
+public record TradeNodeModifier(ClausewitzItem item) {
 
     public String getKey() {
         return this.item.getVarAsString("key");

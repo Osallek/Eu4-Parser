@@ -5,7 +5,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class AgeAbility {
 
@@ -34,7 +33,7 @@ public class AgeAbility {
 
     public List<String> getRules() {
         ClausewitzItem child = item.getChild("rule");
-        return child == null ? null : child.getVariables().stream().map(ClausewitzVariable::getName).collect(Collectors.toList());
+        return child == null ? null : child.getVariables().stream().map(ClausewitzVariable::getName).toList();
     }
 
     @Override

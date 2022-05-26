@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class EstatePrivilege {
 
@@ -106,7 +105,7 @@ public class EstatePrivilege {
     }
 
     public List<EstatePrivilegeModifier> getConditionalModifiers() {
-        return this.item.getChildren("conditional_modifier").stream().map(EstatePrivilegeModifier::new).collect(Collectors.toList());
+        return this.item.getChildren("conditional_modifier").stream().map(EstatePrivilegeModifier::new).toList();
     }
 
     public Modifiers getModifierByLandOwnership() {
@@ -151,12 +150,11 @@ public class EstatePrivilege {
             return true;
         }
 
-        if (!(o instanceof EstatePrivilege)) {
+        if (!(o instanceof EstatePrivilege estatePrivilege)) {
             return false;
         }
 
-        EstatePrivilege that = (EstatePrivilege) o;
-        return Objects.equals(getName(), that.getName());
+        return Objects.equals(getName(), estatePrivilege.getName());
     }
 
     @Override

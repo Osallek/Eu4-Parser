@@ -69,11 +69,9 @@ public class Policy {
             return true;
         }
 
-        if (!(o instanceof Policy)) {
+        if (!(o instanceof Policy policy)) {
             return false;
         }
-
-        Policy policy = (Policy) o;
 
         return Objects.equals(getName(), policy.getName());
     }

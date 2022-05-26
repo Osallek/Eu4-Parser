@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.save.events;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PendingEvents {
 
@@ -31,6 +30,6 @@ public class PendingEvents {
     }
 
     private void refreshAttributes() {
-        this.pendingEvents = this.item.getChildren().stream().map(PendingEvent::new).collect(Collectors.toList());
+        this.pendingEvents = this.item.getChildren().stream().map(PendingEvent::new).toList();
     }
 }

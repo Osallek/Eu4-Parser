@@ -2,13 +2,7 @@ package fr.osallek.eu4parser.model.save.gameplayoptions;
 
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 
-public class GameplayOptions {
-
-    private final ClausewitzList list;
-
-    public GameplayOptions(ClausewitzList list) {
-        this.list = list;
-    }
+public record GameplayOptions(ClausewitzList list) {
 
     public Difficulty getDifficulty() {
         return Difficulty.ofValue(this.list.getAsInt(0));

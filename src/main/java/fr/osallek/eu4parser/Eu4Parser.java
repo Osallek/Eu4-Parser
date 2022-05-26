@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
@@ -31,11 +32,18 @@ public class Eu4Parser {
 
     private Eu4Parser() {}
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    public static LauncherSettings loadSettings(String gameFolderPath) throws IOException {
+        return OBJECT_MAPPER.readValue(Paths.get(gameFolderPath).resolve("launcher-settings.json").toFile(), LauncherSettings.class);
+    }
+
     public static Save loadSave(String gameFolderPath, String modFolder, String path) throws IOException {
         return loadSave(gameFolderPath, modFolder, path, new HashMap<>());
     }
 
-    public static Save loadSave(String gameFolderPath, String modFolder, String path, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+    public static Save loadSave(String gameFolderPath, String modFolder, String path,
+                                Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         File file = new File(path);
         Save save = null;
 
@@ -76,8 +84,24 @@ public class Eu4Parser {
         return new Game(gameFolderPath);
     }
 
+    public static Game parseGame(String gameFolderPath, LauncherSettings launcherSettings) throws IOException {
+        return new Game(gameFolderPath, launcherSettings);
+    }
+
     public static Game parseGame(String gameFolderPath, List<String> modEnabled) throws IOException {
         return new Game(gameFolderPath, modEnabled);
+    }
+
+    public static Game parseGame(String gameFolderPath, List<String> modEnabled, LauncherSettings launcherSettings) throws IOException {
+        return new Game(gameFolderPath, launcherSettings, modEnabled);
+    }
+
+    public static Game parseGame(String gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
+        return new Game(gameFolderPath, modEnabled, runnable);
+    }
+
+    public static Game parseGame(String gameFolderPath, List<String> modEnabled, Runnable runnable, LauncherSettings launcherSettings) throws IOException {
+        return new Game(gameFolderPath, launcherSettings, modEnabled, runnable);
     }
 
     public static void writeSave(Save save, String path) throws IOException {
@@ -86,7 +110,8 @@ public class Eu4Parser {
 
     public static void writeSave(Save save, String path, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (save.isCompressed()) {
-            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))), StandardCharsets.ISO_8859_1)) {
+            try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(path))),
+                                                                    StandardCharsets.ISO_8859_1)) {
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.AI_FILE));
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1));
                 save.writeAi(writer, listeners);

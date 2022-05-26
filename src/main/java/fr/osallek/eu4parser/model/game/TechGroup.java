@@ -108,11 +108,9 @@ public class TechGroup extends Nodded {
             return true;
         }
 
-        if (!(o instanceof TechGroup)) {
+        if (!(o instanceof TechGroup techGroup)) {
             return false;
         }
-
-        TechGroup techGroup = (TechGroup) o;
 
         return Objects.equals(getName(), techGroup.getName());
     }

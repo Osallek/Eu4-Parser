@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Religion {
 
@@ -404,7 +403,7 @@ public class Religion {
 
     public List<Icon> getIcons() {
         ClausewitzItem child = this.item.getChild("orthodox_icons");
-        return child == null ? null : child.getChildren().stream().map(Icon::new).collect(Collectors.toList());
+        return child == null ? null : child.getChildren().stream().map(Icon::new).toList();
     }
 
     public ReligionGroup getReligionGroup() {

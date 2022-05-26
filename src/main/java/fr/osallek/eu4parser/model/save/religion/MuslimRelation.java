@@ -3,13 +3,7 @@ package fr.osallek.eu4parser.model.save.religion;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class MuslimRelation {
-
-    private final ClausewitzItem item;
-
-    public MuslimRelation(ClausewitzItem item) {
-        this.item = item;
-    }
+public record MuslimRelation(ClausewitzItem item) {
 
     public MuslimRelationSchool getFirst() {
         String value = this.item.getVarAsString("first");

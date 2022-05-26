@@ -5,7 +5,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class ReligiousReforms {
 
@@ -59,7 +58,7 @@ public class ReligiousReforms {
         return this.item.getChildrenNot("trigger", "can_buy_idea", "ai_will_do")
                         .stream()
                         .map(reform -> new ReligiousReform(reform, this, i.getAndIncrement()))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     @Override
@@ -68,11 +67,9 @@ public class ReligiousReforms {
             return true;
         }
 
-        if (!(o instanceof ReligiousReforms)) {
+        if (!(o instanceof ReligiousReforms religiousReforms)) {
             return false;
         }
-
-        ReligiousReforms religiousReforms = (ReligiousReforms) o;
 
         return Objects.equals(getName(), religiousReforms.getName());
     }

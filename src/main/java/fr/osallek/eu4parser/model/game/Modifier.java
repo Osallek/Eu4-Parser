@@ -36,13 +36,11 @@ public class Modifier {
             return true;
         }
 
-        if (!(o instanceof Modifier)) {
+        if (!(o instanceof Modifier modifier)) {
             return false;
         }
 
-        Modifier area = (Modifier) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), modifier.getName());
     }
 
     @Override

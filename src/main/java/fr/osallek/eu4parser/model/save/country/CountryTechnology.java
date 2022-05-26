@@ -10,19 +10,9 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CountryTechnology {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public CountryTechnology(Save save, ClausewitzItem item) {
-        this.save = save;
-        this.item = item;
-    }
+public record CountryTechnology(Save save, ClausewitzItem item) {
 
     public Integer getAdm() {
         return this.item.getVarAsInt("adm_tech");
@@ -60,7 +50,7 @@ public class CountryTechnology {
                                           .filter(Objects::nonNull)
                                           .filter(m -> m.hasModifier(modifier))
                                           .map(m -> m.getModifier(modifier))
-                                          .collect(Collectors.toList());
+                                          .toList();
 
         if (this.save.getGame().getTechnology(power, level).getYear() > this.save.getDate().getYear()
             && this.save.getGame().getTechnology(power, level).getAheadOfTime().hasModifier(modifier)) {

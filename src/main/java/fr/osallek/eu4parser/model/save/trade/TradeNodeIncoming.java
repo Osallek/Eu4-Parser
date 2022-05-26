@@ -3,16 +3,7 @@ package fr.osallek.eu4parser.model.save.trade;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
-public class TradeNodeIncoming {
-
-    private final ClausewitzItem item;
-
-    private final Save save;
-
-    public TradeNodeIncoming(ClausewitzItem item, Save save) {
-        this.item = item;
-        this.save = save;
-    }
+public record TradeNodeIncoming(ClausewitzItem item, Save save) {
 
     public SaveTradeNode getFrom() {
         return this.save.getTradeNode(getFromIndex());

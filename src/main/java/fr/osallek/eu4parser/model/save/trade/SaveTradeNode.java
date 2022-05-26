@@ -75,7 +75,7 @@ public class SaveTradeNode {
         return this.item.getVariables("steer_power")
                         .stream()
                         .map(ClausewitzVariable::getAsDouble)
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public Integer getNbCollectors() {
@@ -181,6 +181,6 @@ public class SaveTradeNode {
             }
         }
 
-        this.incoming = this.item.getChildren("incoming").stream().map(child -> new TradeNodeIncoming(child, this.save)).collect(Collectors.toList());
+        this.incoming = this.item.getChildren("incoming").stream().map(child -> new TradeNodeIncoming(child, this.save)).toList();
     }
 }

@@ -59,11 +59,9 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
             return true;
         }
 
-        if (!(o instanceof CrownLandBonus)) {
+        if (!(o instanceof CrownLandBonus crownLandBonus)) {
             return false;
         }
-
-        CrownLandBonus crownLandBonus = (CrownLandBonus) o;
 
         return Objects.equals(getName(), crownLandBonus.getName());
     }

@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.model.game.NativeAdvancement;
 import fr.osallek.eu4parser.model.game.NativeAdvancements;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SaveNativeAdvancement {
 
@@ -31,11 +30,11 @@ public class SaveNativeAdvancement {
     }
 
     public List<NativeAdvancement> getEmbracedNativeAdvancements() {
-        return this.nativeAdvancements.getNativeAdvancements().stream().filter(this::getEmbracedNativeAdvancement).collect(Collectors.toList());
+        return this.nativeAdvancements.getNativeAdvancements().stream().filter(this::getEmbracedNativeAdvancement).toList();
     }
 
     public List<NativeAdvancement> getNotEmbracedNativeAdvancements() {
-        return this.nativeAdvancements.getNativeAdvancements().stream().filter(index -> !this.getEmbracedNativeAdvancement(index)).collect(Collectors.toList());
+        return this.nativeAdvancements.getNativeAdvancements().stream().filter(index -> !this.getEmbracedNativeAdvancement(index)).toList();
     }
 
     public boolean getEmbracedNativeAdvancement(NativeAdvancement nativeAdvancement) {

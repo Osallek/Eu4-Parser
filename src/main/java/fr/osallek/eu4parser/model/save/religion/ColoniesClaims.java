@@ -8,13 +8,7 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColoniesClaims {
-
-    private final ClausewitzList list;
-
-    public ColoniesClaims(ClausewitzList list) {
-        this.list = list;
-    }
+public record ColoniesClaims(ClausewitzList list) {
 
     public List<String> getColonyClaims() {
         return this.list == null ? new ArrayList<>() : this.list.getValues();

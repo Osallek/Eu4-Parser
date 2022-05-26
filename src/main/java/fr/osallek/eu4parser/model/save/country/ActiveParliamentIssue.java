@@ -7,16 +7,7 @@ import fr.osallek.eu4parser.model.game.ParliamentIssue;
 
 import java.time.LocalDate;
 
-public class ActiveParliamentIssue {
-
-    private final Game game;
-
-    private final ClausewitzItem item;
-
-    public ActiveParliamentIssue(ClausewitzItem item, Game game) {
-        this.game = game;
-        this.item = item;
-    }
+public record ActiveParliamentIssue(ClausewitzItem item, Game game) {
 
     public LocalDate getDate() {
         return this.item.getVarAsDate("date");

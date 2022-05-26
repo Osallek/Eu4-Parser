@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileNode implements Comparable<FileNode> {
@@ -68,7 +67,7 @@ public class FileNode implements Comparable<FileNode> {
     public static List<FileNode> getChildren(FileNode fileNode) {
         if (Files.isDirectory(fileNode.path)) {
             try (Stream<Path> stream = Files.list(fileNode.path)) {
-                return stream.map(p -> new FileNode(fileNode.root, p, fileNode.mod)).collect(Collectors.toList());
+                return stream.map(p -> new FileNode(fileNode.root, p, fileNode.mod)).toList();
             } catch (IOException e) {
                 return new ArrayList<>();
             }
@@ -109,6 +108,7 @@ public class FileNode implements Comparable<FileNode> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         FileNode fileNode = (FileNode) o;
         return Objects.equals(this.relativePath, fileNode.relativePath);
     }

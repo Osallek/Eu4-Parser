@@ -6,13 +6,7 @@ import fr.osallek.eu4parser.common.NumbersUtils;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class PowerSpentIndexed {
-
-    private final ClausewitzItem item;
-
-    public PowerSpentIndexed(ClausewitzItem item) {
-        this.item = item;
-    }
+public record PowerSpentIndexed(ClausewitzItem item) {
 
     public Map<PowerSpent, Integer> getPowerSpent() {
         Map<PowerSpent, Integer> powerSpentIndexed = new EnumMap<>(PowerSpent.class);

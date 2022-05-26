@@ -262,7 +262,7 @@ public class GovernmentReform {
 
         ClausewitzList list = item.getList("disallowed_trade_goods");
         this.disallowedTradeGoods = list == null ? this.disallowedTradeGoods
-                                                 : Pair.of(list.getValues().stream().map(game::getTradeGood).collect(Collectors.toList()), condition);
+                                                 : Pair.of(list.getValues().stream().map(game::getTradeGood).toList(), condition);
 
         list = item.getList("factions");
         this.factions = list == null ? this.factions : Pair.of(list.getValues(), condition);
@@ -275,7 +275,7 @@ public class GovernmentReform {
         this.statesGeneralMechanic = child == null ? null : Pair.of(child.getChildren()
                                                                          .stream()
                                                                          .map(Modifiers::new)
-                                                                         .collect(Collectors.toList()), condition);
+                                                                         .toList(), condition);
 
         this.basicReform = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("basic_reform")), condition);
         this.legacyGovernment = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("legacy_government")), condition);

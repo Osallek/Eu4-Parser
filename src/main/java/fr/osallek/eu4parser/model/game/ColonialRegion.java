@@ -149,26 +149,26 @@ public class ColonialRegion extends Nodded {
         ClausewitzItem child = item.getChild("trade_goods");
         return child == null ? null : child.getVariables()
                                            .stream()
-                                           .collect(Collectors.toMap(var -> game.getTradeGood(var.getName()), ClausewitzVariable::getAsInt));
+                                           .collect(Collectors.toMap(variable -> game.getTradeGood(variable.getName()), ClausewitzVariable::getAsInt));
     }
 
     public Map<Culture, Integer> getCultures() {
         ClausewitzItem child = item.getChild("culture");
         return child == null ? null : child.getVariables()
                                            .stream()
-                                           .collect(Collectors.toMap(var -> game.getCulture(var.getName()), ClausewitzVariable::getAsInt));
+                                           .collect(Collectors.toMap(variable -> game.getCulture(variable.getName()), ClausewitzVariable::getAsInt));
     }
 
     public Map<Religion, Integer> getReligions() {
         ClausewitzItem child = item.getChild("religion");
         return child == null ? null : child.getVariables()
                                            .stream()
-                                           .collect(Collectors.toMap(var -> game.getReligion(var.getName()), ClausewitzVariable::getAsInt));
+                                           .collect(Collectors.toMap(variable -> game.getReligion(variable.getName()), ClausewitzVariable::getAsInt));
     }
 
     public List<Names> getColonialNames() {
         List<ClausewitzItem> names = item.getChildren("names");
-        return names.stream().map(Names::new).collect(Collectors.toList());
+        return names.stream().map(Names::new).toList();
     }
 
     public boolean isRandom() {
@@ -186,11 +186,9 @@ public class ColonialRegion extends Nodded {
             return true;
         }
 
-        if (!(o instanceof ColonialRegion)) {
+        if (!(o instanceof ColonialRegion area)) {
             return false;
         }
-
-        ColonialRegion area = (ColonialRegion) o;
 
         return Objects.equals(getName(), area.getName());
     }

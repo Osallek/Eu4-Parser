@@ -8,13 +8,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class WarParticipant {
-
-    private final ClausewitzItem item;
-
-    public WarParticipant(ClausewitzItem item) {
-        this.item = item;
-    }
+public record WarParticipant(ClausewitzItem item) {
 
     public Double getValue() {
         return this.item.getVarAsDouble("value");

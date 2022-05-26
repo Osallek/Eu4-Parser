@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.model.game.Nodded;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Objects;
 
 public class Localisation extends Nodded {

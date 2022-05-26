@@ -3,13 +3,7 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class VictoryCard {
-
-    private final ClausewitzItem item;
-
-    public VictoryCard(ClausewitzItem item) {
-        this.item = item;
-    }
+public record VictoryCard(ClausewitzItem item) {
 
     public String getArea() {
         return this.item.getVarAsString("area");

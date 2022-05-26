@@ -3,13 +3,7 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.BooleanUtils;
 
-public class PlayerAiPrefsCommand {
-
-    private final ClausewitzItem item;
-
-    public PlayerAiPrefsCommand(ClausewitzItem item) {
-        this.item = item;
-    }
+public record PlayerAiPrefsCommand(ClausewitzItem item) {
 
     public boolean startWars() {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("start_wars"));

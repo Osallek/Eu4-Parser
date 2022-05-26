@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class TradeNode extends Nodded {
 
@@ -138,7 +137,7 @@ public class TradeNode extends Nodded {
     }
 
     public List<TradeNodeOutgoing> getOutgoings() {
-        return this.item.getChildren("outgoing").stream().map(TradeNodeOutgoing::new).collect(Collectors.toList());
+        return this.item.getChildren("outgoing").stream().map(TradeNodeOutgoing::new).toList();
     }
 
     @Override
@@ -152,11 +151,9 @@ public class TradeNode extends Nodded {
             return true;
         }
 
-        if (!(o instanceof TradeNode)) {
+        if (!(o instanceof TradeNode tradeNode)) {
             return false;
         }
-
-        TradeNode tradeNode = (TradeNode) o;
 
         return Objects.equals(getName(), tradeNode.getName());
     }

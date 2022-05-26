@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -522,6 +521,15 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("yearly_authority", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("overlord_naval_forcelimit", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("all_estate_loyalty_equilibrium", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("relation_with_same_religion", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("relation_with_heathens", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("relation_with_heathens", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("free_land_leader_pool", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("free_navy_leader_pool", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("relation_with_same_culture", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("relation_with_same_culture_group", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("relation_with_accepted_culture", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("relation_with_other_culture", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {
@@ -547,31 +555,24 @@ public class ModifiersUtils {
      * For constants (i.e. = yes) return 1 for yes, 0 for false
      */
     public static double getSum(double value, Modifier modifier, Modifiers... modifiers) {
-
-        switch (modifier.getType()) {
-            case ADDITIVE:
-                return value + Arrays.stream(modifiers)
-                                     .map(m -> m.getModifier(modifier))
-                                     .filter(Objects::nonNull)
-                                     .mapToDouble(Double::doubleValue)
-                                     .sum();
-            case MULTIPLICATIVE:
-                return value * (1 + Arrays.stream(modifiers)
-                                          .map(m -> m.getModifier(modifier))
-                                          .filter(Objects::nonNull)
-                                          .mapToDouble(Double::doubleValue)
-                                          .sum());
-            case CONSTANT:
-            case BOOLEAN:
-                return Math.max(value, Arrays.stream(modifiers)
-                                             .map(m -> m.getModifier(modifier))
-                                             .filter(Objects::nonNull)
-                                             .mapToDouble(Double::doubleValue)
-                                             .max()
-                                             .orElse(0));
-            default:
-                return value;
-        }
+        return switch (modifier.getType()) {
+            case ADDITIVE -> value + Arrays.stream(modifiers)
+                                           .map(m -> m.getModifier(modifier))
+                                           .filter(Objects::nonNull)
+                                           .mapToDouble(Double::doubleValue)
+                                           .sum();
+            case MULTIPLICATIVE -> value * (1 + Arrays.stream(modifiers)
+                                                      .map(m -> m.getModifier(modifier))
+                                                      .filter(Objects::nonNull)
+                                                      .mapToDouble(Double::doubleValue)
+                                                      .sum());
+            case CONSTANT, BOOLEAN -> Math.max(value, Arrays.stream(modifiers)
+                                                            .map(m -> m.getModifier(modifier))
+                                                            .filter(Objects::nonNull)
+                                                            .mapToDouble(Double::doubleValue)
+                                                            .max()
+                                                            .orElse(0));
+        };
     }
 
     public static Modifiers scaleModifiers(Modifiers modifiers, Number scale) {
@@ -607,27 +608,21 @@ public class ModifiersUtils {
                                                    .entrySet()
                                                    .stream()
                                                    .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
-                                                   .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                                                       switch (entry.getKey().getType()) {
-                                                           case ADDITIVE:
-                                                           case MULTIPLICATIVE:
-                                                               return entry.getValue()
-                                                                           .stream()
-                                                                           .filter(Objects::nonNull)
-                                                                           .map(BigDecimal::valueOf)
-                                                                           .reduce(BigDecimal.ZERO, BigDecimal::add)
-                                                                           .setScale(4, RoundingMode.HALF_EVEN)
-                                                                           .doubleValue();
-                                                           case CONSTANT:
-                                                               return entry.getValue()
-                                                                           .stream()
-                                                                           .filter(Objects::nonNull)
-                                                                           .mapToDouble(Double::doubleValue)
-                                                                           .max()
-                                                                           .orElse(0);
-                                                       }
-
-                                                       return entry.getValue().get(0);
+                                                   .collect(Collectors.toMap(Map.Entry::getKey, entry -> switch (entry.getKey().getType()) {
+                                                       case ADDITIVE, MULTIPLICATIVE -> entry.getValue()
+                                                                                             .stream()
+                                                                                             .filter(Objects::nonNull)
+                                                                                             .map(BigDecimal::valueOf)
+                                                                                             .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                                                                             .setScale(4, RoundingMode.HALF_EVEN)
+                                                                                             .doubleValue();
+                                                       case CONSTANT -> entry.getValue()
+                                                                             .stream()
+                                                                             .filter(Objects::nonNull)
+                                                                             .mapToDouble(Double::doubleValue)
+                                                                             .max()
+                                                                             .orElse(0);
+                                                       default -> entry.getValue().get(0);
                                                    }));
 
             return new Modifiers(enables, modifier);
@@ -646,27 +641,20 @@ public class ModifiersUtils {
         }
 
         switch (modifier.getType()) {
-            case ADDITIVE:
-            case MULTIPLICATIVE:
-                modifiers.getModifiers().put(modifier, modifiers.getModifiers().getOrDefault(modifier, 0d) + NumbersUtils.doubleOrDefault(value));
-                break;
-            case CONSTANT:
-                modifiers.getModifiers().put(modifier, value);
-                break;
+            case ADDITIVE, MULTIPLICATIVE ->
+                    modifiers.getModifiers().put(modifier, modifiers.getModifiers().getOrDefault(modifier, 0d) + NumbersUtils.doubleOrDefault(value));
+            case CONSTANT -> modifiers.getModifiers().put(modifier, value);
         }
     }
 
     public static Double sumModifiers(Modifier modifier, List<Double> values) {
-        switch (modifier.getType()) {
-            case ADDITIVE:
-            case MULTIPLICATIVE:
-                return values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).sum();
-            case CONSTANT:
-                return values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).max().isPresent()
-                       ? values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).max().getAsDouble() : null;
-        }
+        return switch (modifier.getType()) {
+            case ADDITIVE, MULTIPLICATIVE -> values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).sum();
+            case CONSTANT -> values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).max().isPresent()
+                             ? values.stream().filter(Objects::nonNull).mapToDouble(Double::doubleValue).max().getAsDouble() : null;
+            default -> null;
+        };
 
-        return null;
     }
 
     public static Modifiers scaleTax(SaveProvince province, Modifiers modifiers) {

@@ -7,16 +7,7 @@ import fr.osallek.eu4parser.model.game.StateEdict;
 
 import java.time.LocalDate;
 
-public class Edict {
-
-    private final Game game;
-
-    private final ClausewitzItem item;
-
-    public Edict(ClausewitzItem item, Game game) {
-        this.game = game;
-        this.item = item;
-    }
+public record Edict(ClausewitzItem item, Game game) {
 
     public StateEdict getWhich() {
         return this.game.getStateEdict(ClausewitzUtils.removeQuotes(this.item.getVarAsString("which")));

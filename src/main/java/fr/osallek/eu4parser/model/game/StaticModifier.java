@@ -37,11 +37,9 @@ public class StaticModifier extends GameModifier {
             return true;
         }
 
-        if (!(o instanceof StaticModifier)) {
+        if (!(o instanceof StaticModifier staticModifier)) {
             return false;
         }
-
-        StaticModifier staticModifier = (StaticModifier) o;
 
         return Objects.equals(getName(), staticModifier.getName());
     }

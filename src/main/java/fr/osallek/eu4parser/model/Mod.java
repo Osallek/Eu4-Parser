@@ -4,11 +4,9 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
-import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.LauncherSettings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,20 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-public class Mod {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Mod.class);
-
-    private final File file;
-
-    private final ClausewitzItem item;
-
-    public Mod(File file, ClausewitzItem item) {
-        this.file = file;
-        this.item = item;
-    }
+public record Mod(File file, ClausewitzItem item, LauncherSettings launcherSettings) {
 
     public String getName() {
         return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
@@ -74,7 +60,7 @@ public class Mod {
     }
 
     public Path getPath() {
-        return Path.of(getPathString()).isAbsolute() ? Path.of(getPathString()) : Eu4Utils.EU4_DOCUMENTS_FOLDER.toPath().resolve(getPathString());
+        return Path.of(getPathString()).isAbsolute() ? Path.of(getPathString()) : this.launcherSettings.getGameDataPath().resolve(getPathString());
     }
 
     public void setPath(Path path) {
@@ -90,7 +76,7 @@ public class Mod {
     }
 
     public Path getArchive() {
-        return Path.of(getArchiveString()).isAbsolute() ? Path.of(getArchiveString()) : Eu4Utils.EU4_DOCUMENTS_FOLDER.toPath().resolve(getArchiveString());
+        return Path.of(getArchiveString()).isAbsolute() ? Path.of(getArchiveString()) : this.launcherSettings.getGameDataPath().resolve(getArchiveString());
     }
 
     public void setArchive(Path archive) {
@@ -108,14 +94,14 @@ public class Mod {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).collect(Collectors.toList());
+        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).toList();
     }
 
     public void setTags(List<String> tags) {
         if (CollectionUtils.isEmpty(tags)) {
             this.item.removeList("tags");
         } else {
-            tags = tags.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+            tags = tags.stream().map(ClausewitzUtils::addQuotes).toList();
             ClausewitzList list = this.item.getList("tags");
 
             if (list == null) {
@@ -134,14 +120,14 @@ public class Mod {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).collect(Collectors.toList());
+        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).toList();
     }
 
     public void setDependencies(List<String> dependencies) {
         if (CollectionUtils.isEmpty(dependencies)) {
             this.item.removeList("dependencies");
         } else {
-            dependencies = dependencies.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+            dependencies = dependencies.stream().map(ClausewitzUtils::addQuotes).toList();
             ClausewitzList list = this.item.getList("dependencies");
 
             if (list == null) {
@@ -154,11 +140,11 @@ public class Mod {
     }
 
     public List<String> getReplacePath() {
-        return this.item.getVarsAsStrings("replace_path").stream().map(ClausewitzUtils::removeQuotes).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("replace_path").stream().map(ClausewitzUtils::removeQuotes).toList();
     }
 
     public void setReplacePath(List<String> replacePath) {
-        replacePath = replacePath.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+        replacePath = replacePath.stream().map(ClausewitzUtils::addQuotes).toList();
         this.item.removeVariables("replace_path");
 
         replacePath.forEach(s -> this.item.addVariable("replace_path", ClausewitzUtils.addQuotes(s)));
@@ -174,10 +160,6 @@ public class Mod {
         } else {
             this.item.setVariable("picture", ClausewitzUtils.addQuotes(picture));
         }
-    }
-
-    public File getFile() {
-        return file;
     }
 
     public ModType getType() {

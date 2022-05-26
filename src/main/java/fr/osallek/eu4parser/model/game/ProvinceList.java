@@ -96,13 +96,11 @@ public class ProvinceList extends Nodded {
             return true;
         }
 
-        if (!(o instanceof ProvinceList)) {
+        if (!(o instanceof ProvinceList provinceList)) {
             return false;
         }
 
-        ProvinceList area = (ProvinceList) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), provinceList.getName());
     }
 
     @Override

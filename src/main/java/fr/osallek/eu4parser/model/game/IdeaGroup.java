@@ -98,11 +98,9 @@ public class IdeaGroup {
             return true;
         }
 
-        if (!(o instanceof IdeaGroup)) {
+        if (!(o instanceof IdeaGroup ideaGroup)) {
             return false;
         }
-
-        IdeaGroup ideaGroup = (IdeaGroup) o;
 
         return Objects.equals(getName(), ideaGroup.getName());
     }

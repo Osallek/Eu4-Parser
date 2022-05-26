@@ -75,11 +75,9 @@ public class Event {
             return true;
         }
 
-        if (!(o instanceof Event)) {
+        if (!(o instanceof Event event)) {
             return false;
         }
-
-        Event event = (Event) o;
 
         return Objects.equals(getId(), event.getId());
     }

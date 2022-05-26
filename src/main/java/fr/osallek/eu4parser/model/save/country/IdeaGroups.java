@@ -10,16 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class IdeaGroups {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public IdeaGroups(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record IdeaGroups(ClausewitzItem item, Save save) {
 
     public Map<IdeaGroup, Integer> getIdeaGroups() {
         return this.item.getVariables()

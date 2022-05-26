@@ -5,13 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
 
-public class OldEmperor {
-
-    private final ClausewitzItem item;
-
-    public OldEmperor(ClausewitzItem item) {
-        this.item = item;
-    }
+public record OldEmperor(ClausewitzItem item) {
 
     public Integer getId() {
         return this.item.getVarAsInt("id");

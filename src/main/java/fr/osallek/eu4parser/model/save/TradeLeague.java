@@ -9,18 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
-public class TradeLeague {
+public record TradeLeague(ClausewitzItem item, Save save) {
 
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public TradeLeague(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+    private static final Random RANDOM = new Random();
 
     public Integer getId() {
         return this.item.getVarAsInt("id");
@@ -33,7 +25,7 @@ public class TradeLeague {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public boolean hasMember(SaveCountry country) {
@@ -60,11 +52,11 @@ public class TradeLeague {
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String... members) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "trade_league", parent.getOrder() + 1);
-        toItem.addVariable("id", new Random().nextInt(Integer.MAX_VALUE));
+        toItem.addVariable("id", RANDOM.nextInt(Integer.MAX_VALUE));
         toItem.addList("members", Arrays.stream(members)
                                         .map(ClausewitzUtils::addQuotes)
                                         .filter(s -> s.length() == 5)
-                                        .collect(Collectors.toList()));
+                                        .toList());
         parent.addChild(toItem);
 
         return toItem;

@@ -4,7 +4,6 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ActiveAgendaScope {
 
@@ -25,7 +24,7 @@ public class ActiveAgendaScope {
     }
 
     public SaveCountry getCountry() {
-        return this.activeAgenda.getCountry().getSave().getCountry(this.item.getVarAsString("country"));
+        return this.activeAgenda.country().getSave().getCountry(this.item.getVarAsString("country"));
     }
 
     public void setCountry(SaveCountry country) {
@@ -42,6 +41,6 @@ public class ActiveAgendaScope {
 
     private void refreshAttributes() {
         List<ClausewitzItem> children = this.item.getChildren("saved_event_target");
-        this.savedEventTargets = children.stream().map(child -> new SavedEventTarget(child, this)).collect(Collectors.toList());
+        this.savedEventTargets = children.stream().map(child -> new SavedEventTarget(child, this)).toList();
     }
 }

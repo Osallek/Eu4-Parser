@@ -6,16 +6,7 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.util.List;
 
-public class FlagShip {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public FlagShip(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record FlagShip(ClausewitzItem item, Save save) {
 
     public String getName() {
         return this.item.getVarAsString("name");

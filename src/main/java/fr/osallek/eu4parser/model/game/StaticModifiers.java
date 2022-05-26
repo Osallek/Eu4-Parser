@@ -552,10 +552,10 @@ public enum StaticModifiers {
 
         APPLIED_TO_COUNTRY = Arrays.stream(StaticModifiers.values())
                                    .filter(staticModifiers -> staticModifiers.applyToCountry != null)
-                                   .collect(Collectors.toList());
+                                   .toList();
         APPLIED_TO_PROVINCE = Arrays.stream(StaticModifiers.values())
                                     .filter(staticModifiers -> staticModifiers.applyToProvince != null)
-                                    .collect(Collectors.toList());
+                                    .toList();
     }
 
     StaticModifiers(Condition trigger, BiFunction<SaveCountry, StaticModifiers, Modifiers> applyToCountry,
@@ -581,7 +581,7 @@ public enum StaticModifiers {
                                                              .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
                                                              .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers)
                                                                                                                    .getModifier(modifier))
-                                                             .collect(Collectors.toList()));
+                                                             .toList());
     }
 
     public static Double applyToModifiersProvince(SaveProvince province, Modifier modifier) {
@@ -591,6 +591,6 @@ public enum StaticModifiers {
                                                                         .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
                                                                         .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers)
                                                                                                                                .getModifier(modifier))
-                                                                        .collect(Collectors.toList()));
+                                                                        .toList());
     }
 }

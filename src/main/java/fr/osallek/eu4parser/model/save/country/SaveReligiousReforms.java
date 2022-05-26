@@ -6,7 +6,6 @@ import fr.osallek.eu4parser.model.game.ReligiousReform;
 import fr.osallek.eu4parser.model.game.ReligiousReforms;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SaveReligiousReforms {
 
@@ -29,7 +28,7 @@ public class SaveReligiousReforms {
                         .stream()
                         .filter(i -> i == 1)
                         .map(i -> getReligiousReforms().getReforms().get(i))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public void addAdoptedReform(ReligiousReform religiousReform) {

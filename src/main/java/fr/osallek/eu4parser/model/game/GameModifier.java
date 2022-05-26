@@ -38,11 +38,9 @@ public abstract class GameModifier {
             return true;
         }
 
-        if (!(o instanceof GameModifier)) {
+        if (!(o instanceof GameModifier gameModifier)) {
             return false;
         }
-
-        GameModifier gameModifier = (GameModifier) o;
 
         return Objects.equals(getName(), gameModifier.getName());
     }

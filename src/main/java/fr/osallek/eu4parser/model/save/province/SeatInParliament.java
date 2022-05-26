@@ -2,13 +2,7 @@ package fr.osallek.eu4parser.model.save.province;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-public class SeatInParliament {
-
-    protected final ClausewitzItem item;
-
-    public SeatInParliament(ClausewitzItem item) {
-        this.item = item;
-    }
+public record SeatInParliament(ClausewitzItem item) {
 
     public Boolean getBack() {
         return this.item.getVarAsBool("back");

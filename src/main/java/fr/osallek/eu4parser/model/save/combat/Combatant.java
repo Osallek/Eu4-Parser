@@ -7,7 +7,6 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class Combatant {
 
@@ -17,7 +16,7 @@ public abstract class Combatant {
 
     protected Id unit;
 
-    public Combatant(ClausewitzItem item, Save save) {
+    protected Combatant(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
         refreshAttributes();
@@ -48,7 +47,7 @@ public abstract class Combatant {
     }
 
     public List<SaveCountry> getParticipatingCountries() {
-        return this.item.getVarsAsStrings("participating_country").stream().map(this.save::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("participating_country").stream().map(this.save::getCountry).toList();
     }
 
     public boolean arranged() {

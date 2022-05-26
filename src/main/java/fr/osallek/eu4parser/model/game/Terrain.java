@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Terrain extends Nodded {
 
@@ -37,7 +36,7 @@ public class Terrain extends Nodded {
 
     public List<Color> getFileColors() {
         ClausewitzList list = this.item.getList("color");
-        return list == null ? null : list.getValuesAsInt().stream().map(this.fileColors::get).collect(Collectors.toList());
+        return list == null ? null : list.getValuesAsInt().stream().map(this.fileColors::get).toList();
     }
 
     public void setColor(List<Integer> indexes) {
@@ -70,13 +69,11 @@ public class Terrain extends Nodded {
             return true;
         }
 
-        if (!(o instanceof Terrain)) {
+        if (!(o instanceof Terrain terrain)) {
             return false;
         }
 
-        Terrain area = (Terrain) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), terrain.getName());
     }
 
     @Override

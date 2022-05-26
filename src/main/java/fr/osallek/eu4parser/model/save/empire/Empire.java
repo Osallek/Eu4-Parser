@@ -9,6 +9,7 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -16,6 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class Empire {
+
+    protected static final Random RANDOM = new Random();
 
     protected final ClausewitzItem item;
 
@@ -25,14 +28,14 @@ public abstract class Empire {
 
     protected Map<String, ImperialReform> imperialReforms;
 
-    public Empire(ClausewitzItem item, Save save) {
+    protected Empire(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
         this.imperialReforms = this.save.getGame()
                                         .getImperialReforms()
                                         .stream()
                                         .filter(imperialReform -> getId().equals(imperialReform.getEmpire()))
-                                        .filter(imperialReform -> this.save.getDlcEnabled().containsAll(imperialReform.dlcRequired()))
+                                        .filter(imperialReform -> new HashSet<>(this.save.getDlcEnabled()).containsAll(imperialReform.dlcRequired()))
                                         .filter(imperialReform -> Collections.disjoint(this.save.getDlcEnabled(), imperialReform.dlcRequiredNot()))
                                         .collect(Collectors.toMap(ImperialReform::getName, Function.identity()));
         refreshAttributes();
@@ -99,15 +102,15 @@ public abstract class Empire {
     }
 
     public List<ImperialReform> getMainLineReforms() {
-        return this.imperialReforms.values().stream().filter(ImperialReform::isMainLine).sorted().collect(Collectors.toList());
+        return this.imperialReforms.values().stream().filter(ImperialReform::isMainLine).sorted().toList();
     }
 
     public List<ImperialReform> getLeftBranchReforms() {
-        return this.imperialReforms.values().stream().filter(ImperialReform::isLeftBranch).sorted().collect(Collectors.toList());
+        return this.imperialReforms.values().stream().filter(ImperialReform::isLeftBranch).sorted().toList();
     }
 
     public List<ImperialReform> getRightBranchReforms() {
-        return this.imperialReforms.values().stream().filter(ImperialReform::isRightBranch).sorted().collect(Collectors.toList());
+        return this.imperialReforms.values().stream().filter(ImperialReform::isRightBranch).sorted().toList();
     }
 
     public List<ImperialReform> getPassedReforms() {
@@ -120,34 +123,34 @@ public abstract class Empire {
                         .map(ClausewitzUtils::removeQuotes)
                         .map(this.imperialReforms::get)
                         .sorted()
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public List<ImperialReform> getMainLinePassedReforms() {
-        return getPassedReforms().stream().filter(ImperialReform::isMainLine).sorted().collect(Collectors.toList());
+        return getPassedReforms().stream().filter(ImperialReform::isMainLine).sorted().toList();
     }
 
 
     public List<ImperialReform> getMainLineNotPassedReforms() {
-        return getMainLineReforms().stream().filter(reform -> !getPassedReforms().contains(reform)).sorted().collect(Collectors.toList());
+        return getMainLineReforms().stream().filter(reform -> !getPassedReforms().contains(reform)).sorted().toList();
     }
 
     public List<ImperialReform> getLeftBranchPassedReforms() {
-        return getPassedReforms().stream().filter(ImperialReform::isLeftBranch).sorted().collect(Collectors.toList());
+        return getPassedReforms().stream().filter(ImperialReform::isLeftBranch).sorted().toList();
     }
 
 
     public List<ImperialReform> getLeftBranchNotPassedReforms() {
-        return getLeftBranchReforms().stream().filter(reform -> !getPassedReforms().contains(reform)).sorted().collect(Collectors.toList());
+        return getLeftBranchReforms().stream().filter(reform -> !getPassedReforms().contains(reform)).sorted().toList();
     }
 
     public List<ImperialReform> getRightBranchPassedReforms() {
-        return getPassedReforms().stream().filter(ImperialReform::isRightBranch).sorted().collect(Collectors.toList());
+        return getPassedReforms().stream().filter(ImperialReform::isRightBranch).sorted().toList();
     }
 
 
     public List<ImperialReform> getRightBranchNotPassedReforms() {
-        return getRightBranchReforms().stream().filter(reform -> !getPassedReforms().contains(reform)).sorted().collect(Collectors.toList());
+        return getRightBranchReforms().stream().filter(reform -> !getPassedReforms().contains(reform)).sorted().toList();
     }
 
     public void addPassedReform(ImperialReform reform) {
@@ -193,7 +196,7 @@ public abstract class Empire {
     }
 
     public void addOldEmperor(SaveCountry country) {
-        String id = Integer.toString(getOldEmperors().stream().map(OldEmperor::getId).max(Integer::compareTo).orElse(new Random().nextInt(9000)));
+        String id = Integer.toString(getOldEmperors().stream().map(OldEmperor::getId).max(Integer::compareTo).orElse(RANDOM.nextInt(9000)));
         OldEmperor.addToItem(this.item, id, country.getTag(), this.save.getDate());
         refreshAttributes();
     }
@@ -204,6 +207,6 @@ public abstract class Empire {
     }
 
     protected void refreshAttributes() {
-        this.oldEmperors = this.item.getChildren("old_emperor").stream().map(OldEmperor::new).collect(Collectors.toList());
+        this.oldEmperors = this.item.getChildren("old_emperor").stream().map(OldEmperor::new).toList();
     }
 }

@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ImperialReform implements Comparable<ImperialReform> {
 
@@ -48,7 +47,7 @@ public class ImperialReform implements Comparable<ImperialReform> {
                         .filter(condition -> "NOT".equals(condition.getName()))
                         .map(condition -> condition.getConditions().get("has_dlc"))
                         .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     public String getEmpire() {

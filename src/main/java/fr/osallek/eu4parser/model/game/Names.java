@@ -31,11 +31,9 @@ public class Names {
             return true;
         }
 
-        if (!(o instanceof Names)) {
+        if (!(o instanceof Names names)) {
             return false;
         }
-
-        Names names = (Names) o;
 
         return Objects.equals(getName(), names.getName());
     }

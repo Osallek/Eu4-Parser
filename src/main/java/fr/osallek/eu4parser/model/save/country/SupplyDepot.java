@@ -7,16 +7,7 @@ import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.time.LocalDate;
 
-public class SupplyDepot {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public SupplyDepot(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record SupplyDepot(ClausewitzItem item, Save save) {
 
     public SaveProvince getProvince() {
         return this.save.getProvince(this.item.getVarAsInt("province"));

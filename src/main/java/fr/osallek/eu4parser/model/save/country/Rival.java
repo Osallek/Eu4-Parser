@@ -6,16 +6,7 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
 
-public class Rival {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public Rival(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record Rival(ClausewitzItem item, Save save) {
 
     public String getRivalTag() {
         return this.item.getVarAsString("country");

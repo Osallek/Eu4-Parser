@@ -25,11 +25,9 @@ public class EventModifier extends GameModifier {
             return true;
         }
 
-        if (!(o instanceof EventModifier)) {
+        if (!(o instanceof EventModifier eventModifier)) {
             return false;
         }
-
-        EventModifier eventModifier = (EventModifier) o;
 
         return Objects.equals(getName(), eventModifier.getName());
     }

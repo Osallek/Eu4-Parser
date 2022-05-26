@@ -4,7 +4,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Id;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Army extends AbstractArmy {
 
@@ -105,6 +104,6 @@ public class Army extends AbstractArmy {
         List<ClausewitzItem> regimentsItems = this.item.getChildren("regiment");
         this.regiments = regimentsItems.stream()
                                        .map(regimentItem -> new Regiment(regimentItem, this.country.getSave(), this))
-                                       .collect(Collectors.toList());
+                                       .toList();
     }
 }

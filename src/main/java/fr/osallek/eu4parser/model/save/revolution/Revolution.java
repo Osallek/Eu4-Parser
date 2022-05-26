@@ -8,18 +8,8 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class Revolution {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    public Revolution(ClausewitzItem item, Save save) {
-        this.save = save;
-        this.item = item;
-    }
+public record Revolution(ClausewitzItem item, Save save) {
 
     public SaveCountry getRevolutionTarget() {
         return this.save.getCountry(this.item.getVarAsString("revolution_target"));
@@ -84,7 +74,7 @@ public class Revolution {
     }
 
     public List<SaveCountry> getPastTargets() {
-        return this.item.getVarsAsStrings("past_targets").stream().map(this.save::getCountry).collect(Collectors.toList());
+        return this.item.getVarsAsStrings("past_targets").stream().map(this.save::getCountry).toList();
     }
 
     public void addPastTarget(SaveCountry country) {

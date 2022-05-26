@@ -4,7 +4,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CultureGroup extends AbstractCulture {
 
@@ -31,7 +30,7 @@ public class CultureGroup extends AbstractCulture {
                                          && !"female_names".equals(child.getName())
                                          && !"dynasty_names".equals(child.getName()))
                         .map(child -> new Culture(child, this))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     @Override

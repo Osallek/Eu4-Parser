@@ -207,7 +207,7 @@ public class Eu4MapUtils {
         borders.values().forEach(polygons -> polygons.removeIf(polygon -> polygon.npoints <= 0));
         borders.values().removeIf(CollectionUtils::isEmpty);
 
-        List<Polygon> listBorders = borders.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        List<Polygon> listBorders = borders.values().stream().flatMap(Collection::stream).toList();
 
         //Sort to have "classic" provinces last for drawing purposes
         return borders.entrySet()

@@ -125,7 +125,7 @@ public class SaveArea {
     }
 
     private void refreshAttributes() {
-        this.provinces = this.save.getGame().getArea(getName()).getProvinces().stream().map(this.save::getProvince).collect(Collectors.toList());
+        this.provinces = this.save.getGame().getArea(getName()).getProvinces().stream().map(this.save::getProvince).toList();
         ClausewitzItem stateItem = this.item.getChild("state");
 
         if (stateItem != null) {
@@ -146,7 +146,7 @@ public class SaveArea {
             this.supplyDepots = supplyDepotsItem.getChildren()
                                                 .stream()
                                                 .map(child -> new SupplyDepot(child, this.save))
-                                                .collect(Collectors.toList());
+                                                .toList();
         }
     }
 

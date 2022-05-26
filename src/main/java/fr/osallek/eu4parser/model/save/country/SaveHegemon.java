@@ -7,23 +7,7 @@ import fr.osallek.eu4parser.model.game.Modifiers;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.save.Save;
 
-public class SaveHegemon {
-
-    private final Save save;
-
-    private final ClausewitzItem item;
-
-    private final Hegemon hegemon;
-
-    public SaveHegemon(ClausewitzItem item, Save save, Hegemon hegemon) {
-        this.save = save;
-        this.item = item;
-        this.hegemon = hegemon;
-    }
-
-    public Hegemon getHegemon() {
-        return hegemon;
-    }
+public record SaveHegemon(ClausewitzItem item, Save save, Hegemon hegemon) {
 
     public SaveCountry getCountry() {
         return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("country")));
@@ -43,8 +27,8 @@ public class SaveHegemon {
     }
 
     public Modifiers getModifiers() {
-        return ModifiersUtils.sumModifiers(getHegemon().getBase(),
-                                           ModifiersUtils.scaleModifiers(getHegemon().getScale(), getProgress() / 100),
-                                           getProgress() >= 100d ? getHegemon().getMax() : null);
+        return ModifiersUtils.sumModifiers(hegemon().getBase(),
+                                           ModifiersUtils.scaleModifiers(hegemon().getScale(), getProgress() / 100),
+                                           getProgress() >= 100d ? hegemon().getMax() : null);
     }
 }

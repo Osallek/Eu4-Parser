@@ -4,13 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
 
-public class HasDeclaredWar {
-
-    private final ClausewitzItem item;
-
-    public HasDeclaredWar(ClausewitzItem item) {
-        this.item = item;
-    }
+public record HasDeclaredWar(ClausewitzItem item) {
 
     public LocalDate getDate() {
         return this.item.getVarAsDate("date");

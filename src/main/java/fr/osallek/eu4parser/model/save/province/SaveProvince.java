@@ -57,7 +57,7 @@ import java.util.stream.Stream;
 
 public class SaveProvince extends Province {
 
-    //TODO DECOLONIZE PROVINCE: REMOVE: IS_CITY, CLAIMS, CORES, CONTROLLER, OWNER (add natives), TRADE_GOODS = unknown
+    //Todo DECOLONIZE PROVINCE: REMOVE: IS_CITY, CLAIMS, CORES, CONTROLLER, OWNER (add natives), TRADE_GOODS = unknown
 
     private final ClausewitzItem item;
 
@@ -270,7 +270,7 @@ public class SaveProvince extends Province {
     }
 
     public List<SaveCountry> getCores() {
-        return getCoresTags().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return getCoresTags().stream().map(this.save::getCountry).toList();
     }
 
     public void setCores(List<SaveCountry> countries) {
@@ -311,7 +311,7 @@ public class SaveProvince extends Province {
     }
 
     public List<SaveCountry> getClaims() {
-        return getClaimsTags().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return getClaimsTags().stream().map(this.save::getCountry).toList();
     }
 
     public void setClaims(List<SaveCountry> countries) {
@@ -374,7 +374,7 @@ public class SaveProvince extends Province {
                                                                     .map(Army::getRegiments)
                                                                     .flatMap(Collection::stream)
                                                                     .filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType()))
-                                                                    .collect(Collectors.toList());
+                                                                    .toList();
     }
 
     public List<Regiment> getCavalry() {
@@ -382,7 +382,7 @@ public class SaveProvince extends Province {
                                                                     .map(Army::getRegiments)
                                                                     .flatMap(Collection::stream)
                                                                     .filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType()))
-                                                                    .collect(Collectors.toList());
+                                                                    .toList();
     }
 
     public List<Regiment> getArtillery() {
@@ -390,7 +390,7 @@ public class SaveProvince extends Province {
                                                                     .map(Army::getRegiments)
                                                                     .flatMap(Collection::stream)
                                                                     .filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType()))
-                                                                    .collect(Collectors.toList());
+                                                                    .toList();
     }
 
     public List<Ship> getHeavyShips() {
@@ -398,7 +398,7 @@ public class SaveProvince extends Province {
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
                                                                     .filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType()))
-                                                                    .collect(Collectors.toList());
+                                                                    .toList();
     }
 
     public List<Ship> getLightShips() {
@@ -406,7 +406,7 @@ public class SaveProvince extends Province {
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
                                                                     .filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType()))
-                                                                    .collect(Collectors.toList());
+                                                                    .toList();
     }
 
     public List<Ship> getGalleys() {
@@ -414,7 +414,7 @@ public class SaveProvince extends Province {
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
                                                                     .filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType()))
-                                                                    .collect(Collectors.toList());
+                                                                    .toList();
     }
 
     public List<Ship> getTransports() {
@@ -422,19 +422,19 @@ public class SaveProvince extends Province {
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
                                                                     .filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType()))
-                                                                    .collect(Collectors.toList());
+                                                                    .toList();
     }
 
     public List<AbstractRegiment> getUnits() {
         if (this.navies == null && this.armies == null) {
             return new ArrayList<>();
         } else if (this.navies == null) {
-            return this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream).collect(Collectors.toList());
+            return this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream).toList();
         } else if (this.armies == null) {
-            return this.navies.stream().map(Navy::getShips).flatMap(Collection::stream).collect(Collectors.toList());
+            return this.navies.stream().map(Navy::getShips).flatMap(Collection::stream).toList();
         } else {
             return Stream.concat(this.navies.stream().map(Navy::getShips).flatMap(Collection::stream),
-                                 this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream)).collect(Collectors.toList());
+                                 this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream)).toList();
         }
     }
 
@@ -763,7 +763,7 @@ public class SaveProvince extends Province {
                                            .map(building -> new ProvinceBuilding(building,
                                                                                  this.save.getGame()
                                                                                           .getBuilding(building.getName())))
-                                           .collect(Collectors.toList());
+                                           .toList();
             this.buildingsUpdated = true;
         }
 
@@ -862,7 +862,7 @@ public class SaveProvince extends Province {
         ClausewitzList list = this.item.getList("great_projects");
 
         if (list != null) {
-            return list.getValues().stream().map(s -> this.save.getGame().getGreatProject(s)).filter(Objects::nonNull).collect(Collectors.toList());
+            return list.getValues().stream().map(s -> this.save.getGame().getGreatProject(s)).filter(Objects::nonNull).toList();
         } else {
             return new ArrayList<>();
         }
@@ -891,7 +891,7 @@ public class SaveProvince extends Province {
             return new ArrayList<>();
         }
 
-        return list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public void setDiscoveredBy(List<SaveCountry> countries) {
@@ -1289,7 +1289,7 @@ public class SaveProvince extends Province {
                                       .filter(Objects::nonNull)
                                       .filter(m -> m.hasModifier(modifier))
                                       .map(m -> m.getModifier(modifier))
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
 
         if (MapUtils.isNotEmpty(getModifiers())) {
@@ -1298,7 +1298,7 @@ public class SaveProvince extends Province {
                                       .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
                                       .map(m -> m.getModifiers(this, modifier))
                                       .filter(Objects::nonNull)
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
 
         if (getCulture() != null && getCulture().getProvinceModifiers().hasModifier(modifier)) {
@@ -1317,7 +1317,7 @@ public class SaveProvince extends Province {
                                  .filter(Objects::nonNull)
                                  .filter(m -> m.hasModifier(modifier))
                                  .map(m -> m.getModifier(modifier))
-                                 .collect(Collectors.toList()));
+                                 .toList());
         }
 
         if (getOwner() != null && getOwner().isAlive() && !this.save.getCelestialEmpire().dismantled()
@@ -1329,7 +1329,7 @@ public class SaveProvince extends Province {
                                  .filter(Objects::nonNull)
                                  .filter(m -> m.hasModifier(modifier))
                                  .map(m -> m.getModifier(modifier))
-                                 .collect(Collectors.toList()));
+                                 .toList());
         }
 
         if (CollectionUtils.isNotEmpty(getGreatProjects())) {
@@ -1338,7 +1338,7 @@ public class SaveProvince extends Province {
                                           .filter(Objects::nonNull)
                                           .filter(m -> m.hasModifier(modifier))
                                           .map(m -> m.getModifier(modifier))
-                                          .collect(Collectors.toList()));
+                                          .toList());
         }
 
         if (getSaveArea() != null && getOwner() != null && getOwner().isAlive()) {
@@ -1367,7 +1367,7 @@ public class SaveProvince extends Province {
                                       .filter(Objects::nonNull)
                                       .filter(m -> m.hasModifier(modifier))
                                       .map(m -> m.getModifier(modifier))
-                                      .collect(Collectors.toList()));
+                                      .toList());
 
                 if (BooleanUtils.toBoolean(activeTradeCompany())) {
                     list.addAll(investment.getInvestments()
@@ -1376,7 +1376,7 @@ public class SaveProvince extends Province {
                                           .filter(Objects::nonNull)
                                           .filter(m -> m.hasModifier(modifier))
                                           .map(m -> m.getModifier(modifier))
-                                          .collect(Collectors.toList()));
+                                          .toList());
 
                     getOwner().getTradeCompanies()
                               .stream()
@@ -1395,7 +1395,7 @@ public class SaveProvince extends Province {
                                                                        .filter(Objects::nonNull)
                                                                        .filter(m -> m.hasModifier(modifier))
                                                                        .map(m -> m.getModifier(modifier))
-                                                                       .collect(Collectors.toList())));
+                                                                       .toList()));
                 }
             }
 

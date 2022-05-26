@@ -104,11 +104,11 @@ public class Country {
                                                                                   .getValues()
                                                                                   .stream()
                                                                                   .map(this.game::getIdeaGroup)
-                                                                                  .collect(Collectors.toList()) : null;
+                                                                                  .toList() : null;
     }
 
     public void setHistoricalIdeaGroups(Collection<IdeaGroup> historicalIdeaGroups) {
-        setHistoricalIdeaGroups(historicalIdeaGroups.stream().map(IdeaGroup::getName).collect(Collectors.toList()));
+        setHistoricalIdeaGroups(historicalIdeaGroups.stream().map(IdeaGroup::getName).toList());
     }
 
     public void setHistoricalIdeaGroups(List<String> historicalIdeaGroups) {
@@ -126,7 +126,7 @@ public class Country {
                                                                           .getVariables()
                                                                           .stream()
                                                                           .map(variable -> Pair.of(variable.getName(), variable.getAsInt()))
-                                                                          .collect(Collectors.toList())
+                                                                          .toList()
                                                          : null;
     }
 
@@ -147,11 +147,11 @@ public class Country {
                                                                             .getValues()
                                                                             .stream()
                                                                             .map(this.game::getUnit)
-                                                                            .collect(Collectors.toList()) : null;
+                                                                            .toList() : null;
     }
 
     public void setHistoricalUnits(Collection<Unit> historicalUnits) {
-        setHistoricalUnits(historicalUnits.stream().map(Unit::getName).collect(Collectors.toList()));
+        setHistoricalUnits(historicalUnits.stream().map(Unit::getName).toList());
     }
 
     public void setHistoricalUnits(List<String> historicalUnits) {
@@ -169,13 +169,13 @@ public class Country {
                                                                         .getValues()
                                                                         .stream()
                                                                         .map(ClausewitzUtils::removeQuotes)
-                                                                        .collect(Collectors.toList()) : null;
+                                                                        .toList() : null;
     }
 
     public void setLeaderNames(List<String> leaderNames) {
         ClausewitzList list = this.commonItem.getList("leader_names");
 
-        leaderNames = leaderNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+        leaderNames = leaderNames.stream().map(ClausewitzUtils::addQuotes).toList();
 
         if (list == null) {
             this.commonItem.addList("leader_names", leaderNames);
@@ -189,13 +189,13 @@ public class Country {
                                                                       .getValues()
                                                                       .stream()
                                                                       .map(ClausewitzUtils::removeQuotes)
-                                                                      .collect(Collectors.toList()) : null;
+                                                                      .toList() : null;
     }
 
     public void setShipNames(List<String> shipNames) {
         ClausewitzList list = this.commonItem.getList("ship_names");
 
-        shipNames = shipNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+        shipNames = shipNames.stream().map(ClausewitzUtils::addQuotes).toList();
 
         if (list == null) {
             this.commonItem.addList("ship_names", shipNames);
@@ -209,13 +209,13 @@ public class Country {
                                                                       .getValues()
                                                                       .stream()
                                                                       .map(ClausewitzUtils::removeQuotes)
-                                                                      .collect(Collectors.toList()) : null;
+                                                                      .toList() : null;
     }
 
     public void setArmyNames(List<String> armyNames) {
         ClausewitzList list = this.commonItem.getList("army_names");
 
-        armyNames = armyNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+        armyNames = armyNames.stream().map(ClausewitzUtils::addQuotes).toList();
 
         if (list == null) {
             this.commonItem.addList("army_names", armyNames);
@@ -229,13 +229,13 @@ public class Country {
                                                                        .getValues()
                                                                        .stream()
                                                                        .map(ClausewitzUtils::removeQuotes)
-                                                                       .collect(Collectors.toList()) : null;
+                                                                       .toList() : null;
     }
 
     public void setFleetNames(List<String> fleetNames) {
         ClausewitzList list = this.commonItem.getList("fleet_names");
 
-        fleetNames = fleetNames.stream().map(ClausewitzUtils::addQuotes).collect(Collectors.toList());
+        fleetNames = fleetNames.stream().map(ClausewitzUtils::addQuotes).toList();
 
         if (list == null) {
             this.commonItem.addList("fleet_names", fleetNames);
@@ -314,11 +314,9 @@ public class Country {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Country)) {
+        if (!(o instanceof Country province)) {
             return false;
         }
-
-        Country province = (Country) o;
 
         return Objects.equals(tag, province.tag);
     }

@@ -113,11 +113,9 @@ public class RulerPersonality {
             return true;
         }
 
-        if (!(o instanceof RulerPersonality)) {
+        if (!(o instanceof RulerPersonality personality)) {
             return false;
         }
-
-        RulerPersonality personality = (RulerPersonality) o;
 
         return Objects.equals(getName(), personality.getName());
     }

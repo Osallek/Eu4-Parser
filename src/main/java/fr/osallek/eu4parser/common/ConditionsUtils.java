@@ -2196,14 +2196,14 @@ public class ConditionsUtils {
                     if (CollectionUtils.isNotEmpty(attackers)
                         && activeWar.getAttackers()
                                     .keySet()
-                                    .containsAll(attackers.stream().map(s -> root.getSave().getCountry(s)).collect(Collectors.toList()))) {
+                                    .containsAll(attackers.stream().map(s -> root.getSave().getCountry(s)).toList())) {
                         return false;
                     }
 
                     if (CollectionUtils.isNotEmpty(defenders)
                         && activeWar.getDefenders()
                                     .keySet()
-                                    .containsAll(defenders.stream().map(s -> root.getSave().getCountry(s)).collect(Collectors.toList()))) {
+                                    .containsAll(defenders.stream().map(s -> root.getSave().getCountry(s)).toList())) {
                         return false;
                     }
 
@@ -2292,7 +2292,7 @@ public class ConditionsUtils {
             case "owns_all_provinces":
                 List<SaveCountry> countries = new ArrayList<>();
                 countries.add(root);
-                countries.addAll(root.getSubjects().stream().filter(c -> !c.getSubjectType().isVoluntary()).collect(Collectors.toList()));
+                countries.addAll(root.getSubjects().stream().filter(c -> !c.getSubjectType().isVoluntary()).toList());
                 return root.getSave().getProvinces().values().stream().filter(condition::apply).allMatch(province -> countries.contains(province.getOwner()));
             case "production_leader":
                 tradeGood = root.getSave().getGame().getTradeGood(condition.getCondition("trade_goods"));
@@ -3083,7 +3083,7 @@ public class ConditionsUtils {
             case "revolution_target":
                 return province.getSave().getRevolution() != null && province.getSave().getRevolution().getRevolutionTarget() != null &&
                        condition.apply(province.getSave().getRevolution().getRevolutionTarget(), province.getSave().getRevolution().getRevolutionTarget());
-            case "sea_zone": //Todo
+            case "sea_zone": //Todo Refers to the sea province on which the current land province scope has a port.
                 break;
             case "strongest_trade_power":
                 country = province.getSave().getTradeNodes().get(province.getTrade()).getTopPower().entrySet().iterator().next().getKey();

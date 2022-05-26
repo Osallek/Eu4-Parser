@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class MissionsTree extends Nodded {
 
@@ -92,7 +91,7 @@ public class MissionsTree extends Nodded {
         return this.item.getChildrenNot("potential_on_load", "potential")
                         .stream()
                         .map(item1 -> new Mission(item1, game, this))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     @Override
@@ -106,11 +105,9 @@ public class MissionsTree extends Nodded {
             return true;
         }
 
-        if (!(o instanceof MissionsTree)) {
+        if (!(o instanceof MissionsTree missionsTree)) {
             return false;
         }
-
-        MissionsTree missionsTree = (MissionsTree) o;
 
         return Objects.equals(getName(), missionsTree.getName());
     }

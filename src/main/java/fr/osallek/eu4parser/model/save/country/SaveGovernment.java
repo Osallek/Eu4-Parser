@@ -48,7 +48,7 @@ public class SaveGovernment {
                            .map(ClausewitzUtils::removeQuotes)
                            .map(this.game::getGovernmentReform)
                            .filter(Objects::nonNull)
-                           .collect(Collectors.toList());
+                           .toList();
             }
         }
 
@@ -81,7 +81,7 @@ public class SaveGovernment {
                                                                 .stream()
                                                                 .filter(governmentReform -> governmentReform.getPotential() == null
                                                                                             || governmentReform.getPotential().apply(country, country))
-                                                                .collect(Collectors.toList()),
+                                                                .toList(),
                                                   (governmentReforms, governmentReforms2) -> governmentReforms,
                                                   LinkedHashMap::new));
     }
@@ -93,7 +93,7 @@ public class SaveGovernment {
             ClausewitzList list = reformStack.getList("history");
 
             if (list != null) {
-                return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(this.game::getGovernmentReform).collect(Collectors.toList());
+                return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(this.game::getGovernmentReform).toList();
             }
         }
 

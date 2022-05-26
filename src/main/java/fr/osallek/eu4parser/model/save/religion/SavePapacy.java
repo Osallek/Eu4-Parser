@@ -301,7 +301,7 @@ public class SavePapacy {
         ClausewitzList list = this.item.getList("concessions");
         List<Integer> concessionsIds = concessions.stream()
                                                   .map(concession -> concession.endsWith("harsh") ? 1 : 2)
-                                                  .collect(Collectors.toList());
+                                                  .toList();
 
         if (list == null) {
             this.item.addList("concessions", concessionsIds.toArray(new Integer[0]));
@@ -333,25 +333,25 @@ public class SavePapacy {
                                                                                                                 : entry.getKey().getConcilatoryModifiers())
                                                                             .filter(m -> m.hasModifier(modifier))
                                                                             .map(m -> m.getModifier(modifier))
-                                                                            .collect(Collectors.toList()));
+                                                                            .toList());
     }
 
     public List<SaveCountry> getConcilatory() {
         ClausewitzList list = this.item.getList("concilatory");
 
-        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getNeutral() {
         ClausewitzList list = this.item.getList("neutral");
 
-        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getHarsh() {
         ClausewitzList list = this.item.getList("harsh");
 
-        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).collect(Collectors.toList());
+        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).toList();
     }
 
     private void refreshAttributes() {
@@ -359,7 +359,7 @@ public class SavePapacy {
 
         if (activeCardinalsItem != null) {
             List<ClausewitzItem> cardinalsItems = activeCardinalsItem.getChildren("cardinal");
-            this.cardinals = cardinalsItems.stream().map(child -> new Cardinal(child, this.save)).collect(Collectors.toList());
+            this.cardinals = cardinalsItems.stream().map(child -> new Cardinal(child, this.save)).toList();
         }
 
         ClausewitzList claimsList = this.item.getList("colony_claim");
