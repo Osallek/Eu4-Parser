@@ -8,7 +8,6 @@ import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
-
 import java.time.LocalDate;
 
 public class Monarch {
@@ -241,7 +240,7 @@ public class Monarch {
                 this.getCountry().getHistory().getQueen(this.getId().getId()).removePersonality(index);
             }
 
-            if (this.personalities.item.getAllOrdered().isEmpty()) {
+            if (this.personalities.item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
                 refreshAttributes();
             }
@@ -258,7 +257,7 @@ public class Monarch {
                 this.getCountry().getHistory().getQueen(this.getId().getId()).removePersonality(personality);
             }
 
-            if (this.personalities.item.getAllOrdered().isEmpty()) {
+            if (this.personalities.item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
                 refreshAttributes();
             }

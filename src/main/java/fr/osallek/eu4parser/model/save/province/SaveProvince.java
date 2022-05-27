@@ -37,10 +37,6 @@ import fr.osallek.eu4parser.model.save.country.SaveInvestment;
 import fr.osallek.eu4parser.model.save.country.SaveModifier;
 import fr.osallek.eu4parser.model.save.country.Ship;
 import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
-
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -54,6 +50,9 @@ import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 public class SaveProvince extends Province {
 
@@ -429,9 +428,9 @@ public class SaveProvince extends Province {
         if (this.navies == null && this.armies == null) {
             return new ArrayList<>();
         } else if (this.navies == null) {
-            return this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream).toList();
+            return this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream).collect(Collectors.toList());
         } else if (this.armies == null) {
-            return this.navies.stream().map(Navy::getShips).flatMap(Collection::stream).toList();
+            return this.navies.stream().map(Navy::getShips).flatMap(Collection::stream).collect(Collectors.toList());
         } else {
             return Stream.concat(this.navies.stream().map(Navy::getShips).flatMap(Collection::stream),
                                  this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream)).toList();
