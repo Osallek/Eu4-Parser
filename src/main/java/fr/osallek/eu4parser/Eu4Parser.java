@@ -1,7 +1,7 @@
 package fr.osallek.eu4parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -136,11 +137,15 @@ public class Eu4Parser {
         return new ArrayList<>();
     }
 
-    public static Save loadSave(Path gameFolderPath, Path modFolder, Path path) throws IOException {
-        return loadSave(gameFolderPath, modFolder, path, new HashMap<>());
+    public static Save loadSave(Path gameFolderPath, Path path) throws IOException {
+        return loadSave(gameFolderPath, path, loadSettings(gameFolderPath), new HashMap<>());
     }
 
-    public static Save loadSave(Path gameFolderPath, Path modFolder, Path path,
+    public static Save loadSave(Path gameFolderPath, Path path, LauncherSettings launcherSettings) throws IOException {
+        return loadSave(gameFolderPath, path, launcherSettings, new HashMap<>());
+    }
+
+    public static Save loadSave(Path gameFolderPath, Path path, LauncherSettings launcherSettings,
                                 Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         File file = path.toFile();
         Save save = null;
@@ -150,9 +155,30 @@ public class Eu4Parser {
                 save = new Save(file.getName(), gameFolderPath,
                                 ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners),
                                 ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners));
+                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners),
+                                launcherSettings);
             } catch (ZipException e) {
-                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, listeners));
+                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, listeners), launcherSettings);
+            }
+        }
+
+        return save;
+    }
+
+    public static Save loadSave(Path path, Game game, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+        File file = path.toFile();
+        Save save = null;
+
+        if (file.canRead()) {
+            try (ZipFile zipFile = new ZipFile(file)) {
+                save = new Save(file.getName(),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners),
+                                true,
+                                game);
+            } catch (ZipException e) {
+                save = new Save(file.getName(), ClausewitzParser.parse(file, 1, listeners), game);
             }
         }
 
@@ -164,13 +190,13 @@ public class Eu4Parser {
 
         if (path.toFile().canRead()) {
             try (ZipFile zipFile = new ZipFile(path.toFile())) {
-                object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, "mod_enabled");
+                object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, "mods_enabled_names");
             } catch (ZipException e) {
-                object = ClausewitzParser.readSingleObject(path.toFile(), 1, "mod_enabled");
+                object = ClausewitzParser.readSingleObject(path.toFile(), 1, "mods_enabled_names");
             }
 
-            if (object != null && ClausewitzList.class.equals(object.getClass())) {
-                return ((ClausewitzList) object).getValues();
+            if (object != null && ClausewitzItem.class.equals(object.getClass())) {
+                return ((ClausewitzItem) object).getChildren().stream().map(item -> item.getVarAsString("filename")).filter(Objects::nonNull).toList();
             }
         }
 
@@ -197,7 +223,7 @@ public class Eu4Parser {
         return new Game(gameFolderPath, modEnabled, runnable);
     }
 
-    public static Game parseGame(Path gameFolderPath, List<String> modEnabled, Runnable runnable, LauncherSettings launcherSettings) throws IOException {
+    public static Game parseGame(Path gameFolderPath, List<String> modEnabled, LauncherSettings launcherSettings, Runnable runnable) throws IOException {
         return new Game(gameFolderPath, launcherSettings, modEnabled, runnable);
     }
 

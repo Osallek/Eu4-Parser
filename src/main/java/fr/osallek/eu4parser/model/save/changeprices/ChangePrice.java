@@ -1,10 +1,6 @@
 package fr.osallek.eu4parser.model.save.changeprices;
 
-import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.Game;
-import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
-
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -12,24 +8,16 @@ public class ChangePrice {
 
     private final ClausewitzItem item;
 
-    private final String localizedName;
-
     public ChangePrice(String key, int percent, LocalDate expiryDate) {
         this.item = ChangePrice.addToItem(null, key, percent, expiryDate);
-        this.localizedName = key;
     }
 
-    public ChangePrice(ClausewitzItem item, Game game) {
+    public ChangePrice(ClausewitzItem item) {
         this.item = item;
-        this.localizedName = game.getLocalisationClean(ClausewitzUtils.removeQuotes(getKey()), Eu4Language.getDefault());
     }
 
     public String getKey() {
         return this.item.getVarAsString("key");
-    }
-
-    public String getLocalizedName() {
-        return localizedName;
     }
 
     public int getValue() {
@@ -67,11 +55,10 @@ public class ChangePrice {
             return true;
         }
 
-        if (!(o instanceof ChangePrice)) {
+        if (!(o instanceof ChangePrice that)) {
             return false;
         }
 
-        ChangePrice that = (ChangePrice) o;
         return getKey().equalsIgnoreCase(that.getKey()) && getValue() == that.getValue() && getExpiryDate().equals(that.getExpiryDate());
     }
 

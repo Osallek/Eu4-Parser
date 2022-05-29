@@ -71,6 +71,8 @@ import org.slf4j.LoggerFactory;
 
 public class Game {
 
+    public static final int NB_PARTS = 71;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
     private final LauncherSettings launcherSettings;
@@ -290,7 +292,7 @@ public class Game {
 
         this.provincesImage = getAbsoluteFile(Eu4Utils.MAP_FOLDER_PATH + File.separator + "provinces.bmp");
 
-        CountDownLatch countDownLatch = new CountDownLatch(71);
+        CountDownLatch countDownLatch = new CountDownLatch(NB_PARTS);
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
@@ -2294,7 +2296,7 @@ public class Game {
     private void loadNativeLocalisations() {
         this.nativeLocalisations = new HashSet<>();
 
-        try (Stream<Path> stream = Files.list(this.launcherSettings.getGameFolderPath().resolve(Eu4Utils.LOCALISATION_FOLDER_PATH))){
+        try (Stream<Path> stream = Files.list(this.launcherSettings.getGameFolderPath().resolve(Eu4Utils.LOCALISATION_FOLDER_PATH))) {
             stream.filter(Files::isRegularFile).forEach(path -> {
                 try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
                     String line;
@@ -2329,7 +2331,7 @@ public class Game {
                     LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
                 }
             });
-        } catch(IOException e){
+        } catch (IOException e) {
             LOGGER.error("An error occurred while reading native localisations: {}", e.getMessage(), e);
         }
     }
@@ -2363,44 +2365,55 @@ public class Game {
                     try (BufferedReader reader = Files.newBufferedReader(fileNode.getPath(), StandardCharsets.UTF_8)) {
                         String line;
                         reader.readLine(); //Skip first line language (and BOM)
+                        AtomicInteger i = new AtomicInteger(1);
 
                         while ((line = reader.readLine()) != null) {
-                            if (StringUtils.isBlank(line)) {
-                                continue;
-                            }
-
-                            int indexOf;
-                            if ((indexOf = line.indexOf('#')) >= 0) { //If has comments
-                                if (line.indexOf('"') < 0) { //If has no data
+                            try {
+                                if (StringUtils.isBlank(line)) {
                                     continue;
                                 }
 
-                                if (line.indexOf('"') < indexOf) { //If data is before comment
-                                    line = line.substring(0, indexOf);
-
-                                    if (ClausewitzUtils.isBlank(line)) {
+                                int indexOf;
+                                if ((indexOf = line.indexOf('#')) >= 0) { //If has comments
+                                    if (line.indexOf('"') < 0) { //If has no data
                                         continue;
                                     }
-                                } else {
+
+                                    if (line.indexOf('"') < indexOf) { //If data is before comment
+                                        line = line.substring(0, indexOf);
+
+                                        if (ClausewitzUtils.isBlank(line)) {
+                                            continue;
+                                        }
+                                    } else {
+                                        continue;
+                                    }
+                                }
+
+                                if ((eu4Language.fileEndWith + ":").equals(line.replace(" ", ""))) {
                                     continue;
                                 }
+
+                                String[] keys = line.split(":", 2);
+                                String key = keys[0].trim();
+                                String version = keys[1].substring(0, 1);
+                                String value = keys[1].substring(1).trim();
+                                int start = value.indexOf('"') + 1;
+                                int end = value.lastIndexOf('"');
+
+                                if (start > end) {
+                                    continue;
+                                }
+
+                                list.add(new Localisation(fileNode, key, eu4Language, version, value.substring(start, end).trim()));
+                            } catch (Exception e) {
+                                LOGGER.error("Could not read file {} at line {} because: {} !", fileNode.getPath(), i.get(), e.getMessage(), e);
+                            } finally {
+                                i.incrementAndGet();
                             }
-
-                            String[] keys = line.split(":", 2);
-                            String key = keys[0].trim();
-                            String version = keys[1].substring(0, 1);
-                            String value = keys[1].substring(1).trim();
-                            int start = value.indexOf('"') + 1;
-                            int end = value.lastIndexOf('"');
-
-                            if (start > end) {
-                                continue;
-                            }
-
-                            list.add(new Localisation(fileNode, key, eu4Language, version, value.substring(start, end).trim()));
                         }
-                    } catch (IOException e) {
-                        LOGGER.error("Could not read file {} because: {} !", fileNode.getRelativePath(), e.getMessage(), e);
+                    } catch (Exception e) {
+                        LOGGER.error("Could not read file {} because: {} !", fileNode.getPath(), e.getMessage(), e);
                     }
                 });
 

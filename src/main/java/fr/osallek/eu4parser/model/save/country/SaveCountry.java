@@ -44,7 +44,6 @@ import fr.osallek.eu4parser.model.game.StaticModifiers;
 import fr.osallek.eu4parser.model.game.TechGroup;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradePolicy;
-import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.Id;
@@ -60,12 +59,6 @@ import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.religion.SavePapacy;
 import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -89,6 +82,11 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class SaveCountry {
 
@@ -419,10 +417,6 @@ public class SaveCountry {
     //Fixme compute the value
     public void setGovernmentName(GovernmentName governmentName) {
         this.governmentName = governmentName;
-    }
-
-    public String getGovernmentLocalizedName() {
-        return this.governmentName == null ? null : save.getGame().getLocalisation(this.governmentName.getRank(getGovernmentLevel()), Eu4Language.getDefault()).getValue();
     }
 
     public Integer getSubjectFocus() {
@@ -2875,7 +2869,9 @@ public class SaveCountry {
     }
 
     public void setPatriarchAuthority(int icon) {
-        if (getReligion() != null && getReligion().getGameReligion().getIcons() != null && icon >= 0 && icon < getReligion().getGameReligion().getIcons().size()) {
+        if (getReligion() != null && getReligion().getGameReligion().getIcons() != null && icon >= 0 && icon < getReligion().getGameReligion()
+                                                                                                                            .getIcons()
+                                                                                                                            .size()) {
             this.item.setVariable("current_icon", icon);
         }
     }
@@ -3868,7 +3864,7 @@ public class SaveCountry {
 
     public double getGoverningCapacity() {
         return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("governing_capacity"))) +
-                                             NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_governing_capacity"))))
+                NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_governing_capacity"))))
                * (1 + NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("governing_capacity_modifier"), false)));
     }
 
@@ -3881,17 +3877,19 @@ public class SaveCountry {
     }
 
     public double getLandMorale() {
-        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_land_morale")) * (1 + getModifier(ModifiersUtils.getModifier("land_morale"))));
+        return NumbersUtils.doubleOrDefault(
+                getModifier(ModifiersUtils.getModifier("tech_land_morale")) * (1 + getModifier(ModifiersUtils.getModifier("land_morale"))));
     }
 
     public double getNavalMorale() {
-        return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("tech_naval_morale")) * (1 + getModifier(ModifiersUtils.getModifier("naval_morale"))));
+        return NumbersUtils.doubleOrDefault(
+                getModifier(ModifiersUtils.getModifier("tech_naval_morale")) * (1 + getModifier(ModifiersUtils.getModifier("naval_morale"))));
     }
 
     public double getLandForceLimit() {
         return Math.max(5,
                         (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit"), false))
-                            + getOwnedProvinces().stream().mapToDouble(SaveProvince::getLandForceLimit).sum()))
+                         + getOwnedProvinces().stream().mapToDouble(SaveProvince::getLandForceLimit).sum()))
                * (1 + NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier"), false)));
     }
 
@@ -4032,7 +4030,7 @@ public class SaveCountry {
 
         if (CollectionUtils.isNotEmpty(getModifiers())) {
             list.addAll(getModifiers().stream()
-                                      .filter(m -> m .getModifier() != null)
+                                      .filter(m -> m.getModifier() != null)
                                       .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
                                       .map(m -> m.getModifiers(this, modifier))
                                       .toList());
@@ -4406,7 +4404,9 @@ public class SaveCountry {
             list.add(getHegemon().getModifiers().getModifier(modifier));
         }
 
-        if (getReligion() != null && getReligion().getGameReligion().getCountry() != null && getReligion().getGameReligion().getCountry().hasModifier(modifier)) {
+        if (getReligion() != null && getReligion().getGameReligion().getCountry() != null && getReligion().getGameReligion()
+                                                                                                          .getCountry()
+                                                                                                          .hasModifier(modifier)) {
             list.add(getReligion().getGameReligion().getCountry().getModifier(modifier));
         }
 
@@ -4463,10 +4463,6 @@ public class SaveCountry {
     }
 
     private void refreshAttributes() {
-        if (this.isPlayable) {
-            setLocalizedName(this.save.getGame().getLocalisation(getTag(), Eu4Language.getDefault()).getValue());
-        }
-
         String governmentNameVar = this.item.getVarAsString("government_name");
         if (StringUtils.isNotBlank(governmentNameVar)) {
             this.governmentName = this.save.getGame().getGovernmentName(ClausewitzUtils.removeQuotes(governmentNameVar));

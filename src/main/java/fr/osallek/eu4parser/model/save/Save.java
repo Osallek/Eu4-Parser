@@ -6,11 +6,11 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.game.Age;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.game.TradeGood;
-import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import fr.osallek.eu4parser.model.save.combat.Combats;
 import fr.osallek.eu4parser.model.save.counters.IdCounters;
@@ -40,7 +40,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -131,22 +130,36 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    public Save(String name, Path gameFolderPath, ClausewitzItem item) throws IOException {
-        this(name, gameFolderPath, item, item, item, false);
+    public Save(String name, Path gameFolderPath, ClausewitzItem item, LauncherSettings launcherSettings) throws IOException {
+        this(name, gameFolderPath, item, item, item, false, launcherSettings);
     }
 
-    public Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem) throws IOException {
-        this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true);
+    public Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, LauncherSettings launcherSettings) throws IOException {
+        this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true, launcherSettings);
     }
 
     private Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
-                 boolean compressed) throws IOException {
+                 boolean compressed, LauncherSettings launcherSettings) throws IOException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
-        this.game = new Game(gameFolderPath, getModEnabled());
+        this.game = new Game(gameFolderPath, launcherSettings, getModEnabled());
+        refreshAttributes();
+    }
+
+    public Save(String name, ClausewitzItem item, Game game) throws IOException {
+        this(name, item, item, item, false, game);
+    }
+
+    public Save(String name, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed, Game game) throws IOException {
+        this.name = name;
+        this.gamestateItem = gamestateItem;
+        this.aiItem = aiItem;
+        this.metaItem = metaItem;
+        this.compressed = compressed;
+        this.game = game;
         refreshAttributes();
     }
 
@@ -745,13 +758,7 @@ public class Save {
                                           .stream()
                                           .map(countryItem -> new SaveCountry(countryItem, this))
                                           .collect(Collectors.toMap(SaveCountry::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
-            this.playableCountries = this.countries.values()
-                                                   .stream()
-                                                   .filter(SaveCountry::isPlayable)
-                                                   .peek(country -> country.setLocalizedName(
-                                                           this.game.getLocalisation(country.getTag(), Eu4Language.getDefault()).getValue()))
-                                                   .sorted(Comparator.comparing(SaveCountry::getLocalizedName, Eu4Utils.COLLATOR))
-                                                   .toList();
+            this.playableCountries = this.countries.values().stream().filter(SaveCountry::isPlayable).toList();
         }
 
         ClausewitzList playersCountriesList = this.gamestateItem.getList("players_countries");
