@@ -6,13 +6,13 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.clausewitzparser.parser.LuaParser;
 import fr.osallek.eu4parser.Eu4Parser;
-import fr.osallek.eu4parser.LauncherSettings;
 import fr.osallek.eu4parser.common.Eu4MapUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.common.TreeNode;
+import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
@@ -21,16 +21,6 @@ import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -69,12 +59,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Game {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
-
-    private final String gameFolderPath;
 
     private final LauncherSettings launcherSettings;
 
@@ -264,29 +261,28 @@ public class Game {
 
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
-    public Game(String gameFolderPath) throws IOException {
+    public Game(Path gameFolderPath) throws IOException {
         this(gameFolderPath, (LauncherSettings) null);
     }
 
-    public Game(String gameFolderPath, LauncherSettings launcherSettings) throws IOException {
+    public Game(Path gameFolderPath, LauncherSettings launcherSettings) throws IOException {
         this(gameFolderPath, launcherSettings, null);
     }
 
-    public Game(String gameFolderPath, List<String> modEnabled) throws IOException {
+    public Game(Path gameFolderPath, List<String> modEnabled) throws IOException {
         this(gameFolderPath, modEnabled, () -> {});
     }
 
-    public Game(String gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled) throws IOException {
+    public Game(Path gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled) throws IOException {
         this(gameFolderPath, null, modEnabled, () -> {});
     }
 
-    public Game(String gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
+    public Game(Path gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
         this(gameFolderPath, null, modEnabled, runnable);
     }
 
-    public Game(String gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled, Runnable runnable) throws IOException {
-        this.gameFolderPath = gameFolderPath;
-        this.launcherSettings = Objects.requireNonNullElse(launcherSettings, Eu4Parser.loadSettings(this.gameFolderPath));
+    public Game(Path gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled, Runnable runnable) throws IOException {
+        this.launcherSettings = Objects.requireNonNullElse(launcherSettings, Eu4Parser.loadSettings(gameFolderPath));
 
         runnable.run();
         readMods(modEnabled);
@@ -1093,10 +1089,6 @@ public class Game {
     public File getAbsoluteFile(Path relativePath) {
         Path path = getAbsolutePath(relativePath);
         return path == null ? null : path.toFile();
-    }
-
-    public String getGameFolderPath() {
-        return gameFolderPath;
     }
 
     public LauncherSettings getLauncherSettings() {
@@ -2197,7 +2189,7 @@ public class Game {
 
     private void readMods(List<String> modsEnabled) throws IOException {
         this.mods = new ArrayList<>();
-        this.filesNode = new TreeNode<>(null, new FileNode(Paths.get(this.gameFolderPath), (Mod) null), FileNode::getChildren);
+        this.filesNode = new TreeNode<>(null, new FileNode(this.launcherSettings.getGameFolderPath(), (Mod) null), FileNode::getChildren);
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
             //Compare with path so replace with system separator
@@ -2302,7 +2294,7 @@ public class Game {
     private void loadNativeLocalisations() {
         this.nativeLocalisations = new HashSet<>();
 
-        try (Stream<Path> stream = Files.list(Path.of(this.gameFolderPath, Eu4Utils.LOCALISATION_FOLDER_PATH))) {
+        try (Stream<Path> stream = Files.list(this.launcherSettings.getGameFolderPath().resolve(Eu4Utils.LOCALISATION_FOLDER_PATH))){
             stream.filter(Files::isRegularFile).forEach(path -> {
                 try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
                     String line;
@@ -2337,7 +2329,7 @@ public class Game {
                     LOGGER.error("Could not read file {} because: {} !", path, e.getMessage(), e);
                 }
             });
-        } catch (IOException e) {
+        } catch(IOException e){
             LOGGER.error("An error occurred while reading native localisations: {}", e.getMessage(), e);
         }
     }

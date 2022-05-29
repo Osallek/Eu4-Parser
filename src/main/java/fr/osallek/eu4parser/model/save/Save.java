@@ -33,11 +33,10 @@ import fr.osallek.eu4parser.model.save.revolution.Revolution;
 import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import fr.osallek.eu4parser.model.save.war.PreviousWar;
-import org.apache.commons.lang3.BooleanUtils;
-
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +54,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.BooleanUtils;
 
 public class Save {
 
@@ -131,23 +131,22 @@ public class Save {
 
     private ListOfDates ideaDates;
 
-    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem item) throws IOException {
-        this(name, gameFolderPath, modFolder, item, item, item, false);
+    public Save(String name, Path gameFolderPath, ClausewitzItem item) throws IOException {
+        this(name, gameFolderPath, item, item, item, false);
     }
 
-    public Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem,
-                ClausewitzItem metaItem) throws IOException {
-        this(name, gameFolderPath, modFolder, gamestateItem, aiItem, metaItem, true);
+    public Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem) throws IOException {
+        this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true);
     }
 
-    private Save(String name, String gameFolderPath, String modFolder, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
+    private Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
                  boolean compressed) throws IOException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
         this.compressed = compressed;
-        this.game = new Game(gameFolderPath, this.getModEnabled());
+        this.game = new Game(gameFolderPath, getModEnabled());
         refreshAttributes();
     }
 

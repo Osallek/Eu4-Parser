@@ -1,20 +1,8 @@
 package fr.osallek.eu4parser.common;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
-import fr.osallek.clausewitzparser.parser.ClausewitzParser;
-import fr.osallek.eu4parser.LauncherSettings;
-import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Country;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.iterators.ReverseListIterator;
-import org.apache.commons.lang3.ArchUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,9 +22,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
+import org.apache.commons.collections4.iterators.ReverseListIterator;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Eu4Utils {
 
@@ -48,11 +41,13 @@ public final class Eu4Utils {
 
     public static final Collator COLLATOR = Collator.getInstance();
 
-    public static final String DOCUMENTS_FOLDER = FileSystemView.getFileSystemView().getDefaultDirectory().getAbsolutePath();
+    public static final Path DOCUMENTS_FOLDER;
 
     public static final String DESCRIPTOR_FILE = "descriptor.mod";
 
-    public static final File OSALLEK_DOCUMENTS_FOLDER = new File(DOCUMENTS_FOLDER + File.separator + "Osallek");
+    public static final String SAVES_FOLDER = "save games";
+
+    public static final Path OSALLEK_DOCUMENTS_FOLDER;
 
     public static final String STEAM_COMMON_FOLDER_PATH = "common";
 
@@ -168,92 +163,25 @@ public final class Eu4Utils {
 
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
-    }
 
-    public static Optional<File> detectInstallationFolder() {
-        Optional<Path> steamFolder = Optional.empty();
-
+        AtomicReference<Path> documentFolder = new AtomicReference<>();
         try {
             if (SystemUtils.IS_OS_WINDOWS) {
-                if (ArchUtils.getProcessor().is64Bit()) {
-                    steamFolder = readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath").map(Path::of);
-                } else {
-                    steamFolder = readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath").map(Path::of);
-                }
-            } else if (SystemUtils.IS_OS_LINUX) {
-                Path steamPath = Path.of(System.getProperty("user.home"), ".steam", "steam");
-
-                if (Files.exists(steamPath) && Files.exists(steamPath.toRealPath()) && Files.isDirectory(steamPath.toRealPath())) {
-                    steamFolder = Optional.of(steamPath.toRealPath());
-                }
+                readRegistry("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", "personal").map(Path::of)
+                                                                                                                                    .ifPresent(documentFolder::set);
             }
-
-            if (steamFolder.isPresent()) {
-                Path path = steamFolder.get().resolve(STEAM_APPS_FOLDER_PATH);
-
-                if (Files.exists(path) && Files.isDirectory(path)) {
-                    Path manifestPath = path.resolve("appmanifest_236850.acf");
-
-                    if (Files.exists(manifestPath) && Files.isRegularFile(manifestPath)) {
-                        return readManifest(manifestPath);
-                    }
-
-                    Path libraryFoldersPath = path.resolve("libraryfolders.vdf");
-
-                    if (Files.exists(libraryFoldersPath) && Files.isRegularFile(libraryFoldersPath)) {
-                        List<String> lines = Files.readAllLines(libraryFoldersPath);
-
-                        List<String> paths = lines.stream().filter(s -> s.contains("\"path\"")).toList();
-                        if (CollectionUtils.isNotEmpty(paths)) {
-                            for (String s : paths) {
-                                String folder = s.replace("\"path\"", "").trim();
-                                folder = folder.substring(1, folder.length() - 1);
-
-                                Path libraryFolder = Path.of(folder).resolve(STEAM_APPS_FOLDER_PATH);
-                                manifestPath = libraryFolder.resolve("appmanifest_236850.acf");
-
-                                if (Files.exists(manifestPath) && Files.isRegularFile(manifestPath)) {
-                                    return readManifest(manifestPath);
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("An error occurred while searching for game installation folder: {}!", e.getMessage(), e);
-            Thread.currentThread().interrupt();
-            return Optional.empty();
-        } catch (Exception e) {
-            LOGGER.error("An error occurred while searching for game installation folder: {}!", e.getMessage(), e);
-            return Optional.empty();
+        } catch (Exception ignored) {
         }
 
-        File file = new File("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Universalis IV");
-        if (file.exists() && file.canRead()) {
-            return Optional.of(file);
+        if (documentFolder.get() == null) {
+            documentFolder.set(Path.of(System.getProperty("user.home")));
         }
 
-        return Optional.empty();
+        DOCUMENTS_FOLDER = documentFolder.get();
+        OSALLEK_DOCUMENTS_FOLDER = DOCUMENTS_FOLDER.resolve("Osallek");
     }
 
-    public static List<Mod> detectMods(LauncherSettings launcherSettings) {
-        if (launcherSettings.getModFolder().toFile().exists() && launcherSettings.getModFolder().toFile().isDirectory()) {
-            try (Stream<Path> stream = Files.list(launcherSettings.getModFolder())) {
-                return stream.filter(path -> path.getFileName().toString().endsWith(".mod"))
-                             .map(path -> new Mod(path.toFile(), ClausewitzParser.parse(path.toFile(), 0), launcherSettings))
-                             .sorted((o1, o2) -> Eu4Utils.COLLATOR.compare(o1.getName(), o2.getName()))
-                             .toList();
-            } catch (Exception e) {
-                LOGGER.error("An error occurred while searching for mods: {}!", e.getMessage(), e);
-            }
-        }
-
-        return new ArrayList<>();
-    }
-
-    private static Optional<String> readRegistry(String location, String key) throws InterruptedException, IOException {
+    public static Optional<String> readRegistry(String location, String key) throws InterruptedException, IOException {
         Process process = new ProcessBuilder("reg", "query", "\"" + location + "\"", "/v", "\"" + key + "\"").start();
         process.waitFor();
 
@@ -270,7 +198,7 @@ public final class Eu4Utils {
         return Optional.empty();
     }
 
-    private static Optional<File> readManifest(Path manifestPath) throws IOException {
+    public static Optional<Path> readManifest(Path manifestPath) throws IOException {
         if (Files.exists(manifestPath) && Files.isRegularFile(manifestPath)) {
             List<String> lines = Files.readAllLines(manifestPath);
 
@@ -281,7 +209,7 @@ public final class Eu4Utils {
                 Path path = manifestPath.getParent().resolve(STEAM_COMMON_FOLDER_PATH).resolve(folder);
 
                 if (Files.exists(path) && Files.isDirectory(path)) {
-                    return Optional.of(path.toFile());
+                    return Optional.of(path);
                 }
             }
         }
