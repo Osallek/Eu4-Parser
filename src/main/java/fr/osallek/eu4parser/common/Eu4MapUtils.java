@@ -153,7 +153,7 @@ public class Eu4MapUtils {
         ImageIO.write(pngMapImage, "PNG", file);
     }
 
-    public static BufferedImage generateMapPng(Game game, Function<Province, Color> provinceColorFunction) throws IOException {
+    public static BufferedImage generateMapPng(Game game, Function<Province, Color> provinceColorFunction) {
         Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
         BufferedImage pngMapImage = new BufferedImage(game.getProvinceImageWidth(), game.getProvinceImageHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D pngMapGraphics = pngMapImage.createGraphics();
@@ -230,7 +230,7 @@ public class Eu4MapUtils {
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, generateGeoJson(game));
     }
 
-    public static FeatureCollection generateGeoJson(Game game) throws IOException {
+    public static FeatureCollection generateGeoJson(Game game) {
         Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
 
         FeatureCollection featureCollection = new FeatureCollection();

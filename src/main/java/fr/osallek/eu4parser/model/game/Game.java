@@ -286,7 +286,6 @@ public class Game {
     public Game(Path gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled, Runnable runnable) throws IOException {
         this.launcherSettings = Objects.requireNonNullElse(launcherSettings, Eu4Parser.loadSettings(gameFolderPath));
 
-        runnable.run();
         readMods(modEnabled);
         runnable.run();
 

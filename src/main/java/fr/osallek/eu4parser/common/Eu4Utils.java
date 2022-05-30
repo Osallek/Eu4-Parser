@@ -3,6 +3,12 @@ package fr.osallek.eu4parser.common;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Country;
+import org.apache.commons.collections4.iterators.ReverseListIterator;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,14 +28,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import org.apache.commons.collections4.iterators.ReverseListIterator;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class Eu4Utils {
 
@@ -41,13 +41,14 @@ public final class Eu4Utils {
 
     public static final Collator COLLATOR = Collator.getInstance();
 
-    public static final Path DOCUMENTS_FOLDER;
+    public static final Path DOCUMENTS_FOLDER = FileSystemView.getFileSystemView().getDefaultDirectory().toPath().toAbsolutePath();
+
+    public static final Path OSALLEK_DOCUMENTS_FOLDER = DOCUMENTS_FOLDER.resolve("Osallek");
 
     public static final String DESCRIPTOR_FILE = "descriptor.mod";
 
     public static final String SAVES_FOLDER = "save games";
 
-    public static final Path OSALLEK_DOCUMENTS_FOLDER;
 
     public static final String STEAM_COMMON_FOLDER_PATH = "common";
 
@@ -163,22 +164,6 @@ public final class Eu4Utils {
 
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
-
-        AtomicReference<Path> documentFolder = new AtomicReference<>();
-        try {
-            if (SystemUtils.IS_OS_WINDOWS) {
-                readRegistry("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", "personal").map(Path::of)
-                                                                                                                                    .ifPresent(documentFolder::set);
-            }
-        } catch (Exception ignored) {
-        }
-
-        if (documentFolder.get() == null) {
-            documentFolder.set(Path.of(System.getProperty("user.home")));
-        }
-
-        DOCUMENTS_FOLDER = documentFolder.get();
-        OSALLEK_DOCUMENTS_FOLDER = DOCUMENTS_FOLDER.resolve("Osallek");
     }
 
     public static Optional<String> readRegistry(String location, String key) throws InterruptedException, IOException {
