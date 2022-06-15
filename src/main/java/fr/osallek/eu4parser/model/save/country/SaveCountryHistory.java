@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -17,7 +18,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class History {
+public class SaveCountryHistory {
 
     private final Save save;
 
@@ -33,9 +34,9 @@ public class History {
 
     private Map<Integer, Queen> queens;
 
-    private SortedMap<LocalDate, String> changedTagFrom;
+    private SortedMap<LocalDate, List<String>> changedTagFrom;
 
-    public History(ClausewitzItem item, Save save, SaveCountry country) {
+    public SaveCountryHistory(ClausewitzItem item, Save save, SaveCountry country) {
         this.save = save;
         this.item = item;
         this.country = country;
@@ -74,11 +75,11 @@ public class History {
         return queens;
     }
 
-    public SortedMap<LocalDate, String> getChangedTagFrom() {
+    public SortedMap<LocalDate, List<String>> getChangedTagFrom() {
         return changedTagFrom;
     }
 
-    public void setChangedTagFrom(SortedMap<LocalDate, String> changedTagFrom) {
+    public void setChangedTagFrom(SortedMap<LocalDate, List<String>> changedTagFrom) {
         this.changedTagFrom = changedTagFrom;
     }
 
@@ -102,9 +103,9 @@ public class History {
         this.item.getChildren()
                  .stream()
                  .filter(child -> child.hasChild("leader"))
-                .filter(child -> new Leader(child.getChild("leader"), this.country).getId().equals(leader.getId()))
-                .findFirst()
-                .ifPresent(this.item::removeChild);
+                 .filter(child -> new Leader(child.getChild("leader"), this.country).getId().equals(leader.getId()))
+                 .findFirst()
+                 .ifPresent(this.item::removeChild);
     }
 
     private void refreshAttributes() {
@@ -180,9 +181,10 @@ public class History {
         this.changedTagFrom = this.item.getChildren()
                                        .stream()
                                        .filter(child -> child.hasVar("changed_tag_from"))
-                                       .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                                 child -> ClausewitzUtils.removeQuotes(child.getVarAsString("changed_tag_from")),
-                                                                 (a, b) -> b,
-                                                                 TreeMap::new));
+                                       .collect(Collectors.groupingBy(child -> Eu4Utils.stringToDate(child.getName()),
+                                                                      TreeMap::new,
+                                                                      Collectors.mapping(
+                                                                              child -> ClausewitzUtils.removeQuotes(child.getVarAsString("changed_tag_from")),
+                                                                              Collectors.toList())));
     }
 }

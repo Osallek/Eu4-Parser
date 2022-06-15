@@ -105,6 +105,14 @@ public class SaveAdvisor {
         this.item.setVariable("hire_date", hireDate);
     }
 
+    public LocalDate getDeathDate() {
+        return this.item.getVarAsDate("death_date");
+    }
+
+    public void setDeathDate(LocalDate deathDate) {
+        this.item.setVariable("death_date", deathDate);
+    }
+
     public Modifiers getModifiers() {
         if (getGameAdvisor().getSkillScaledModifier() == null) {
             return getGameAdvisor().getModifiers();

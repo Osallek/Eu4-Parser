@@ -37,6 +37,10 @@ import fr.osallek.eu4parser.model.save.country.SaveInvestment;
 import fr.osallek.eu4parser.model.save.country.SaveModifier;
 import fr.osallek.eu4parser.model.save.country.Ship;
 import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -50,9 +54,6 @@ import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 public class SaveProvince extends Province {
 
@@ -76,7 +77,7 @@ public class SaveProvince extends Province {
 
     private boolean buildingsUpdated;
 
-    private History history;
+    private SaveProvinceHistory history;
 
     private List<Army> armies;
 
@@ -867,7 +868,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public History getHistory() {
+    public SaveProvinceHistory getHistory() {
         return history;
     }
 
@@ -1452,7 +1453,7 @@ public class SaveProvince extends Province {
         ClausewitzItem historyItem = this.item.getChild("history");
 
         if (historyItem != null) {
-            this.history = new History(historyItem, this);
+            this.history = new SaveProvinceHistory(historyItem, this);
         }
 
         ClausewitzItem buildersItem = this.item.getChild("building_builders");

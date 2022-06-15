@@ -28,6 +28,10 @@ public class NumbersUtils {
         }
     }
 
+    public static Integer doubleToInt(Double aDouble) {
+        return aDouble == null ? null : aDouble.intValue();
+    }
+
     public static int intOrDefault(Integer integer) {
         return intOrDefault(integer, 0);
     }

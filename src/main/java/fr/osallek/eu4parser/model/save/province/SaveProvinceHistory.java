@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.save.province;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
@@ -17,7 +18,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class History {
+public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
 
     private final ClausewitzItem item;
 
@@ -35,10 +36,36 @@ public class History {
 
     private Map<Integer, SaveAdvisor> advisors;
 
-    public History(ClausewitzItem item, SaveProvince province) {
+    public SaveProvinceHistory(ClausewitzItem item, SaveProvince province) {
+        super(item, province);
         this.item = item;
         this.province = province;
         refreshAttributes();
+    }
+
+    @Override
+    public LocalDate getDate() {
+        return this.province.getSave().getStartDate();
+    }
+
+    public Boolean getSeatInParliament() {
+        return this.item.getVarAsBool("seat_in_parliament");
+    }
+
+    public Double getExtraCost() {
+        return this.item.getVarAsDouble("extra_cost");
+    }
+
+    public Integer getFormerNativeSize() {
+        return NumbersUtils.doubleToInt(this.item.getVarAsDouble("former_native_size"));
+    }
+
+    public List<SaveProvinceHistoryEvent> getEvents() {
+        return this.item.getChildren()
+                        .stream()
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .map(child -> new SaveProvinceHistoryEvent(child, this.province))
+                        .collect(Collectors.toList());
     }
 
     public SortedMap<LocalDate, SaveCountry> getOwners() {
@@ -111,9 +138,9 @@ public class History {
                                     .stream()
                                     .filter(child -> child.hasChild("controller"))
                                     .filter(child -> child.getChild("controller").hasVar("tag"))
-                                    .collect(Collectors.toMap(var -> Eu4Utils.stringToDate(var.getName()),
+                                    .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
                                                               child -> this.province.getSave().getCountry(child.getChild("controller").getVarAsString("tag")),
-                                                              (a, b) -> b,
+                                                              (a, b) -> a, //Take a because only happens when changing tag
                                                               TreeMap::new));
 
         if (MapUtils.isNotEmpty(this.owners) && this.province.getOwner() != null && !this.owners.containsValue(this.province.getOwner())) {
