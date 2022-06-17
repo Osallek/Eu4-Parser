@@ -331,9 +331,9 @@ public class ConditionsUtils {
             case "disaster": //Used for scope has_disaster_progress
                 return true;
             case "dominant_culture":
-                return country.getDominantCulture().getName().equals(rawValueToCulture(rawValue, root, from));
+                return country.getDominantCulture() != null && country.getDominantCulture().getName().equals(rawValueToCulture(rawValue, root, from));
             case "dominant_religion":
-                return country.getDominantReligion().getName().equals(rawValueToReligion(rawValue, root, from));
+                return country.getDominantReligion() != null && country.getDominantReligion().getName().equals(rawValueToReligion(rawValue, root, from));
             case "doom":
                 if ((aDouble = NumbersUtils.toDouble(value)) != null) {
                     return NumbersUtils.doubleOrDefault(country.getDoom()) >= aDouble;
@@ -379,9 +379,10 @@ public class ConditionsUtils {
             case "galley_fraction":
                 return BigDecimal.valueOf(country.getNbGalleys()).compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getNavySize()))) >= 0;
             case "gold_income":
-                return country.getLedger() != null && country.getLedger().getLastMonthIncomeTable().get(Income.GOLD) >= NumbersUtils.toDouble(value);
+                return country.getLedger() != null && country.getLedger().getLastMonthIncomeTable().containsKey(Income.GOLD)
+                       && country.getLedger().getLastMonthIncomeTable().get(Income.GOLD) >= NumbersUtils.toDouble(value);
             case "gold_income_percentage":
-                return country.getLedger() != null
+                return country.getLedger() != null && country.getLedger().getLastMonthIncomeTable().containsKey(Income.GOLD)
                        && BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.GOLD))
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))) >= 0;
             case "government":
@@ -583,7 +584,8 @@ public class ConditionsUtils {
             case "has_parliament":
                 return country.getParliament() != null;
             case "has_patriarchs":
-                return country.getReligion() != null && ("yes".equalsIgnoreCase(value) == country.getReligion().getGameReligion().hasPatriarchs());
+                return country.getReligion() != null && ("yes".equalsIgnoreCase(value) == BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().hasPatriarchs()));
             case "has_personal_deity":
                 return value.equalsIgnoreCase(country.getPersonalDeity().getName());
             case "has_privateers":
@@ -1663,7 +1665,7 @@ public class ConditionsUtils {
             case "production_efficiency":
                 return country.getProductionEfficiency() >= NumbersUtils.toDouble(value);
             case "production_income_percentage":
-                return country.getLedger() != null
+                return country.getLedger() != null && country.getLedger().getLastMonthIncomeTable().containsKey(Income.PRODUCTION)
                        && BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.PRODUCTION))
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))) >= 0;
             case "provinces_on_capital_continent_of":
@@ -1762,7 +1764,7 @@ public class ConditionsUtils {
             case "tariff_value":
                 return country.getTariff() != null && country.getTariff() >= NumbersUtils.toDouble(value);
             case "tax_income_percentage":
-                return country.getLedger() != null
+                return country.getLedger() != null  && country.getLedger().getLastMonthIncomeTable().containsKey(Income.TAXES)
                        && BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TAXES))
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))) >= 0;
             case "technology_group":
@@ -1816,7 +1818,7 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return country.getTradeEmbargoedBy().contains(other);
             case "trade_income_percentage":
-                return country.getLedger() != null
+                return country.getLedger() != null && country.getLedger().getLastMonthIncomeTable().containsKey(Income.TRADE)
                        && BigDecimal.valueOf(country.getLedger().getLastMonthIncomeTable().get(Income.TRADE))
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))) >= 0;
             case "transport_fraction":
@@ -1835,13 +1837,16 @@ public class ConditionsUtils {
             case "unit_type":
                 return value.equalsIgnoreCase(country.getUnitType());
             case "uses_authority":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().isUseAuthority());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().isUseAuthority()));
             case "uses_church_aspects":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().usesChurchPower());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().usesChurchPower()));
             case "uses_blessings":
                 return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().getBlessings() != null);
             case "uses_cults":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().useFetishistCult());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().useFetishistCult()));
             case "uses_devotion":
                 return "yes".equalsIgnoreCase(value) == country.getGovernment()
                                                                .getReforms()
@@ -1850,27 +1855,37 @@ public class ConditionsUtils {
                                                                                    && (reform.isHasDevotion().getValue() == null
                                                                                        || reform.isHasDevotion().getValue().apply(country, country)));
             case "uses_doom":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().useDoom());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().useDoom()));
             case "uses_fervor":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().useFervor());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().useFervor()));
             case "uses_harmony":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().usesHarmony());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().usesHarmony()));
             case "uses_isolationism":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().usesIsolationism());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().usesIsolationism()));
             case "uses_karma":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().usesKarma());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().usesKarma()));
             case "uses_papacy":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().getPapacy() != null);
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().getPapacy() != null));
             case "uses_patriarch_authority":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().hasPatriarchs());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().hasPatriarchs()));
             case "uses_personal_deities":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().usePersonalDeity());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().usePersonalDeity()));
             case "uses_piety":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().usesPiety());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().usesPiety()));
             case "uses_religious_icons":
                 return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().getIcons() != null);
             case "uses_syncretic_faiths":
-                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && country.getReligion().getGameReligion().canHaveSecondaryReligion());
+                return "yes".equalsIgnoreCase(value) == (country.getReligion() != null && BooleanUtils.toBoolean(
+                        country.getReligion().getGameReligion().canHaveSecondaryReligion()));
             case "value": //Special case, used for scopes to count
                 return true;
             case "vassal_of":
@@ -2865,7 +2880,7 @@ public class ConditionsUtils {
                 return value.equalsIgnoreCase(province.getOwnerTag());
             case "owner_has_patriarchs":
                 return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getOwner().getReligion() != null &&
-                                                         province.getOwner().getReligion().getGameReligion().hasPatriarchs());
+                                                         BooleanUtils.toBoolean(province.getOwner().getReligion().getGameReligion().hasPatriarchs()));
             case "papacy_active":
                 return province.getSave().getReligions().getReligions().values().stream().anyMatch(religion -> religion.getPapacy() != null);
             case "previous_owner":

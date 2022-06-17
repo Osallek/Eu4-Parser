@@ -576,7 +576,8 @@ public enum StaticModifiers {
     public static Double applyToModifiersCountry(SaveCountry country, Modifier modifier) {
         return ModifiersUtils.sumModifiers(modifier,
                                            APPLIED_TO_COUNTRY.stream()
-                                                             .filter(staticModifiers -> !staticModifiers.modifiers.isEmpty())
+                                                             .filter(staticModifiers -> staticModifiers.modifiers != null
+                                                                                        && !staticModifiers.modifiers.isEmpty())
                                                              .filter(staticModifiers -> staticModifiers.trigger.apply(country, country))
                                                              .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
                                                              .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers)
@@ -586,7 +587,8 @@ public enum StaticModifiers {
 
     public static Double applyToModifiersProvince(SaveProvince province, Modifier modifier) {
         return ModifiersUtils.sumModifiers(modifier, APPLIED_TO_PROVINCE.stream()
-                                                                        .filter(staticModifiers -> !staticModifiers.modifiers.isEmpty())
+                                                                        .filter(staticModifiers -> staticModifiers.modifiers != null
+                                                                                                   && !staticModifiers.modifiers.isEmpty())
                                                                         .filter(staticModifiers -> staticModifiers.trigger.apply(province))
                                                                         .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
                                                                         .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers)

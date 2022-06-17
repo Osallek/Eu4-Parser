@@ -265,6 +265,10 @@ public class SaveCountry {
         }
     }
 
+    public String getCustomName() {
+        return this.item.getVarAsString("custom_name");
+    }
+
     public String getFlagPath(String extension) {
         return Path.of(Eu4Utils.GFX_FOLDER_PATH, "flags", getTag() + "." + extension).toString();
     }
@@ -995,7 +999,7 @@ public class SaveCountry {
     }
 
     public Set<SaveReligion> getAvailableSecondaryReligions() {
-        if (getReligion() == null || !getReligion().getGameReligion().canHaveSecondaryReligion()) {
+        if (getReligion() == null || !BooleanUtils.toBoolean(getReligion().getGameReligion().canHaveSecondaryReligion())) {
             return new HashSet<>();
         }
 
@@ -3392,7 +3396,8 @@ public class SaveCountry {
         return this.leaders.values().stream().filter(leader -> leaderType.equals(leader.getType())).toList();
     }
 
-    public void addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege, LeaderPersonality personality) {
+    public void addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege,
+                          LeaderPersonality personality) {
         int leaderId = this.save.getIdCounters().getAndIncrement(Counter.LEADER);
         Id.addToItem(this.item, "leader", leaderId, 49, this.item.getChild("active_relations").getOrder() + 1);
         this.history.addLeader(date, birthDate, name, type, manuever, fire, shock, siege, personality, leaderId);
@@ -4755,7 +4760,10 @@ public class SaveCountry {
                 if (!leadersItems.isEmpty()) {
                     leadersItems.forEach(leaderItem -> {
                         Id leaderId = new Id(leaderItem);
-                        this.leaders.put(leaderId.getId(), this.history.getLeader(leaderId.getId()));
+
+                        if (this.history.getLeader(leaderId.getId()) != null) {
+                            this.leaders.put(leaderId.getId(), this.history.getLeader(leaderId.getId()));
+                        }
                     });
                 }
             }

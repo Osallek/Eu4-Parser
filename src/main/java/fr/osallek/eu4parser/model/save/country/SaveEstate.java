@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SaveEstate {
 
@@ -47,8 +48,8 @@ public class SaveEstate {
         return this.item.getVarAsString("type");
     }
 
-    public Double getLoyalty() {
-        return this.item.getVarAsDouble("loyalty");
+    public double getLoyalty() {
+        return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("loyalty"));
     }
 
     public void setLoyalty(Double loyalty) {
@@ -130,24 +131,27 @@ public class SaveEstate {
         return ModifiersUtils.sumModifiers(modifier, modifiers);
     }
 
-    public Double getInfluence() {
+    public double getInfluence() {
         return NumbersUtils.doubleOrDefault(getEstateGame().getBaseInfluence())
-               + getInfluenceModifiers().stream().mapToDouble(SaveEstateModifier::getValue).sum()
-               + (getGrantedPrivileges() == null ? 0
-                                                 : getGrantedPrivileges().stream()
-                                                                         .map(EstateInteraction::getPrivilege)
-                                                                         .mapToDouble(EstatePrivilege::getInfluence)
-                                                                         .sum())
+               + getInfluenceModifiers().stream().mapToDouble(SaveEstateModifier::getValue).filter(Objects::nonNull).sum()
+               + getGrantedPrivileges().stream()
+                                       .map(EstateInteraction::getPrivilege)
+                                       .map(EstatePrivilege::getInfluence)
+                                       .filter(Objects::nonNull)
+                                       .mapToDouble(Double::doubleValue)
+                                       .sum()
                + getInfluenceFromTerritory()
                + this.estateGame.getInfluenceModifiers()
                                 .stream()
                                 .filter(estateModifier -> estateModifier.getTrigger().apply(this.country, this.country))
-                                .mapToDouble(EstateModifier::getAmount)
+                                .map(EstateModifier::getAmount)
+                                .filter(Objects::nonNull)
+                                .mapToDouble(Double::doubleValue)
                                 .sum()
                + NumbersUtils.doubleOrDefault(this.country.getModifier(ModifiersUtils.getModifier(getInfluenceModifierName()))) * 100;
     }
 
-    public Double getInfluenceFromTerritory() {
+    public double getInfluenceFromTerritory() {
         return Math.min(this.game.getEstateMaxInfluenceFromDev(),
                         getTerritory() * NumbersUtils.doubleOrDefault(this.estateGame.getInfluenceFromDevModifier()) * this.game.getEstateInfluencePerDev());
     }
@@ -162,7 +166,7 @@ public class SaveEstate {
                               .orElse(getType());
     }
 
-    public Double getTerritory() {
+    public double getTerritory() {
         return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("territory"));
     }
 

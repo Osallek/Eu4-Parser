@@ -918,11 +918,8 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Map<SaveCountry, Integer> getImproveCount() {
-        return this.improveCount.entrySet()
-                                .stream()
-                                .map(entry -> new AbstractMap.SimpleEntry<>(this.save.getCountry(entry.getKey()), entry.getValue()))
-                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public Map<String, Integer> getImproveCount() {
+        return this.improveCount;
     }
 
     public int getTotalImproveCount() {

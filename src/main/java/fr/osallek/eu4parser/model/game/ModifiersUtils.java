@@ -530,6 +530,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("relation_with_same_culture_group", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("relation_with_accepted_culture", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("relation_with_other_culture", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_piety_accelerator", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {

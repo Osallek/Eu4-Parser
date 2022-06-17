@@ -10,6 +10,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class SaveProvinceHistoryEvent {
 
@@ -58,16 +61,16 @@ public class SaveProvinceHistoryEvent {
         return this.item.getVarAsBool("hre");
     }
 
-    public Integer getBaseTax() {
-        return NumbersUtils.doubleToInt(this.item.getVarAsDouble("base_tax"));
+    public Double getBaseTax() {
+        return this.item.getVarAsDouble("base_tax");
     }
 
-    public Integer getBaseProduction() {
-        return NumbersUtils.doubleToInt(this.item.getVarAsDouble("base_production"));
+    public Double getBaseProduction() {
+        return this.item.getVarAsDouble("base_production");
     }
 
-    public Integer getBaseManpower() {
-        return NumbersUtils.doubleToInt(this.item.getVarAsDouble("base_manpower"));
+    public Double getBaseManpower() {
+        return this.item.getVarAsDouble("base_manpower");
     }
 
     public String getTradeGood() {
@@ -146,13 +149,13 @@ public class SaveProvinceHistoryEvent {
         return null;
     }
 
-    public List<String> getBuildings() {
+    public Map<String, Boolean> getBuildings() {
         return this.province.getSave()
                             .getGame()
                             .getBuildings()
                             .stream()
                             .map(Building::getName)
-                            .filter(name -> this.item.hasVar(name, "yes"))
-                            .toList();
+                            .filter(this.item::hasVar)
+                            .collect(Collectors.toMap(Function.identity(), this.item::getVarAsBool));
     }
 }
