@@ -30,15 +30,15 @@ public class SaveProvinceHistoryEvent {
     }
 
     public String getCapital() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("capital"));
+        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("capital"));
     }
 
     public Double getColonySize() {
-        return this.item.getVarAsDouble("colonysize");
+        return this.item.getLastVarAsDouble("colonysize");
     }
 
     public Double getUnrest() {
-        return this.item.getVarAsDouble("unrest");
+        return this.item.getLastVarAsDouble("unrest");
     }
 
     public List<String> getAddCores() {
@@ -58,71 +58,71 @@ public class SaveProvinceHistoryEvent {
     }
 
     public Boolean getHre() {
-        return this.item.getVarAsBool("hre");
+        return this.item.getLastVarAsBool("hre");
     }
 
     public Double getBaseTax() {
-        return this.item.getVarAsDouble("base_tax");
+        return this.item.getLastVarAsDouble("base_tax");
     }
 
     public Double getBaseProduction() {
-        return this.item.getVarAsDouble("base_production");
+        return this.item.getLastVarAsDouble("base_production");
     }
 
     public Double getBaseManpower() {
-        return this.item.getVarAsDouble("base_manpower");
+        return this.item.getLastVarAsDouble("base_manpower");
     }
 
     public String getTradeGood() {
-        return this.item.getVarAsString("trade_goods");
+        return this.item.getLastVarAsString("trade_goods");
     }
 
     public Pair<String, String> getName() {
         if (this.item.hasChild("name")) {
-            return Pair.of(this.item.getChild("name").getVarAsString("name"), this.item.getChild("name").getVarAsString("old_name"));
+            return Pair.of(this.item.getLastChild("name").getVarAsString("name"), this.item.getLastChild("name").getVarAsString("old_name"));
         }
 
         return null;
     }
 
     public String getTribalOwner() {
-        return this.item.getVarAsString("tribal_owner");
+        return this.item.getLastVarAsString("tribal_owner");
     }
 
     public SaveAdvisor getAdvisor() {
         if (this.item.hasChild("advisor")) {
-            return new SaveAdvisor(this.item.getChild("advisor"), this.province.getSave());
+            return new SaveAdvisor(this.item.getLastChild("advisor"), this.province.getSave());
         }
 
         return null;
     }
 
     public Integer getNativeHostileness() {
-        return this.item.getVarAsInt("native_hostileness");
+        return this.item.getLastVarAsInt("native_hostileness");
     }
 
     public Integer getNativeFerocity() {
-        return this.item.getVarAsInt("native_ferocity");
+        return this.item.getLastVarAsInt("native_ferocity");
     }
 
     public Integer getNativeSize() {
-        return NumbersUtils.doubleToInt(this.item.getVarAsDouble("native_size"));
+        return NumbersUtils.doubleToInt(this.item.getLastVarAsDouble("native_size"));
     }
 
     public String getOwner() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("owner"));
+        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("owner"));
     }
 
     public String getController() {
-        if (this.item.hasChild("controller") && this.item.getChild("controller").hasVar("tag")) {
-            return ClausewitzUtils.removeQuotes(this.item.getChild("controller").getVarAsString("tag"));
+        if (this.item.hasChild("controller") && this.item.getLastChild("controller").hasVar("tag")) {
+            return ClausewitzUtils.removeQuotes(this.item.getLastChild("controller").getVarAsString("tag"));
         }
 
         return null;
     }
 
     public String getRemoveClaim() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("remove_claim"));
+        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("remove_claim"));
     }
 
     public List<String> getDiscoveredBy() {
@@ -130,20 +130,20 @@ public class SaveProvinceHistoryEvent {
     }
 
     public String getCulture() {
-        return this.item.getVarAsString("culture");
+        return this.item.getLastVarAsString("culture");
     }
 
     public String getReligion() {
-        return this.item.getVarAsString("religion");
+        return this.item.getLastVarAsString("religion");
     }
 
     public Boolean getIsCity() {
-        return this.item.getVarAsBool("is_city");
+        return this.item.getLastVarAsBool("is_city");
     }
 
     public ProvinceRevolt getRevolt() {
         if (this.item.hasChild("revolt")) {
-            return new ProvinceRevolt(this.item.getChild("revolt"));
+            return new ProvinceRevolt(this.item.getLastChild("revolt"));
         }
 
         return null;

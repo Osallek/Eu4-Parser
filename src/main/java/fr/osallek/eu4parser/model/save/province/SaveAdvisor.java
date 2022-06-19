@@ -77,12 +77,20 @@ public class SaveAdvisor {
         return this.save.getGame().getCulture(this.item.getVarAsString("culture"));
     }
 
+    public String getCultureName() {
+        return this.item.getVarAsString("culture");
+    }
+
     public void setCulture(Culture culture) {
         this.item.setVariable("culture", culture.getName());
     }
 
     public SaveReligion getReligion() {
         return this.save.getReligions().getReligion(this.item.getVarAsString("religion"));
+    }
+
+    public String getReligionName() {
+        return this.item.getVarAsString("religion");
     }
 
     public void setReligion(SaveReligion religion) {

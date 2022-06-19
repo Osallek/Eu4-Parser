@@ -7,12 +7,12 @@ import java.time.LocalDate;
 
 public class Heir extends Monarch {
 
-    public Heir(ClausewitzItem item, Save save, SaveCountry country) {
-        super(item, save, country);
+    public Heir(ClausewitzItem item, SaveCountry country) {
+        super(item, country);
     }
 
-    public Heir(ClausewitzItem item, Save save, SaveCountry country, LocalDate date) {
-        super(item, save, country, date);
+    public Heir(ClausewitzItem item, SaveCountry country, LocalDate date) {
+        super(item, country, date);
     }
 
     public Double getClaim() {

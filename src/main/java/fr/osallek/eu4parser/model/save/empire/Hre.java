@@ -247,7 +247,9 @@ public class Hre extends Empire {
         refreshAttributes();
     }
 
+    @Override
     protected void refreshAttributes() {
+        super.refreshAttributes();
         ClausewitzItem incidentItem = this.item.getChild("active_incident");
 
         if (incidentItem != null) {

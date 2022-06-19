@@ -4,9 +4,6 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.LeaderPersonality;
-import fr.osallek.eu4parser.model.save.Save;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,14 +14,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 
-public class SaveCountryHistory {
-
-    private final Save save;
-
-    private final SaveCountry country;
-
-    private final ClausewitzItem item;
+public class SaveCountryHistory extends SaveCountryHistoryEvent {
 
     private Map<Integer, Monarch> monarchs;
 
@@ -36,11 +28,22 @@ public class SaveCountryHistory {
 
     private SortedMap<LocalDate, List<String>> changedTagFrom;
 
-    public SaveCountryHistory(ClausewitzItem item, Save save, SaveCountry country) {
-        this.save = save;
-        this.item = item;
-        this.country = country;
+    public SaveCountryHistory(ClausewitzItem item, SaveCountry country) {
+        super(item, country);
         refreshAttributes();
+    }
+
+    @Override
+    public LocalDate getDate() {
+        return this.country.getSave().getStartDate();
+    }
+
+    public List<SaveCountryHistoryEvent> getEvents() {
+        return this.item.getChildren()
+                        .stream()
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .map(child -> new SaveCountryHistoryEvent(child, this.country))
+                        .collect(Collectors.toList());
     }
 
     public Monarch getMonarch(int id) {
@@ -75,7 +78,7 @@ public class SaveCountryHistory {
         return queens;
     }
 
-    public SortedMap<LocalDate, List<String>> getChangedTagFrom() {
+    public SortedMap<LocalDate, List<String>> getChangedTagsFrom() {
         return changedTagFrom;
     }
 
@@ -129,7 +132,7 @@ public class SaveCountryHistory {
                                      return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
                                  })
                                  .filter(Objects::nonNull)
-                                 .map(child -> new Monarch(child.getKey(), this.save, this.country, child.getValue()))
+                                 .map(child -> new Monarch(child.getKey(), this.country, child.getValue()))
                                  .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity(), (monarch, monarch2) -> monarch2));
 
         this.leaders = this.item.getChildren()
@@ -152,7 +155,7 @@ public class SaveCountryHistory {
                                   return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
                               })
                               .filter(Objects::nonNull)
-                              .map(child -> new Heir(child.getKey(), this.save, this.country, child.getValue()))
+                              .map(child -> new Heir(child.getKey(), this.country, child.getValue()))
                               .collect(Collectors.toMap(heir -> heir.getId().getId(), Function.identity(), (heir, heir2) -> heir2));
 
         this.queens = this.item.getChildren()
@@ -163,7 +166,7 @@ public class SaveCountryHistory {
                                    return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
                                })
                                .filter(Objects::nonNull)
-                               .map(child -> new Queen(child.getKey(), this.save, this.country, child.getValue()))
+                               .map(child -> new Queen(child.getKey(), this.country, child.getValue()))
                                .collect(Collectors.toMap(queen -> queen.getId().getId(), Function.identity(), (queen, queen2) -> queen2));
 
         this.leaders.putAll(this.monarchs.values()

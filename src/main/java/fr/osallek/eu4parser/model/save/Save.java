@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.save;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
@@ -33,8 +34,6 @@ import fr.osallek.eu4parser.model.save.revolution.Revolution;
 import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import fr.osallek.eu4parser.model.save.war.PreviousWar;
-import org.apache.commons.lang3.BooleanUtils;
-
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -42,11 +41,13 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,6 +56,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.BooleanUtils;
 
 public class Save {
 
@@ -759,6 +761,19 @@ public class Save {
                                           .collect(Collectors.toMap(SaveCountry::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
             this.playableCountries = this.countries.values().stream().filter(SaveCountry::isPlayable).toList();
         }
+
+        Set<String> vars = countriesItem.getChildren()
+                                        .stream()
+                                        .map(child -> child.getChild("history"))
+                                        .filter(Objects::nonNull)
+                                        .map(ClausewitzItem::getChildren)
+                                        .flatMap(Collection::stream)
+                                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                                        .map(ClausewitzItem::getAllOrdered)
+                                        .flatMap(Collection::stream)
+                                        .filter(Objects::nonNull)
+                                        .map(ClausewitzObject::getName)
+                                        .collect(Collectors.toSet());
 
         ClausewitzList playersCountriesList = this.gamestateItem.getList("players_countries");
 

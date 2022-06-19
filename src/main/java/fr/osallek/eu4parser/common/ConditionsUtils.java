@@ -31,12 +31,6 @@ import fr.osallek.eu4parser.model.save.gameplayoptions.ProvinceTaxManpower;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -51,6 +45,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConditionsUtils {
 
@@ -227,7 +226,7 @@ public class ConditionsUtils {
                 return country.getConsort() != null
                        && country.getConsort().getBirthDate().plusYears(NumbersUtils.toInt(value)).isBefore(country.getSave().getDate());
             case "consort_culture":
-                return country.getConsort() != null && country.getConsort().getCulture().getName().equals(rawValueToCulture(rawValue, root, from));
+                return country.getConsort() != null && rawValueToCulture(rawValue, root, from).equals(country.getConsort().getCultureName());
             case "consort_dip":
                 return country.getConsort() != null && country.getConsort().getDip() >= NumbersUtils.toInt(value);
             case "consort_has_personality":
@@ -679,7 +678,7 @@ public class ConditionsUtils {
             case "heir_claim":
                 return country.getHeir() != null && NumbersUtils.doubleOrDefault(country.getHeir().getClaim()) >= NumbersUtils.toInt(value);
             case "heir_culture":
-                return country.getHeir() != null && country.getHeir().getCulture().getName().equals(rawValueToCulture(rawValue, root, from));
+                return country.getHeir() != null && rawValueToCulture(rawValue, root, from).equals(country.getHeir().getCultureName());
             case "heir_has_consort_dynasty":
                 return country.getHeir() != null && country.getConsort() != null && country.getHeir().getDynasty().equals(country.getConsort().getDynasty());
             case "heir_has_personality":
@@ -1708,7 +1707,7 @@ public class ConditionsUtils {
             case "ruler_consort_marriage_length": //Todo
                 break;
             case "ruler_culture":
-                return country.getMonarch() == null || rawValueToCulture(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getCulture().getName());
+                return country.getMonarch() == null || rawValueToCulture(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getCultureName());
             case "ruler_is_foreigner":
                 return "yes".equalsIgnoreCase(value) == (country.getMonarch() == null ||
                                                          (country.getMonarch().getCountry() != null && !country.equals(country.getMonarch().getCountry())));
@@ -2835,6 +2834,7 @@ public class ConditionsUtils {
                 return NumbersUtils.intOrDefault(province.getNativeHostileness()) >= NumbersUtils.toInt(value);
             case "national_defense":
                 return "yes".equalsIgnoreCase(value) == (province.getOwner() != null && province.getCores().contains(province.getOwner())
+                                                         && province.getCulture() != null
                                                          && province.getCulture()
                                                                     .getCultureGroup()
                                                                     .equals(province.getOwner().getPrimaryCulture().getCultureGroup())

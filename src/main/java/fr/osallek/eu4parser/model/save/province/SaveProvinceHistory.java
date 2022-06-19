@@ -49,15 +49,15 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
     }
 
     public Boolean getSeatInParliament() {
-        return this.item.getVarAsBool("seat_in_parliament");
+        return this.item.getLastVarAsBool("seat_in_parliament");
     }
 
     public Double getExtraCost() {
-        return this.item.getVarAsDouble("extra_cost");
+        return this.item.getLastVarAsDouble("extra_cost");
     }
 
     public Integer getFormerNativeSize() {
-        return NumbersUtils.doubleToInt(this.item.getVarAsDouble("former_native_size"));
+        return NumbersUtils.doubleToInt(this.item.getLastVarAsDouble("former_native_size"));
     }
 
     public List<SaveProvinceHistoryEvent> getEvents() {
@@ -144,8 +144,8 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
                                                               TreeMap::new));
 
         if (MapUtils.isNotEmpty(this.owners) && this.province.getOwner() != null && !this.owners.containsValue(this.province.getOwner())) {
-            if (MapUtils.isNotEmpty(this.province.getOwner().getHistory().getChangedTagFrom())) {
-                this.owners.put(this.province.getOwner().getHistory().getChangedTagFrom().lastKey(), this.province.getOwner());
+            if (MapUtils.isNotEmpty(this.province.getOwner().getHistory().getChangedTagsFrom())) {
+                this.owners.put(this.province.getOwner().getHistory().getChangedTagsFrom().lastKey(), this.province.getOwner());
             } else {
                 this.owners.put(this.province.getSave().getDate(), this.province.getOwner());
             }

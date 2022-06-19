@@ -210,4 +210,8 @@ public abstract class Empire {
     protected void refreshAttributes() {
         this.oldEmperors = this.item.getChildren("old_emperor").stream().map(OldEmperor::new).toList();
     }
+
+    public Save getSave() {
+        return save;
+    }
 }

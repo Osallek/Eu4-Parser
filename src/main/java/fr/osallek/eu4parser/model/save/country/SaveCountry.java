@@ -4495,7 +4495,7 @@ public class SaveCountry {
         ClausewitzItem historyItem = this.item.getChild("history");
 
         if (historyItem != null) {
-            this.history = new SaveCountryHistory(historyItem, this.save, this);
+            this.history = new SaveCountryHistory(historyItem, this);
         }
 
         ClausewitzItem flagsItem = this.item.getChild("flags");

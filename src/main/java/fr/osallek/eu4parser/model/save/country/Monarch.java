@@ -12,8 +12,6 @@ import java.time.LocalDate;
 
 public class Monarch {
 
-    protected final Save save;
-
     protected final SaveCountry country;
 
     protected final ClausewitzItem item;
@@ -32,15 +30,13 @@ public class Monarch {
 
     private Leader leader;
 
-    public Monarch(ClausewitzItem item, Save save, SaveCountry country) {
-        this.save = save;
+    public Monarch(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
         refreshAttributes();
     }
 
-    public Monarch(ClausewitzItem item, Save save, SaveCountry country, LocalDate date) {
-        this.save = save;
+    public Monarch(ClausewitzItem item, SaveCountry country, LocalDate date) {
         this.item = item;
         this.country = country;
         this.monarchDate = date;
@@ -70,7 +66,7 @@ public class Monarch {
     }
 
     public SaveCountry getCountry() {
-        return this.save.getCountry(this.item.getVarAsString("country"));
+        return this.country.getSave().getCountry(this.item.getVarAsString("country"));
     }
 
     public Integer getAdm() {
@@ -124,7 +120,11 @@ public class Monarch {
     }
 
     public Culture getCulture() {
-        return this.save.getGame().getCulture(this.item.getVarAsString("culture"));
+        return this.country.getSave().getGame().getCulture(this.item.getVarAsString("culture"));
+    }
+
+    public String getCultureName() {
+        return this.item.getVarAsString("culture");
     }
 
     public void setCulture(Culture culture) {
@@ -138,7 +138,11 @@ public class Monarch {
     }
 
     public SaveReligion getReligion() {
-        return this.save.getReligions().getReligion(this.item.getVarAsString("religion"));
+        return this.country.getSave().getReligions().getReligion(this.item.getVarAsString("religion"));
+    }
+
+    public String getReligionName() {
+        return this.item.getVarAsString("religion");
     }
 
     public void setReligion(SaveReligion religion) {
@@ -281,7 +285,7 @@ public class Monarch {
     }
 
     public SaveCountry getWho() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("who")));
+        return this.country.getSave().getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("who")));
     }
 
     public void setWho(SaveCountry who) {
@@ -316,7 +320,7 @@ public class Monarch {
         ClausewitzItem personalitiesItem = this.item.getChild("personalities");
 
         if (personalitiesItem != null) {
-            this.personalities = new Personalities(personalitiesItem, this.save);
+            this.personalities = new Personalities(personalitiesItem, this.country.getSave());
         }
 
         ClausewitzItem hasDeclaredWarItem = this.item.getChild("has_declared_war");

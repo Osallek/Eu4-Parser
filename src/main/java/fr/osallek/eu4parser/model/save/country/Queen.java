@@ -7,12 +7,12 @@ import java.time.LocalDate;
 
 public class Queen extends Monarch {
 
-    public Queen(ClausewitzItem item, Save save, SaveCountry country) {
-        super(item, save, country);
+    public Queen(ClausewitzItem item, SaveCountry country) {
+        super(item, country);
     }
 
-    public Queen(ClausewitzItem item, Save save, SaveCountry country, LocalDate date) {
-        super(item, save, country, date);
+    public Queen(ClausewitzItem item, SaveCountry country, LocalDate date) {
+        super(item, country, date);
     }
 
     public Boolean getConsort() {
@@ -24,7 +24,7 @@ public class Queen extends Monarch {
     }
 
     public SaveCountry getCountryOfOrigin() {
-        return this.save.getCountry(this.item.getVarAsString("country_of_origin"));
+        return this.country.getSave().getCountry(this.item.getVarAsString("country_of_origin"));
     }
 
     public void setCountryOfOrigin(SaveCountry countryOfOrigin) {
