@@ -84,18 +84,6 @@ public class SaveCountryHistoryEvent {
         return null;
     }
 
-    public Integer getMilTech() {
-        return this.item.getLastVarAsInt("mil_tech");
-    }
-
-    public Integer getAdmTech() {
-        return this.item.getLastVarAsInt("adm_tech");
-    }
-
-    public Integer getDipTech() {
-        return this.item.getLastVarAsInt("dip_tech");
-    }
-
     public String getAddGovernmentReform() {
         return this.item.getLastVarAsString("add_government_reform");
     }

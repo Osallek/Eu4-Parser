@@ -113,6 +113,10 @@ public class SaveProvinceHistoryEvent {
         return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("owner"));
     }
 
+    public String getFakeOwner() {
+        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("fake_owner"));
+    }
+
     public String getController() {
         if (this.item.hasChild("controller") && this.item.getLastChild("controller").hasVar("tag")) {
             return ClausewitzUtils.removeQuotes(this.item.getLastChild("controller").getVarAsString("tag"));
