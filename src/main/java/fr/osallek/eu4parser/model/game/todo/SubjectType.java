@@ -120,7 +120,7 @@ public class SubjectType {
 
     private double militaryFocus;
 
-    private int relativePowerClass;
+    private double relativePowerClass;
 
     private int diplomacyViewClass;
 
@@ -285,7 +285,7 @@ public class SubjectType {
         this.forcelimitBonus = NumbersUtils.doubleOrDefault(item.getVarAsDouble("forcelimit_bonus"), this.forcelimitBonus);
         this.forcelimitToOverlord = NumbersUtils.doubleOrDefault(item.getVarAsDouble("forcelimit_to_overlord"), this.forcelimitToOverlord);
         this.militaryFocus = NumbersUtils.doubleOrDefault(item.getVarAsDouble("military_focus"), this.militaryFocus);
-        this.relativePowerClass = NumbersUtils.intOrDefault(item.getVarAsInt("relative_power_class"), this.relativePowerClass);
+        this.relativePowerClass = NumbersUtils.doubleOrDefault(item.getVarAsDouble("relative_power_class"), this.relativePowerClass);
         this.diplomacyViewClass = NumbersUtils.intOrDefault(item.getVarAsInt("diplomacy_view_class"), this.diplomacyViewClass);
         this.embargoRivals = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("embargo_rivals"), this.embargoRivals);
         this.supportLoyalists = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("support_loyalists"), this.supportLoyalists);
@@ -681,7 +681,7 @@ public class SubjectType {
         return militaryFocus;
     }
 
-    public int getRelativePowerClass() {
+    public double getRelativePowerClass() {
         return relativePowerClass;
     }
 

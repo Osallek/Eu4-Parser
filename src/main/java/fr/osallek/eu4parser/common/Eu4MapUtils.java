@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.googlecode.pngtastic.core.PngOptimizer;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Province;
 import org.apache.batik.dom.GenericDOMImplementation;
@@ -52,6 +53,8 @@ public class Eu4MapUtils {
     public static final Color OCEAN_COLOR = new Color(68, 107, 163);
 
     public static final Color IMPASSABLE_COLOR = new Color(94, 94, 94);
+
+    public static final PngOptimizer PNG_OPTIMIZER = new PngOptimizer();
 
     public static Color winterToColor(String winter) {
         if ("mild_winter".equals(winter)) {

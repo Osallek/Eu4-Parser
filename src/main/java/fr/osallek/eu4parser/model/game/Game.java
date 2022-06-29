@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
+import com.googlecode.pngtastic.core.PngImage;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
@@ -1003,6 +1004,7 @@ public class Game {
                 File destFile = finalPath.toFile();
                 FileUtils.forceMkdirParent(destFile);
                 ImageIO.write(ImageReader.convertFileToImage(file.toFile()), "png", destFile);
+                Eu4MapUtils.PNG_OPTIMIZER.optimize(new PngImage(destFile.getAbsolutePath(), null), destFile.getAbsolutePath(), false, 9);
             } else if ("png".equals(extension) || "jpg".equals(extension) || "jpeg".equals(extension)) {
                 finalPath = destFolder.resolve(destFileName + "." + FilenameUtils.getExtension(fileName));
                 FileUtils.copyFile(file.toFile(), finalPath.toFile());
@@ -3302,7 +3304,7 @@ public class Game {
                         if (StaticModifiers.value(item.getName()) != null) {
                             StaticModifiers.value(item.getName()).setModifiers(new Modifiers(item));
                             StaticModifier staticModifier = new StaticModifier(item);
-                            this.staticModifiers.put(staticModifier.getName(), staticModifier);
+                            this.staticModifiers.put(staticModifier.getName().toLowerCase(), staticModifier);
                         }
                     });
                 });
@@ -3492,7 +3494,7 @@ public class Game {
                     this.parliamentIssues.putAll(parliamentIssueItem.getChildren()
                                                                     .stream()
                                                                     .map(ParliamentIssue::new)
-                                                                    .collect(Collectors.toMap(ParliamentIssue::getName, Function.identity(), (a, b) -> b)));
+                                                                    .collect(Collectors.toMap(i -> i.getName().toLowerCase(), Function.identity(), (a, b) -> b)));
                 });
     }
 
@@ -3571,7 +3573,7 @@ public class Game {
                     this.eventModifiers.putAll(eventModifierItem.getChildren()
                                                                 .stream()
                                                                 .map(EventModifier::new)
-                                                                .collect(Collectors.toMap(EventModifier::getName, Function.identity(), (a, b) -> b)));
+                                                                .collect(Collectors.toMap(m -> m.getName().toLowerCase(), Function.identity(), (a, b) -> b)));
                 });
     }
 
@@ -3584,8 +3586,8 @@ public class Game {
                     this.provinceTriggeredModifiers.putAll(provinceTriggeredIssueItem.getChildren()
                                                                                      .stream()
                                                                                      .map(TriggeredModifier::new)
-                                                                                     .collect(Collectors.toMap(TriggeredModifier::getName, Function.identity(),
-                                                                                                               (a, b) -> b)));
+                                                                                     .collect(Collectors.toMap(m -> m.getName().toLowerCase(),
+                                                                                                               Function.identity(), (a, b) -> b)));
                 });
     }
 
@@ -3598,7 +3600,8 @@ public class Game {
                     this.triggeredModifiers.putAll(triggeredIssueItem.getChildren()
                                                                      .stream()
                                                                      .map(TriggeredModifier::new)
-                                                                     .collect(Collectors.toMap(GameModifier::getName, Function.identity(), (a, b) -> b)));
+                                                                     .collect(Collectors.toMap(m -> m.getName().toLowerCase(), Function.identity(),
+                                                                                               (a, b) -> b)));
 
                 });
     }

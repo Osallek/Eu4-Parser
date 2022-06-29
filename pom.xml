@@ -73,6 +73,11 @@
       <artifactId>geojson-jackson</artifactId>
       <version>${geojson-jackson.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.depsypher</groupId>
+      <artifactId>pngtastic</artifactId>
+      <version>1.7</version>
+    </dependency>
   </dependencies>
 
   <build>
