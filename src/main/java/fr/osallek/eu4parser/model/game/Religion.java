@@ -1,11 +1,19 @@
 package fr.osallek.eu4parser.model.game;
 
+import com.googlecode.pngtastic.core.PngImage;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.common.Eu4MapUtils;
+import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +23,8 @@ public class Religion {
     private final ReligionGroup religionGroup;
 
     private final ClausewitzItem item;
+
+    private Path writenTo;
 
     public Religion(ClausewitzItem item, ReligionGroup religionGroup) {
         this.item = item;
@@ -433,5 +443,24 @@ public class Religion {
         } else {
             this.item.setVariable("harmonized_modifier", harmonizedModifier);
         }
+    }
+
+    public BufferedImage getImage() throws IOException {
+        return ImageReader.convertFileToImage(this.religionGroup.getGame().getReligionsImage()).getSubimage((getIcon() - 1) * 64, 0, 64, 64);
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(getImage(), "png", dest.toFile());
+        Eu4MapUtils.PNG_OPTIMIZER.optimize(new PngImage(dest.toFile().getAbsolutePath(), null), dest.toFile().getAbsolutePath(), false, 9);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 }

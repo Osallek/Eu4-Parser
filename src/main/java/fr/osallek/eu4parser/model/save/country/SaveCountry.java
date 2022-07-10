@@ -269,6 +269,10 @@ public class SaveCountry {
         return this.item.getVarAsString("custom_name");
     }
 
+    public String getName() {
+        return this.item.getVarAsString("name");
+    }
+
     public String getFlagPath(String extension) {
         return Path.of(Eu4Utils.GFX_FOLDER_PATH, "flags", getTag() + "." + extension).toString();
     }
@@ -303,6 +307,18 @@ public class SaveCountry {
 
     public boolean isClientState() {
         return Country.CLIENT_STATE_PATTERN.matcher(getTag()).matches();
+    }
+
+    public boolean isCossackRevolt() {
+        return Country.COSSACK_REVOLT_PATTERN.matcher(getTag()).matches();
+    }
+
+    public boolean isObserver() {
+        return Country.OBSERVER_PATTERN.matcher(getTag()).matches();
+    }
+
+    public boolean isUnknown() {
+        return Country.UNKNOWN_PATTERN.matcher(getTag()).matches();
     }
 
     public boolean isNameEditable() {

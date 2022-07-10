@@ -6,6 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,10 @@ public class Building extends Nodded {
 
     public SpriteType getSprite() {
         return this.game.getSpriteType(getSpriteName());
+    }
+
+    public File getImage() {
+        return this.game.getBuildingFlagImage(this);
     }
 
     public Integer getCost() {

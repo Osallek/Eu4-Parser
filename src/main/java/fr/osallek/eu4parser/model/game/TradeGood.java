@@ -1,23 +1,43 @@
 package fr.osallek.eu4parser.model.game;
 
+import com.googlecode.pngtastic.core.PngImage;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.common.Eu4MapUtils;
+import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
+import org.apache.commons.io.FileUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class TradeGood {
 
     private final ClausewitzItem item;
 
+    private final int index;
+
+    private final Game game;
+
     private ClausewitzItem priceItem;
 
-    public TradeGood(ClausewitzItem item) {
+    private Path writenTo;
+
+    public TradeGood(ClausewitzItem item, int index, Game game) {
         this.item = item;
+        this.index = index;
+        this.game = game;
     }
 
     public void setPriceItem(ClausewitzItem priceItem) {
         this.priceItem = priceItem;
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     public String getName() {
@@ -85,6 +105,25 @@ public class TradeGood {
         } else {
             this.priceItem.setVariable("goldtype", goldType);
         }
+    }
+
+    public BufferedImage getImage() throws IOException {
+        return ImageReader.convertFileToImage(this.game.getResourcesImage()).getSubimage(this.index * 64, 0, 64, 64);
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(getImage(), "png", dest.toFile());
+        Eu4MapUtils.PNG_OPTIMIZER.optimize(new PngImage(dest.toFile().getAbsolutePath(), null), dest.toFile().getAbsolutePath(), false, 9);
+        this.writenTo = dest;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
     }
 
     @Override

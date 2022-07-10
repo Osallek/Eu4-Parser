@@ -1,10 +1,12 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
 import org.apache.commons.collections4.MapUtils;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,6 +103,10 @@ public class Advisor extends Nodded {
 
     public SpriteType getDefaultSprite() {
         return this.game.getSpriteType(getDefaultSpriteName());
+    }
+
+    public File getDefaultImage() {
+        return this.game.getSpriteTypeImageFile(getDefaultSpriteName());
     }
 
     @Override

@@ -10,6 +10,7 @@ import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 
+import java.io.File;
 import java.time.LocalDate;
 
 public class SaveAdvisor {
@@ -119,6 +120,10 @@ public class SaveAdvisor {
 
     public void setDeathDate(LocalDate deathDate) {
         this.item.setVariable("death_date", deathDate);
+    }
+
+    public File getImage() {
+        return this.gameAdvisor.getDefaultImage();
     }
 
     public Modifiers getModifiers() {

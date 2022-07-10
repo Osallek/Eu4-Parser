@@ -13,8 +13,11 @@ public class ReligionGroup {
 
     private final ClausewitzItem item;
 
-    public ReligionGroup(ClausewitzItem item) {
+    private final Game game;
+
+    public ReligionGroup(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
     }
 
     public String getName() {
@@ -128,6 +131,10 @@ public class ReligionGroup {
                         .stream()
                         .map(child -> new Religion(child, this))
                         .toList();
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     @Override

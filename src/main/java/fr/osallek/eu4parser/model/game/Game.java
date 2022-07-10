@@ -987,11 +987,11 @@ public class Game {
         }
     }
 
-    public Path convertImage(Path destFolder, Path destPath, Path file) {
+    public static Path convertImage(Path destFolder, Path destPath, Path file) {
         return convertImage(destFolder, destPath, null, file);
     }
 
-    public Path convertImage(Path destFolder, Path destPath, String destName, Path file) {
+    public static Path convertImage(Path destFolder, Path destPath, String destName, Path file) {
         try {
             String fileName = file.getFileName().toString();
             String destFileName = StringUtils.isBlank(destName) ? FilenameUtils.removeExtension(fileName) : destName;
@@ -1116,6 +1116,14 @@ public class Game {
         return provinceImageHeight;
     }
 
+    public File getResourcesImage() {
+        return getSpriteTypeImageFile("GFX_resource_icon");
+    }
+
+    public File getReligionsImage() {
+        return getSpriteTypeImageFile("GFX_icon_religion");
+    }
+
     public File getNormalCursorImage() {
         return getAbsoluteFile(Eu4Utils.GFX_FOLDER_PATH + File.separator + "cursors" + File.separator + "normal.png");
     }
@@ -1134,6 +1142,14 @@ public class Game {
 
     public File getCountryFlagImage(Country country) {
         return country == null ? null : getAbsoluteFile(country.getFlagPath("tga"));
+    }
+
+    public File getBuildingFlagImage(Building building) {
+        return building == null ? null : getSpriteTypeImageFile(building.getSpriteName());
+    }
+
+    public File getAdvisorFlagImage(Building building) {
+        return building == null ? null : getSpriteTypeImageFile(building.getSpriteName());
     }
 
     public Map<Integer, Province> getProvinces() {
@@ -1215,6 +1231,10 @@ public class Game {
     public Localisation getLocalisation(String key, Eu4Language eu4Language) {
         Map<Eu4Language, Localisation> map = this.localisations.get(key);
         return MapUtils.isEmpty(map) ? null : map.get(eu4Language);
+    }
+
+    public Map<Eu4Language, Localisation> getLocalisation(String key) {
+        return this.localisations.get(key);
     }
 
     public String getLocalisationClean(String key, Eu4Language eu4Language) {
@@ -2787,7 +2807,7 @@ public class Game {
                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
                     religionGroupsItem.getChildren()
                                       .stream()
-                                      .map(ReligionGroup::new)
+                                      .map(item -> new ReligionGroup(item, this))
                                       .forEach(religionGroup -> this.religionGroups.put(religionGroup.getName(), religionGroup));
                 });
     }
@@ -2801,7 +2821,7 @@ public class Game {
                     ClausewitzItem institutionsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.institutions.putAll(institutionsItem.getChildren()
                                                              .stream()
-                                                             .map(item -> new Institution(item, i.getAndIncrement()))
+                                                             .map(item -> new Institution(item, this, i.getAndIncrement()))
                                                              .collect(Collectors.toMap(Institution::getName, Function.identity(), (a, b) -> b,
                                                                                        LinkedHashMap::new)));
                 });
@@ -2809,13 +2829,14 @@ public class Game {
 
     private void readTradeGoods() {
         this.tradeGoods = new LinkedHashMap<>();
+        AtomicInteger i = new AtomicInteger();
 
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "tradegoods", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem tradeGoodsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.tradeGoods.putAll(tradeGoodsItem.getChildren()
                                                          .stream()
-                                                         .map(TradeGood::new)
+                                                         .map(item -> new TradeGood(item, i.getAndIncrement(), this))
                                                          .collect(Collectors.toMap(TradeGood::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
                 });
 
@@ -3494,7 +3515,8 @@ public class Game {
                     this.parliamentIssues.putAll(parliamentIssueItem.getChildren()
                                                                     .stream()
                                                                     .map(ParliamentIssue::new)
-                                                                    .collect(Collectors.toMap(i -> i.getName().toLowerCase(), Function.identity(), (a, b) -> b)));
+                                                                    .collect(Collectors.toMap(i -> i.getName().toLowerCase(), Function.identity(),
+                                                                                              (a, b) -> b)));
                 });
     }
 

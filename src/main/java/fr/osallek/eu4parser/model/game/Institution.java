@@ -2,6 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Objects;
@@ -10,10 +11,13 @@ public class Institution implements Comparable<Institution> {
 
     private final ClausewitzItem item;
 
+    private final Game game;
+
     private int index;
 
-    public Institution(ClausewitzItem item, int index) {
+    public Institution(ClausewitzItem item, Game game, int index) {
         this.item = item;
+        this.game = game;
         this.index = index;
     }
 
@@ -83,6 +87,10 @@ public class Institution implements Comparable<Institution> {
         } else {
             this.item.setVariable("historical_start_date", historicalStartDate);
         }
+    }
+
+    public File getImage() {
+        return this.game.getSpriteTypeImageFile("GFX_icon_institution_" + getName());
     }
 
     @Override

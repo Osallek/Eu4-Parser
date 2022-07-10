@@ -8,6 +8,7 @@ import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -24,13 +25,19 @@ public class Country {
 
     public static final Pattern COUNTRY_PATTERN = Pattern.compile("[A-Z]{3}");
 
-    public static final Pattern CUSTOM_COUNTRY_PATTERN = Pattern.compile("D[0-9]{2}");
+    public static final Pattern CUSTOM_COUNTRY_PATTERN = Pattern.compile("D\\d{2}");
 
-    public static final Pattern COLONY_PATTERN = Pattern.compile("C[0-9]{2}");
+    public static final Pattern COLONY_PATTERN = Pattern.compile("C\\d{2}");
 
-    public static final Pattern TRADING_CITY_PATTERN = Pattern.compile("T[0-9]{2}");
+    public static final Pattern TRADING_CITY_PATTERN = Pattern.compile("T\\d{2}");
 
-    public static final Pattern CLIENT_STATE_PATTERN = Pattern.compile("K[0-9]{2}");
+    public static final Pattern CLIENT_STATE_PATTERN = Pattern.compile("K\\d{2}");
+
+    public static final Pattern COSSACK_REVOLT_PATTERN = Pattern.compile("E\\d{2}");
+
+    public static final Pattern OBSERVER_PATTERN = Pattern.compile("O\\d{2}");
+
+    public static final Pattern UNKNOWN_PATTERN = Pattern.compile("F\\d{2}");
 
     private final Game game;
 
@@ -69,6 +76,10 @@ public class Country {
 
     public String getFlagPath(String extension) {
         return Path.of(Eu4Utils.GFX_FOLDER_PATH, "flags", getTag() + "." + extension).toString();
+    }
+
+    public File getFlagFile() {
+        return this.game.getCountryFlagImage(this);
     }
 
     public String getGraphicalCulture() {
