@@ -1,5 +1,7 @@
 package fr.osallek.eu4parser.common;
 
+import com.googlecode.pngtastic.core.PngImage;
+import com.googlecode.pngtastic.core.PngOptimizer;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Country;
@@ -9,7 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.filechooser.FileSystemView;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
@@ -162,8 +167,20 @@ public final class Eu4Utils {
 
     public static final Path BUILDINGS_GFX = Path.of(GFX_FOLDER_PATH, INTERFACE_FOLDER_PATH, BUILDINGS_FOLDER_PATH);
 
+    public static final PngOptimizer PNG_OPTIMIZER = new PngOptimizer();
+
     static {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
+    }
+
+    public static void optimizePng(Path file, Path dest) throws IOException {
+        try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file.toFile().getAbsolutePath()))) {
+            PngImage pngImage = PNG_OPTIMIZER.optimize(new PngImage(stream, null), false, 9);
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                pngImage.writeDataOutputStream(outputStream);
+                pngImage.export(dest.toFile().getAbsolutePath(), outputStream.toByteArray());
+            }
+        }
     }
 
     public static Optional<String> readRegistry(String location, String key) throws InterruptedException, IOException {

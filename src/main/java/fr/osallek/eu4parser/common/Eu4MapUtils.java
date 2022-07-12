@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.googlecode.pngtastic.core.PngImage;
 import com.googlecode.pngtastic.core.PngOptimizer;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Province;
@@ -29,9 +30,13 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -53,8 +58,6 @@ public class Eu4MapUtils {
     public static final Color OCEAN_COLOR = new Color(68, 107, 163);
 
     public static final Color IMPASSABLE_COLOR = new Color(94, 94, 94);
-
-    public static final PngOptimizer PNG_OPTIMIZER = new PngOptimizer();
 
     public static Color winterToColor(String winter) {
         if ("mild_winter".equals(winter)) {

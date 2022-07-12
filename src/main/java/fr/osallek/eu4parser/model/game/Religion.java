@@ -4,6 +4,7 @@ import com.googlecode.pngtastic.core.PngImage;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4MapUtils;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.collections4.CollectionUtils;
@@ -452,7 +453,7 @@ public class Religion {
     public void writeImageTo(Path dest) throws IOException {
         FileUtils.forceMkdirParent(dest.toFile());
         ImageIO.write(getImage(), "png", dest.toFile());
-        Eu4MapUtils.PNG_OPTIMIZER.optimize(new PngImage(dest.toFile().getAbsolutePath(), null), dest.toFile().getAbsolutePath(), false, 9);
+        Eu4Utils.optimizePng(dest, dest);
         this.writenTo = dest;
     }
 

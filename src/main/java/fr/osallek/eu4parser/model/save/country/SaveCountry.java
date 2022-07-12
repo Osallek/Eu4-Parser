@@ -12,6 +12,7 @@ import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.UnitType;
 import fr.osallek.eu4parser.model.game.AgeAbility;
 import fr.osallek.eu4parser.model.game.CenterOfTrade;
+import fr.osallek.eu4parser.model.game.ColonialRegion;
 import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.CrownLandBonus;
 import fr.osallek.eu4parser.model.game.Culture;
@@ -61,11 +62,16 @@ import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.imageio.ImageIO;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -80,6 +86,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -225,6 +232,8 @@ public class SaveCountry {
 
     private TradeLeague tradeLeague;
 
+    private Path writenTo;
+
     public SaveCountry(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
@@ -275,6 +284,70 @@ public class SaveCountry {
 
     public String getFlagPath(String extension) {
         return Path.of(Eu4Utils.GFX_FOLDER_PATH, "flags", getTag() + "." + extension).toString();
+    }
+
+    public File getFlagFile() {
+        return this.save.getGame().getAbsoluteFile(getFlagPath("tga"));
+    }
+
+    public boolean useCustomFlagImage() {
+        return isCustom() || isColony() || isClientState() || isTradeCity();
+    }
+
+    public BufferedImage getCustomFlagImage() throws IOException {
+        if (isCustom()) {
+            //Todo
+            return null;
+        } else if (isColony() && getColonialParent() != null) {
+            Optional<ColonialRegion> region = this.save.getGame()
+                                                       .getColonialRegions()
+                                                       .stream()
+                                                       .filter(r -> CollectionUtils.isNotEmpty(r.getProvinces()))
+                                                       .filter(r -> r.getProvinces().contains(getCapitalId()))
+                                                       .findFirst();
+
+            if (region.isEmpty() || region.get().getColor() == null) {
+                return null;
+            }
+
+            BufferedImage image = ImageIO.read(getColonialParent().getFlagFile());
+            Graphics2D g = image.createGraphics();
+            g.setColor(region.get().getColor().toColor());
+            g.fillRect(image.getWidth() / 2, 0, image.getWidth() / 2, image.getHeight());
+            g.dispose();
+
+            return image;
+        } else if (isClientState()) {
+            //Todo
+            return null;
+        } else if (isTradeCity()) {
+            //Todo
+            return null;
+        } else {
+            return null;
+        }
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(getCustomFlagImage(), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public void writeImageTo(Path dest, BufferedImage image) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(image, "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     public void setName(String name) {
@@ -331,10 +404,6 @@ public class SaveCountry {
 
     public void setHegemon(SaveHegemon hegemon) {
         this.hegemon = hegemon;
-    }
-
-    public File getFlagFile() {
-        return this.save.getGame().getCountryFlagImage(this);
     }
 
     public boolean isHuman() {

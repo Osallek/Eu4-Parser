@@ -1,6 +1,5 @@
 package fr.osallek.eu4parser.model.game;
 
-import com.googlecode.pngtastic.core.PngImage;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
@@ -21,7 +20,6 @@ import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
-import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -1004,7 +1002,7 @@ public class Game {
                 File destFile = finalPath.toFile();
                 FileUtils.forceMkdirParent(destFile);
                 ImageIO.write(ImageReader.convertFileToImage(file.toFile()), "png", destFile);
-                Eu4MapUtils.PNG_OPTIMIZER.optimize(new PngImage(destFile.getAbsolutePath(), null), destFile.getAbsolutePath(), false, 9);
+                Eu4Utils.optimizePng(destFile.getAbsoluteFile().toPath(), destFile.getAbsoluteFile().toPath());
             } else if ("png".equals(extension) || "jpg".equals(extension) || "jpeg".equals(extension)) {
                 finalPath = destFolder.resolve(destFileName + "." + FilenameUtils.getExtension(fileName));
                 FileUtils.copyFile(file.toFile(), finalPath.toFile());
@@ -1134,10 +1132,6 @@ public class Game {
 
     public File getGoldImage() {
         return getSpriteTypeImageFile("GFX_icon_gold");
-    }
-
-    public File getCountryFlagImage(SaveCountry country) {
-        return country == null ? null : getAbsoluteFile(country.getFlagPath("tga"));
     }
 
     public File getCountryFlagImage(Country country) {

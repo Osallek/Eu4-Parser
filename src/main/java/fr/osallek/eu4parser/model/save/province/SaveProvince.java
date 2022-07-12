@@ -42,11 +42,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1490,12 +1489,13 @@ public class SaveProvince extends Province {
             this.discoveryReligionDates = new ListOfDates(discoveryReligionDatesItem);
         }
 
-        ClausewitzList improveCountList = this.item.getList("country_improve_count");
+        ClausewitzItem improveCountItem = this.item.getChild("country_improve_count");
 
-        if (improveCountList != null) {
-            this.improveCount = new LinkedHashMap<>();
-            for (int i = 0; i < improveCountList.size() - 2; i += 2) {
-                this.improveCount.put(ClausewitzUtils.removeQuotes(improveCountList.get(i)), improveCountList.getAsInt(i + 1));
+        if (improveCountItem != null) {
+            this.improveCount = new HashMap<>();
+            for (int i = 0; i < improveCountItem.getVariables().size() - 1; i += 2) {
+                this.improveCount.put(ClausewitzUtils.removeQuotes(improveCountItem.getVariables().get(i).getValue()),
+                                      improveCountItem.getVariables().get(i + 1).getAsInt());
             }
         }
 
