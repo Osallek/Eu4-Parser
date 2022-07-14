@@ -103,11 +103,9 @@ public abstract class AbstractCulture {
             return true;
         }
 
-        if (!(o instanceof AbstractCulture)) {
+        if (!(o instanceof AbstractCulture abstractCulture)) {
             return false;
         }
-
-        AbstractCulture abstractCulture = (AbstractCulture) o;
 
         return Objects.equals(getName(), abstractCulture.getName());
     }

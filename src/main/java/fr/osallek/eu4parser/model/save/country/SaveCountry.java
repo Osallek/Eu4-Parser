@@ -95,6 +95,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.slf4j.LoggerFactory;
 
 public class SaveCountry {
 
@@ -4219,14 +4220,18 @@ public class SaveCountry {
         Monarch mon;
         if ((mon = getMonarch()) != null && mon.getPersonalities() != null
             && CollectionUtils.isNotEmpty(mon.getPersonalities().getPersonalities())) {
-            list.addAll(mon.getPersonalities()
-                           .getPersonalities()
-                           .stream()
-                           .map(RulerPersonality::getModifiers)
-                           .filter(Objects::nonNull)
-                           .filter(m -> m.hasModifier(modifier))
-                           .map(m -> m.getModifier(modifier))
-                           .toList());
+            try {
+                list.addAll(mon.getPersonalities()
+                               .getPersonalities()
+                               .stream()
+                               .map(RulerPersonality::getModifiers)
+                               .filter(Objects::nonNull)
+                               .filter(m -> m.hasModifier(modifier))
+                               .map(m -> m.getModifier(modifier))
+                               .toList());
+            } catch (Exception e) {
+                LoggerFactory.getLogger(SaveCountry.class).error(e.getMessage(), e);
+            }
         }
 
         list.addAll(this.save.getGame()

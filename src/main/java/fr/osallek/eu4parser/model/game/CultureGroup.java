@@ -1,14 +1,21 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import org.apache.commons.lang3.StringUtils;
-
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 public class CultureGroup extends AbstractCulture {
 
+    //Small fix because it seems that creating a group with the same name add culture to the existing group
+    private final List<ClausewitzItem> items = new ArrayList<>();
+
     public CultureGroup(ClausewitzItem item) {
         super(item);
+        this.items.add(item);
     }
 
     public String getGraphicalCulture() {
@@ -24,13 +31,19 @@ public class CultureGroup extends AbstractCulture {
     }
 
     public List<Culture> getCultures() {
-        return this.item.getChildren()
-                        .stream()
-                        .filter(child -> !"male_names".equals(child.getName())
-                                         && !"female_names".equals(child.getName())
-                                         && !"dynasty_names".equals(child.getName()))
-                        .map(child -> new Culture(child, this))
-                        .toList();
+        return new ArrayList<>(this.items.stream()
+                                         .map(ClausewitzItem::getChildren)
+                                         .flatMap(Collection::stream)
+                                         .filter(child -> !"male_names".equals(child.getName())
+                                                          && !"female_names".equals(child.getName())
+                                                          && !"dynasty_names".equals(child.getName()))
+                                         .map(child -> new Culture(child, this))
+                                         .collect(Collectors.toMap(Culture::getName, Function.identity(), (a, b) -> b))
+                                         .values());
+    }
+
+    public void addItem(ClausewitzItem item) {
+        this.items.add(item);
     }
 
     @Override

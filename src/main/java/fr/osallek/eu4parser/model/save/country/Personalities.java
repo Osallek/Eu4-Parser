@@ -4,8 +4,8 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.game.RulerPersonality;
 import fr.osallek.eu4parser.model.save.Save;
-
 import java.util.List;
+import java.util.Objects;
 
 public record Personalities(ClausewitzItem item, Save save) {
 
@@ -14,6 +14,7 @@ public record Personalities(ClausewitzItem item, Save save) {
                         .stream()
                         .map(ClausewitzVariable::getName)
                         .map(s -> this.save.getGame().getRulerPersonality(s))
+                        .filter(Objects::nonNull)
                         .toList();
     }
 

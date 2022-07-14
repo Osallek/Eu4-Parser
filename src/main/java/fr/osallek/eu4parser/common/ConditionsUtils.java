@@ -599,7 +599,7 @@ public class ConditionsUtils {
             case "has_reform":
                 return country.getGovernment().getReforms().stream().anyMatch(reform -> value.equalsIgnoreCase(reform.getName()));
             case "have_had_reform":
-                return country.getGovernment().getHistory().stream().anyMatch(reform -> value.equalsIgnoreCase(reform.getName()));
+                return country.getGovernment().getHistory().stream().anyMatch(reform -> value.equalsIgnoreCase(reform));
             case "government_reform_progress":
                 return NumbersUtils.doubleOrDefault(country.getGovernmentReformProgress()) >= NumbersUtils.toDouble(value);
             case "has_ruler":

@@ -13,12 +13,11 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.ModifierDefinition;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
-import org.apache.commons.collections4.CollectionUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 
 public class SaveEstate {
 
@@ -145,10 +144,10 @@ public class SaveEstate {
                                 .stream()
                                 .filter(estateModifier -> estateModifier.getTrigger().apply(this.country, this.country))
                                 .map(EstateModifier::getAmount)
-                                .filter(Objects::nonNull)
                                 .mapToDouble(Double::doubleValue)
                                 .sum()
-               + NumbersUtils.doubleOrDefault(this.country.getModifier(ModifiersUtils.getModifier(getInfluenceModifierName()))) * 100;
+               + ((getInfluenceModifierName() == null || ModifiersUtils.getModifier(getInfluenceModifierName()) == null)? 0 :
+                  NumbersUtils.doubleOrDefault(this.country.getModifier(ModifiersUtils.getModifier(getInfluenceModifierName()))) * 100);
     }
 
     public double getInfluenceFromTerritory() {
@@ -157,7 +156,8 @@ public class SaveEstate {
     }
 
     public String getInfluenceModifierName() {
-        return this.estateGame.getModifierDefinitions()
+        return this.estateGame.getModifierDefinitions() == null ? null :
+               this.estateGame.getModifierDefinitions()
                               .stream()
                               .filter(modifierDefinition -> "influence".equalsIgnoreCase(modifierDefinition.getType())
                                                             && modifierDefinition.getTrigger().apply(this.country, this.country))

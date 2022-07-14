@@ -20,16 +20,6 @@ import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -68,6 +58,15 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Game {
 
@@ -2787,10 +2786,19 @@ public class Game {
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "cultures", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.cultureGroups.putAll(cultureGroupsItem.getChildren()
-                                                               .stream()
-                                                               .map(CultureGroup::new)
-                                                               .collect(Collectors.toMap(AbstractCulture::getName, Function.identity(), (a, b) -> b)));
+                    cultureGroupsItem.getChildren()
+                                     .stream()
+                                     .map(CultureGroup::new)
+                                     .forEach(cultureGroup -> {
+                                         this.cultureGroups.compute(cultureGroup.getName(), (s, group) -> {
+                                             if (group == null) {
+                                                 return cultureGroup;
+                                             } else {
+                                                 group.addItem(cultureGroup.item);
+                                                 return group;
+                                             }
+                                         });
+                                     });
                 });
     }
 

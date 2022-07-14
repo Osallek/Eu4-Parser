@@ -6,7 +6,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Government;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +25,10 @@ public class SaveGovernment {
         this.game = game;
         this.item = item;
         this.country = country;
+    }
+
+    public String getTypeName() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("government"));
     }
 
     public Government getType() {
@@ -48,6 +51,23 @@ public class SaveGovernment {
                            .map(ClausewitzUtils::removeQuotes)
                            .map(this.game::getGovernmentReform)
                            .filter(Objects::nonNull)
+                           .toList();
+            }
+        }
+
+        return new ArrayList<>();
+    }
+
+    public List<String> getReformsNames() {
+        ClausewitzItem reformStack = this.item.getChild("reform_stack");
+
+        if (reformStack != null) {
+            ClausewitzList list = reformStack.getList("reforms");
+
+            if (list != null) {
+                return list.getValues()
+                           .stream()
+                           .map(ClausewitzUtils::removeQuotes)
                            .toList();
             }
         }
@@ -86,14 +106,14 @@ public class SaveGovernment {
                                                   LinkedHashMap::new));
     }
 
-    public List<GovernmentReform> getHistory() {
+    public List<String> getHistory() {
         ClausewitzItem reformStack = this.item.getChild("reform_stack");
 
         if (reformStack != null) {
             ClausewitzList list = reformStack.getList("history");
 
             if (list != null) {
-                return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(this.game::getGovernmentReform).toList();
+                return list.getValues().stream().map(ClausewitzUtils::removeQuotes).toList();
             }
         }
 
