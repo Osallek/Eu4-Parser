@@ -15,6 +15,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,6 +46,8 @@ public class Eu4Parser {
     private static final Logger LOGGER = LoggerFactory.getLogger(Eu4Parser.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    public static final Charset SAVE_CHARSET = Charset.forName("Windows-1252");
 
     public static LauncherSettings loadSettings(Path gameFolderPath) throws IOException {
         LauncherSettings launcherSettings = OBJECT_MAPPER.readValue(gameFolderPath.resolve("launcher-settings.json").toFile(), LauncherSettings.class);
@@ -153,12 +156,12 @@ public class Eu4Parser {
         if (file.canRead()) {
             try (ZipFile zipFile = new ZipFile(file)) {
                 save = new Save(file.getName(), gameFolderPath,
-                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
                                 launcherSettings);
             } catch (ZipException e) {
-                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, listeners), launcherSettings);
+                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET), launcherSettings);
             }
         }
 
@@ -172,13 +175,13 @@ public class Eu4Parser {
         if (file.canRead()) {
             try (ZipFile zipFile = new ZipFile(file)) {
                 save = new Save(file.getName(),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
+                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
                                 true,
                                 game);
             } catch (ZipException e) {
-                save = new Save(file.getName(), ClausewitzParser.parse(file, 1, listeners), game);
+                save = new Save(file.getName(), ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET), game);
             }
         }
 
