@@ -791,11 +791,11 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithPositivePiety(SaveCountry country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, NumbersUtils.doubleOrDefault(country.getPiety())));
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, NumbersUtils.doubleOrDefault(country.getPiety()) / 100));
     }
 
     public static Modifiers scaleWithNegativePiety(SaveCountry country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, -NumbersUtils.doubleOrDefault(country.getPiety())));
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, -NumbersUtils.doubleOrDefault(country.getPiety()) / 100));
     }
 
     public static Modifiers scaleWithFreeCitiesInHre(SaveCountry country, Modifiers modifiers) {
