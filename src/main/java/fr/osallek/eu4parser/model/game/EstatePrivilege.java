@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.NumbersUtils;
+import java.io.File;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,10 +14,13 @@ public class EstatePrivilege {
 
     private final ClausewitzItem item;
 
+    private final Game game;
+
     private Estate estate;
 
-    public EstatePrivilege(ClausewitzItem item) {
+    public EstatePrivilege(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
     }
 
     public String getName() {
@@ -45,6 +49,10 @@ public class EstatePrivilege {
         } else {
             this.item.setVariable("icon", icon);
         }
+    }
+
+    public File getImage() {
+        return this.game.getSpriteTypeImageFile(getIcon());
     }
 
     public double getLoyalty() {

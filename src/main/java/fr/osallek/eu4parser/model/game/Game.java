@@ -1121,6 +1121,10 @@ public class Game {
         return getSpriteTypeImageFile("GFX_icon_religion");
     }
 
+    public File getEstatesImage() {
+        return getSpriteTypeImageFile("GFX_estates_icons_colour-stroke");
+    }
+
     public File getNormalCursorImage() {
         return getAbsoluteFile(Eu4Utils.GFX_FOLDER_PATH + File.separator + "cursors" + File.separator + "normal.png");
     }
@@ -3261,7 +3265,7 @@ public class Game {
                     ClausewitzItem estatePrivilegesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.estatePrivileges.putAll(estatePrivilegesItem.getChildren()
                                                                      .stream()
-                                                                     .map(EstatePrivilege::new)
+                                                                     .map(item -> new EstatePrivilege(item, this))
                                                                      .collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b)));
                 });
 

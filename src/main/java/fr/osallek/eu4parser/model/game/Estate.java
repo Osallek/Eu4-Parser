@@ -2,15 +2,21 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
-import org.apache.commons.collections4.CollectionUtils;
-
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.imageio.ImageIO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 
 public class Estate {
 
@@ -19,6 +25,8 @@ public class Estate {
     private final Game game;
 
     private List<ModifierDefinition> modifierDefinitions;
+
+    private Path writenTo;
 
     public Estate(ClausewitzItem item, List<ModifierDefinition> modifierDefinitions, Game game) {
         this.item = item;
@@ -124,7 +132,7 @@ public class Estate {
         }
 
         ClausewitzList clausewitzList = this.item.getList("color");
-        return clausewitzList == null ? null : new Color(clausewitzList, true);
+        return clausewitzList == null ? null : new Color(clausewitzList);
     }
 
     public void setColor(Color color) {
@@ -136,7 +144,7 @@ public class Estate {
         ClausewitzList list = this.item.getList("color");
 
         if (list != null) {
-            Color actualColor = new Color(list, true);
+            Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
@@ -182,6 +190,25 @@ public class Estate {
         } else {
             this.item.addList("agendas", agendas.stream().filter(Objects::nonNull).toArray(String[]::new));
         }
+    }
+
+    public BufferedImage getImage() throws IOException {
+        return ImageReader.convertFileToImage(this.game.getEstatesImage()).getSubimage((getIcon() - 1) * 47, 0, 47, 44);
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(getImage(), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
     }
 
     @Override
