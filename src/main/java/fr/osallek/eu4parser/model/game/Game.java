@@ -3289,7 +3289,7 @@ public class Game {
                     ClausewitzItem rulerPersonalityItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.rulerPersonalities.putAll(rulerPersonalityItem.getChildren()
                                                                        .stream()
-                                                                       .map(RulerPersonality::new)
+                                                                       .map(item -> new RulerPersonality(item, this))
                                                                        .collect(Collectors.toMap(RulerPersonality::getName, Function.identity(), (a, b) -> b)));
                 });
     }
