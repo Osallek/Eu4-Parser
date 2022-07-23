@@ -3116,7 +3116,7 @@ public class Game {
                     ClausewitzItem ideasItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.ideaGroups.putAll(ideasItem.getChildren()
                                                     .stream()
-                                                    .map(IdeaGroup::new)
+                                                    .map(item -> new IdeaGroup(item, this))
                                                     .collect(Collectors.toMap(IdeaGroup::getName, Function.identity(), (a, b) -> b)));
                 });
     }

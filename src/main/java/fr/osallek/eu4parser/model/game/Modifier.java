@@ -2,6 +2,9 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 
+import fr.osallek.eu4parser.common.Eu4Utils;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class Modifier {
@@ -28,6 +31,10 @@ public class Modifier {
 
     public ModifierScope getScope() {
         return scope;
+    }
+
+    public File getImage(Game game) {
+        return game.getAbsoluteFile(Path.of(Eu4Utils.GFX_FOLDER_PATH, Eu4Utils.INTERFACE_FOLDER_PATH, "ideas_EU4", getName() + ".dds"));
     }
 
     @Override

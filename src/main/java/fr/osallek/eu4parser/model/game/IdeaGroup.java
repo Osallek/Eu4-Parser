@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.Power;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -16,8 +16,11 @@ public class IdeaGroup {
 
     private final ClausewitzItem item;
 
-    public IdeaGroup(ClausewitzItem item) {
+    private final Game game;
+
+    public IdeaGroup(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
     }
 
     public String getName() {
@@ -90,6 +93,10 @@ public class IdeaGroup {
         }
 
         return ModifiersUtils.sumModifiers(modifier, modifiers);
+    }
+
+    public File getImage() {
+        return this.game.getSpriteTypeImageFile("GFX_idea_" + getName());
     }
 
     @Override
