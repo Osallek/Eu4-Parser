@@ -4,18 +4,20 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.NumbersUtils;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Modifiers {
 
@@ -164,6 +166,21 @@ public class Modifiers {
                                                          .stream()
                                                          .filter(entry -> ModifierScope.PROVINCE.equals(entry.getKey().getScope()))
                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    }
+
+    public File getImage(Game game) {
+        AtomicReference<File> image = new AtomicReference<>(null);
+
+        if (MapUtils.isNotEmpty(this.modifiers)) {
+            this.modifiers.keySet()
+                          .stream()
+                          .map(m -> m.getImage(game))
+                          .filter(Objects::nonNull)
+                          .findFirst()
+                          .ifPresent(image::set);
+        }
+
+        return image.get();
     }
 
     @Override

@@ -4,7 +4,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.country.Heir;
 import fr.osallek.eu4parser.model.save.country.Monarch;
 import fr.osallek.eu4parser.model.save.country.Queen;
-
 import java.io.File;
 import java.util.Objects;
 
@@ -112,7 +111,7 @@ public class RulerPersonality {
     }
 
     public File getImage() {
-        return this.game.getSpriteTypeImageFile("GFX_ancestor_" + getName());
+        return getModifiers().getImage(this.game);
     }
 
     @Override
