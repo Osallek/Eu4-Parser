@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.ReligiousReform;
 import fr.osallek.eu4parser.model.game.ReligiousReforms;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SaveReligiousReforms {
@@ -23,12 +24,16 @@ public class SaveReligiousReforms {
     }
 
     public List<ReligiousReform> getAdoptedReforms() {
-        return this.item.getList(0)
-                        .getValuesAsInt()
-                        .stream()
-                        .filter(i -> i == 1)
-                        .map(i -> getReligiousReforms().getReforms().get(i))
-                        .toList();
+        List<Integer> valuesAsInt = this.item.getList(0).getValuesAsInt();
+        List<ReligiousReform> reforms = new ArrayList<>();
+
+        for (int i = 0; i < valuesAsInt.size(); i++) {
+            if (valuesAsInt.get(i) == 1) {
+                reforms.add(getReligiousReforms().getReforms().get(i));
+            }
+        }
+
+        return reforms;
     }
 
     public void addAdoptedReform(ReligiousReform religiousReform) {
