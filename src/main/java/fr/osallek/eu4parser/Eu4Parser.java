@@ -10,6 +10,12 @@ import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.save.Save;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArchUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,11 +39,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArchUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Eu4Parser {
 
@@ -56,23 +57,28 @@ public class Eu4Parser {
         return launcherSettings;
     }
 
+    public static Optional<Path> detectSteamFolder() throws IOException, InterruptedException {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            if (ArchUtils.getProcessor().is64Bit()) {
+                return Eu4Utils.readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath").map(Path::of);
+            } else {
+                return Eu4Utils.readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath").map(Path::of);
+            }
+        } else if (SystemUtils.IS_OS_LINUX) {
+            Path steamPath = Path.of(System.getProperty("user.home"), ".steam", "steam");
+
+            if (Files.exists(steamPath) && Files.exists(steamPath.toRealPath()) && Files.isDirectory(steamPath.toRealPath())) {
+                return Optional.of(steamPath.toRealPath());
+            }
+        }
+
+        return Optional.empty();
+    }
+
     public static Optional<Path> detectInstallationFolder() {
-        Optional<Path> steamFolder = Optional.empty();
 
         try {
-            if (SystemUtils.IS_OS_WINDOWS) {
-                if (ArchUtils.getProcessor().is64Bit()) {
-                    steamFolder = Eu4Utils.readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam", "InstallPath").map(Path::of);
-                } else {
-                    steamFolder = Eu4Utils.readRegistry("HKEY_LOCAL_MACHINE\\SOFTWARE\\Valve\\Steam", "InstallPath").map(Path::of);
-                }
-            } else if (SystemUtils.IS_OS_LINUX) {
-                Path steamPath = Path.of(System.getProperty("user.home"), ".steam", "steam");
-
-                if (Files.exists(steamPath) && Files.exists(steamPath.toRealPath()) && Files.isDirectory(steamPath.toRealPath())) {
-                    steamFolder = Optional.of(steamPath.toRealPath());
-                }
-            }
+            Optional<Path> steamFolder = detectSteamFolder();
 
             if (steamFolder.isPresent()) {
                 Path path = steamFolder.get().resolve(Eu4Utils.STEAM_APPS_FOLDER_PATH);
