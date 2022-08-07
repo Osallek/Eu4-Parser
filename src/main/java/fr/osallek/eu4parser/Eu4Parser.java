@@ -17,9 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -144,6 +147,28 @@ public class Eu4Parser {
         }
 
         return new ArrayList<>();
+    }
+
+    public static boolean isIronman(Path path) throws IOException {
+        File file = path.toFile();
+
+        if (file.canRead()) {
+            try (ZipFile zipFile = new ZipFile(file)) {
+                ZipEntry zipEntry = zipFile.getEntry(Eu4Utils.META_FILE);
+
+                try (InputStream stream = zipFile.getInputStream(zipEntry);
+                     InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
+                     BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                    return !Eu4Utils.MAGIC_WORD.equals(reader.readLine());
+                }
+            } catch (ZipException e) {
+                try (BufferedReader reader = Files.newBufferedReader(file.toPath(), SAVE_CHARSET)) {
+                    return !Eu4Utils.MAGIC_WORD.equals(reader.readLine());
+                }
+            }
+        } else {
+            return true;
+        }
     }
 
     public static Save loadSave(Path gameFolderPath, Path path) throws IOException {
