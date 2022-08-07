@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -57,6 +58,10 @@ public class Mission extends Nodded {
     public Path getIconPath(String extension) {
         SpriteType spriteType = this.game.getSpriteType(getIcon());
         return Path.of(FilenameUtils.removeExtension(ClausewitzUtils.removeQuotes(spriteType.getTextureFile())) + "." + extension);
+    }
+
+    public File getIconFile() {
+        return this.game.getSpriteTypeImageFile(getIcon());
     }
 
     public Boolean isGeneric() {

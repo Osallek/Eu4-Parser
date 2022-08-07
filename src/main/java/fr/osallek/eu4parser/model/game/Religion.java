@@ -1,9 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
-import com.googlecode.pngtastic.core.PngImage;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.eu4parser.common.Eu4MapUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;

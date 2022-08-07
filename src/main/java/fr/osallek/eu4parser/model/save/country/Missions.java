@@ -9,25 +9,30 @@ import fr.osallek.eu4parser.model.game.MissionsTree;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 
 public record Missions(ClausewitzItem item, Game game) {
 
-    public List<MissionsTree> getMissionsTrees() {
+    public Map<Integer, List<MissionsTree>> getMissionsTrees() {
         List<ClausewitzList> missions = this.item.getLists("mission_slot");
+        Map<Integer, List<MissionsTree>> slots = new TreeMap<>();
 
-        return missions.stream()
-                       .filter(Predicate.not(ClausewitzList::isEmpty))
-                       .map(list -> list.get(0))
-                       .map(this.game::getMissionsTree)
-                       .toList();
+        for (int i = 0; i < missions.size(); i++) {
+            if (missions.get(i) != null && !missions.get(i).isEmpty()) {
+                slots.put(i, missions.get(i).getValues().stream().map(this.game::getMissionsTree).filter(Objects::nonNull).toList());
+            }
+        }
+
+        return slots;
     }
 
     public List<Mission> getMissions() {
-        return getMissionsTrees().stream().map(MissionsTree::getMissions).flatMap(Collection::stream).toList();
+        return getMissionsTrees().values().stream().flatMap(Collection::stream).map(MissionsTree::getMissions).flatMap(Collection::stream).toList();
     }
 
-    public MissionsTree getMissionsTree(int slot) {
+    public List<MissionsTree> getMissionsTrees(int slot) {
         if (slot < 1 || slot > 5) {
             return null;
         }
@@ -38,7 +43,7 @@ public record Missions(ClausewitzItem item, Game game) {
 
         if (missions.size() > slot) {
             if (missions.get(slot) instanceof ClausewitzList list) {
-                return this.game.getMissionsTree((list).get(0));
+                return list.getValues().stream().map(this.game::getMissionsTree).filter(Objects::nonNull).toList();
             }
         }
 

@@ -3201,6 +3201,7 @@ public class Game {
 
     private void readMissionsTrees() {
         this.missionsTrees = new HashMap<>();
+        this.missions = new HashMap<>();
 
         getFileNodesList(Eu4Utils.MISSIONS_FOLDER_PATH, this::isRegularTxtFile)
                 .forEach(fileNode -> {
