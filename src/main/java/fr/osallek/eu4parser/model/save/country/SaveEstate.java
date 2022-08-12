@@ -13,11 +13,12 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.ModifierDefinition;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.apache.commons.collections4.CollectionUtils;
 
 public class SaveEstate {
 
@@ -107,6 +108,7 @@ public class SaveEstate {
         if (CollectionUtils.isNotEmpty(getGrantedPrivileges())) {
             getGrantedPrivileges().stream()
                                   .map(EstateInteraction::getPrivilege)
+                                  .filter(Objects::nonNull)
                                   .forEach(privilege -> {
                                       if (privilege.getModifiers().hasModifier(modifier)) {
                                           modifiers.add(privilege.getModifiers().getModifier(modifier));
@@ -135,6 +137,7 @@ public class SaveEstate {
                + getInfluenceModifiers().stream().mapToDouble(SaveEstateModifier::getValue).filter(Objects::nonNull).sum()
                + getGrantedPrivileges().stream()
                                        .map(EstateInteraction::getPrivilege)
+                                       .filter(Objects::nonNull)
                                        .map(EstatePrivilege::getInfluence)
                                        .filter(Objects::nonNull)
                                        .mapToDouble(Double::doubleValue)
@@ -146,7 +149,7 @@ public class SaveEstate {
                                 .map(EstateModifier::getAmount)
                                 .mapToDouble(Double::doubleValue)
                                 .sum()
-               + ((getInfluenceModifierName() == null || ModifiersUtils.getModifier(getInfluenceModifierName()) == null)? 0 :
+               + ((getInfluenceModifierName() == null || ModifiersUtils.getModifier(getInfluenceModifierName()) == null) ? 0 :
                   NumbersUtils.doubleOrDefault(this.country.getModifier(ModifiersUtils.getModifier(getInfluenceModifierName()))) * 100);
     }
 
