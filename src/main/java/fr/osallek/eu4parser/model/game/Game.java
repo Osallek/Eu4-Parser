@@ -1010,7 +1010,7 @@ public class Game {
             }
 
             return finalPath == null ? null : destFolder.relativize(finalPath);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("An error occurred while converting image {}: {}", file, e.getMessage(), e);
             return null;
         }

@@ -162,12 +162,72 @@ public class Eu4Parser {
                     return !Eu4Utils.MAGIC_WORD.equals(reader.readLine());
                 }
             } catch (ZipException e) {
-                try (BufferedReader reader = Files.newBufferedReader(file.toPath(), SAVE_CHARSET)) {
-                    return !Eu4Utils.MAGIC_WORD.equals(reader.readLine());
-                }
+                return false;
             }
         } else {
             return true;
+        }
+    }
+
+    public static boolean isValid(Path path) {
+        return isValidCompressed(path) || isValidUncompressed(path);
+    }
+
+    public static boolean isValidCompressed(Path path) {
+        try (ZipFile zipFile = new ZipFile(path.toFile())) {
+            ZipEntry zipEntry = zipFile.getEntry(Eu4Utils.GAMESTATE_FILE);
+            if (zipEntry == null) {
+                return false;
+            }
+
+            try (InputStream stream = zipFile.getInputStream(zipEntry);
+                 InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
+                 BufferedReader reader = new BufferedReader(inputStreamReader)) {
+
+                if (!Eu4Utils.MAGIC_WORD.equals(reader.readLine())) {
+                    return false;
+                }
+            }
+
+            zipEntry = zipFile.getEntry(Eu4Utils.META_FILE);
+            if (zipEntry == null) {
+                return false;
+            }
+
+            try (InputStream stream = zipFile.getInputStream(zipEntry);
+                 InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
+                 BufferedReader reader = new BufferedReader(inputStreamReader)) {
+
+                if (!Eu4Utils.MAGIC_WORD.equals(reader.readLine())) {
+                    return false;
+                }
+            }
+
+            zipEntry = zipFile.getEntry(Eu4Utils.AI_FILE);
+            if (zipEntry == null) {
+                return false;
+            }
+
+            try (InputStream stream = zipFile.getInputStream(zipEntry);
+                 InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
+                 BufferedReader reader = new BufferedReader(inputStreamReader)) {
+
+                if (!Eu4Utils.MAGIC_WORD.equals(reader.readLine())) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public static boolean isValidUncompressed(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path, SAVE_CHARSET)) {
+            return Eu4Utils.MAGIC_WORD.equals(reader.readLine());
+        } catch (IOException e) {
+            return false;
         }
     }
 
