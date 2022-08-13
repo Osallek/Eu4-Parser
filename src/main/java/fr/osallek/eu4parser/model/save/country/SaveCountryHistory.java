@@ -4,6 +4,8 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.LeaderPersonality;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +16,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
 
 public class SaveCountryHistory extends SaveCountryHistoryEvent {
 
@@ -36,6 +37,19 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
     @Override
     public LocalDate getDate() {
         return this.country.getSave().getStartDate();
+    }
+
+    public boolean hasEvents() {
+        return this.item.getChildren().stream().anyMatch(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches());
+    }
+
+    public boolean hasEventAfter(LocalDate date) {
+        return hasEvents() && this.item.getChildren()
+                                       .stream()
+                                       .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                                       .map(child -> Eu4Utils.stringToDate(child.getName()))
+                                       .filter(Objects::nonNull)
+                                       .anyMatch(date::isBefore);
     }
 
     public List<SaveCountryHistoryEvent> getEvents() {

@@ -20,6 +20,16 @@ import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
 import fr.osallek.eu4parser.model.game.todo.SubjectType;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -37,6 +47,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -58,15 +69,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.imageio.ImageIO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Game {
 
@@ -159,6 +161,8 @@ public class Game {
     private Map<String, Advisor> advisors;
 
     private Map<String, IdeaGroup> ideaGroups;
+
+    private Set<String> ideas;
 
     private Map<String, CasusBelli> casusBelli;
 
@@ -1828,6 +1832,10 @@ public class Game {
         return this.ideaGroups.get(name);
     }
 
+    public Set<String> getIdeas() {
+        return Collections.unmodifiableSet(this.ideas);
+    }
+
     public List<CasusBelli> getCasusBelli() {
         return new ArrayList<>(this.casusBelli.values());
     }
@@ -3119,6 +3127,13 @@ public class Game {
                                                     .map(item -> new IdeaGroup(item, this))
                                                     .collect(Collectors.toMap(IdeaGroup::getName, Function.identity(), (a, b) -> b)));
                 });
+
+        this.ideas = this.ideaGroups.values()
+                                    .stream()
+                                    .map(IdeaGroup::getIdeas)
+                                    .map(Map::keySet)
+                                    .flatMap(Collection::stream)
+                                    .collect(Collectors.toSet());
     }
 
     private void readCasusBelli() {

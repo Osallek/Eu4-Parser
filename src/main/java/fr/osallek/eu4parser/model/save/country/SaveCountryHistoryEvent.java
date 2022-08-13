@@ -2,12 +2,12 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
 import fr.osallek.eu4parser.model.Power;
-import fr.osallek.eu4parser.model.game.IdeaGroup;
+
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,8 +33,10 @@ public class SaveCountryHistoryEvent {
     }
 
     public Leader getLeader() {
-        if (this.item.hasChild("leader")) {
-            return new Leader(this.item.getLastChild("leader"), this.country);
+        ClausewitzItem child = this.item.getLastChild("leader");
+
+        if (child != null) {
+            return new Leader(child, this.country);
         }
 
         return null;
@@ -43,11 +45,8 @@ public class SaveCountryHistoryEvent {
     public Map<String, Boolean> getIdeasLevel() {
         return this.country.getSave()
                            .getGame()
-                           .getIdeaGroups()
+                           .getIdeas()
                            .stream()
-                           .map(IdeaGroup::getIdeas)
-                           .map(Map::keySet)
-                           .flatMap(Collection::stream)
                            .filter(this.item::hasVar)
                            .collect(Collectors.toMap(Function.identity(), this.item::getVarAsBool));
     }
@@ -77,8 +76,10 @@ public class SaveCountryHistoryEvent {
     }
 
     public Color getChangedCountryMapcolorFrom() {
-        if (this.item.hasList("changed_country_mapcolor_from")) {
-            return new Color(this.item.getList("changed_country_mapcolor_from"));
+        ClausewitzList list = this.item.getList("changed_country_mapcolor_from");
+
+        if (list != null) {
+            return new Color(list);
         }
 
         return null;
@@ -129,48 +130,60 @@ public class SaveCountryHistoryEvent {
     }
 
     public Queen getQueen() {
-        if (this.item.hasChild("queen")) {
-            return new Queen(this.item.getLastChild("queen"), this.country);
+        ClausewitzItem child = this.item.getLastChild("queen");
+
+        if (child != null) {
+            return new Queen(child, this.country);
         }
 
         return null;
     }
 
     public Queen getMonarchConsort() {
-        if (this.item.hasChild("monarch_consort")) {
-            return new Queen(this.item.getLastChild("monarch_consort"), this.country);
+        ClausewitzItem child = this.item.getLastChild("monarch_consort");
+
+        if (child != null) {
+            return new Queen(child, this.country);
         }
 
         return null;
     }
 
     public Monarch getMonarch() {
-        if (this.item.hasChild("monarch")) {
-            return new Monarch(this.item.getLastChild("monarch"), this.country);
+        ClausewitzItem child = this.item.getLastChild("monarch");
+
+        if (child != null) {
+            return new Monarch(child, this.country);
         }
 
         return null;
     }
 
     public Heir getMonarchHeir() {
-        if (this.item.hasChild("monarch_heir")) {
-            return new Heir(this.item.getLastChild("monarch_heir"), this.country);
+        ClausewitzItem child = this.item.getLastChild("monarch_heir");
+
+        if (child != null) {
+            return new Heir(child, this.country);
         }
 
         return null;
     }
 
     public Heir getHeir() {
-        if (this.item.hasChild("heir")) {
-            return new Heir(this.item.getLastChild("heir"), this.country);
+        ClausewitzItem child = this.item.getLastChild("heir");
+
+        if (child != null) {
+            return new Heir(child, this.country);
         }
 
         return null;
     }
 
     public Heir getMonarchForeignHeir() {
-        if (this.item.hasChild("monarch_foreign_heir")) {
-            return new Heir(this.item.getLastChild("monarch_foreign_heir"), this.country);
+        ClausewitzItem child = this.item.getLastChild("monarch_foreign_heir");
+
+        if (child != null) {
+            return new Heir(child, this.country);
         }
 
         return null;
@@ -189,8 +202,10 @@ public class SaveCountryHistoryEvent {
     }
 
     public Power getNationalFocus() {
-        if (this.item.hasVar("national_focus")) {
-            return Power.byName(this.item.getLastVarAsString("national_focus"));
+        String variable = this.item.getLastVarAsString("national_focus");
+
+        if (variable != null) {
+            return Power.byName(variable);
         }
 
         return null;
@@ -198,5 +213,9 @@ public class SaveCountryHistoryEvent {
 
     public String getSetEstatePrivilege() {
         return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("set_estate_privilege"));
+    }
+
+    public SaveCountry getCountry() {
+        return country;
     }
 }

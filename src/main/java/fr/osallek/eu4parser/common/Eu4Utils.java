@@ -173,7 +173,7 @@ public final class Eu4Utils {
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
     }
 
-    public static void optimizePng(Path file, Path dest) throws IOException {
+    public static synchronized void optimizePng(Path file, Path dest) throws IOException {
         try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file.toFile().getAbsolutePath()))) {
             PngImage pngImage = PNG_OPTIMIZER.optimize(new PngImage(stream, null), false, 9);
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {

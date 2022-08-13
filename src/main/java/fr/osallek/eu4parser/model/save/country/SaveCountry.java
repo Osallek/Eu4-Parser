@@ -364,7 +364,7 @@ public class SaveCountry {
     }
 
     public boolean isAlive() {
-        return getCapital() != null && getDevelopment() != null && getDevelopment() > 0;
+        return getCapital() != null && getDevelopment() != null && getDevelopment() > 0 && CollectionUtils.isNotEmpty(getContinents());
     }
 
     public boolean isCustom() {
