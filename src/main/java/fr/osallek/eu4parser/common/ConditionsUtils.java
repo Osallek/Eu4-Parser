@@ -31,6 +31,12 @@ import fr.osallek.eu4parser.model.save.gameplayoptions.ProvinceTaxManpower;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -45,11 +51,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConditionsUtils {
 
@@ -849,7 +850,8 @@ public class ConditionsUtils {
                                                                                                                               == null
                                                                                                                               || reform.isFreeCity()
                                                                                                                                        .getValue()
-                                                                                                                                       .apply(country, country))));
+                                                                                                                                       .apply(country,
+                                                                                                                                              country))));
             case "is_free_or_tributary_trigger":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null || country.getSubjectType().isVoluntary());
             case "is_great_power":
@@ -932,7 +934,8 @@ public class ConditionsUtils {
                                                                                                                               == null
                                                                                                                               || reform.isNomad()
                                                                                                                                        .getValue()
-                                                                                                                                       .apply(country, country))));
+                                                                                                                                       .apply(country,
+                                                                                                                                              country))));
             case "is_orangists_in_power":
                 return "yes".equalsIgnoreCase(value) == (country.getStatistsVsMonarchists() != null && country.getStatistsVsMonarchists() > 0);
             case "is_origin_of_consort":
@@ -977,7 +980,8 @@ public class ConditionsUtils {
                                                                                                                               == null
                                                                                                                               || reform.isRepublic()
                                                                                                                                        .getValue()
-                                                                                                                                       .apply(country, country))));
+                                                                                                                                       .apply(country,
+                                                                                                                                              country))));
             case "is_revolutionary":
                 return "yes".equalsIgnoreCase(value) == (country.getGovernment() != null &&
                                                          country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isRevolutionary().getKey()
@@ -986,7 +990,8 @@ public class ConditionsUtils {
                                                                                                                               == null
                                                                                                                               || reform.isRevolutionary()
                                                                                                                                        .getValue()
-                                                                                                                                       .apply(country, country))));
+                                                                                                                                       .apply(country,
+                                                                                                                                              country))));
             case "is_revolution_target":
                 return "yes".equalsIgnoreCase(value) == (country.getSave().getRevolution() != null
                                                          && country.equals(country.getSave().getRevolution().getRevolutionTarget()));
@@ -1034,7 +1039,8 @@ public class ConditionsUtils {
                                                                                                                               == null
                                                                                                                               || reform.isTribal()
                                                                                                                                        .getValue()
-                                                                                                                                       .apply(country, country))));
+                                                                                                                                       .apply(country,
+                                                                                                                                              country))));
             case "is_tributary":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null && country.getSubjectType().isVoluntary());
             case "is_vassal":
@@ -1661,7 +1667,7 @@ public class ConditionsUtils {
             case "primary_culture":
                 return rawValueToCulture(rawValue, root, from).equalsIgnoreCase(country.getPrimaryCulture().getName());
             case "primitives":
-                return "yes".equalsIgnoreCase(value) == country.getTechnologyGroup().isPrimitive();
+                return "yes".equalsIgnoreCase(value) == (country.getTechnologyGroup() != null && country.getTechnologyGroup().isPrimitive());
             case "production_efficiency":
                 return country.getProductionEfficiency() >= NumbersUtils.toDouble(value);
             case "production_income_percentage":
@@ -1769,9 +1775,10 @@ public class ConditionsUtils {
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))) >= 0;
             case "technology_group":
                 if ((other = country.getSave().getCountry(value)) != null) {
-                    return country.getTechnologyGroup().equals(other.getTechnologyGroup());
+                    return (country.getTechnologyGroup() != null && other.getTechnologyGroup() != null
+                            && country.getTechnologyGroup().equals(other.getTechnologyGroup()));
                 } else {
-                    return value.equalsIgnoreCase(country.getTechnologyGroup().getName());
+                    return country.getTechnologyGroup() != null && value.equalsIgnoreCase(country.getTechnologyGroup().getName());
                 }
             case "tech_difference":
                 return root.getTech().getTotal() - NumbersUtils.toInt(value) >= from.getTech().getTotal();
