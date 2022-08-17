@@ -1,23 +1,33 @@
 package fr.osallek.eu4parser.model.save.war;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.BooleanUtils;
+
+import java.time.LocalDate;
 
 public class Battle {
 
     private final ClausewitzItem item;
 
+    private final LocalDate date;
+
     private Combatant attacker;
 
     private Combatant defender;
 
-    public Battle(ClausewitzItem item) {
+    public Battle(LocalDate date, ClausewitzItem item) {
         this.item = item;
+        this.date = date;
         refreshAttributes();
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
     public String getName() {
-        return this.item.getVarAsString("name");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
     }
 
     public void setName(String name) {

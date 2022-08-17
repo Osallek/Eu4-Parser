@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser.model.save.war;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.save.country.Losses;
@@ -19,7 +20,7 @@ public record WarParticipant(ClausewitzItem item) {
     }
 
     public String getTag() {
-        return this.item.getVarAsString("tag");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("tag"));
     }
 
     public boolean getPromisedLand() {

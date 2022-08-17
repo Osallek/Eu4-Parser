@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.Losses;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import org.apache.commons.collections4.MapUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,7 +32,11 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
     private Map<SaveCountry, WarParticipant> attackers;
 
+    private Map<SaveCountry, WarParticipant> persistentAttackers;
+
     private Map<SaveCountry, WarParticipant> defenders;
+
+    private Map<SaveCountry, WarParticipant> persistentDefenders;
 
     private WarGoal warGoal;
 
@@ -45,11 +51,11 @@ public class ActiveWar implements Comparable<ActiveWar> {
     }
 
     public String getName() {
-        return this.item.getVarAsString("name");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
     }
 
     public void setName(String name) {
-        this.item.setVariable("name", name);
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public LocalDate getStartDate() {
@@ -109,7 +115,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
             return this.defenders.values()
                                  .stream()
                                  .map(WarParticipant::getLosses)
-                                 .filter(Objects::nonNull)
+                                 .filter(MapUtils::isNotEmpty)
                                  .flatMap(m -> m.entrySet().stream())
                                  .collect(Collectors.toMap(Map.Entry::getKey,
                                                            Map.Entry::getValue,
@@ -124,24 +130,12 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return warGoal;
     }
 
-    public List<String> getPersistentAttackers() {
-        ClausewitzList list = this.item.getList("persistent_attackers");
-
-        if (list != null) {
-            return list.getValues();
-        }
-
-        return new ArrayList<>();
+    public Map<SaveCountry, WarParticipant> getPersistentAttackers() {
+        return this.persistentAttackers == null ? new HashMap<>() : this.persistentAttackers;
     }
 
-    public List<String> getPersistentDefenders() {
-        ClausewitzList list = this.item.getList("persistent_defenders");
-
-        if (list != null) {
-            return list.getValues();
-        }
-
-        return new ArrayList<>();
+    public Map<SaveCountry, WarParticipant> getPersistentDefenders() {
+        return this.persistentDefenders == null ? new HashMap<>() : this.persistentDefenders;
     }
 
     public String getOriginalAttacker() {
@@ -166,6 +160,20 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
     public Double getDefenderScore() {
         return this.item.getVarAsDouble("defender_score");
+    }
+
+    public Double getAttackerScore() {
+        return this.item.getVarAsDouble("attacker_score");
+    }
+
+    public Double getScore() {
+        if (getDefenderScore() != null) {
+            return - getDefenderScore();
+        } else if (getAttackerScore() != null) {
+            return getAttackerScore();
+        }
+
+        return null;
     }
 
     public Double getScore(SaveCountry country) {
@@ -202,8 +210,22 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return this.item.getVarAsBool("is_coalition");
     }
 
+    public List<WarHistoryEvent> getEvents() {
+        if (!this.item.hasChild("history")) {
+            return new ArrayList<>();
+        }
+
+        return this.item.getChild("history")
+                        .getChildren()
+                        .stream()
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .map(child -> new WarHistoryEvent(child, this))
+                        .sorted(Comparator.comparing(WarHistoryEvent::getDate))
+                        .collect(Collectors.toList());
+    }
+
     public boolean isFinished() {
-        return false;
+        return MapUtils.isEmpty(this.attackers) || MapUtils.isEmpty(this.defenders);
     }
 
     public Map<SaveCountry, WarParticipant> getSide(SaveCountry country) {
@@ -258,32 +280,26 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
             this.battles = historyItem.getChildrenNot("war_goal")
                                       .stream()
-                                      .filter(child -> child.getChild("battle") != null)
-                                      .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                                child -> Collections.singletonList(new Battle(child.getChild("battle"))),
-                                                                (a, b) -> Stream.concat(a.stream(), b.stream()).toList(),
-                                                                TreeMap::new));
+                                      .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                                      .filter(child -> child.hasChild("battle"))
+                                      .map(child -> new Battle(Eu4Utils.stringToDate(child.getName()), child.getChild("battle")))
+                                      .collect(Collectors.groupingBy(Battle::getDate, TreeMap::new, Collectors.toList()));
         }
 
-        ClausewitzItem warGoalChild = this.item.getChild("superiority");
-
-        if (warGoalChild == null) {
-            warGoalChild = this.item.getChild("take_province");
+        for (WarGoalType warGoalType : WarGoalType.values()) {
+            if (this.item.hasChild(warGoalType.name().toLowerCase())) {
+                this.warGoal = new WarGoal(this.item.getChild(warGoalType.name().toLowerCase()), this.save);
+                break;
+            }
         }
-
-        if (warGoalChild == null) {
-            warGoalChild = this.item.getChild("blockade_ports");
-        }
-
-        this.warGoal = new WarGoal(warGoalChild, this.save);
 
         List<ClausewitzItem> participantsItems = this.item.getChildren("participants");
         ClausewitzList attackersList = this.item.getList("attackers");
         ClausewitzList defendersList = this.item.getList("defenders");
 
         if (attackersList != null && defendersList != null) {
-            this.attackers = new HashMap<>();
-            this.defenders = new HashMap<>();
+            this.attackers = new LinkedHashMap<>();
+            this.defenders = new LinkedHashMap<>();
             participantsItems.forEach(participantsItem -> {
                 WarParticipant warParticipant = new WarParticipant(participantsItem);
                 SaveCountry country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
@@ -293,6 +309,25 @@ public class ActiveWar implements Comparable<ActiveWar> {
                     this.attackers.put(country, warParticipant);
                 } else if (defendersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
                     this.defenders.put(country, warParticipant);
+                }
+            });
+        }
+
+        ClausewitzList persistentAttackersList = this.item.getList("persistent_attackers");
+        ClausewitzList persistentDefendersList = this.item.getList("persistent_defenders");
+
+        if (persistentAttackersList != null && persistentDefendersList != null) {
+            this.persistentAttackers = new LinkedHashMap<>();
+            this.persistentDefenders = new LinkedHashMap<>();
+            participantsItems.forEach(participantsItem -> {
+                WarParticipant warParticipant = new WarParticipant(participantsItem);
+                SaveCountry country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
+                country.addWar(this);
+
+                if (persistentAttackersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
+                    this.persistentAttackers.put(country, warParticipant);
+                } else if (persistentDefendersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
+                    this.persistentDefenders.put(country, warParticipant);
                 }
             });
         }

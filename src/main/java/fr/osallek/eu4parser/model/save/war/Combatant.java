@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser.model.save.war;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 public record Combatant(ClausewitzItem item) {
@@ -37,10 +38,10 @@ public record Combatant(ClausewitzItem item) {
     }
 
     public String getCountry() {
-        return this.item.getVarAsString("country");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("country"));
     }
 
     public String getCommander() {
-        return this.item.getVarAsString("commander");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("commander"));
     }
 }
