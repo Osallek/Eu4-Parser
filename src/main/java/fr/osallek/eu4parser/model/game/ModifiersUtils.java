@@ -7,10 +7,6 @@ import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -22,6 +18,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModifiersUtils {
 
@@ -798,20 +797,23 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, -NumbersUtils.doubleOrDefault(country.getPiety()) / 100));
     }
 
+    public static Modifiers scaleWithCountriesInHre(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getSave()
+                                                               .getCountries()
+                                                               .values()
+                                                               .stream()
+                                                               .filter(SaveCountry::isAlive)
+                                                               .filter(c -> c.getCapital() != null)
+                                                               .filter(c -> c.getCapital().inHre())
+                                                               .filter(c -> !c.isFreeCity())
+                                                               .count());
+    }
+
     public static Modifiers scaleWithFreeCitiesInHre(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getSave().getCountries()
                                                                .values()
                                                                .stream()
-                                                               .filter(c -> c.getGovernment() != null)
-                                                               .filter(c -> CollectionUtils.isNotEmpty(c.getGovernment().getReforms()))
-                                                               .filter(c -> c.getGovernment()
-                                                                             .getReforms()
-                                                                             .stream()
-                                                                             .anyMatch(reform -> reform.isFreeCity().getKey()
-                                                                                                 && (reform.isFreeCity().getValue() == null
-                                                                                                     || reform.isFreeCity()
-                                                                                                              .getValue()
-                                                                                                              .apply(country, country))))
+                                                               .filter(SaveCountry::isFreeCity)
                                                                .count());
     }
 

@@ -821,12 +821,9 @@ public class ConditionsUtils {
             case "is_dynamic_tag":
                 return "yes".equalsIgnoreCase(value) == country.isClientState();
             case "is_elector":
-                return "yes".equalsIgnoreCase(value) == (!country.getSave().getHre().dismantled() && country.getSave()
-                                                                                                            .getHre()
-                                                                                                            .getElectors()
-                                                                                                            .contains(country));
+                return "yes".equalsIgnoreCase(value) == country.isElector();
             case "is_emperor":
-                return "yes".equalsIgnoreCase(value) == (!country.getSave().getHre().dismantled() && country.equals(country.getSave().getHre().getEmperor()));
+                return "yes".equalsIgnoreCase(value) == country.isEmperor();
             case "is_emperor_of_china":
                 return "yes".equalsIgnoreCase(value) == (!country.getSave().getCelestialEmpire().dismantled()
                                                          && country.equals(country.getSave().getCelestialEmpire().getEmperor()));
@@ -844,14 +841,7 @@ public class ConditionsUtils {
             case "is_former_colonial_nation":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null && country.getColonialParent() != null);
             case "is_free_city":
-                return "yes".equalsIgnoreCase(value) == (country.getGovernment() != null &&
-                                                         country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isFreeCity().getKey()
-                                                                                                                          && (reform.isFreeCity().getValue()
-                                                                                                                              == null
-                                                                                                                              || reform.isFreeCity()
-                                                                                                                                       .getValue()
-                                                                                                                                       .apply(country,
-                                                                                                                                              country))));
+                return "yes".equalsIgnoreCase(value) == country.isFreeCity();
             case "is_free_or_tributary_trigger":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() == null || country.getSubjectType().isVoluntary());
             case "is_great_power":

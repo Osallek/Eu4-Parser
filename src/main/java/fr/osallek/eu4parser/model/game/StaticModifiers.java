@@ -125,6 +125,7 @@ public enum StaticModifiers {
     DEFENDER_OF_FAITH(new Condition(Pair.of("is_defender_of_faith", "yes")), null, null),
     DEFENDER_OF_FAITH_REFUSED_CTA(new Condition(Pair.of("has_country_modifier", "defender_of_faith_refused_cta")), null, null),
     EMPEROR(new Condition(Pair.of("is_emperor", "yes")), null, null),
+    STATES_IN_HRE(new Condition(Pair.of("is_emperor", "yes")), null, null),
     FREE_CITIES_IN_HRE(new Condition(Pair.of("is_emperor", "yes")), null, null),
     FREE_CITY_IN_HRE(new Condition(Pair.of("is_free_city", "yes")), null, null),
     MEMBER_IN_HRE(new Condition(Pair.of("is_part_of_hre", "yes")), null, null),
@@ -379,6 +380,7 @@ public enum StaticModifiers {
         NAVY_TRADITION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNavyTradition(country, modif.modifiers);
         POSITIVE_PIETY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPositivePiety(country, modif.modifiers);
         NEGATIVE_PIETY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNegativePiety(country, modif.modifiers);
+        STATES_IN_HRE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCountriesInHre(country, modif.modifiers);
         FREE_CITIES_IN_HRE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithFreeCitiesInHre(country, modif.modifiers);
         OCCUPIED_IMPERIAL.applyToCountry = (country, modif) -> ModifiersUtils.scaleOccupiedImperial(country, modif.modifiers);
         NUM_OF_MARRIAGES.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumOfRoyalMarriages(country, modif.modifiers);
