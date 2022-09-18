@@ -257,7 +257,27 @@ public enum StaticModifiers {
     COSSACKS_MODIFIER(new Condition(Pair.of("num_of_cossacks", "1")), null, null),
     EXPAND_ADMINISTATION_MODIFIER(new Condition(Pair.of("num_expanded_administration", "1")), null, null),
     OVER_GOVERNING_CAPACITY_MODIFIER(new Condition(Pair.of("always", "yes")), null, null),
-    LOST_HEGEMONY(new Condition(Pair.of("has_country_modifier", "lost_hegemony")), null, null);
+    LOST_HEGEMONY(new Condition(Pair.of("has_country_modifier", "lost_hegemony")), null, null),
+    PAPAL_INFLUENCE(new Condition(Pair.of("papacy_active", "yes")), null, null),
+    CHURCH_POWER(new Condition(Pair.of("uses_church_aspects", "yes")), null, null),
+    FERVOR(new Condition(Pair.of("uses_fervor", "yes")), null, null),
+    KARMA(new Condition(Pair.of("uses_karma", "yes")), null, null),
+    POSITIVE_KARMA(new Condition(Pair.of("uses_karma", "yes")), null, null),
+    NEGATIVE_KARMA(new Condition(Pair.of("uses_karma", "yes")), null, null),
+    DIPLOMATIC_REPUTATION(new Condition(Pair.of("always", "yes")), null, null),
+    TOLERANCE_OWN(new Condition(Pair.of("always", "yes")), null, null),
+    TOLERANCE_HERETIC(new Condition(Pair.of("always", "yes")), null, null),
+    TOLERANCE_HEATHEN(new Condition(Pair.of("always", "yes")), null, null),
+    NUM_ACCEPTED_CULTURES(new Condition(Pair.of("always", "yes")), null, null),
+    RULER_ADM(new Condition(Pair.of("always", "yes")), null, null),
+    RULER_DIP(new Condition(Pair.of("always", "yes")), null, null),
+    RULER_MIL(new Condition(Pair.of("always", "yes")), null, null),
+    HEIR_ADM(new Condition(Pair.of("has_heir", "yes")), null, null),
+    HEIR_DIP(new Condition(Pair.of("has_heir", "yes")), null, null),
+    HEIR_MIL(new Condition(Pair.of("has_heir", "yes")), null, null),
+    CONSORT_ADM(new Condition(Pair.of("has_consort", "yes")), null, null),
+    CONSORT_DIP(new Condition(Pair.of("has_consort", "yes")), null, null),
+    CONSORT_MIL(new Condition(Pair.of("has_consort", "yes")), null, null);
 
     public final Condition trigger;
 
@@ -505,6 +525,26 @@ public enum StaticModifiers {
         EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
         OVER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverGoverningCapacity(country, modif.modifiers);
         LOST_HEGEMONY.applyToCountry = (country, modif) -> StaticModifiers.LOST_HEGEMONY.modifiers;
+        PAPAL_INFLUENCE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPapalInfluence(country, modif.modifiers);
+        CHURCH_POWER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithChurchPower(country, modif.modifiers);
+        FERVOR.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithFervor(country, modif.modifiers);
+        KARMA.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithKarma(country, modif.modifiers);
+        POSITIVE_KARMA.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPositiveKarma(country, modif.modifiers);
+        NEGATIVE_KARMA.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNegativeKarma(country, modif.modifiers);
+        DIPLOMATIC_REPUTATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDiplomaticReputation(country, modif.modifiers);
+        TOLERANCE_OWN.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithToleranceOwn(country, modif.modifiers);
+        TOLERANCE_HERETIC.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithToleranceHeretic(country, modif.modifiers);
+        TOLERANCE_HEATHEN.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithToleranceHeathen(country, modif.modifiers);
+        NUM_ACCEPTED_CULTURES.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumAcceptedCultures(country, modif.modifiers);
+        RULER_ADM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithRulerAdm(country, modif.modifiers);
+        RULER_DIP.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithRulerDip(country, modif.modifiers);
+        RULER_MIL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithRulerMil(country, modif.modifiers);
+        HEIR_ADM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHeirAdm(country, modif.modifiers);
+        HEIR_DIP.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHeirDip(country, modif.modifiers);
+        HEIR_MIL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithHeirMil(country, modif.modifiers);
+        CONSORT_ADM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithConsortAdm(country, modif.modifiers);
+        CONSORT_DIP.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithConsortDip(country, modif.modifiers);
+        CONSORT_MIL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithConsortMil(country, modif.modifiers);
         DEVELOPMENT.applyToProvince = (province, modif) -> { //Ugly but thanks to Paradox
             Modifiers m = Modifiers.copy(modif.modifiers);
 

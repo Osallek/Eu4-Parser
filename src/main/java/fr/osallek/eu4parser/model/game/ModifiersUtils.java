@@ -7,6 +7,10 @@ import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -18,9 +22,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ModifiersUtils {
 
@@ -530,6 +531,42 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("relation_with_accepted_culture", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("relation_with_other_culture", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_piety_accelerator", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("global_allowed_num_of_buildings", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_amount_of_carolean", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_amount_of_hussars", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_fort_maintenance_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_garrison_size", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_attacker_dice_roll_bonus", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_defender_dice_roll_bonus", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_own_coast_naval_combat_bonus", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("artillery_levels_available_vs_fort", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_not_build_buildings", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_chain_claim", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("global_trade_goods_size", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("years_to_integrate_personal_union", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("transport_attrition", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_hostile_attrition", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("may_build_supply_depot", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("may_refill_garrison", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("may_return_manpower_on_disband", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("capped_by_forcelimit", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("manpower_in_own_culture_provinces", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("manpower_in_culture_group_provinces", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("manpower_in_accepted_culture_provinces", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("global_defender_dice_roll_bonus", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("own_territory_dice_roll_bonus", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("global_attacker_dice_roll_bonus", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("national_focus_years", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allow_client_states", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allow_free_estate_privilege_revocation", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_not_declare_war", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_not_build_missionaries", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("all_estate_influence_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("reasons_to_elect", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_not_build_colonies", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_not_send_merchants", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_karma_accelerator", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_church_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {
@@ -754,6 +791,30 @@ public class ModifiersUtils {
 
     public static Modifiers scaleWithInflation(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getInflation()));
+    }
+
+    public static Modifiers scaleWithPapalInfluence(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getPapalInfluence()));
+    }
+
+    public static Modifiers scaleWithChurchPower(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getChurch().getPower()));
+    }
+
+    public static Modifiers scaleWithFervor(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.doubleOrDefault(country.getFervor().getValue()));
+    }
+
+    public static Modifiers scaleWithKarma(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getKarma()));
+    }
+
+    public static Modifiers scaleWithPositiveKarma(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, NumbersUtils.intOrDefault(country.getKarma())));
+    }
+
+    public static Modifiers scaleWithNegativeKarma(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, -Math.min(0, NumbersUtils.intOrDefault(country.getKarma())));
     }
 
     public static Modifiers scaleWithCallForPeace(SaveCountry country, Modifiers modifiers) {
@@ -1073,6 +1134,62 @@ public class ModifiersUtils {
 
     public static Modifiers scaleWithOverGoverningCapacity(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, country.getGoverningCapacityUsedPercent() - 1));
+    }
+
+    public static Modifiers scaleWithDiplomaticReputation(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getDiplomaticReputation());
+    }
+
+    public static Modifiers scaleWithToleranceOwn(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getToleranceOwn());
+    }
+
+    public static Modifiers scaleWithToleranceHeretic(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getToleranceHeretic());
+    }
+
+    public static Modifiers scaleWithToleranceHeathen(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getToleranceHeathen());
+    }
+
+    public static Modifiers scaleWithNumAcceptedCultures(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, CollectionUtils.size(country.getAcceptedCultures()));
+    }
+
+    public static Modifiers scaleWithRulerAdm(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getMonarch().getAdm());
+    }
+
+    public static Modifiers scaleWithRulerDip(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getMonarch().getDip());
+    }
+
+    public static Modifiers scaleWithRulerMil(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getMonarch().getMil());
+    }
+
+    public static Modifiers scaleWithHeirAdm(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getHeir().getAdm());
+    }
+
+    public static Modifiers scaleWithHeirDip(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getHeir().getDip());
+    }
+
+    public static Modifiers scaleWithHeirMil(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getHeir().getMil());
+    }
+
+    public static Modifiers scaleWithConsortAdm(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getConsort().getAdm());
+    }
+
+    public static Modifiers scaleWithConsortDip(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getConsort().getDip());
+    }
+
+    public static Modifiers scaleWithConsortMil(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getConsort().getMil());
     }
 
     public static Modifiers scaleWithMaintainedForts(SaveCountry country, Modifiers modifiers) {
