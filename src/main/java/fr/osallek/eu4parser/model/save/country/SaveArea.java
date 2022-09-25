@@ -36,7 +36,7 @@ public class SaveArea {
     }
 
     public String getName() {
-        return this.item.getName();
+        return ClausewitzUtils.removeQuotes(this.item.getName());
     }
 
     public List<SaveProvince> getProvinces() {

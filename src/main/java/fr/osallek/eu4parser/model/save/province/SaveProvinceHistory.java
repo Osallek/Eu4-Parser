@@ -63,7 +63,7 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
     public List<SaveProvinceHistoryEvent> getEvents() {
         return this.item.getChildren()
                         .stream()
-                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
                         .map(child -> new SaveProvinceHistoryEvent(child, this.province))
                         .collect(Collectors.toList());
     }

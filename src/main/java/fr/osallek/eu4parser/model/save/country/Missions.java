@@ -1,11 +1,13 @@
 package fr.osallek.eu4parser.model.save.country;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Mission;
 import fr.osallek.eu4parser.model.game.MissionsTree;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +23,14 @@ public record Missions(ClausewitzItem item, Game game) {
 
         for (int i = 0; i < missions.size(); i++) {
             if (missions.get(i) != null && !missions.get(i).isEmpty()) {
-                slots.put(i, missions.get(i).getValues().stream().map(this.game::getMissionsTree).filter(Objects::nonNull).toList());
+                slots.put(i, missions.get(i)
+                                     .getValues()
+                                     .stream()
+                                     .filter(StringUtils::isNotBlank)
+                                     .map(ClausewitzUtils::removeQuotes)
+                                     .map(this.game::getMissionsTree)
+                                     .filter(Objects::nonNull)
+                                     .toList());
             }
         }
 

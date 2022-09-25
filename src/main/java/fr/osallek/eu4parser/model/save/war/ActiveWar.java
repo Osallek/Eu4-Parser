@@ -168,7 +168,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
     public Double getScore() {
         if (getDefenderScore() != null) {
-            return - getDefenderScore();
+            return -getDefenderScore();
         } else if (getAttackerScore() != null) {
             return getAttackerScore();
         }
@@ -218,7 +218,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         return this.item.getChild("history")
                         .getChildren()
                         .stream()
-                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
                         .map(child -> new WarHistoryEvent(child, this))
                         .sorted(Comparator.comparing(WarHistoryEvent::getDate))
                         .collect(Collectors.toList());
@@ -280,7 +280,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
             this.battles = historyItem.getChildrenNot("war_goal")
                                       .stream()
-                                      .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                                      .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
                                       .filter(child -> child.hasChild("battle"))
                                       .map(child -> new Battle(Eu4Utils.stringToDate(child.getName()), child.getChild("battle")))
                                       .collect(Collectors.groupingBy(Battle::getDate, TreeMap::new, Collectors.toList()));
@@ -324,9 +324,15 @@ public class ActiveWar implements Comparable<ActiveWar> {
                 SaveCountry country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
                 country.addWar(this);
 
-                if (persistentAttackersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
+                if (persistentAttackersList.getValues()
+                                           .stream()
+                                           .map(ClausewitzUtils::removeQuotes)
+                                           .anyMatch(s -> s.equals(ClausewitzUtils.removeQuotes(warParticipant.getTag())))) {
                     this.persistentAttackers.put(country, warParticipant);
-                } else if (persistentDefendersList.getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
+                } else if (persistentDefendersList.getValues()
+                                                  .stream()
+                                                  .map(ClausewitzUtils::removeQuotes)
+                                                  .anyMatch(s -> s.equals(ClausewitzUtils.removeQuotes(warParticipant.getTag())))) {
                     this.persistentDefenders.put(country, warParticipant);
                 }
             });

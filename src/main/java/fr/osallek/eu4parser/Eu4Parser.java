@@ -149,28 +149,69 @@ public class Eu4Parser {
         return new ArrayList<>();
     }
 
-    public static boolean isIronman(Path path) throws IOException {
+    public static boolean isIronman(Path path) {
         File file = path.toFile();
 
-        if (file.canRead()) {
-            try (ZipFile zipFile = new ZipFile(file)) {
-                ZipEntry zipEntry = zipFile.getEntry(Eu4Utils.META_FILE);
+        try {
+            if (file.canRead()) {
+                try (ZipFile zipFile = new ZipFile(file)) {
+                    char[] buffer = new char[6];
+                    ZipEntry zipEntry = zipFile.getEntry(Eu4Utils.META_FILE);
+                    if (zipEntry == null) {
+                        return false;
+                    }
 
-                try (InputStream stream = zipFile.getInputStream(zipEntry);
-                     InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
-                     BufferedReader reader = new BufferedReader(inputStreamReader)) {
-                    return !Eu4Utils.MAGIC_WORD.equals(reader.readLine());
+                    try (InputStream stream = zipFile.getInputStream(zipEntry);
+                         InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
+                         BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                        reader.read(buffer);
+                        if (!Eu4Utils.IRONMAN_MAGIC_WORD.equals(new String(buffer))) {
+                            return false;
+                        }
+                    }
+
+                    zipEntry = zipFile.getEntry(Eu4Utils.GAMESTATE_FILE);
+                    if (zipEntry == null) {
+                        return false;
+                    }
+
+                    try (InputStream stream = zipFile.getInputStream(zipEntry);
+                         InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
+                         BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                        reader.read(buffer);
+                        if (!Eu4Utils.IRONMAN_MAGIC_WORD.equals(new String(buffer))) {
+                            return false;
+                        }
+                    }
+
+                    zipEntry = zipFile.getEntry(Eu4Utils.AI_FILE);
+                    if (zipEntry == null) {
+                        return false;
+                    }
+
+                    try (InputStream stream = zipFile.getInputStream(zipEntry);
+                         InputStreamReader inputStreamReader = new InputStreamReader(stream, SAVE_CHARSET);
+                         BufferedReader reader = new BufferedReader(inputStreamReader)) {
+                        reader.read(buffer);
+                        if (!Eu4Utils.IRONMAN_MAGIC_WORD.equals(new String(buffer))) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                } catch (ZipException e) {
+                    return false;
                 }
-            } catch (ZipException e) {
+            } else {
                 return false;
             }
-        } else {
-            return true;
+        } catch (IOException e) {
+            return false;
         }
     }
 
     public static boolean isValid(Path path) {
-        return isValidCompressed(path) || isValidUncompressed(path);
+        return isValidCompressed(path) || isValidUncompressed(path) || isIronman(path);
     }
 
     public static boolean isValidCompressed(Path path) {
@@ -232,26 +273,36 @@ public class Eu4Parser {
     }
 
     public static Save loadSave(Path gameFolderPath, Path path) throws IOException {
-        return loadSave(gameFolderPath, path, loadSettings(gameFolderPath), new HashMap<>());
+        return loadSave(gameFolderPath, path, loadSettings(gameFolderPath), null, new HashMap<>());
     }
 
     public static Save loadSave(Path gameFolderPath, Path path, LauncherSettings launcherSettings) throws IOException {
-        return loadSave(gameFolderPath, path, launcherSettings, new HashMap<>());
+        return loadSave(gameFolderPath, path, launcherSettings, null, new HashMap<>());
     }
 
-    public static Save loadSave(Path gameFolderPath, Path path, LauncherSettings launcherSettings,
+    public static Save loadSave(Path gameFolderPath, Path path, LauncherSettings launcherSettings, Map<Integer, String> tokens,
                                 Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         File file = path.toFile();
         Save save = null;
 
-        if (file.canRead()) {
-            try (ZipFile zipFile = new ZipFile(file)) {
-                save = new Save(file.getName(), gameFolderPath,
-                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
-                                launcherSettings);
-            } catch (ZipException e) {
+        if (file.canRead() && isValid(path)) {
+            if (isIronman(path)) {
+                try (ZipFile zipFile = new ZipFile(file)) {
+                    save = new Save(file.getName(), gameFolderPath,
+                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.GAMESTATE_FILE, 6, tokens, listeners, SAVE_CHARSET),
+                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.AI_FILE, 6, tokens, listeners, SAVE_CHARSET),
+                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.META_FILE, 6, tokens, listeners, SAVE_CHARSET),
+                                    launcherSettings);
+                }
+            } else if (isValidCompressed(path)) {
+                try (ZipFile zipFile = new ZipFile(file)) {
+                    save = new Save(file.getName(), gameFolderPath,
+                                    ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
+                                    ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
+                                    ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
+                                    launcherSettings);
+                }
+            } else if (isValidUncompressed(path)) {
                 save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET), launcherSettings);
             }
         }
@@ -259,19 +310,31 @@ public class Eu4Parser {
         return save;
     }
 
-    public static Save loadSave(Path path, Game game, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
+    public static Save loadSave(Path path, Game game, Map<Integer, String> tokens,
+                                Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         File file = path.toFile();
         Save save = null;
 
-        if (file.canRead()) {
-            try (ZipFile zipFile = new ZipFile(file)) {
-                save = new Save(file.getName(),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
-                                ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
-                                true,
-                                game);
-            } catch (ZipException e) {
+        if (file.canRead() && isValid(path)) {
+            if (isIronman(path)) {
+                try (ZipFile zipFile = new ZipFile(file)) {
+                    save = new Save(file.getName(),
+                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.GAMESTATE_FILE, 6, tokens, listeners, StandardCharsets.ISO_8859_1),
+                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.AI_FILE, 6, tokens, listeners, StandardCharsets.ISO_8859_1),
+                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.META_FILE, 6, tokens, listeners, StandardCharsets.ISO_8859_1),
+                                    true,
+                                    game);
+                }
+            } else if (isValidCompressed(path)) {
+                try (ZipFile zipFile = new ZipFile(file)) {
+                    save = new Save(file.getName(),
+                                    ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
+                                    ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
+                                    ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
+                                    true,
+                                    game);
+                }
+            } else if (isValidUncompressed(path)) {
                 save = new Save(file.getName(), ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET), game);
             }
         }
@@ -279,14 +342,26 @@ public class Eu4Parser {
         return save;
     }
 
-    public static List<String> getMods(Path path) throws IOException {
+    public static List<String> getMods(Path path, Map<Integer, String> tokens) throws IOException {
         ClausewitzObject object;
 
+        if (!isValid(path)) {
+            return new ArrayList<>();
+        }
+
         if (path.toFile().canRead()) {
-            try (ZipFile zipFile = new ZipFile(path.toFile())) {
-                object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, "mods_enabled_names");
-            } catch (ZipException e) {
+            if (isIronman(path)) {
+                try (ZipFile zipFile = new ZipFile(path.toFile())) {
+                    object = ClausewitzParser.readSingleObjectBinary(zipFile, Eu4Utils.META_FILE, 6, "mods_enabled_names", StandardCharsets.ISO_8859_1, tokens);
+                }
+            } else if (isValidCompressed(path)) {
+                try (ZipFile zipFile = new ZipFile(path.toFile())) {
+                    object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, "mods_enabled_names");
+                }
+            } else if (isValidUncompressed(path)) {
                 object = ClausewitzParser.readSingleObject(path.toFile(), 1, "mods_enabled_names");
+            } else {
+                return new ArrayList<>();
             }
 
             if (object != null && ClausewitzItem.class.equals(object.getClass())) {

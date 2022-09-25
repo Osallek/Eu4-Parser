@@ -40,13 +40,15 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
     }
 
     public boolean hasEvents() {
-        return this.item.getChildren().stream().anyMatch(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches());
+        return this.item.getChildren()
+                        .stream()
+                        .anyMatch(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches());
     }
 
     public boolean hasEventAfter(LocalDate date) {
         return hasEvents() && this.item.getChildren()
                                        .stream()
-                                       .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                                       .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
                                        .map(child -> Eu4Utils.stringToDate(child.getName()))
                                        .filter(Objects::nonNull)
                                        .anyMatch(date::isBefore);
@@ -55,7 +57,7 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
     public List<SaveCountryHistoryEvent> getEvents() {
         return this.item.getChildren()
                         .stream()
-                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
                         .map(child -> new SaveCountryHistoryEvent(child, this.country))
                         .collect(Collectors.toList());
     }

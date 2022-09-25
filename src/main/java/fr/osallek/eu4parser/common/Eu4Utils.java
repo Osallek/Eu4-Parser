@@ -64,6 +64,7 @@ public final class Eu4Utils {
     public static final PathMatcher LUA_PATH_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**.lua");
 
     public static final String MAGIC_WORD = "EU4txt";
+    public static final String IRONMAN_MAGIC_WORD = "EU4bin";
 
     public static final String AI_FILE = "ai";
 

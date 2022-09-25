@@ -34,6 +34,8 @@ import fr.osallek.eu4parser.model.save.revolution.Revolution;
 import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import fr.osallek.eu4parser.model.save.war.PreviousWar;
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -56,7 +58,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.BooleanUtils;
 
 public class Save {
 
@@ -719,7 +720,7 @@ public class Save {
         List<ClausewitzItem> rebelFactionItems = this.gamestateItem.getChildren("rebel_faction");
         this.rebelFactions = rebelFactionItems.stream()
                                               .map(child -> new RebelFaction(child, this))
-                                              .collect(Collectors.toMap(RebelFaction::getId, Function.identity()));
+                                              .collect(Collectors.toMap(RebelFaction::getId, Function.identity(), (a, b) -> b));
 
         ClausewitzItem hreItem = this.gamestateItem.getChild("empire");
 

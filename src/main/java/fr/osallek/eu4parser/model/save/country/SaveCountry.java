@@ -60,6 +60,15 @@ import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.religion.SavePapacy;
 import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -87,14 +96,6 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.imageio.ImageIO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.LoggerFactory;
 
 public class SaveCountry {
 
@@ -251,7 +252,7 @@ public class SaveCountry {
     }
 
     public String getTag() {
-        return this.item.getName();
+        return ClausewitzUtils.removeQuotes(this.item.getName());
     }
 
     public String getLocalizedName() {
@@ -3806,7 +3807,7 @@ public class SaveCountry {
         List<Mission> reforms = new ArrayList<>();
 
         if (list != null) {
-            return list.getValues().stream().map(s -> this.save.getGame().getMission(ClausewitzUtils.removeQuotes(s))).toList();
+            return list.getValues().stream().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getGame().getMission(s)).filter(Objects::nonNull).toList();
         }
 
         return reforms;

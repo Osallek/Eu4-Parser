@@ -26,8 +26,8 @@ public class ProvinceHistoryItem {
                 .item
                 .getChildren()
                 .stream()
-                .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
-                .sorted(Comparator.comparing(ClausewitzItem::getName))
+                .filter(child -> Eu4Utils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
+                .sorted(Comparator.comparing(i -> ClausewitzUtils.removeQuotes(i.getName())))
                 .filter(child -> Eu4Utils.stringToDate(child.getName()).isAfter(date))
                 .findFirst();
         this.item = new ClausewitzItem(province.getDefaultHistoryItem().item, ClausewitzUtils.dateToString(date),

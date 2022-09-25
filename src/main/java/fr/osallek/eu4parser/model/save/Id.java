@@ -44,6 +44,11 @@ public record Id(ClausewitzItem item) {
     }
 
     @Override
+    public String toString() {
+        return getId() + ", " + getType();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
