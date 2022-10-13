@@ -21,6 +21,7 @@ import fr.osallek.eu4parser.model.game.FetishistCult;
 import fr.osallek.eu4parser.model.game.GameModifier;
 import fr.osallek.eu4parser.model.game.GovernmentName;
 import fr.osallek.eu4parser.model.game.GovernmentRank;
+import fr.osallek.eu4parser.model.game.GovernmentReform;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.Investment;
@@ -42,11 +43,10 @@ import fr.osallek.eu4parser.model.game.ReligiousReform;
 import fr.osallek.eu4parser.model.game.RulerPersonality;
 import fr.osallek.eu4parser.model.game.StaticModifier;
 import fr.osallek.eu4parser.model.game.StaticModifiers;
+import fr.osallek.eu4parser.model.game.SubjectType;
 import fr.osallek.eu4parser.model.game.TechGroup;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradePolicy;
-import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
-import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.ListOfDoubles;
@@ -55,6 +55,7 @@ import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
 import fr.osallek.eu4parser.model.save.counters.Counter;
 import fr.osallek.eu4parser.model.save.diplomacy.DatableRelation;
+import fr.osallek.eu4parser.model.save.diplomacy.Dependency;
 import fr.osallek.eu4parser.model.save.province.SaveAdvisor;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.religion.SavePapacy;
@@ -3164,12 +3165,12 @@ public class SaveCountry {
     }
 
     public Integer getSplendor() {
-        Double absolutism = this.item.getVarAsDouble("splendor");
+        Double splendor = this.item.getVarAsDouble("splendor");
 
-        if (absolutism == null) {
+        if (splendor == null) {
             return null;
         } else {
-            return absolutism.intValue();
+            return splendor.intValue();
         }
     }
 
@@ -4001,9 +4002,8 @@ public class SaveCountry {
     }
 
     public double getLandForceLimit() {
-        return Math.max(5,
-                        (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit"), false))
-                         + getOwnedProvinces().stream().mapToDouble(SaveProvince::getLandForceLimit).sum()))
+        return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit"), false))
+                + getOwnedProvinces().stream().mapToDouble(SaveProvince::getLandForceLimit).sum())
                * (1 + NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier"), false)));
     }
 
@@ -4560,17 +4560,45 @@ public class SaveCountry {
             }
         }
 
-        if (CollectionUtils.isNotEmpty(getSubjects()) && modifier.getName().equalsIgnoreCase("LAND_FORCELIMIT")) {
-            list.add(getSubjects().stream()
-                                  .filter(subject -> subject.getSubjectType().getForcelimitToOverlord() != 0)
-                                  .mapToDouble(subject -> subject.getLandForceLimit() * subject.getSubjectType().getForcelimitToOverlord())
-                                  .sum());
+        if (CollectionUtils.isNotEmpty(getSubjects())) {
+            getSubjects().stream()
+                         .map(subject -> this.save.getDiplomacy()
+                                                  .getDependencies()
+                                                  .stream()
+                                                  .filter(dependency -> this.equals(dependency.getFirst()) && subject.equals(dependency.getSecond()))
+                                                  .findFirst())
+                         .filter(Optional::isPresent)
+                         .map(Optional::get)
+                         .map(Dependency::getSubjectTypeUpgrades)
+                         .filter(Objects::nonNull)
+                         .flatMap(Collection::stream)
+                         .forEach(upgrade -> list.add(upgrade.getModifiersOverlord().getModifier(modifier)));
+
+
+            if (modifier.getName().equalsIgnoreCase("LAND_FORCELIMIT")) {
+                list.add(getSubjects().stream()
+                                      .filter(subject -> subject.getSubjectType().getForcelimitToOverlord() != 0)
+                                      .filter(subject -> !subject.isColony() || subject.getOwnedProvinces().stream().filter(SaveProvince::isCity).count() >= 10)
+                                      .mapToDouble(subject -> ((int) subject.getLandForceLimit()) * subject.getSubjectType().getForcelimitToOverlord())
+                                      .sum());
+            }
         }
 
         if (CollectionUtils.isNotEmpty(getEstates())) {
             list.addAll(getEstates().stream()
                                     .map(estate -> estate.getModifiers(modifier))
                                     .toList());
+        }
+
+        if (getOverlord() != null) {
+            this.save.getDiplomacy()
+                     .getDependencies()
+                     .stream()
+                     .filter(dependency -> this.equals(dependency.getSecond()) && getOverlord().equals(dependency.getSecond()))
+                     .map(Dependency::getSubjectTypeUpgrades)
+                     .filter(Objects::nonNull)
+                     .flatMap(Collection::stream)
+                     .forEach(upgrade -> list.add(upgrade.getModifiersSubject().getModifier(modifier)));
         }
 
         if (getCrownLandBonus() != null && getCrownLandBonus().getModifiers().hasModifier(modifier)) {

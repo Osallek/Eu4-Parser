@@ -1250,16 +1250,9 @@ public class SaveProvince extends Province {
     }
 
     public double getLandForceLimit() {
-        if (getOwner() != null && getOwner().isAlive() && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
-            if (getTradeGood().getProvinceModifiers().hasModifier(ModifiersUtils.getModifier("land_forcelimit"))) {
-                return getTradeGood().getProvinceModifiers().getModifier(ModifiersUtils.getModifier("land_forcelimit"));
-            } else {
-                return 0;
-            }
-        } else {
-            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit")))
-                   * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier")));
-        }
+        return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit")))
+                * (100 - NumbersUtils.doubleOrDefault(getLocalAutonomy())) / 100)
+               * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier")));
     }
 
     public double getNavalForceLimit() {
@@ -1270,7 +1263,8 @@ public class SaveProvince extends Province {
                 return 0;
             }
         } else {
-            return NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit")))
+            return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit")))
+                    * (100 - NumbersUtils.doubleOrDefault(getLocalAutonomy())) / 100)
                    * (1 + getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier")));
         }
     }

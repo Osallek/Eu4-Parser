@@ -1,11 +1,8 @@
-package fr.osallek.eu4parser.model.game.todo;
+package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.NumbersUtils;
-import fr.osallek.eu4parser.model.game.Condition;
-import fr.osallek.eu4parser.model.game.ModifierSubject;
-import fr.osallek.eu4parser.model.game.SubjectTypeRelation;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 

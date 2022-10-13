@@ -1,7 +1,7 @@
 package fr.osallek.eu4parser.model.save.diplomacy;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.todo.SubjectType;
+import fr.osallek.eu4parser.model.game.SubjectType;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 

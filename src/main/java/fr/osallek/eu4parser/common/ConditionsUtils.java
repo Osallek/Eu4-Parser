@@ -12,7 +12,7 @@ import fr.osallek.eu4parser.model.game.Policy;
 import fr.osallek.eu4parser.model.game.ProvinceList;
 import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.TradeGood;
-import fr.osallek.eu4parser.model.game.todo.SubjectType;
+import fr.osallek.eu4parser.model.game.SubjectType;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
 import fr.osallek.eu4parser.model.save.country.ActivePolicy;

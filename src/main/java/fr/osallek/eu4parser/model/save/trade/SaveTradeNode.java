@@ -40,7 +40,7 @@ public class SaveTradeNode {
     }
 
     public String getName() {
-        return this.item.getVarAsString("definitions");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("definitions"));
     }
 
     public int getIndex() {

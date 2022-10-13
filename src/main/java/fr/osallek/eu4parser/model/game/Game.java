@@ -18,8 +18,6 @@ import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
-import fr.osallek.eu4parser.model.game.todo.GovernmentReform;
-import fr.osallek.eu4parser.model.game.todo.SubjectType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -72,7 +70,7 @@ import java.util.stream.Stream;
 
 public class Game {
 
-    public static final int NB_PARTS = 71;
+    public static final int NB_PARTS = 72;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -177,6 +175,8 @@ public class Game {
     private Map<String, TechGroup> techGroups;
 
     private Map<String, SubjectType> subjectTypes;
+
+    private Map<String, SubjectTypeUpgrade> subjectTypeUpgrades;
 
     private Map<String, FetishistCult> fetishistCults;
 
@@ -650,6 +650,15 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readSubjectTypes();
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readSubjectTypeUpgrades();
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -1866,6 +1875,14 @@ public class Game {
 
     public SubjectType getSubjectType(String name) {
         return this.subjectTypes.get(name);
+    }
+
+    public List<SubjectTypeUpgrade> getSubjectTypeUpgrades() {
+        return new ArrayList<>(this.subjectTypeUpgrades.values());
+    }
+
+    public SubjectTypeUpgrade getSubjectTypeUpgrade(String name) {
+        return this.subjectTypeUpgrades.get(name);
     }
 
     public List<FetishistCult> getFetishistCults() {
@@ -3185,6 +3202,19 @@ public class Game {
                                                              .stream()
                                                              .map(item -> new SubjectType(item, this.subjectTypes.values()))
                                                              .collect(Collectors.toMap(SubjectType::getName, Function.identity(), (a, b) -> b)));
+                });
+    }
+
+    private void readSubjectTypeUpgrades() {
+        this.subjectTypeUpgrades = new HashMap<>();
+
+        getFileNodes(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "subject_type_upgrades", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem clausewitzItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+                    this.subjectTypeUpgrades.putAll(clausewitzItem.getChildren()
+                                                                  .stream()
+                                                                  .map(item -> new SubjectTypeUpgrade(item, fileNode))
+                                                                  .collect(Collectors.toMap(SubjectTypeUpgrade::getName, Function.identity(), (a, b) -> b)));
                 });
     }
 

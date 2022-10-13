@@ -989,7 +989,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithAbsolutism(SaveCountry country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getAbsolutism()) / 100);
+        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getAbsolutism()) / 100d);
     }
 
     public static Modifiers scaleWithCurrentPowerProjection(SaveCountry country, Modifiers modifiers) {

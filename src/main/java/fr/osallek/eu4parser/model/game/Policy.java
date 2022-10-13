@@ -60,7 +60,7 @@ public class Policy {
     }
 
     public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("modifier"));
+        return new Modifiers(this.item.getVarsNot("monarch_power"));
     }
 
     @Override

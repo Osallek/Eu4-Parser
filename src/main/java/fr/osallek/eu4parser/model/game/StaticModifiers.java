@@ -168,7 +168,7 @@ public enum StaticModifiers {
     TRIBUTARY_STATE_BEHIND_OVERLORD_TECH_MIL(new Condition(Pair.of("is_tributary", "yes")), null, null),
     LIBERTY_DESIRE(new Condition(Pair.of("liberty_desire", "0.001")), null, null),
     IN_GOLDEN_ERA(new Condition(Pair.of("in_golden_age", "yes")), null, null),
-    ABSOLUTISM(new Condition(Pair.of("absolutism", "1")), null, null),
+    ABSOLUTISM(new Condition(Pair.of("absolutism", "0")), null, null),
     LOW_ARMY_PROFESSIONALISM(new Condition(Pair.of("low_army_professionalism", "yes")), null, null),
     HIGH_ARMY_PROFESSIONALISM(new Condition(Pair.of("high_army_professionalism", "yes")), null, null),
     STRELTSY_MODIFIER(new Condition(Pair.of("num_of_streltsy", "1")), null, null),
@@ -436,7 +436,7 @@ public enum StaticModifiers {
         STRELTSY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStreltsyPercent(country, modif.modifiers);
         POWER_PROJECTION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCurrentPowerProjection(country, modif.modifiers);
         TRADE_COMPANY_STRONG.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStrongCompany(country, modif.modifiers);
-        LARGE_COLONIAL_NATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLargeColony(country, modif.modifiers);
+//        LARGE_COLONIAL_NATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLargeColony(country, modif.modifiers);
         MARCH_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMarches(country, modif.modifiers);
         VASSAL_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithVassals(country, modif.modifiers);
         DAIMYO_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyos(country, modif.modifiers);
@@ -548,20 +548,11 @@ public enum StaticModifiers {
         DEVELOPMENT.applyToProvince = (province, modif) -> { //Ugly but thanks to Paradox
             Modifiers m = Modifiers.copy(modif.modifiers);
 
-            if (m.hasModifier("land_forcelimit")) {
-                Modifier modifier = ModifiersUtils.getModifier("land_forcelimit");
-                Modifiers newM = ModifiersUtils.scaleAutonomy(province, new Modifiers(new HashSet<>(), Map.of(modifier, m.getModifier(modifier))));
-                m.getModifiers().put(modifier, newM.getModifier(modifier));
-            }
-
             if (m.hasModifier("naval_forcelimit")) {
                 Modifier modifier = ModifiersUtils.getModifier("naval_forcelimit");
 
                 if (!province.isPort()) {
                     m.getModifiers().put(modifier, 0d);
-                } else {
-                    Modifiers newM = ModifiersUtils.scaleAutonomy(province, new Modifiers(new HashSet<>(), Map.of(modifier, m.getModifier(modifier))));
-                    m.getModifiers().put(modifier, newM.getModifier(modifier));
                 }
             }
 
@@ -620,8 +611,8 @@ public enum StaticModifiers {
                                            APPLIED_TO_COUNTRY.stream()
                                                              .filter(staticModifiers -> staticModifiers.modifiers != null
                                                                                         && !staticModifiers.modifiers.isEmpty())
-                                                             .filter(staticModifiers -> staticModifiers.trigger.apply(country, country))
                                                              .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
+                                                             .filter(staticModifiers -> staticModifiers.trigger.apply(country, country))
                                                              .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers)
                                                                                                                    .getModifier(modifier))
                                                              .toList());
