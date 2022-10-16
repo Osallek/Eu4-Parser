@@ -3726,6 +3726,57 @@ public class SaveCountry {
         return this.item.getVarsAsStrings("previous_country_tags");
     }
 
+    public SortedMap<LocalDate, String> getChangedTags() {
+        if (CollectionUtils.isEmpty(getPreviousCountryTags())) {
+            return new TreeMap<>();
+        } else {
+            return this.history.getEvents()
+                               .stream()
+                               .filter(h -> StringUtils.isNotBlank(h.getChangedTagFrom()))
+                               .collect(Collectors.toMap(SaveCountryHistoryEvent::getDate, SaveCountryHistoryEvent::getChangedTagFrom, (a, b) -> a,
+                                                         TreeMap::new));
+        }
+    }
+
+    public String getTagAt(LocalDate date) {
+        SortedMap<LocalDate, String> map = getChangedTags();
+
+        if (MapUtils.isEmpty(map)) {
+            return getTag();
+        } else {
+            for (Map.Entry<LocalDate, String> entry : map.entrySet()) {
+                if (entry.getKey().isAfter(date)) {
+                    return entry.getValue();
+                }
+            }
+        }
+
+        return getTag(); //Should not happen
+    }
+
+    public LocalDate getDiedAt() {
+        if (!isAlive() && getHistory().hasEvents() && getCapital() != null && CollectionUtils.isNotEmpty(getCapital().getHistory().getEvents())) {
+            return getCapital().getHistory()
+                               .getOwners()
+                               .entrySet()
+                               .stream()
+                               .filter(entry -> entry.getValue().getTagAt(entry.getKey()).equals(getTagAt(entry.getKey())))
+                               .max(Map.Entry.comparingByKey())
+                               .map(Map.Entry::getKey)
+                               .map(date -> {
+                                   for (LocalDate localDate : getCapital().getHistory().getOwners().keySet()) {
+                                       if (localDate.isAfter(date)) {
+                                           return localDate;
+                                       }
+                                   }
+
+                                   return null;
+                               }).orElse(null);
+        }
+
+        return null;
+    }
+
     public List<CustomNationalIdea> getCustomNationalIdeas() {
         return customNationalIdeas;
     }
