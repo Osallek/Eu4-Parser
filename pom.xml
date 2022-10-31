@@ -24,7 +24,7 @@
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <commons-io.version>2.11.0</commons-io.version>
-    <jackson.version>2.13.3</jackson.version>
+    <jackson.version>2.13.4.2</jackson.version>
     <batik.version>1.14</batik.version>
     <geojson-jackson.version>1.14</geojson-jackson.version>
     <pngtastic.version>1.7</pngtastic.version>
