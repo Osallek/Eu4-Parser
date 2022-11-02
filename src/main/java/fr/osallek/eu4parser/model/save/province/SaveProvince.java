@@ -11,6 +11,7 @@ import fr.osallek.eu4parser.model.game.CenterOfTrade;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.GameModifier;
 import fr.osallek.eu4parser.model.game.GreatProject;
+import fr.osallek.eu4parser.model.game.GreatProjectTier;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.Investment;
@@ -25,6 +26,7 @@ import fr.osallek.eu4parser.model.game.TradePolicy;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.Save;
+import fr.osallek.eu4parser.model.save.SaveGreatProject;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.AbstractRegiment;
 import fr.osallek.eu4parser.model.save.country.Army;
@@ -857,11 +859,11 @@ public class SaveProvince extends Province {
         refreshAttributes();
     }
 
-    public List<GreatProject> getGreatProjects() {
+    public List<SaveGreatProject> getGreatProjects() {
         ClausewitzList list = this.item.getList("great_projects");
 
         if (list != null) {
-            return list.getValues().stream().map(s -> this.save.getGame().getGreatProject(s)).filter(Objects::nonNull).toList();
+            return list.getValues().stream().map(this.save::getGreatProject).filter(Objects::nonNull).toList();
         } else {
             return new ArrayList<>();
         }
@@ -1324,7 +1326,9 @@ public class SaveProvince extends Province {
 
         if (CollectionUtils.isNotEmpty(getGreatProjects())) {
             list.addAll(getGreatProjects().stream()
-                                          .map(GreatProject::getModifiers)
+                                          .map(SaveGreatProject::getTier)
+                                          .filter(Objects::nonNull)
+                                          .map(GreatProjectTier::getProvinceModifiers)
                                           .filter(Objects::nonNull)
                                           .filter(m -> m.hasModifier(modifier))
                                           .map(m -> m.getModifier(modifier))

@@ -3308,11 +3308,15 @@ public class Game {
         this.estatePrivileges = new HashMap<>();
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estate_privileges", this::isRegularTxtFile)
                 .forEach(path -> {
-                    ClausewitzItem estatePrivilegesItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.estatePrivileges.putAll(estatePrivilegesItem.getChildren()
-                                                                     .stream()
-                                                                     .map(item -> new EstatePrivilege(item, this))
-                                                                     .collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b)));
+                    try {
+                        ClausewitzItem estatePrivilegesItem = ClausewitzParser.parse(path.toFile(), 0);
+                        this.estatePrivileges.putAll(estatePrivilegesItem.getChildren()
+                                                                         .stream()
+                                                                         .map(item -> new EstatePrivilege(item, this))
+                                                                         .collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b)));
+                    } catch (Exception e) {
+                        LOGGER.error("{}", e.getMessage(), e);
+                    }
                 });
 
         this.estates = new HashMap<>();

@@ -22,6 +22,7 @@ import fr.osallek.eu4parser.model.game.GameModifier;
 import fr.osallek.eu4parser.model.game.GovernmentName;
 import fr.osallek.eu4parser.model.game.GovernmentRank;
 import fr.osallek.eu4parser.model.game.GovernmentReform;
+import fr.osallek.eu4parser.model.game.GreatProjectTier;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.Investment;
@@ -51,6 +52,7 @@ import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.ListOfDoubles;
 import fr.osallek.eu4parser.model.save.Save;
+import fr.osallek.eu4parser.model.save.SaveGreatProject;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
 import fr.osallek.eu4parser.model.save.counters.Counter;
@@ -4516,6 +4518,18 @@ public class SaveCountry {
                                            .map(province -> province.getModifier(modifier))
                                            .toList());
         }
+
+        list.addAll(getOwnedProvinces().stream()
+                                       .map(SaveProvince::getGreatProjects)
+                                       .filter(CollectionUtils::isNotEmpty)
+                                       .flatMap(Collection::stream)
+                                       .map(SaveGreatProject::getTier)
+                                       .filter(Objects::nonNull)
+                                       .map(GreatProjectTier::getCountryModifiers)
+                                       .filter(Objects::nonNull)
+                                       .filter(m -> m.hasModifier(modifier))
+                                       .map(m -> m.getModifier(modifier))
+                                       .toList());
 
         if (getFactions() != null) {
             getFactions().stream()

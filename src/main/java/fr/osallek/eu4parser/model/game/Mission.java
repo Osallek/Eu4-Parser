@@ -112,7 +112,7 @@ public class Mission extends Nodded {
 
     public List<Mission> getRequiredMissions() {
         ClausewitzList list = this.item.getList("required_missions");
-        return list == null ? null : list.getValues().stream().map(this.game::getMission).toList();
+        return list == null ? null : list.getValues().stream().map(this.game::getMission).filter(Objects::nonNull).toList();
     }
 
     public void setRequiredMissions(List<String> requiredMissions) {

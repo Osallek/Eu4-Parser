@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
@@ -86,12 +87,12 @@ public class GreatProject {
         this.item.setVariable("can_be_moved", canBeMoved);
     }
 
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("modifier"));
-    }
-
     public List<GreatProjectTier> getTiers() {
         return this.item.getChildrenStartWith("tier_").stream().map(GreatProjectTier::new).toList();
+    }
+
+    public int getMaxLevel() {
+        return Math.max(0, CollectionUtils.size(this.item.getChildrenStartWith("tier_")) - 1);
     }
 
     @Override

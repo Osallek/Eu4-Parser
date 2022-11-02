@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.save;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
@@ -43,13 +42,11 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -630,6 +627,20 @@ public class Save {
         return province == null ? null : (SaveProvince) province;
     }
 
+    public List<SaveGreatProject> getGreatProjects() {
+        ClausewitzItem greatProjectsItem = this.gamestateItem.getChild("great_projects");
+
+        if (greatProjectsItem == null) {
+            return new ArrayList<>();
+        }
+
+        return greatProjectsItem.getChildren().stream().map(item -> new SaveGreatProject(this, item)).toList();
+    }
+
+    public SaveGreatProject getGreatProject(String name) {
+        return getGreatProjects().stream().filter(project -> ClausewitzUtils.removeQuotes(name).equals(project.getName())).findFirst().orElse(null);
+    }
+
     public void writeAi(BufferedWriter bufferedWriter, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (this.compressed) {
             bufferedWriter.write(Eu4Utils.MAGIC_WORD);
@@ -762,19 +773,6 @@ public class Save {
                                           .collect(Collectors.toMap(SaveCountry::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
             this.playableCountries = this.countries.values().stream().filter(SaveCountry::isPlayable).toList();
         }
-
-        Set<String> vars = countriesItem.getChildren()
-                                        .stream()
-                                        .map(child -> child.getChild("history"))
-                                        .filter(Objects::nonNull)
-                                        .map(ClausewitzItem::getChildren)
-                                        .flatMap(Collection::stream)
-                                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
-                                        .map(ClausewitzItem::getAllOrdered)
-                                        .flatMap(Collection::stream)
-                                        .filter(Objects::nonNull)
-                                        .map(ClausewitzObject::getName)
-                                        .collect(Collectors.toSet());
 
         ClausewitzList playersCountriesList = this.gamestateItem.getList("players_countries");
 
