@@ -5,6 +5,7 @@ import com.googlecode.pngtastic.core.PngOptimizer;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.Country;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.iterators.ReverseListIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -267,7 +268,7 @@ public final class Eu4Utils {
         Iterator<Building> iterator = queue.iterator();
         while (iterator.hasNext()) {
             Building building = iterator.next();
-            if (!building.getManufactoryFor().isEmpty()) {
+            if (CollectionUtils.isNotEmpty(building.getManufactoryFor())) {
                 manufactories.add(building);
                 iterator.remove();
             } else if (ClausewitzUtils.isBlank(building.getMakeObsolete())) {

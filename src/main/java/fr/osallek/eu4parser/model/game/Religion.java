@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -77,8 +78,8 @@ public class Religion {
         }
     }
 
-    public Boolean isHreReligion() {
-        return this.item.getVarAsBool("hre_religion");
+    public boolean isHreReligion() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_religion"));
     }
 
     public void setHreReligion(Boolean hreReligion) {
@@ -89,8 +90,8 @@ public class Religion {
         }
     }
 
-    public Boolean isHreHereticReligion() {
-        return this.item.getVarAsBool("hre_heretic_religion");
+    public boolean isHreHereticReligion() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_heretic_religion"));
     }
 
     public void setHreHereticReligion(Boolean hreHereticReligion) {
@@ -101,8 +102,8 @@ public class Religion {
         }
     }
 
-    public Boolean isUseAuthority() {
-        return this.item.getVarAsBool("use_authority");
+    public boolean isUseAuthority() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("use_authority"));
     }
 
     public void setUseAuthority(Boolean useAuthority) {
@@ -113,8 +114,8 @@ public class Religion {
         }
     }
 
-    public Boolean useReligiousReforms() {
-        return this.item.getVarAsBool("use_religious_reforms");
+    public boolean useReligiousReforms() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("use_religious_reforms"));
     }
 
     public void setUseReligiousReforms(Boolean useReligiousReforms) {
@@ -125,8 +126,8 @@ public class Religion {
         }
     }
 
-    public Boolean usesAnglicanPower() {
-        return this.item.getVarAsBool("uses_anglican_power");
+    public boolean usesAnglicanPower() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_anglican_power"));
     }
 
     public void setUsesAnglicanPower(Boolean usesAnglicanPower) {
@@ -137,8 +138,8 @@ public class Religion {
         }
     }
 
-    public Boolean usesHussitePower() {
-        return this.item.getVarAsBool("uses_hussite_power");
+    public boolean usesHussitePower() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_hussite_power"));
     }
 
     public void setUsesHussitePower(Boolean usesHussitePower) {
@@ -149,8 +150,8 @@ public class Religion {
         }
     }
 
-    public Boolean usesChurchPower() {
-        return this.item.getVarAsBool("uses_church_power");
+    public boolean usesChurchPower() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_church_power"));
     }
 
     public void setUsesChurchPower(Boolean usesChurchPower) {
@@ -161,8 +162,8 @@ public class Religion {
         }
     }
 
-    public Boolean useFervor() {
-        return this.item.getVarAsBool("use_fervor");
+    public boolean useFervor() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("use_fervor"));
     }
 
     public void setUseFervor(Boolean useFervor) {
@@ -173,8 +174,8 @@ public class Religion {
         }
     }
 
-    public Boolean hasPatriarchs() {
-        return this.item.getVarAsBool("has_patriarchs");
+    public boolean hasPatriarchs() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("has_patriarchs"));
     }
 
     public void setHasPatriarchs(Boolean hasPatriarchs) {
@@ -185,8 +186,8 @@ public class Religion {
         }
     }
 
-    public Boolean misguidedHeretic() {
-        return this.item.getVarAsBool("misguided_heretic");
+    public boolean misguidedHeretic() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("misguided_heretic"));
     }
 
     public void setMisguidedHeretic(Boolean misguidedHeretic) {
@@ -197,8 +198,8 @@ public class Religion {
         }
     }
 
-    public Boolean useFetishistCult() {
-        return this.item.getVarAsBool("fetishist_cult");
+    public boolean useFetishistCult() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("fetishist_cult"));
     }
 
     public void setUseFetishistCult(Boolean useFetishistCult) {
@@ -209,8 +210,8 @@ public class Religion {
         }
     }
 
-    public Boolean useDoom() {
-        return this.item.getVarAsBool("doom");
+    public boolean useDoom() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("doom"));
     }
 
     public void setDoom(Boolean doom) {
@@ -221,8 +222,8 @@ public class Religion {
         }
     }
 
-    public Boolean usePersonalDeity() {
-        return this.item.getVarAsBool("personal_deity");
+    public boolean usePersonalDeity() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("personal_deity"));
     }
 
     public void setUsePersonalDeity(Boolean usePersonalDeity) {
@@ -233,8 +234,8 @@ public class Religion {
         }
     }
 
-    public Boolean usesIsolationism() {
-        return this.item.getVarAsBool("uses_isolationism");
+    public boolean usesIsolationism() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_isolationism"));
     }
 
     public void setUsesIsolationism(Boolean usesIsolationism) {
@@ -245,8 +246,8 @@ public class Religion {
         }
     }
 
-    public Boolean usesKarma() {
-        return this.item.getVarAsBool("uses_karma");
+    public boolean usesKarma() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_karma"));
     }
 
     public void setUsesKarma(Boolean usesKarma) {
@@ -257,8 +258,8 @@ public class Religion {
         }
     }
 
-    public Boolean usesPiety() {
-        return this.item.getVarAsBool("uses_piety");
+    public boolean usesPiety() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_piety"));
     }
 
     public void setUsesPiety(Boolean usesPiety) {
@@ -269,8 +270,8 @@ public class Religion {
         }
     }
 
-    public Boolean usesHarmony() {
-        return this.item.getVarAsBool("uses_harmony");
+    public boolean usesHarmony() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_harmony"));
     }
 
     public void setUsesHarmony(Boolean usesHarmony) {
@@ -281,8 +282,8 @@ public class Religion {
         }
     }
 
-    public Boolean canHaveSecondaryReligion() {
-        return this.item.getVarAsBool("can_have_secondary_religion");
+    public boolean canHaveSecondaryReligion() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("can_have_secondary_religion"));
     }
 
     public void setCanHaveSecondaryReligion(Boolean canHaveSecondaryReligion) {

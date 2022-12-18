@@ -624,7 +624,7 @@ public class Save {
     public SaveProvince getProvinceByColor(int red, int green, int blue) {
         Province province = this.game.getProvincesByColor().get(new Color(red, green, blue).getRGB());
 
-        return province == null ? null : (SaveProvince) province;
+        return province == null ? null : this.provinces.get(province.getId());
     }
 
     public List<SaveGreatProject> getGreatProjects() {

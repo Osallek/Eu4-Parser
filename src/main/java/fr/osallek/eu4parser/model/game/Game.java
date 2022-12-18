@@ -3292,7 +3292,7 @@ public class Game {
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estates_preload", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem estatePreloadItem = ClausewitzParser.parse(path.toFile(), 0);
-                    estatePreloadItem.getChildren().forEach(item -> modifierDefinitions.put(item.getName(),
+                    estatePreloadItem.getChildren().forEach(item -> modifierDefinitions.put(StringUtils.appendIfMissing(item.getName(), "_modifier"),
                                                                                             item.getChildren("modifier_definition")
                                                                                                 .stream()
                                                                                                 .map(ModifierDefinition::new)

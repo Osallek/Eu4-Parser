@@ -112,6 +112,10 @@ public class IdeaGroup {
         return Objects.equals(getName(), ideaGroup.getName());
     }
 
+    public Game getGame() {
+        return game;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(getName());

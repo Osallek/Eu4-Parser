@@ -152,6 +152,10 @@ public class EstatePrivilege {
         }
     }
 
+    public Game getGame() {
+        return game;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

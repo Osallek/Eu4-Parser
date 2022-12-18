@@ -785,7 +785,7 @@ public class SaveProvince extends Province {
                     return;
                 }
 
-                if (!building.getManufactoryFor().isEmpty() && !building.getManufactoryFor().contains(null) //Null = all goods
+                if (CollectionUtils.isNotEmpty(building.getManufactoryFor()) && !building.getManufactoryFor().contains(null) //Null = all goods
                     && !building.getManufactoryFor().contains(getTradeGood())) {
                     return;
                 }

@@ -218,7 +218,7 @@ public class Building extends Nodded {
 
     public boolean onlyInPort() {
         Condition condition = getTrigger();
-        return condition != null && condition.getCondition("has_port").equals("yes");
+        return condition != null && condition.getCondition("has_port") != null && condition.getCondition("has_port").equals("yes");
     }
 
     public boolean onlyNative() {

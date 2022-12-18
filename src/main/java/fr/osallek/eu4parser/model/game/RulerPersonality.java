@@ -114,6 +114,10 @@ public class RulerPersonality {
         return getModifiers().getImage(this.game);
     }
 
+    public Game getGame() {
+        return game;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
