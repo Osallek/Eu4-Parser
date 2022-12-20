@@ -9,9 +9,12 @@ import java.util.Objects;
 
 public abstract class AbstractCulture {
 
+    protected final Game game;
+
     protected final ClausewitzItem item;
 
-    protected AbstractCulture(ClausewitzItem item) {
+    protected AbstractCulture(Game game, ClausewitzItem item) {
+        this.game = game;
         this.item = item;
     }
 
@@ -95,6 +98,10 @@ public abstract class AbstractCulture {
 
     public Modifiers getProvinceModifiers() {
         return new Modifiers(this.item.getChild("province"));
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     @Override

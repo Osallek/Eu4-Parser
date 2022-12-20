@@ -961,8 +961,8 @@ public class Game {
             Thread.currentThread().interrupt();
         }
 
-        this.continents.values().forEach(continent -> continent.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setContinent(continent)));
-        this.areas.values().forEach(area -> area.getProvinces().forEach(provinceId -> this.getProvince(provinceId).setArea(area)));
+        this.continents.values().forEach(continent -> continent.getProvinces().forEach(provinceId -> getProvince(provinceId).setContinent(continent)));
+        this.areas.values().forEach(area -> area.getProvinces().forEach(provinceId -> getProvince(provinceId).setArea(area)));
         this.regions.values().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
         this.superRegions.values()
                          .stream()
@@ -2817,7 +2817,7 @@ public class Game {
                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
                     cultureGroupsItem.getChildren()
                                      .stream()
-                                     .map(CultureGroup::new)
+                                     .map(item -> new CultureGroup(this, item))
                                      .forEach(cultureGroup -> {
                                          this.cultureGroups.compute(cultureGroup.getName(), (s, group) -> {
                                              if (group == null) {
@@ -2890,7 +2890,7 @@ public class Game {
                     ClausewitzItem tradeNodesItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
                     this.tradeNodes.putAll(tradeNodesItem.getChildren()
                                                          .stream()
-                                                         .map(item -> new TradeNode(item, fileNode))
+                                                         .map(item -> new TradeNode(item, fileNode, this))
                                                          .collect(Collectors.toMap(TradeNode::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new)));
                 });
     }

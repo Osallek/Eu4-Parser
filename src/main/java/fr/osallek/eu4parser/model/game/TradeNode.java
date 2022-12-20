@@ -16,9 +16,12 @@ public class TradeNode extends Nodded {
 
     private final ClausewitzItem item;
 
-    public TradeNode(ClausewitzItem item, FileNode fileNode) {
+    private final Game game;
+
+    public TradeNode(ClausewitzItem item, FileNode fileNode, Game game) {
         super(fileNode);
         this.item = item;
+        this.game = game;
     }
 
     @Override
@@ -143,6 +146,10 @@ public class TradeNode extends Nodded {
     @Override
     public void write(BufferedWriter writer) throws IOException {
         this.item.write(writer, true, 0, new HashMap<>());
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     @Override

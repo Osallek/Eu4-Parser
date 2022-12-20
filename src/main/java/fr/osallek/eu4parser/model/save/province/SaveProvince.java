@@ -785,8 +785,8 @@ public class SaveProvince extends Province {
                     return;
                 }
 
-                if (CollectionUtils.isNotEmpty(building.getManufactoryFor()) && !building.getManufactoryFor().contains(null) //Null = all goods
-                    && !building.getManufactoryFor().contains(getTradeGood())) {
+                if (CollectionUtils.isNotEmpty(building.getManufactoryFor()) && !building.getManufactoryFor().contains("all")
+                    && !building.getManufactoryFor().contains(getTradeGoods())) {
                     return;
                 }
 
@@ -1216,6 +1216,18 @@ public class SaveProvince extends Province {
             this.item.removeVariable("center_of_trade");
         } else {
             this.item.setVariable("center_of_trade", centerOfTrade);
+        }
+    }
+
+    public Integer getExpandInfrastructure() {
+        return this.item.getVarAsInt("expand_infrastructure");
+    }
+
+    public void setExpandInfrastructure(Integer expandInfrastructure) {
+        if (expandInfrastructure == null || expandInfrastructure == 0) {
+            this.item.removeVariable("expand_infrastructure");
+        } else {
+            this.item.setVariable("expand_infrastructure", expandInfrastructure);
         }
     }
 

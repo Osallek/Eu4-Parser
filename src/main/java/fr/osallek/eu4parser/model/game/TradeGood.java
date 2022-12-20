@@ -127,6 +127,10 @@ public class TradeGood {
         return writenTo;
     }
 
+    public Game getGame() {
+        return game;
+    }
+
     @Override
     public String toString() {
         return getName();

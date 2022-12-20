@@ -13,8 +13,8 @@ public class CultureGroup extends AbstractCulture {
     //Small fix because it seems that creating a group with the same name add culture to the existing group
     private final List<ClausewitzItem> items = new ArrayList<>();
 
-    public CultureGroup(ClausewitzItem item) {
-        super(item);
+    public CultureGroup(Game game, ClausewitzItem item) {
+        super(game, item);
         this.items.add(item);
     }
 
@@ -37,7 +37,7 @@ public class CultureGroup extends AbstractCulture {
                                          .filter(child -> !"male_names".equals(child.getName())
                                                           && !"female_names".equals(child.getName())
                                                           && !"dynasty_names".equals(child.getName()))
-                                         .map(child -> new Culture(child, this))
+                                         .map(child -> new Culture(this.game, child, this))
                                          .collect(Collectors.toMap(Culture::getName, Function.identity(), (a, b) -> b))
                                          .values());
     }

@@ -241,6 +241,10 @@ public class SaveReligion {
         }
     }
 
+    public Save getSave() {
+        return save;
+    }
+
     private void refreshAttributes() {
         if (this.religionInstanceDataItem != null) {
             List<ClausewitzItem> relationsItems = this.religionInstanceDataItem.getChildren("relation");

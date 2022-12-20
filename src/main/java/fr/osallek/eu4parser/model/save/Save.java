@@ -820,7 +820,6 @@ public class Save {
                 if (province != null) {
                     SaveProvince saveProvince = new SaveProvince(provinceItem, province, this);
                     this.provinces.put(saveProvince.getId(), saveProvince);
-                    this.game.getProvinces().compute(saveProvince.getId(), (integer, p) -> p = saveProvince);
                     this.game.getProvincesByColor()
                              .compute(Eu4Utils.rgbToColor(saveProvince.getRed(), saveProvince.getGreen(), saveProvince.getBlue()),
                                       (color, p) -> p = saveProvince);

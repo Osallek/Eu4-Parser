@@ -37,6 +37,14 @@ public class Government {
         return this.item.getVarAsString("basic_reform");
     }
 
+    public GovernmentReform getBasicGovernmentReform() {
+        if (getBasicReform() != null) {
+            return this.game.getGovernmentReform(getBasicReform());
+        }
+
+        return null;
+    }
+
     public void setBasicReform(String basicReform) {
         if (StringUtils.isBlank(basicReform)) {
             this.item.removeVariable("basic_reform");

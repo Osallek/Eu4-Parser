@@ -9,8 +9,8 @@ public class Culture extends AbstractCulture {
 
     private final CultureGroup cultureGroup;
 
-    public Culture(ClausewitzItem item, CultureGroup cultureGroup) {
-        super(item);
+    public Culture(Game game, ClausewitzItem item, CultureGroup cultureGroup) {
+        super(game, item);
         this.cultureGroup = cultureGroup;
     }
 
