@@ -567,6 +567,8 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("can_not_send_merchants", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_karma_accelerator", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_church_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("morale_damage_received", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("morale_damage", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {

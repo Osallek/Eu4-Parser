@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.BooleanUtils;
 
 public class IdeaGroup {
 
@@ -40,8 +41,8 @@ public class IdeaGroup {
         this.item.setVariable("category", power.name());
     }
 
-    public Boolean isFree() {
-        return this.item.getVarAsBool("free");
+    public boolean isFree() {
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("free"));
     }
 
     public void setFree(Boolean free) {

@@ -2,15 +2,15 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Building extends Nodded {
 
@@ -218,7 +218,7 @@ public class Building extends Nodded {
 
     public boolean onlyInPort() {
         Condition condition = getTrigger();
-        return condition != null && condition.getCondition("has_port") != null && condition.getCondition("has_port").equals("yes");
+        return condition != null && "yes".equals(condition.getCondition("has_port"));
     }
 
     public boolean onlyNative() {
@@ -234,7 +234,8 @@ public class Building extends Nodded {
             return false;
         }
 
-        return conditions.stream().anyMatch(c -> c.getConditions().get("government").stream().anyMatch("native"::equals));
+        return conditions.stream().anyMatch(c -> MapUtils.isNotEmpty(c.getConditions()) && c.getCondition("government") != null &&
+                                                 c.getConditions().get("government").stream().anyMatch("native"::equals));
     }
 
     public Condition getTrigger() {

@@ -85,10 +85,14 @@ public class TradeGood {
     }
 
     public Double getBasePrice() {
-        return this.priceItem.getVarAsDouble("base_price");
+        return this.priceItem == null ? 1 : this.priceItem.getVarAsDouble("base_price");
     }
 
     public void setBasePrice(Double basePrice) {
+        if (this.priceItem == null) {
+            return;
+        }
+
         if (basePrice == null) {
             this.priceItem.removeVariable("base_price");
         } else {
@@ -97,10 +101,14 @@ public class TradeGood {
     }
 
     public Boolean isGoldType() {
-        return this.priceItem.getVarAsBool("goldtype");
+        return this.priceItem != null && this.priceItem.getVarAsBool("goldtype");
     }
 
     public void setGoldType(Boolean goldType) {
+        if (this.priceItem == null) {
+            return;
+        }
+
         if (goldType == null) {
             this.priceItem.removeVariable("goldtype");
         } else {

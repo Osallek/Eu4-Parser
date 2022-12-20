@@ -1,10 +1,10 @@
 package fr.osallek.eu4parser.common;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class ImageReader {
 
@@ -15,9 +15,7 @@ public class ImageReader {
             return null;
         }
 
-        if (file.toString().endsWith(".tga")) {
-            return ImageIO.read(file);
-        } else if (file.toString().endsWith(".dds")) {
+        if (file.toString().endsWith(".dds")) {
             try (FileInputStream fis = new FileInputStream(file)) {
                 byte[] buffer = new byte[fis.available()];
                 fis.read(buffer);
@@ -31,7 +29,7 @@ public class ImageReader {
                 return image;
             }
         } else {
-            return null;
+            return ImageIO.read(file);
         }
     }
 }
