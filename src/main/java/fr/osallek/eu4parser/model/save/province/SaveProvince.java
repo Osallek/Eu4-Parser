@@ -764,7 +764,7 @@ public class SaveProvince extends Province {
                                            .map(building -> new ProvinceBuilding(building,
                                                                                  this.save.getGame()
                                                                                           .getBuilding(building.getName())))
-                                           .toList();
+                                           .collect(Collectors.toList()); //Mutable list
             this.buildingsUpdated = true;
         }
 
