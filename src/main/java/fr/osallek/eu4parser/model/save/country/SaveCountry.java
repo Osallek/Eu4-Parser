@@ -2553,6 +2553,10 @@ public class SaveCountry {
     public void addOwnedProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("owned_provinces");
 
+        if (list == null) {
+            list = this.item.addList("owned_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+        }
+
         if (!list.contains(province.getId())) {
             list.add(province.getId());
         }
@@ -2588,6 +2592,10 @@ public class SaveCountry {
 
     public void addControlledProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("controlled_provinces");
+
+        if (list == null) {
+            list = this.item.addList("controlled_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+        }
 
         if (!list.contains(province.getId())) {
             list.add(province.getId());
@@ -2625,6 +2633,10 @@ public class SaveCountry {
     public void addCoreProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("core_provinces");
 
+        if (list == null) {
+            list = this.item.addList("core_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+        }
+
         if (!list.contains(province.getId())) {
             list.add(province.getId());
         }
@@ -2660,6 +2672,10 @@ public class SaveCountry {
 
     public void addClaimProvince(SaveProvince province) {
         ClausewitzList list = this.item.getList("claim_provinces");
+
+        if (list == null) {
+            list = this.item.addList("claim_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+        }
 
         if (!list.contains(province.getId())) {
             list.add(province.getId());
