@@ -9,6 +9,7 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.game.Age;
 import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.Hegemon;
 import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePrices;
@@ -47,6 +48,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -325,6 +327,18 @@ public class Save {
 
     public List<SaveHegemon> getHegemons() {
         return hegemons;
+    }
+
+    public void setHegemon(Hegemon hegemon, SaveCountry country, double progress) {
+        Optional<SaveHegemon> saveHegemon = getHegemons().stream().filter(h -> hegemon.equals(h.hegemon())).findFirst();
+
+        if (saveHegemon.isPresent()) {
+            saveHegemon.get().setCountry(country);
+            saveHegemon.get().setProgress(progress);
+        } else {
+            SaveHegemon.addToItem(this.gamestateItem, hegemon.getName(), country, progress, this.gamestateItem.getList("institutions").getOrder() + 1);
+            refreshAttributes();
+        }
     }
 
     public Map<String, SaveTradeNode> getTradeNodes() {

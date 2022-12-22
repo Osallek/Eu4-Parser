@@ -31,4 +31,12 @@ public record SaveHegemon(ClausewitzItem item, Save save, Hegemon hegemon) {
                                            ModifiersUtils.scaleModifiers(hegemon().getScale(), getProgress() / 100),
                                            getProgress() >= 100d ? hegemon().getMax() : null);
     }
+
+    public static ClausewitzItem addToItem(ClausewitzItem parent, String name, SaveCountry country, double progress, int order) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, name, order, true, true);
+        toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
+        toItem.addVariable("progress", progress);
+
+        return toItem;
+    }
 }
