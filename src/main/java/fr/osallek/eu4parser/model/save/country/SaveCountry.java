@@ -2554,11 +2554,26 @@ public class SaveCountry {
         ClausewitzList list = this.item.getList("owned_provinces");
 
         if (list == null) {
-            list = this.item.addList("owned_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+            list = this.item.addList("owned_provinces", this.item.getList("total_count").getOrder() + 1, true, true, true);
         }
 
         if (!list.contains(province.getId())) {
             list.add(province.getId());
+
+            if (!getContinents().contains(province.getContinent())) {
+                List<ProvinceList> continents = this.save.getGame().getContinents();
+                for (int i = 0; i < continents.size(); i++) {
+                    ProvinceList continent = continents.get(i);
+                    if (continent.equals(province.getContinent())) {
+                        this.item.getList("continent").set(i, 1);
+                    }
+                }
+            }
+
+            if (list.size() == 1) {
+                setCapital(province);
+                setTradePort(province.getId());
+            }
         }
     }
 
@@ -2594,7 +2609,7 @@ public class SaveCountry {
         ClausewitzList list = this.item.getList("controlled_provinces");
 
         if (list == null) {
-            list = this.item.addList("controlled_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+            list = this.item.addList("controlled_provinces", this.item.getList("total_count").getOrder() + 1, true, true, true);
         }
 
         if (!list.contains(province.getId())) {
@@ -2634,7 +2649,7 @@ public class SaveCountry {
         ClausewitzList list = this.item.getList("core_provinces");
 
         if (list == null) {
-            list = this.item.addList("core_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+            list = this.item.addList("core_provinces", this.item.getList("total_count").getOrder() + 1, true, true, true);
         }
 
         if (!list.contains(province.getId())) {
@@ -2674,7 +2689,7 @@ public class SaveCountry {
         ClausewitzList list = this.item.getList("claim_provinces");
 
         if (list == null) {
-            list = this.item.addList("claim_provinces", this.item.getList("total_count").getOrder(), true, true, true);
+            list = this.item.addList("claim_provinces", this.item.getList("total_count").getOrder() + 1, true, true, true);
         }
 
         if (!list.contains(province.getId())) {
