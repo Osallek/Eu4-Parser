@@ -10,13 +10,13 @@ import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.game.CenterOfTrade;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.GameModifier;
-import fr.osallek.eu4parser.model.game.GreatProject;
 import fr.osallek.eu4parser.model.game.GreatProjectTier;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.Investment;
 import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
+import fr.osallek.eu4parser.model.game.ParliamentBribe;
 import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.game.StaticModifier;
 import fr.osallek.eu4parser.model.game.StaticModifiers;
@@ -39,10 +39,6 @@ import fr.osallek.eu4parser.model.save.country.SaveInvestment;
 import fr.osallek.eu4parser.model.save.country.SaveModifier;
 import fr.osallek.eu4parser.model.save.country.Ship;
 import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +51,9 @@ import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 public class SaveProvince extends Province {
 
@@ -214,6 +213,16 @@ public class SaveProvince extends Province {
 
     public SeatInParliament getSeatInParliament() {
         return this.seatInParliament;
+    }
+
+    public void addSeatInParliament(ParliamentBribe bribe) {
+        SeatInParliament.addToItem(this.item, bribe.getName());
+        refreshAttributes();
+    }
+
+    public void removeSeatInParliament() {
+        this.item.removeChild("seat_in_parliament");
+        refreshAttributes();
     }
 
     public List<Double> getInstitutionsProgress() {
@@ -1453,7 +1462,7 @@ public class SaveProvince extends Province {
         ClausewitzItem seatInParliamentItem = this.item.getChild("seat_in_parliament");
 
         if (seatInParliamentItem != null) {
-            this.seatInParliament = new SeatInParliament(seatInParliamentItem);
+            this.seatInParliament = new SeatInParliament(seatInParliamentItem, this.save);
         }
 
         ClausewitzItem historyItem = this.item.getChild("history");
@@ -1570,11 +1579,10 @@ public class SaveProvince extends Province {
             return true;
         }
 
-        if (!(o instanceof SaveProvince)) {
+        if (!(o instanceof SaveProvince province)) {
             return false;
         }
 
-        SaveProvince province = (SaveProvince) o;
         return Objects.equals(getId(), province.getId());
     }
 

@@ -18,16 +18,6 @@ import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -67,10 +57,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Game {
 
-    public static final int NB_PARTS = 72;
+    public static final int NB_PARTS = 73;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -237,6 +236,8 @@ public class Game {
     private Map<String, NavalDoctrine> navalDoctrines;
 
     private Map<String, ParliamentIssue> parliamentIssues;
+
+    private Map<String, ParliamentBribe> parliamentBribes;
 
     private Map<String, PersonalDeity> personalDeities;
 
@@ -839,6 +840,15 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readParliamentIssue();
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readParliamentBribe();
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -2115,6 +2125,14 @@ public class Game {
 
     public ParliamentIssue getParliamentIssue(String name) {
         return this.parliamentIssues.get(name);
+    }
+
+    public List<ParliamentBribe> getParliamentBribes() {
+        return new ArrayList<>(this.parliamentBribes.values());
+    }
+
+    public ParliamentBribe getParliamentBribe(String name) {
+        return this.parliamentBribes.get(name);
     }
 
     public List<PersonalDeity> getPersonalDeities() {
@@ -3573,6 +3591,19 @@ public class Game {
                                                                     .map(ParliamentIssue::new)
                                                                     .collect(Collectors.toMap(i -> i.getName().toLowerCase(), Function.identity(),
                                                                                               (a, b) -> b)));
+                });
+    }
+
+    private void readParliamentBribe() {
+        this.parliamentBribes = new HashMap<>();
+
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "parliament_bribes", this::isRegularTxtFile)
+                .forEach(path -> {
+                    ClausewitzItem bribe = ClausewitzParser.parse(path.toFile(), 0);
+                    this.parliamentBribes.putAll(bribe.getChildren()
+                                                      .stream()
+                                                      .map(item -> new ParliamentBribe(item, this))
+                                                      .collect(Collectors.toMap(ParliamentBribe::getName, Function.identity(), (a, b) -> b)));
                 });
     }
 
