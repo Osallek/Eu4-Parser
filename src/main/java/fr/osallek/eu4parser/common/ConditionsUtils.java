@@ -11,8 +11,8 @@ import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.game.Policy;
 import fr.osallek.eu4parser.model.game.ProvinceList;
 import fr.osallek.eu4parser.model.game.Religion;
-import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.SubjectType;
+import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
 import fr.osallek.eu4parser.model.save.country.ActivePolicy;
@@ -22,6 +22,7 @@ import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.Queen;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveEstate;
+import fr.osallek.eu4parser.model.save.country.SaveEstateModifier;
 import fr.osallek.eu4parser.model.save.country.SaveFaction;
 import fr.osallek.eu4parser.model.save.country.SaveModifier;
 import fr.osallek.eu4parser.model.save.diplomacy.QuantifyDatableRelation;
@@ -31,12 +32,6 @@ import fr.osallek.eu4parser.model.save.gameplayoptions.ProvinceTaxManpower;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -51,6 +46,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConditionsUtils {
 
@@ -2115,9 +2115,21 @@ public class ConditionsUtils {
                 return aDouble != null && aDouble >= NumbersUtils.toDouble(condition.getCondition("value"));
             case "has_estate_influence_modifier":
                 estate = root.getEstate(condition.getCondition("estate"));
-                return estate != null && estate.getInfluenceModifiers()
-                                               .stream()
-                                               .anyMatch(modifier -> condition.getCondition("modifier").equalsIgnoreCase(modifier.getDesc()));
+
+                if (estate == null) {
+                    return false;
+                }
+
+                Optional<SaveEstateModifier> m = estate.getInfluenceModifiers()
+                                                              .stream()
+                                                              .filter(modifier -> condition.getCondition("modifier").equalsIgnoreCase(modifier.getDesc()))
+                                                              .findFirst();
+
+                if (m.isEmpty() || condition.getCondition("value") == null) {
+                    return false;
+                }
+
+                return NumbersUtils.doubleOrDefault(m.get().getValue()) >= NumbersUtils.toDouble(condition.getCondition("value")) ;
             case "has_estate_loyalty_modifier":
                 estate = root.getEstate(condition.getCondition("estate"));
                 return estate != null && estate.getLoyaltyModifiers()

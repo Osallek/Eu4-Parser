@@ -7,15 +7,14 @@ import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class Condition {
 
@@ -84,7 +83,13 @@ public class Condition {
             return false;
         }
 
-        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
+            if ("FROM".equals(scope.name)) {
+                return scope.apply(from, from);
+            } else {
+                return scope.apply(root, from);
+            }
+        })) {
             return false;
         }
 
@@ -102,6 +107,56 @@ public class Condition {
         }
 
         if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean apply(SaveProvince province, SaveProvince from) {
+        if (this.conditions != null && this.conditions.entrySet()
+                                                      .stream()
+                                                      .anyMatch(entry -> entry.getValue()
+                                                                              .stream()
+                                                                              .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(),
+                                                                                                                                       s)))) {
+            return false;
+        }
+
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
+            return false;
+        }
+
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
+            if ("FROM".equals(scope.name)) {
+                return scope.apply(from, from);
+            } else {
+                return scope.apply(province, from);
+            }
+        })) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean apply(SaveCountry country, SaveProvince from) {
+        if (this.conditions != null
+            && this.conditions.entrySet()
+                              .stream()
+                              .anyMatch(entry -> entry.getValue()
+                                                      .stream()
+                                                      .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(country, country, country, entry.getKey(), s)))) {
+            return false;
+        }
+
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
+            if ("FROM".equals(scope.name)) {
+                return scope.apply(from, from);
+            } else {
+                return scope.apply(country, from);
+            }
+        })) {
             return false;
         }
 
