@@ -16,13 +16,16 @@ import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.Investment;
 import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
+import fr.osallek.eu4parser.model.game.Names;
 import fr.osallek.eu4parser.model.game.ParliamentBribe;
 import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.game.StaticModifier;
 import fr.osallek.eu4parser.model.game.StaticModifiers;
+import fr.osallek.eu4parser.model.game.TradeCompany;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
 import fr.osallek.eu4parser.model.game.TradePolicy;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.Save;
@@ -37,8 +40,13 @@ import fr.osallek.eu4parser.model.save.country.SaveArea;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveInvestment;
 import fr.osallek.eu4parser.model.save.country.SaveModifier;
+import fr.osallek.eu4parser.model.save.country.SaveTradeCompany;
 import fr.osallek.eu4parser.model.save.country.Ship;
 import fr.osallek.eu4parser.model.save.trade.TradeNodeCountry;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,13 +55,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 public class SaveProvince extends Province {
 
@@ -470,7 +476,40 @@ public class SaveProvince extends Province {
         return this.item.getVarAsBool("active_trade_company");
     }
 
-    public void setActiveTradeCompany(boolean activeTradeCompany) {
+    public void setActiveTradeCompany(boolean activeTradeCompany, Eu4Language language) {
+        if (BooleanUtils.toBoolean(activeTradeCompany()) == activeTradeCompany) {
+            return;
+        }
+
+        if (BooleanUtils.toBoolean(activeTradeCompany())) {
+            getOwner().getTradeCompanies().forEach(c -> c.removeProvince(this));
+        } else {
+            TradeCompany company = this.save.getGame().getTradeCompanies().stream().filter(c -> c.getProvinces().contains(getId())).findFirst().orElse(null);
+
+            if (company == null) {
+                return;
+            }
+
+            Optional<SaveTradeCompany> tradeCompany = getOwner().getTradeCompanies()
+                                                                .stream()
+                                                                .filter(c -> CollectionUtils.containsAny(company.getProvinces(), c.getProvinces()))
+                                                                .findFirst();
+
+            if (tradeCompany.isPresent()) {
+                tradeCompany.get().addProvince(this);
+            } else {
+                String key = company.getNames()
+                                    .stream()
+                                    .filter(names -> names.getTrigger() == null || names.getTrigger().apply(getOwner(), getOwner()))
+                                    .findFirst()
+                                    .map(Names::getName)
+                                    .map(ClausewitzUtils::removeQuotes)
+                                    .orElse(company.getName());
+
+                this.save.addTradeCompany(key, this);
+            }
+        }
+
         this.item.setVariable("active_trade_company", activeTradeCompany);
     }
 

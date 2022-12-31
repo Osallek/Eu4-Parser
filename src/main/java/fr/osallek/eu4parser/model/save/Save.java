@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -605,22 +604,15 @@ public class Save {
         return BooleanUtils.toBoolean(this.gamestateItem.getVarAsBool("achievement_ok"));
     }
 
-    public void addTradeCompany(String name, String owner, Integer... provinces) {
-        owner = ClausewitzUtils.addQuotes(owner);
+    public void addTradeCompany(String name, SaveProvince province) {
+        ClausewitzItem tradeCompanyManagerItem = this.gamestateItem.getChild("trade_company_manager");
 
-        String finalOwner = owner;
-        provinces = Arrays.stream(provinces).filter(province -> getProvince(province).getOwner().equals(finalOwner)).toArray(Integer[]::new);
-
-        if (provinces.length > 0) {
-            ClausewitzItem tradeCompanyManagerItem = this.gamestateItem.getChild("trade_company_manager");
-
-            if (tradeCompanyManagerItem == null) {
-                tradeCompanyManagerItem = this.gamestateItem.addChild("trade_company_manager");
-            }
-
-            SaveTradeCompany.addToItem(tradeCompanyManagerItem, name, owner, provinces);
-            refreshAttributes();
+        if (tradeCompanyManagerItem == null) {
+            tradeCompanyManagerItem = this.gamestateItem.addChild("trade_company_manager");
         }
+
+        SaveTradeCompany.addToItem(this, tradeCompanyManagerItem, name, province);
+        refreshAttributes();
     }
 
     public TechLevelDates getTechLevelDates() {

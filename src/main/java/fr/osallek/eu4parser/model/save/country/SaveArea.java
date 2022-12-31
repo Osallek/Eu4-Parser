@@ -44,7 +44,7 @@ public class SaveArea {
     }
 
     public CountryState getCountryState(SaveCountry country) {
-        return this.countriesStates.get(country);
+        return this.countriesStates == null ? null : this.countriesStates.get(country);
     }
 
     public Map<SaveCountry, CountryState> getCountriesStates() {

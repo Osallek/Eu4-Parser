@@ -39,7 +39,7 @@ public class SaveAdvisor {
     }
 
     public void setName(String name) {
-        this.item.setVariable("lender", ClausewitzUtils.addQuotes(name));
+        this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
     public Advisor getGameAdvisor() {
