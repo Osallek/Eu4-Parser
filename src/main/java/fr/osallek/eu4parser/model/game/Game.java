@@ -55,9 +55,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
+
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -1308,6 +1311,25 @@ public class Game {
 
     public String getLocalisationCleanNoPunctuation(String key, Eu4Language eu4Language) {
         return getLocalisationClean(key, eu4Language).replaceAll("[\\p{P}]", "").trim();
+    }
+
+    public String getComputedLocalisation(SaveCountry root, String key, Eu4Language language) {
+        Localisation localisation = getLocalisation(key, language);
+
+        if (localisation == null) {
+            return key;
+        }
+
+        String s = localisation.getValue() + localisation.getValue();
+
+        Matcher matcher = Eu4Utils.LOCALISATION_REPLACE_PATTERN.matcher(s);
+        List<String> matches = new ArrayList<>();
+
+        while (matcher.find()) {
+            matches.add(matcher.group());
+        }
+
+        return s;
     }
 
     public void addLocalisation(Localisation localisation) {

@@ -159,6 +159,8 @@ public final class Eu4Utils {
 
     public static final Pattern DATE_PATTERN = Pattern.compile("-?[0-9]{1,4}.[0-9]{1,2}.[0-9]{1,2}");
 
+    public static final Pattern LOCALISATION_REPLACE_PATTERN = Pattern.compile("\\[[^]]+]");
+
     public static final List<String> HISTORICAL_COUNCILS = List.of("concilatory", "neutral", "harsh");
 
     public static final Path FLAGS_GFX = Path.of(GFX_FOLDER_PATH, "flags");
