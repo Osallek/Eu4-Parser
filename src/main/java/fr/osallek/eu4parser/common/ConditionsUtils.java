@@ -32,6 +32,12 @@ import fr.osallek.eu4parser.model.save.gameplayoptions.ProvinceTaxManpower;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import fr.osallek.eu4parser.model.save.trade.SaveTradeNode;
 import fr.osallek.eu4parser.model.save.war.ActiveWar;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -46,11 +52,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConditionsUtils {
 
@@ -447,7 +448,7 @@ public class ConditionsUtils {
             case "has_consort_regency":
                 return country.getConsort() != null && BooleanUtils.toBoolean(country.getConsort().getRegent());
             case "has_country_flag":
-                return country.getFlags().contains(value);
+                return country.getFlags() != null && country.getFlags().contains(value);
             case "has_country_modifier":
                 return country.getModifiers().stream().anyMatch(modifier -> modifier.getModifierName().equals(value));
             case "has_custom_ideas":
@@ -575,7 +576,7 @@ public class ConditionsUtils {
             case "has_mission":
                 return country.getCountryMissions().getMissions().stream().anyMatch(mission -> value.equalsIgnoreCase(mission.getName()));
             case "has_new_dynasty":
-                return country.getPreviousMonarchs().size() >= 2 && country.getHistory().getMonarchs().size() >= 2
+                return country.getMonarch() != null && country.getPreviousMonarchs().size() >= 2 && country.getHistory().getMonarchs().size() >= 2
                        && !country.getHistory()
                                   .getMonarch(country.getPreviousMonarchs().get(country.getPreviousMonarchs().size() - 2).getId())
                                   .getDynasty()
@@ -691,7 +692,7 @@ public class ConditionsUtils {
                                                            .stream()
                                                            .anyMatch(rulerPersonality -> value.equalsIgnoreCase(rulerPersonality.getName()));
             case "heir_has_ruler_dynasty":
-                return country.getHeir() != null && country.getHeir().getDynasty().equals(country.getMonarch().getDynasty());
+                return country.getHeir() != null && country.getMonarch() != null && country.getHeir().getDynasty().equals(country.getMonarch().getDynasty());
             case "heir_mil":
                 return country.getHeir() != null && NumbersUtils.intOrDefault(country.getHeir().getMil()) >= NumbersUtils.toInt(value);
             case "heir_nationality":
@@ -835,7 +836,7 @@ public class ConditionsUtils {
             case "is_federation_leader":
                 return "yes".equalsIgnoreCase(value) == country.equals(country.getFederationLeader());
             case "is_female":
-                return "yes".equalsIgnoreCase(value) == BooleanUtils.toBoolean(country.getMonarch().getFemale());
+                return "yes".equalsIgnoreCase(value) == (country.getMonarch() != null && BooleanUtils.toBoolean(country.getMonarch().getFemale()));
             case "is_force_converted":
                 return "yes".equalsIgnoreCase(value) == (country.getForceConvert() != null);
             case "is_former_colonial_nation":
@@ -907,7 +908,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null
                                                          && Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equals(country.getSubjectType().getName()));
             case "is_monarch_leader":
-                return "yes".equalsIgnoreCase(value) == (country.getMonarch().getLeader() != null);
+                return "yes".equalsIgnoreCase(value) == (country.getMonarch() != null && (country.getMonarch().getLeader() != null));
             case "is_month":
             case "real_month_of_year":
                 return country.getSave().getDate().getMonthValue() == NumbersUtils.toInt(value);
@@ -2085,7 +2086,7 @@ public class ConditionsUtils {
                        && root.getConsort().getRulerFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
                               .isBefore(root.getSave().getDate());
             case "had_country_flag":
-                return root.getFlags().contains(condition.getCondition("flag"))
+                return root.getFlags() != null && root.getFlags().contains(condition.getCondition("flag"))
                        && root.getFlags().get(condition.getCondition("flag")).plusDays(NumbersUtils.toInt(condition.getCondition("days")))
                               .isBefore(root.getSave().getDate());
             case "had_global_flag":
