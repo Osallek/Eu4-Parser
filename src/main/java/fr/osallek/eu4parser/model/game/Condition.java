@@ -85,9 +85,9 @@ public class Condition {
 
         if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
             if ("FROM".equals(scope.name)) {
-                return scope.apply(from, from);
+                return !scope.apply(from, from);
             } else {
-                return scope.apply(root, from);
+                return !scope.apply(root, from);
             }
         })) {
             return false;
@@ -129,9 +129,9 @@ public class Condition {
 
         if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
             if ("FROM".equals(scope.name)) {
-                return scope.apply(from, from);
+                return !scope.apply(from, from);
             } else {
-                return scope.apply(province, from);
+                return !scope.apply(province, from);
             }
         })) {
             return false;
@@ -152,9 +152,9 @@ public class Condition {
 
         if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
             if ("FROM".equals(scope.name)) {
-                return scope.apply(from, from);
+                return !scope.apply(from, from);
             } else {
-                return scope.apply(country, from);
+                return !scope.apply(country, from);
             }
         })) {
             return false;

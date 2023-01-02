@@ -30,6 +30,10 @@ public class SaveAdvisor {
         refreshAttributes();
     }
 
+    public Save getSave() {
+        return save;
+    }
+
     public Id getId() {
         return id;
     }

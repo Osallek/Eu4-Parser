@@ -6,8 +6,8 @@ import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.RulerPersonality;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
-import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
+
 import java.time.LocalDate;
 
 public class Monarch {

@@ -15,7 +15,8 @@ public record IdeaGroups(ClausewitzItem item, Save save) {
     public Map<IdeaGroup, Integer> getIdeaGroups() {
         return this.item.getVariables()
                         .stream()
-                        .collect(Collectors.toMap(var -> this.save.getGame().getIdeaGroup(var.getName()),
+                        .filter(variable -> this.save.getGame().getIdeaGroup(variable.getName()) != null)
+                        .collect(Collectors.toMap(variable -> this.save.getGame().getIdeaGroup(variable.getName()),
                                                   ClausewitzVariable::getAsInt,
                                                   (a, b) -> b,
                                                   LinkedHashMap::new));

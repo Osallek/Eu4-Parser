@@ -9,6 +9,7 @@ import fr.osallek.eu4parser.Eu4Parser;
 import fr.osallek.eu4parser.common.Eu4MapUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
+import fr.osallek.eu4parser.common.LocalisationUtils;
 import fr.osallek.eu4parser.common.ModNotFoundException;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.common.TreeNode;
@@ -18,6 +19,17 @@ import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
+import fr.osallek.eu4parser.model.save.Save;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -55,21 +67,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.imageio.ImageIO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Game {
 
-    public static final int NB_PARTS = 73;
+    public static final int NB_PARTS = 74;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -132,6 +136,8 @@ public class Game {
     private Set<String> nativeLocalisations;
 
     private Map<String, Map<Eu4Language, Localisation>> localisations;
+
+    private Map<String, CustomizableLocalization> customizableLocalizations;
 
     private Map<String, SpriteType> spriteTypes;
 
@@ -398,6 +404,15 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 loadLocalisations();
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readCustomisableLocalisations();
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -1023,10 +1038,14 @@ public class Game {
                 finalPath = destFolder.resolve(destPath).resolve(destFileName + ".png");
                 File destFile = finalPath.toFile();
                 FileUtils.forceMkdirParent(destFile);
-                ImageIO.write(ImageReader.convertFileToImage(file.toFile()), "png", destFile);
-                Eu4Utils.optimizePng(destFile.getAbsoluteFile().toPath(), destFile.getAbsoluteFile().toPath());
+                BufferedImage image = ImageReader.convertFileToImage(file.toFile());
+
+                if (image != null) {
+                    ImageIO.write(image, "png", destFile);
+                    Eu4Utils.optimizePng(destFile.getAbsoluteFile().toPath(), destFile.getAbsoluteFile().toPath());
+                }
             } else if ("png".equals(extension) || "jpg".equals(extension) || "jpeg".equals(extension)) {
-                finalPath = destFolder.resolve(destFileName + "." + FilenameUtils.getExtension(fileName));
+                finalPath = destFolder.resolve(destPath).resolve(destFileName + "." + FilenameUtils.getExtension(fileName));
                 FileUtils.copyFile(file.toFile(), finalPath.toFile());
             } else {
                 LOGGER.warn("Unknown: {}", fileName);
@@ -1268,46 +1287,38 @@ public class Game {
             return key;
         }
 
-        StringBuilder localisationBuilder = new StringBuilder(localisation.getValue());
-
-        if (localisationBuilder.length() == 0) {
-            return key;
-        }
-
-        int indexOf;
-        while (localisationBuilder.toString().indexOf('§') >= 0) {
-            for (int i = 0; i < localisationBuilder.length(); i++) {
-                if (localisationBuilder.charAt(i) == '§') {
-                    localisationBuilder.deleteCharAt(i);//Remove char
-                    localisationBuilder.deleteCharAt(i);//Remove color code
-                    indexOf = localisationBuilder.indexOf("§", i);
-                    localisationBuilder.deleteCharAt(indexOf);//Remove closing char
-                    localisationBuilder.deleteCharAt(indexOf);//Remove closing code
-                    break;
-                }
-            }
-        }
-
-        if ((indexOf = localisationBuilder.toString().indexOf('$')) >= 0) {
-            if (ClausewitzUtils.hasAtLeast(localisationBuilder.toString(), '$', 2)) {
-                String[] splits = localisationBuilder.toString().split("\\$");
-                localisationBuilder = new StringBuilder();
-                for (int i = 0; i < splits.length; i += 2) {
-                    localisationBuilder.append(splits[i]).append(" ");
-                }
-            } else {
-                localisationBuilder = new StringBuilder(localisationBuilder.substring(0, indexOf));
-            }
-        }
-
-        return localisationBuilder.toString().replace("\\r\\n", "")
-                                  .replace("\\n", " ")
-                                  .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
-                                  .trim();
+        return LocalisationUtils.cleanLocalisation(localisation.getValue());
     }
 
     public String getLocalisationCleanNoPunctuation(String key, Eu4Language eu4Language) {
         return getLocalisationClean(key, eu4Language).replaceAll("[\\p{P}]", "").trim();
+    }
+
+    public String getComputedLocalisation(Save save, Object root, String key, Eu4Language language) {
+        Localisation localisation = getLocalisation(key, language);
+
+        if (localisation == null) {
+            return key;
+        }
+
+        return getComputedLocalisation(save, root, localisation);
+    }
+
+    public String getComputedLocalisation(Save save, Object root, Localisation localisation) {
+        String s = localisation.getValue();
+
+        Matcher matcher = Eu4Utils.LOCALISATION_REPLACE_PATTERN.matcher(s);
+        List<String> matches = new ArrayList<>();
+
+        while (matcher.find()) {
+            matches.add(matcher.group());
+        }
+
+        for (String matche : matches) {
+            s = s.replace(matche, LocalisationUtils.replaceScope(save, root, matche, localisation.getEu4Language()));
+        }
+
+        return LocalisationUtils.cleanLocalisation(s);
     }
 
     public void addLocalisation(Localisation localisation) {
@@ -1316,6 +1327,22 @@ public class Game {
         }
 
         this.localisations.get(localisation.getKey()).put(localisation.getEu4Language(), localisation);
+    }
+
+    public Map<String, CustomizableLocalization> getCustomizableLocalizations() {
+        return customizableLocalizations;
+    }
+
+    public CustomizableLocalization getCustomizableLocalization(String key) {
+        if (key == null) {
+            return null;
+        }
+
+        return this.customizableLocalizations.get(key);
+    }
+
+    public void setCustomizableLocalizations(Map<String, CustomizableLocalization> customizableLocalizations) {
+        this.customizableLocalizations = customizableLocalizations;
     }
 
     public List<String> getGraphicalCultures() {
@@ -2481,6 +2508,19 @@ public class Game {
                 });
 
         return list;
+    }
+
+    private void readCustomisableLocalisations() {
+        this.customizableLocalizations = new HashMap<>();
+
+        getFileNodes(Eu4Utils.CUSTOMIZABLE_LOCALIZATION_FOLDER_PATH, this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+                    this.customizableLocalizations.putAll(item.getChildren("defined_text")
+                                                              .stream()
+                                                              .map(i -> new CustomizableLocalization(i, this, fileNode))
+                                                              .collect(Collectors.toMap(CustomizableLocalization::getName, Function.identity(), (a, b) -> b)));
+                });
     }
 
     private void readGraphicalCultures() {

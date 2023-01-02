@@ -506,11 +506,30 @@ public class SaveProvince extends Province {
                                     .map(ClausewitzUtils::removeQuotes)
                                     .orElse(company.getName());
 
-                this.save.addTradeCompany(key, this);
+                this.save.addTradeCompany(this.save.getGame().getComputedLocalisation(getSave(), getOwner(), key, language), this);
             }
         }
 
         this.item.setVariable("active_trade_company", activeTradeCompany);
+    }
+
+    public SaveTradeCompany getTradeCompany() {
+        if (!BooleanUtils.toBoolean(activeTradeCompany())) {
+            return null;
+        }
+
+        TradeCompany company = this.save.getGame().getTradeCompanies().stream().filter(c -> c.getProvinces().contains(getId())).findFirst().orElse(null);
+
+        if (company == null) {
+            return null;
+        }
+
+        Optional<SaveTradeCompany> tradeCompany = getOwner().getTradeCompanies()
+                                                            .stream()
+                                                            .filter(c -> CollectionUtils.containsAny(company.getProvinces(), c.getProvinces()))
+                                                            .findFirst();
+
+        return tradeCompany.orElse(null);
     }
 
     public boolean centerOfReligion() {

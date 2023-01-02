@@ -854,7 +854,7 @@ public class Save {
 
         if (activeAdvisorsItem != null) {
             activeAdvisorsItem.getChildren().forEach(child -> {
-                SaveCountry country = this.getCountry(ClausewitzUtils.removeQuotes(child.getName()));
+                SaveCountry country = getCountry(ClausewitzUtils.removeQuotes(child.getName()));
                 child.getChildren("advisor")
                      .stream()
                      .map(Id::new)
