@@ -15,7 +15,7 @@ public class ImageReader {
             return null;
         }
 
-        if (file.toString().endsWith(".dds")) {
+        if (file.toString().toLowerCase().endsWith(".dds")) {
             try (FileInputStream fis = new FileInputStream(file)) {
                 byte[] buffer = new byte[fis.available()];
                 fis.read(buffer);
@@ -23,6 +23,11 @@ public class ImageReader {
                 int[] pixels = DDSReader.read(buffer, DDSReader.ARGB, 0);
                 int width = DDSReader.getWidth(buffer);
                 int height = DDSReader.getHeight(buffer);
+
+                if (width * height > 10_000 * 10_000) { //Fix for corrupted files to prevent OOM
+                    return null;
+                }
+
                 BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                 image.setRGB(0, 0, width, height, pixels, 0, width);
 

@@ -82,6 +82,7 @@ public final class Eu4Utils {
     public static final String GFX_FOLDER_PATH = "gfx";
 
     public static final String LOCALISATION_FOLDER_PATH = "localisation";
+    public static final Path CUSTOMIZABLE_LOCALIZATION_FOLDER_PATH = Path.of("customizable_localization");
 
     public static final String INTERFACE_FOLDER_PATH = "interface";
 
