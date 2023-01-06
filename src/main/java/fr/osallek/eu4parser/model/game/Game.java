@@ -981,7 +981,7 @@ public class Game {
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
-            LOGGER.error("An error occurred while waiting for game files reading : {}", e.getMessage(), e);
+            LOGGER.info("Interrupted while waiting for game files reading");
             Eu4Utils.POOL_EXECUTOR.shutdownNow();
             Thread.currentThread().interrupt();
         }
@@ -2716,7 +2716,7 @@ public class Game {
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
-            LOGGER.error("An error occurred while reading province history : {}", e.getMessage(), e);
+            LOGGER.info("Interrupted while reading province history");
             Thread.currentThread().interrupt();
         }
     }
