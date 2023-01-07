@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public record EstateInteraction(Game game, ClausewitzList list) {
 
     public EstatePrivilege getPrivilege() {
-        return this.game.getEstatePrivilege(this.list.get(0));
+        return this.game.getEstatePrivilege(ClausewitzUtils.removeQuotes(this.list.get(0)));
     }
 
     public LocalDate getDate() {

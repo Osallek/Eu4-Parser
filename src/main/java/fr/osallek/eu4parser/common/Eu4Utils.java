@@ -8,10 +8,10 @@ import fr.osallek.eu4parser.model.game.Country;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.iterators.ReverseListIterator;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.filechooser.FileSystemView;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,10 +46,6 @@ public final class Eu4Utils {
     public static final ThreadPoolExecutor POOL_EXECUTOR = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     public static final Collator COLLATOR = Collator.getInstance();
-
-    public static final Path DOCUMENTS_FOLDER = FileSystemView.getFileSystemView().getDefaultDirectory().toPath().toAbsolutePath();
-
-    public static final Path OSALLEK_DOCUMENTS_FOLDER = DOCUMENTS_FOLDER.resolve("Osallek");
 
     public static final String DESCRIPTOR_FILE = "descriptor.mod";
 
@@ -174,8 +170,27 @@ public final class Eu4Utils {
 
     public static final PngOptimizer PNG_OPTIMIZER = new PngOptimizer();
 
+    public static final Path DOCUMENTS_FOLDER;
+
+    public static final Path OSALLEK_DOCUMENTS_FOLDER;
+
     static {
+        Path documentsFolder1;
         COLLATOR.setStrength(Collator.NO_DECOMPOSITION);
+
+        if (SystemUtils.IS_OS_WINDOWS) {
+            try {
+                documentsFolder1 = readRegistry("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", "Personal")
+                        .map(Path::of).orElse(Path.of(System.getProperty("user.home")));
+            } catch (Exception e) {
+                documentsFolder1 = Path.of(System.getProperty("user.home"));
+            }
+        } else {
+            documentsFolder1 = Path.of(System.getProperty("user.home"));
+        }
+
+        DOCUMENTS_FOLDER = documentsFolder1;
+        OSALLEK_DOCUMENTS_FOLDER = DOCUMENTS_FOLDER.resolve("Osallek");
     }
 
     public static synchronized void optimizePng(Path file, Path dest) throws IOException {

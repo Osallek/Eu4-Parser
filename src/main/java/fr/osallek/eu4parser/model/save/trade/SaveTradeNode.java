@@ -142,7 +142,7 @@ public class SaveTradeNode {
     }
 
     public Map<SaveCountry, TradeNodeCountry> getCountries() {
-        return countries.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
+        return countries.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(ClausewitzUtils.removeQuotes(entry.getKey())), Map.Entry::getValue));
     }
 
     public TradeNodeCountry getCountry(SaveCountry country) {

@@ -29,7 +29,7 @@ public class TradeNodeCountry {
     }
 
     public String getCountry() {
-        return this.item.getName();
+        return ClausewitzUtils.removeQuotes(this.item.getName());
     }
 
     public Integer getType() {

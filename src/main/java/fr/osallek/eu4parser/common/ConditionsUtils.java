@@ -722,6 +722,7 @@ public class ConditionsUtils {
                     return country.isAlive() && !country.getSave().getHre().dismantled() && BooleanUtils.toBoolean(other.getReligion().isHreHereticReligion());
                 } else {
                     return country.isAlive() && !country.getSave().getHre().dismantled()
+                           && country.getSave().getReligions().getReligion(rawValueToReligion(rawValue, root, from)) != null
                            && BooleanUtils.toBoolean(country.getSave()
                                                             .getReligions()
                                                             .getReligion(rawValueToReligion(rawValue, root, from))
@@ -1678,11 +1679,10 @@ public class ConditionsUtils {
                               .stream()
                               .anyMatch(rel -> rel.getPapacy() != null && rel.getPapacy().getReformDesire() >= NumbersUtils.toDouble(value));
             case "religion":
-                return country.getReligionName() != null && rawValueToReligion(rawValue, root, from).equalsIgnoreCase(country.getReligionName());
+                return country.getReligionName() != null && country.getReligionName().equalsIgnoreCase(rawValueToReligion(rawValue, root, from));
             case "religion_group":
-                return country.getReligion() != null && rawValueToReligionGroup(rawValue, root, from).equalsIgnoreCase(country.getReligion()
-                                                                                                                              .getReligionGroup()
-                                                                                                                              .getName());
+                return country.getReligion() != null
+                       && country.getReligion().getReligionGroup().getName().equalsIgnoreCase(rawValueToReligionGroup(rawValue, root, from));
             case "religious_unity":
                 return country.getReligiousUnity() >= NumbersUtils.toDouble(value);
             case "republican_tradition":
@@ -3123,9 +3123,9 @@ public class ConditionsUtils {
 
     public static String rawValueToReligion(String rawValue, SaveCountry root, SaveCountry from) {
         if ("ROOT".equalsIgnoreCase(rawValue)) {
-            return root.getReligion().getName();
+            return Optional.ofNullable(root).map(SaveCountry::getReligion).map(SaveReligion::getName).orElse(null);
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
-            return from.getReligion().getName();
+            return Optional.ofNullable(from).map(SaveCountry::getReligion).map(SaveReligion::getName).orElse(null);
         } else {
             return rawValue;
         }
