@@ -3,9 +3,9 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -132,16 +133,16 @@ public class Country {
         }
     }
 
-    public List<Pair<String, Integer>> getMonarchNames() {
+    public Map<String, Integer> getMonarchNames() {
         return this.commonItem.hasChild("monarch_names") ? this.commonItem.getChild("monarch_names")
                                                                           .getVariables()
                                                                           .stream()
-                                                                          .map(variable -> Pair.of(variable.getName(), variable.getAsInt()))
-                                                                          .toList()
+                                                                          .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt,
+                                                                                                    (a, b) -> a))
                                                          : null;
     }
 
-    public void setMonarchNames(List<Pair<String, Integer>> monarchNames) {
+    public void setMonarchNames(Map<String, Integer> monarchNames) {
         ClausewitzItem item = this.commonItem.getChild("monarch_names");
 
         if (item == null) {
@@ -150,7 +151,7 @@ public class Country {
 
         item.removeAllVariables();
         ClausewitzItem finalItem = item;
-        monarchNames.forEach(pair -> finalItem.addVariable(ClausewitzUtils.addQuotes(pair.getKey()), pair.getValue()));
+        monarchNames.forEach((name, weight) -> finalItem.addVariable(ClausewitzUtils.addQuotes(name), weight));
     }
 
     public List<Unit> getHistoricalUnits() {

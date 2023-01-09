@@ -569,6 +569,9 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("monthly_church_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("morale_damage_received", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("morale_damage", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_governing_cost_increase", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("development_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tech_development_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {

@@ -311,6 +311,7 @@ public class Game {
                     try {
                         readProvinces();
                     } catch (IOException e) {
+                    } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
@@ -322,6 +323,7 @@ public class Game {
                     try {
                         readBorders();
                     } catch (IOException e) {
+                    } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
@@ -332,6 +334,8 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readDefaultMap();
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
                         runnable.run();
@@ -341,6 +345,8 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readClimate();
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
                         runnable.run();
@@ -350,6 +356,8 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readContinents();
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
                         runnable.run();
@@ -359,6 +367,8 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readPositions();
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
                         runnable.run();
@@ -368,12 +378,14 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readProvinceHistory();
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage(), e);
                     } finally {
                         countDownLatch.countDown();
                         runnable.run();
                     }
                 });
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
@@ -384,7 +396,7 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 loadDefines();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
@@ -395,6 +407,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 loadNativeLocalisations();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -404,6 +418,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 loadLocalisations();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -413,6 +429,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readCustomisableLocalisations();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -422,6 +440,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readGraphicalCultures();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -432,6 +452,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readSpriteTypes();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -441,6 +463,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readEstates();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -450,6 +474,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readFactions();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -459,6 +485,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readTradeGoods();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -468,6 +496,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readBuildings();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -477,6 +507,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readAreas();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -486,6 +518,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readRegions();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -495,6 +529,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readSuperRegions();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -504,6 +540,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readCultures();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -513,6 +551,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readReligion();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -522,6 +562,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readInstitutions();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -531,6 +573,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readTradeNodes();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -540,6 +584,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readImperialReforms();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -549,6 +595,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readDecrees();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -558,6 +606,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readGoldenBulls();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -567,6 +617,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readEvents();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -576,6 +628,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readGovernmentRanks();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -585,6 +639,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readGovernmentNames();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -594,6 +650,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readGovernmentReforms();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -603,6 +661,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readGovernments();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -612,6 +672,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readUnits();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -621,6 +683,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readTechnologies();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -630,6 +694,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readAdvisors();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -639,6 +705,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readIdeaGroups();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -648,6 +716,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readCasusBelli();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -657,6 +727,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readTradeCompanies();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -666,6 +738,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readSubjectTypes();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -675,6 +749,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readSubjectTypeUpgrades();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -684,6 +760,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readFetishistCults();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -693,6 +771,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readChurchAspects();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -702,6 +782,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readMissionsTrees();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -711,6 +793,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readRulerPersonalities();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -720,6 +804,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readLeaderPersonalities();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -729,6 +815,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readProfessionalismModifiers();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -738,6 +826,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readStaticModifiers();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -747,6 +837,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readInvestments();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -756,6 +848,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readPolicies();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -765,6 +859,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readHegemons();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -774,6 +870,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readAges();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -783,6 +881,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readDefenderOfFaith();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -792,6 +892,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readCentersOfTrade();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -801,6 +903,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readFervors();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -810,6 +914,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readGreatProjects();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -819,6 +925,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readHolyOrders();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -828,6 +936,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readIsolationism();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -837,6 +947,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readNativeAdvancements();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -846,6 +958,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readNavalDoctrine();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -855,6 +969,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readParliamentIssue();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -864,6 +980,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readParliamentBribe();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -873,6 +991,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readPersonalDeities();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -882,6 +1002,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readReligiousReforms();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -891,6 +1013,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readCrownLandBonuses();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -900,6 +1024,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readStateEdicts();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -909,6 +1035,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readTradePolicies();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -918,6 +1046,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readEventModifiers();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -927,6 +1057,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readProvinceTriggeredModifiers();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -936,6 +1068,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readTriggeredModifiers();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -945,6 +1079,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readCountry();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -954,6 +1090,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readColonialRegions();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -963,6 +1101,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readDiplomacy();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -972,6 +1112,8 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readBookmarks();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 runnable.run();
@@ -2817,8 +2959,8 @@ public class Game {
             FileNode terrainFile = getFileNode(Eu4Utils.MAP_FOLDER_PATH + File.separator + "terrain.txt");
 
             if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
-                ClausewitzItem terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
-                this.terrainItem = terrainItem;
+                this.terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
+                ClausewitzItem terrainsItem = this.terrainItem.getChild("terrain");
                 ClausewitzItem terrainsItem = terrainItem.getChild("terrain");
 
                 this.terrains = new HashMap<>();
@@ -2827,7 +2969,7 @@ public class Game {
                                                  .map(item -> new Terrain(item, terrainFile, this, terrainColors))
                                                  .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
 
-                ClausewitzItem treesItem = terrainItem.getChild("tree");
+                ClausewitzItem treesItem = this.terrainItem.getChild("tree");
 
                 this.trees = new HashMap<>();
                 this.trees.putAll(treesItem.getChildren()
@@ -2835,7 +2977,7 @@ public class Game {
                                            .map(item -> new Tree(item, terrainFile, this, treesColors))
                                            .collect(Collectors.toMap(Tree::getName, Function.identity(), (a, b) -> b)));
 
-                ClausewitzItem categories = terrainItem.getChild("categories");
+                ClausewitzItem categories = this.terrainItem.getChild("categories");
 
                 this.terrainCategories = new HashMap<>();
                 this.terrainCategories.putAll(categories.getChildren()

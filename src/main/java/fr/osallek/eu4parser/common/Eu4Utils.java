@@ -254,7 +254,7 @@ public final class Eu4Utils {
     }
 
     public static Integer cleanStringAndParseToInt(String s) {
-        return Integer.parseInt(s.replaceAll("[\\D]", ""));
+        return Integer.parseInt(s.replaceAll("\\D", ""));
     }
 
     public static Double cleanStringAndParseToDouble(String s) {

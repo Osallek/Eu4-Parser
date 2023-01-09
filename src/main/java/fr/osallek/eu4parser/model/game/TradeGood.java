@@ -1,9 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
-import com.googlecode.pngtastic.core.PngImage;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.eu4parser.common.Eu4MapUtils;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
@@ -14,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 
 public class TradeGood {
 
@@ -101,7 +100,7 @@ public class TradeGood {
     }
 
     public Boolean isGoldType() {
-        return this.priceItem != null && this.priceItem.getVarAsBool("goldtype");
+        return Optional.ofNullable(this.priceItem).map(i -> i.getVarAsBool("goldtype")).orElse(null);
     }
 
     public void setGoldType(Boolean goldType) {
