@@ -2961,7 +2961,6 @@ public class Game {
             if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
                 this.terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
                 ClausewitzItem terrainsItem = this.terrainItem.getChild("terrain");
-                ClausewitzItem terrainsItem = terrainItem.getChild("terrain");
 
                 this.terrains = new HashMap<>();
                 this.terrains.putAll(terrainsItem.getChildren()
