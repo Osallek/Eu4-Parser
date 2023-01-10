@@ -310,7 +310,6 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readProvinces();
-                    } catch (IOException e) {
                     } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     } finally {
@@ -322,7 +321,6 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readBorders();
-                    } catch (IOException e) {
                     } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     } finally {
@@ -3913,7 +3911,11 @@ public class Game {
                                        Country country = new Country(variable.getName().toUpperCase(), commonFileNode,
                                                                      ClausewitzParser.parse(commonFileNode.getPath().toFile(), 0), this);
                                        FileNode historyFileNode = countriesHistory.get(country.getTag());
-                                       country.setHistory(ClausewitzParser.parse(historyFileNode.getPath().toFile(), 0), historyFileNode);
+
+                                       if (historyFileNode != null) {
+                                           country.setHistory(ClausewitzParser.parse(historyFileNode.getPath().toFile(), 0), historyFileNode);
+                                       }
+
                                        this.countries.put(country.getTag(), country);
                                    });
                 });
