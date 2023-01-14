@@ -116,7 +116,12 @@ public class TradeGood {
     }
 
     public BufferedImage getImage() throws IOException {
-        return ImageReader.convertFileToImage(this.game.getResourcesImage()).getSubimage(this.index * 64, 0, 64, 64);
+        return getSubImage(ImageReader.convertFileToImage(this.game.getResourcesImage()));
+    }
+
+    public BufferedImage getSubImage(BufferedImage image) {
+        double size = (double) image.getWidth() / this.game.getResourcesNbFrames();
+        return image.getSubimage((int) (this.index * size), 0, (int) size, image.getHeight());
     }
 
     public void writeImageTo(Path dest) throws IOException {

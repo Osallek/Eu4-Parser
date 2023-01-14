@@ -446,7 +446,12 @@ public class Religion {
     }
 
     public BufferedImage getImage() throws IOException {
-        return ImageReader.convertFileToImage(this.religionGroup.getGame().getReligionsImage()).getSubimage((getIcon() - 1) * 64, 0, 64, 64);
+        return getSubImage(ImageReader.convertFileToImage(this.religionGroup.getGame().getReligionsImage()));
+    }
+
+    public BufferedImage getSubImage(BufferedImage image) {
+        double size = (double) image.getWidth() / this.religionGroup.getGame().getReligionsNbFrames();
+        return image.getSubimage((int) ((getIcon() - 1) * size), 0, (int) size, image.getHeight());
     }
 
     public void writeImageTo(Path dest) throws IOException {

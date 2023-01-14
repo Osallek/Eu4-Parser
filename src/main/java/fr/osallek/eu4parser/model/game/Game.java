@@ -1299,8 +1299,32 @@ public class Game {
         return getSpriteTypeImageFile("GFX_resource_icon");
     }
 
+    public SpriteType getResourcesSprite() {
+        return getSpriteType("GFX_resource_icon");
+    }
+
+    public Integer getResourcesNbFrames() {
+        return getResourcesSprite().getNoOfFrames();
+    }
+
     public File getReligionsImage() {
         return getSpriteTypeImageFile("GFX_icon_religion");
+    }
+
+    public SpriteType getReligionsSprite() {
+        return getSpriteType("GFX_icon_religion");
+    }
+
+    public Integer getReligionsNbFrames() {
+        return getReligionsSprite().getNoOfFrames();
+    }
+
+    public SpriteType getEstatesSprite() {
+        return getSpriteType("GFX_estates_icons_colour-stroke");
+    }
+
+    public Integer getEstatesNbFrames() {
+        return getEstatesSprite().getNoOfFrames();
     }
 
     public File getEstatesImage() {

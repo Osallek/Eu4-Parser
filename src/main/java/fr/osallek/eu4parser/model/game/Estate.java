@@ -193,7 +193,12 @@ public class Estate {
     }
 
     public BufferedImage getImage() throws IOException {
-        return ImageReader.convertFileToImage(this.game.getEstatesImage()).getSubimage((getIcon() - 1) * 47, 0, 47, 44);
+        return getSubImage(ImageReader.convertFileToImage(this.game.getEstatesImage()));
+    }
+
+    public BufferedImage getSubImage(BufferedImage image) {
+        double size = (double) image.getWidth() / this.game.getEstatesNbFrames();
+        return image.getSubimage((int) ((getIcon() - 1) * size), 0, (int) size, image.getHeight());
     }
 
     public void writeImageTo(Path dest) throws IOException {
