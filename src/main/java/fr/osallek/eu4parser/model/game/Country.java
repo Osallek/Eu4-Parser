@@ -6,7 +6,9 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
+import org.apache.commons.io.FileUtils;
 
+import javax.imageio.ImageIO;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +56,8 @@ public class Country {
 
     private SortedMap<LocalDate, CountryHistoryItem> historyItems;
 
+    private Path writenTo;
+
     public Country(String tag, FileNode commonFileNode, ClausewitzItem commonItem, Game game) {
         this.tag = tag;
         this.game = game;
@@ -81,6 +85,21 @@ public class Country {
 
     public File getFlagFile() {
         return this.game.getCountryFlagImage(this);
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(ImageIO.read(getFlagFile()), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     public String getGraphicalCulture() {

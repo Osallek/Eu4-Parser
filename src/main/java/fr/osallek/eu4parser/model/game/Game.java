@@ -286,7 +286,7 @@ public class Game {
     }
 
     public Game(Path gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled) throws IOException {
-        this(gameFolderPath, null, modEnabled, () -> {});
+        this(gameFolderPath, launcherSettings, modEnabled, () -> {});
     }
 
     public Game(Path gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
