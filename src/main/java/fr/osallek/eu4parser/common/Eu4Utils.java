@@ -12,6 +12,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -167,6 +168,13 @@ public final class Eu4Utils {
     public static final Path ADVISORS_GFX = Path.of(GFX_FOLDER_PATH, INTERFACE_FOLDER_PATH, ADVISORS_FOLDER_PATH);
 
     public static final Path BUILDINGS_GFX = Path.of(GFX_FOLDER_PATH, INTERFACE_FOLDER_PATH, BUILDINGS_FOLDER_PATH);
+
+    public static final List<Color> REVOLUTIONARY_COLORS = List.of(Color.WHITE, new Color(20, 20, 20), new Color(117, 38, 143),
+                                                                   new Color(113, 11, 43), new Color(97, 12, 12), new Color(175, 15, 15),
+                                                                   new Color(188, 90, 27), new Color(64, 40, 22), new Color(244, 184, 12),
+                                                                   new Color(17, 53, 13), new Color(46, 114, 55), new Color(18, 179, 113),
+                                                                   new Color(50, 173, 192), new Color(30, 30, 128), new Color(116, 198, 240),
+                                                                   new Color(0, 68, 131), new Color(200, 48, 40));
 
     public static final PngOptimizer PNG_OPTIMIZER = new PngOptimizer();
 

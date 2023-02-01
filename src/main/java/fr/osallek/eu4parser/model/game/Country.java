@@ -298,14 +298,14 @@ public class Country {
         }
     }
 
-    public List<Integer> getRevolutionaryColors() {
+    public List<java.awt.Color> getRevolutionaryColors() {
         ClausewitzList colorList = this.commonItem.getList("revolutionary_colors");
 
         if (colorList == null) {
             return null;
         }
 
-        return colorList.getValuesAsInt();
+        return colorList.getValuesAsInt().stream().map(Eu4Utils.REVOLUTIONARY_COLORS::get).toList();
     }
 
     public void setRevolutionaryColor(List<Integer> colors) {
