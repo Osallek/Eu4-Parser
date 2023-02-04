@@ -498,7 +498,7 @@ public final class LocalisationUtils {
     }
 
     public static Optional<Queen> getConsort(Country country) {
-        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::Queen);
+        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getQueen);
     }
 
     public static Optional<SaveCountry> getOverlord(SaveCountry country) {

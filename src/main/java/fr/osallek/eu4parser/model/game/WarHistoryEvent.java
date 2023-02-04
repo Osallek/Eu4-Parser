@@ -1,4 +1,4 @@
-package fr.osallek.eu4parser.model.save.war;
+package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
@@ -7,7 +7,13 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import java.time.LocalDate;
 import java.util.List;
 
-public record WarHistoryEvent(ClausewitzItem item, ActiveWar save) {
+public final class WarHistoryEvent {
+
+    private final ClausewitzItem item;
+
+    public WarHistoryEvent(ClausewitzItem item) {
+        this.item = item;
+    }
 
     public LocalDate getDate() {
         return Eu4Utils.stringToDate(this.item.getName());
@@ -32,4 +38,5 @@ public record WarHistoryEvent(ClausewitzItem item, ActiveWar save) {
     public List<Battle> getBattles() {
         return this.item.getChildren("battle").stream().map(child -> new Battle(getDate(), child)).toList();
     }
+
 }

@@ -4,6 +4,9 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.model.game.Battle;
+import fr.osallek.eu4parser.model.game.WarGoal;
+import fr.osallek.eu4parser.model.game.WarHistoryEvent;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.Losses;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
@@ -219,7 +222,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
                         .getChildren()
                         .stream()
                         .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
-                        .map(child -> new WarHistoryEvent(child, this))
+                        .map(child -> new WarHistoryEvent(child))
                         .sorted(Comparator.comparing(WarHistoryEvent::getDate))
                         .collect(Collectors.toList());
     }
@@ -288,7 +291,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
 
         for (WarGoalType warGoalType : WarGoalType.values()) {
             if (this.item.hasChild(warGoalType.name().toLowerCase())) {
-                this.warGoal = new WarGoal(this.item.getChild(warGoalType.name().toLowerCase()), this.save);
+                this.warGoal = new WarGoal(this.item.getChild(warGoalType.name().toLowerCase()), this.save.getGame());
                 break;
             }
         }

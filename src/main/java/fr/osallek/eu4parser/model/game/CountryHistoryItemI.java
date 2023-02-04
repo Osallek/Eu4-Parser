@@ -71,5 +71,5 @@ public interface CountryHistoryItemI {
 
     Monarch getMonarch();
 
-    Queen Queen();
+    Queen getQueen();
 }

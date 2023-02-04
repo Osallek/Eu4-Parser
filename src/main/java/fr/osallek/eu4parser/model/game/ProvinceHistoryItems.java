@@ -11,8 +11,16 @@ public class ProvinceHistoryItems implements ProvinceHistoryItemI {
 
     private final List<ProvinceHistoryItemI> items;
 
-    public ProvinceHistoryItems(List<ProvinceHistoryItemI> items) {
+    private final Province province;
+
+    public ProvinceHistoryItems(List<ProvinceHistoryItemI> items, Province province) {
         this.items = items;
+        this.province = province;
+    }
+
+    @Override
+    public Province getProvince() {
+        return this.province;
     }
 
     @Override
@@ -23,6 +31,18 @@ public class ProvinceHistoryItems implements ProvinceHistoryItemI {
     @Override
     public Country getController() {
         return this.items.stream().map(ProvinceHistoryItemI::getController).filter(Objects::nonNull).findFirst().orElse(null);
+    }
+
+    @Override
+    public List<Country> getCumulatedCores() {
+        List<Country> countries = new ArrayList<>();
+
+        for (ProvinceHistoryItemI item : this.items) {
+            countries.addAll(item.getAddCores());
+            countries.removeAll(item.getRemoveCores());
+        }
+
+        return countries;
     }
 
     @Override

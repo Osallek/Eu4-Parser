@@ -1,7 +1,8 @@
-package fr.osallek.eu4parser.model.save.war;
+package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.save.war.Combatant;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;

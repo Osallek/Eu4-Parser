@@ -149,11 +149,11 @@ public class Province {
 
     public void setHistory(ClausewitzItem item, Game game, FileNode historyMod) {
         this.historyFileNode = historyMod;
-        this.defaultHistoryItem = new ProvinceHistoryItem(item, game);
+        this.defaultHistoryItem = new ProvinceHistoryItem(item, game, this);
         this.historyItems = item.getChildren()
                                 .stream()
                                 .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
-                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()), child -> new ProvinceHistoryItem(child, game),
+                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()), child -> new ProvinceHistoryItem(child, game, this),
                                                           (o1, o2) -> o1, TreeMap::new));
     }
 
@@ -398,7 +398,7 @@ public class Province {
                                                                           .map(Map.Entry::getValue))
                                                  .collect(Collectors.toList());
         Collections.reverse(items);
-        return new ProvinceHistoryItems(items);
+        return new ProvinceHistoryItems(items, this);
     }
 
     public FileNode getHistoryFileNode() {

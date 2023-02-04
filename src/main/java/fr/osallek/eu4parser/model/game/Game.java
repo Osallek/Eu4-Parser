@@ -17,7 +17,6 @@ import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
-import fr.osallek.eu4parser.model.game.diplomacy.DiplomacyRelation;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.Save;
@@ -74,7 +73,7 @@ import java.util.stream.Stream;
 
 public class Game {
 
-    public static final int NB_PARTS = 74;
+    public static final int NB_PARTS = 75;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -281,6 +280,8 @@ public class Game {
     private List<DiplomacyRelation> warnings;
 
     private List<DiplomacyRelation> royalMarriage;
+
+    private List<War> wars;
 
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
@@ -1121,6 +1122,17 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readBookmarks();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readWars();
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
@@ -2421,8 +2433,28 @@ public class Game {
         return new TreeMap<>(this.hreEmperors);
     }
 
+    public HreEmperor getHreEmperorAt(LocalDate date) {
+        return this.getHreEmperors()
+                   .entrySet()
+                   .stream()
+                   .filter(e -> e.getKey().isBefore(date) || e.getKey().equals(date))
+                   .collect(Collectors.toCollection(TreeSet::new))
+                   .last()
+                   .getValue();
+    }
+
     public Map<LocalDate, CelestialEmperor> getCelestialEmperors() {
         return new TreeMap<>(this.celestialEmperors);
+    }
+
+    public CelestialEmperor getCelestialEmperorAt(LocalDate date) {
+        return this.getCelestialEmperors()
+                   .entrySet()
+                   .stream()
+                   .filter(e -> e.getKey().isBefore(date) || e.getKey().equals(date))
+                   .collect(Collectors.toCollection(TreeSet::new))
+                   .last()
+                   .getValue();
     }
 
     public List<Bookmark> getBookmarks() {
@@ -2451,6 +2483,10 @@ public class Game {
 
     public List<DiplomacyRelation> getRoyalMarriage() {
         return royalMarriage;
+    }
+
+    public List<War> getWars() {
+        return wars;
     }
 
     public Map<Province, Map<Polygon, Boolean>> getBorders() {
@@ -3386,15 +3422,15 @@ public class Game {
     }
 
     private void readIdeaGroups() {
-        this.ideaGroups = new HashMap<>();
+        this.ideaGroups = new LinkedHashMap<>();
 
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "ideas", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem ideasItem = ClausewitzParser.parse(path.toFile(), 0);
-                    this.ideaGroups.putAll(ideasItem.getChildren()
-                                                    .stream()
-                                                    .map(item -> new IdeaGroup(item, this))
-                                                    .collect(Collectors.toMap(IdeaGroup::getName, Function.identity(), (a, b) -> b)));
+                    ideasItem.getChildren()
+                             .stream()
+                             .map(item -> new IdeaGroup(item, this))
+                             .forEach(ideaGroup -> this.ideaGroups.put(ideaGroup.getName(), ideaGroup));
                 });
 
         this.ideas = this.ideaGroups.values()
@@ -4044,6 +4080,18 @@ public class Game {
                                                          .map(item -> new Bookmark(fileNode, item, this))
                                                          .collect(Collectors.toMap(Bookmark::getName, Function.identity())));
                 });
+    }
+
+    private void readWars() {
+        this.wars = new ArrayList<>();
+
+        getFileNodes(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "wars", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+                    this.wars.add(new War(fileNode, item, this));
+                });
+
+        this.wars.sort(Comparator.comparing(War::getStart).thenComparing(War::getEnd).thenComparing(War::getName));
     }
 
     public boolean isRegularTxtFile(FileNode fileNode) {

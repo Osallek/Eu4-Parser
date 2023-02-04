@@ -501,7 +501,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Queen Queen() {
+    public Queen getQueen() {
         return this.item.hasVar("queen") ? null : new Queen(this.item.getChild("queen"), this.country);
     }
 }

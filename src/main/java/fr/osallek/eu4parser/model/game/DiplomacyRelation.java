@@ -1,4 +1,4 @@
-package fr.osallek.eu4parser.model.game.diplomacy;
+package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;

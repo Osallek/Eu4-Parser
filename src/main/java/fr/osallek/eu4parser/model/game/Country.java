@@ -6,7 +6,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
-import fr.osallek.eu4parser.model.game.diplomacy.DiplomacyRelation;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
@@ -366,6 +365,33 @@ public class Country {
                         .findFirst()
                         .map(DiplomacyRelation::getFirst)
                         .orElse(null);
+    }
+
+    public String getSubjectTypeAt(LocalDate date) {
+        return this.game.getSubjectTypeRelations()
+                        .entrySet()
+                        .stream()
+                        .filter(e -> e.getValue().stream().anyMatch(r -> this.equals(r.getSecond())))
+                        .filter(e -> e.getValue().stream().anyMatch(r -> r.getStartDate().equals(date) || r.getStartDate().isBefore(date)))
+                        .filter(e -> e.getValue().stream().anyMatch(r -> r.getEndDate().equals(date) || r.getEndDate().isBefore(date)))
+                        .findFirst()
+                        .map(Map.Entry::getKey)
+                        .orElse(null);
+    }
+
+    public Stream<ProvinceHistoryItemI> getOwnedProvinceAt(LocalDate date) {
+        return this.game.getProvinces().values().stream().map(p -> p.getHistoryItemAt(date)).filter(p -> this.equals(p.getOwner()));
+    }
+
+    public Stream<ProvinceHistoryItemI> getCoresProvinceAt(LocalDate date) {
+        return this.game.getProvinces().values().stream().map(p -> p.getHistoryItemAt(date)).filter(p -> p.getCumulatedCores().contains(this));
+    }
+
+    public Stream<War> getWarsAt(LocalDate date) {
+        return this.game.getWars().stream()
+                        .filter(war -> war.getStart().equals(date) || war.getStart().isBefore(date))
+                        .filter(war -> war.getEnd() == null || war.getEnd().equals(date) || war.getEnd().isBefore(date))
+                        .filter(war -> war.getAttackersAt(date).contains(this.tag) || war.getDefendersAt(date).contains(this.tag));
     }
 
     public void writeCommon(BufferedWriter writer) throws IOException {

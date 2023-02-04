@@ -4,9 +4,13 @@ import java.util.List;
 
 public interface ProvinceHistoryItemI {
 
+    Province getProvince();
+
     Country getOwner();
 
     Country getController();
+
+    List<Country> getCumulatedCores();
 
     List<Country> getAddCores();
 

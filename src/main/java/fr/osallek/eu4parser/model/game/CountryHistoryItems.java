@@ -182,7 +182,7 @@ public class CountryHistoryItems implements CountryHistoryItemI {
     }
 
     @Override
-    public Queen Queen() {
-        return this.items.stream().map(CountryHistoryItemI::Queen).filter(Objects::nonNull).findFirst().orElse(null);
+    public Queen getQueen() {
+        return this.items.stream().map(CountryHistoryItemI::getQueen).filter(Objects::nonNull).findFirst().orElse(null);
     }
 }

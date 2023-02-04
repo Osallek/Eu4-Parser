@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class ProvinceHistoryItem implements ProvinceHistoryItemI {
 
@@ -21,7 +22,10 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
 
     private final Game game;
 
+    private final Province province;
+
     public ProvinceHistoryItem(Province province, LocalDate date) {
+        this.province = province;
         Optional<ClausewitzItem> nextHistoryItem = province.getDefaultHistoryItem()
                 .item
                 .getChildren()
@@ -35,9 +39,15 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
         this.game = province.getDefaultHistoryItem().game;
     }
 
-    public ProvinceHistoryItem(ClausewitzItem item, Game game) {
+    public ProvinceHistoryItem(ClausewitzItem item, Game game, Province province) {
         this.item = item;
         this.game = game;
+        this.province = province;
+    }
+
+    @Override
+    public Province getProvince() {
+        return this.province;
     }
 
     @Override
@@ -74,6 +84,12 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
         } else {
             this.item.setVariable("controller", controller, 1);
         }
+    }
+
+    @Override
+    public List<Country> getCumulatedCores() {
+        List<Country> removeCore = getRemoveCores();
+        return getAddCores().stream().filter(Predicate.not(removeCore::contains)).toList();
     }
 
     @Override
