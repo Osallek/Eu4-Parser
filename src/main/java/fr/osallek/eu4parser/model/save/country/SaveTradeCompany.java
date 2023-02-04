@@ -4,8 +4,10 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.model.game.TradeCompany;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
@@ -104,6 +106,15 @@ public class SaveTradeCompany {
 
     public void setPromoteInvestments(boolean promoteInvestments) {
         this.item.setVariable("promote_investments", promoteInvestments);
+    }
+
+    public TradeCompany getTradeCompany() {
+        return this.save.getGame()
+                        .getTradeCompanies()
+                        .stream()
+                        .filter(c -> CollectionUtils.containsAny(getProvinces(), c.getProvinces()))
+                        .findFirst()
+                        .orElse(null);
     }
 
     public static ClausewitzItem addToItem(Save save, ClausewitzItem parent, String name, SaveProvince province) {

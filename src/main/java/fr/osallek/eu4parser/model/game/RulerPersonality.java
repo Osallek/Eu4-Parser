@@ -91,19 +91,19 @@ public class RulerPersonality {
     }
 
     public boolean isMonarchValid(Monarch monarch) {
-        if (getAllow() != null && !getAllow().apply(monarch.getCountry(), monarch.getCountry())) {
+        if (getAllow() != null && !getAllow().apply(monarch.getSaveCountry(), monarch.getSaveCountry())) {
             return false;
         }
 
-        if (Monarch.class.equals(monarch.getClass()) && (getRulerAllow() == null || getRulerAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+        if (Monarch.class.equals(monarch.getClass()) && (getRulerAllow() == null || getRulerAllow().apply(monarch.getSaveCountry(), monarch.getSaveCountry()))) {
             return false;
         }
 
-        if (Heir.class.equals(monarch.getClass()) && (getHeirAllow() == null || getHeirAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+        if (Heir.class.equals(monarch.getClass()) && (getHeirAllow() == null || getHeirAllow().apply(monarch.getSaveCountry(), monarch.getSaveCountry()))) {
             return false;
         }
 
-        if (Queen.class.equals(monarch.getClass()) && (getConsortAllow() == null || getConsortAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+        if (Queen.class.equals(monarch.getClass()) && (getConsortAllow() == null || getConsortAllow().apply(monarch.getSaveCountry(), monarch.getSaveCountry()))) {
             return false;
         }
 

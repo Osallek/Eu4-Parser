@@ -6,6 +6,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
+import fr.osallek.eu4parser.model.game.diplomacy.DiplomacyRelation;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Country {
 
@@ -67,12 +70,17 @@ public class Country {
 
     public void setHistory(ClausewitzItem item, FileNode historyMod) {
         this.historyFileNode = historyMod;
-        this.defaultHistoryItem = new CountryHistoryItem(item, this.game);
+        this.defaultHistoryItem = new CountryHistoryItem(item, this.game, this);
         this.historyItems = item.getChildren()
                                 .stream()
                                 .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
-                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()), child -> new CountryHistoryItem(child, this.game),
+                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
+                                                          child -> new CountryHistoryItem(child, this.game, this),
                                                           (o1, o2) -> o1, TreeMap::new));
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public String getTag() {
@@ -334,6 +342,30 @@ public class Country {
 
     public SortedMap<LocalDate, CountryHistoryItem> getHistoryItems() {
         return historyItems;
+    }
+
+    public CountryHistoryItemI getHistoryItemAt(LocalDate date) {
+        List<CountryHistoryItemI> items = Stream.concat(Stream.of(this.defaultHistoryItem),
+                                                        this.historyItems.entrySet()
+                                                                         .stream()
+                                                                         .filter(e -> date.isBefore(e.getKey()) || date.equals(e.getKey()))
+                                                                         .map(Map.Entry::getValue))
+                                                .collect(Collectors.toList());
+        Collections.reverse(items);
+        return new CountryHistoryItems(items);
+    }
+
+    public Country getOverlordAt(LocalDate date) {
+        return this.game.getSubjectTypeRelations()
+                        .values()
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .filter(r -> this.equals(r.getSecond()))
+                        .filter(r -> r.getStartDate().equals(date) || r.getStartDate().isBefore(date))
+                        .filter(r -> r.getEndDate().equals(date) || r.getStartDate().isAfter(date))
+                        .findFirst()
+                        .map(DiplomacyRelation::getFirst)
+                        .orElse(null);
     }
 
     public void writeCommon(BufferedWriter writer) throws IOException {

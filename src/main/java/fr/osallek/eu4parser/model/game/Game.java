@@ -17,6 +17,7 @@ import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
+import fr.osallek.eu4parser.model.game.diplomacy.DiplomacyRelation;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.Save;
@@ -270,6 +271,16 @@ public class Game {
     private Map<LocalDate, HreEmperor> hreEmperors;
 
     private Map<LocalDate, CelestialEmperor> celestialEmperors;
+
+    private Map<String, List<DiplomacyRelation>> subjectTypeRelations;
+
+    private List<DiplomacyRelation> alliances;
+
+    private List<DiplomacyRelation> guarantees;
+
+    private List<DiplomacyRelation> warnings;
+
+    private List<DiplomacyRelation> royalMarriage;
 
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
@@ -2422,6 +2433,26 @@ public class Game {
         return this.bookmarks.get(name);
     }
 
+    public Map<String, List<DiplomacyRelation>> getSubjectTypeRelations() {
+        return subjectTypeRelations;
+    }
+
+    public List<DiplomacyRelation> getAlliances() {
+        return alliances;
+    }
+
+    public List<DiplomacyRelation> getGuarantees() {
+        return guarantees;
+    }
+
+    public List<DiplomacyRelation> getWarnings() {
+        return warnings;
+    }
+
+    public List<DiplomacyRelation> getRoyalMarriage() {
+        return royalMarriage;
+    }
+
     public Map<Province, Map<Polygon, Boolean>> getBorders() {
         return this.borders;
     }
@@ -2742,7 +2773,7 @@ public class Game {
                         String[] csvLine = line.split(";", -1);
 
                         if (csvLine.length >= 4 && StringUtils.isNoneBlank(Arrays.copyOf(csvLine, 4))) {
-                            Province province = new Province(csvLine);
+                            Province province = new Province(csvLine, this);
                             this.provinces.put(province.getId(), province);
 
                             if (province.getColor() != null) {
@@ -3408,7 +3439,7 @@ public class Game {
                     ClausewitzItem tradeCompaniesItem = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
                     this.tradeCompanies.putAll(tradeCompaniesItem.getChildren()
                                                                  .stream()
-                                                                 .map(item -> new TradeCompany(item, fileNode))
+                                                                 .map(item -> new TradeCompany(item, fileNode, this))
                                                                  .collect(Collectors.toMap(TradeCompany::getName, Function.identity(), (a, b) -> b)));
                 });
     }
@@ -3948,6 +3979,11 @@ public class Game {
     private void readDiplomacy() {
         this.hreEmperors = new HashMap<>();
         this.celestialEmperors = new HashMap<>();
+        this.royalMarriage = new ArrayList<>();
+        this.guarantees = new ArrayList<>();
+        this.warnings = new ArrayList<>();
+        this.alliances = new ArrayList<>();
+        this.subjectTypeRelations = new HashMap<>();
 
         getPaths(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "diplomacy", this::isRegularTxtFile)
                 .forEach(path -> {
@@ -3964,6 +4000,34 @@ public class Game {
                                      if (item.hasVar("celestial_emperor")) {
                                          this.celestialEmperors.put(ClausewitzUtils.stringToDate(ClausewitzUtils.removeQuotes(item.getName())),
                                                                     new CelestialEmperor(item));
+                                     }
+                                 });
+
+                    diplomacyItem.getChildren()
+                                 .stream()
+                                 .filter(item -> !ClausewitzUtils.DATE_PATTERN.matcher(item.getName()).matches())
+                                 .forEach(item -> {
+                                     switch (item.getName()) {
+                                         case "alliance" -> this.alliances.add(new DiplomacyRelation(item, this));
+                                         case "royal_marriage" -> this.royalMarriage.add(new DiplomacyRelation(item, this));
+                                         case "guarantee" -> this.guarantees.add(new DiplomacyRelation(item, this));
+                                         case "warning" -> this.warnings.add(new DiplomacyRelation(item, this));
+                                         case "vassal" -> {
+                                             this.subjectTypeRelations.putIfAbsent("vassal", new ArrayList<>());
+                                             this.subjectTypeRelations.get("vassal").add(new DiplomacyRelation(item, this));
+                                         }
+                                         case "march" -> {
+                                             this.subjectTypeRelations.putIfAbsent("march", new ArrayList<>());
+                                             this.subjectTypeRelations.get("march").add(new DiplomacyRelation(item, this));
+                                         }
+                                         case "union" -> {
+                                             this.subjectTypeRelations.putIfAbsent("personal_union", new ArrayList<>());
+                                             this.subjectTypeRelations.get("personal_union").add(new DiplomacyRelation(item, this));
+                                         }
+                                         case "dependency" -> {
+                                             this.subjectTypeRelations.putIfAbsent(item.getVarAsString("subject_type"), new ArrayList<>());
+                                             this.subjectTypeRelations.get(item.getVarAsString("subject_type")).add(new DiplomacyRelation(item, this));
+                                         }
                                      }
                                  });
                 });

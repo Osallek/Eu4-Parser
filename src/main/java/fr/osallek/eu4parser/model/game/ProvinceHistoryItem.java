@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class ProvinceHistoryItem {
+public class ProvinceHistoryItem implements ProvinceHistoryItemI {
 
     private final ClausewitzItem item;
 
@@ -40,6 +40,7 @@ public class ProvinceHistoryItem {
         this.game = game;
     }
 
+    @Override
     public Country getOwner() {
         ClausewitzVariable variable = this.item.getVar("owner");
         return variable == null ? null : this.game.getCountry(variable.getValue());
@@ -57,6 +58,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Country getController() {
         ClausewitzVariable variable = this.item.getVar("controller");
         return variable == null ? null : this.game.getCountry(variable.getValue());
@@ -74,6 +76,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public List<Country> getAddCores() {
         return this.item.getVarsAsStrings("add_core").stream().map(this.game::getCountry).toList();
     }
@@ -95,6 +98,7 @@ public class ProvinceHistoryItem {
         removeAddCore(country.getTag());
     }
 
+    @Override
     public List<Country> getRemoveCores() {
         return this.item.getVarsAsStrings("remove_core").stream().map(this.game::getCountry).toList();
     }
@@ -116,6 +120,7 @@ public class ProvinceHistoryItem {
         removeRemoveCore(country.getTag());
     }
 
+    @Override
     public Boolean getCity() {
         return this.item.getVarAsBool("is_city");
     }
@@ -128,6 +133,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Culture getCulture() {
         return this.game.getCulture(this.item.getVarAsString("culture"));
     }
@@ -140,6 +146,7 @@ public class ProvinceHistoryItem {
         setCulture(culture.getName());
     }
 
+    @Override
     public Religion getReligion() {
         return this.game.getReligion(this.item.getVarAsString("religion"));
     }
@@ -152,6 +159,7 @@ public class ProvinceHistoryItem {
         setReligion(religion.getName());
     }
 
+    @Override
     public Integer getBaseTax() {
         return this.item.getVarAsInt("base_tax");
     }
@@ -164,6 +172,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getBaseProduction() {
         return this.item.getVarAsInt("base_production");
     }
@@ -176,6 +185,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getBaseManpower() {
         return this.item.getVarAsInt("base_manpower");
     }
@@ -188,6 +198,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public TradeGood getTradeGoods() {
         return this.game.getTradeGood(this.item.getVarAsString("trade_goods"));
     }
@@ -200,6 +211,7 @@ public class ProvinceHistoryItem {
         setTradeGood(tradeGood.getName());
     }
 
+    @Override
     public Boolean getHre() {
         return this.item.getVarAsBool("hre");
     }
@@ -212,6 +224,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public String getCapital() {
         return ClausewitzUtils.removeQuotes(this.item.getVarAsString("capital"));
     }
@@ -220,6 +233,7 @@ public class ProvinceHistoryItem {
         this.item.setVariable("capital", ClausewitzUtils.addQuotes(capital));
     }
 
+    @Override
     public List<TechGroup> getDiscoveredBy() {
         return this.item.getVarsAsStrings("discovered_by").stream().map(this.game::getTechGroup).toList();
     }
@@ -240,6 +254,7 @@ public class ProvinceHistoryItem {
         removeDiscoveredBy(country.getTag());
     }
 
+    @Override
     public Boolean getReformationCenter() {
         return this.item.getVarAsBool("reformation_center");
     }
@@ -252,6 +267,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Boolean getSeatInParliament() {
         return this.item.getVarAsBool("seat_in_parliament");
     }
@@ -264,6 +280,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getUnrest() {
         return this.item.getVarAsInt("unrest");
     }
@@ -276,6 +293,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getCenterOfTrade() {
         return this.item.getVarAsInt("center_of_trade");
     }
@@ -288,6 +306,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getExtraCost() {
         return this.item.getVarAsInt("extra_cost");
     }
@@ -300,6 +319,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getNativeSize() {
         return this.item.getVarAsInt("native_size");
     }
@@ -312,6 +332,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getNativeHostileness() {
         return this.item.getVarAsInt("native_hostileness");
     }
@@ -324,6 +345,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public Integer getNativeFerocity() {
         return this.item.getVarAsInt("native_ferocity");
     }
@@ -336,6 +358,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public List<ModifierApply> getPermanentModifier() {
         if (this.item.hasChild("add_permanent_province_modifier")) {
             return this.item.getChildren("add_permanent_province_modifier").stream().map(ModifierApply::new).toList();
@@ -344,6 +367,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public List<ModifierApply> getRemoveModifier() {
         if (this.item.hasChild("remove_province_modifier")) {
             return this.item.getChildren("remove_province_modifier").stream().map(ModifierApply::new).toList();
@@ -352,6 +376,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public ProvinceRevolt getRevolt() {
         if (this.item.hasChild("revolt")) {
             return new ProvinceRevolt(this.item.getChild("revolt"));
@@ -360,6 +385,7 @@ public class ProvinceHistoryItem {
         }
     }
 
+    @Override
     public List<Building> getBuildings() {
         return this.game.getBuildings()
                         .stream()

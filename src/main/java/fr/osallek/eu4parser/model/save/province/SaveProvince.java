@@ -513,7 +513,7 @@ public class SaveProvince extends Province {
         this.item.setVariable("active_trade_company", activeTradeCompany);
     }
 
-    public SaveTradeCompany getTradeCompany() {
+    public SaveTradeCompany getSaveTradeCompany() {
         if (!BooleanUtils.toBoolean(activeTradeCompany())) {
             return null;
         }

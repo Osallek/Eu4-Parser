@@ -1,7 +1,7 @@
 package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.save.Save;
+import fr.osallek.eu4parser.model.game.Country;
 
 import java.time.LocalDate;
 
@@ -12,6 +12,14 @@ public class Heir extends Monarch {
     }
 
     public Heir(ClausewitzItem item, SaveCountry country, LocalDate date) {
+        super(item, country, date);
+    }
+
+    public Heir(ClausewitzItem item, Country country) {
+        super(item, country);
+    }
+
+    public Heir(ClausewitzItem item, Country country, LocalDate date) {
         super(item, country, date);
     }
 

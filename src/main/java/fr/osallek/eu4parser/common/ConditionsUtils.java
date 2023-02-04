@@ -482,9 +482,9 @@ public class ConditionsUtils {
             case "has_first_revolution_started":
                 return country.getSave().getRevolution() != null && BooleanUtils.toBoolean(country.getSave().getRevolution().hasFirstRevolutionStarted());
             case "has_foreign_consort":
-                return country.getConsort() != null && country.getConsort().getWho() != null;
+                return country.getConsort() != null && country.getConsort().getSaveWho() != null;
             case "has_foreign_heir":
-                return country.getHeir() != null && country.getHeir().getWho() != null;
+                return country.getHeir() != null && country.getHeir().getSaveWho() != null;
             case "has_friendly_reformation_center":
                 return country.getOwnedProvinces()
                               .stream()
@@ -499,7 +499,7 @@ public class ConditionsUtils {
             case "has_given_consort_to":
                 other = country.getSave().getCountry(value);
                 return other.getConsort() != null && Queen.class.equals(other.getConsort().getClass())
-                       && ((Queen) other.getConsort()).getCountryOfOrigin().equals(country);
+                       && ((Queen) other.getConsort()).getSaveCountryOfOrigin().equals(country);
             case "has_guaranteed":
                 other = country.getSave().getCountry(value);
                 return other.getGuarantees().contains(country);
@@ -697,7 +697,7 @@ public class ConditionsUtils {
                 return country.getHeir() != null && NumbersUtils.intOrDefault(country.getHeir().getMil()) >= NumbersUtils.toInt(value);
             case "heir_nationality":
                 other = country.getSave().getCountry(value);
-                return country.getHeir() != null && country.getHeir().getWho().equals(other);
+                return country.getHeir() != null && country.getHeir().getSaveWho().equals(other);
             case "heir_religion":
                 return country.getHeir() != null && country.getHeir().getReligion().getName().equals(rawValueToReligion(rawValue, root, from));
             case "high_army_professionalism":
@@ -932,7 +932,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getStatistsVsMonarchists() != null && country.getStatistsVsMonarchists() > 0);
             case "is_origin_of_consort":
                 other = country.getSave().getCountry(value);
-                return country.getConsort() != null && country.getConsort().getWho().equals(other);
+                return country.getConsort() != null && country.getConsort().getSaveWho().equals(other);
             case "is_overseas_subject":
                 if (country.getOverlord() == null) {
                     return !"yes".equalsIgnoreCase(value);
@@ -1708,7 +1708,7 @@ public class ConditionsUtils {
                 return country.getMonarch() == null || rawValueToCulture(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getCultureName());
             case "ruler_is_foreigner":
                 return "yes".equalsIgnoreCase(value) == (country.getMonarch() == null ||
-                                                         (country.getMonarch().getCountry() != null && !country.equals(country.getMonarch().getCountry())));
+                                                         (country.getMonarch().getSaveCountry() != null && !country.equals(country.getMonarch().getSaveCountry())));
             case "ruler_religion":
                 return country.getMonarch() == null || rawValueToReligion(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getReligion().getName());
             case "sailors":

@@ -50,7 +50,7 @@ public final class Eu4Utils {
 
     public static final String DESCRIPTOR_FILE = "descriptor.mod";
 
-    public static final String SAVES_FOLDER = "save games";
+    public static final String SAVES_FOLDER = "game games";
 
 
     public static final String STEAM_COMMON_FOLDER_PATH = "common";

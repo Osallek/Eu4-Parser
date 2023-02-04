@@ -16,9 +16,16 @@ public class TradeCompany extends Nodded {
 
     private final ClausewitzItem item;
 
-    public TradeCompany(ClausewitzItem item, FileNode fileNode) {
+    private final Game game;
+
+    public TradeCompany(ClausewitzItem item, FileNode fileNode, Game game) {
         super(fileNode);
         this.item = item;
+        this.game = game;
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     @Override

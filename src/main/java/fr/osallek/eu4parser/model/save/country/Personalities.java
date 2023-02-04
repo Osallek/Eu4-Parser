@@ -2,18 +2,19 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.RulerPersonality;
-import fr.osallek.eu4parser.model.save.Save;
+
 import java.util.List;
 import java.util.Objects;
 
-public record Personalities(ClausewitzItem item, Save save) {
+public record Personalities(ClausewitzItem item, Game game) {
 
     public List<RulerPersonality> getPersonalities() {
         return this.item.getVariables()
                         .stream()
                         .map(ClausewitzVariable::getName)
-                        .map(s -> this.save.getGame().getRulerPersonality(s))
+                        .map(this.game::getRulerPersonality)
                         .filter(Objects::nonNull)
                         .toList();
     }

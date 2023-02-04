@@ -2,6 +2,9 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
+import fr.osallek.eu4parser.model.save.country.Heir;
+import fr.osallek.eu4parser.model.save.country.Monarch;
+import fr.osallek.eu4parser.model.save.country.Queen;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,19 +13,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class CountryHistoryItem {
+public class CountryHistoryItem implements CountryHistoryItemI {
 
     private final Game game;
 
     private final ClausewitzItem item;
 
-    public CountryHistoryItem(ClausewitzItem item, Game game) {
+    private final Country country;
+
+    public CountryHistoryItem(ClausewitzItem item, Game game, Country country) {
         this.game = game;
         this.item = item;
+        this.country = country;
     }
 
-    //Todo monarch, leader, heir, queen
-
+    @Override
     public TechGroup getTechnologyGroup() {
         return this.item.hasVar("technology_group") ? this.game.getTechGroup(this.item.getVarAsString("technology_group")) : null;
     }
@@ -31,6 +36,7 @@ public class CountryHistoryItem {
         this.item.setVariable("technology_group", technologyGroup);
     }
 
+    @Override
     public String getUnitType() {
         return this.item.getVarAsString("unit_type");
     }
@@ -39,6 +45,7 @@ public class CountryHistoryItem {
         this.item.setVariable("unit_type", unitType);
     }
 
+    @Override
     public Integer getMercantilism() {
         return this.item.getVarAsInt("mercantilism");
     }
@@ -47,6 +54,7 @@ public class CountryHistoryItem {
         this.item.setVariable("mercantilism", mercantilism);
     }
 
+    @Override
     public Province getCapital() {
         return this.item.hasVar("capital") ? this.game.getProvince(this.item.getVarAsInt("capital")) : null;
     }
@@ -59,6 +67,7 @@ public class CountryHistoryItem {
         this.item.setVariable("capital", capital);
     }
 
+    @Override
     public Country getChangedTagFrom() {
         return this.item.hasVar("changed_tag_from") ? this.game.getCountry(this.item.getVarAsString("changed_tag_from")) : null;
     }
@@ -71,6 +80,7 @@ public class CountryHistoryItem {
         this.item.setVariable("changed_tag_from", changedTagFrom);
     }
 
+    @Override
     public Province getFixedCapital() {
         return this.item.hasVar("fixed_capital") ?  this.game.getProvince(this.item.getVarAsInt("fixed_capital")) : null;
     }
@@ -83,6 +93,7 @@ public class CountryHistoryItem {
         this.item.setVariable("fixed_capital", capital);
     }
 
+    @Override
     public Government getGovernment() {
         return this.item.hasVar("government") ? this.game.getGovernment(this.item.getVarAsString("government")) : null;
     }
@@ -95,6 +106,7 @@ public class CountryHistoryItem {
         this.item.setVariable("government", government);
     }
 
+    @Override
     public String getReligiousSchool() {
         return this.item.getVarAsString("religious_school");
     }
@@ -103,6 +115,7 @@ public class CountryHistoryItem {
         this.item.setVariable("religious_school", religiousSchool);
     }
 
+    @Override
     public Power getNationalFocus() {
         return this.item.hasVar("national_focus") ? Power.byName(this.item.getVarAsString("national_focus")) : null;
     }
@@ -115,10 +128,12 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public Integer getGovernmentLevel() {
         return this.item.getVarAsInt("government_rank");
     }
 
+    @Override
     public GovernmentRank getGovernmentRank() {
         return getGovernmentLevel() == null ? null : this.game.getGovernmentRank(getGovernmentLevel());
     }
@@ -135,6 +150,7 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public Culture getPrimaryCulture() {
         return this.item.hasVar("primary_culture") ? this.game.getCulture(this.item.getVarAsString("primary_culture")) : null;
     }
@@ -147,6 +163,7 @@ public class CountryHistoryItem {
         this.item.setVariable("primary_culture", primaryCulture);
     }
 
+    @Override
     public Religion getReligion() {
         return this.item.hasVar("religion") ? this.game.getReligion(this.item.getVarAsString("religion")) : null;
     }
@@ -159,6 +176,7 @@ public class CountryHistoryItem {
         this.item.setVariable("religion", religion);
     }
 
+    @Override
     public Religion getJoinLeague() {
         return this.item.hasVar("join_league") ? null : this.game.getReligion(this.item.getVarAsString("join_league"));
     }
@@ -175,6 +193,7 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public Double getAddArmyProfessionalism() {
         return this.item.getVarAsDouble("add_army_professionalism");
     }
@@ -187,6 +206,7 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public List<Culture> getAddAcceptedCultures() {
         return this.item.getVarsAsStrings("add_accepted_culture").stream().map(this.game::getCulture).toList();
     }
@@ -214,6 +234,7 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public List<Culture> getRemoveAcceptedCultures() {
         return this.item.getVarsAsStrings("remove_accepted_culture").stream().map(this.game::getCulture).toList();
     }
@@ -241,6 +262,7 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public List<Country> getHistoricalFriends() {
         return this.item.getVarsAsStrings("historical_friend").stream().map(this.game::getCountry).toList();
     }
@@ -262,6 +284,7 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public List<Country> getHistoricalEnemies() {
         return this.item.getVarsAsStrings("historical_rival").stream().map(this.game::getCountry).toList();
     }
@@ -287,6 +310,7 @@ public class CountryHistoryItem {
         }
     }
 
+    @Override
     public Boolean getElector() {
         return this.item.getVarAsBool("elector");
     }
@@ -295,6 +319,7 @@ public class CountryHistoryItem {
         this.item.setVariable("elector", elector);
     }
 
+    @Override
     public Boolean getRevolutionTarget() {
         return this.item.getVarAsBool("revolution_target");
     }
@@ -303,6 +328,7 @@ public class CountryHistoryItem {
         this.item.setVariable("revolution_target", revolutionTarget);
     }
 
+    @Override
     public Boolean getClearScriptedPersonalities() {
         return this.item.getVarAsBool("clear_scripted_personalities");
     }
@@ -311,6 +337,7 @@ public class CountryHistoryItem {
         this.item.setVariable("clear_scripted_personalities", clearScriptedPersonalities);
     }
 
+    @Override
     public List<ChangeEstateLandShare> getChangeEstateLandShares() {
         List<ClausewitzItem> list = this.item.getChildren("change_estate_land_share");
         return CollectionUtils.isEmpty(list) ? null : list.stream().map(child -> new ChangeEstateLandShare(child, this.game)).toList();
@@ -325,6 +352,7 @@ public class CountryHistoryItem {
         shares.forEach((estate, share) -> ChangeEstateLandShare.addToItem(this.item, estate, share));
     }
 
+    @Override
     public List<RulerPersonality> getAddHeirPersonalities() {
         return this.item.getVarsAsStrings("add_heir_personality").stream().map(this.game::getRulerPersonality).toList();
     }
@@ -347,6 +375,7 @@ public class CountryHistoryItem {
         this.item.removeVariable("add_heir_personality", addHeirPersonality);
     }
 
+    @Override
     public List<RulerPersonality> getAddRulerPersonalities() {
         return this.item.getVarsAsStrings("add_ruler_personality").stream().map(this.game::getRulerPersonality).toList();
     }
@@ -369,6 +398,7 @@ public class CountryHistoryItem {
         this.item.removeVariable("add_ruler_personality", addRulerPersonality);
     }
 
+    @Override
     public List<RulerPersonality> getAddQueenPersonalities() {
         return this.item.getVarsAsStrings("add_queen_personality").stream().map(this.game::getRulerPersonality).toList();
     }
@@ -391,6 +421,7 @@ public class CountryHistoryItem {
         this.item.removeVariable("add_queen_personality", addQueenPersonality);
     }
 
+    @Override
     public List<EstatePrivilege> getSetEstatePrivilege() {
         return this.item.getVarsAsStrings("set_estate_privilege").stream().map(this.game::getEstatePrivilege).toList();
     }
@@ -413,6 +444,7 @@ public class CountryHistoryItem {
         this.item.removeVariable("set_estate_privilege", setEstatePrivilege);
     }
 
+    @Override
     public List<GovernmentReform> getAddGovernmentReform() {
         return this.item.getVarsAsStrings("add_government_reform").stream().map(this.game::getGovernmentReform).toList();
     }
@@ -435,6 +467,7 @@ public class CountryHistoryItem {
         this.item.removeVariable("add_government_reform", addGovernmentReform);
     }
 
+    @Override
     public List<String> getSetCountryFlag() {
         return this.item.getVarsAsStrings("set_country_flag");
     }
@@ -455,5 +488,20 @@ public class CountryHistoryItem {
 
     public void removeSetCountryFlag(String setCountryFlag) {
         this.item.removeVariable("set_country_flag", setCountryFlag);
+    }
+
+    @Override
+    public Heir getHeir() {
+        return this.item.hasVar("heir") ? null : new Heir(this.item.getChild("heir"), this.country);
+    }
+
+    @Override
+    public Monarch getMonarch() {
+        return this.item.hasVar("monarch") ? null : new Monarch(this.item.getChild("monarch"), this.country);
+    }
+
+    @Override
+    public Queen Queen() {
+        return this.item.hasVar("queen") ? null : new Queen(this.item.getChild("queen"), this.country);
     }
 }

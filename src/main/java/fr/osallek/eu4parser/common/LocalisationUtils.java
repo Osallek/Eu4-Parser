@@ -4,12 +4,19 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.Advisor;
 import fr.osallek.eu4parser.model.game.Area;
+import fr.osallek.eu4parser.model.game.Country;
+import fr.osallek.eu4parser.model.game.CountryHistoryItemI;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.CustomizableLocalization;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.GovernmentName;
+import fr.osallek.eu4parser.model.game.Province;
+import fr.osallek.eu4parser.model.game.ProvinceHistoryItemI;
 import fr.osallek.eu4parser.model.game.Region;
+import fr.osallek.eu4parser.model.game.Religion;
+import fr.osallek.eu4parser.model.game.ReligionGroup;
 import fr.osallek.eu4parser.model.game.SuperRegion;
+import fr.osallek.eu4parser.model.game.TradeCompany;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.Save;
@@ -106,7 +113,83 @@ public final class LocalisationUtils {
                         }
                     }
                 }
+            } else if (current.get() instanceof Country country) {
+                switch (key) {
+                    case "Capital" -> current = getCapital(country);
+                    case "ColonialParent" -> current = getColonialParent(country);
+                    case "Culture" -> current = getCulture(country);
+                    case "From" -> current = getFrom(country);
+                    case "Heir" -> current = getHeir(country);
+                    case "Monarch" -> current = getMonarch(country);
+                    case "Consort" -> current = getConsort(country);
+                    case "Overlord" -> current = getOverlord(country);
+                    case "Religion" -> current = getReligion(country);
+                    case "Root" -> current = getRoot(country);
+                    case "This" -> current = getThis(country);
+                    case "Dip_Advisor" -> current = getAdmAdvisor(country);
+                    case "Adm_Advisor" -> current = getDipAdvisor(country);
+                    case "Mil_Advisor" -> current = getMilAdvisor(country);
+                    case "GetAdm" -> current = getAdmAdvisor(country).map(a -> getAdvisorType(a, language));
+                    case "GetDip" -> current = getDipAdvisor(country).map(a -> getAdvisorType(a, language));
+                    case "GetMil" -> current = getMilAdvisor(country).map(a -> getAdvisorType(a, language));
+                    //Commands
+                    case "GetAdjective" -> current = getAdjective(country, language);
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetFlagshipName" -> current = getFlagShip(country);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "GetName" -> current = getName(country, language);
+                    case "GetTag" -> current = getTag(country);
+                    case "GetYear" -> current = getYear(save);
+                    case "GovernmentName" -> current = getGovernmentName(country, language);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in country", key);
+                        }
+                    }
+                }
             } else if (current.get() instanceof SaveProvince province) {
+                switch (key) {
+                    case "Culture" -> current = getCulture(province);
+                    case "Owner" -> current = getOwner(province);
+                    case "Religion" -> current = getReligion(province);
+                    case "TradeCompany" -> current = getTradeCompany(province);
+                    case "From" -> current = getFrom(province);
+                    case "Root" -> current = getRoot(province);
+                    case "This" -> current = getThis(province);
+                    //Commands
+                    case "GetAreaName" -> current = getAreaName(province, language);
+                    case "GetRegionName" -> current = getRegionName(province, language);
+                    case "GetContinentName" -> current = getContinentName(province, language);
+                    case "GetSuperRegionName" -> current = getSuperRegionName(province, language);
+                    case "GetCapitalName" -> current = getCapitalName(province);
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "GetName" -> current = getName(province);
+                    case "GetTradeGoodsName" -> current = getTradeGoodName(province, language);
+                    case "GetYear" -> current = getYear(save);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in province", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof Province province) {
                 switch (key) {
                     case "Culture" -> current = getCulture(province);
                     case "Owner" -> current = getOwner(province);
@@ -189,7 +272,7 @@ public final class LocalisationUtils {
                         }
                     }
                 }
-            } else if (current.get() instanceof SaveReligion religion) {
+            } else if (current.get() instanceof Religion religion) {
                 switch (key) {
                     //Commands
                     case "GetDate" -> current = getDate(save, language);
@@ -254,12 +337,33 @@ public final class LocalisationUtils {
                         }
                     }
                 }
+            } else if (current.get() instanceof TradeCompany tradeCompany) {
+                switch (key) {
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "GetName" -> current = getName(tradeCompany, language);
+                    case "GetYear" -> current = getYear(save);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in culture", key);
+                        }
+                    }
+                }
             }
 
             if (current.isEmpty()) {
                 break;
-            } else if (current.get() instanceof String) {
-                return (String) current.get();
+            } else if (current.get() instanceof String s) {
+                return ClausewitzUtils.removeQuotes(s);
             }
         }
 
@@ -297,19 +401,39 @@ public final class LocalisationUtils {
         return Optional.ofNullable(country).map(SaveCountry::getCapital);
     }
 
+    public static Optional<Province> getCapital(Country country) {
+        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getCapital);
+    }
+
     public static Optional<SaveCountry> getColonialParent(SaveCountry country) {
         return Optional.ofNullable(country).map(SaveCountry::getColonialParent);
+    }
+
+    public static Optional<SaveCountry> getColonialParent(Country country) {
+        return Optional.empty();
     }
 
     public static Optional<Culture> getCulture(SaveCountry country) {
         return Optional.ofNullable(country).map(SaveCountry::getPrimaryCulture);
     }
 
+    public static Optional<Culture> getCulture(Country country) {
+        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getPrimaryCulture);
+    }
+
     public static Optional<Culture> getCulture(SaveProvince province) {
         return Optional.ofNullable(province).map(SaveProvince::getCulture);
     }
 
+    public static Optional<Culture> getCulture(Province province) {
+        return Optional.ofNullable(province).map(p -> p.getHistoryItemAt(p.getGame().getStartDate())).map(ProvinceHistoryItemI::getCulture);
+    }
+
     public static Optional<SaveCountry> getFrom(SaveCountry country) {
+        return Optional.ofNullable(country);
+    }
+
+    public static Optional<Country> getFrom(Country country) {
         return Optional.ofNullable(country);
     }
 
@@ -317,7 +441,15 @@ public final class LocalisationUtils {
         return Optional.ofNullable(province);
     }
 
+    public static Optional<Province> getFrom(Province province) {
+        return Optional.ofNullable(province);
+    }
+
     public static Optional<SaveCountry> getRoot(SaveCountry country) {
+        return Optional.ofNullable(country);
+    }
+
+    public static Optional<Country> getRoot(Country country) {
         return Optional.ofNullable(country);
     }
 
@@ -325,7 +457,15 @@ public final class LocalisationUtils {
         return Optional.ofNullable(province);
     }
 
+    public static Optional<Province> getRoot(Province province) {
+        return Optional.ofNullable(province);
+    }
+
     public static Optional<SaveCountry> getThis(SaveCountry country) {
+        return Optional.ofNullable(country);
+    }
+
+    public static Optional<Country> getThis(Country country) {
         return Optional.ofNullable(country);
     }
 
@@ -333,36 +473,72 @@ public final class LocalisationUtils {
         return Optional.ofNullable(province);
     }
 
+    public static Optional<Province> getThis(Province province) {
+        return Optional.ofNullable(province);
+    }
+
     public static Optional<Heir> getHeir(SaveCountry country) {
         return Optional.ofNullable(country).map(SaveCountry::getHeir);
+    }
+
+    public static Optional<Heir> getHeir(Country country) {
+        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getHeir);
     }
 
     public static Optional<Monarch> getMonarch(SaveCountry country) {
         return Optional.ofNullable(country).map(SaveCountry::getMonarch);
     }
 
+    public static Optional<Monarch> getMonarch(Country country) {
+        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getMonarch);
+    }
+
     public static Optional<Queen> getConsort(SaveCountry country) {
         return Optional.ofNullable(country).map(SaveCountry::getQueen);
+    }
+
+    public static Optional<Queen> getConsort(Country country) {
+        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::Queen);
     }
 
     public static Optional<SaveCountry> getOverlord(SaveCountry country) {
         return Optional.ofNullable(country).map(SaveCountry::getOverlord);
     }
 
+    public static Optional<Country> getOverlord(Country country) {
+        return Optional.ofNullable(country).map(c -> c.getOverlordAt(c.getGame().getStartDate()));
+    }
+
     public static Optional<SaveCountry> getOwner(SaveProvince province) {
         return Optional.ofNullable(province).map(SaveProvince::getOwner);
     }
 
-    public static Optional<SaveReligion> getReligion(SaveProvince province) {
-        return Optional.ofNullable(province).map(SaveProvince::getReligion);
+    public static Optional<Country> getOwner(Province province) {
+        return Optional.ofNullable(province).map(p -> p.getHistoryItemAt(p.getGame().getStartDate())).map(ProvinceHistoryItemI::getOwner);
     }
 
-    public static Optional<SaveReligion> getReligion(SaveCountry country) {
-        return Optional.ofNullable(country).map(SaveCountry::getReligion);
+    public static Optional<Religion> getReligion(SaveProvince province) {
+        return Optional.ofNullable(province).map(SaveProvince::getReligion).map(SaveReligion::getGameReligion);
+    }
+
+    public static Optional<Religion> getReligion(Province province) {
+        return Optional.ofNullable(province).map(p -> p.getHistoryItemAt(p.getGame().getStartDate())).map(ProvinceHistoryItemI::getReligion);
+    }
+
+    public static Optional<Religion> getReligion(SaveCountry country) {
+        return Optional.ofNullable(country).map(SaveCountry::getReligion).map(SaveReligion::getGameReligion);
+    }
+
+    public static Optional<Religion> getReligion(Country country) {
+        return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getReligion);
     }
 
     public static Optional<SaveTradeCompany> getTradeCompany(SaveProvince province) {
-        return Optional.ofNullable(province).map(SaveProvince::getTradeCompany);
+        return Optional.ofNullable(province).map(SaveProvince::getSaveTradeCompany);
+    }
+
+    public static Optional<TradeCompany> getTradeCompany(Province province) {
+        return Optional.ofNullable(province).map(Province::getTradeCompany);
     }
 
     public static Optional<SaveAdvisor> getAdmAdvisor(SaveCountry country) {
@@ -376,6 +552,10 @@ public final class LocalisationUtils {
                        .findFirst();
     }
 
+    public static Optional<SaveAdvisor> getAdmAdvisor(Country country) {
+        return Optional.empty();
+    }
+
     public static Optional<SaveAdvisor> getDipAdvisor(SaveCountry country) {
         return Optional.ofNullable(country)
                        .map(SaveCountry::getActiveAdvisors)
@@ -387,6 +567,10 @@ public final class LocalisationUtils {
                        .findFirst();
     }
 
+    public static Optional<SaveAdvisor> getDipAdvisor(Country country) {
+        return Optional.empty();
+    }
+
     public static Optional<SaveAdvisor> getMilAdvisor(SaveCountry country) {
         return Optional.ofNullable(country)
                        .map(SaveCountry::getActiveAdvisors)
@@ -396,6 +580,10 @@ public final class LocalisationUtils {
                        .flatMap(Collection::stream)
                        .filter(a -> Power.MIL.equals(a.getGameAdvisor().getPower()))
                        .findFirst();
+    }
+
+    public static Optional<SaveAdvisor> getMilAdvisor(Country country) {
+        return Optional.empty();
     }
 
     public static Optional<SaveCountry> getTag(Save save, String tag) {
@@ -413,6 +601,16 @@ public final class LocalisationUtils {
                                                 .map(Localisation::getValue));
     }
 
+    public static Optional<String> getAreaName(Province province, Eu4Language language) {
+        return Optional.ofNullable(province)
+                       .map(Province::getGame)
+                       .flatMap(game -> Optional.of(province)
+                                                .map(Province::getArea)
+                                                .map(Area::getName)
+                                                .map(s -> game.getLocalisation(s, language))
+                                                .map(Localisation::getValue));
+    }
+
     public static Optional<String> getRegionName(SaveProvince province, Eu4Language language) {
         return Optional.ofNullable(province)
                        .map(SaveProvince::getSave)
@@ -425,12 +623,35 @@ public final class LocalisationUtils {
                                                 .map(Localisation::getValue));
     }
 
+    public static Optional<String> getRegionName(Province province, Eu4Language language) {
+        return Optional.ofNullable(province)
+                       .map(Province::getGame)
+                       .flatMap(game -> Optional.of(province)
+                                                .map(Province::getArea)
+                                                .map(Area::getRegion)
+                                                .map(Region::getName)
+                                                .map(s -> game.getLocalisation(s, language))
+                                                .map(Localisation::getValue));
+    }
+
     public static Optional<String> getSuperRegionName(SaveProvince province, Eu4Language language) {
         return Optional.ofNullable(province)
                        .map(SaveProvince::getSave)
                        .map(Save::getGame)
                        .flatMap(game -> Optional.of(province)
                                                 .map(SaveProvince::getArea)
+                                                .map(Area::getRegion)
+                                                .map(Region::getSuperRegion)
+                                                .map(SuperRegion::getName)
+                                                .map(s -> game.getLocalisation(s, language))
+                                                .map(Localisation::getValue));
+    }
+
+    public static Optional<String> getSuperRegionName(Province province, Eu4Language language) {
+        return Optional.ofNullable(province)
+                       .map(Province::getGame)
+                       .flatMap(game -> Optional.of(province)
+                                                .map(Province::getArea)
                                                 .map(Area::getRegion)
                                                 .map(Region::getSuperRegion)
                                                 .map(SuperRegion::getName)
@@ -452,6 +673,19 @@ public final class LocalisationUtils {
                                .map(Localisation::getValue));
     }
 
+    public static Optional<String> getContinentName(Province province, Eu4Language language) {
+        return Optional.ofNullable(province)
+                       .map(Province::getGame)
+                       .map(Game::getContinents)
+                       .filter(CollectionUtils::isNotEmpty)
+                       .flatMap(list -> list
+                               .stream()
+                               .filter(l -> l.getProvinces().contains(province.getId()))
+                               .findFirst()
+                               .map(l -> province.getGame().getLocalisation(l.getName(), language))
+                               .map(Localisation::getValue));
+    }
+
     public static Optional<String> getAdm(Monarch monarch) {
         return Optional.ofNullable(monarch).map(Monarch::getAdm).map(String::valueOf);
     }
@@ -466,6 +700,10 @@ public final class LocalisationUtils {
 
     public static Optional<String> getCapitalName(SaveProvince province) {
         return Optional.ofNullable(province).map(p -> ObjectUtils.firstNonNull(p.getCapital(), p.getName()));
+    }
+
+    public static Optional<String> getCapitalName(Province province) {
+        return Optional.ofNullable(province).map(p -> p.getHistoryItemAt(p.getGame().getStartDate())).map(ProvinceHistoryItemI::getCapital);
     }
 
     public static Optional<String> getDate(Save save, Eu4Language language) {
@@ -493,6 +731,10 @@ public final class LocalisationUtils {
                        .map(FlagShip::getName);
     }
 
+    public static Optional<String> getFlagShip(Country country) {
+        return Optional.empty();
+    }
+
     public static Optional<String> getGroup(Culture culture, Eu4Language language) {
         return Optional.ofNullable(culture)
                        .map(Culture::getCultureGroup)
@@ -500,10 +742,10 @@ public final class LocalisationUtils {
                        .map(Localisation::getValue);
     }
 
-    public static Optional<String> getGroup(SaveReligion saveReligion, Eu4Language language) {
-        return Optional.ofNullable(saveReligion)
-                       .map(SaveReligion::getReligionGroup)
-                       .map(g -> saveReligion.getSave().getGame().getLocalisation(g.getName(), language))
+    public static Optional<String> getGroup(Religion religion, Eu4Language language) {
+        return Optional.ofNullable(religion)
+                       .map(Religion::getReligionGroup)
+                       .map(g -> g.getGame().getLocalisation(g.getName(), language))
                        .map(Localisation::getValue);
     }
 
@@ -520,7 +762,11 @@ public final class LocalisationUtils {
     }
 
     public static Optional<String> getName(SaveProvince province) {
-        return Optional.ofNullable(province.getName());
+        return Optional.ofNullable(province).map(SaveProvince::getName);
+    }
+
+    public static Optional<String> getName(Province province) {
+        return Optional.ofNullable(province).map(Province::getName);
     }
 
     public static Optional<String> getName(SaveCountry country, Eu4Language language) {
@@ -528,6 +774,12 @@ public final class LocalisationUtils {
                                                             country.getName(),
                                                             country.getLocalizedName(),
                                                             Optional.ofNullable(country.getSave().getGame().getLocalisation(country.getTag(), language))
+                                                                    .map(Localisation::getValue)
+                                                                    .orElse(null)));
+    }
+
+    public static Optional<String> getName(Country country, Eu4Language language) {
+        return Optional.ofNullable(ObjectUtils.firstNonNull(Optional.ofNullable(country.getGame().getLocalisation(country.getTag(), language))
                                                                     .map(Localisation::getValue)
                                                                     .orElse(null)));
     }
@@ -540,10 +792,10 @@ public final class LocalisationUtils {
                        .map(StringUtils::capitalize);
     }
 
-    public static Optional<String> getName(SaveReligion religion, Eu4Language language) {
+    public static Optional<String> getName(Religion religion, Eu4Language language) {
         return Optional.ofNullable(religion)
-                       .map(SaveReligion::getSave)
-                       .map(Save::getGame)
+                       .map(Religion::getReligionGroup)
+                       .map(ReligionGroup::getGame)
                        .map(game -> game.getLocalisation(religion.getName(), language))
                        .map(Localisation::getValue)
                        .map(StringUtils::capitalize);
@@ -569,13 +821,25 @@ public final class LocalisationUtils {
         return Optional.ofNullable(tradeCompany).map(SaveTradeCompany::getName);
     }
 
+    public static Optional<String> getName(TradeCompany tradeCompany, Eu4Language language) {
+        return Optional.ofNullable(tradeCompany)
+                       .map(TradeCompany::getGame)
+                       .map(game -> game.getLocalisation(tradeCompany.getName(), language))
+                       .map(Localisation::getValue)
+                       .map(StringUtils::capitalize);
+    }
+
     public static Optional<String> getTag(SaveCountry country) {
         return Optional.ofNullable(country).map(SaveCountry::getTag);
     }
 
+    public static Optional<String> getTag(Country country) {
+        return Optional.ofNullable(country).map(Country::getTag);
+    }
+
     public static Optional<String> getTitle(Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .flatMap(m -> Optional.ofNullable(m.getCountry())
+                       .flatMap(m -> Optional.ofNullable(m.getSaveCountry())
                                              .flatMap(c -> Optional.ofNullable(c.getGovernmentName())
                                                                    .map(name -> {
                                                                        if (Monarch.class.equals(monarch.getClass())) {
@@ -593,7 +857,7 @@ public final class LocalisationUtils {
                                                                    })
                                                                    .map(ranks -> ranks.get(c.getGovernmentLevel()))))
                        .flatMap(s -> Optional.of(monarch)
-                                             .map(Monarch::getCountry)
+                                             .map(Monarch::getSaveCountry)
                                              .map(SaveCountry::getSave)
                                              .map(Save::getGame)
                                              .map(game -> game.getLocalisation(s, language)))
@@ -611,6 +875,14 @@ public final class LocalisationUtils {
                        .map(Localisation::getValue);
     }
 
+    public static Optional<String> getTradeGoodName(Province province, Eu4Language language) {
+        return Optional.ofNullable(province)
+                       .map(p -> p.getHistoryItemAt(p.getGame().getStartDate()))
+                       .map(ProvinceHistoryItemI::getTradeGoods)
+                       .flatMap(good -> Optional.of(province).map(Province::getGame).map(game -> game.getLocalisation(good.getName(), language)))
+                       .map(Localisation::getValue);
+    }
+
     public static Optional<String> getYear(Save save) {
         return Optional.ofNullable(save).map(Save::getDate).map(LocalDate::getYear).map(String::valueOf);
     }
@@ -624,12 +896,35 @@ public final class LocalisationUtils {
                        .map(Localisation::getValue);
     }
 
+    public static Optional<String> getGovernmentName(Country country, Eu4Language language) {
+        //Fixme
+        /*return Optional.ofNullable(country)
+                       .map(c -> c.getHistoryItemAt(c.getGame().getStartDate()))
+                       .map(CountryHistoryItemI::getGovernment)
+                       .map(GovernmentName::getRanks)
+                       .map(map -> map.get(country.getHistoryItemAt(country.getGame().getStartDate()).getGovernmentLevel()))
+                       .flatMap(s -> Optional.of(country).map(Country::getGame).map(game -> game.getLocalisation(s, language)))
+                       .map(Localisation::getValue);*/
+
+        return Optional.empty();
+    }
+
     public static Optional<String> getAdjective(SaveCountry country, Eu4Language language) {
         return Optional.ofNullable(country)
                        .map(SaveCountry::getTag)
                        .flatMap(s -> Optional.of(country)
                                              .map(SaveCountry::getSave)
                                              .map(Save::getGame)
+                                             .map(game -> ObjectUtils.firstNonNull(game.getLocalisation(s + "_ADJ", language),
+                                                                                   game.getLocalisation(s + "_ADJ2", language))))
+                       .map(Localisation::getValue);
+    }
+
+    public static Optional<String> getAdjective(Country country, Eu4Language language) {
+        return Optional.ofNullable(country)
+                       .map(Country::getTag)
+                       .flatMap(s -> Optional.of(country)
+                                             .map(Country::getGame)
                                              .map(game -> ObjectUtils.firstNonNull(game.getLocalisation(s + "_ADJ", language),
                                                                                    game.getLocalisation(s + "_ADJ2", language))))
                        .map(Localisation::getValue);

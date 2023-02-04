@@ -6,14 +6,20 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Province {
 
     //Todo adjacent province
     //Todo sea province if port
+
+    private final Game game;
 
     private final int id;
 
@@ -73,7 +79,8 @@ public class Province {
 
     private FileNode historyFileNode;
 
-    public Province(String[] csvLine) {
+    public Province(String[] csvLine, Game game) {
+        this.game = game;
         this.id = Eu4Utils.cleanStringAndParseToInt(csvLine[0].trim());
 
         if (StringUtils.isNoneBlank(csvLine[1], csvLine[2], csvLine[3])) {
@@ -87,6 +94,7 @@ public class Province {
     }
 
     public Province(Province other) {
+        this.game = other.game;
         this.id = other.id;
         this.color = other.color;
         this.name = other.name;
@@ -151,6 +159,10 @@ public class Province {
 
     public int getId() {
         return id;
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public Integer getColor() {
@@ -365,12 +377,28 @@ public class Province {
         this.tradeWindY = tradeWindY;
     }
 
+    public TradeCompany getTradeCompany() {
+        return this.game.getTradeCompanies().stream().filter(c -> c.getProvinces().contains(getId())).findFirst().orElse(null);
+    }
+
     public ProvinceHistoryItem getDefaultHistoryItem() {
         return defaultHistoryItem;
     }
 
     public SortedMap<LocalDate, ProvinceHistoryItem> getHistoryItems() {
         return historyItems;
+    }
+
+
+    public ProvinceHistoryItemI getHistoryItemAt(LocalDate date) {
+        List<ProvinceHistoryItemI> items = Stream.concat(Stream.of(this.defaultHistoryItem),
+                                                         this.historyItems.entrySet()
+                                                                          .stream()
+                                                                          .filter(e -> date.isBefore(e.getKey()) || date.equals(e.getKey()))
+                                                                          .map(Map.Entry::getValue))
+                                                 .collect(Collectors.toList());
+        Collections.reverse(items);
+        return new ProvinceHistoryItems(items);
     }
 
     public FileNode getHistoryFileNode() {

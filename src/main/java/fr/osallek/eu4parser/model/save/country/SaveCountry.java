@@ -4018,7 +4018,7 @@ public class SaveCountry {
         return tradeLeague;
     }
 
-    /* Don't use only for save !!
+    /* Don't use only for game !!
        Use tradeLeague addMember to add
      */
     public void setTradeLeague(TradeLeague tradeLeague) {
