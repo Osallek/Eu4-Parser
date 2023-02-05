@@ -9,6 +9,7 @@ import fr.osallek.eu4parser.model.game.Condition;
 import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.CountryHistoryItemI;
 import fr.osallek.eu4parser.model.game.Culture;
+import fr.osallek.eu4parser.model.game.CultureGroup;
 import fr.osallek.eu4parser.model.game.Government;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
@@ -49,10 +50,10 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -489,9 +490,9 @@ public class ConditionsUtils {
             case "has_first_revolution_started":
                 return country.getSave().getRevolution() != null && BooleanUtils.toBoolean(country.getSave().getRevolution().hasFirstRevolutionStarted());
             case "has_foreign_consort":
-                return country.getConsort() != null && country.getConsort().getSaveWho() != null;
+                return country.getConsort() != null && country.getConsort().getWho() != null;
             case "has_foreign_heir":
-                return country.getHeir() != null && country.getHeir().getSaveWho() != null;
+                return country.getHeir() != null && country.getHeir().getWho() != null;
             case "has_friendly_reformation_center":
                 return country.getOwnedProvinces()
                               .stream()
@@ -704,7 +705,7 @@ public class ConditionsUtils {
                 return country.getHeir() != null && NumbersUtils.intOrDefault(country.getHeir().getMil()) >= NumbersUtils.toInt(value);
             case "heir_nationality":
                 other = country.getSave().getCountry(value);
-                return country.getHeir() != null && country.getHeir().getSaveWho().equals(other);
+                return country.getHeir() != null && country.getHeir().getWho().equals(other);
             case "heir_religion":
                 return country.getHeir() != null && country.getHeir().getReligion().getName().equals(rawValueToReligion(rawValue, root, from));
             case "high_army_professionalism":
@@ -939,7 +940,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getStatistsVsMonarchists() != null && country.getStatistsVsMonarchists() > 0);
             case "is_origin_of_consort":
                 other = country.getSave().getCountry(value);
-                return country.getConsort() != null && country.getConsort().getSaveWho().equals(other);
+                return country.getConsort() != null && country.getConsort().getWho().equals(other);
             case "is_overseas_subject":
                 if (country.getOverlord() == null) {
                     return !"yes".equalsIgnoreCase(value);
@@ -1715,7 +1716,7 @@ public class ConditionsUtils {
                 return country.getMonarch() == null || rawValueToCulture(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getCultureName());
             case "ruler_is_foreigner":
                 return "yes".equalsIgnoreCase(value) == (country.getMonarch() == null ||
-                                                         (country.getMonarch().getSaveCountry() != null && !country.equals(country.getMonarch().getSaveCountry())));
+                                                         (country.getMonarch().getCountry() != null && !country.equals(country.getMonarch().getCountry())));
             case "ruler_religion":
                 return country.getMonarch() == null || rawValueToReligion(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getReligion().getName());
             case "sailors":
@@ -1939,13 +1940,10 @@ public class ConditionsUtils {
     }
 
     public static boolean applyConditionToCountry(Country country, Country root, Country from, String condition, String rawValue) {
-        TradeGood tradeGood;
         Country other;
         Province province;
         Integer integer;
-        Double aDouble;
         String value;
-        SubjectType subjectType;
         Religion religion;
         Government government;
         CountryHistoryItemI historyItem;
@@ -2003,10 +2001,11 @@ public class ConditionsUtils {
             case "core_percentage":
                 break; //Todo
             case "culture_group":
-                return country.getHistoryItemAt(country.getGame().getStartDate()).getPrimaryCulture()
-                              .getCultureGroup()
-                              .getName()
-                              .equals(rawValueToCultureGroup(rawValue, root, from));
+                return rawValueToCultureGroup(rawValue, root, from)
+                        .equals(Optional.ofNullable(country.getHistoryItemAt(country.getGame().getStartDate()).getPrimaryCulture())
+                                        .map(Culture::getCultureGroup)
+                                        .map(CultureGroup::getName)
+                                        .orElse(null));
             case "culture_group_claim":
                 break;//Todo
             case "current_age":
@@ -2073,19 +2072,18 @@ public class ConditionsUtils {
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getGovernment() != null
                        && historyItem.getGovernment().getName().equals(ClausewitzUtils.addQuotes(value));
             case "government_rank":
-                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getGovernmentLevel() >= NumbersUtils.toInt(value);
+                return country.getHistoryItemAt(country.getGame().getStartDate()).getGovernmentLevel() >= NumbersUtils.toInt(value);
             case "guaranteed_by":
                 break; //Todo
             case "has_border_with_religious_enemy":
                 break; //Todo
             case "has_consort":
-                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getQueen() != null;
-            case "has_consort_flag":
-                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getQueen() != null
-                       && historyItem.getQueen().getRulerFlags().contains(value);
+                return country.getHistoryItemAt(country.getGame().getStartDate()).getQueen() != null;
             case "has_consort_regency":
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getQueen() != null
                                                          && BooleanUtils.toBoolean(historyItem.getQueen().getRegent()));
+            case "has_country_flag":
+                return country.getHistoryItemAt(country.getGame().getStartDate()).getCumulatedAcceptedCultures().contains(value);
             case "has_female_consort":
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getQueen() != null
                                                          && BooleanUtils.toBoolean(historyItem.getQueen().getFemale()));
@@ -2096,10 +2094,7 @@ public class ConditionsUtils {
                 return !"yes".equalsIgnoreCase(value);
             case "has_foreign_consort":
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getQueen() != null
-                                                         && historyItem.getQueen().getWho() != null);
-            case "has_foreign_heir":
-                return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getHeir() != null
-                                                         && historyItem.getHeir().getWho() != null);
+                                                         && !country.getTag().equalsIgnoreCase(historyItem.getQueen().getCountryOfOrigin()));
             case "has_game_started":
                 return !"yes".equalsIgnoreCase(value);
             case "has_government_ability":
@@ -2107,8 +2102,8 @@ public class ConditionsUtils {
             case "has_given_consort_to":
                 other = country.getGame().getCountry(value);
                 otherHistoryItem = other.getHistoryItemAt(other.getGame().getStartDate());
-                return "yes".equalsIgnoreCase(value) == (otherHistoryItem.getQueen() != null && Queen.class.equals(otherHistoryItem.getQueen().getClass())
-                                                         && otherHistoryItem.getQueen().getCountryOfOrigin().equals(country));
+                return "yes".equalsIgnoreCase(value) == (otherHistoryItem.getQueen() != null &&
+                                                         country.getTag().equals(otherHistoryItem.getQueen().getCountryOfOrigin()));
             case "has_guaranteed":
                 break; //Todo
             case "has_government_attribute":
@@ -2117,9 +2112,6 @@ public class ConditionsUtils {
                 break;//Todo
             case "has_heir":
                 return "yes".equalsIgnoreCase(value) == (country.getHistoryItemAt(country.getGame().getStartDate()).getHeir() != null);
-            case "has_heir_flag":
-                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getHeir() != null
-                       && historyItem.getHeir().getRulerFlags().contains(value);
             case "has_matching_religion":
                 historyItem = country.getHistoryItemAt(country.getGame().getStartDate());
                 if (Eu4Utils.isTag(value)) {
@@ -2146,12 +2138,14 @@ public class ConditionsUtils {
             case "has_regency":
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getMonarch() != null
                        && BooleanUtils.toBoolean(historyItem.getMonarch().getRegent());
+            case "has_reform":
+                return country.getHistoryItemAt(country.getGame().getStartDate())
+                              .getAddGovernmentReform()
+                              .stream()
+                              .anyMatch(reform -> value.equalsIgnoreCase(reform.getName()));
             case "has_ruler":
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getMonarch() != null
                        && historyItem.getMonarch().getName().equals(value);
-            case "has_ruler_flag":
-                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getMonarch() != null &&
-                       historyItem.getMonarch().getRulerFlags() != null && historyItem.getMonarch().getRulerFlags().contains(value);
             case "has_unified_culture_group":
                 break; //Todo
             case "heir_adm":
@@ -2185,10 +2179,6 @@ public class ConditionsUtils {
             case "heir_mil":
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getHeir() != null
                        && NumbersUtils.intOrDefault(historyItem.getHeir().getMil()) >= NumbersUtils.toInt(value);
-            case "heir_nationality":
-                other = country.getGame().getCountry(value);
-                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getHeir() != null
-                       && historyItem.getHeir().getSaveWho().equals(other);
             case "heir_religion":
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getHeir() != null
                        && historyItem.getHeir().getReligion().getName().equals(rawValueToReligion(rawValue, root, from));
@@ -2242,12 +2232,15 @@ public class ConditionsUtils {
                                   .map(date -> date.equals(country.getGame().getStartDate()))
                                   .orElse(false);
             case "is_lesser_in_union":
-                break;//Todo
+                return "yes".equalsIgnoreCase(value) == (country.getOverlordAt(country.getGame().getStartDate()) != null &&
+                                                         Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equalsIgnoreCase(
+                                                                 country.getSubjectTypeAt(country.getGame().getStartDate())));
             case "is_monarch_leader":
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getMonarch() != null
                                                          && historyItem.getMonarch().getLeader() != null);
             case "is_march":
-                break; //Todo
+                return "yes".equalsIgnoreCase(value) == (country.getOverlordAt(country.getGame().getStartDate()) != null
+                                                         && Eu4Utils.SUBJECT_TYPE_MARCH.equals(country.getSubjectTypeAt(country.getGame().getStartDate())));
             case "is_neighbor_of":
                 break; //Todo
             case "is_nomad":
@@ -2255,8 +2248,8 @@ public class ConditionsUtils {
                                                          && historyItem.getGovernment().getBasicGovernmentReform().isNomad().getKey());
             case "is_origin_of_consort":
                 other = country.getGame().getCountry(value);
-                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getQueen() != null
-                       && historyItem.getQueen().getWho().equals(other);
+                return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getQueen() != null &&
+                       other.getTag().equals(historyItem.getQueen().getCountryOfOrigin());
             case "is_part_of_hre":
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getCapital() != null
                                                          && BooleanUtils.toBoolean(historyItem.getCapital()
@@ -2317,7 +2310,7 @@ public class ConditionsUtils {
                            && historyItem.getMonarch().getMil() != null && historyItem.getMonarch().getMil() >= integer;
                 } else {
                     other = country.getGame().getCountry(value);
-                    otherHistoryItem = country.getHistoryItemAt(country.getGame().getStartDate());
+                    otherHistoryItem = other.getHistoryItemAt(other.getGame().getStartDate());
                     historyItem = country.getHistoryItemAt(country.getGame().getStartDate());
                     return otherHistoryItem.getMonarch() == null || otherHistoryItem.getMonarch().getMil() == null
                            || (historyItem.getMonarch() != null
@@ -2580,7 +2573,7 @@ public class ConditionsUtils {
                 return true;
             case "primary_culture":
                 return rawValueToCulture(rawValue, root, from).equalsIgnoreCase(
-                        country.getHistoryItemAt(country.getGame().getStartDate()).getPrimaryCulture().getName());
+                        Optional.ofNullable(country.getHistoryItemAt(country.getGame().getStartDate()).getPrimaryCulture()).map(Culture::getName).orElse(null));
             case "primitives":
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getTechnologyGroup() != null
                                                          && historyItem.getTechnologyGroup().isPrimitive());
@@ -2613,7 +2606,7 @@ public class ConditionsUtils {
                        rawValueToCulture(rawValue, root, from).equalsIgnoreCase(historyItem.getMonarch().getCultureName());
             case "ruler_is_foreigner":
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getMonarch() != null &&
-                                                         (historyItem.getMonarch().getSaveCountry() != null &&
+                                                         (historyItem.getMonarch().getCountry() != null &&
                                                           !country.equals(historyItem.getMonarch().getCountry())));
             case "ruler_religion":
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getMonarch() != null &&
@@ -2783,7 +2776,7 @@ public class ConditionsUtils {
             case "root":
                 return condition.apply(root, from);
             case "from":
-                return condition.apply(from, root);
+                return condition.apply(from, from);
             case "ai_attitude":
                 country = root.getSave().getCountry(condition.getCondition("who"));
                 return root.getActiveRelation(country) != null
@@ -2920,9 +2913,9 @@ public class ConditionsUtils {
                 }
 
                 Optional<SaveEstateModifier> m = estate.getInfluenceModifiers()
-                                                              .stream()
-                                                              .filter(modifier -> condition.getCondition("modifier").equalsIgnoreCase(modifier.getDesc()))
-                                                              .findFirst();
+                                                       .stream()
+                                                       .filter(modifier -> condition.getCondition("modifier").equalsIgnoreCase(modifier.getDesc()))
+                                                       .findFirst();
 
                 if (m.isEmpty() || condition.getCondition("value") == null) {
                     return false;
@@ -3185,11 +3178,208 @@ public class ConditionsUtils {
         return false;
     }
 
+    public static boolean applyScopeToCountry(Country root, Country from, Condition condition) {
+        Country country;
+        Province province;
+        SubjectType subjectType;
+        Double aDouble;
+        Integer integer;
+        Religion religion;
+
+        if ((country = root.getGame().getCountry(condition.getName())) != null) {
+            return condition.apply(country, from);
+        }
+
+        if ((province = Optional.ofNullable(NumbersUtils.toInt(condition.getName())).map(i -> root.getGame().getProvince(i)).orElse(null)) != null) {
+            return condition.apply(province);
+        }
+
+        switch (condition.getName().toLowerCase()) {
+            case "or":
+                return (condition.getConditions() == null || condition.getConditions().entrySet()
+                                                                      .stream()
+                                                                      .anyMatch(entry -> entry.getValue()
+                                                                                              .stream()
+                                                                                              .anyMatch(value -> applyConditionToCountry(root, root, from,
+                                                                                                                                         entry.getKey(),
+                                                                                                                                         value))))
+                       || (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToCountry(root, from, scope)));
+            case "and", "if", "hidden_trigger":
+                return (condition.getConditions() == null || condition.getConditions().entrySet()
+                                                                      .stream()
+                                                                      .allMatch(entry -> entry.getValue()
+                                                                                              .stream()
+                                                                                              .anyMatch(value -> applyConditionToCountry(root, root, from,
+                                                                                                                                         entry.getKey(),
+                                                                                                                                         value))))
+                       && (condition.getScopes() == null || condition.getScopes().stream().allMatch(scope -> applyScopeToCountry(root, from, scope)));
+            case "not":
+                return (condition.getConditions() == null || condition.getConditions().entrySet()
+                                                                      .stream()
+                                                                      .noneMatch(entry -> entry.getValue()
+                                                                                               .stream()
+                                                                                               .anyMatch(value -> applyConditionToCountry(root, root, from,
+                                                                                                                                          entry.getKey(),
+                                                                                                                                          value))))
+                       && (condition.getScopes() == null || condition.getScopes().stream().noneMatch(scope -> applyScopeToCountry(root, from, scope)));
+            case "root":
+                return condition.apply(root, from);
+            case "from":
+                return condition.apply(from, root);
+            case "any_owned_province":
+                return root.getOwnedProvinceAt(root.getGame().getStartDate()).map(ProvinceHistoryItemI::getProvince).anyMatch(condition::apply);
+            case "can_be_overlord":
+                subjectType = root.getGame().getSubjectType(condition.getCondition("can_be_overlord"));
+                return subjectType.isPotentialOverlord() == null || subjectType.isPotentialOverlord().apply(root, from);
+            case "capital_scope":
+                return condition.apply(root.getHistoryItemAt(root.getGame().getStartDate()).getCapital());
+            case "development_in_provinces":
+                return root.getOwnedProvinceAt(root.getGame().getStartDate())
+                           .filter(i -> condition.apply(i.getProvince()))
+                           .mapToInt(p -> p.getBaseTax() + p.getBaseProduction() + p.getBaseManpower())
+                           .sum() >= NumbersUtils.toInt(condition.getCondition("value"));
+            case "emperor":
+                return root.getGame().getHreEmperorAt(root.getGame().getStartDate()) != null &&
+                       condition.apply(root.getGame().getCountry(root.getGame().getHreEmperorAt(root.getGame().getStartDate()).getTag()), from);
+            case "is_in_war":
+                List<String> attackers = condition.getConditions() == null ? null : condition.getConditions().get("attackers");
+                List<String> defenders = condition.getConditions() == null ? null : condition.getConditions().get("defenders");
+                String attackerLeader = condition.getCondition("attacker_leader");
+                String defenderLeader = condition.getCondition("defender_leader");
+                String casusBelli = condition.getCondition("casus_belli");
+                Integer warGoalProvince = NumbersUtils.toInt(condition.getCondition("war_goal_province"));
+                LocalDate startDate = Eu4Utils.stringToDate(condition.getCondition("start_date"));
+                Integer duration = NumbersUtils.toInt(condition.getCondition("duration"));
+
+                return root.getWarsAt(root.getGame().getStartDate()).anyMatch(activeWar -> {
+                    if (CollectionUtils.isNotEmpty(attackers)
+                        && new HashSet<>(activeWar.getAttackersAt(root.getGame().getStartDate())).containsAll(attackers)) {
+                        return false;
+                    }
+
+                    if (CollectionUtils.isNotEmpty(defenders)
+                        && new HashSet<>(activeWar.getDefendersAt(root.getGame().getStartDate())).containsAll(defenders)) {
+                        return false;
+                    }
+
+                    if (attackerLeader != null && !Objects.equals(activeWar.getAttackersAt(root.getGame().getStartDate()).get(0),
+                                                                  root.getGame().getCountry(attackerLeader).getTag())) {
+                        return false;
+                    }
+
+                    if (defenderLeader != null && !Objects.equals(activeWar.getDefendersAt(root.getGame().getStartDate()).get(0),
+                                                                  root.getGame().getCountry(defenderLeader).getTag())) {
+                        return false;
+                    }
+
+                    if (StringUtils.isNotBlank(casusBelli) && !casusBelli.equalsIgnoreCase(activeWar.getWarGoal().getCasusBelli().getName())) {
+                        return false;
+                    }
+
+                    if (warGoalProvince != null && activeWar.getWarGoal().getProvince() != null
+                        && !Objects.equals(activeWar.getWarGoal().getProvince(), warGoalProvince)) {
+                        return false;
+                    }
+
+                    if (startDate != null && activeWar.getStart().isBefore(startDate)) {
+                        return false;
+                    }
+
+                    if (duration != null && activeWar.getStart().plusDays(duration).isAfter(root.getGame().getStartDate())) {
+                        return false;
+                    }
+
+                    return true;
+                });
+            case "num_of_owned_provinces_with":
+                return root.getOwnedProvinceAt(root.getGame().getStartDate()).map(ProvinceHistoryItemI::getProvince).filter(condition::apply).count()
+                       >= NumbersUtils.toInt(condition.getCondition("value"));
+            case "num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with":
+                break; //To complexe to be worth computing
+            case "num_of_religion":
+                religion = null;
+                if (condition.getCondition("secondary") != null) {
+                    return false;
+                } else if (condition.getCondition("religion") != null) {
+                    religion = root.getGame().getReligion(condition.getCondition("religion"));
+                }
+
+                Religion finalReligion = religion;
+                if ((integer = NumbersUtils.toInt(condition.getCondition("value"))) != null) {
+                    if (religion != null) {
+                        return root.getOwnedProvinceAt(root.getGame().getStartDate()).filter(i -> finalReligion.equals(i.getReligion())).count() >= integer;
+                    } else if (condition.getCondition("heretic") != null) {
+                        return root.getOwnedProvinceAt(root.getGame().getStartDate())
+                                   .filter(i -> !Objects.equals(root.getHistoryItemAt(root.getGame().getStartDate()).getReligion(), i.getReligion())).count()
+                               >= integer;
+                    } else {
+                        return false;
+                    }
+                } else if ((aDouble = NumbersUtils.toDouble(condition.getCondition("value"))) != null) {
+                    long nbProv;
+                    if (religion != null) {
+                        nbProv = root.getOwnedProvinceAt(root.getGame().getStartDate()).filter(i -> finalReligion.equals(i.getReligion())).count();
+                    } else if (condition.getCondition("heretic") != null) {
+                        nbProv = root.getOwnedProvinceAt(root.getGame().getStartDate())
+                                     .filter(i -> !Objects.equals(root.getHistoryItemAt(root.getGame().getStartDate()).getReligion(), i.getReligion()))
+                                     .count();
+                    } else {
+                        return false;
+                    }
+
+                    return BigDecimal.valueOf(aDouble)
+                                     .multiply(BigDecimal.valueOf(root.getOwnedProvinceAt(root.getGame().getStartDate()).count()))
+                                     .compareTo(BigDecimal.valueOf(nbProv)) >= 0;
+                }
+                break;
+            case "overlord":
+                return root.getOverlordAt(root.getGame().getStartDate()) != null && condition.apply(root.getOverlordAt(root.getGame().getStartDate()), from);
+            case "owns_all_provinces":
+                List<Country> countries = new ArrayList<>();
+                countries.add(root);
+                countries.addAll(root.getSubjectsAt(root.getGame().getStartDate())
+                                     .filter(c -> !c.getGame().getSubjectType(c.getSubjectTypeAt(root.getGame().getStartDate())).isVoluntary())
+                                     .toList());
+                return root.getGame()
+                           .getProvinces()
+                           .values()
+                           .stream()
+                           .filter(condition::apply)
+                           .allMatch(p -> countries.contains(p.getHistoryItemAt(root.getGame().getStartDate()).getOwner()));
+            case "religion_years":
+                religion = root.getGame().getReligion(condition.getConditions().entrySet().iterator().next().getValue().get(0));
+                if (religion.getDate() == null) {
+                    return NumbersUtils.toInt(condition.getCondition(religion.getName())) <= 0;
+                } else {
+                    return religion.getDate() != null && religion.getDate().plusYears(NumbersUtils.toInt(condition.getCondition(religion.getName())))
+                                                                 .isBefore(root.getGame().getStartDate());
+                }
+            case "same_continent": //Todo object
+                break;
+            case "years_in_union_under":
+                country = root.getGame().getCountry(condition.getCondition("who"));
+                return root.equals(country.getOverlordAt(root.getGame().getStartDate())) &&
+                       Eu4Utils.SUBJECT_TYPE_PERSONAL_UNION.equals(country.getSubjectTypeAt(root.getGame().getStartDate())) &&
+                       country.getSubjectSinceAt(root.getGame().getStartDate())
+                              .plusYears(NumbersUtils.toInt(condition.getCondition("value")))
+                              .isBefore(root.getGame().getStartDate());
+            case "years_in_vassalage_under":
+                country = root.getGame().getCountry(condition.getCondition("who"));
+                return root.equals(country.getOverlordAt(root.getGame().getStartDate())) &&
+                       Eu4Utils.SUBJECT_TYPE_VASSAL.equals(country.getSubjectTypeAt(root.getGame().getStartDate())) &&
+                       country.getSubjectSinceAt(root.getGame().getStartDate())
+                              .plusYears(NumbersUtils.toInt(condition.getCondition("value")))
+                              .isBefore(root.getGame().getStartDate());
+        }
+
+        LOGGER.debug("Don't know how to manage country scope: {} !", condition);
+        return false;
+    }
+
     public static boolean applyConditionToProvince(SaveProvince province, String condition, String rawValue) {
         String value;
         Institution institution;
         Integer integer;
-        Calendar calendar = Calendar.getInstance();
         SaveCountry other;
         Building building;
 
@@ -3796,6 +3986,259 @@ public class ConditionsUtils {
         return false;
     }
 
+    public static boolean applyConditionToProvince(Province province, String condition, String rawValue) {
+        String value;
+        Country other;
+        Building building;
+        ProvinceHistoryItemI historyItem;
+
+        if ("ROOT".equals(rawValue) || "FROM".equals(rawValue)) {
+            value = Optional.ofNullable(province.getHistoryItemAt(province.getGame().getStartDate()).getOwner()).map(Country::getTag).orElse(null);
+        } else {
+            value = rawValue;
+        }
+
+        switch (condition.toLowerCase()) {
+            case "always":
+                return "yes".equalsIgnoreCase(value);
+            case "area":
+                return province.getGame().getArea(value).getProvinces().contains(province.getId());
+            case "base_manpower":
+                return value != null
+                       && NumbersUtils.intOrDefault(province.getHistoryItemAt(province.getGame().getStartDate()).getBaseManpower()) >=
+                          NumbersUtils.toInt(value);
+            case "base_production":
+                return value != null
+                       && NumbersUtils.intOrDefault(province.getHistoryItemAt(province.getGame().getStartDate()).getBaseProduction()) >=
+                          NumbersUtils.toInt(value);
+            case "base_tax":
+                return value != null
+                       && NumbersUtils.intOrDefault(province.getHistoryItemAt(province.getGame().getStartDate()).getBaseTax()) >= NumbersUtils.toInt(value);
+            case "can_build":
+                building = province.getGame().getBuilding(value);
+                return building != null && (building.getTrigger() == null || building.getTrigger().apply(province));
+            case "capital":
+                return "yes".equalsIgnoreCase(value) == (province.getHistoryItemAt(province.getGame().getStartDate()).getOwner() != null &&
+                                                         province.getHistoryItemAt(province.getGame().getStartDate())
+                                                                 .getOwner()
+                                                                 .getHistoryItemAt(province.getGame().getStartDate())
+                                                                 .getCapital()
+                                                                 .equals(province));
+            case "colonial_region":
+                return province.getGame().getColonialRegion(value).getProvinces().contains(province.getId());
+            case "continent":
+                return value != null && value.equalsIgnoreCase(province.getContinent().getName());
+            case "controlled_by":
+                return value != null && value.equalsIgnoreCase(ClausewitzUtils.removeQuotes(
+                        Optional.ofNullable(province.getHistoryItemAt(province.getGame().getStartDate()).getController()).map(Country::getTag).orElse(null)));
+            case "country_or_subject_holds":
+            case "country_or_vassal_holds":
+                other = province.getGame().getCountry(value);
+                return province.getHistoryItemAt(province.getGame().getStartDate()).getOwner() != null
+                       && (province.getHistoryItemAt(province.getGame().getStartDate()).getOwner().equals(other) ||
+                           other.equals(
+                                   province.getHistoryItemAt(province.getGame().getStartDate()).getOwner().getOverlordAt(province.getGame().getStartDate())));
+            case "culture":
+                return province.getHistoryItemAt(province.getGame().getStartDate()).getCulture() != null &&
+                       rawValueToCulture(rawValue, province).equalsIgnoreCase(
+                               province.getHistoryItemAt(province.getGame().getStartDate()).getCulture().getName());
+            case "culture_group":
+                return province.getHistoryItemAt(province.getGame().getStartDate()).getCulture() != null
+                       && province.getHistoryItemAt(province.getGame().getStartDate())
+                                  .getCulture()
+                                  .getCultureGroup()
+                                  .getName()
+                                  .equals(rawValueToCultureGroup(rawValue, province));
+            case "current_age":
+                return province.getGame()
+                               .getAges()
+                               .stream()
+                               .filter(age -> age.getStart() <= province.getGame().getStartDate().getYear())
+                               .collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparingInt(Age::getStart))))
+                               .last()
+                               .getName()
+                               .equals(value);
+            case "development":
+                return value != null && NumbersUtils.intOrDefault(province.getHistoryItemAt(province.getGame().getStartDate()).getBaseManpower()) +
+                                        NumbersUtils.intOrDefault(province.getHistoryItemAt(province.getGame().getStartDate()).getBaseProduction()) +
+                                        NumbersUtils.intOrDefault(province.getHistoryItemAt(province.getGame().getStartDate()).getBaseTax())
+                                        >= NumbersUtils.toDouble(value);
+            case "exists":
+                if ("yes".equalsIgnoreCase(value)) {
+                    return true;
+                } else {
+                    return province.getGame().getCountry(value) != null;
+                }
+            case "fort_level":
+                return value != null && province.getHistoryItemAt(province.getGame().getStartDate())
+                                                .getCumulatedBuildings()
+                                                .stream()
+                                                .anyMatch(build -> build.getModifiers().hasModifier("fort_level")
+                                                                   && build.getModifiers().getModifier("fort_level") >= NumbersUtils.toInt(value));
+            case "has_building":
+                return value != null && province.getHistoryItemAt(province.getGame().getStartDate())
+                                                .getCumulatedBuildings()
+                                                .stream()
+                                                .anyMatch(provinceBuilding -> value.equalsIgnoreCase(provinceBuilding.getName()));
+            case "has_climate":
+                return value != null && value.equalsIgnoreCase(province.getClimate());
+            case "has_owner_accepted_culture":
+                return "yes".equalsIgnoreCase(value) == ((historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
+                                                         historyItem.getCulture() != null &&
+                                                         historyItem.getOwner()
+                                                                    .getHistoryItemAt(province.getGame().getStartDate())
+                                                                    .getCumulatedAcceptedCultures()
+                                                                    .contains(historyItem.getCulture().getName()));
+            case "has_owner_culture":
+                return "yes".equalsIgnoreCase(value) == ((historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
+                                                         historyItem.getCulture() != null &&
+                                                         historyItem.getOwner()
+                                                                    .getHistoryItemAt(province.getGame().getStartDate())
+                                                                    .getPrimaryCulture()
+                                                                    .equals(historyItem.getCulture()));
+            case "has_owner_culture_group":
+                return "yes".equalsIgnoreCase(value) == ((historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
+                                                         historyItem.getCulture() != null &&
+                                                         historyItem.getOwner()
+                                                                    .getHistoryItemAt(province.getGame().getStartDate())
+                                                                    .getPrimaryCulture()
+                                                                    .getCultureGroup()
+                                                                    .equals(historyItem.getCulture().getCultureGroup()));
+            case "has_owner_religion":
+                return "yes".equalsIgnoreCase(value) == ((historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
+                                                         historyItem.getReligion() != null &&
+                                                         historyItem.getOwner()
+                                                                    .getHistoryItemAt(province.getGame().getStartDate())
+                                                                    .getReligion()
+                                                                    .equals(historyItem.getReligion()));
+            case "has_port":
+                return "yes".equalsIgnoreCase(value) == (province.isPort());
+            case "has_terrain": //Don't do
+                break;
+            case "has_winter":
+                return value != null && value.equalsIgnoreCase(province.getWinter());
+            case "has_monsoon":
+                return value != null && value.equalsIgnoreCase(province.getClimate());
+            case "hre_size":
+                break; //Todo
+            case "in_capital_state":
+                return "yes".equalsIgnoreCase(value) == ((historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
+                                                         province.getArea()
+                                                                 .equals(historyItem.getOwner()
+                                                                                    .getHistoryItemAt(province.getGame().getStartDate())
+                                                                                    .getCapital()
+                                                                                    .getArea()));
+            case "is_capital":
+                return "yes".equalsIgnoreCase(value) == (province.getGame()
+                                                                 .getCountries()
+                                                                 .stream()
+                                                                 .anyMatch(country -> province.equals(
+                                                                         country.getHistoryItemAt(province.getGame().getStartDate()).getCapital())));
+            case "is_capital_of":
+                other = province.getGame().getCountry(value);
+                return province.equals(other.getHistoryItemAt(province.getGame().getStartDate()).getCapital());
+            case "is_city":
+                return "yes".equalsIgnoreCase(value);
+            case "is_core":
+                return province.getHistoryItemAt(province.getGame().getStartDate())
+                               .getCumulatedCores()
+                               .stream()
+                               .anyMatch(country -> country.getTag().equalsIgnoreCase(value));
+            case "is_empty":
+                return "yes".equalsIgnoreCase(value) == (province.getHistoryItemAt(province.getGame().getStartDate()).getController() != null);
+            case "is_institution_origin":
+                return "yes".equalsIgnoreCase(value) == Objects.equals(province.getId(), province.getGame().getInstitution(value).getHistoricalStartProvince());
+            case "is_lake":
+                return "yes".equalsIgnoreCase(value) == province.isLake();
+            case "is_cored":
+                return "yes".equalsIgnoreCase(value) == (province.getHistoryItemAt(province.getGame().getStartDate()).getOwner() != null &&
+                                                         province.getHistoryItemAt(province.getGame().getStartDate())
+                                                                 .getCumulatedCores()
+                                                                 .contains(province.getHistoryItemAt(province.getGame().getStartDate()).getOwner()));
+            case "is_month":
+            case "real_month_of_year":
+                return Objects.equals(province.getGame().getStartDate().getMonthValue(), NumbersUtils.toInt(value));
+            case "is_node_in_trade_company_region":
+                return "yes".equalsIgnoreCase(value) == province.getGame()
+                                                                .getTradeCompanies()
+                                                                .stream()
+                                                                .anyMatch(tradeCompany -> tradeCompany.getProvinces().contains(province.getId()));
+            case "is_occupied":
+                return "yes".equalsIgnoreCase(value) == (province.getHistoryItemAt(province.getGame().getStartDate()).getController() != null);
+            case "is_ocean":
+                return "yes".equalsIgnoreCase(value) == province.isOcean();
+            case "is_part_of_hre":
+                return "yes".equalsIgnoreCase(value) == BooleanUtils.toBoolean(province.getHistoryItemAt(province.getGame().getStartDate()).getHre());
+            case "is_religion_enabled":
+                Religion religion = province.getGame().getReligion(rawValueToReligion(rawValue, province));
+                return religion != null && (religion.getDate() == null || (religion.getDate().isBefore(province.getGame().getStartDate())));
+            case "is_sea":
+                return "yes".equalsIgnoreCase(value) == province.isOcean();
+            case "is_wasteland":
+                return "yes".equalsIgnoreCase(value) == (province.isImpassable());
+            case "is_year":
+                return Objects.equals(province.getGame().getStartDate().getYear(), NumbersUtils.toInt(value));
+            case "months_since_defection": //Todo
+                break;
+            case "num_of_electors":
+                return value != null && province.getGame().getHreEmperorAt(province.getGame().getStartDate()) != null &&
+                       province.getGame()
+                               .getCountries()
+                               .stream()
+                               .map(c -> c.getHistoryItemAt(province.getGame().getStartDate()))
+                               .filter(i -> BooleanUtils.toBoolean(i.getElector()))
+                               .count() >= NumbersUtils.toInt(value);
+            case "num_of_foreign_hre_provinces":
+                break; //Too complexe and very slow
+            case "owned_by":
+                return value != null && value.equalsIgnoreCase(
+                        Optional.ofNullable(province.getHistoryItemAt(province.getGame().getStartDate()).getOwner()).map(Country::getTag).orElse(null));
+            case "owner_has_patriarchs":
+                return "yes".equalsIgnoreCase(value) == (province.getHistoryItemAt(province.getGame().getStartDate()).getOwner() != null &&
+                                                         province.getHistoryItemAt(province.getGame().getStartDate())
+                                                                 .getOwner()
+                                                                 .getHistoryItemAt(province.getGame().getStartDate())
+                                                                 .getReligion()
+                                                                 .hasPatriarchs());
+            case "papacy_active":
+                return province.getGame()
+                               .getReligions()
+                               .stream()
+                               .anyMatch(r -> r.getPapacy() != null && (r.getDate() == null || province.getGame().getStartDate().isAfter(r.getDate())));
+            case "province_has_center_of_trade_of_level":
+                return value != null &&
+                       NumbersUtils.intOrDefault(province.getHistoryItemAt(province.getGame().getStartDate()).getCenterOfTrade()) >= NumbersUtils.toInt(value);
+            case "province_id":
+                return value != null && province.getId() == NumbersUtils.toInt(value);
+            case "real_day_of_year":
+                return value != null && province.getGame().getStartDate().getDayOfYear() == NumbersUtils.toInt(value);
+            case "region":
+                return value != null && value.equalsIgnoreCase(province.getArea().getRegion().getName());
+            case "religion":
+                return province.getHistoryItemAt(province.getGame().getStartDate()).getReligion() != null &&
+                       rawValueToReligion(rawValue, province).equalsIgnoreCase(
+                               province.getHistoryItemAt(province.getGame().getStartDate()).getReligion().getName());
+            case "religion_group":
+                return province.getHistoryItemAt(province.getGame().getStartDate()).getReligion() != null &&
+                       rawValueToReligionGroup(rawValue, province).equalsIgnoreCase(
+                               province.getHistoryItemAt(province.getGame().getStartDate()).getReligion().getReligionGroup().getName());
+            case "start_date":
+                return province.getGame().getStartDate().equals(Eu4Utils.stringToDate(value));
+            case "started_in":
+                return province.getGame().getStartDate().equals(Eu4Utils.stringToDate(value))
+                       || province.getGame().getStartDate().isAfter(Eu4Utils.stringToDate(value));
+            case "superregion":
+                return value != null && value.equalsIgnoreCase(province.getArea().getRegion().getSuperRegion().getName());
+            case "trade_company_region":
+                return province.getGame().getTradeCompany(value).getProvinces().contains(province.getId());
+            case "trade_goods":
+                return value != null && value.equalsIgnoreCase(province.getHistoryItemAt(province.getGame().getStartDate()).getTradeGoods().getName());
+        }
+
+        LOGGER.debug("Don't know how to manage province condition: {} !", condition);
+        return false;
+    }
+
     public static boolean applyScopeToProvince(SaveProvince province, Condition condition) {
         SaveCountry country;
         SaveTradeNode tradeNode;
@@ -3919,6 +4362,62 @@ public class ConditionsUtils {
         return false;
     }
 
+    public static boolean applyScopeToProvince(Province province, Condition condition) {
+        Country country;
+        ProvinceHistoryItemI historyItem;
+
+        if ((country = province.getGame().getCountry(condition.getName())) != null) {
+            return condition.apply(country, country);
+        }
+
+        if (Optional.ofNullable(NumbersUtils.toInt(condition.getName())).map(i -> province.getGame().getProvince(i)).isPresent()) {
+            return condition.apply(province.getGame().getProvince(NumbersUtils.toInt(condition.getName())));
+        }
+
+        switch (condition.getName().toLowerCase()) {
+            case "or":
+                return (condition.getConditions() == null ||
+                        condition.getConditions().entrySet()
+                                 .stream()
+                                 .anyMatch(entry -> entry.getValue()
+                                                         .stream()
+                                                         .anyMatch(value -> applyConditionToProvince(province, entry.getKey(), value)))) ||
+                       (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToProvince(province, scope)));
+            case "and":
+            case "hidden_trigger":
+                return (condition.getConditions() == null ||
+                        condition.getConditions().entrySet()
+                                 .stream()
+                                 .allMatch(entry -> entry.getValue()
+                                                         .stream()
+                                                         .anyMatch(value -> applyConditionToProvince(province, entry.getKey(), value)))) &&
+                       (condition.getScopes() == null || condition.getScopes().stream().allMatch(scope -> applyScopeToProvince(province, scope)));
+            case "not":
+                return (condition.getConditions() == null ||
+                        condition.getConditions().entrySet()
+                                 .stream()
+                                 .noneMatch(entry -> entry.getValue()
+                                                          .stream()
+                                                          .anyMatch(value -> applyConditionToProvince(province, entry.getKey(), value)))) &&
+                       (condition.getScopes() == null || condition.getScopes().stream().noneMatch(scope -> applyScopeToProvince(province, scope)));
+            case "controller":
+                return (historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getController() != null &&
+                       condition.apply(historyItem.getController(), historyItem.getController());
+            case "emperor":
+                return province.getGame().getHreEmperorAt(province.getGame().getStartDate()) != null &&
+                       condition.apply(province.getGame().getCountry(province.getGame().getHreEmperorAt(province.getGame().getStartDate()).getTag()),
+                                       province.getGame().getCountry(province.getGame().getHreEmperorAt(province.getGame().getStartDate()).getTag()));
+            case "owner":
+                return (historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
+                       condition.apply(historyItem.getOwner(), historyItem.getOwner());
+            case "sea_zone": //Todo Refers to the sea province on which the current land province scope has a port.
+                break;
+        }
+
+        LOGGER.debug("Don't know how to manage province scope: {} !", condition);
+        return false;
+    }
+
     public static String rawValueToReligion(String rawValue, SaveCountry root, SaveCountry from) {
         if ("ROOT".equalsIgnoreCase(rawValue)) {
             return Optional.ofNullable(root).map(SaveCountry::getReligion).map(SaveReligion::getName).orElse(null);
@@ -4019,6 +4518,18 @@ public class ConditionsUtils {
         }
     }
 
+    public static String rawValueToReligion(String rawValue, Province province) {
+        if (province.getHistoryItemAt(province.getGame().getStartDate()).getReligion() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getReligion().getName();
+        } else if ("FROM".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getReligion().getName();
+        } else {
+            return rawValue;
+        }
+    }
+
     public static String rawValueToReligionGroup(String rawValue, SaveProvince province) {
         if (province.getReligion() == null) {
             return rawValue;
@@ -4026,6 +4537,18 @@ public class ConditionsUtils {
             return province.getReligion().getGameReligion().getReligionGroup().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
             return province.getReligion().getGameReligion().getReligionGroup().getName();
+        } else {
+            return rawValue;
+        }
+    }
+
+    public static String rawValueToReligionGroup(String rawValue, Province province) {
+        if (province.getHistoryItemAt(province.getGame().getStartDate()).getReligion() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getReligion().getReligionGroup().getName();
+        } else if ("FROM".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getReligion().getReligionGroup().getName();
         } else {
             return rawValue;
         }
@@ -4043,6 +4566,18 @@ public class ConditionsUtils {
         }
     }
 
+    public static String rawValueToCulture(String rawValue, Province province) {
+        if (province.getHistoryItemAt(province.getGame().getStartDate()).getCulture() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getCulture().getName();
+        } else if ("FROM".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getCulture().getName();
+        } else {
+            return rawValue;
+        }
+    }
+
     public static String rawValueToCultureGroup(String rawValue, SaveProvince province) {
         if (province.getCulture() == null) {
             return rawValue;
@@ -4050,6 +4585,18 @@ public class ConditionsUtils {
             return province.getCulture().getCultureGroup().getName();
         } else if ("FROM".equalsIgnoreCase(rawValue)) {
             return province.getCulture().getCultureGroup().getName();
+        } else {
+            return rawValue;
+        }
+    }
+
+    public static String rawValueToCultureGroup(String rawValue, Province province) {
+        if (province.getHistoryItemAt(province.getGame().getStartDate()).getCulture() == null) {
+            return rawValue;
+        } else if ("ROOT".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getCulture().getCultureGroup().getName();
+        } else if ("FROM".equalsIgnoreCase(rawValue)) {
+            return province.getHistoryItemAt(province.getGame().getStartDate()).getCulture().getCultureGroup().getName();
         } else {
             return rawValue;
         }

@@ -84,13 +84,7 @@ public class Condition {
             return false;
         }
 
-        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
-            if ("FROM".equals(scope.name)) {
-                return !scope.apply(from, from);
-            } else {
-                return !scope.apply(root, from);
-            }
-        })) {
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
             return false;
         }
 
@@ -107,13 +101,7 @@ public class Condition {
             return false;
         }
 
-        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
-            if ("FROM".equals(scope.name)) {
-                return !scope.apply(from, from);
-            } else {
-                return !scope.apply(root, from);
-            }
-        })) {
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
             return false;
         }
 
@@ -121,6 +109,23 @@ public class Condition {
     }
 
     public boolean apply(SaveProvince province) {
+        if (this.conditions != null && this.conditions.entrySet()
+                                                      .stream()
+                                                      .anyMatch(entry -> entry.getValue()
+                                                                              .stream()
+                                                                              .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(),
+                                                                                                                                       s)))) {
+            return false;
+        }
+
+        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean apply(Province province) {
         if (this.conditions != null && this.conditions.entrySet()
                                                       .stream()
                                                       .anyMatch(entry -> entry.getValue()
@@ -151,16 +156,6 @@ public class Condition {
             return false;
         }
 
-        if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
-            if ("FROM".equals(scope.name)) {
-                return !scope.apply(from, from);
-            } else {
-                return !scope.apply(province, from);
-            }
-        })) {
-            return false;
-        }
-
         return true;
     }
 
@@ -176,9 +171,9 @@ public class Condition {
 
         if (this.scopes != null && this.scopes.stream().anyMatch(scope -> {
             if ("FROM".equals(scope.name)) {
-                return !scope.apply(from, from);
+                return !ConditionsUtils.applyScopeToProvince(from, scope);
             } else {
-                return !scope.apply(country, from);
+                return !ConditionsUtils.applyScopeToCountry(country, country, scope);
             }
         })) {
             return false;

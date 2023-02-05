@@ -164,4 +164,21 @@ public class ProvinceHistoryItems implements ProvinceHistoryItemI {
     public List<Building> getBuildings() {
         return this.items.stream().map(ProvinceHistoryItemI::getBuildings).filter(CollectionUtils::isNotEmpty).findFirst().orElse(new ArrayList<>());
     }
+
+    @Override
+    public List<Building> getRemoveBuildings() {
+        return this.items.stream().map(ProvinceHistoryItemI::getRemoveBuildings).filter(CollectionUtils::isNotEmpty).findFirst().orElse(new ArrayList<>());
+    }
+
+    @Override
+    public List<Building> getCumulatedBuildings() {
+        List<Building> buildings = new ArrayList<>();
+
+        for (ProvinceHistoryItemI item : this.items) {
+            buildings.addAll(item.getBuildings());
+            buildings.removeAll(item.getRemoveBuildings());
+        }
+
+        return buildings;
+    }
 }

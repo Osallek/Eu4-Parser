@@ -2,9 +2,6 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
-import fr.osallek.eu4parser.model.save.country.Heir;
-import fr.osallek.eu4parser.model.save.country.Monarch;
-import fr.osallek.eu4parser.model.save.country.Queen;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class CountryHistoryItem implements CountryHistoryItemI {
 
@@ -207,17 +205,17 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public List<Culture> getAddAcceptedCultures() {
-        return this.item.getVarsAsStrings("add_accepted_culture").stream().map(this.game::getCulture).toList();
+    public List<String> getAddAcceptedCultures() {
+        return this.item.getVarsAsStrings("add_accepted_culture");
     }
 
     public void setAddAcceptedCultures(List<Culture> cultures) {
         getAddAcceptedCultures().forEach(acceptedCulture -> cultures.stream()
-                                                                    .filter(culture -> culture.equals(acceptedCulture))
+                                                                    .filter(culture -> culture.getName().equals(acceptedCulture))
                                                                     .findFirst()
                                                                     .ifPresentOrElse(cultures::remove,
-                                                                                  () -> this.item.removeVariable("add_accepted_culture",
-                                                                                                                 acceptedCulture.getName())));
+                                                                                     () -> this.item.removeVariable("add_accepted_culture",
+                                                                                                                    acceptedCulture)));
 
         cultures.forEach(this::addAddAcceptedCulture);
     }
@@ -235,17 +233,17 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public List<Culture> getRemoveAcceptedCultures() {
-        return this.item.getVarsAsStrings("remove_accepted_culture").stream().map(this.game::getCulture).toList();
+    public List<String> getRemoveAcceptedCultures() {
+        return this.item.getVarsAsStrings("remove_accepted_culture");
     }
 
     public void setRemoveAcceptedCultures(List<Culture> cultures) {
         getAddAcceptedCultures().forEach(acceptedCulture -> cultures.stream()
-                                                                    .filter(culture -> culture.equals(acceptedCulture))
+                                                                    .filter(culture -> culture.getName().equals(acceptedCulture))
                                                                     .findFirst()
                                                                     .ifPresentOrElse(cultures::remove,
                                                                                   () -> this.item.removeVariable("remove_accepted_culture",
-                                                                                                                 acceptedCulture.getName())));
+                                                                                                                 acceptedCulture)));
 
         cultures.forEach(this::removeAcceptedCulture);
     }
@@ -260,6 +258,12 @@ public class CountryHistoryItem implements CountryHistoryItemI {
         if (!removeAcceptedCulture.contains(culture)) {
             this.item.addVariable("remove_accepted_culture", culture, this.item.getVar("primary_culture").getOrder() + 1);
         }
+    }
+
+    @Override
+    public List<String> getCumulatedAcceptedCultures() {
+        List<String> removeAcceptedCultures = getRemoveAcceptedCultures();
+        return getAddAcceptedCultures().stream().filter(Predicate.not(removeAcceptedCultures::contains)).toList();
     }
 
     @Override
@@ -491,17 +495,51 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
+    public List<String> getClearCountryFlag() {
+        return this.item.getVarsAsStrings("clr_country_flag");
+    }
+
+    public void clrClearCountryFlag(List<String> clrCountryFlag) {
+        this.item.removeVariables("clr_country_flag");
+
+        if (CollectionUtils.isNotEmpty(clrCountryFlag)) {
+            clrCountryFlag.forEach(s -> this.item.addVariable("clr_country_flag", s));
+        }
+    }
+
+    public void addClearCountryFlag(String clrCountryFlag) {
+        if (!this.item.hasVar("clr_country_flag", clrCountryFlag)) {
+            this.item.addVariable("clr_country_flag", clrCountryFlag);
+        }
+    }
+
+    public void removeClearCountryFlag(String clrCountryFlag) {
+        this.item.removeVariable("clr_country_flag", clrCountryFlag);
+    }
+
+    @Override
+    public List<String> getCumulatedCountryFlags() {
+        List<String> clearCountryFlag = getClearCountryFlag();
+        return getSetCountryFlag().stream().filter(Predicate.not(clearCountryFlag::contains)).toList();
+    }
+
+    @Override
     public Heir getHeir() {
-        return this.item.hasVar("heir") ? null : new Heir(this.item.getChild("heir"), this.country);
+        return this.item.hasChild("heir") ? new Heir(this.item.getChild("heir"), this.country) : null;
     }
 
     @Override
     public Monarch getMonarch() {
-        return this.item.hasVar("monarch") ? null : new Monarch(this.item.getChild("monarch"), this.country);
+        return this.item.hasChild("monarch") ? new Monarch(this.item.getChild("monarch"), this.country) : null;
     }
 
     @Override
     public Queen getQueen() {
-        return this.item.hasVar("queen") ? null : new Queen(this.item.getChild("queen"), this.country);
+        return this.item.hasChild("queen") ? new Queen(this.item.getChild("queen"), this.country) : null;
+    }
+
+    @Override
+    public List<Leader> getLeaders() {
+        return this.item.getChildren("leader").stream().map(i -> new Leader(i, this.country)).toList();
     }
 }

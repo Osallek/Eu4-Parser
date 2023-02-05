@@ -4091,6 +4091,7 @@ public class Game {
                     this.wars.add(new War(fileNode, item, this));
                 });
 
+        this.wars.removeIf(war -> CollectionUtils.isEmpty(war.getEvents()));
         this.wars.sort(Comparator.comparing(War::getStart).thenComparing(War::getEnd).thenComparing(War::getName));
     }
 

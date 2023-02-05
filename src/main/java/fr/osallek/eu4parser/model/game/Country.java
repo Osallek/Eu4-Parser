@@ -379,6 +379,25 @@ public class Country {
                         .orElse(null);
     }
 
+    public LocalDate getSubjectSinceAt(LocalDate date) {
+        return this.game.getSubjectTypeRelations()
+                        .values()
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .filter(r -> this.equals(r.getSecond()))
+                        .filter(r -> r.getStartDate().equals(date) || r.getStartDate().isBefore(date))
+                        .filter(r -> r.getEndDate().equals(date) || r.getStartDate().isAfter(date))
+                        .findFirst()
+                        .map(DiplomacyRelation::getStartDate)
+                        .orElse(null);
+    }
+
+    public Stream<Country> getSubjectsAt(LocalDate date) {
+        return this.game.getCountries()
+                        .stream()
+                        .filter(c -> this.equals(c.getOverlordAt(date)));
+    }
+
     public Stream<ProvinceHistoryItemI> getOwnedProvinceAt(LocalDate date) {
         return this.game.getProvinces().values().stream().map(p -> p.getHistoryItemAt(date)).filter(p -> this.equals(p.getOwner()));
     }

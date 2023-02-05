@@ -272,6 +272,33 @@ public final class LocalisationUtils {
                         }
                     }
                 }
+            } else if (current.get() instanceof fr.osallek.eu4parser.model.game.Monarch monarch) {
+                switch (key) {
+                    case "Dynasty" -> current = getDynasty(monarch);
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "GetName" -> current = getName(monarch);
+                    case "GetYear" -> current = getYear(save);
+                    case "GetAdm" -> current = getAdm(monarch);
+                    case "GetDip" -> current = getDip(monarch);
+                    case "GetMil" -> current = getMil(monarch);
+                    case "GetTitle" -> current = getTitle(monarch, language);
+                    case "GetWomanMan" -> current = getTitle(monarch, language);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in monarch", key);
+                        }
+                    }
+                }
             } else if (current.get() instanceof Religion religion) {
                 switch (key) {
                     //Commands
@@ -481,7 +508,7 @@ public final class LocalisationUtils {
         return Optional.ofNullable(country).map(SaveCountry::getHeir);
     }
 
-    public static Optional<Heir> getHeir(Country country) {
+    public static Optional<fr.osallek.eu4parser.model.game.Heir> getHeir(Country country) {
         return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getHeir);
     }
 
@@ -489,7 +516,7 @@ public final class LocalisationUtils {
         return Optional.ofNullable(country).map(SaveCountry::getMonarch);
     }
 
-    public static Optional<Monarch> getMonarch(Country country) {
+    public static Optional<fr.osallek.eu4parser.model.game.Monarch> getMonarch(Country country) {
         return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getMonarch);
     }
 
@@ -497,7 +524,7 @@ public final class LocalisationUtils {
         return Optional.ofNullable(country).map(SaveCountry::getQueen);
     }
 
-    public static Optional<Queen> getConsort(Country country) {
+    public static Optional<fr.osallek.eu4parser.model.game.Queen> getConsort(Country country) {
         return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getQueen);
     }
 
@@ -690,6 +717,10 @@ public final class LocalisationUtils {
         return Optional.ofNullable(monarch).map(Monarch::getAdm).map(String::valueOf);
     }
 
+    public static Optional<String> getAdm(fr.osallek.eu4parser.model.game.Monarch monarch) {
+        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getAdm).map(String::valueOf);
+    }
+
     public static Optional<String> getAdvisorType(SaveAdvisor advisor, Eu4Language language) {
         return Optional.ofNullable(advisor)
                        .map(SaveAdvisor::getGameAdvisor)
@@ -712,6 +743,10 @@ public final class LocalisationUtils {
 
     public static Optional<String> getDip(Monarch monarch) {
         return Optional.ofNullable(monarch).map(Monarch::getDip).map(String::valueOf);
+    }
+
+    public static Optional<String> getDip(fr.osallek.eu4parser.model.game.Monarch monarch) {
+        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getDip).map(String::valueOf);
     }
 
     public static Optional<String> getFlagShip(SaveCountry country) {
@@ -751,6 +786,10 @@ public final class LocalisationUtils {
 
     public static Optional<String> getMil(Monarch monarch) {
         return Optional.ofNullable(monarch.getMil()).map(String::valueOf);
+    }
+
+    public static Optional<String> getMil(fr.osallek.eu4parser.model.game.Monarch monarch) {
+        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getMil).map(String::valueOf);
     }
 
     public static Optional<String> getMonth(Save save, Eu4Language language) {
@@ -805,12 +844,24 @@ public final class LocalisationUtils {
         return Optional.ofNullable(monarch).map(Monarch::getMonarchName);
     }
 
+    public static Optional<String> getName(fr.osallek.eu4parser.model.game.Monarch monarch) {
+        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getMonarchName);
+    }
+
     public static Optional<String> getName(Heir heir) {
         return Optional.ofNullable(heir).map(Heir::getName);
     }
 
+    public static Optional<String> getName(fr.osallek.eu4parser.model.game.Heir heir) {
+        return Optional.ofNullable(heir).map(fr.osallek.eu4parser.model.game.Heir::getName);
+    }
+
     public static Optional<String> getName(Queen queen) {
         return Optional.ofNullable(queen).map(Queen::getName);
+    }
+
+    public static Optional<String> getName(fr.osallek.eu4parser.model.game.Queen queen) {
+        return Optional.ofNullable(queen).map(fr.osallek.eu4parser.model.game.Queen::getName);
     }
 
     public static Optional<String> getName(SaveAdvisor advisor) {
@@ -839,7 +890,7 @@ public final class LocalisationUtils {
 
     public static Optional<String> getTitle(Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .flatMap(m -> Optional.ofNullable(m.getSaveCountry())
+                       .flatMap(m -> Optional.ofNullable(m.getCountry())
                                              .flatMap(c -> Optional.ofNullable(c.getGovernmentName())
                                                                    .map(name -> {
                                                                        if (Monarch.class.equals(monarch.getClass())) {
@@ -857,12 +908,16 @@ public final class LocalisationUtils {
                                                                    })
                                                                    .map(ranks -> ranks.get(c.getGovernmentLevel()))))
                        .flatMap(s -> Optional.of(monarch)
-                                             .map(Monarch::getSaveCountry)
+                                             .map(Monarch::getCountry)
                                              .map(SaveCountry::getSave)
                                              .map(Save::getGame)
                                              .map(game -> game.getLocalisation(s, language)))
                        .map(Localisation::getValue)
                        .map(StringUtils::capitalize);
+    }
+
+    public static Optional<String> getTitle(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
+        return Optional.empty();
     }
 
     public static Optional<String> getTradeGoodName(SaveProvince province, Eu4Language language) {
@@ -932,6 +987,10 @@ public final class LocalisationUtils {
 
     public static Optional<String> getDynasty(Monarch monarch) {
         return Optional.ofNullable(monarch).map(Monarch::getDynasty);
+    }
+
+    public static Optional<String> getDynasty(fr.osallek.eu4parser.model.game.Monarch monarch) {
+        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getDynasty);
     }
 
     public static String cleanLocalisation(String s) {

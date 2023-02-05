@@ -409,6 +409,14 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
                         .toList();
     }
 
+    @Override
+    public List<Building> getRemoveBuildings() {
+        return this.game.getBuildings()
+                        .stream()
+                        .filter(building -> this.item.hasVar(building.getName()) && !BooleanUtils.toBoolean(this.item.getVarAsBool(building.getName())))
+                        .toList();
+    }
+
     public void addBuilding(String building) {
         this.item.addVariable(building, true);
     }
@@ -422,7 +430,13 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     public void removeBuilding(Building building) {
-        removeBuilding(building);
+        removeBuilding(building.getName());
+    }
+
+    @Override
+    public List<Building> getCumulatedBuildings() {
+        List<Building> removeBuildings = getRemoveBuildings();
+        return getBuildings().stream().filter(Predicate.not(removeBuildings::contains)).toList();
     }
 
     public void write(BufferedWriter writer) throws IOException {

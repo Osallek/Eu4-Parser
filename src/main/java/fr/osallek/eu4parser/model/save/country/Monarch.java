@@ -2,9 +2,9 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.Personalities;
 import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.RulerPersonality;
 import fr.osallek.eu4parser.model.save.Id;
@@ -20,8 +20,6 @@ public class Monarch {
     protected final Game game;
 
     protected SaveCountry saveCountry;
-
-    protected Country country;
 
     protected LocalDate monarchDate;
 
@@ -52,21 +50,6 @@ public class Monarch {
         refreshAttributes();
     }
 
-    public Monarch(ClausewitzItem item, Country country) {
-        this.item = item;
-        this.country = country;
-        this.game = country.getGame();
-        refreshAttributes();
-    }
-
-    public Monarch(ClausewitzItem item, Country country, LocalDate date) {
-        this.item = item;
-        this.country = country;
-        this.game = country.getGame();
-        this.monarchDate = date;
-        refreshAttributes();
-    }
-
     public Id getId() {
         return id;
     }
@@ -89,12 +72,8 @@ public class Monarch {
         return monarchDate;
     }
 
-    public SaveCountry getSaveCountry() {
+    public SaveCountry getCountry() {
         return this.saveCountry;
-    }
-
-    public Country getCountry() {
-        return country;
     }
 
     public Integer getAdm() {
@@ -312,12 +291,8 @@ public class Monarch {
         return rulerFlags;
     }
 
-    public SaveCountry getSaveWho() {
+    public SaveCountry getWho() {
         return this.saveCountry.getSave().getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("who")));
-    }
-
-    public Country getWho() {
-        return this.game.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("who")));
     }
 
     public void setWho(SaveCountry who) {

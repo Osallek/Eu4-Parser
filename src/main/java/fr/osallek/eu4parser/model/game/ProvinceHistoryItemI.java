@@ -59,4 +59,8 @@ public interface ProvinceHistoryItemI {
     ProvinceRevolt getRevolt();
 
     List<Building> getBuildings();
+
+    List<Building> getRemoveBuildings();
+
+    List<Building> getCumulatedBuildings();
 }

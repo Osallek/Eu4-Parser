@@ -92,7 +92,7 @@ public class FileNode implements Comparable<FileNode> {
 
     @Override
     public int compareTo(FileNode o) {
-        return Comparator.comparing(FileNode::getRelativePath).compare(this, o);
+        return Comparator.comparing(Path::toFile).compare(this.relativePath, o.relativePath);
     }
 
     @Override

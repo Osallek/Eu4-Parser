@@ -1,9 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.eu4parser.model.Power;
-import fr.osallek.eu4parser.model.save.country.Heir;
-import fr.osallek.eu4parser.model.save.country.Monarch;
-import fr.osallek.eu4parser.model.save.country.Queen;
 
 import java.util.List;
 
@@ -39,9 +36,11 @@ public interface CountryHistoryItemI {
 
     Double getAddArmyProfessionalism();
 
-    List<Culture> getAddAcceptedCultures();
+    List<String> getAddAcceptedCultures();
 
-    List<Culture> getRemoveAcceptedCultures();
+    List<String> getRemoveAcceptedCultures();
+
+    List<String> getCumulatedAcceptedCultures();
 
     List<Country> getHistoricalFriends();
 
@@ -67,9 +66,15 @@ public interface CountryHistoryItemI {
 
     List<String> getSetCountryFlag();
 
+    List<String> getClearCountryFlag();
+
+    List<String> getCumulatedCountryFlags();
+
     Heir getHeir();
 
     Monarch getMonarch();
 
     Queen getQueen();
+
+    List<Leader> getLeaders();
 }

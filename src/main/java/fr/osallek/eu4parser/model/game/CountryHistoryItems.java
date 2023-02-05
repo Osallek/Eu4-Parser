@@ -1,12 +1,10 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.eu4parser.model.Power;
-import fr.osallek.eu4parser.model.save.country.Heir;
-import fr.osallek.eu4parser.model.save.country.Monarch;
-import fr.osallek.eu4parser.model.save.country.Queen;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,17 +92,22 @@ public class CountryHistoryItems implements CountryHistoryItemI {
     }
 
     @Override
-    public List<Culture> getAddAcceptedCultures() {
+    public List<String> getAddAcceptedCultures() {
         return this.items.stream().map(CountryHistoryItemI::getAddAcceptedCultures).filter(CollectionUtils::isNotEmpty).findFirst().orElse(new ArrayList<>());
     }
 
     @Override
-    public List<Culture> getRemoveAcceptedCultures() {
+    public List<String> getRemoveAcceptedCultures() {
         return this.items.stream()
                          .map(CountryHistoryItemI::getRemoveAcceptedCultures)
                          .filter(CollectionUtils::isNotEmpty)
                          .findFirst()
                          .orElse(new ArrayList<>());
+    }
+
+    @Override
+    public List<String> getCumulatedAcceptedCultures() {
+        return this.items.stream().map(CountryHistoryItemI::getCumulatedAcceptedCultures).flatMap(Collection::stream).distinct().toList();
     }
 
     @Override
@@ -172,6 +175,16 @@ public class CountryHistoryItems implements CountryHistoryItemI {
     }
 
     @Override
+    public List<String> getClearCountryFlag() {
+        return this.items.stream().map(CountryHistoryItemI::getClearCountryFlag).findFirst().orElse(new ArrayList<>());
+    }
+
+    @Override
+    public List<String> getCumulatedCountryFlags() {
+        return this.items.stream().map(CountryHistoryItemI::getCumulatedCountryFlags).flatMap(Collection::stream).distinct().toList();
+    }
+
+    @Override
     public Heir getHeir() {
         return this.items.stream().map(CountryHistoryItemI::getHeir).filter(Objects::nonNull).findFirst().orElse(null);
     }
@@ -184,5 +197,10 @@ public class CountryHistoryItems implements CountryHistoryItemI {
     @Override
     public Queen getQueen() {
         return this.items.stream().map(CountryHistoryItemI::getQueen).filter(Objects::nonNull).findFirst().orElse(null);
+    }
+
+    @Override
+    public List<Leader> getLeaders() {
+        return this.items.stream().map(CountryHistoryItemI::getLeaders).flatMap(Collection::stream).distinct().toList();
     }
 }
