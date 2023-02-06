@@ -1,13 +1,11 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.ConditionsUtils;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
@@ -17,9 +15,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class ConditionAnd extends ConditionAbstract {
-
-    protected List<? extends ConditionAbstract> scopes;
-
+    
     protected BooleanSupplier anyMatch;
 
     protected UnaryOperator<Boolean> converter;
@@ -33,22 +29,9 @@ public class ConditionAnd extends ConditionAbstract {
     }
 
     public ConditionAnd(ClausewitzItem item, String... ignore) {
-        super(s -> true);
+        super(s -> true, item, ignore);
         this.anyMatch = () -> false;
         this.converter = Boolean::booleanValue;
-        List<String> list = Arrays.asList(ignore);
-
-        this.name = item.getName();
-        this.conditions = item.getVariables()
-                              .stream()
-                              .filter(variable -> CollectionUtils.isEmpty(list) || !list.contains(variable.getName()))
-                              .collect(Collectors.groupingBy(variable -> variable.getName().toLowerCase(),
-                                                             Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-        this.scopes = item.getChildren()
-                          .stream()
-                          .filter(child -> CollectionUtils.isEmpty(list) || !list.contains(child.getName()))
-                          .map(ConditionAnd::new)
-                          .toList();
     }
 
     public ConditionAnd(ConditionAbstract other) {

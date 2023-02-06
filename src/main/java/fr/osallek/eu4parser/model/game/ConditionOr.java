@@ -1,16 +1,13 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.ConditionsUtils;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
-import java.util.List;
-
 public class ConditionOr extends ConditionAbstract {
-
-    protected List<? extends ConditionAbstract> scopes;
 
     public ConditionOr(ConditionAbstract other) {
         super(other.filter);
@@ -19,9 +16,8 @@ public class ConditionOr extends ConditionAbstract {
         this.scopes = other.getScopes();
     }
 
-    @Override
-    public List<? extends ConditionAbstract> getScopes() {
-        return this.scopes;
+    public ConditionOr(ClausewitzItem item, String... ignore) {
+        super(s -> true, item, ignore);
     }
 
     public boolean apply(SaveCountry root, SaveCountry from) {

@@ -1,15 +1,19 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public abstract class ConditionAbstract {
 
@@ -19,8 +23,31 @@ public abstract class ConditionAbstract {
 
     protected Predicate<String> filter;
 
+    protected List<? extends ConditionAbstract> scopes;
+
     protected ConditionAbstract(Predicate<String> filter) {
         this.filter = filter;
+    }
+
+    protected ConditionAbstract(Predicate<String> filter, ClausewitzItem item, String... ignore) {
+        this(filter);
+        List<String> list = Arrays.asList(ignore);
+
+        this.name = item.getName();
+        this.conditions = item.getVariables()
+                              .stream()
+                              .filter(variable -> CollectionUtils.isEmpty(list) || !list.contains(variable.getName()))
+                              .collect(Collectors.groupingBy(variable -> variable.getName().toLowerCase(),
+                                                             Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.scopes = item.getChildren()
+                          .stream()
+                          .filter(child -> CollectionUtils.isEmpty(list) || !list.contains(child.getName()))
+                          .map(child -> switch (child.getName().toLowerCase()) {
+                              case "not" -> new ConditionNot(child);
+                              case "or" -> new ConditionOr(child);
+                              default -> new ConditionAnd(child);
+                          })
+                          .toList();
     }
 
     public ConditionTagOnly tagOnly() {
@@ -63,7 +90,9 @@ public abstract class ConditionAbstract {
         return (this.conditions != null && this.conditions.containsKey(condition.toLowerCase())) ? this.conditions.get(condition.toLowerCase()).get(0) : null;
     }
 
-    public abstract List<? extends ConditionAbstract> getScopes();
+    public List<? extends ConditionAbstract> getScopes() {
+        return scopes;
+    }
 
     public List<? extends ConditionAbstract> getScopes(String name) {
         return getScopes() == null ? null : getScopes().stream().filter(condition -> name.equals(condition.getName())).toList();
