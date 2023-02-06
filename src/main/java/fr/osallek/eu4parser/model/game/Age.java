@@ -45,9 +45,9 @@ public class Age {
         }
     }
 
-    public Condition getCanStart() {
+    public ConditionAnd getCanStart() {
         ClausewitzItem child = item.getChild("can_start");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public Double getPapacy() {

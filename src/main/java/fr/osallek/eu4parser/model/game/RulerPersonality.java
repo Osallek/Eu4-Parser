@@ -26,12 +26,12 @@ public class RulerPersonality {
         this.item.setName(name);
     }
 
-    public Condition getRulerAllow() {
+    public ConditionAnd getRulerAllow() {
         ClausewitzItem child = item.getChild("ruler_allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setRulerAllow(Condition condition) {
+    public void setRulerAllow(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("ruler_allow");
             return;
@@ -41,12 +41,12 @@ public class RulerPersonality {
         //Todo Condition => item
     }
 
-    public Condition getHeirAllow() {
+    public ConditionAnd getHeirAllow() {
         ClausewitzItem child = item.getChild("heir_allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setHeirAllow(Condition condition) {
+    public void setHeirAllow(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("heir_allow");
             return;
@@ -56,12 +56,12 @@ public class RulerPersonality {
         //Todo Condition => item
     }
 
-    public Condition getConsortAllow() {
+    public ConditionAnd getConsortAllow() {
         ClausewitzItem child = item.getChild("consort_allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setConsortAllow(Condition condition) {
+    public void setConsortAllow(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("consort_allow");
             return;
@@ -71,12 +71,12 @@ public class RulerPersonality {
         //Todo Condition => item
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = item.getChild("allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setAllow(Condition condition) {
+    public void setAllow(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("allow");
             return;

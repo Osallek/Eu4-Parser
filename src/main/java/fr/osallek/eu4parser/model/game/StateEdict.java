@@ -22,12 +22,12 @@ public class StateEdict {
         this.item.setName(name);
     }
 
-    public Condition getPotential() {
+    public ConditionAnd getPotential() {
         ClausewitzItem child = item.getChild("potential");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setPotential(Condition condition) {
+    public void setPotential(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("potential");
             return;
@@ -37,12 +37,12 @@ public class StateEdict {
         //Todo Condition => item
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = item.getChild("allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setAllow(Condition condition) {
+    public void setAllow(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("allow");
             return;

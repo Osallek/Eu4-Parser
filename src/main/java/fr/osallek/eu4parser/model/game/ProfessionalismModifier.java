@@ -13,12 +13,12 @@ public class ProfessionalismModifier implements Comparable<ProfessionalismModifi
         this.item = item;
     }
 
-    public Condition getTrigger() {
+    public ConditionAnd getTrigger() {
         ClausewitzItem child = item.getChild("trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setTrigger(Condition condition) {
+    public void setTrigger(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("trigger");
             return;

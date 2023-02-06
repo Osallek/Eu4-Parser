@@ -2434,13 +2434,12 @@ public class Game {
     }
 
     public HreEmperor getHreEmperorAt(LocalDate date) {
-        return this.getHreEmperors()
-                   .entrySet()
-                   .stream()
-                   .filter(e -> e.getKey().isBefore(date) || e.getKey().equals(date))
-                   .collect(Collectors.toCollection(TreeSet::new))
-                   .last()
-                   .getValue();
+        return getHreEmperors().entrySet()
+                               .stream()
+                               .filter(e -> e.getKey().isBefore(date) || e.getKey().equals(date))
+                               .collect(Collectors.toCollection(() -> new TreeSet<>(Map.Entry.comparingByKey())))
+                               .last()
+                               .getValue();
     }
 
     public Map<LocalDate, CelestialEmperor> getCelestialEmperors() {
@@ -2452,7 +2451,7 @@ public class Game {
                    .entrySet()
                    .stream()
                    .filter(e -> e.getKey().isBefore(date) || e.getKey().equals(date))
-                   .collect(Collectors.toCollection(TreeSet::new))
+                   .collect(Collectors.toCollection(() -> new TreeSet<>(Map.Entry.comparingByKey())))
                    .last()
                    .getValue();
     }

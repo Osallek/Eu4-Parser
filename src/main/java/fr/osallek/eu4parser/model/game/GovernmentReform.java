@@ -26,135 +26,135 @@ public class GovernmentReform {
 
     private List<String> governmentAbilities;
 
-    private Pair<String, Condition> icon;
+    private Pair<String, ConditionAnd> icon;
 
-    private Pair<String, Condition> legacyEquivalent;
+    private Pair<String, ConditionAnd> legacyEquivalent;
 
-    private Pair<Boolean, Condition> basicReform;
+    private Pair<Boolean, ConditionAnd> basicReform;
 
-    private Pair<Boolean, Condition> legacyGovernment;
+    private Pair<Boolean, ConditionAnd> legacyGovernment;
 
-    private Pair<Boolean, Condition> lockLevelWhenSelected;
+    private Pair<Boolean, ConditionAnd> lockLevelWhenSelected;
 
-    private Pair<Boolean, Condition> validForNewCountry;
+    private Pair<Boolean, ConditionAnd> validForNewCountry;
 
-    private Pair<Boolean, Condition> allowConvert;
+    private Pair<Boolean, ConditionAnd> allowConvert;
 
-    private Pair<Boolean, Condition> rulersCanBeGenerals;
+    private Pair<Boolean, ConditionAnd> rulersCanBeGenerals;
 
-    private Pair<Boolean, Condition> heirsCanBeGenerals;
+    private Pair<Boolean, ConditionAnd> heirsCanBeGenerals;
 
-    private Pair<Integer, Condition> fixedRank;
+    private Pair<Integer, ConditionAnd> fixedRank;
 
-    private Pair<Boolean, Condition> republicanName;
+    private Pair<Boolean, ConditionAnd> republicanName;
 
-    private Pair<Boolean, Condition> militarisedSociety;
+    private Pair<Boolean, ConditionAnd> militarisedSociety;
 
-    private Pair<Boolean, Condition> claimStates;
+    private Pair<Boolean, ConditionAnd> claimStates;
 
-    private Pair<Boolean, Condition> religion;
+    private Pair<Boolean, ConditionAnd> religion;
 
-    private Pair<Boolean, Condition> republic;
+    private Pair<Boolean, ConditionAnd> republic;
 
-    private Pair<Boolean, Condition> dictatorship;
+    private Pair<Boolean, ConditionAnd> dictatorship;
 
-    private Pair<Boolean, Condition> isElective;
+    private Pair<Boolean, ConditionAnd> isElective;
 
-    private Pair<Boolean, Condition> queen;
+    private Pair<Boolean, ConditionAnd> queen;
 
-    private Pair<Boolean, Condition> heir;
+    private Pair<Boolean, ConditionAnd> heir;
 
-    private Pair<Boolean, Condition> hasParliament;
+    private Pair<Boolean, ConditionAnd> hasParliament;
 
-    private Pair<Boolean, Condition> hasDevotion;
+    private Pair<Boolean, ConditionAnd> hasDevotion;
 
-    private Pair<Boolean, Condition> hasMeritocracy;
+    private Pair<Boolean, ConditionAnd> hasMeritocracy;
 
-    private Pair<Boolean, Condition> allowForceTributary;
+    private Pair<Boolean, ConditionAnd> allowForceTributary;
 
-    private Pair<Integer, Condition> duration;
+    private Pair<Integer, ConditionAnd> duration;
 
-    private Pair<Boolean, Condition> electionOnDeath;
+    private Pair<Boolean, ConditionAnd> electionOnDeath;
 
-    private Pair<Boolean, Condition> monarchy;
+    private Pair<Boolean, ConditionAnd> monarchy;
 
-    private Pair<Boolean, Condition> tribal;
+    private Pair<Boolean, ConditionAnd> tribal;
 
-    private Pair<Integer, Condition> differentReligionAcceptance;
+    private Pair<Integer, ConditionAnd> differentReligionAcceptance;
 
-    private Pair<Integer, Condition> differentReligionGroupAcceptance;
+    private Pair<Integer, ConditionAnd> differentReligionGroupAcceptance;
 
-    private Pair<Boolean, Condition> boostIncome;
+    private Pair<Boolean, ConditionAnd> boostIncome;
 
-    private Pair<Boolean, Condition> monastic;
+    private Pair<Boolean, ConditionAnd> monastic;
 
-    private Pair<Boolean, Condition> canUseTradePost;
+    private Pair<Boolean, ConditionAnd> canUseTradePost;
 
-    private Pair<Boolean, Condition> nativeMechanic;
+    private Pair<Boolean, ConditionAnd> nativeMechanic;
 
-    private Pair<Boolean, Condition> canFormTradeLeague;
+    private Pair<Boolean, ConditionAnd> canFormTradeLeague;
 
-    private Pair<Boolean, Condition> freeCity;
+    private Pair<Boolean, ConditionAnd> freeCity;
 
-    private Pair<Boolean, Condition> isTradingCity;
+    private Pair<Boolean, ConditionAnd> isTradingCity;
 
-    private Pair<String, Condition> tradeCityReform;
+    private Pair<String, ConditionAnd> tradeCityReform;
 
-    private Pair<Boolean, Condition> maintainDynasty;
+    private Pair<Boolean, ConditionAnd> maintainDynasty;
 
-    private Pair<Boolean, Condition> allowMigration;
+    private Pair<Boolean, ConditionAnd> allowMigration;
 
-    private Pair<Integer, Condition> nationDesignerCost;
+    private Pair<Integer, ConditionAnd> nationDesignerCost;
 
-    private Pair<Boolean, Condition> papacy;
+    private Pair<Boolean, ConditionAnd> papacy;
 
-    private Pair<Boolean, Condition> hasHarem;
+    private Pair<Boolean, ConditionAnd> hasHarem;
 
-    private Pair<Boolean, Condition> hasPashas;
+    private Pair<Boolean, ConditionAnd> hasPashas;
 
-    private Pair<Boolean, Condition> allowVassalWar;
+    private Pair<Boolean, ConditionAnd> allowVassalWar;
 
-    private Pair<Boolean, Condition> allowVassalAlliance;
+    private Pair<Boolean, ConditionAnd> allowVassalAlliance;
 
-    private Pair<Double, Condition> minAutonomy;
+    private Pair<Double, ConditionAnd> minAutonomy;
 
-    private Pair<Integer, Condition> factionsFrame;
+    private Pair<Integer, ConditionAnd> factionsFrame;
 
-    private Pair<List<String>, Condition> factions;
+    private Pair<List<String>, ConditionAnd> factions;
 
-    private Pair<Boolean, Condition> foreignSlaveRulers;
+    private Pair<Boolean, ConditionAnd> foreignSlaveRulers;
 
-    private Pair<Boolean, Condition> royalMarriage;
+    private Pair<Boolean, ConditionAnd> royalMarriage;
 
-    private Pair<Boolean, Condition> nomad;
+    private Pair<Boolean, ConditionAnd> nomad;
 
-    private Pair<Map<String, Modifiers>, Condition> assimilationCultures;
+    private Pair<Map<String, Modifiers>, ConditionAnd> assimilationCultures;
 
-    private Pair<List<Modifiers>, Condition> statesGeneralMechanic;
+    private Pair<List<Modifiers>, ConditionAnd> statesGeneralMechanic;
 
-    private Pair<Boolean, Condition> validForNationDesigner;
+    private Pair<Boolean, ConditionAnd> validForNationDesigner;
 
-    private Pair<Boolean, Condition> allowNormalConversion;
+    private Pair<Boolean, ConditionAnd> allowNormalConversion;
 
-    private Pair<Double, Condition> startTerritoryToEstates;
+    private Pair<Double, ConditionAnd> startTerritoryToEstates;
 
-    private Pair<Boolean, Condition> hasTermElection;
+    private Pair<Boolean, ConditionAnd> hasTermElection;
 
-    private Pair<Boolean, Condition> forceAdmiralLeader;
+    private Pair<Boolean, ConditionAnd> forceAdmiralLeader;
 
-    private Pair<Boolean, Condition> admiralsBecomeRulers;
+    private Pair<Boolean, ConditionAnd> admiralsBecomeRulers;
 
-    private Pair<Boolean, Condition> generalsBecomeRulers;
+    private Pair<Boolean, ConditionAnd> generalsBecomeRulers;
 
-    private Pair<Boolean, Condition> allowBanners;
+    private Pair<Boolean, ConditionAnd> allowBanners;
 
-    private Pair<Boolean, Condition> usesRevolutionaryZeal;
+    private Pair<Boolean, ConditionAnd> usesRevolutionaryZeal;
 
-    private Pair<Boolean, Condition> revolutionary;
+    private Pair<Boolean, ConditionAnd> revolutionary;
 
-    private Pair<Boolean, Condition> revolutionaryClientState;
+    private Pair<Boolean, ConditionAnd> revolutionaryClientState;
 
-    private Pair<List<TradeGood>, Condition> disallowedTradeGoods;
+    private Pair<List<TradeGood>, ConditionAnd> disallowedTradeGoods;
 
     public GovernmentReform(ClausewitzItem item, Game game, GovernmentReform defaultGovernmentReform) {
         this(defaultGovernmentReform);
@@ -249,7 +249,7 @@ public class GovernmentReform {
 
     private void readAttributes(ClausewitzItem item) {
         ClausewitzItem child = item.getChild("allow");
-        Condition condition = child == null ? null : new Condition(item.getChild("allow"));
+        ConditionAnd condition = child == null ? null : new ConditionAnd(item.getChild("allow"));
 
         Boolean aBoolean;
         Integer integer;
@@ -359,20 +359,20 @@ public class GovernmentReform {
         return customAttributes;
     }
 
-    public Condition getPotential() {
+    public ConditionAnd getPotential() {
         ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Pair<Boolean, Condition> isBasicReform() {
+    public Pair<Boolean, ConditionAnd> isBasicReform() {
         return basicReform;
     }
 
-    public Pair<Boolean, Condition> isLegacyGovernment() {
+    public Pair<Boolean, ConditionAnd> isLegacyGovernment() {
         return legacyGovernment;
     }
 
-    public Pair<String, Condition> getIcon() {
+    public Pair<String, ConditionAnd> getIcon() {
         return icon;
     }
 
@@ -380,39 +380,39 @@ public class GovernmentReform {
         return this.game.getSpriteTypeImageFile("government_reform_" + ClausewitzUtils.removeQuotes(this.icon.getKey()));
     }
 
-    public Pair<GovernmentReform, Condition> getLegacyEquivalent() {
+    public Pair<GovernmentReform, ConditionAnd> getLegacyEquivalent() {
         return Pair.of(this.game.getGovernmentReform(this.legacyEquivalent.getKey()), this.legacyEquivalent.getRight());
     }
 
-    public Pair<Boolean, Condition> isLockLevelWhenSelected() {
+    public Pair<Boolean, ConditionAnd> isLockLevelWhenSelected() {
         return lockLevelWhenSelected;
     }
 
-    public Pair<Boolean, Condition> isValidForNewCountry() {
+    public Pair<Boolean, ConditionAnd> isValidForNewCountry() {
         return validForNewCountry;
     }
 
-    public Pair<Boolean, Condition> isAllowConvert() {
+    public Pair<Boolean, ConditionAnd> isAllowConvert() {
         return allowConvert;
     }
 
-    public Pair<Boolean, Condition> isRulersCanBeGenerals() {
+    public Pair<Boolean, ConditionAnd> isRulersCanBeGenerals() {
         return rulersCanBeGenerals;
     }
 
-    public Pair<Boolean, Condition> isHeirsCanBeGenerals() {
+    public Pair<Boolean, ConditionAnd> isHeirsCanBeGenerals() {
         return heirsCanBeGenerals;
     }
 
-    public Pair<Integer, Condition> getFixedRank() {
+    public Pair<Integer, ConditionAnd> getFixedRank() {
         return fixedRank;
     }
 
-    public Pair<Boolean, Condition> isRepublicanName() {
+    public Pair<Boolean, ConditionAnd> isRepublicanName() {
         return republicanName;
     }
 
-    public Pair<Boolean, Condition> isMilitarisedSociety() {
+    public Pair<Boolean, ConditionAnd> isMilitarisedSociety() {
         return militarisedSociety;
     }
 
@@ -420,220 +420,220 @@ public class GovernmentReform {
         return governmentAbilities;
     }
 
-    public Pair<Boolean, Condition> isClaimStates() {
+    public Pair<Boolean, ConditionAnd> isClaimStates() {
         return claimStates;
     }
 
-    public Pair<Boolean, Condition> isReligion() {
+    public Pair<Boolean, ConditionAnd> isReligion() {
         return religion;
     }
 
-    public Pair<Boolean, Condition> isRepublic() {
+    public Pair<Boolean, ConditionAnd> isRepublic() {
         return republic;
     }
 
-    public Pair<Boolean, Condition> isDictatorship() {
+    public Pair<Boolean, ConditionAnd> isDictatorship() {
         return dictatorship;
     }
 
-    public Pair<Boolean, Condition> isElective() {
+    public Pair<Boolean, ConditionAnd> isElective() {
         return isElective;
     }
 
-    public Pair<Boolean, Condition> isQueen() {
+    public Pair<Boolean, ConditionAnd> isQueen() {
         return queen;
     }
 
-    public Pair<Boolean, Condition> isHeir() {
+    public Pair<Boolean, ConditionAnd> isHeir() {
         return heir;
     }
 
-    public Pair<Boolean, Condition> isHasParliament() {
+    public Pair<Boolean, ConditionAnd> isHasParliament() {
         return hasParliament;
     }
 
-    public Pair<Boolean, Condition> isHasDevotion() {
+    public Pair<Boolean, ConditionAnd> isHasDevotion() {
         return hasDevotion;
     }
 
-    public Pair<Boolean, Condition> isHasMeritocracy() {
+    public Pair<Boolean, ConditionAnd> isHasMeritocracy() {
         return hasMeritocracy;
     }
 
-    public Pair<Boolean, Condition> isAllowForceTributary() {
+    public Pair<Boolean, ConditionAnd> isAllowForceTributary() {
         return allowForceTributary;
     }
 
-    public Pair<Integer, Condition> getDuration() {
+    public Pair<Integer, ConditionAnd> getDuration() {
         return duration;
     }
 
-    public Pair<Boolean, Condition> isElectionOnDeath() {
+    public Pair<Boolean, ConditionAnd> isElectionOnDeath() {
         return electionOnDeath;
     }
 
-    public Pair<Boolean, Condition> isMonarchy() {
+    public Pair<Boolean, ConditionAnd> isMonarchy() {
         return monarchy;
     }
 
-    public Pair<Boolean, Condition> isTribal() {
+    public Pair<Boolean, ConditionAnd> isTribal() {
         return tribal;
     }
 
-    public Pair<Integer, Condition> getDifferentReligionAcceptance() {
+    public Pair<Integer, ConditionAnd> getDifferentReligionAcceptance() {
         return differentReligionAcceptance;
     }
 
-    public Pair<Integer, Condition> getDifferentReligionGroupAcceptance() {
+    public Pair<Integer, ConditionAnd> getDifferentReligionGroupAcceptance() {
         return differentReligionGroupAcceptance;
     }
 
-    public Pair<Boolean, Condition> isBoostIncome() {
+    public Pair<Boolean, ConditionAnd> isBoostIncome() {
         return boostIncome;
     }
 
-    public Pair<Boolean, Condition> isMonastic() {
+    public Pair<Boolean, ConditionAnd> isMonastic() {
         return monastic;
     }
 
-    public Pair<Boolean, Condition> isCanUseTradePost() {
+    public Pair<Boolean, ConditionAnd> isCanUseTradePost() {
         return canUseTradePost;
     }
 
-    public Pair<Boolean, Condition> isNativeMechanic() {
+    public Pair<Boolean, ConditionAnd> isNativeMechanic() {
         return nativeMechanic;
     }
 
-    public Pair<Boolean, Condition> isCanFormTradeLeague() {
+    public Pair<Boolean, ConditionAnd> isCanFormTradeLeague() {
         return canFormTradeLeague;
     }
 
-    public Pair<Boolean, Condition> isFreeCity() {
+    public Pair<Boolean, ConditionAnd> isFreeCity() {
         return freeCity;
     }
 
-    public Pair<Boolean, Condition> isTradingCity() {
+    public Pair<Boolean, ConditionAnd> isTradingCity() {
         return isTradingCity;
     }
 
-    public Pair<String, Condition> getTradeCityReform() {
+    public Pair<String, ConditionAnd> getTradeCityReform() {
         return tradeCityReform;
     }
 
-    public Pair<Boolean, Condition> isMaintainDynasty() {
+    public Pair<Boolean, ConditionAnd> isMaintainDynasty() {
         return maintainDynasty;
     }
 
-    public Pair<Boolean, Condition> isAllowMigration() {
+    public Pair<Boolean, ConditionAnd> isAllowMigration() {
         return allowMigration;
     }
 
-    public Condition getNationDesignerTrigger() {
+    public ConditionAnd getNationDesignerTrigger() {
         ClausewitzItem child = this.item.getChild("nation_designer_trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Pair<Integer, Condition> getNationDesignerCost() {
+    public Pair<Integer, ConditionAnd> getNationDesignerCost() {
         return nationDesignerCost;
     }
 
-    public Pair<Boolean, Condition> isPapacy() {
+    public Pair<Boolean, ConditionAnd> isPapacy() {
         return papacy;
     }
 
-    public Pair<Boolean, Condition> isHasHarem() {
+    public Pair<Boolean, ConditionAnd> isHasHarem() {
         return hasHarem;
     }
 
-    public Pair<Boolean, Condition> isHasPashas() {
+    public Pair<Boolean, ConditionAnd> isHasPashas() {
         return hasPashas;
     }
 
-    public Pair<Boolean, Condition> isAllowVassalWar() {
+    public Pair<Boolean, ConditionAnd> isAllowVassalWar() {
         return allowVassalWar;
     }
 
-    public Pair<Boolean, Condition> isAllowVassalAlliance() {
+    public Pair<Boolean, ConditionAnd> isAllowVassalAlliance() {
         return allowVassalAlliance;
     }
 
-    public Pair<Double, Condition> getMinAutonomy() {
+    public Pair<Double, ConditionAnd> getMinAutonomy() {
         return minAutonomy;
     }
 
-    public Pair<Integer, Condition> getFactionsFrame() {
+    public Pair<Integer, ConditionAnd> getFactionsFrame() {
         return factionsFrame;
     }
 
-    public Pair<List<String>, Condition> getFactions() {
+    public Pair<List<String>, ConditionAnd> getFactions() {
         return factions;
     }
 
-    public Pair<Boolean, Condition> isForeignSlaveRulers() {
+    public Pair<Boolean, ConditionAnd> isForeignSlaveRulers() {
         return foreignSlaveRulers;
     }
 
-    public Pair<Boolean, Condition> isRoyalMarriage() {
+    public Pair<Boolean, ConditionAnd> isRoyalMarriage() {
         return royalMarriage;
     }
 
-    public Pair<Boolean, Condition> isNomad() {
+    public Pair<Boolean, ConditionAnd> isNomad() {
         return nomad;
     }
 
-    public Pair<Map<String, Modifiers>, Condition> getAssimilationCultures() {
+    public Pair<Map<String, Modifiers>, ConditionAnd> getAssimilationCultures() {
         return assimilationCultures;
     }
 
-    public Pair<List<Modifiers>, Condition> getStatesGeneralMechanic() {
+    public Pair<List<Modifiers>, ConditionAnd> getStatesGeneralMechanic() {
         return statesGeneralMechanic;
     }
 
-    public Pair<Boolean, Condition> isValidForNationDesigner() {
+    public Pair<Boolean, ConditionAnd> isValidForNationDesigner() {
         return validForNationDesigner;
     }
 
-    public Pair<Boolean, Condition> isAllowNormalConversion() {
+    public Pair<Boolean, ConditionAnd> isAllowNormalConversion() {
         return allowNormalConversion;
     }
 
-    public Pair<Double, Condition> getStartTerritoryToEstates() {
+    public Pair<Double, ConditionAnd> getStartTerritoryToEstates() {
         return startTerritoryToEstates;
     }
 
-    public Pair<Boolean, Condition> isHasTermElection() {
+    public Pair<Boolean, ConditionAnd> isHasTermElection() {
         return hasTermElection;
     }
 
-    public Pair<Boolean, Condition> isForceAdmiralLeader() {
+    public Pair<Boolean, ConditionAnd> isForceAdmiralLeader() {
         return forceAdmiralLeader;
     }
 
-    public Pair<Boolean, Condition> isAdmiralsBecomeRulers() {
+    public Pair<Boolean, ConditionAnd> isAdmiralsBecomeRulers() {
         return admiralsBecomeRulers;
     }
 
-    public Pair<Boolean, Condition> isGeneralsBecomeRulers() {
+    public Pair<Boolean, ConditionAnd> isGeneralsBecomeRulers() {
         return generalsBecomeRulers;
     }
 
-    public Pair<Boolean, Condition> isAllowBanners() {
+    public Pair<Boolean, ConditionAnd> isAllowBanners() {
         return allowBanners;
     }
 
-    public Pair<Boolean, Condition> isUsesRevolutionaryZeal() {
+    public Pair<Boolean, ConditionAnd> isUsesRevolutionaryZeal() {
         return usesRevolutionaryZeal;
     }
 
-    public Pair<Boolean, Condition> isRevolutionary() {
+    public Pair<Boolean, ConditionAnd> isRevolutionary() {
         return revolutionary;
     }
 
-    public Pair<Boolean, Condition> isRevolutionaryClientState() {
+    public Pair<Boolean, ConditionAnd> isRevolutionaryClientState() {
         return revolutionaryClientState;
     }
 
-    public Pair<List<TradeGood>, Condition> getDisallowedTradeGoods() {
+    public Pair<List<TradeGood>, ConditionAnd> getDisallowedTradeGoods() {
         return disallowedTradeGoods;
     }
 

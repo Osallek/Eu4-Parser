@@ -20,13 +20,13 @@ public class AgeObjective {
         this.item.setName(name);
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Condition getTrigger() {
-        return new Condition(this.item, "allow");
+    public ConditionAnd getTrigger() {
+        return new ConditionAnd(this.item, "allow");
     }
 
     @Override

@@ -66,14 +66,14 @@ public class TradePolicy {
         this.item.setVariable("center_of_reformation", centerOfReformation);
     }
 
-    public Condition getCanSelect() {
+    public ConditionAnd getCanSelect() {
         ClausewitzItem child = item.getChild("can_select");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Condition getCanMaintain() {
+    public ConditionAnd getCanMaintain() {
         ClausewitzItem child = item.getChild("can_maintain");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public Modifiers getTradePower() {

@@ -10,11 +10,11 @@ public class NationDesignerCost {
         this.item = item;
     }
 
-    public Condition getTrigger() {
-        return this.item.getChild("trigger") == null ? null : new Condition(item.getChild("trigger"));
+    public ConditionAnd getTrigger() {
+        return this.item.getChild("trigger") == null ? null : new ConditionAnd(item.getChild("trigger"));
     }
 
-    public void setTrigger(Condition condition) {
+    public void setTrigger(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("trigger");
             return;

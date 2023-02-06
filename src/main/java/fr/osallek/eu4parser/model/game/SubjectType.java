@@ -473,9 +473,9 @@ public class SubjectType {
         this.item.setName(name);
     }
 
-    public Condition isPotentialOverlord() {
+    public ConditionAnd isPotentialOverlord() {
         ClausewitzItem child = this.item.getChild("is_potential_overlord");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public String getSprite() {

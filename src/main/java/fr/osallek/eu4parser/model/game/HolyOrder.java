@@ -42,9 +42,9 @@ public class HolyOrder {
         this.item.setVariable("cost_type", category.name().toLowerCase() + "_power");
     }
 
-    public Condition getTrigger() {
+    public ConditionAnd getTrigger() {
         ClausewitzItem child = item.getChild("trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public Modifiers getModifiers() {

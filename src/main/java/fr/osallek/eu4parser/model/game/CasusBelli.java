@@ -167,9 +167,9 @@ public class CasusBelli {
         }
     }
 
-    public Condition getPrerequisites() {
+    public ConditionAnd getPrerequisites() {
         ClausewitzItem child = this.item.getChild("prerequisites");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public List<String> getAttackerDisabledPo() {

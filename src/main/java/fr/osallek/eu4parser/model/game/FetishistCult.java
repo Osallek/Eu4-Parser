@@ -24,13 +24,13 @@ public class FetishistCult {
         return new Modifiers(item.getVarsNot("sprite"));
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = this.item.getChild("allow");
 
         if (child == null) {
             return null;
         } else {
-            Condition allow = new Condition(child);
+            ConditionAnd allow = new ConditionAnd(child);
             allow.removeCondition("has_unlocked_cult", this.getName()); //Prevent endless recursive
 
             return allow;

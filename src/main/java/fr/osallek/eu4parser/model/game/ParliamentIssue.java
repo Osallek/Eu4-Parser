@@ -24,9 +24,9 @@ public class ParliamentIssue extends GameModifier {
         this.item.setVariable("category", category.name());
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     @Override

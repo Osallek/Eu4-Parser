@@ -80,19 +80,19 @@ public class EstatePrivilege {
         }
     }
 
-    public Condition getIsValid() {
+    public ConditionAnd getIsValid() {
         ClausewitzItem child = this.item.getChild("is_valid");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Condition getCanSelect() {
+    public ConditionAnd getCanSelect() {
         ClausewitzItem child = this.item.getChild("can_select");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Condition getCanRevoke() {
+    public ConditionAnd getCanRevoke() {
         ClausewitzItem child = this.item.getChild("can_revoke");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public Modifiers getModifiers() {

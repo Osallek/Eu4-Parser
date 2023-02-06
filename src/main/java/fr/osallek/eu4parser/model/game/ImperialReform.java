@@ -25,18 +25,18 @@ public class ImperialReform implements Comparable<ImperialReform> {
         this.item.setName(name);
     }
 
-    public Condition getPotential() {
+    public ConditionAnd getPotential() {
         ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public List<String> dlcRequired() {
-        Condition potential = getPotential();
+        ConditionAnd potential = getPotential();
         return potential == null ? null : potential.getConditions().get("has_dlc");
     }
 
     public List<String> dlcRequiredNot() {
-        Condition potential = getPotential();
+        ConditionAnd potential = getPotential();
 
         if (potential == null) {
             return null;

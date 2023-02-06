@@ -22,12 +22,12 @@ public class ReligiousReforms {
         this.item.setName(name);
     }
 
-    public Condition getCanBuyIdea() {
+    public ConditionAnd getCanBuyIdea() {
         ClausewitzItem child = item.getChild("can_buy_idea");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setCanBuyIdea(Condition condition) {
+    public void setCanBuyIdea(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("can_buy_idea");
             return;
@@ -37,12 +37,12 @@ public class ReligiousReforms {
         //Todo Condition => item
     }
 
-    public Condition getTrigger() {
+    public ConditionAnd getTrigger() {
         ClausewitzItem child = item.getChild("trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public void setTrigger(Condition condition) {
+    public void setTrigger(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("trigger");
             return;

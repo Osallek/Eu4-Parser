@@ -20,9 +20,9 @@ public class Names {
         this.item.setVariable("name", name);
     }
 
-    public Condition getTrigger() {
+    public ConditionAnd getTrigger() {
         ClausewitzItem child = item.getChild("trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     @Override

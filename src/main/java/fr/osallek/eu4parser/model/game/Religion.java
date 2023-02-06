@@ -428,9 +428,9 @@ public class Religion {
         return new Modifiers(item.getChild("country_as_secondary"));
     }
 
-    public Condition getWillGetCenter() {
+    public ConditionAnd getWillGetCenter() {
         ClausewitzItem child = this.item.getChild("will_get_center");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public String getHarmonizedModifier() {

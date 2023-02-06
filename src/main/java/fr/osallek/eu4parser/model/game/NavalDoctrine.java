@@ -32,9 +32,9 @@ public class NavalDoctrine {
         }
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = this.item.getChild("can_select");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public Modifiers getModifiers() {

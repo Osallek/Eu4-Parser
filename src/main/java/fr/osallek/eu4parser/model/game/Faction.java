@@ -32,8 +32,8 @@ public class Faction {
         this.item.setVariable("monarch_power", category.name());
     }
 
-    public Condition getTrigger() {
-        return new Condition(this.item, "monarch_power", "modifier", "triggered_faction_name");
+    public ConditionAnd getTrigger() {
+        return new ConditionAnd(this.item, "monarch_power", "modifier", "triggered_faction_name");
     }
 
     public List<Names> getNames() {

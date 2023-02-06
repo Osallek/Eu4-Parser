@@ -22,9 +22,9 @@ public class AgeAbility {
         this.item.setName(name);
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = item.getChild("allow");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public Modifiers getModifiers() {

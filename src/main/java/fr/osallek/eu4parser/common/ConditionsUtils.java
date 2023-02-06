@@ -5,7 +5,8 @@ import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.UnitType;
 import fr.osallek.eu4parser.model.game.Age;
 import fr.osallek.eu4parser.model.game.Building;
-import fr.osallek.eu4parser.model.game.Condition;
+import fr.osallek.eu4parser.model.game.ConditionAbstract;
+import fr.osallek.eu4parser.model.game.ConditionAnd;
 import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.CountryHistoryItemI;
 import fr.osallek.eu4parser.model.game.Culture;
@@ -42,6 +43,7 @@ import fr.osallek.eu4parser.model.save.war.ActiveWar;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +66,8 @@ import java.util.stream.Collectors;
 public class ConditionsUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConditionsUtils.class.getName());
+
+    public static final ConditionAnd ALWAYS_CONDITION = new ConditionAnd(Pair.of("always", "yes"));
 
     private ConditionsUtils() {}
 
@@ -1718,7 +1722,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getMonarch() == null ||
                                                          (country.getMonarch().getCountry() != null && !country.equals(country.getMonarch().getCountry())));
             case "ruler_religion":
-                return country.getMonarch() == null || rawValueToReligion(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getReligion().getName());
+                return country.getMonarch() == null && rawValueToReligion(rawValue, root, from).equalsIgnoreCase(country.getMonarch().getReligion().getName());
             case "sailors":
                 return NumbersUtils.doubleOrDefault(country.getSailors()) >= NumbersUtils.toDouble(value);
             case "sailors_percentage":
@@ -2197,7 +2201,11 @@ public class ConditionsUtils {
             case "ironman":
                 return false;
             case "is_at_war":
-                break; //Todo
+                return "yes".equalsIgnoreCase(value) == country.getWarsAt(country.getGame().getStartDate()).findAny().isPresent();
+            case "is_client_nation":
+                return "yes".equalsIgnoreCase(value) == Country.CLIENT_STATE_PATTERN.matcher(country.getTag()).matches();
+            case "is_colonial_nation":
+                return "yes".equalsIgnoreCase(value) == Country.COLONY_PATTERN.matcher(country.getTag()).matches();
             case "is_core":
                 return country.getGame()
                               .getProvince(NumbersUtils.toInt(value))
@@ -2254,6 +2262,8 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == ((historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getCapital() != null
                                                          && BooleanUtils.toBoolean(historyItem.getCapital()
                                                                                               .getHistoryItemAt(country.getGame().getStartDate()).getHre()));
+            case "is_playing_custom_nation":
+                return "yes".equalsIgnoreCase(value) == Country.CUSTOM_COUNTRY_PATTERN.matcher(country.getTag()).matches();
             case "is_religion_enabled":
                 religion = country.getGame().getReligion(rawValueToReligion(rawValue, root, from));
                 return religion != null && (religion.getDate() == null || (country.getGame().getStartDate().isAfter(religion.getDate())));
@@ -2380,11 +2390,12 @@ public class ConditionsUtils {
                                 .filter(marriage -> (marriage.getFirst().equals(other) || marriage.getSecond().equals(other)))
                                 .count();
                 }
-            case "num_of_owned_and_controlled_institutions":
+            case "num_of_owned_and_controlled_institutions": //Fixme tech group seems to give institutions at start
                 return country.getGame()
                               .getInstitutions()
                               .stream()
-                              .filter(i -> i.getHistoricalStartDate().isBefore(country.getGame().getStartDate()) ||
+                              .filter(i -> i.getHistoricalStartProvince() != null)
+                              .filter(i -> i.getHistoricalStartDate() == null || i.getHistoricalStartDate().isBefore(country.getGame().getStartDate()) ||
                                            country.getGame().getStartDate().equals(i.getHistoricalStartDate()))
                               .filter(i -> country.equals(country.getGame()
                                                                  .getProvince(i.getHistoricalStartProvince())
@@ -2610,6 +2621,7 @@ public class ConditionsUtils {
                                                           !country.equals(historyItem.getMonarch().getCountry())));
             case "ruler_religion":
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getMonarch() != null &&
+                       historyItem.getMonarch().getReligion() != null &&
                        rawValueToReligion(rawValue, root, from).equalsIgnoreCase(historyItem.getMonarch().getReligion().getName());
             case "senior_union_with":
                 other = country.getGame().getCountry(value);
@@ -2716,13 +2728,19 @@ public class ConditionsUtils {
             case "war_with":
                 other = country.getGame().getCountry(value);
                 return country.getWarsAt(country.getGame().getStartDate()).anyMatch(war -> war.inOtherSideAt(country.getGame().getStartDate(), country, other));
+            case "was_tag":
+                return country.getHistoryItemAt(country.getGame().getStartDate())
+                              .getChangedTagsFrom()
+                              .stream()
+                              .map(Country::getTag)
+                              .anyMatch(value::equalsIgnoreCase);
         }
 
         LOGGER.debug("Don't know how to manage country condition: {} = {}", condition, value);
         return false;
     }
 
-    public static boolean applyScopeToCountry(SaveCountry root, SaveCountry from, Condition condition) {
+    public static boolean applyScopeToCountry(SaveCountry root, SaveCountry from, ConditionAbstract condition) {
         SaveCountry country;
         SaveProvince saveProvince;
         SubjectType subjectType;
@@ -2745,34 +2763,11 @@ public class ConditionsUtils {
 
         switch (condition.getName().toLowerCase()) {
             case "or":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .anyMatch(entry -> entry.getValue()
-                                                                                              .stream()
-                                                                                              .anyMatch(value -> applyConditionToCountry(root, root, from,
-                                                                                                                                         entry.getKey(),
-                                                                                                                                         value))))
-                       || (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToCountry(root, from, scope)));
-            case "and":
-            case "if":
-            case "hidden_trigger":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .allMatch(entry -> entry.getValue()
-                                                                                              .stream()
-                                                                                              .anyMatch(value -> applyConditionToCountry(root, root, from,
-                                                                                                                                         entry.getKey(),
-                                                                                                                                         value))))
-                       && (condition.getScopes() == null || condition.getScopes().stream().allMatch(scope -> applyScopeToCountry(root, from, scope)));
+                return condition.or().apply(root, from);
+            case "and", "if", "hidden_trigger":
+                return condition.and().apply(root, from);
             case "not":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .noneMatch(entry -> entry.getValue()
-                                                                                               .stream()
-                                                                                               .anyMatch(value -> applyConditionToCountry(root, root, from,
-                                                                                                                                          entry.getKey(),
-                                                                                                                                          value))))
-                       && (condition.getScopes() == null || condition.getScopes().stream().noneMatch(scope -> applyScopeToCountry(root, from, scope)));
+                return condition.not().apply(root, from);
             case "root":
                 return condition.apply(root, from);
             case "from":
@@ -3178,7 +3173,7 @@ public class ConditionsUtils {
         return false;
     }
 
-    public static boolean applyScopeToCountry(Country root, Country from, Condition condition) {
+    public static boolean applyScopeToCountry(Country root, Country from, ConditionAbstract condition) {
         Country country;
         Province province;
         SubjectType subjectType;
@@ -3196,32 +3191,11 @@ public class ConditionsUtils {
 
         switch (condition.getName().toLowerCase()) {
             case "or":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .anyMatch(entry -> entry.getValue()
-                                                                                              .stream()
-                                                                                              .anyMatch(value -> applyConditionToCountry(root, root, from,
-                                                                                                                                         entry.getKey(),
-                                                                                                                                         value))))
-                       || (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToCountry(root, from, scope)));
+                return condition.or().apply(root, from);
             case "and", "if", "hidden_trigger":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .allMatch(entry -> entry.getValue()
-                                                                                              .stream()
-                                                                                              .anyMatch(value -> applyConditionToCountry(root, root, from,
-                                                                                                                                         entry.getKey(),
-                                                                                                                                         value))))
-                       && (condition.getScopes() == null || condition.getScopes().stream().allMatch(scope -> applyScopeToCountry(root, from, scope)));
+                return condition.and().apply(root, from);
             case "not":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .noneMatch(entry -> entry.getValue()
-                                                                                               .stream()
-                                                                                               .anyMatch(value -> applyConditionToCountry(root, root, from,
-                                                                                                                                          entry.getKey(),
-                                                                                                                                          value))))
-                       && (condition.getScopes() == null || condition.getScopes().stream().noneMatch(scope -> applyScopeToCountry(root, from, scope)));
+                return condition.not().apply(root, from);
             case "root":
                 return condition.apply(root, from);
             case "from":
@@ -3232,7 +3206,7 @@ public class ConditionsUtils {
                 subjectType = root.getGame().getSubjectType(condition.getCondition("can_be_overlord"));
                 return subjectType.isPotentialOverlord() == null || subjectType.isPotentialOverlord().apply(root, from);
             case "capital_scope":
-                return condition.apply(root.getHistoryItemAt(root.getGame().getStartDate()).getCapital());
+                return (province = root.getHistoryItemAt(root.getGame().getStartDate()).getCapital()) != null && condition.apply(province);
             case "development_in_provinces":
                 return root.getOwnedProvinceAt(root.getGame().getStartDate())
                            .filter(i -> condition.apply(i.getProvince()))
@@ -4239,7 +4213,7 @@ public class ConditionsUtils {
         return false;
     }
 
-    public static boolean applyScopeToProvince(SaveProvince province, Condition condition) {
+    public static boolean applyScopeToProvince(SaveProvince province, ConditionAbstract condition) {
         SaveCountry country;
         SaveTradeNode tradeNode;
 
@@ -4253,33 +4227,11 @@ public class ConditionsUtils {
 
         switch (condition.getName().toLowerCase()) {
             case "or":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .anyMatch(entry -> entry.getValue()
-                                                                                              .stream()
-                                                                                              .anyMatch(value -> applyConditionToProvince(province,
-                                                                                                                                          entry.getKey(),
-                                                                                                                                          value))))
-                       || (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToProvince(province, scope)));
-            case "and":
-            case "hidden_trigger":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .allMatch(entry -> entry.getValue()
-                                                                                              .stream()
-                                                                                              .anyMatch(value -> applyConditionToProvince(province,
-                                                                                                                                          entry.getKey(),
-                                                                                                                                          value))))
-                       && (condition.getScopes() == null || condition.getScopes().stream().allMatch(scope -> applyScopeToProvince(province, scope)));
+                return condition.or().apply(province);
+            case "and", "if", "hidden_trigger":
+                return condition.and().apply(province);
             case "not":
-                return (condition.getConditions() == null || condition.getConditions().entrySet()
-                                                                      .stream()
-                                                                      .noneMatch(entry -> entry.getValue()
-                                                                                               .stream()
-                                                                                               .anyMatch(value -> applyConditionToProvince(province,
-                                                                                                                                           entry.getKey(),
-                                                                                                                                           value))))
-                       && (condition.getScopes() == null || condition.getScopes().stream().noneMatch(scope -> applyScopeToProvince(province, scope)));
+                return condition.not().apply(province);
             case "controller":
                 return condition.apply(province.getController(), province.getController());
             case "crusade_target":
@@ -4362,7 +4314,7 @@ public class ConditionsUtils {
         return false;
     }
 
-    public static boolean applyScopeToProvince(Province province, Condition condition) {
+    public static boolean applyScopeToProvince(Province province, ConditionAbstract condition) {
         Country country;
         ProvinceHistoryItemI historyItem;
 
@@ -4376,30 +4328,11 @@ public class ConditionsUtils {
 
         switch (condition.getName().toLowerCase()) {
             case "or":
-                return (condition.getConditions() == null ||
-                        condition.getConditions().entrySet()
-                                 .stream()
-                                 .anyMatch(entry -> entry.getValue()
-                                                         .stream()
-                                                         .anyMatch(value -> applyConditionToProvince(province, entry.getKey(), value)))) ||
-                       (condition.getScopes() == null || condition.getScopes().stream().anyMatch(scope -> applyScopeToProvince(province, scope)));
-            case "and":
-            case "hidden_trigger":
-                return (condition.getConditions() == null ||
-                        condition.getConditions().entrySet()
-                                 .stream()
-                                 .allMatch(entry -> entry.getValue()
-                                                         .stream()
-                                                         .anyMatch(value -> applyConditionToProvince(province, entry.getKey(), value)))) &&
-                       (condition.getScopes() == null || condition.getScopes().stream().allMatch(scope -> applyScopeToProvince(province, scope)));
+                return condition.or().apply(province);
+            case "and", "if", "hidden_trigger":
+                return condition.and().apply(province);
             case "not":
-                return (condition.getConditions() == null ||
-                        condition.getConditions().entrySet()
-                                 .stream()
-                                 .noneMatch(entry -> entry.getValue()
-                                                          .stream()
-                                                          .anyMatch(value -> applyConditionToProvince(province, entry.getKey(), value)))) &&
-                       (condition.getScopes() == null || condition.getScopes().stream().noneMatch(scope -> applyScopeToProvince(province, scope)));
+                return condition.not().apply(province);
             case "controller":
                 return (historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getController() != null &&
                        condition.apply(historyItem.getController(), historyItem.getController());

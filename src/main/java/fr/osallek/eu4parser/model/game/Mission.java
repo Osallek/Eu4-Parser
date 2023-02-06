@@ -100,14 +100,14 @@ public class Mission extends Nodded {
         }
     }
 
-    public Condition getProvincesToHighlight() {
+    public ConditionAnd getProvincesToHighlight() {
         ClausewitzItem child = this.item.getChild("provinces_to_highlight");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Condition getTrigger() {
+    public ConditionAnd getTrigger() {
         ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public List<Mission> getRequiredMissions() {

@@ -82,12 +82,12 @@ public class TechGroup extends Nodded {
         //Todo NationDesignerCost => item
     }
 
-    public Condition getNationDesignerTrigger() {
+    public ConditionAnd getNationDesignerTrigger() {
         ClausewitzItem triggerChild = this.item.getChild("nation_designer_trigger");
-        return triggerChild == null ? null : new Condition(triggerChild);
+        return triggerChild == null ? null : new ConditionAnd(triggerChild);
     }
 
-    public void setNationDesignerTrigger(Condition condition) {
+    public void setNationDesignerTrigger(ConditionAnd condition) {
         if (condition == null) {
             this.item.removeChild("nation_designer_trigger");
             return;

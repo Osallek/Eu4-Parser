@@ -28,9 +28,9 @@ public class PersonalDeity {
         this.item.setVariable("sprite", sprite);
     }
 
-    public Condition getAllow() {
+    public ConditionAnd getAllow() {
         ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new Condition(this.item.getChild("allow"));
+        return child == null ? null : new ConditionAnd(this.item.getChild("allow"));
     }
 
     public Modifiers getModifiers() {

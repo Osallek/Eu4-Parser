@@ -343,7 +343,7 @@ public class Country {
         return historyItems;
     }
 
-    public CountryHistoryItemI getHistoryItemAt(LocalDate date) {
+    public CountryHistoryItems getHistoryItemAt(LocalDate date) {
         List<CountryHistoryItemI> items = Stream.concat(Stream.of(this.defaultHistoryItem),
                                                         this.historyItems.entrySet()
                                                                          .stream()

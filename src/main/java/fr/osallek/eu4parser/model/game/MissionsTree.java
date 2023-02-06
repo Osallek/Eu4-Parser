@@ -77,14 +77,14 @@ public class MissionsTree extends Nodded {
         }
     }
 
-    public Condition getPotentialOnLoad() {
+    public ConditionAnd getPotentialOnLoad() {
         ClausewitzItem child = this.item.getChild("potential_on_load");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Condition getPotential() {
+    public ConditionAnd getPotential() {
         ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public List<Mission> getMissions() {

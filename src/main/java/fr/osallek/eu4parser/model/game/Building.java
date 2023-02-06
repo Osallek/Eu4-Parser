@@ -2,15 +2,16 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public class Building extends Nodded {
 
@@ -217,18 +218,18 @@ public class Building extends Nodded {
     }
 
     public boolean onlyInPort() {
-        Condition condition = getTrigger();
+        ConditionAnd condition = getTrigger();
         return condition != null && "yes".equals(condition.getCondition("has_port"));
     }
 
     public boolean onlyNative() {
-        Condition condition = getTrigger();
+        ConditionAnd condition = getTrigger();
 
         if (condition == null) {
             return false;
         }
 
-        List<Condition> conditions = condition.getScopes("owner");
+        List<? extends ConditionAbstract> conditions = condition.getScopes("owner");
 
         if (CollectionUtils.isEmpty(conditions)) {
             return false;
@@ -238,9 +239,9 @@ public class Building extends Nodded {
                                                  c.getConditions().get("government").stream().anyMatch("native"::equals));
     }
 
-    public Condition getTrigger() {
+    public ConditionAnd getTrigger() {
         ClausewitzItem child = this.item.getChild("build_trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     @Override

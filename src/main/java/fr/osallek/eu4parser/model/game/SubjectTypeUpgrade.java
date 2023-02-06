@@ -32,9 +32,9 @@ public class SubjectTypeUpgrade extends Nodded {
         this.item.setVariable("cost", cost);
     }
 
-    public Condition getCanUpgradeTrigger() {
+    public ConditionAnd getCanUpgradeTrigger() {
         ClausewitzItem child = this.item.getChild("can_upgrade_trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     public Modifiers getModifiersOverlord() {

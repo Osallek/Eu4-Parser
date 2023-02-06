@@ -15,14 +15,14 @@ public class TriggeredModifier extends GameModifier {
         return new Modifiers(this.item.getVariables());
     }
 
-    public Condition getPotential() {
+    public ConditionAnd getPotential() {
         ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
-    public Condition getTrigger() {
+    public ConditionAnd getTrigger() {
         ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new Condition(child);
+        return child == null ? null : new ConditionAnd(child);
     }
 
     @Override

@@ -18,8 +18,8 @@ public class Icon {
         this.item.setName(name);
     }
 
-    public Condition getAllow() {
-        return new Condition(item.getChild("allow"));
+    public ConditionAnd getAllow() {
+        return new ConditionAnd(item.getChild("allow"));
     }
 
     public Modifiers getModifiers() {

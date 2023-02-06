@@ -41,6 +41,10 @@ public class CountryHistoryItems implements CountryHistoryItemI {
         return this.items.stream().map(CountryHistoryItemI::getChangedTagFrom).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
+    public List<Country> getChangedTagsFrom() {
+        return this.items.stream().map(CountryHistoryItemI::getChangedTagFrom).filter(Objects::nonNull).toList();
+    }
+
     @Override
     public Province getFixedCapital() {
         return this.items.stream().map(CountryHistoryItemI::getFixedCapital).filter(Objects::nonNull).findFirst().orElse(null);

@@ -6,9 +6,11 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -391,11 +393,13 @@ public class Province {
 
 
     public ProvinceHistoryItemI getHistoryItemAt(LocalDate date) {
-        List<ProvinceHistoryItemI> items = Stream.concat(Stream.of(this.defaultHistoryItem),
-                                                         this.historyItems.entrySet()
-                                                                          .stream()
-                                                                          .filter(e -> date.isBefore(e.getKey()) || date.equals(e.getKey()))
-                                                                          .map(Map.Entry::getValue))
+        List<ProvinceHistoryItemI> items = Stream.concat(Optional.ofNullable(this.defaultHistoryItem).stream(),
+                                                         Optional.ofNullable(this.historyItems)
+                                                                 .map(SortedMap::entrySet)
+                                                                 .stream()
+                                                                 .flatMap(Collection::stream)
+                                                                 .filter(e -> date.isBefore(e.getKey()) || date.equals(e.getKey()))
+                                                                 .map(Map.Entry::getValue))
                                                  .collect(Collectors.toList());
         Collections.reverse(items);
         return new ProvinceHistoryItems(items, this);
