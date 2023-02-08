@@ -73,7 +73,7 @@ import java.util.stream.Stream;
 
 public class Game {
 
-    public static final int NB_PARTS = 75;
+    public static final int NB_PARTS = 76;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -282,6 +282,8 @@ public class Game {
     private List<DiplomacyRelation> royalMarriage;
 
     private List<War> wars;
+
+    private Map<String, Decision> decisions;
 
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
@@ -1133,6 +1135,17 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readWars();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readDecisions();
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
@@ -2486,6 +2499,14 @@ public class Game {
 
     public List<War> getWars() {
         return wars;
+    }
+
+    public Map<String, Decision> getDecisions() {
+        return decisions;
+    }
+
+    public Decision getDecision(String name) {
+        return this.decisions.get(name);
     }
 
     public Map<Province, Map<Polygon, Boolean>> getBorders() {
@@ -4092,6 +4113,23 @@ public class Game {
 
         this.wars.removeIf(war -> CollectionUtils.isEmpty(war.getEvents()));
         this.wars.sort(Comparator.comparing(War::getStart).thenComparing(War::getEnd).thenComparing(War::getName));
+    }
+
+    private void readDecisions() {
+        this.decisions = new HashMap<>();
+
+        getFileNodes("decisions", this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+
+                    if (item.hasChild("country_decisions")) {
+                        this.decisions.putAll(item.getChild("country_decisions")
+                                                  .getChildren()
+                                                  .stream()
+                                                  .map(i -> new Decision(fileNode, i))
+                                                  .collect(Collectors.toMap(Decision::getName, Function.identity())));
+                    }
+                });
     }
 
     public boolean isRegularTxtFile(FileNode fileNode) {
