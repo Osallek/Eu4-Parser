@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser.model.game.effects;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 //add_province_modifier, add_country_modifier
@@ -12,7 +13,7 @@ public class AddModifier {
     }
 
     public String getName() {
-        return this.item.getVarAsString("name");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
     }
 
     public Integer getDuration() {

@@ -1,7 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
@@ -39,7 +39,7 @@ public abstract class ConditionAbstract {
                               .stream()
                               .filter(variable -> CollectionUtils.isEmpty(list) || !list.contains(variable.getName()))
                               .collect(Collectors.groupingBy(variable -> variable.getName().toLowerCase(),
-                                                             Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+                                                             Collectors.mapping(v -> ClausewitzUtils.removeQuotes(v.getValue()), Collectors.toList())));
         this.scopes = item.getChildren()
                           .stream()
                           .filter(child -> CollectionUtils.isEmpty(list) || !list.contains(child.getName()))
@@ -54,7 +54,9 @@ public abstract class ConditionAbstract {
     @SafeVarargs
     protected ConditionAbstract(Predicate<String> filter, Pair<String, String>... conditions) {
         this(filter);
-        this.conditions = Arrays.stream(conditions).collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())));
+        this.conditions = Arrays.stream(conditions)
+                                .collect(Collectors.groupingBy(Pair::getKey,
+                                                               Collectors.mapping(p -> ClausewitzUtils.removeQuotes(p.getValue()), Collectors.toList())));
     }
 
     public ConditionTagOnly tagOnly() {

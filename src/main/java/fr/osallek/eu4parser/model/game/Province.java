@@ -398,7 +398,7 @@ public class Province {
                                                                  .map(SortedMap::entrySet)
                                                                  .stream()
                                                                  .flatMap(Collection::stream)
-                                                                 .filter(e -> date.isBefore(e.getKey()) || date.equals(e.getKey()))
+                                                                 .filter(e -> date.isAfter(e.getKey()) || date.equals(e.getKey()))
                                                                  .map(Map.Entry::getValue))
                                                  .collect(Collectors.toList());
         Collections.reverse(items);

@@ -347,7 +347,7 @@ public class Country {
         List<CountryHistoryItemI> items = Stream.concat(Stream.of(this.defaultHistoryItem),
                                                         this.historyItems.entrySet()
                                                                          .stream()
-                                                                         .filter(e -> date.isBefore(e.getKey()) || date.equals(e.getKey()))
+                                                                         .filter(e -> date.isAfter(e.getKey()) || date.equals(e.getKey()))
                                                                          .map(Map.Entry::getValue))
                                                 .collect(Collectors.toList());
         Collections.reverse(items);

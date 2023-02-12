@@ -67,7 +67,7 @@ public class CountryHistoryItems implements CountryHistoryItemI {
 
     @Override
     public Integer getGovernmentLevel() {
-        return this.items.stream().map(CountryHistoryItemI::getGovernmentLevel).filter(Objects::nonNull).findFirst().orElse(null);
+        return this.items.stream().map(CountryHistoryItemI::getGovernmentLevel).filter(Objects::nonNull).findFirst().orElse(2);
     }
 
     @Override

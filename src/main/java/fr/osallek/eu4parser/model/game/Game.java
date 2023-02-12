@@ -2487,6 +2487,10 @@ public class Game {
     }
 
     public Country getCountry(String tag) {
+        if (tag == null) {
+            return null;
+        }
+
         return this.countries.get(ClausewitzUtils.removeQuotes(tag).toUpperCase());
     }
 

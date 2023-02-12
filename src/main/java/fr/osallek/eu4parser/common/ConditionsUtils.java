@@ -1685,7 +1685,7 @@ public class ConditionsUtils {
                                     .compareTo(new BigDecimal(value).multiply(BigDecimal.valueOf(country.getLedger().getLastMonthIncome()))) >= 0;
             case "provinces_on_capital_continent_of":
                 other = country.getSave().getCountry(value);
-                return country.getOwnedProvinces().stream().anyMatch(province -> province.getContinent() == other.getCapital().getContinent());
+                return country.getOwnedProvinces().stream().anyMatch(province -> Objects.equals(province.getContinent(), other.getCapital().getContinent()));
             case "real_day_of_year":
                 return country.getSave().getDate().getDayOfYear() == NumbersUtils.toInt(value);
             case "reform_desire":
@@ -3408,8 +3408,8 @@ public class ConditionsUtils {
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return province.getArtillery().size() >= integer;
                 } else {
-                    other = province.getSave().getCountry(value);
-                    return province.getArtillery().stream().anyMatch(regiment -> regiment.getArmy().getCountry().equals(other));
+                    return value != null &&
+                           province.getArtillery().stream().anyMatch(regiment -> regiment.getArmy().getCountry().equals(province.getSave().getCountry(value)));
                 }
             case "base_manpower":
                 return province.getBaseManpower() >= NumbersUtils.toInt(value);
@@ -3427,7 +3427,7 @@ public class ConditionsUtils {
                     return province.getCavalry().size() >= integer;
                 } else {
                     other = province.getSave().getCountry(value);
-                    return province.getCavalry().stream().anyMatch(regiment -> regiment.getArmy().getCountry().equals(other));
+                    return value != null && province.getCavalry().stream().anyMatch(regiment -> regiment.getArmy().getCountry().equals(other));
                 }
             case "colonial_region":
                 return province.getSave().getGame().getColonialRegion(value).getProvinces().contains(province.getId());
@@ -3910,7 +3910,7 @@ public class ConditionsUtils {
                                .stream()
                                .anyMatch(religion -> religion.getPapacy() != null && religion.getPapacy().getReformDesire() >= NumbersUtils.toDouble(value));
             case "region":
-                return value.equalsIgnoreCase(province.getArea().getRegion().getName());
+                return province.getArea() != null && value.equalsIgnoreCase(province.getArea().getRegion().getName());
             case "religion":
                 return province.getReligion() != null && rawValueToReligion(rawValue, province).equalsIgnoreCase(province.getReligionName());
             case "religion_group":
@@ -3934,7 +3934,7 @@ public class ConditionsUtils {
                 return province.getSave().getStartDate().equals(Eu4Utils.stringToDate(value))
                        || province.getSave().getStartDate().isAfter(Eu4Utils.stringToDate(value));
             case "superregion":
-                return value.equalsIgnoreCase(province.getArea().getRegion().getSuperRegion().getName());
+                return province.getArea() != null && value.equalsIgnoreCase(province.getArea().getRegion().getSuperRegion().getName());
             case "total_number_of_cardinals":
                 return province.getSave()
                                .getReligions()
@@ -4034,14 +4034,14 @@ public class ConditionsUtils {
             case "colonial_region":
                 return province.getGame().getColonialRegion(value).getProvinces().contains(province.getId());
             case "continent":
-                return value != null && value.equalsIgnoreCase(province.getContinent().getName());
+                return province.getContinent() != null && value != null && value.equalsIgnoreCase(province.getContinent().getName());
             case "controlled_by":
                 return value != null && value.equalsIgnoreCase(ClausewitzUtils.removeQuotes(
                         Optional.ofNullable(province.getHistoryItemAt(province.getGame().getStartDate()).getController()).map(Country::getTag).orElse(null)));
             case "country_or_subject_holds":
             case "country_or_vassal_holds":
                 other = province.getGame().getCountry(value);
-                return province.getHistoryItemAt(province.getGame().getStartDate()).getOwner() != null
+                return value != null && province.getHistoryItemAt(province.getGame().getStartDate()).getOwner() != null
                        && (province.getHistoryItemAt(province.getGame().getStartDate()).getOwner().equals(other) ||
                            other.equals(
                                    province.getHistoryItemAt(province.getGame().getStartDate()).getOwner().getOverlordAt(province.getGame().getStartDate())));
@@ -4129,7 +4129,8 @@ public class ConditionsUtils {
             case "hre_size":
                 break; //Todo
             case "in_capital_state":
-                return "yes".equalsIgnoreCase(value) == ((historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
+                return province.getArea() != null &&
+                       "yes".equalsIgnoreCase(value) == ((historyItem = province.getHistoryItemAt(province.getGame().getStartDate())).getOwner() != null &&
                                                          province.getArea()
                                                                  .equals(historyItem.getOwner()
                                                                                     .getHistoryItemAt(province.getGame().getStartDate())
@@ -4142,8 +4143,7 @@ public class ConditionsUtils {
                                                                  .anyMatch(country -> province.equals(
                                                                          country.getHistoryItemAt(province.getGame().getStartDate()).getCapital())));
             case "is_capital_of":
-                other = province.getGame().getCountry(value);
-                return province.equals(other.getHistoryItemAt(province.getGame().getStartDate()).getCapital());
+                return value != null && province.equals(province.getGame().getCountry(value).getHistoryItemAt(province.getGame().getStartDate()).getCapital());
             case "is_city":
                 return "yes".equalsIgnoreCase(value);
             case "is_core":
@@ -4220,7 +4220,7 @@ public class ConditionsUtils {
             case "real_day_of_year":
                 return value != null && province.getGame().getStartDate().getDayOfYear() == NumbersUtils.toInt(value);
             case "region":
-                return value != null && value.equalsIgnoreCase(province.getArea().getRegion().getName());
+                return value != null && province.getArea() != null && value.equalsIgnoreCase(province.getArea().getRegion().getName());
             case "religion":
                 return province.getHistoryItemAt(province.getGame().getStartDate()).getReligion() != null &&
                        rawValueToReligion(rawValue, province).equalsIgnoreCase(
@@ -4235,7 +4235,7 @@ public class ConditionsUtils {
                 return province.getGame().getStartDate().equals(Eu4Utils.stringToDate(value))
                        || province.getGame().getStartDate().isAfter(Eu4Utils.stringToDate(value));
             case "superregion":
-                return value != null && value.equalsIgnoreCase(province.getArea().getRegion().getSuperRegion().getName());
+                return province.getArea() != null && value != null && value.equalsIgnoreCase(province.getArea().getRegion().getSuperRegion().getName());
             case "trade_company_region":
                 return province.getGame().getTradeCompany(value).getProvinces().contains(province.getId());
             case "trade_goods":

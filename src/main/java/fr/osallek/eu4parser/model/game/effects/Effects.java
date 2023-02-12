@@ -1,5 +1,6 @@
 package fr.osallek.eu4parser.model.game.effects;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
@@ -22,10 +23,6 @@ public class Effects {
         this.game = game;
     }
 
-    public Game getGame() {
-        return game;
-    }
-
     public ConditionAnd getLimit() {
         return this.item.hasChild("limit") ? new ConditionAnd(item.getChild("limit")) : null;
     }
@@ -42,40 +39,41 @@ public class Effects {
         return this.item.hasChild("else") ? new Effects(this.item.getChild("if"), this.game) : null;
     }
 
-    public Map<String, Effects> getRegions() {
+    public Map<String, List<Effects>> getRegions() {
         return this.item.getChildren()
                         .stream()
                         .filter(i -> this.game.getRegion(i.getName()) != null)
-                        .collect(Collectors.toMap(ClausewitzObject::getName, i -> new Effects(i, this.game)));
+                        .collect(Collectors.groupingBy(ClausewitzObject::getName, Collectors.mapping(i -> new Effects(i, this.game), Collectors.toList())));
     }
 
-    public Map<String, Effects> getAreas() {
+    public Map<String, List<Effects>> getAreas() {
         return this.item.getChildren()
                         .stream()
                         .filter(i -> this.game.getArea(i.getName()) != null)
-                        .collect(Collectors.toMap(ClausewitzObject::getName, i -> new Effects(i, this.game)));
+                        .collect(Collectors.groupingBy(ClausewitzObject::getName, Collectors.mapping(i -> new Effects(i, this.game), Collectors.toList())));
     }
 
-    public Map<String, Effects> getCountries() {
+    public Map<String, List<Effects>> getCountries() {
         return this.item.getChildren()
                         .stream()
                         .filter(i -> this.game.getCountry(i.getName()) != null)
-                        .collect(Collectors.toMap(ClausewitzObject::getName, i -> new Effects(i, this.game)));
+                        .collect(Collectors.groupingBy(ClausewitzObject::getName, Collectors.mapping(i -> new Effects(i, this.game), Collectors.toList())));
     }
 
-    public Map<Integer, Effects> getProvinces() {
+    public Map<Integer, List<Effects>> getProvinces() {
         return this.item.getChildren()
                         .stream()
                         .filter(i -> NumbersUtils.parseInt(i.getName()).isPresent())
                         .filter(i -> this.game.getProvince(NumbersUtils.toInt(i.getName())) != null)
-                        .collect(Collectors.toMap(i -> NumbersUtils.toInt(i.getName()), i -> new Effects(i, this.game)));
+                        .collect(Collectors.groupingBy(i -> NumbersUtils.toInt(i.getName()),
+                                                       Collectors.mapping(i -> new Effects(i, this.game), Collectors.toList())));
     }
 
-    public Map<String, String> getUnits() {
+    public Map<String, List<String>> getUnits() {
         return this.item.getVariables()
                         .stream()
                         .filter(variable -> this.game.getUnit(variable.getName()) != null)
-                        .collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getValue));
+                        .collect(Collectors.groupingBy(ClausewitzObject::getName, Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
     }
 
     public List<Event> getCountryEvents() {
@@ -86,7 +84,11 @@ public class Effects {
         return this.item.getChildren("add_country_modifier").stream().map(AddModifier::new).toList();
     }
 
-    public Map<String, String> getEffects() {
-        return this.item.getVariables().stream().collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getValue));
+    public Map<String, List<String>> getEffects() {
+        return this.item.getVariables()
+                        .stream()
+                        .filter(variable -> this.game.getUnit(variable.getName()) == null)
+                        .collect(Collectors.groupingBy(ClausewitzObject::getName,
+                                                       Collectors.mapping(v -> ClausewitzUtils.removeQuotes(v.getValue()), Collectors.toList())));
     }
 }
