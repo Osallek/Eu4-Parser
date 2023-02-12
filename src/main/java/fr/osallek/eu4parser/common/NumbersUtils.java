@@ -1,29 +1,35 @@
 package fr.osallek.eu4parser.common;
 
+import java.util.Optional;
+
 public class NumbersUtils {
 
     private NumbersUtils() {}
 
-    public static Integer toInt(final String str) {
-        if (str == null) {
-            return null;
+    public static Optional<Integer> parseInt(String s) {
+        if (s == null) {
+            return Optional.empty();
         }
 
         try {
-            return Integer.parseInt(str);
-        } catch (final NumberFormatException nfe) {
-            return null;
+            return Optional.of(Integer.parseInt(s));
+        } catch (NumberFormatException nfe) {
+            return Optional.empty();
         }
     }
 
-    public static Double toDouble(final String str) {
-        if (str == null) {
+    public static Integer toInt(String s) {
+        return parseInt(s).orElse(null);
+    }
+
+    public static Double toDouble(String s) {
+        if (s == null) {
             return null;
         }
 
         try {
-            return Double.parseDouble(str);
-        } catch (final NumberFormatException nfe) {
+            return Double.parseDouble(s);
+        } catch (NumberFormatException nfe) {
             return null;
         }
     }

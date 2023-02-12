@@ -89,23 +89,6 @@ public class ConditionOr extends ConditionAbstract {
         return false;
     }
 
-    public boolean apply(SaveProvince province, SaveProvince from) {
-        if (this.conditions != null &&
-            this.conditions.entrySet()
-                           .stream()
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
-            return true;
-        }
-
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToProvince(province, scope))) {
-            return true;
-        }
-
-        return false;
-    }
-
     public boolean apply(SaveCountry country, SaveProvince from) {
         if (this.conditions != null
             && this.conditions.entrySet()

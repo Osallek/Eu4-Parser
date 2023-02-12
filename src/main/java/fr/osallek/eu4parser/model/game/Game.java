@@ -73,7 +73,7 @@ import java.util.stream.Stream;
 
 public class Game {
 
-    public static final int NB_PARTS = 76;
+    public static final int NB_PARTS = 77;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -262,6 +262,8 @@ public class Game {
     private Map<String, TriggeredModifier> provinceTriggeredModifiers;
 
     private Map<String, TriggeredModifier> triggeredModifiers;
+
+    private Map<String, ConditionAnd> scriptedTriggers;
 
     private Map<String, Country> countries;
 
@@ -1090,6 +1092,17 @@ public class Game {
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
+                readScriptedTriggers();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
                 readCountry();
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
@@ -1504,6 +1517,16 @@ public class Game {
         return getComputedLocalisation(save, root, localisation);
     }
 
+    public String getComputedLocalisation(Object root, String key, Eu4Language language) {
+        Localisation localisation = getLocalisation(key, language);
+
+        if (localisation == null) {
+            return key;
+        }
+
+        return getComputedLocalisation(root, localisation);
+    }
+
     public String getComputedLocalisation(Save save, Object root, Localisation localisation) {
         String s = localisation.getValue();
 
@@ -1516,6 +1539,23 @@ public class Game {
 
         for (String matche : matches) {
             s = s.replace(matche, LocalisationUtils.replaceScope(save, root, matche, localisation.getEu4Language()));
+        }
+
+        return LocalisationUtils.cleanLocalisation(s);
+    }
+
+    public String getComputedLocalisation(Object root, Localisation localisation) {
+        String s = localisation.getValue();
+
+        Matcher matcher = Eu4Utils.LOCALISATION_REPLACE_PATTERN.matcher(s);
+        List<String> matches = new ArrayList<>();
+
+        while (matcher.find()) {
+            matches.add(matcher.group());
+        }
+
+        for (String matche : matches) {
+            s = s.replace(matche, LocalisationUtils.replaceScope(this, root, matche, localisation.getEu4Language()));
         }
 
         return LocalisationUtils.cleanLocalisation(s);
@@ -2428,6 +2468,14 @@ public class Game {
 
     public TriggeredModifier getTriggeredModifier(String name) {
         return this.triggeredModifiers.get(name);
+    }
+
+    public Map<String, ConditionAnd> getScriptedTriggers() {
+        return scriptedTriggers;
+    }
+
+    public ConditionAnd getScriptedTrigger(String name) {
+        return this.scriptedTriggers.get(name);
     }
 
     public List<String> getCountriesTags() {
@@ -4005,6 +4053,21 @@ public class Game {
                 });
     }
 
+    private void readScriptedTriggers() {
+        this.scriptedTriggers = new HashMap<>();
+
+        getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "scripted_triggers", this::isRegularTxtFile)
+                .forEach(path -> {
+                    ClausewitzItem triggersItem = ClausewitzParser.parse(path.toFile(), 0);
+                    this.scriptedTriggers.putAll(triggersItem.getChildren()
+                                                             .stream()
+                                                             .map(ConditionAnd::new)
+                                                             .collect(Collectors.toMap(cond -> cond.getName().toLowerCase(), Function.identity(),
+                                                                                       (a, b) -> b)));
+
+                });
+    }
+
     private void readCountry() {
         this.countries = new HashMap<>();
 
@@ -4126,7 +4189,7 @@ public class Game {
                         this.decisions.putAll(item.getChild("country_decisions")
                                                   .getChildren()
                                                   .stream()
-                                                  .map(i -> new Decision(fileNode, i))
+                                                  .map(i -> new Decision(fileNode, this, i))
                                                   .collect(Collectors.toMap(Decision::getName, Function.identity())));
                     }
                 });

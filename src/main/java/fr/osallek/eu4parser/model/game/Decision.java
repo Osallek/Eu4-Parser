@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.game.effects.Effects;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -10,10 +11,13 @@ import java.util.Optional;
 
 public class Decision extends Nodded {
 
+    private final Game game;
+
     private final ClausewitzItem item;
 
-    public Decision(FileNode fileNode, ClausewitzItem item) {
+    public Decision(FileNode fileNode, Game game, ClausewitzItem item) {
         super(fileNode);
+        this.game = game;
         this.item = item;
     }
 
@@ -91,8 +95,8 @@ public class Decision extends Nodded {
         return Optional.ofNullable(this.item.getChild("allow")).map(ConditionAnd::new).orElse(null);
     }
 
-    public Modifiers getEffects() {
-        return new Modifiers(this.item.getChild("effect"));
+    public Effects getEffects() {
+        return new Effects(this.item.getChild("effect"), this.game);
     }
 
     @Override

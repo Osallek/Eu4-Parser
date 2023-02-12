@@ -8,36 +8,21 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 public class ConditionAnd extends ConditionAbstract {
     
-    protected BooleanSupplier anyMatch;
-
-    protected UnaryOperator<Boolean> converter;
-
     @SafeVarargs
     public ConditionAnd(Pair<String, String>... conditions) {
-        super(s -> true);
-        this.anyMatch = () -> false;
-        this.converter = Boolean::booleanValue;
-        this.conditions = Arrays.stream(conditions).collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())));
+        super(s -> true, conditions);
     }
 
     public ConditionAnd(ClausewitzItem item, String... ignore) {
         super(s -> true, item, ignore);
-        this.anyMatch = () -> false;
-        this.converter = Boolean::booleanValue;
     }
 
     public ConditionAnd(ConditionAbstract other) {
         super(other.filter);
-        this.anyMatch = () -> false;
-        this.converter = Boolean::booleanValue;
         this.name = other.name;
         this.conditions = other.conditions;
         this.scopes = other.getScopes();
@@ -56,14 +41,14 @@ public class ConditionAnd extends ConditionAbstract {
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
                                                    .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
         if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
-        return !this.anyMatch.getAsBoolean();
+        return true;
     }
 
     public boolean apply(Country root, Country from) {
@@ -74,14 +59,14 @@ public class ConditionAnd extends ConditionAbstract {
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
                                                    .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
         if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
-        return !this.anyMatch.getAsBoolean();
+        return true;
     }
 
     public boolean apply(SaveProvince province) {
@@ -92,14 +77,14 @@ public class ConditionAnd extends ConditionAbstract {
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
                                                    .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
         if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
-        return !this.anyMatch.getAsBoolean();
+        return true;
     }
 
     public boolean apply(Province province) {
@@ -110,32 +95,14 @@ public class ConditionAnd extends ConditionAbstract {
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
                                                    .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
         if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
-        return !this.anyMatch.getAsBoolean();
-    }
-
-    public boolean apply(SaveProvince province, SaveProvince from) {
-        if (this.conditions != null &&
-            this.conditions.entrySet()
-                           .stream()
-                           .filter(e -> this.filter.test(e.getKey()))
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
-            return this.anyMatch.getAsBoolean();
-        }
-
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
-            return this.anyMatch.getAsBoolean();
-        }
-
-        return !this.anyMatch.getAsBoolean();
+        return true;
     }
 
     public boolean apply(SaveCountry country, SaveProvince from) {
@@ -146,7 +113,7 @@ public class ConditionAnd extends ConditionAbstract {
                               .anyMatch(entry -> entry.getValue()
                                                       .stream()
                                                       .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(country, country, country, entry.getKey(), s)))) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
         if (getScopes() != null && getScopes().stream().anyMatch(scope -> {
@@ -156,17 +123,17 @@ public class ConditionAnd extends ConditionAbstract {
                 return !ConditionsUtils.applyScopeToCountry(country, country, scope);
             }
         })) {
-            return this.anyMatch.getAsBoolean();
+            return false;
         }
 
-        return !this.anyMatch.getAsBoolean();
+        return true;
     }
 
     public boolean apply(Leader leader) {
         if (this.conditions != null && getCondition("is_admiral") != null) {
             if ("yes".equalsIgnoreCase(getCondition("is_admiral")) && !LeaderType.ADMIRAL.equals(leader.getType())
                 || "no".equalsIgnoreCase(getCondition("is_admiral")) && LeaderType.ADMIRAL.equals(leader.getType())) {
-                return this.anyMatch.getAsBoolean();
+                return false;
             }
         }
 

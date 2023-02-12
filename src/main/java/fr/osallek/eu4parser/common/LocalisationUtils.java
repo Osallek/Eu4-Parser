@@ -10,6 +10,7 @@ import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.CustomizableLocalization;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.GovernmentName;
+import fr.osallek.eu4parser.model.game.HreEmperor;
 import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.game.ProvinceHistoryItemI;
 import fr.osallek.eu4parser.model.game.Region;
@@ -23,12 +24,14 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.FlagShip;
 import fr.osallek.eu4parser.model.save.country.Heir;
+import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.Monarch;
 import fr.osallek.eu4parser.model.save.country.Navy;
 import fr.osallek.eu4parser.model.save.country.Queen;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveTradeCompany;
 import fr.osallek.eu4parser.model.save.country.Ship;
+import fr.osallek.eu4parser.model.save.empire.Empire;
 import fr.osallek.eu4parser.model.save.province.SaveAdvisor;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public final class LocalisationUtils {
 
@@ -60,7 +64,7 @@ public final class LocalisationUtils {
 
     public static String replaceScope(Save save, Object root, String scope, Eu4Language language) {
         if (save == null || root == null || StringUtils.isBlank(scope) || language == null) {
-            return "";
+            return " ";
         }
 
         scope = StringUtils.stripEnd(StringUtils.stripStart(scope, "["), "]");
@@ -96,6 +100,7 @@ public final class LocalisationUtils {
                     case "GetFlagshipName" -> current = getFlagShip(country);
                     case "GetMonth" -> current = getMonth(save, language);
                     case "GetName" -> current = getName(country, language);
+                    case "Emperor" -> current = getEmperor(save);
                     case "GetTag" -> current = getTag(country);
                     case "GetYear" -> current = getYear(save);
                     case "GovernmentName" -> current = getGovernmentName(country, language);
@@ -106,48 +111,10 @@ public final class LocalisationUtils {
                             current = getCustomisableLocalisation(save, current.orElse(null), key, language);
                         } else {
                             current = getTag(save, key);
-                        }
 
-                        if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in country", key);
-                        }
-                    }
-                }
-            } else if (current.get() instanceof Country country) {
-                switch (key) {
-                    case "Capital" -> current = getCapital(country);
-                    case "ColonialParent" -> current = getColonialParent(country);
-                    case "Culture" -> current = getCulture(country);
-                    case "From" -> current = getFrom(country);
-                    case "Heir" -> current = getHeir(country);
-                    case "Monarch" -> current = getMonarch(country);
-                    case "Consort" -> current = getConsort(country);
-                    case "Overlord" -> current = getOverlord(country);
-                    case "Religion" -> current = getReligion(country);
-                    case "Root" -> current = getRoot(country);
-                    case "This" -> current = getThis(country);
-                    case "Dip_Advisor" -> current = getAdmAdvisor(country);
-                    case "Adm_Advisor" -> current = getDipAdvisor(country);
-                    case "Mil_Advisor" -> current = getMilAdvisor(country);
-                    case "GetAdm" -> current = getAdmAdvisor(country).map(a -> getAdvisorType(a, language));
-                    case "GetDip" -> current = getDipAdvisor(country).map(a -> getAdvisorType(a, language));
-                    case "GetMil" -> current = getMilAdvisor(country).map(a -> getAdvisorType(a, language));
-                    //Commands
-                    case "GetAdjective" -> current = getAdjective(country, language);
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetFlagshipName" -> current = getFlagShip(country);
-                    case "GetMonth" -> current = getMonth(save, language);
-                    case "GetName" -> current = getName(country, language);
-                    case "GetTag" -> current = getTag(country);
-                    case "GetYear" -> current = getYear(save);
-                    case "GovernmentName" -> current = getGovernmentName(country, language);
-                    default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
-
-                        if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
-                        } else {
-                            current = getTag(save, key);
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                            }
                         }
 
                         if (current.isEmpty()) {
@@ -172,6 +139,7 @@ public final class LocalisationUtils {
                     case "GetCapitalName" -> current = getCapitalName(province);
                     case "GetDate" -> current = getDate(save, language);
                     case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
                     case "GetName" -> current = getName(province);
                     case "GetTradeGoodsName" -> current = getTradeGoodName(province, language);
                     case "GetYear" -> current = getYear(save);
@@ -182,10 +150,225 @@ public final class LocalisationUtils {
                             current = getCustomisableLocalisation(save, current.orElse(null), key, language);
                         } else {
                             current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                            }
                         }
 
                         if (current.isEmpty()) {
                             LOGGER.warn("Could not find scope {} in province", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof SaveAdvisor advisor) {
+                switch (key) {
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
+                    case "GetName" -> current = getName(advisor);
+                    case "GetYear" -> current = getYear(save);
+                    case "GetWomanMan" -> current = getAdvisorType(advisor, language);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in advisor", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof Monarch monarch) {
+                switch (key) {
+                    case "Dynasty" -> current = getDynasty(monarch);
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
+                    case "GetName" -> current = getName(monarch);
+                    case "GetYear" -> current = getYear(save);
+                    case "GetAdm" -> current = getAdm(monarch);
+                    case "GetDip" -> current = getDip(monarch);
+                    case "GetMil" -> current = getMil(monarch);
+                    case "GetTitle" -> current = getTitle(monarch, language);
+                    case "GetWomanMan" -> current = getTitle(monarch, language);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in monarch", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof Religion religion) {
+                switch (key) {
+                    case "GetGroupName" -> current = getGroup(religion, language);
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
+                    case "GetName" -> current = getName(religion, language);
+                    case "GetYear" -> current = getYear(save);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in religion", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof Culture culture) {
+                switch (key) {
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
+                    case "GetName" -> current = getName(culture, language);
+                    case "GetYear" -> current = getYear(save);
+                    case "GetGroupName" -> current = getGroup(culture, language);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in culture", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof SaveTradeCompany tradeCompany) {
+                switch (key) {
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
+                    case "GetName" -> current = getName(tradeCompany);
+                    case "GetYear" -> current = getYear(save);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in culture", key);
+                        }
+                    }
+                }
+            }
+
+            if (current.isEmpty()) {
+                break;
+            } else if (current.get() instanceof String s) {
+                return ClausewitzUtils.removeQuotes(s);
+            }
+        }
+
+        return " ";
+    }
+
+    public static String replaceScope(Game game, Object root, String scope, Eu4Language language) {
+        if (game == null || root == null || StringUtils.isBlank(scope) || language == null) {
+            return " ";
+        }
+
+        scope = StringUtils.stripEnd(StringUtils.stripStart(scope, "["), "]");
+
+        Iterator<String> keys = List.of(StringUtils.split(scope, '.')).iterator();
+        Optional<?> current = Optional.of(root);
+
+        while (keys.hasNext()) {
+            String key = keys.next();
+
+            if (current.get() instanceof Country country) {
+                switch (key) {
+                    case "Capital" -> current = getCapital(country);
+                    case "ColonialParent" -> current = getColonialParent(country);
+                    case "Culture" -> current = getCulture(country);
+                    case "From" -> current = getFrom(country);
+                    case "Heir" -> current = getHeir(country);
+                    case "Monarch" -> current = getMonarch(country);
+                    case "Consort" -> current = getConsort(country);
+                    case "Overlord" -> current = getOverlord(country);
+                    case "Religion" -> current = getReligion(country);
+                    case "Root" -> current = getRoot(country);
+                    case "This" -> current = getThis(country);
+                    case "Dip_Advisor" -> current = getAdmAdvisor(country);
+                    case "Adm_Advisor" -> current = getDipAdvisor(country);
+                    case "Mil_Advisor" -> current = getMilAdvisor(country);
+                    case "GetAdm" -> current = getAdmAdvisor(country).map(a -> getAdvisorType(a, language));
+                    case "GetDip" -> current = getDipAdvisor(country).map(a -> getAdvisorType(a, language));
+                    case "GetMil" -> current = getMilAdvisor(country).map(a -> getAdvisorType(a, language));
+                    //Commands
+                    case "GetAdjective" -> current = getAdjective(country, language);
+                    case "GetDate" -> current = getDate(game, language);
+                    case "GetFlagshipName" -> current = getFlagShip(country);
+                    case "GetMonth" -> current = getMonth(game, language);
+                    case "GetName" -> current = getName(country, language);
+                    case "Emperor" -> current = getEmperor(game);
+                    case "GetTag" -> current = getTag(country);
+                    case "GetYear" -> current = getYear(game);
+                    case "GovernmentName" -> current = getGovernmentName(country, language);
+                    default -> {
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
+                        } else {
+                            current = getTag(game, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.warn("Could not find scope {} in country", key);
                         }
                     }
                 }
@@ -204,18 +387,23 @@ public final class LocalisationUtils {
                     case "GetContinentName" -> current = getContinentName(province, language);
                     case "GetSuperRegionName" -> current = getSuperRegionName(province, language);
                     case "GetCapitalName" -> current = getCapitalName(province);
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
+                    case "GetDate" -> current = getDate(province.getGame(), language);
+                    case "GetMonth" -> current = getMonth(province.getGame(), language);
+                    case "Emperor" -> current = getEmperor(province.getGame());
                     case "GetName" -> current = getName(province);
                     case "GetTradeGoodsName" -> current = getTradeGoodName(province, language);
-                    case "GetYear" -> current = getYear(save);
+                    case "GetYear" -> current = getYear(province.getGame());
                     default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
                         } else {
-                            current = getTag(save, key);
+                            current = getTag(game, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                            }
                         }
 
                         if (current.isEmpty()) {
@@ -223,75 +411,31 @@ public final class LocalisationUtils {
                         }
                     }
                 }
-            } else if (current.get() instanceof SaveAdvisor advisor) {
-                switch (key) {
-                    //Commands
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
-                    case "GetName" -> current = getName(advisor);
-                    case "GetYear" -> current = getYear(save);
-                    case "GetWomanMan" -> current = getAdvisorType(advisor, language);
-                    default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
-
-                        if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
-                        } else {
-                            current = getTag(save, key);
-                        }
-
-                        if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in advisor", key);
-                        }
-                    }
-                }
-            } else if (current.get() instanceof Monarch monarch) {
-                switch (key) {
-                    case "Dynasty" -> current = getDynasty(monarch);
-                    //Commands
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
-                    case "GetName" -> current = getName(monarch);
-                    case "GetYear" -> current = getYear(save);
-                    case "GetAdm" -> current = getAdm(monarch);
-                    case "GetDip" -> current = getDip(monarch);
-                    case "GetMil" -> current = getMil(monarch);
-                    case "GetTitle" -> current = getTitle(monarch, language);
-                    case "GetWomanMan" -> current = getTitle(monarch, language);
-                    default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
-
-                        if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
-                        } else {
-                            current = getTag(save, key);
-                        }
-
-                        if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in monarch", key);
-                        }
-                    }
-                }
             } else if (current.get() instanceof fr.osallek.eu4parser.model.game.Monarch monarch) {
                 switch (key) {
                     case "Dynasty" -> current = getDynasty(monarch);
-                    //Commands
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
-                    case "GetName" -> current = getName(monarch);
-                    case "GetYear" -> current = getYear(save);
+                    case "GetTitle" -> current = getTitle(monarch, language);
+                    case "GetWomanMan" -> current = getTitle(monarch, language);
                     case "GetAdm" -> current = getAdm(monarch);
                     case "GetDip" -> current = getDip(monarch);
                     case "GetMil" -> current = getMil(monarch);
-                    case "GetTitle" -> current = getTitle(monarch, language);
-                    case "GetWomanMan" -> current = getTitle(monarch, language);
+                    case "GetName" -> current = getName(monarch);
+                    //Commands
+                    case "GetDate" -> current = getDate(game, language);
+                    case "GetMonth" -> current = getMonth(game, language);
+                    case "Emperor" -> current = getEmperor(game);
+                    case "GetYear" -> current = getYear(game);
                     default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
                         } else {
-                            current = getTag(save, key);
+                            current = getTag(game, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                            }
                         }
 
                         if (current.isEmpty()) {
@@ -301,19 +445,24 @@ public final class LocalisationUtils {
                 }
             } else if (current.get() instanceof Religion religion) {
                 switch (key) {
-                    //Commands
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
-                    case "GetName" -> current = getName(religion, language);
-                    case "GetYear" -> current = getYear(save);
                     case "GetGroupName" -> current = getGroup(religion, language);
+                    //Commands
+                    case "GetDate" -> current = getDate(game, language);
+                    case "GetMonth" -> current = getMonth(game, language);
+                    case "Emperor" -> current = getEmperor(game);
+                    case "GetName" -> current = getName(religion, language);
+                    case "GetYear" -> current = getYear(game);
                     default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
                         } else {
-                            current = getTag(save, key);
+                            current = getTag(game, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                            }
                         }
 
                         if (current.isEmpty()) {
@@ -324,39 +473,23 @@ public final class LocalisationUtils {
             } else if (current.get() instanceof Culture culture) {
                 switch (key) {
                     //Commands
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
+                    case "GetDate" -> current = getDate(game, language);
+                    case "GetMonth" -> current = getMonth(game, language);
+                    case "Emperor" -> current = getEmperor(game);
                     case "GetName" -> current = getName(culture, language);
-                    case "GetYear" -> current = getYear(save);
+                    case "GetYear" -> current = getYear(game);
                     case "GetGroupName" -> current = getGroup(culture, language);
                     default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
                         } else {
-                            current = getTag(save, key);
-                        }
+                            current = getTag(game, key);
 
-                        if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in culture", key);
-                        }
-                    }
-                }
-            } else if (current.get() instanceof SaveTradeCompany tradeCompany) {
-                switch (key) {
-                    //Commands
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
-                    case "GetName" -> current = getName(tradeCompany);
-                    case "GetYear" -> current = getYear(save);
-                    default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
-
-                        if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
-                        } else {
-                            current = getTag(save, key);
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                            }
                         }
 
                         if (current.isEmpty()) {
@@ -367,17 +500,22 @@ public final class LocalisationUtils {
             } else if (current.get() instanceof TradeCompany tradeCompany) {
                 switch (key) {
                     //Commands
-                    case "GetDate" -> current = getDate(save, language);
-                    case "GetMonth" -> current = getMonth(save, language);
+                    case "GetDate" -> current = getDate(game, language);
+                    case "GetMonth" -> current = getMonth(game, language);
+                    case "Emperor" -> current = getEmperor(game);
                     case "GetName" -> current = getName(tradeCompany, language);
-                    case "GetYear" -> current = getYear(save);
+                    case "GetYear" -> current = getYear(game);
                     default -> {
-                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
                         } else {
-                            current = getTag(save, key);
+                            current = getTag(game, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                            }
                         }
 
                         if (current.isEmpty()) {
@@ -394,7 +532,7 @@ public final class LocalisationUtils {
             }
         }
 
-        return "";
+        return " ";
     }
 
     public static DateTimeFormatter getPrettyDateFormat(Eu4Language language) {
@@ -414,14 +552,30 @@ public final class LocalisationUtils {
                            if (root instanceof SaveCountry country) {
                                return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(country, country)).findFirst();
                            } else if (root instanceof SaveProvince province) {
-                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(province, province)).findFirst();
+                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(province)).findFirst();
+                           } else if (root instanceof Leader leader) {
+                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(leader)).findFirst();
                            } else {
                                return Optional.empty();
                            }
                        })
-                       .flatMap(t -> Optional.of(save)
-                                             .map(Save::getGame)
-                                             .map(game -> game.getComputedLocalisation(save, root, t.getLocalisationKey(), language)));
+                       .map(t -> save.getGame().getComputedLocalisation(save, root, t.getLocalisationKey(), language));
+    }
+
+    public static Optional<String> getCustomisableLocalisation(Game game, Object root, String key, Eu4Language language) {
+        return Optional.ofNullable(key)
+                       .flatMap(s -> Optional.ofNullable(game).map(g -> g.getCustomizableLocalization(s)))
+                       .filter(l -> CollectionUtils.isNotEmpty(l.getTexts()))
+                       .flatMap(l -> {
+                           if (root instanceof Country country) {
+                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(country, country)).findFirst();
+                           } else if (root instanceof Province province) {
+                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(province)).findFirst();
+                           } else {
+                               return Optional.empty();
+                           }
+                       })
+                       .map(t -> game.getComputedLocalisation(root, t.getLocalisationKey(), language));
     }
 
     public static Optional<SaveProvince> getCapital(SaveCountry country) {
@@ -617,6 +771,19 @@ public final class LocalisationUtils {
         return Optional.ofNullable(save).map(s -> save.getCountry(tag));
     }
 
+    public static Optional<Country> getTag(Game game, String tag) {
+        return Optional.ofNullable(game).map(g -> g.getCountry(tag));
+    }
+
+
+    public static Optional<SaveProvince> getProvince(Save save, Integer id) {
+        return Optional.ofNullable(save).map(s -> save.getProvince(id));
+    }
+
+    public static Optional<Province> getProvince(Game game, Integer id) {
+        return Optional.ofNullable(game).map(g -> g.getProvince(id));
+    }
+
     public static Optional<String> getAreaName(SaveProvince province, Eu4Language language) {
         return Optional.ofNullable(province)
                        .map(SaveProvince::getSave)
@@ -741,6 +908,10 @@ public final class LocalisationUtils {
         return Optional.ofNullable(save).map(Save::getDate).map(date -> date.format(getPrettyDateFormat(language)));
     }
 
+    public static Optional<String> getDate(Game game, Eu4Language language) {
+        return Optional.ofNullable(game).map(Game::getStartDate).map(date -> date.format(getPrettyDateFormat(language)));
+    }
+
     public static Optional<String> getDip(Monarch monarch) {
         return Optional.ofNullable(monarch).map(Monarch::getDip).map(String::valueOf);
     }
@@ -800,6 +971,22 @@ public final class LocalisationUtils {
                        .map(StringUtils::capitalize);
     }
 
+    public static Optional<String> getMonth(Game game, Eu4Language language) {
+        return Optional.ofNullable(game)
+                       .map(Game::getStartDate)
+                       .map(LocalDate::getMonth)
+                       .map(month -> month.getDisplayName(TextStyle.FULL, language.locale))
+                       .map(StringUtils::capitalize);
+    }
+
+    public static Optional<SaveCountry> getEmperor(Save save) {
+        return Optional.ofNullable(save).map(Save::getHre).filter(Predicate.not(Empire::dismantled)).map(Empire::getEmperor);
+    }
+
+    public static Optional<Country> getEmperor(Game game) {
+        return Optional.ofNullable(game).map(g -> g.getHreEmperorAt(g.getStartDate())).map(HreEmperor::getTag).map(game::getCountry);
+    }
+
     public static Optional<String> getName(SaveProvince province) {
         return Optional.ofNullable(province).map(SaveProvince::getName);
     }
@@ -841,11 +1028,13 @@ public final class LocalisationUtils {
     }
 
     public static Optional<String> getName(Monarch monarch) {
-        return Optional.ofNullable(monarch).map(Monarch::getMonarchName);
+        return Optional.ofNullable(monarch).map(Monarch::getMonarchName).or(() -> Optional.ofNullable(monarch).map(Monarch::getName));
     }
 
     public static Optional<String> getName(fr.osallek.eu4parser.model.game.Monarch monarch) {
-        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getMonarchName);
+        return Optional.ofNullable(monarch)
+                       .map(fr.osallek.eu4parser.model.game.Monarch::getMonarchName)
+                       .or(() -> Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getName));
     }
 
     public static Optional<String> getName(Heir heir) {
@@ -942,6 +1131,10 @@ public final class LocalisationUtils {
         return Optional.ofNullable(save).map(Save::getDate).map(LocalDate::getYear).map(String::valueOf);
     }
 
+    public static Optional<String> getYear(Game game) {
+        return Optional.ofNullable(game).map(Game::getStartDate).map(LocalDate::getYear).map(String::valueOf);
+    }
+
     public static Optional<String> getGovernmentName(SaveCountry country, Eu4Language language) {
         return Optional.ofNullable(country)
                        .map(SaveCountry::getGovernmentName)
@@ -994,15 +1187,11 @@ public final class LocalisationUtils {
     }
 
     public static String cleanLocalisation(String s) {
-        if (s == null) {
-            return null;
+        if (StringUtils.isEmpty(s)) {
+            return s;
         }
 
         StringBuilder localisationBuilder = new StringBuilder(s);
-
-        if (localisationBuilder.length() == 0) {
-            return s;
-        }
 
         int indexOf;
         while (localisationBuilder.toString().indexOf('§') >= 0) {
@@ -1030,9 +1219,9 @@ public final class LocalisationUtils {
             }
         }
 
-        return localisationBuilder.toString().replace("\\r\\n", "")
-                                  .replace("\\n", " ")
-                                  .replaceAll("[^'.\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", "")
-                                  .trim();
+        return StringUtils.normalizeSpace(localisationBuilder.toString()
+                                                             .replace("\\r\\n", "")
+                                                             .replace("\\n", " ")
+                                                             .replaceAll("[^'.\\-_\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", ""));
     }
 }

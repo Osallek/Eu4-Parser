@@ -80,6 +80,7 @@ public class ConditionsUtils {
         String value;
         SubjectType subjectType;
         Religion religion;
+        ConditionAnd scriptedTrigger;
 
         if ("ROOT".equals(rawValue)) {
             value = root.getTag().toUpperCase();
@@ -121,6 +122,10 @@ public class ConditionsUtils {
                           .stream()
                           .filter(province -> tradeGood.equals(province.getTradeGood()))
                           .count() >= NumbersUtils.toInt(value);
+        }
+
+        if ((scriptedTrigger = country.getSave().getGame().getScriptedTrigger(condition)) != null) {
+            return scriptedTrigger.apply(country, from);
         }
 
         switch (condition.toLowerCase()) {
@@ -1952,6 +1957,8 @@ public class ConditionsUtils {
         Government government;
         CountryHistoryItemI historyItem;
         CountryHistoryItemI otherHistoryItem;
+        ConditionAnd scriptedTrigger;
+        TradeGood tradeGood;
 
         if ("ROOT".equals(rawValue)) {
             value = root.getTag().toUpperCase();
@@ -1959,6 +1966,22 @@ public class ConditionsUtils {
             value = from.getTag().toUpperCase();
         } else {
             value = rawValue;
+        }
+
+        if (country.getGame().getBuilding(condition) != null) {
+            return country.getOwnedProvinceAt(country.getGame().getStartDate())
+                          .filter(i -> i.getCumulatedBuildings().stream().anyMatch(b -> b.getName().equals(value)))
+                          .count() >= NumbersUtils.toInt(value);
+        }
+
+        if ((tradeGood = country.getGame().getTradeGood(condition)) != null) {
+            return country.getOwnedProvinceAt(country.getGame().getStartDate())
+                          .filter(i -> tradeGood.equals(i.getTradeGoods()))
+                          .count() >= NumbersUtils.toInt(value);
+        }
+
+        if ((scriptedTrigger = country.getGame().getScriptedTrigger(condition)) != null) {
+            return scriptedTrigger.apply(country, from);
         }
 
         switch (condition.toLowerCase()) {
@@ -3356,6 +3379,7 @@ public class ConditionsUtils {
         Integer integer;
         SaveCountry other;
         Building building;
+        ConditionAnd scriptedTrigger;
 
         if ("ROOT".equals(rawValue)) {
             value = province.getOwnerTag();
@@ -3367,6 +3391,10 @@ public class ConditionsUtils {
 
         if ((institution = province.getSave().getGame().getInstitution(condition)) != null) {
             return province.getInstitutionsProgress().get(institution.getIndex()) >= NumbersUtils.toDouble(value);
+        }
+
+        if ((scriptedTrigger = province.getSave().getGame().getScriptedTrigger(condition)) != null) {
+            return scriptedTrigger.apply(province);
         }
 
         switch (condition.toLowerCase()) {
@@ -3965,11 +3993,16 @@ public class ConditionsUtils {
         Country other;
         Building building;
         ProvinceHistoryItemI historyItem;
+        ConditionAnd scriptedTrigger;
 
         if ("ROOT".equals(rawValue) || "FROM".equals(rawValue)) {
             value = Optional.ofNullable(province.getHistoryItemAt(province.getGame().getStartDate()).getOwner()).map(Country::getTag).orElse(null);
         } else {
             value = rawValue;
+        }
+
+        if ((scriptedTrigger = province.getGame().getScriptedTrigger(condition)) != null) {
+            return scriptedTrigger.apply(province);
         }
 
         switch (condition.toLowerCase()) {

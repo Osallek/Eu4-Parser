@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,6 +49,12 @@ public abstract class ConditionAbstract {
                               default -> new ConditionAnd(child);
                           })
                           .toList();
+    }
+
+    @SafeVarargs
+    protected ConditionAbstract(Predicate<String> filter, Pair<String, String>... conditions) {
+        this(filter);
+        this.conditions = Arrays.stream(conditions).collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())));
     }
 
     public ConditionTagOnly tagOnly() {
@@ -110,8 +117,6 @@ public abstract class ConditionAbstract {
     public abstract boolean apply(SaveProvince province);
 
     public abstract boolean apply(Province province);
-
-    public abstract boolean apply(SaveProvince province, SaveProvince from);
 
     public abstract boolean apply(SaveCountry country, SaveProvince from);
 
