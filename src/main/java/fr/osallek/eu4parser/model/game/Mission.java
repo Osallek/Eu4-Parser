@@ -3,10 +3,13 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.imageio.ImageIO;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +26,8 @@ public class Mission extends Nodded {
     private final Game game;
 
     private final MissionsTree missionsTree;
+
+    private Path writenTo;
 
     public Mission(ClausewitzItem item, Game game, MissionsTree missionsTree) {
         super(missionsTree.getFileNode());
@@ -135,6 +140,21 @@ public class Mission extends Nodded {
         } else {
             this.item.addList("required_missions", requiredMissions.stream().filter(Objects::nonNull).toList());
         }
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(ImageIO.read(getIconFile()), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     @Override
