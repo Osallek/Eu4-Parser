@@ -23,6 +23,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.security.MessageDigest;
 import java.text.Collator;
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -181,6 +182,8 @@ public final class Eu4Utils {
     public static final Path DOCUMENTS_FOLDER;
 
     public static final Path OSALLEK_DOCUMENTS_FOLDER;
+
+    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
 
     static {
         Path documentsFolder1;
@@ -449,5 +452,46 @@ public final class Eu4Utils {
         }
 
         return keys;
+    }
+
+    public static Optional<String> getFileChecksum(File file) {
+        return Optional.ofNullable(file).map(File::toPath).flatMap(Eu4Utils::getFileChecksum);
+    }
+
+    public static Optional<String> getFileChecksum(Path path) {
+        return Optional.ofNullable(path).filter(Files::exists).filter(Files::isReadable).map(p -> {
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+                try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(path.toFile()))) {
+                    byte[] buffer = new byte[8192];
+                    int count;
+
+                    while ((count = bis.read(buffer)) > 0) {
+                        md.update(buffer, 0, count);
+                    }
+                }
+
+                return bytesToHex(md.digest());
+            } catch (Exception e) {
+                LOGGER.error("Could not get hash of {}: {}", path.getFileName(), e.getMessage(), e);
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Thanks to <a href="https://stackoverflow.com/a/9855338">...</a>
+     */
+    public static String bytesToHex(byte[] bytes) {
+        byte[] hexChars = new byte[bytes.length * 2];
+
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+
+        return new String(hexChars, StandardCharsets.UTF_8);
     }
 }
