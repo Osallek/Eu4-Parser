@@ -2097,7 +2097,7 @@ public class ConditionsUtils {
                 return true;
             case "government":
                 return (historyItem = country.getHistoryItemAt(country.getGame().getStartDate())).getGovernment() != null
-                       && historyItem.getGovernment().getName().equals(ClausewitzUtils.addQuotes(value));
+                       && ClausewitzUtils.removeQuotes(historyItem.getGovernment().getName()).equals(ClausewitzUtils.removeQuotes(value));
             case "government_rank":
                 return country.getHistoryItemAt(country.getGame().getStartDate()).getGovernmentLevel() >= NumbersUtils.toInt(value);
             case "guaranteed_by":

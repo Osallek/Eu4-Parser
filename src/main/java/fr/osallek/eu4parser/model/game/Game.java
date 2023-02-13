@@ -1578,7 +1578,7 @@ public class Game {
             return null;
         }
 
-        return this.customizableLocalizations.get(key);
+        return this.customizableLocalizations.get(StringUtils.toRootLowerCase(key));
     }
 
     public void setCustomizableLocalizations(Map<String, CustomizableLocalization> customizableLocalizations) {
@@ -2822,7 +2822,8 @@ public class Game {
                     this.customizableLocalizations.putAll(item.getChildren("defined_text")
                                                               .stream()
                                                               .map(i -> new CustomizableLocalization(i, this, fileNode))
-                                                              .collect(Collectors.toMap(CustomizableLocalization::getName, Function.identity(), (a, b) -> b)));
+                                                              .collect(Collectors.toMap(l -> StringUtils.toRootLowerCase(l.getName()), Function.identity(),
+                                                                                        (a, b) -> b)));
                 });
     }
 

@@ -94,6 +94,7 @@ public final class LocalisationUtils {
                     case "GetAdm" -> current = getAdmAdvisor(country).map(a -> getAdvisorType(a, language));
                     case "GetDip" -> current = getDipAdvisor(country).map(a -> getAdvisorType(a, language));
                     case "GetMil" -> current = getMilAdvisor(country).map(a -> getAdvisorType(a, language));
+                    case "GetClergyName" -> current = getClergyEstate(country, language);
                     //Commands
                     case "GetAdjective" -> current = getAdjective(country, language);
                     case "GetDate" -> current = getDate(save, language);
@@ -202,6 +203,13 @@ public final class LocalisationUtils {
                     case "GetMil" -> current = getMil(monarch);
                     case "GetTitle" -> current = getTitle(monarch, language);
                     case "GetWomanMan" -> current = getTitle(monarch, language);
+                    case "GetHerHis" -> current = getHerHis(monarch, language);
+                    case "GetHerHisCap" -> current = getHerHis(monarch, language).map(StringUtils::capitalize);
+                    case "GetHerselfHimself" -> current = getHerselfHimself(monarch, language);
+                    case "GetHerselfHimselfCap" -> current = getHerselfHimself(monarch, language).map(StringUtils::capitalize);
+                    case "GetSheHe" -> current = getSheHe(monarch, language);
+                    case "GetSheHeCap" -> current = getSheHe(monarch, language).map(StringUtils::capitalize);
+                    case "GetSisterBrother" -> current = getSisterBrother(monarch, language);
                     default -> {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
@@ -344,6 +352,7 @@ public final class LocalisationUtils {
                     case "GetAdm" -> current = getAdmAdvisor(country).map(a -> getAdvisorType(a, language));
                     case "GetDip" -> current = getDipAdvisor(country).map(a -> getAdvisorType(a, language));
                     case "GetMil" -> current = getMilAdvisor(country).map(a -> getAdvisorType(a, language));
+                    case "GetClergyName" -> current = getClergyEstate(country, language);
                     //Commands
                     case "GetAdjective" -> current = getAdjective(country, language);
                     case "GetDate" -> current = getDate(game, language);
@@ -420,6 +429,13 @@ public final class LocalisationUtils {
                     case "GetDip" -> current = getDip(monarch);
                     case "GetMil" -> current = getMil(monarch);
                     case "GetName" -> current = getName(monarch);
+                    case "GetHerHis" -> current = getHerHis(monarch, language);
+                    case "GetHerHisCap" -> current = getHerHis(monarch, language).map(StringUtils::capitalize);
+                    case "GetHerselfHimself" -> current = getHerselfHimself(monarch, language);
+                    case "GetHerselfHimselfCap" -> current = getHerselfHimself(monarch, language).map(StringUtils::capitalize);
+                    case "GetSheHe" -> current = getSheHe(monarch, language);
+                    case "GetSheHeCap" -> current = getSheHe(monarch, language).map(StringUtils::capitalize);
+                    case "GetSisterBrother" -> current = getSisterBrother(monarch, language);
                     //Commands
                     case "GetDate" -> current = getDate(game, language);
                     case "GetMonth" -> current = getMonth(game, language);
@@ -533,6 +549,102 @@ public final class LocalisationUtils {
         }
 
         return " ";
+    }
+
+    private static Optional<String> getHerHis(Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> "son";
+                           case SPANISH -> "su";
+                           case ENGLISH -> bool ? "her" : "his";
+                           case GERMAN -> bool ? "seine" : "ihr";
+                       });
+    }
+
+    private static Optional<String> getHerHis(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> "son";
+                           case SPANISH -> "su";
+                           case ENGLISH -> bool ? "her" : "his";
+                           case GERMAN -> bool ? "seine" : "ihr";
+                       });
+    }
+
+    private static Optional<String> getHerselfHimself(Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> bool ? "elle-même" : "lui-même";
+                           case SPANISH -> bool ? "ella misma" : "él mismo";
+                           case ENGLISH -> bool ? "herself" : "himself";
+                           case GERMAN -> bool ? "sie selbst" : "er selbst";
+                       });
+    }
+
+    private static Optional<String> getHerselfHimself(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> bool ? "elle-même" : "lui-même";
+                           case SPANISH -> bool ? "ella misma" : "él mismo";
+                           case ENGLISH -> bool ? "herself" : "himself";
+                           case GERMAN -> bool ? "sie selbst" : "er selbst";
+                       });
+    }
+
+    private static Optional<String> getSheHe(Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> bool ? "elle" : "il";
+                           case SPANISH -> bool ? "ella" : "él";
+                           case ENGLISH -> bool ? "she" : "he";
+                           case GERMAN -> bool ? "sie" : "er";
+                       });
+    }
+
+    private static Optional<String> getSheHe(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> bool ? "elle" : "il";
+                           case SPANISH -> bool ? "ella" : "él";
+                           case ENGLISH -> bool ? "she" : "he";
+                           case GERMAN -> bool ? "sie" : "er";
+                       });
+    }
+
+    private static Optional<String> getSisterBrother(Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> bool ? "sœur" : "frère";
+                           case SPANISH -> bool ? "hermana" : "hermano";
+                           case ENGLISH -> bool ? "sister" : "brother";
+                           case GERMAN -> bool ? "schwester" : "bruder";
+                       });
+    }
+
+    private static Optional<String> getSisterBrother(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
+        return Optional.ofNullable(monarch)
+                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
+                       .map(BooleanUtils::toBoolean)
+                       .map(bool -> switch (language) {
+                           case FRENCH -> bool ? "sœur" : "frère";
+                           case SPANISH -> bool ? "hermana" : "hermano";
+                           case ENGLISH -> bool ? "sister" : "brother";
+                           case GERMAN -> bool ? "schwester" : "bruder";
+                       });
     }
 
     public static DateTimeFormatter getPrettyDateFormat(Eu4Language language) {
@@ -765,6 +877,20 @@ public final class LocalisationUtils {
 
     public static Optional<SaveAdvisor> getMilAdvisor(Country country) {
         return Optional.empty();
+    }
+
+    public static Optional<String> getClergyEstate(SaveCountry country, Eu4Language language) {
+        return Optional.ofNullable(country)
+                       .map(c -> c.getEstate("estate_church"))
+                       .map(e -> e.getEstateGame().getName())
+                       .map(s -> country.getSave().getGame().getLocalisation(s, language))
+                       .map(Localisation::getValue);
+    }
+
+    public static Optional<String> getClergyEstate(Country country, Eu4Language language) {
+        return Optional.ofNullable(country)
+                       .map(c -> c.getGame().getLocalisation("estate_church", language))
+                       .map(Localisation::getValue);
     }
 
     public static Optional<SaveCountry> getTag(Save save, String tag) {
@@ -1222,6 +1348,6 @@ public final class LocalisationUtils {
         return StringUtils.normalizeSpace(localisationBuilder.toString()
                                                              .replace("\\r\\n", "")
                                                              .replace("\\n", " ")
-                                                             .replaceAll("[^'.\\-_\\p{L}\\p{M}\\p{Alnum}\\p{Space}]", ""));
+                                                             .replaceAll("[^«»\\p{Punct}\\p{L}\\p{M}\\p{Alnum}\\s ]", ""));
     }
 }
