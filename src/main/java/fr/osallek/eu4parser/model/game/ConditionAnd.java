@@ -8,8 +8,6 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.List;
-
 public class ConditionAnd extends ConditionAbstract {
     
     @SafeVarargs
@@ -26,11 +24,6 @@ public class ConditionAnd extends ConditionAbstract {
         this.name = other.name;
         this.conditions = other.conditions;
         this.scopes = other.getScopes();
-    }
-
-    @Override
-    public List<? extends ConditionAbstract> getScopes() {
-        return this.scopes;
     }
 
     public boolean apply(SaveCountry root, SaveCountry from) {

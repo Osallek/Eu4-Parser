@@ -9,7 +9,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +26,9 @@ public abstract class ConditionAbstract {
 
     protected Predicate<String> filter;
 
-    protected List<? extends ConditionAbstract> scopes;
+    protected List<ConditionAbstract> scopes;
+
+    protected Map<String, List<ConditionAbstract>> clauses;
 
     protected ConditionAbstract(Predicate<String> filter) {
         this.filter = filter;
@@ -40,15 +44,23 @@ public abstract class ConditionAbstract {
                               .filter(variable -> CollectionUtils.isEmpty(list) || !list.contains(variable.getName()))
                               .collect(Collectors.groupingBy(variable -> variable.getName().toLowerCase(),
                                                              Collectors.mapping(v -> ClausewitzUtils.removeQuotes(v.getValue()), Collectors.toList())));
-        this.scopes = item.getChildren()
-                          .stream()
-                          .filter(child -> CollectionUtils.isEmpty(list) || !list.contains(child.getName()))
-                          .map(child -> switch (child.getName().toLowerCase()) {
-                              case "not" -> new ConditionNot(child);
-                              case "or" -> new ConditionOr(child);
-                              default -> new ConditionAnd(child);
-                          })
-                          .toList();
+        this.scopes = new ArrayList<>();
+        this.clauses = new HashMap<>();
+
+        item.getChildren()
+            .stream()
+            .filter(child -> CollectionUtils.isEmpty(list) || !list.contains(child.getName()))
+            .forEach(child -> {
+                switch (child.getName().toLowerCase()) {
+                    case "not" -> this.scopes.add(new ConditionNot(child));
+                    case "or" -> this.scopes.add(new ConditionOr(child));
+                    case "and" -> this.scopes.add(new ConditionAnd(child));
+                    default -> {
+                        this.clauses.putIfAbsent(child.getName(), new ArrayList<>());
+                        this.clauses.get(child.getName()).add(new ConditionAnd(child));
+                    }
+                }
+            });
     }
 
     @SafeVarargs
@@ -99,12 +111,16 @@ public abstract class ConditionAbstract {
         return (this.conditions != null && this.conditions.containsKey(condition.toLowerCase())) ? this.conditions.get(condition.toLowerCase()).get(0) : null;
     }
 
-    public List<? extends ConditionAbstract> getScopes() {
+    public List<ConditionAbstract> getScopes() {
         return scopes;
     }
 
-    public List<? extends ConditionAbstract> getScopes(String name) {
+    public List<ConditionAbstract> getScopes(String name) {
         return getScopes() == null ? null : getScopes().stream().filter(condition -> name.equals(condition.getName())).toList();
+    }
+
+    public Map<String, List<ConditionAbstract>> getClauses() {
+        return clauses;
     }
 
     public boolean isEmpty() {
