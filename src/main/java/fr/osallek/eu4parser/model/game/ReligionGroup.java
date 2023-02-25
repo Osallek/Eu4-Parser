@@ -127,7 +127,7 @@ public class ReligionGroup {
     }
 
     public List<Religion> getReligions() {
-        return this.item.getChildren()
+        return this.item.getChildrenNot("religious_schools")
                         .stream()
                         .map(child -> new Religion(child, this))
                         .toList();

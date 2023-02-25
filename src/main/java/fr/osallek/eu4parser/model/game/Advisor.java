@@ -1,12 +1,16 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Power;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
 
+import javax.imageio.ImageIO;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +21,8 @@ public class Advisor extends Nodded {
     private final ClausewitzItem item;
 
     private final Game game;
+
+    private Path writenTo;
 
     public Advisor(ClausewitzItem item, Game game, FileNode fileNode) {
         super(fileNode);
@@ -106,6 +112,21 @@ public class Advisor extends Nodded {
 
     public File getDefaultImage() {
         return this.game.getSpriteTypeImageFile(getDefaultSpriteName());
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(ImageIO.read(getDefaultImage()), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     @Override
