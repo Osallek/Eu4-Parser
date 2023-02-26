@@ -2,8 +2,11 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Power;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -11,13 +14,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
+
+import javax.imageio.ImageIO;
 
 public class IdeaGroup {
 
     private final ClausewitzItem item;
 
     private final Game game;
+
+    private Path writenTo;
 
     public IdeaGroup(ClausewitzItem item, Game game) {
         this.item = item;
@@ -98,6 +107,21 @@ public class IdeaGroup {
 
     public File getImage() {
         return this.game.getSpriteTypeImageFile("GFX_idea_" + getName());
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(ImageIO.read(getImage()), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     @Override

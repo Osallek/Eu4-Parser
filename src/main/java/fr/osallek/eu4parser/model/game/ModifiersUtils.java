@@ -576,6 +576,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("local_gold_depletion_chance_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("amount_of_carolean", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("local_center_of_trade_upgrade_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("overlord_naval_forcelimit_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {

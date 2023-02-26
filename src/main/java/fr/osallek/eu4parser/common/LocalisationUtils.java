@@ -24,7 +24,6 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.FlagShip;
 import fr.osallek.eu4parser.model.save.country.Heir;
-import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.Monarch;
 import fr.osallek.eu4parser.model.save.country.Navy;
 import fr.osallek.eu4parser.model.save.country.Queen;
@@ -62,9 +61,9 @@ public final class LocalisationUtils {
 
     private LocalisationUtils() {}
 
-    public static String replaceScope(Save save, Object root, String scope, Eu4Language language) {
+    public static Optional<String> replaceScope(Save save, Object root, String scope, Eu4Language language) {
         if (save == null || root == null || StringUtils.isBlank(scope) || language == null) {
-            return " ";
+            return Optional.empty();
         }
 
         scope = StringUtils.stripEnd(StringUtils.stripStart(scope, "["), "]");
@@ -109,12 +108,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
                         } else {
                             current = getTag(save, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
                             }
                         }
 
@@ -148,12 +147,16 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
                         } else {
                             current = getTag(save, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
+                            }
+
+                            if (current.isEmpty() && MapUtils.isNotEmpty(province.getVariables()) && province.getVariables().containsKey(key)) {
+                                current = Optional.of(String.valueOf(province.getVariables().get(key)));
                             }
                         }
 
@@ -175,12 +178,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
                         } else {
                             current = getTag(save, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
                             }
                         }
 
@@ -214,12 +217,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
                         } else {
                             current = getTag(save, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
                             }
                         }
 
@@ -241,12 +244,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
                         } else {
                             current = getTag(save, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
                             }
                         }
 
@@ -268,12 +271,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
                         } else {
                             current = getTag(save, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
                             }
                         }
 
@@ -294,12 +297,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(save, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
                         } else {
                             current = getTag(save, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(save, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
                             }
                         }
 
@@ -313,16 +316,16 @@ public final class LocalisationUtils {
             if (current.isEmpty()) {
                 break;
             } else if (current.get() instanceof String s) {
-                return ClausewitzUtils.removeQuotes(s);
+                return Optional.ofNullable(ClausewitzUtils.removeQuotes(s));
             }
         }
 
-        return " ";
+        return Optional.empty();
     }
 
-    public static String replaceScope(Game game, Object root, String scope, Eu4Language language) {
+    public static Optional<String> replaceScope(Game game, Object root, String scope, Eu4Language language) {
         if (game == null || root == null || StringUtils.isBlank(scope) || language == null) {
-            return " ";
+            return Optional.empty();
         }
 
         scope = StringUtils.stripEnd(StringUtils.stripStart(scope, "["), "]");
@@ -367,12 +370,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
                         } else {
                             current = getTag(game, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
                             }
                         }
 
@@ -406,12 +409,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
                         } else {
                             current = getTag(game, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
                             }
                         }
 
@@ -445,12 +448,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
                         } else {
                             current = getTag(game, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
                             }
                         }
 
@@ -472,12 +475,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
                         } else {
                             current = getTag(game, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
                             }
                         }
 
@@ -499,12 +502,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
                         } else {
                             current = getTag(game, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
                             }
                         }
 
@@ -525,12 +528,12 @@ public final class LocalisationUtils {
                         CustomizableLocalization localization = game.getCustomizableLocalization(key);
 
                         if (localization != null) {
-                            current = getCustomisableLocalisation(game, current.orElse(null), key, language);
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
                         } else {
                             current = getTag(game, key);
 
                             if (current.isEmpty()) {
-                                current = NumbersUtils.parseInt(key).map(id -> getProvince(game, id));
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
                             }
                         }
 
@@ -544,17 +547,16 @@ public final class LocalisationUtils {
             if (current.isEmpty()) {
                 break;
             } else if (current.get() instanceof String s) {
-                return ClausewitzUtils.removeQuotes(s);
+                return Optional.ofNullable(ClausewitzUtils.removeQuotes(s));
             }
         }
 
-        return " ";
+        return Optional.empty();
     }
 
     private static Optional<String> getHerHis(Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> "son";
                            case SPANISH -> "su";
@@ -565,8 +567,7 @@ public final class LocalisationUtils {
 
     private static Optional<String> getHerHis(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> "son";
                            case SPANISH -> "su";
@@ -577,8 +578,7 @@ public final class LocalisationUtils {
 
     private static Optional<String> getHerselfHimself(Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> bool ? "elle-même" : "lui-même";
                            case SPANISH -> bool ? "ella misma" : "él mismo";
@@ -589,8 +589,7 @@ public final class LocalisationUtils {
 
     private static Optional<String> getHerselfHimself(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> bool ? "elle-même" : "lui-même";
                            case SPANISH -> bool ? "ella misma" : "él mismo";
@@ -601,8 +600,7 @@ public final class LocalisationUtils {
 
     private static Optional<String> getSheHe(Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> bool ? "elle" : "il";
                            case SPANISH -> bool ? "ella" : "él";
@@ -613,8 +611,7 @@ public final class LocalisationUtils {
 
     private static Optional<String> getSheHe(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> bool ? "elle" : "il";
                            case SPANISH -> bool ? "ella" : "él";
@@ -625,8 +622,7 @@ public final class LocalisationUtils {
 
     private static Optional<String> getSisterBrother(Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> bool ? "sœur" : "frère";
                            case SPANISH -> bool ? "hermana" : "hermano";
@@ -637,8 +633,7 @@ public final class LocalisationUtils {
 
     private static Optional<String> getSisterBrother(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
         return Optional.ofNullable(monarch)
-                       .map(fr.osallek.eu4parser.model.game.Monarch::getFemale)
-                       .map(BooleanUtils::toBoolean)
+                       .map(m -> BooleanUtils.toBoolean(m.getFemale()))
                        .map(bool -> switch (language) {
                            case FRENCH -> bool ? "sœur" : "frère";
                            case SPANISH -> bool ? "hermana" : "hermano";
@@ -656,27 +651,8 @@ public final class LocalisationUtils {
                                         .replace("uu", "uuuu"));
     }
 
-    public static Optional<String> getCustomisableLocalisation(Save save, Object root, String key, Eu4Language language) {
-        return Optional.ofNullable(key)
-                       .flatMap(s -> Optional.ofNullable(save).map(Save::getGame).map(game -> game.getCustomizableLocalization(s)))
-                       .filter(l -> CollectionUtils.isNotEmpty(l.getTexts()))
-                       .flatMap(l -> {
-                           if (root instanceof SaveCountry country) {
-                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(country, country)).findFirst();
-                           } else if (root instanceof SaveProvince province) {
-                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(province)).findFirst();
-                           } else if (root instanceof Leader leader) {
-                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(leader)).findFirst();
-                           } else {
-                               return Optional.empty();
-                           }
-                       })
-                       .map(t -> save.getGame().getComputedLocalisation(save, root, t.getLocalisationKey(), language));
-    }
-
-    public static Optional<String> getCustomisableLocalisation(Game game, Object root, String key, Eu4Language language) {
-        return Optional.ofNullable(key)
-                       .flatMap(s -> Optional.ofNullable(game).map(g -> g.getCustomizableLocalization(s)))
+    public static Optional<String> getCustomisableLocalisation(Game game, Object root, CustomizableLocalization localization, Eu4Language language) {
+        return Optional.ofNullable(localization)
                        .filter(l -> CollectionUtils.isNotEmpty(l.getTexts()))
                        .flatMap(l -> {
                            if (root instanceof Country country) {
@@ -1232,7 +1208,33 @@ public final class LocalisationUtils {
     }
 
     public static Optional<String> getTitle(fr.osallek.eu4parser.model.game.Monarch monarch, Eu4Language language) {
-        return Optional.empty();
+        return Optional.ofNullable(monarch)
+                       .flatMap(m -> Optional.ofNullable(m.getCountry())
+                                             .flatMap(c -> Optional.ofNullable(c.getGame().getGovernmentNames())
+                                                                   .filter(CollectionUtils::isNotEmpty)
+                                                                   .flatMap(names -> names.stream().filter(name -> name.getTrigger().apply(c, c)).findFirst())
+                                                                   .map(name -> {
+                                                                       if (fr.osallek.eu4parser.model.game.Monarch.class.equals(monarch.getClass())) {
+                                                                           return BooleanUtils.toBoolean(monarch.getFemale()) ? name.getRulersFemale()
+                                                                                                                              : name.getRulersMale();
+                                                                       } else if (fr.osallek.eu4parser.model.game.Queen.class.equals(monarch.getClass())) {
+                                                                           return BooleanUtils.toBoolean(monarch.getFemale()) ? name.getConsortsFemale()
+                                                                                                                              : name.getConsortsMale();
+                                                                       } else if (fr.osallek.eu4parser.model.game.Heir.class.equals(monarch.getClass())) {
+                                                                           return BooleanUtils.toBoolean(monarch.getFemale()) ? name.getHeirsFemale()
+                                                                                                                              : name.getHeirsMale();
+                                                                       } else {
+                                                                           return null;
+                                                                       }
+                                                                   })
+                                                                   .map(ranks -> ranks.get(
+                                                                           c.getHistoryItemAt(c.getGame().getStartDate()).getGovernmentLevel())))
+                                             .flatMap(s -> Optional.of(monarch)
+                                                                   .map(fr.osallek.eu4parser.model.game.Monarch::getCountry)
+                                                                   .map(Country::getGame)
+                                                                   .map(game -> game.getLocalisation(s, language)))
+                                             .map(Localisation::getValue)
+                                             .map(StringUtils::capitalize));
     }
 
     public static Optional<String> getTradeGoodName(SaveProvince province, Eu4Language language) {
@@ -1271,16 +1273,14 @@ public final class LocalisationUtils {
     }
 
     public static Optional<String> getGovernmentName(Country country, Eu4Language language) {
-        //Fixme
-        /*return Optional.ofNullable(country)
-                       .map(c -> c.getHistoryItemAt(c.getGame().getStartDate()))
-                       .map(CountryHistoryItemI::getGovernment)
+        return Optional.ofNullable(country)
+                       .map(c -> c.getGame().getGovernmentNames())
+                       .filter(CollectionUtils::isNotEmpty)
+                       .flatMap(names -> names.stream().filter(name -> name.getTrigger().apply(country, country)).findFirst())
                        .map(GovernmentName::getRanks)
                        .map(map -> map.get(country.getHistoryItemAt(country.getGame().getStartDate()).getGovernmentLevel()))
                        .flatMap(s -> Optional.of(country).map(Country::getGame).map(game -> game.getLocalisation(s, language)))
-                       .map(Localisation::getValue);*/
-
-        return Optional.empty();
+                       .map(Localisation::getValue);
     }
 
     public static Optional<String> getAdjective(SaveCountry country, Eu4Language language) {

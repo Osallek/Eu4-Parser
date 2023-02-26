@@ -6,14 +6,18 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ReligionGroup {
 
     private final ClausewitzItem item;
 
     private final Game game;
+
+    private List<ReligiousSchool> religiousSchools;
 
     public ReligionGroup(ClausewitzItem item, Game game) {
         this.item = item;
@@ -131,6 +135,16 @@ public class ReligionGroup {
                         .stream()
                         .map(child -> new Religion(child, this))
                         .toList();
+    }
+
+    public List<ReligiousSchool> getReligiousSchools() {
+        if (this.religiousSchools == null) {
+            this.religiousSchools = Optional.ofNullable(this.item.getChild("religious_schools"))
+                                            .map(i -> i.getChildren().stream().map(ii -> new ReligiousSchool(ii, this.game)).toList())
+                                            .orElse(new ArrayList<>());
+        }
+
+        return this.religiousSchools;
     }
 
     public Game getGame() {

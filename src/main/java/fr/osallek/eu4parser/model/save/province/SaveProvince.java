@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.save.province;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.UnitType;
@@ -147,6 +148,12 @@ public class SaveProvince extends Province {
 
     public ListOfDates getFlags() {
         return flags;
+    }
+
+    public Map<String, Double> getVariables() {
+        return Optional.ofNullable(this.item.getChild("variables"))
+                       .map(i -> i.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble)))
+                       .orElse(null);
     }
 
     public String getTerritorialCore() {

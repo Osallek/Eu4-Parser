@@ -1538,7 +1538,7 @@ public class Game {
         }
 
         for (String matche : matches) {
-            s = s.replace(matche, LocalisationUtils.replaceScope(save, root, matche, localisation.getEu4Language()));
+            s = s.replace(matche, LocalisationUtils.replaceScope(save, root, matche, localisation.getEu4Language()).orElse(" "));
         }
 
         return LocalisationUtils.cleanLocalisation(s);
@@ -1555,7 +1555,31 @@ public class Game {
         }
 
         for (String matche : matches) {
-            s = s.replace(matche, LocalisationUtils.replaceScope(this, root, matche, localisation.getEu4Language()));
+            s = s.replace(matche, LocalisationUtils.replaceScope(this, root, matche, localisation.getEu4Language()).orElse(" "));
+        }
+
+        return LocalisationUtils.cleanLocalisation(s);
+    }
+
+    public String getComputedLocalisation(List<Object> roots, Localisation localisation) {
+        String s = localisation.getValue();
+
+        Matcher matcher = Eu4Utils.LOCALISATION_REPLACE_PATTERN.matcher(s);
+        List<String> matches = new ArrayList<>();
+
+        while (matcher.find()) {
+            matches.add(matcher.group());
+        }
+
+        for (String matche : matches) {
+            for (Object root : roots) {
+                Optional<String> replace = LocalisationUtils.replaceScope(this, root, matche, localisation.getEu4Language());
+
+                if (replace.isPresent()) {
+                    s = s.replace(matche, replace.get());
+                    break;
+                }
+            }
         }
 
         return LocalisationUtils.cleanLocalisation(s);
@@ -3674,7 +3698,8 @@ public class Game {
                         this.estatePrivileges.putAll(estatePrivilegesItem.getChildren()
                                                                          .stream()
                                                                          .map(item -> new EstatePrivilege(item, this))
-                                                                         .collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b)));
+                                                                         .collect(
+                                                                                 Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b)));
                     } catch (Exception e) {
                         LOGGER.error("{}", e.getMessage(), e);
                     }
@@ -3865,7 +3890,7 @@ public class Game {
                     ClausewitzItem greatProjectsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.greatProjects.putAll(greatProjectsItem.getChildren()
                                                                .stream()
-                                                               .map(GreatProject::new)
+                                                               .map(item -> new GreatProject(item, this))
                                                                .collect(Collectors.toMap(GreatProject::getName, Function.identity(), (a, b) -> b)));
                 });
     }

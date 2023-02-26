@@ -1,13 +1,19 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.game.effects.Effects;
+
+import java.util.Optional;
 
 public class GreatProjectTier {
 
     private final ClausewitzItem item;
 
-    public GreatProjectTier(ClausewitzItem item) {
+    private final Game game;
+
+    public GreatProjectTier(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
     }
 
     public String getName() {
@@ -57,5 +63,9 @@ public class GreatProjectTier {
 
     public Modifiers getCountryModifiers() {
         return new Modifiers(this.item.getChild("country_modifiers"));
+    }
+
+    public Effects getOnUpgraded() {
+        return Optional.ofNullable(this.item.getChild("on_upgraded")).map(i -> new Effects(i, this.game)).orElse(null);
     }
 }

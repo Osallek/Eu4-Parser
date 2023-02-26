@@ -1,19 +1,29 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.game.effects.Effects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class GreatProject {
 
     private final ClausewitzItem item;
 
-    public GreatProject(ClausewitzItem item) {
+    private final Game game;
+
+    private Path writenTo;
+
+    public GreatProject(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
     }
 
     public String getName() {
@@ -38,6 +48,14 @@ public class GreatProject {
 
     public void setDate(LocalDate date) {
         this.item.setVariable("date", date);
+    }
+
+    public Integer getMoveDaysPerUnitDistance() {
+        return this.item.getVarAsInt("move_days_per_unit_distance");
+    }
+
+    public void setMoveDaysPerUnitDistance(Integer days) {
+        this.item.setVariable("move_days_per_unit_distance", days);
     }
 
     public Time getTime() {
@@ -88,11 +106,47 @@ public class GreatProject {
     }
 
     public List<GreatProjectTier> getTiers() {
-        return this.item.getChildrenStartWith("tier_").stream().map(GreatProjectTier::new).toList();
+        return this.item.getChildrenStartWith("tier_").stream().map(item1 -> new GreatProjectTier(item1, this.game)).toList();
     }
 
     public int getMaxLevel() {
         return Math.max(0, CollectionUtils.size(this.item.getChildrenStartWith("tier_")) - 1);
+    }
+
+    public ConditionAnd getCanUpgradeTrigger() {
+        return Optional.ofNullable(this.item.getChild("can_upgrade_trigger")).map(ConditionAnd::new).orElse(null);
+    }
+
+    public ConditionAnd getCanUseModifiersTrigger() {
+        return Optional.ofNullable(this.item.getChild("can_use_modifiers_trigger")).map(ConditionAnd::new).orElse(null);
+    }
+
+    public ConditionAnd getKeepTrigger() {
+        return Optional.ofNullable(this.item.getChild("keep_trigger")).map(ConditionAnd::new).orElse(null);
+    }
+
+    public ConditionAnd getBuildTrigger() {
+        return Optional.ofNullable(this.item.getChild("build_trigger")).map(ConditionAnd::new).orElse(null);
+    }
+
+    public Effects getOnBuilt() {
+        return Optional.ofNullable(this.item.getChild("on_built")).map(i -> new Effects(i, this.game)).orElse(null);
+    }
+
+    public Effects getOnDestroy() {
+        return Optional.ofNullable(this.item.getChild("on_destroy")).map(i -> new Effects(i, this.game)).orElse(null);
+    }
+
+    public File getImageFile() {
+        return this.game.getSpriteTypeImageFile("GFX_great_project_" + ClausewitzUtils.removeQuotes(getName()));
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     @Override
