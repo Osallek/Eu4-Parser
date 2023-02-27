@@ -3864,7 +3864,7 @@ public class Game {
                     ClausewitzItem centersOfTradeItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.centersOfTrade.putAll(centersOfTradeItem.getChildren()
                                                                  .stream()
-                                                                 .map(CenterOfTrade::new)
+                                                                 .map(item -> new CenterOfTrade(item, this))
                                                                  .collect(Collectors.toMap(CenterOfTrade::getName, Function.identity(), (a, b) -> b)));
                 });
     }
