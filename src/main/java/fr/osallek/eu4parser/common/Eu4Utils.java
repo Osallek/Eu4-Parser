@@ -90,6 +90,10 @@ public final class Eu4Utils {
 
     public static final String BUILDINGS_FOLDER_PATH = "buildings";
 
+    public static final String DLC_META_FOLDER_PATH = "dlc_metadata";
+
+    public static final String DLC_INFO_FOLDER_PATH = "dlc_info";
+
     public static final String GRAPHICAL_CULTURES_FILE = "graphicalculturetype.txt";
 
     public static final LocalDate DEFAULT_DATE = LocalDate.of(1, 1, 1);

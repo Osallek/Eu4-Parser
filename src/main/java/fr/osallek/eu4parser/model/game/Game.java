@@ -73,7 +73,7 @@ import java.util.stream.Stream;
 
 public class Game {
 
-    public static final int NB_PARTS = 77;
+    public static final int NB_PARTS = 78;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -286,6 +286,8 @@ public class Game {
     private List<War> wars;
 
     private Map<String, Decision> decisions;
+
+    private Map<String, Dlc> dlcs;
 
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
@@ -1159,6 +1161,17 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readDecisions();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readDlcs();
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
@@ -2583,6 +2596,14 @@ public class Game {
 
     public Decision getDecision(String name) {
         return this.decisions.get(name);
+    }
+
+    public Map<String, Dlc> getDlcs() {
+        return dlcs;
+    }
+
+    public Dlc getDlc(String name) {
+        return this.dlcs.get(name);
     }
 
     public Map<Province, Map<Polygon, Boolean>> getBorders() {
@@ -4221,6 +4242,23 @@ public class Game {
                                                   .stream()
                                                   .map(i -> new Decision(fileNode, this, i))
                                                   .collect(Collectors.toMap(Decision::getName, Function.identity())));
+                    }
+                });
+    }
+
+    private void readDlcs() {
+        this.dlcs = new HashMap<>();
+
+        getFileNodes(Path.of(Eu4Utils.DLC_META_FOLDER_PATH, Eu4Utils.DLC_INFO_FOLDER_PATH), this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+
+                    if (item.hasChild("dlcs")) {
+                        this.dlcs.putAll(item.getChild("dlcs")
+                                             .getChildren()
+                                             .stream()
+                                             .map(i -> new Dlc(i, this, fileNode))
+                                             .collect(Collectors.toMap(Dlc::getInternalName, Function.identity())));
                     }
                 });
     }
