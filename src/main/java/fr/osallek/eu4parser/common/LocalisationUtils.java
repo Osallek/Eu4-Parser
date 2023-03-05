@@ -1326,8 +1326,11 @@ public final class LocalisationUtils {
                     localisationBuilder.deleteCharAt(i);//Remove char
                     localisationBuilder.deleteCharAt(i);//Remove color code
                     indexOf = localisationBuilder.indexOf("§", i);
-                    localisationBuilder.deleteCharAt(indexOf);//Remove closing char
-                    localisationBuilder.deleteCharAt(indexOf);//Remove closing code
+
+                    if (indexOf >= 0) {
+                        localisationBuilder.deleteCharAt(indexOf);//Remove closing char
+                        localisationBuilder.deleteCharAt(indexOf);//Remove closing code
+                    }
                     break;
                 }
             }
