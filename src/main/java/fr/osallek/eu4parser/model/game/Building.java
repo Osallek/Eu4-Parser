@@ -2,8 +2,12 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.common.Eu4Utils;
+import java.nio.file.Path;
+import javax.imageio.ImageIO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedWriter;
@@ -18,6 +22,8 @@ public class Building extends Nodded {
     private final ClausewitzItem item;
 
     private final Game game;
+
+    private Path writenTo;
 
     public Building(ClausewitzItem item, Game game, FileNode fileNode) {
         super(fileNode);
@@ -242,6 +248,21 @@ public class Building extends Nodded {
     public ConditionAnd getTrigger() {
         ClausewitzItem child = this.item.getChild("build_trigger");
         return child == null ? null : new ConditionAnd(child);
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(ImageIO.read(getImage()), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     @Override
