@@ -2,19 +2,33 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.io.FileUtils;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Age {
 
     private final ClausewitzItem item;
 
-    public Age(ClausewitzItem item) {
+    private final Game game;
+
+    private Path writenTo;
+
+    public Age(ClausewitzItem item, Game game) {
         this.item = item;
+        this.game = game;
     }
 
     public String getName() {
@@ -62,11 +76,12 @@ public class Age {
         }
     }
 
-    public Map<String, Integer> getAbsolutism() {
-        ClausewitzItem child = this.item.getChild("absolutism");
-        return child == null ? null : child.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt));
+    public Map<String, Double> getAbsolutism() {
+        return Optional.ofNullable(this.item.getChild("absolutism"))
+                       .map(ClausewitzItem::getVariables)
+                       .map(Collection::stream)
+                       .map(s -> s.collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble)))
+                       .orElse(null);
     }
 
     public void setAbsolutism(Map<String, Integer> absolutism) {
@@ -90,20 +105,41 @@ public class Age {
         }
     }
 
-    public Map<String, AgeObjective> getObjectives() {
-        ClausewitzItem child = this.item.getChild("objectives");
-        return child == null ? null : child.getChildren()
-                                           .stream()
-                                           .map(AgeObjective::new)
-                                           .collect(Collectors.toMap(AgeObjective::getName, Function.identity()));
+    public List<AgeObjective> getObjectives() {
+        return Optional.ofNullable(this.item.getChild("objectives"))
+                       .map(ClausewitzItem::getChildren)
+                       .map(Collection::stream)
+                       .map(s -> s.map(i -> new AgeObjective(i, this.game)))
+                       .map(Stream::toList)
+                       .orElse(null);
     }
 
-    public Map<String, AgeAbility> getAbilities() {
-        ClausewitzItem child = item.getChild("abilities");
-        return child == null ? null : child.getChildren()
-                                           .stream()
-                                           .map(AgeAbility::new)
-                                           .collect(Collectors.toMap(AgeAbility::getName, Function.identity()));
+    public List<AgeAbility> getAbilities() {
+        return Optional.ofNullable(this.item.getChild("abilities"))
+                       .map(ClausewitzItem::getChildren)
+                       .map(Collection::stream)
+                       .map(s -> s.map(i -> new AgeAbility(i, this.game)))
+                       .map(Stream::toList)
+                       .orElse(null);
+    }
+
+    public File getImage() {
+        return this.game.getSpriteTypeImageFile("GFX_" + getName());
+    }
+
+    public void writeImageTo(Path dest) throws IOException {
+        FileUtils.forceMkdirParent(dest.toFile());
+        ImageIO.write(ImageIO.read(getImage()), "png", dest.toFile());
+        Eu4Utils.optimizePng(dest, dest);
+        this.writenTo = dest;
+    }
+
+    public Path getWritenTo() {
+        return writenTo;
+    }
+
+    public void setWritenTo(Path writenTo) {
+        this.writenTo = writenTo;
     }
 
     @Override
@@ -112,11 +148,9 @@ public class Age {
             return true;
         }
 
-        if (!(o instanceof Age)) {
+        if (!(o instanceof Age age)) {
             return false;
         }
-
-        Age age = (Age) o;
 
         return Objects.equals(getName(), age.getName());
     }

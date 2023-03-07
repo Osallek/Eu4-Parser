@@ -2335,7 +2335,6 @@ public class Game {
         return this.ages.values()
                         .stream()
                         .map(Age::getAbilities)
-                        .map(Map::values)
                         .flatMap(Collection::stream)
                         .filter(ageAbility -> ageAbility.getName().equalsIgnoreCase(name))
                         .findFirst()
@@ -2350,7 +2349,6 @@ public class Game {
         return this.ages.values()
                         .stream()
                         .map(Age::getObjectives)
-                        .map(Map::values)
                         .flatMap(Collection::stream)
                         .filter(ageObjective -> ageObjective.getName().equalsIgnoreCase(name))
                         .findFirst()
@@ -3859,7 +3857,7 @@ public class Game {
                     ClausewitzItem agesItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.ages.putAll(agesItem.getChildren()
                                              .stream()
-                                             .map(Age::new)
+                                             .map(item -> new Age(item, this))
                                              .collect(Collectors.toMap(Age::getName, Function.identity(), (a, b) -> b)));
                 });
     }
