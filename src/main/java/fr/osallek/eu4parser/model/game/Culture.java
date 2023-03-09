@@ -14,6 +14,10 @@ public class Culture extends AbstractCulture {
         this.cultureGroup = cultureGroup;
     }
 
+    public String getPrimary() {
+        return this.item.getVarAsString("primary");
+    }
+
     public CultureGroup getCultureGroup() {
         return cultureGroup;
     }

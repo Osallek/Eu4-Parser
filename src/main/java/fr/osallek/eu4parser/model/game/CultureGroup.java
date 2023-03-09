@@ -1,12 +1,13 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 public class CultureGroup extends AbstractCulture {
 
@@ -32,11 +33,8 @@ public class CultureGroup extends AbstractCulture {
 
     public List<Culture> getCultures() {
         return new ArrayList<>(this.items.stream()
-                                         .map(ClausewitzItem::getChildren)
+                                         .map(i -> i.getChildrenNot("male_names", "female_names", "dynasty_names"))
                                          .flatMap(Collection::stream)
-                                         .filter(child -> !"male_names".equals(child.getName())
-                                                          && !"female_names".equals(child.getName())
-                                                          && !"dynasty_names".equals(child.getName()))
                                          .map(child -> new Culture(this.game, child, this))
                                          .collect(Collectors.toMap(Culture::getName, Function.identity(), (a, b) -> b))
                                          .values());

@@ -3839,7 +3839,7 @@ public class Game {
                     ClausewitzItem hegemonsItem = ClausewitzParser.parse(path.toFile(), 0);
                     this.factions.putAll(hegemonsItem.getChildren()
                                                      .stream()
-                                                     .map(Faction::new)
+                                                     .map(item -> new Faction(item, this))
                                                      .collect(Collectors.toMap(Faction::getName, Function.identity(), (a, b) -> b)));
 
                 });
