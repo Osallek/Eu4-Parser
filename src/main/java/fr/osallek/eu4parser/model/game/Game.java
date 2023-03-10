@@ -73,7 +73,7 @@ import java.util.stream.Stream;
 
 public class Game {
 
-    public static final int NB_PARTS = 78;
+    public static final int NB_PARTS = 79;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -286,6 +286,8 @@ public class Game {
     private List<War> wars;
 
     private Map<String, Decision> decisions;
+
+    private Map<String, Disaster> disasters;
 
     private Map<String, Dlc> dlcs;
 
@@ -1161,6 +1163,17 @@ public class Game {
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
                 readDecisions();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                countDownLatch.countDown();
+                runnable.run();
+            }
+        });
+
+        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            try {
+                readDisasters();
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
@@ -2594,6 +2607,14 @@ public class Game {
 
     public Decision getDecision(String name) {
         return this.decisions.get(name);
+    }
+
+    public Map<String, Disaster> getDisasters() {
+        return disasters;
+    }
+
+    public Disaster getDisaster(String name) {
+        return this.disasters.get(name);
     }
 
     public Map<String, Dlc> getDlcs() {
@@ -4241,6 +4262,19 @@ public class Game {
                                                   .map(i -> new Decision(fileNode, this, i))
                                                   .collect(Collectors.toMap(Decision::getName, Function.identity())));
                     }
+                });
+    }
+
+    private void readDisasters() {
+        this.disasters = new HashMap<>();
+
+        getFileNodes(Path.of(Eu4Utils.COMMON_FOLDER_PATH, "disasters"), this::isRegularTxtFile)
+                .forEach(fileNode -> {
+                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+                    this.disasters.putAll(item.getChildren()
+                                              .stream()
+                                              .map(i -> new Disaster(fileNode, i, this))
+                                              .collect(Collectors.toMap(Disaster::getName, Function.identity())));
                 });
     }
 
