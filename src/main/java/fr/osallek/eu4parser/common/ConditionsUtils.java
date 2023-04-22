@@ -2157,7 +2157,7 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (historyItem.getGovernment() != null &&
                                                          historyItem.getGovernment().getBasicGovernmentReform().isMilitarisedSociety().getKey());
             case "has_parliament":
-                break; //Todo
+                return !"yes".equalsIgnoreCase(value); //Todo
             case "has_patriarchs":
                 historyItem = country.getHistoryItemAt(country.getGame().getStartDate());
                 return "yes".equalsIgnoreCase(value) == (historyItem.getReligion() != null

@@ -242,6 +242,9 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("HORDE_UNITY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MERITOCRACY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MONTHLY_MILITARIZED_SOCIETY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_prussian_militarized_society_1", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_prussian_militarized_society_2", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_prussian_militarized_society_3", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("YEARLY_TRIBAL_ALLEGIANCE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("IMPERIAL_MANDATE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("ELECTION_CYCLE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
@@ -577,6 +580,118 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("amount_of_carolean", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("local_center_of_trade_upgrade_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("overlord_naval_forcelimit_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monarch_power_tribute", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("tributary_conversion_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("global_allowed_num_of_manufactories", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_claim_states", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("free_concentrate_development", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("expand_infrastructure_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_absolutism_effect", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("chance_to_inherit", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("culture_conversion_time", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_culture_conversion_time", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("same_religion_advisor_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("artillery_barrage_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("great_project_upgrade_time", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_great_project_upgrade_time", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("warscore_from_battles_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("yearly_innovativeness", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("enable_forced_march", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("reverse_relation_with_same_religion", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("janissary_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("yearly_government_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("number_of_cannons_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("hull_size_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_flagships", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("heavy_ship_cannons", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("heavy_ship_hull_size", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("light_ship_cannons", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("light_ship_hull_size", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("galley_cannons", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("galley_hullsize", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("transport_cannons", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("transport_hullsize", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("loyalty_change_on_revoked", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("estate_interaction_cooldown_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("all_estate_possible_privileges", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allow_mercenary_drill", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("merc_leader_army_tradition", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("merc_independent_from_trade_range", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allow_mercenaries_to_split", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("centralize_state_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_centralize_state_cost", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("land_morale_constant", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("naval_morale_constant", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_general_shock", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_general_fire", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_general_maneuver", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_general_siege", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_admiral_shock", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_admiral_fire", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_admiral_maneuver", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_admiral_siege", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("coast_raid_range", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("development_cost_in_primary_culture", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("reduced_trade_penalty_on_non_main_tradenode", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("colony_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_colony_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("spy_action_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("placed_merchant_power_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("reduced_liberty_desire_on_other_continent", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("overextension_impact_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("artillery_level_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_tolerance_of_heretics", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_tolerance_of_heathens", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("garrison_damage", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_garrison_damage", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("assault_fort_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_assault_fort_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("assault_fort_ability", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_assault_fort_ability", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("vassal_manpower_bonus", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("vassal_sailors_bonus", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("vassal_naval_forcelimit_bonus", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("annexation_relations_impact", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_revoke_parliament_seats", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("parliament_backing_chance", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("parliament_effect_duration", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("parliament_debate_duration", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("parliament_chance_of_decision", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("num_of_parliament_issues", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("max_possible_parliament_seats", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_recruit_cawa", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_recruit_cossacks", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_recruit_rajputs", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_recruit_revolutionary_guards", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("naval_morale_damage", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("naval_morale_damage_received", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("no_claim_cost_increasement", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_musketeer_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_caravel_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_galleon_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_man_of_war_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_samurai_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("expand_infrastructure_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("ottoman_decadence_gain_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_ottoman_decadence", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_russian_dip_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_russian_mil_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_russian_adm_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_russian_modernization", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("russian_modernization_gain_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("colony_development_boost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_warscore_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("manpower_against_imperial_enemies", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("regiment_manpower_usage", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_geobukseon_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_galleass_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_tercio_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_voc_indiamen_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("special_unit_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("colonial_subject_type_upgrade_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("colonial_type_change_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("landing_penalty", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_council_consensus", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {
@@ -1144,6 +1259,36 @@ public class ModifiersUtils {
 
     public static Modifiers scaleWithOverGoverningCapacity(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, country.getGoverningCapacityUsedPercent() - 1));
+    }
+
+    public static Modifiers scaleWithUnderGoverningCapacity(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, 1 - country.getGoverningCapacityUsedPercent()));
+    }
+
+    public static Modifiers scaleWithMandate(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getSave().getCelestialEmpire().dismantled() ? 0 :
+                                                        (country.getSave().getCelestialEmpire().getImperialInfluence() / 100));
+    }
+
+    public static Modifiers scaleWithImperialAuthority(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getSave().getHre().dismantled() ? 0 :
+                                                        (country.getSave().getHre().getImperialInfluence() / 100));
+    }
+
+    public static Modifiers scaleWithPositiveImperialAuthority(SaveCountry country, Modifiers modifiers) {
+        double authority = country.getSave().getHre().dismantled() ? 0 : country.getSave().getHre().getImperialInfluence();
+        authority = Math.max(0, authority - 50);//0 - 50
+
+        return ModifiersUtils.scaleModifiers(modifiers, authority / 50);
+    }
+
+    public static Modifiers scaleWithNegativeImperialAuthority(SaveCountry country, Modifiers modifiers) {
+        double authority = country.getSave().getHre().dismantled() ? 0 : country.getSave().getHre().getImperialInfluence();
+        authority = Math.min(50, authority);//0 - 50
+        authority -= 50;//-50 - 0
+        authority /= -50;//1 - 0
+
+        return ModifiersUtils.scaleModifiers(modifiers, authority);
     }
 
     public static Modifiers scaleWithDiplomaticReputation(SaveCountry country, Modifiers modifiers) {

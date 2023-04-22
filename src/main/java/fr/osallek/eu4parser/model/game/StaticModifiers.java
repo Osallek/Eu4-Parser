@@ -257,6 +257,11 @@ public enum StaticModifiers {
     COSSACKS_MODIFIER(new ConditionAnd(Pair.of("num_of_cossacks", "1")), null, null),
     EXPAND_ADMINISTATION_MODIFIER(new ConditionAnd(Pair.of("num_expanded_administration", "1")), null, null),
     OVER_GOVERNING_CAPACITY_MODIFIER(new ConditionAnd(Pair.of("always", "yes")), null, null),
+    UNDER_GOVERNING_CAPACITY_MODIFIER(new ConditionAnd(Pair.of("always", "yes")), null, null),
+    MANDATE(new ConditionAnd(Pair.of("is_emperor_of_china", "yes")), null, null),
+    IMPERIAL_AUTHORITY(new ConditionAnd(Pair.of("is_emperor", "yes")), null, null),
+    POSITIVE_IMPERIAL_AUTHORITY(new ConditionAnd(Pair.of("is_emperor", "yes")), null, null),
+    NEGATIVE_IMPERIAL_AUTHORITY(new ConditionAnd(Pair.of("is_emperor", "yes")), null, null),
     LOST_HEGEMONY(new ConditionAnd(Pair.of("has_country_modifier", "lost_hegemony")), null, null),
     PAPAL_INFLUENCE(new ConditionAnd(Pair.of("papacy_active", "yes")), null, null),
     CHURCH_POWER(new ConditionAnd(Pair.of("uses_church_aspects", "yes")), null, null),
@@ -524,6 +529,11 @@ public enum StaticModifiers {
         COSSACKS_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCossacksPercent(country, modif.modifiers);
         EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
         OVER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverGoverningCapacity(country, modif.modifiers);
+        UNDER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithUnderGoverningCapacity(country, modif.modifiers);
+        MANDATE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMandate(country, modif.modifiers);
+        IMPERIAL_AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithImperialAuthority(country, modif.modifiers);
+        POSITIVE_IMPERIAL_AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPositiveImperialAuthority(country, modif.modifiers);
+        NEGATIVE_IMPERIAL_AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNegativeImperialAuthority(country, modif.modifiers);
         LOST_HEGEMONY.applyToCountry = (country, modif) -> StaticModifiers.LOST_HEGEMONY.modifiers;
         PAPAL_INFLUENCE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPapalInfluence(country, modif.modifiers);
         CHURCH_POWER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithChurchPower(country, modif.modifiers);

@@ -33,7 +33,7 @@ public class CultureGroup extends AbstractCulture {
 
     public List<Culture> getCultures() {
         return new ArrayList<>(this.items.stream()
-                                         .map(i -> i.getChildrenNot("male_names", "female_names", "dynasty_names"))
+                                         .map(i -> i.getChildrenNot("male_names", "female_names", "dynasty_names", "country", "province"))
                                          .flatMap(Collection::stream)
                                          .map(child -> new Culture(this.game, child, this))
                                          .collect(Collectors.toMap(Culture::getName, Function.identity(), (a, b) -> b))

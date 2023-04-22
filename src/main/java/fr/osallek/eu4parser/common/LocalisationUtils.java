@@ -1324,12 +1324,15 @@ public final class LocalisationUtils {
             for (int i = 0; i < localisationBuilder.length(); i++) {
                 if (localisationBuilder.charAt(i) == '§') {
                     localisationBuilder.deleteCharAt(i);//Remove char
-                    localisationBuilder.deleteCharAt(i);//Remove color code
-                    indexOf = localisationBuilder.indexOf("§", i);
 
-                    if (indexOf >= 0) {
-                        localisationBuilder.deleteCharAt(indexOf);//Remove closing char
-                        localisationBuilder.deleteCharAt(indexOf);//Remove closing code
+                    if (localisationBuilder.length() > i) {
+                        localisationBuilder.deleteCharAt(i);//Remove color code
+                        indexOf = localisationBuilder.indexOf("§", i);
+
+                        if (indexOf >= 0) {
+                            localisationBuilder.deleteCharAt(indexOf);//Remove closing char
+                            localisationBuilder.deleteCharAt(indexOf);//Remove closing code
+                        }
                     }
                     break;
                 }
