@@ -5,15 +5,15 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import org.apache.commons.lang3.BooleanUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.BooleanUtils;
 
 public abstract class Empire {
 
@@ -35,9 +35,17 @@ public abstract class Empire {
                                         .stream()
                                         .filter(imperialReform -> getId().equals(imperialReform.getEmpire()))
                                         .filter(imperialReform -> imperialReform.dlcRequired() == null
-                                                                  || new HashSet<>(this.save.getDlcEnabled()).containsAll(imperialReform.dlcRequired()))
+                                                                  || this.save.getDlcEnabled()
+                                                                              .stream()
+                                                                              .map(ClausewitzUtils::removeQuotes)
+                                                                              .collect(Collectors.toSet())
+                                                                              .containsAll(imperialReform.dlcRequired()))
                                         .filter(imperialReform -> imperialReform.dlcRequiredNot() == null
-                                                                  || Collections.disjoint(this.save.getDlcEnabled(), imperialReform.dlcRequiredNot()))
+                                                                  || Collections.disjoint(this.save.getDlcEnabled()
+                                                                                                   .stream()
+                                                                                                   .map(ClausewitzUtils::removeQuotes)
+                                                                                                   .collect(Collectors.toSet()),
+                                                                                          imperialReform.dlcRequiredNot()))
                                         .collect(Collectors.toMap(ImperialReform::getName, Function.identity()));
         refreshAttributes();
     }

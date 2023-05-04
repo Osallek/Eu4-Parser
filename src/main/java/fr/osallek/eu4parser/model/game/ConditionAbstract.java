@@ -75,6 +75,10 @@ public abstract class ConditionAbstract {
         return new ConditionTagOnly(this);
     }
 
+    public ConditionDlcOnly dlcOnly() {
+        return new ConditionDlcOnly(this);
+    }
+
     public ConditionOr or() {
         return new ConditionOr(this);
     }

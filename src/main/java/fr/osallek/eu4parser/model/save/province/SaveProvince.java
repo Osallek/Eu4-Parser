@@ -1395,6 +1395,7 @@ public class SaveProvince extends Province {
                                  .filter(Objects::nonNull)
                                  .filter(m -> m.hasModifier(modifier))
                                  .map(m -> m.getModifier(modifier))
+                                 .filter(Objects::nonNull)
                                  .toList());
         }
 
