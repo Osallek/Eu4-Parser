@@ -32,8 +32,8 @@ public class ModifiersUtils {
     public static final Map<String, Modifier> MODIFIERS_MAP = new HashMap<>();
 
     static {
-        ModifiersUtils.addModifier("ARMY_TRADITION", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("ARMY_TRADITION_DECAY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("ARMY_TRADITION", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "YEARLY_ARMY_TRADITION");
+        ModifiersUtils.addModifier("ARMY_TRADITION_DECAY", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "YEARLY_ARMY_TRADITION_DECAY");
         ModifiersUtils.addModifier("ARMY_TRADITION_FROM_BATTLE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("YEARLY_ARMY_PROFESSIONALISM", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("DRILL_GAIN_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -50,7 +50,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("ARTILLERY_POWER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("ARTILLERY_FIRE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("ARTILLERY_SHOCK", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CAV_TO_INF_RATIO", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CAV_TO_INF_RATIO", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "MODIFIER_CAV_TO_INF_RATIO");
         ModifiersUtils.addModifier("CAVALRY_FLANKING", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("ARTILLERY_BONUS_VS_FORT", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("BACKROW_ARTILLERY_DAMAGE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -61,7 +61,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("SIEGE_ABILITY", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MOVEMENT_SPEED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("FIRE_DAMAGE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("FIRE_DAMAGE_RECEIVED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("FIRE_DAMAGE_RECEIVED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "MODIFIER_FIRE_DAMAGE_RECIEVED");
         ModifiersUtils.addModifier("SHOCK_DAMAGE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("SHOCK_DAMAGE_RECEIVED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("RECOVER_ARMY_MORALE_SPEED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -90,7 +90,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("WAR_EXHAUSTION", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("WAR_EXHAUSTION_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("LEADER_LAND_FIRE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("LEADER_LAND_MANUEVER", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("LEADER_LAND_MANUEVER", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "LAND_LEADER_MANEUVER");
         ModifiersUtils.addModifier("LEADER_LAND_SHOCK", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("LEADER_SIEGE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GENERAL_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -106,14 +106,14 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("SPECIAL_UNIT_FORCELIMIT", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MANPOWER_IN_TRUE_FAITH_PROVINCES", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MERCENARY_MANPOWER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("NAVY_TRADITION", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("NAVY_TRADITION_DECAY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("NAVY_TRADITION", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "YEARLY_NAVY_TRADITION");
+        ModifiersUtils.addModifier("NAVY_TRADITION_DECAY", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "YEARLY_NAVY_TRADITION_DECAY");
         ModifiersUtils.addModifier("NAVAL_TRADITION_FROM_BATTLE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("NAVAL_TRADITION_FROM_TRADE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("HEAVY_SHIP_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("HEAVY_SHIP_POWER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("HEAVY_SHIP_POWER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "HEAVYSHIP_POWER");
         ModifiersUtils.addModifier("LIGHT_SHIP_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("LIGHT_SHIP_POWER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("LIGHT_SHIP_POWER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "LIGHTSHIP_POWER");
         ModifiersUtils.addModifier("GALLEY_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GALLEY_POWER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("TRANSPORT_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -138,7 +138,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("RECOVER_NAVY_MORALE_SPEED", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("PRESTIGE_FROM_NAVAL", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("LEADER_NAVAL_FIRE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("LEADER_NAVAL_MANUEVER", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("LEADER_NAVAL_MANUEVER", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "NAVAL_LEADER_MANEUVER");
         ModifiersUtils.addModifier("LEADER_NAVAL_SHOCK", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("OWN_COAST_NAVAL_COMBAT_BONUS", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("ADMIRAL_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -167,10 +167,10 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("CANNONS_FOR_HUNTING_PIRATES_IN_FLEET", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MOVEMENT_SPEED_IN_FLEET_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("DIPLOMATS", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("DIPLOMATIC_REPUTATION", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("DIPLOMATIC_REPUTATION", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "diplomatic_reputation");
         ModifiersUtils.addModifier("DIPLOMATIC_UPKEEP", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("ENVOY_TRAVEL_TIME", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("FABRICATE_CLAIMS_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("FABRICATE_CLAIMS_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "MODIFIER_FABRICATE_CLAIMS_TIME");
         ModifiersUtils.addModifier("IMPROVE_RELATION_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("VASSAL_FORCELIMIT_BONUS", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("VASSAL_INCOME", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -252,8 +252,8 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("REELECTION_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("REFORM_PROGRESS_GROWTH", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GOVERNING_CAPACITY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("GOVERNING_CAPACITY_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("STATE_GOVERNING_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("GOVERNING_CAPACITY_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "MODIFIER_GOVERNING_CAPACITY_MODIFIER");
+        ModifiersUtils.addModifier("STATE_GOVERNING_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "MODIFIER_STATES_GOVERNING_COST");
         ModifiersUtils.addModifier("TRADE_COMPANY_GOVERNING_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("EXPAND_ADMINISTRATION_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("YEARLY_REVOLUTIONARY_ZEAL", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
@@ -271,7 +271,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("PROMOTE_CULTURE_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_UNREST", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("STABILITY_COST_MODIFIER", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("GLOBAL_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("GLOBAL_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "GLOBAL_AUTONOMY_MOD");
         ModifiersUtils.addModifier("MIN_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("AUTONOMY_CHANGE_TIME", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("HARSH_TREATMENT_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -283,7 +283,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("REDUCED_LIBERTY_DESIRE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("REDUCED_LIBERTY_DESIRE_ON_SAME_CONTINENT", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("SPY_OFFENCE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("GLOBAL_SPY_DEFENCE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("GLOBAL_SPY_DEFENCE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "SPY_GLOBAL_DEFENCE");
         ModifiersUtils.addModifier("DISCOVERED_RELATIONS_IMPACT", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("REBEL_SUPPORT_EFFICIENCY", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_MISSIONARY_STRENGTH", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
@@ -310,11 +310,11 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("CURIA_TREASURY_CONTRIBUTION", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("CURIA_POWERS_COST", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("YEARLY_PATRIARCH_AUTHORITY", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CB_ON_RELIGIOUS_ENEMIES", ModifierType.CONSTANT, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CB_ON_RELIGIOUS_ENEMIES", ModifierType.CONSTANT, ModifierScope.COUNTRY, "MAY_ATTACK_RELIGIOUS_ENEMIES");
         ModifiersUtils.addModifier("COLONISTS", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("COLONIST_PLACEMENT_CHANCE", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("GLOBAL_COLONIAL_GROWTH", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("RANGE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("RANGE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "COLONIAL_RANGE");
         ModifiersUtils.addModifier("NATIVE_UPRISING_CHANCE", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("NATIVE_ASSIMILATION", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MIGRATION_COOLDOWN", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -393,7 +393,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("LOCAL_RELIGIOUS_CONVERSION_RESISTANCE", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("LOCAL_CULTURE_CONVERSION_COST", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("LOCAL_UNREST", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
-        ModifiersUtils.addModifier("LOCAL_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("LOCAL_AUTONOMY", ModifierType.ADDITIVE, ModifierScope.PROVINCE, "LOCAL_AUTONOMY_MOD");
         ModifiersUtils.addModifier("LOCAL_YEARS_OF_NATIONALISM", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("MIN_LOCAL_AUTONOMY", ModifierType.CONSTANT, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("ATTACK_BONUS_IN_CAPITAL_TERRAIN", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
@@ -405,8 +405,8 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("FREE_MAINTENANCE_ON_EXPL_CONQ", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("IGNORE_CORING_DISTANCE", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("CB_ON_GOVERNMENT_ENEMIES", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CB_ON_PRIMITIVES", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("CB_ON_OVERSEAS", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("CB_ON_PRIMITIVES", ModifierType.BOOLEAN, ModifierScope.COUNTRY, "MODIFIER_MAY_ATTACK_PRIMITIVES");
+        ModifiersUtils.addModifier("CB_ON_OVERSEAS", ModifierType.BOOLEAN, ModifierScope.COUNTRY, "MODIFIER_MAY_ATTACK_OVERSEAS");
         ModifiersUtils.addModifier("IDEA_CLAIM_COLONIES", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("MAY_EXPLORE", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("NO_RELIGION_PENALTY", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
@@ -515,7 +515,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("monthly_gold_inflation_modifier", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("gold_depletion_chance_modifier", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("global_monthly_devastation", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("global_prosperity_growth", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("global_prosperity_growth", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "MODIFIER_GLOBAL_PROPSPERITY_GROWTH");
         ModifiersUtils.addModifier("local_prosperity_growth", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("monthly_favor_modifier", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("tolerance_of_heretics_capacity", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
@@ -570,7 +570,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("can_not_send_merchants", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_karma_accelerator", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_church_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("morale_damage_received", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("morale_damage_received", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "MODIFIER_MORALE_DAMAGE_RECIEVED");
         ModifiersUtils.addModifier("morale_damage", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("local_governing_cost_increase", ModifierType.ADDITIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("development_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -611,12 +611,12 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("galley_hullsize", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("transport_cannons", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("transport_hullsize", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("loyalty_change_on_revoked", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("loyalty_change_on_revoked", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "MODIFIER_ESTATE_LOYALTY_CHANGE_ON_REVOKED");
         ModifiersUtils.addModifier("estate_interaction_cooldown_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("all_estate_possible_privileges", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("allow_mercenary_drill", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("merc_leader_army_tradition", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("merc_independent_from_trade_range", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("merc_leader_army_tradition", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "MODIFIER_MERCENARY_LEADER_ARMY_TRADITION");
+        ModifiersUtils.addModifier("merc_independent_from_trade_range", ModifierType.BOOLEAN, ModifierScope.COUNTRY, "MODIFIER_MERCENARY_INDEPENDENT_FROM_TRADE_RANGE");
         ModifiersUtils.addModifier("allow_mercenaries_to_split", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("centralize_state_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("local_centralize_state_cost", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
@@ -690,12 +690,26 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("special_unit_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("colonial_subject_type_upgrade_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("colonial_type_change_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("landing_penalty", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("landing_penalty", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "MODIFIER_FLAGSHIP_LANDING_PENALTY");
         ModifiersUtils.addModifier("monthly_council_consensus", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("can_recruit_hussars", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("has_samurai", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("has_geobukseon", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_has_samurai", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_has_geobukseon", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("allow_only_owner_religion", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_has_man_of_war", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_has_galleass", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("block_slave_raid", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {
         Modifier modifier = new Modifier(name, type, scopes);
+        MODIFIERS_MAP.put(modifier.getName(), modifier);
+    }
+
+    public static void addModifier(String name, ModifierType type, ModifierScope scopes, String localisationKey) {
+        Modifier modifier = new Modifier(name, type, scopes, localisationKey);
         MODIFIERS_MAP.put(modifier.getName(), modifier);
     }
 

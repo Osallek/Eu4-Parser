@@ -30,10 +30,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
@@ -372,8 +374,8 @@ public final class Eu4Utils {
         return Arrays.stream(items).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
-    public static List<String> modifierToLocalisationKeys(String s) {
-        List<String> keys = new ArrayList<>();
+    public static Set<String> modifierToLocalisationKeys(String s) {
+        Set<String> keys = new LinkedHashSet<>();
 
         if (s.startsWith("tech_")) {
             s = s.substring(5);
@@ -439,6 +441,23 @@ public final class Eu4Utils {
             keys.add("idea_" + s);
             keys.add(("idea_" + s).toLowerCase());
             keys.add(("idea_" + s).toUpperCase());
+        }
+
+        if (s.startsWith("local_") || s.startsWith("LOCAL_")) {
+            s = s.substring(6);
+            keys.add("modifier_" + s);
+            keys.add(("modifier_" + s).toLowerCase());
+            keys.add(("modifier_" + s).toUpperCase());
+            keys.add(s);
+            keys.add(s.toLowerCase());
+            keys.add(s.toUpperCase());
+            keys.add("idea_" + s);
+            keys.add(("idea_" + s).toLowerCase());
+            keys.add(("idea_" + s).toUpperCase());
+            keys.add("l_" + s);
+            keys.add("L_" + s);
+            keys.add(("l_" + s).toLowerCase());
+            keys.add(("L_" + s).toUpperCase());
         }
 
         if (s.endsWith("_speed") || s.endsWith("_SPEED")) {

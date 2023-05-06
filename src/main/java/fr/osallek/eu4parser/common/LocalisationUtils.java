@@ -76,6 +76,7 @@ public final class LocalisationUtils {
 
             if (current.get() instanceof SaveCountry country) {
                 switch (key) {
+                    case "Country" -> current = Optional.of(country);
                     case "Capital" -> current = getCapital(country);
                     case "ColonialParent" -> current = getColonialParent(country);
                     case "Culture" -> current = getCulture(country);
@@ -124,6 +125,7 @@ public final class LocalisationUtils {
                 }
             } else if (current.get() instanceof SaveProvince province) {
                 switch (key) {
+                    case "Country" -> current = getOwner(province);
                     case "Culture" -> current = getCulture(province);
                     case "Owner" -> current = getOwner(province);
                     case "Religion" -> current = getReligion(province);
@@ -338,6 +340,7 @@ public final class LocalisationUtils {
 
             if (current.get() instanceof Country country) {
                 switch (key) {
+                    case "Country" -> current = Optional.of(country);
                     case "Capital" -> current = getCapital(country);
                     case "ColonialParent" -> current = getColonialParent(country);
                     case "Culture" -> current = getCulture(country);
@@ -386,6 +389,7 @@ public final class LocalisationUtils {
                 }
             } else if (current.get() instanceof Province province) {
                 switch (key) {
+                    case "Country" -> current = getOwner(province);
                     case "Culture" -> current = getCulture(province);
                     case "Owner" -> current = getOwner(province);
                     case "Religion" -> current = getReligion(province);

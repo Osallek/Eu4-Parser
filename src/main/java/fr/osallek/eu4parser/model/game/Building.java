@@ -3,21 +3,22 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
-import java.nio.file.Path;
-import javax.imageio.ImageIO;
+import fr.osallek.eu4parser.model.Localised;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.imageio.ImageIO;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class Building extends Nodded {
+public class Building extends Nodded implements Localised {
 
     private final ClausewitzItem item;
 
@@ -37,6 +38,11 @@ public class Building extends Nodded {
 
     public void setName(String name) {
         this.item.setName(name);
+    }
+
+    @Override
+    public String getLocalisationKey() {
+        return "building_" + getName();
     }
 
     public String getSpriteName() {
