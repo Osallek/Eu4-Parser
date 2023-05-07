@@ -411,7 +411,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("MAY_EXPLORE", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("NO_RELIGION_PENALTY", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("REDUCED_STAB_IMPACTS", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("SEA_REPAIR", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("SEA_REPAIR", ModifierType.BOOLEAN, ModifierScope.COUNTRY, "MODIFIER_MAY_SEA_REPAIR");
         ModifiersUtils.addModifier("MAY_ESTABLISH_FRONTIER", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("EXTRA_MANPOWER_AT_RELIGIOUS_WAR", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("AUTO_EXPLORE_ADJACENT_TO_COLONY", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
