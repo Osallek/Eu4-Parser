@@ -3753,7 +3753,7 @@ public class ConditionsUtils {
                                             return false;
                                         }
 
-                                        return value.equalsIgnoreCase(religion.getPapacy().getColonyClaim(colonialRegionIndex));
+                                        return religion.getPapacy().getColonyClaim(colonialRegionIndex).map(value::equalsIgnoreCase).orElse(false);
                                     });
                 } else {
                     return !province.getSave()
@@ -3779,7 +3779,7 @@ public class ConditionsUtils {
                                         }
 
                                         return "yes".equalsIgnoreCase(value)
-                                               != Eu4Utils.DEFAULT_TAG.equalsIgnoreCase(religion.getPapacy().getColonyClaim(colonialRegionIndex));
+                                               != (religion.getPapacy().getColonyClaim(colonialRegionIndex).map(Eu4Utils.DEFAULT_TAG::equalsIgnoreCase)).orElse(false);
                                     });
                 }
             case "is_sea":

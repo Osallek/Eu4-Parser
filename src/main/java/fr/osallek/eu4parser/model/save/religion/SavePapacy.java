@@ -14,6 +14,7 @@ import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import java.util.Optional;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
@@ -254,12 +255,8 @@ public class SavePapacy {
         return this.coloniesClaims.getColonyClaims();
     }
 
-    public String getColonyClaim(int index) {
-        if (this.coloniesClaims == null) {
-            return null;
-        }
-
-        return this.coloniesClaims.getColonyClaim(index);
+    public Optional<String> getColonyClaim(int index) {
+        return Optional.ofNullable(this.coloniesClaims).flatMap(c -> c.getColonyClaim(index));
     }
 
     public void setColonyClaim(int index, SaveCountry country) {
