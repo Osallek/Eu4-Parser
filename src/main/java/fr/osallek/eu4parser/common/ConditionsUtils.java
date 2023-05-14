@@ -105,8 +105,7 @@ public class ConditionsUtils {
         }
 
         if (country.getSave().getGame().getIdeaGroup(condition) != null) {
-            return country.getIdeaGroups().getIdeaGroupsNames().containsKey(condition)
-                   && country.getIdeaGroups().getIdeaGroupsNames().get(condition) >= NumbersUtils.toInt(value);
+            return country.getIdeaGroups().getIdeaGroupsNames().getOrDefault(condition, -1) >= NumbersUtils.toInt(value);
         }
 
         if ((subjectType = country.getSave().getGame().getSubjectType(condition)) != null) {
@@ -132,7 +131,7 @@ public class ConditionsUtils {
             case "absolutism":
                 return NumbersUtils.intOrDefault(country.getAbsolutism()) >= NumbersUtils.toInt(value);
             case "accepted_culture":
-                return country.getAcceptedCultures().stream().map(Culture::getName).anyMatch(s -> s.equalsIgnoreCase(rawValueToCulture(rawValue, root, from)));
+                return country.getAcceptedCulturesNames().stream().anyMatch(s -> s.equalsIgnoreCase(rawValueToCulture(rawValue, root, from)));
             case "adm":
                 if ((integer = NumbersUtils.toInt(value)) != null) {
                     return country.getMonarch() != null && country.getMonarch().getAdm() != null && country.getMonarch().getAdm() >= integer;

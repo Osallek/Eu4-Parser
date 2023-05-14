@@ -1039,8 +1039,12 @@ public class SaveCountry {
         return this.save.getGame().getCulture(this.item.getVarAsString("dominant_culture"));
     }
 
+    public List<String> getAcceptedCulturesNames() {
+        return this.item.getVarsAsStrings("accepted_culture");
+    }
+
     public List<Culture> getAcceptedCultures() {
-        return this.item.getVarsAsStrings("accepted_culture").stream().map(s -> this.save.getGame().getCulture(s)).toList();
+        return getAcceptedCulturesNames().stream().map(s -> this.save.getGame().getCulture(s)).toList();
     }
 
     public void setAcceptedCulture(List<Culture> cultures) {
@@ -3216,13 +3220,7 @@ public class SaveCountry {
     }
 
     public Integer getAbsolutism() {
-        Double absolutism = this.item.getVarAsDouble("absolutism");
-
-        if (absolutism == null) {
-            return null;
-        } else {
-            return absolutism.intValue();
-        }
+        return Optional.ofNullable(this.item.getVarAsDouble("absolutism")).map(Double::intValue).orElse(null);
     }
 
     public void setAbsolutism(Integer absolutism) {
@@ -4114,7 +4112,7 @@ public class SaveCountry {
     public double getTolerance(Religion religion) {
         if (religion == null || getReligion() == null) {
             return 0;
-        } else if (getReligion().getGameReligion().equals(religion)) {
+        } else if (religion.getName().equals(getReligionName())) {
             return getToleranceOwn();
         } else if (getReligion().getReligionGroup().equals(religion.getReligionGroup())) {
             return getToleranceHeretic();
