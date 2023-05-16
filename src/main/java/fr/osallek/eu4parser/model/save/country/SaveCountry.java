@@ -3500,6 +3500,19 @@ public class SaveCountry {
         refreshAttributes();
     }
 
+    public void removeAeFor(String tag) {
+        tag = ClausewitzUtils.removeQuotes(tag).toUpperCase();
+        ClausewitzItem child = this.item.getChild("active_relations");
+
+        if (child != null) {
+            child = child.getChild(tag);
+
+            if (child != null && child.getNbChildren() > 0) {
+                child.removeChildIf(item -> "opinion".equals(item.getName()) && item.hasVar("modifier", "\"aggressive_expansion\""));
+            }
+        }
+    }
+
     public Map<String, ActiveRelation> getActiveRelations() {
         return activeRelations;
     }
