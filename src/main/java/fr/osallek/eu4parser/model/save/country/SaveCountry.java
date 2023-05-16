@@ -813,7 +813,7 @@ public class SaveCountry {
     }
 
     public Integer getKarma() {
-        return this.item.getVarAsDouble("karma").intValue();
+        return (int) NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("karma"));
     }
 
     public void setKarma(int karma) {
