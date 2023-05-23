@@ -352,6 +352,31 @@ public class Diplomacy {
         refreshAttributes();
     }
 
+    public List<Integration> getIntegrations() {
+        return this.item.getChildren("integration")
+                        .stream()
+                        .map(child -> new Integration(child, save))
+                        .toList();
+    }
+
+
+    public void addIntegration(SaveCountry first, SaveCountry second, LocalDate startDate, Double progress) {
+        Integration.addToItem(this.item, "integration", first.getTag(), second.getTag(), startDate, progress == null ? 0 : progress);
+    }
+
+    public void removeIntegration(SaveCountry first, SaveCountry second) {
+        List<Integration> integrations = getIntegrations();
+        for (int i = 0; i < integrations.size(); i++) {
+            Integration integration = integrations.get(i);
+            if (integration.getFirst().equals(first) && integration.getSecond().equals(second)) {
+                this.item.removeChild("integration", i);
+                break;
+            }
+        }
+
+        refreshAttributes();
+    }
+
     private void refreshAttributes() {
         this.dependencies = this.item.getChildren("dependency")
                                      .stream()
