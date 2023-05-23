@@ -226,7 +226,7 @@ public class Building extends Nodded implements Localised {
     }
 
     public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("modifier"));
+        return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     public boolean onlyInPort() {

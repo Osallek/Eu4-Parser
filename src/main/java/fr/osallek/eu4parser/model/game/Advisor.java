@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Power;
 import org.apache.commons.collections4.MapUtils;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class Advisor extends Nodded {
@@ -39,14 +41,14 @@ public class Advisor extends Nodded {
     }
 
     public Power getPower() {
-        return Power.byName(this.item.getVarAsString("monarch_power"));
+        return Power.byName(this.item.getVarAsString("monarch_power").orElse(null));
     }
 
     public void setPower(Power power) {
         this.item.setVariable("monarch_power", power.name());
     }
 
-    public Boolean allowOnlyMale() {
+    public Optional<Boolean> allowOnlyMale() {
         return this.item.getVarAsBool("allow_only_male");
     }
 
@@ -58,7 +60,7 @@ public class Advisor extends Nodded {
         }
     }
 
-    public Boolean allowOnlyFemale() {
+    public Optional<Boolean> allowOnlyFemale() {
         return this.item.getVarAsBool("allow_only_female");
     }
 
@@ -70,21 +72,20 @@ public class Advisor extends Nodded {
         }
     }
 
-    public Modifiers getSkillScaledModifier() {
-        return new Modifiers(this.item.getChild("skill_scaled_modifier"));
+    public Optional<Modifiers> getSkillScaledModifier() {
+        return this.item.getChild("skill_scaled_modifier").map(Modifiers::new);
     }
 
     public void setSkillScaledModifiers(Map<String, Double> modifiers) {
         if (MapUtils.isEmpty(modifiers)) {
             this.item.removeChild("skill_scaled_modifier");
         } else {
-            ClausewitzItem child = this.item.getChild("skill_scaled_modifier");
-
-            if (child == null) {
-                child = this.item.addChild("skill_scaled_modifier");
-            } else {
-                child.removeAllVariables();
-            }
+            ClausewitzItem child = this.item.getChild("skill_scaled_modifier")
+                                            .map(item1 -> {
+                                                item1.removeAllVariables();
+                                                return item1;
+                                            })
+                                            .orElse(this.item.addChild("skill_scaled_modifier"));
 
             modifiers.forEach(child::addVariable);
         }
@@ -98,7 +99,7 @@ public class Advisor extends Nodded {
         this.item.removeVariableIf(variable -> !Set.of("monarch_power", "allow_only_male", "allow_only_female").contains(variable.getName()));
 
         if (MapUtils.isNotEmpty(modifiers)) {
-            modifiers.forEach((name, value) -> this.item.addVariable(name, value, this.item.getVar("monarch_power").getOrder() + 1));
+            modifiers.forEach((name, value) -> this.item.addVariable(name, value, this.item.getVar("monarch_power").map(ClausewitzVariable::getOrder).orElse(0) + 1));
         }
     }
 
@@ -140,13 +141,11 @@ public class Advisor extends Nodded {
             return true;
         }
 
-        if (!(o instanceof Advisor)) {
+        if (!(o instanceof Advisor advisor)) {
             return false;
         }
 
-        Advisor area = (Advisor) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), advisor.getName());
     }
 
     @Override

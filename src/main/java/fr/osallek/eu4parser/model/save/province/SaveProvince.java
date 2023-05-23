@@ -1377,8 +1377,8 @@ public class SaveProvince extends Province {
                                       .toList());
         }
 
-        if (getCulture() != null && getCulture().getProvinceModifiers().hasModifier(modifier)) {
-            list.add(getCulture().getProvinceModifiers().getModifier(modifier));
+        if (getCulture() != null) {
+            getCulture().getProvinceModifiers().filter(m -> m.hasModifier(modifier)).ifPresent(m -> list.add(m.getModifier(modifier)));
         }
 
         if (getTradeGood() != null && getTradeGood().getProvinceModifiers().hasModifier(modifier)) {

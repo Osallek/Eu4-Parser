@@ -13,7 +13,7 @@ public class ParliamentIssue extends GameModifier {
 
     @Override
     public Modifiers getModifier() {
-        return new Modifiers(this.item.getChild("modifier"));
+        return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     public Power getCategory() {

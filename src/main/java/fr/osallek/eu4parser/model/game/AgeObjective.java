@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 
 public class AgeObjective {
 
@@ -31,9 +32,8 @@ public class AgeObjective {
         this.item.setName(name);
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
     public ConditionAnd getTrigger() {

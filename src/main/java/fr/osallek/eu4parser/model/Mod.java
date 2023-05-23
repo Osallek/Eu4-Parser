@@ -4,61 +4,63 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public record Mod(File file, ClausewitzItem item, LauncherSettings launcherSettings) {
 
-    public String getName() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+    public Optional<String> getName() {
+        return this.item.getVarAsString("name").map(ClausewitzUtils::removeQuotes);
     }
 
     public void setName(String name) {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public String getVersion() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("version"));
+    public Optional<String> getVersion() {
+        return this.item.getVarAsString("version").map(ClausewitzUtils::removeQuotes);
     }
 
     public void setVersion(String version) {
         this.item.setVariable("version", ClausewitzUtils.addQuotes(version));
     }
 
-    public String getSupportedVersion() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("supported_version"));
+    public Optional<String> getSupportedVersion() {
+        return this.item.getVarAsString("supported_version").map(ClausewitzUtils::removeQuotes);
     }
 
     public void setSupportedVersion(String supportedVersion) {
         this.item.setVariable("supported_version", ClausewitzUtils.addQuotes(supportedVersion));
     }
 
-    public String getRemoteFileId() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("remote_file_id"));
+    public Optional<String> getRemoteFileId() {
+        return this.item.getVarAsString("remote_file_id").map(ClausewitzUtils::removeQuotes);
     }
 
     public void setRemoteFileId(String remoteFileId) {
         this.item.setVariable("remote_file_id", ClausewitzUtils.addQuotes(remoteFileId));
     }
 
-    public String getPathString() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("path"));
+    public Optional<String> getPathString() {
+        return this.item.getVarAsString("path").map(ClausewitzUtils::removeQuotes);
     }
 
-    public Path getPath() {
-        return Path.of(getPathString()).isAbsolute() ? Path.of(getPathString()) : this.launcherSettings.getGameDataPath().resolve(getPathString());
+    public Optional<Path> getPath() {
+        return getPathString().map(Path::of).map(path -> path.isAbsolute() ? path : this.launcherSettings.getGameDataPath().resolve(path));
     }
 
     public void setPath(Path path) {
@@ -69,12 +71,12 @@ public record Mod(File file, ClausewitzItem item, LauncherSettings launcherSetti
         this.item.setVariable("path", ClausewitzUtils.addQuotes(path));
     }
 
-    public String getArchiveString() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("archive"));
+    public Optional<String> getArchiveString() {
+        return this.item.getVarAsString("archive").map(ClausewitzUtils::removeQuotes);
     }
 
-    public Path getArchive() {
-        return Path.of(getArchiveString()).isAbsolute() ? Path.of(getArchiveString()) : this.launcherSettings.getGameDataPath().resolve(getArchiveString());
+    public Optional<Path> getArchive() {
+        return getArchiveString().map(Path::of).map(path -> path.isAbsolute() ? path : this.launcherSettings.getGameDataPath().resolve(path));
     }
 
     public void setArchive(Path archive) {
@@ -86,13 +88,7 @@ public record Mod(File file, ClausewitzItem item, LauncherSettings launcherSetti
     }
 
     public List<String> getTags() {
-        ClausewitzList list = this.item.getList("tags");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).toList();
+        return this.item.getList("tags").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(ClausewitzUtils::removeQuotes).toList();
     }
 
     public void setTags(List<String> tags) {
@@ -100,25 +96,21 @@ public record Mod(File file, ClausewitzItem item, LauncherSettings launcherSetti
             this.item.removeList("tags");
         } else {
             tags = tags.stream().map(ClausewitzUtils::addQuotes).toList();
-            ClausewitzList list = this.item.getList("tags");
-
-            if (list == null) {
-                list = this.item.addList("tags", false, tags);
-            } else {
+            List<String> finalTags = tags;
+            this.item.getList("tags").ifPresentOrElse(list -> {
                 list.clear();
-                list.addAll(tags);
-            }
+                list.addAll(finalTags);
+            }, () -> this.item.addList("tags", false, finalTags));
         }
     }
 
     public List<String> getDependencies() {
-        ClausewitzList list = this.item.getList("dependencies");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues().stream().map(ClausewitzUtils::removeQuotes).toList();
+        return this.item.getList("dependencies")
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(ClausewitzUtils::removeQuotes)
+                        .toList();
     }
 
     public void setDependencies(List<String> dependencies) {
@@ -126,14 +118,11 @@ public record Mod(File file, ClausewitzItem item, LauncherSettings launcherSetti
             this.item.removeList("dependencies");
         } else {
             dependencies = dependencies.stream().map(ClausewitzUtils::addQuotes).toList();
-            ClausewitzList list = this.item.getList("dependencies");
-
-            if (list == null) {
-                list = this.item.addList("dependencies", false, dependencies);
-            } else {
+            List<String> finalDependencies = dependencies;
+            this.item.getList("tags").ifPresentOrElse(list -> {
                 list.clear();
-                list.addAll(dependencies);
-            }
+                list.addAll(finalDependencies);
+            }, () -> this.item.addList("tags", false, finalDependencies));
         }
     }
 
@@ -148,8 +137,8 @@ public record Mod(File file, ClausewitzItem item, LauncherSettings launcherSetti
         replacePath.forEach(s -> this.item.addVariable("replace_path", ClausewitzUtils.addQuotes(s)));
     }
 
-    public String getPicture() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("picture"));
+    public Optional<String> getPicture() {
+        return this.item.getVarAsString("picture").map(ClausewitzUtils::removeQuotes).filter(StringUtils::isNotBlank);
     }
 
     public void setPicture(String picture) {

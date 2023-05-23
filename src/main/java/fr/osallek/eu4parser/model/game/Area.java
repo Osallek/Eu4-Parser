@@ -50,9 +50,7 @@ public class Area extends Nodded {
         if (this.list != null) {
             return this.list.getValuesAsInt();
         } else if (this.item != null) {
-            ClausewitzList clausewitzList = this.item.getList("");
-
-            return clausewitzList == null ? new ArrayList<>() : clausewitzList.getValuesAsInt();
+            return this.item.getList("").map(ClausewitzList::getValuesAsInt).orElse(new ArrayList<>());
         } else {
             return new ArrayList<>();
         }
@@ -63,11 +61,7 @@ public class Area extends Nodded {
             if (this.list != null) {
                 this.list.clear();
             } else if (this.item != null) {
-                ClausewitzList clausewitzList = this.item.getList("");
-
-                if (clausewitzList != null) {
-                    clausewitzList.clear();
-                }
+                this.item.getList("").ifPresent(ClausewitzList::clear);
             }
 
             return;
@@ -76,13 +70,9 @@ public class Area extends Nodded {
         if (this.list != null) {
             this.list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
         } else if (this.item != null) {
-            ClausewitzList clausewitzList = this.item.getList("");
-
-            if (clausewitzList != null) {
-                clausewitzList.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-            } else {
-                this.item.addList("", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-            }
+            this.item.getList("")
+                     .ifPresentOrElse(list -> list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)),
+                                      () -> this.item.addList("", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)));
         }
     }
 
@@ -90,25 +80,15 @@ public class Area extends Nodded {
         if (this.list != null) {
             this.list.add(province);
         } else if (this.item != null) {
-            ClausewitzList clausewitzList = this.item.getList("");
-
-            if (clausewitzList != null) {
-                clausewitzList.setAll(province);
-            } else {
-                this.item.addList("", province);
-            }
+            this.item.getList("").ifPresentOrElse(list -> list.setAll(province), () -> this.item.addList("", province));
         }
     }
 
     public void removeProvince(int province) {
         if (this.list != null) {
             this.list.remove(String.valueOf(province));
-        }  else if (this.item != null) {
-            ClausewitzList clausewitzList = this.item.getList("");
-
-            if (clausewitzList != null) {
-                clausewitzList.remove(String.valueOf(province));
-            }
+        } else if (this.item != null) {
+            this.item.getList("").ifPresent(list -> list.remove(String.valueOf(province)));
         }
     }
 
@@ -117,8 +97,7 @@ public class Area extends Nodded {
             return null;
         }
 
-        ClausewitzList clausewitzList = this.item.getList("color");
-        return clausewitzList == null ? null : new Color(clausewitzList);
+        return this.item.getList("color").map(Color::new).orElse(null);
     }
 
     public void setColor(Color color) {
@@ -136,16 +115,12 @@ public class Area extends Nodded {
             this.object = this.item;
         }
 
-        ClausewitzList clausewitzList = this.item.getList("color");
-
-        if (clausewitzList != null) {
-            Color actualColor = new Color(clausewitzList);
+        this.item.getList("color").ifPresentOrElse(list -> {
+            Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
     public Region getRegion() {

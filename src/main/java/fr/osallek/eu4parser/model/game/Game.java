@@ -2,7 +2,6 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.clausewitzparser.parser.LuaParser;
 import fr.osallek.eu4parser.Eu4Parser;
@@ -2661,9 +2660,7 @@ public class Game {
                           knownMods.put(path.getFileName().toString(), mod);
 
                           if (!ModType.STEAM.pattern.matcher(path.getFileName().toString()).matches()) {
-                              if (StringUtils.isNotBlank(mod.getRemoteFileId())) {
-                                  knownMods.put("ugc_" + ClausewitzUtils.removeQuotes(mod.getRemoteFileId()) + ".mod", mod);
-                              }
+                              mod.getRemoteFileId().ifPresent(s -> knownMods.put("ugc_" + s + ".mod", mod));
                           }
                       });
             }
@@ -2673,7 +2670,7 @@ public class Game {
             for (String modName : modsEnabled) {
                 Mod mod = knownMods.get(ClausewitzUtils.removeQuotes(modName).replaceAll("^mod/", ""));
                 if (mod != null) {
-                    map.put(mod.getPath().toFile(), mod);
+                    mod.getPath().ifPresent(path -> map.put(path.toFile(), mod));
                     this.mods.add(mod);
                 } else {
                     throw new ModNotFoundException(modName);
@@ -2914,22 +2911,17 @@ public class Game {
     private void readSpriteTypes() {
         this.spriteTypes = new HashMap<>();
 
-        getPaths(Eu4Utils.INTERFACE_FOLDER_PATH,
-                 fileNode -> Files.isRegularFile(fileNode.getPath()),
-                 fileNode -> fileNode.getPath().toString().endsWith(".gfx"))
-                .forEach(path -> {
-                    ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0);
-                    ClausewitzItem spriteTypesItem = rootItem.getChild("spriteTypes");
-
-                    if (spriteTypesItem != null) {
-                        this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
-                                                               .stream()
-                                                               .map(SpriteType::new)
-                                                               .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
-                                                                                         Function.identity(),
-                                                                                         (a, b) -> a)));
-                    }
-                });
+        getPaths(Eu4Utils.INTERFACE_FOLDER_PATH, fileNode -> Files.isRegularFile(fileNode.getPath()),
+                 fileNode -> fileNode.getPath().toString().endsWith(".gfx")).forEach(path -> {
+            ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0);
+            rootItem.getChild("spriteTypes").ifPresent(spriteTypesItem -> {
+                this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
+                                                       .stream()
+                                                       .map(SpriteType::new)
+                                                       .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
+                                                                                 Function.identity(), (a, b) -> a)));
+            });
+        });
     }
 
     private void readProvincesDefinition() throws IOException {
@@ -2965,17 +2957,8 @@ public class Game {
 
         if (provincesMapFile != null && provincesMapFile.canRead()) {
             ClausewitzItem provinceMapItem = ClausewitzParser.parse(provincesMapFile, 0);
-            ClausewitzList seaList = provinceMapItem.getList("sea_starts");
-
-            if (seaList != null) {
-                seaList.getValuesAsInt().forEach(id -> this.provinces.get(id).setOcean(true));
-            }
-
-            ClausewitzList lakesList = provinceMapItem.getList("lakes");
-
-            if (lakesList != null) {
-                lakesList.getValuesAsInt().forEach(id -> this.provinces.get(id).setLake(true));
-            }
+            provinceMapItem.getList("sea_starts").ifPresent(seaList -> seaList.getValuesAsInt().forEach(id -> this.provinces.get(id).setOcean(true)));
+            provinceMapItem.getList("lakes").ifPresent(lakesList -> lakesList.getValuesAsInt().forEach(id -> this.provinces.get(id).setLake(true)));
         }
     }
 
@@ -3056,7 +3039,7 @@ public class Game {
                 Integer provinceId = NumbersUtils.toInt(child.getName());
 
                 if (provinceId != null && this.provinces.containsKey(provinceId) && child.hasList("position")) {
-                    this.provinces.get(provinceId).setPositions(child.getList("position"));
+                    child.getList("position").ifPresent(l -> this.provinces.get(provinceId).setPositions(l));
                 }
             });
         }
@@ -3186,29 +3169,30 @@ public class Game {
 
             if (terrainFile != null && terrainFile.getPath() != null && terrainFile.getPath().toFile().canRead()) {
                 this.terrainItem = ClausewitzParser.parse(terrainFile.getPath().toFile(), 0);
-                ClausewitzItem terrainsItem = this.terrainItem.getChild("terrain");
+                this.terrainItem.getChild("terrain").ifPresent(terrainsItem -> {
+                    this.terrains = new HashMap<>();
+                    this.terrains.putAll(terrainsItem.getChildren()
+                                                     .stream()
+                                                     .map(item -> new Terrain(item, terrainFile, this, terrainColors))
+                                                     .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
+                });
 
-                this.terrains = new HashMap<>();
-                this.terrains.putAll(terrainsItem.getChildren()
-                                                 .stream()
-                                                 .map(item -> new Terrain(item, terrainFile, this, terrainColors))
-                                                 .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
+                this.terrainItem.getChild("tree").ifPresent(treesItem -> {
+                    this.trees = new HashMap<>();
+                    this.trees.putAll(treesItem.getChildren()
+                                               .stream()
+                                               .map(item -> new Tree(item, terrainFile, this, treesColors))
+                                               .collect(Collectors.toMap(Tree::getName, Function.identity(), (a, b) -> b)));
 
-                ClausewitzItem treesItem = this.terrainItem.getChild("tree");
+                });
 
-                this.trees = new HashMap<>();
-                this.trees.putAll(treesItem.getChildren()
-                                           .stream()
-                                           .map(item -> new Tree(item, terrainFile, this, treesColors))
-                                           .collect(Collectors.toMap(Tree::getName, Function.identity(), (a, b) -> b)));
-
-                ClausewitzItem categories = this.terrainItem.getChild("categories");
-
-                this.terrainCategories = new HashMap<>();
-                this.terrainCategories.putAll(categories.getChildren()
-                                                        .stream()
-                                                        .map(item -> new TerrainCategory(item, terrainFile))
-                                                        .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
+                this.terrainItem.getChild("categories").ifPresent(categories -> {
+                    this.terrainCategories = new HashMap<>();
+                    this.terrainCategories.putAll(categories.getChildren()
+                                                            .stream()
+                                                            .map(item -> new TerrainCategory(item, terrainFile))
+                                                            .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
+                });
 
                 provinceTerrains.forEach((provinceColor, color) ->
                                                  this.terrains.values()
@@ -3435,9 +3419,12 @@ public class Game {
 
         AtomicReference<GovernmentReform> defaultReform = new AtomicReference<>();
 
-        reformsItems.stream().filter(item -> item.hasChild("defaults_reform")).findFirst().ifPresent(item -> {
-            defaultReform.set(new GovernmentReform(item.getChild("defaults_reform"), this, null));
-        });
+        reformsItems.stream()
+                    .map(item -> item.getChild("defaults_reform"))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .ifPresent(item -> defaultReform.set(new GovernmentReform(item, this, null)));
 
         this.governmentReforms.putAll(reformsItems.stream()
                                                   .map(item -> item.getChildrenNot("defaults_reform"))
@@ -3509,39 +3496,37 @@ public class Game {
 
         if (techGroupsFile != null && techGroupsFile.getPath().toFile().canRead()) {
             ClausewitzItem techGroupsItem = ClausewitzParser.parse(techGroupsFile.getPath().toFile(), 0);
-            this.techGroups.putAll(techGroupsItem.getChild("groups")
-                                                 .getChildren()
-                                                 .stream()
-                                                 .map(item -> new TechGroup(item, techGroupsFile))
-                                                 .collect(Collectors.toMap(TechGroup::getName, Function.identity(), (a, b) -> b)));
+            techGroupsItem.getChild("groups")
+                          .ifPresent(groups -> this.techGroups.putAll(groups.getChildren()
+                                                                            .stream()
+                                                                            .map(item -> new TechGroup(item, techGroupsFile))
+                                                                            .collect(Collectors.toMap(TechGroup::getName, Function.identity(), (a, b) -> b))));
 
-            ClausewitzItem technologiesItem = techGroupsItem.getChild("tables");
-
-            if (technologiesItem != null) {
+            techGroupsItem.getChild("tables").ifPresent(technologiesItem -> {
                 for (Power power : Power.values()) {
-                    String filePath = null;
+                    Optional<String> filePath = Optional.empty();
                     List<Technology> techs = new ArrayList<>();
                     AtomicInteger i = new AtomicInteger(0);
 
                     switch (power) { //Don't read others because it is useless, AI can't take them
-                        case ADM -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("adm_tech"));
-                        case DIP -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("dip_tech"));
-                        case MIL -> filePath = ClausewitzUtils.removeQuotes(technologiesItem.getVarAsString("mil_tech"));
+                        case ADM -> filePath = technologiesItem.getVarAsString("adm_tech").map(ClausewitzUtils::removeQuotes);
+                        case DIP -> filePath = technologiesItem.getVarAsString("dip_tech").map(ClausewitzUtils::removeQuotes);
+                        case MIL -> filePath = technologiesItem.getVarAsString("mil_tech").map(ClausewitzUtils::removeQuotes);
                     }
 
-                    if (filePath != null) {
+                    if (filePath.isPresent()) {
                         Path path = getAbsolutePath(Eu4Utils.COMMON_FOLDER_PATH + File.separator + filePath);
 
                         if (path != null && path.toFile().canRead()) {
                             ClausewitzItem techItem = ClausewitzParser.parse(path.toFile(), 0);
-                            Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time"));
+                            Modifiers aheadOfTime = new Modifiers(techItem.getChild("ahead_of_time").orElse(null));
 
                             techItem.getChildren("technology").forEach(item -> techs.add(new Technology(item, power, aheadOfTime, i.getAndIncrement())));
                             this.technologies.put(power, techs);
                         }
                     }
                 }
-            }
+            });
         }
     }
 
@@ -3692,21 +3677,20 @@ public class Game {
         if (guiPath != null && guiPath.toFile().exists() && guiPath.toFile().canRead()) {
             ClausewitzItem guiItem = ClausewitzParser.parse(guiPath.toFile(), 0);
 
-            if ((guiItem = guiItem.getChild("guiTypes")) != null) {
-                if ((guiItem = guiItem.getChildren("windowType")
-                                      .stream()
-                                      .filter(child -> "\"countrymissionsview_missions_gridbox_listbox_entry\"".equals(child.getVarAsString("name")))
-                                      .findFirst()
-                                      .orElse(null)) != null) {
-                    if ((guiItem = guiItem.getChildren("gridBoxType")
-                                          .stream()
-                                          .filter(child -> "\"countrymissionsview_missions_gridbox\"".equals(child.getVarAsString("name")))
-                                          .findFirst()
-                                          .orElse(null)) != null) {
-                        this.maxMissionsSlots = guiItem.getVarAsInt("max_slots_horizontal");
-                    }
-                }
-            }
+            guiItem.getChild("guiTypes")
+                   .flatMap(item -> item.getChildren("windowType")
+                                        .stream()
+                                        .filter(child -> child.getVarAsString("name").isPresent()
+                                                         && "\"countrymissionsview_missions_gridbox_listbox_entry\"".equals(
+                                                child.getVarAsString("name").get()))
+                                        .findFirst())
+                   .flatMap(item -> item.getChildren("gridBoxType")
+                                        .stream()
+                                        .filter(child -> child.getVarAsString("name").isPresent() && "\"countrymissionsview_missions_gridbox\"".equals(
+                                                child.getVarAsString("name").get()))
+                                        .findFirst())
+                   .flatMap(item -> item.getVarAsInt("max_slots_horizontal"))
+                   .ifPresent(integer -> this.maxMissionsSlots = integer);
         }
     }
 
@@ -4214,8 +4198,10 @@ public class Game {
                                              this.subjectTypeRelations.get("personal_union").add(new DiplomacyRelation(item, this));
                                          }
                                          case "dependency" -> {
-                                             this.subjectTypeRelations.putIfAbsent(item.getVarAsString("subject_type"), new ArrayList<>());
-                                             this.subjectTypeRelations.get(item.getVarAsString("subject_type")).add(new DiplomacyRelation(item, this));
+                                             item.getVarAsString("subject_type").ifPresent(s -> {
+                                                 this.subjectTypeRelations.putIfAbsent(s, new ArrayList<>());
+                                                 this.subjectTypeRelations.get(s).add(new DiplomacyRelation(item, this));
+                                             });
                                          }
                                      }
                                  });
@@ -4251,48 +4237,39 @@ public class Game {
     private void readDecisions() {
         this.decisions = new HashMap<>();
 
-        getFileNodes("decisions", this::isRegularTxtFile)
-                .forEach(fileNode -> {
-                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+        getFileNodes("decisions", this::isRegularTxtFile).forEach(fileNode -> {
+            ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
 
-                    if (item.hasChild("country_decisions")) {
-                        this.decisions.putAll(item.getChild("country_decisions")
-                                                  .getChildren()
-                                                  .stream()
-                                                  .map(i -> new Decision(fileNode, this, i))
-                                                  .collect(Collectors.toMap(Decision::getName, Function.identity())));
-                    }
-                });
+            item.getChild("country_decisions")
+                .ifPresent(item1 -> this.decisions.putAll(item1.getChildren()
+                                                               .stream()
+                                                               .map(i -> new Decision(fileNode, this, i))
+                                                               .collect(Collectors.toMap(Decision::getName, Function.identity()))));
+        });
     }
 
     private void readDisasters() {
         this.disasters = new HashMap<>();
 
-        getFileNodes(Path.of(Eu4Utils.COMMON_FOLDER_PATH, "disasters"), this::isRegularTxtFile)
-                .forEach(fileNode -> {
-                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
-                    this.disasters.putAll(item.getChildren()
-                                              .stream()
-                                              .map(i -> new Disaster(fileNode, i, this))
-                                              .collect(Collectors.toMap(Disaster::getName, Function.identity())));
-                });
+        getFileNodes(Path.of(Eu4Utils.COMMON_FOLDER_PATH, "disasters"), this::isRegularTxtFile).forEach(fileNode -> {
+            ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+            this.disasters.putAll(
+                    item.getChildren().stream().map(i -> new Disaster(fileNode, i, this)).collect(Collectors.toMap(Disaster::getName, Function.identity())));
+        });
     }
 
     private void readDlcs() {
         this.dlcs = new HashMap<>();
 
-        getFileNodes(Path.of(Eu4Utils.DLC_META_FOLDER_PATH, Eu4Utils.DLC_INFO_FOLDER_PATH), this::isRegularTxtFile)
-                .forEach(fileNode -> {
-                    ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
+        getFileNodes(Path.of(Eu4Utils.DLC_META_FOLDER_PATH, Eu4Utils.DLC_INFO_FOLDER_PATH), this::isRegularTxtFile).forEach(fileNode -> {
+            ClausewitzItem item = ClausewitzParser.parse(fileNode.getPath().toFile(), 0);
 
-                    if (item.hasChild("dlcs")) {
-                        this.dlcs.putAll(item.getChild("dlcs")
-                                             .getChildren()
-                                             .stream()
-                                             .map(i -> new Dlc(i, this, fileNode))
-                                             .collect(Collectors.toMap(Dlc::getInternalName, Function.identity())));
-                    }
-                });
+            item.getChild("dlcs")
+                .ifPresent(item1 -> this.dlcs.putAll(item1.getChildren()
+                                                          .stream()
+                                                          .map(i -> new Dlc(i, this, fileNode))
+                                                          .collect(Collectors.toMap(Dlc::getInternalName, Function.identity()))));
+        });
     }
 
     public boolean isRegularTxtFile(FileNode fileNode) {

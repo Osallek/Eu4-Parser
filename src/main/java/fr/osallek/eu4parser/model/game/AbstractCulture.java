@@ -4,8 +4,10 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class AbstractCulture {
 
@@ -33,71 +35,56 @@ public abstract class AbstractCulture {
     public abstract List<String> getPossibleDynastyNames();
 
     public List<String> getMaleNames() {
-        ClausewitzList list = this.item.getList("male_names");
-        return list == null ? null : list.getValues();
+        return this.item.getList("male_names").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
-    public void setMaleNames(List<String> maleNames) {
-        if (CollectionUtils.isEmpty(maleNames)) {
+    public void setMaleNames(List<String> names) {
+        if (CollectionUtils.isEmpty(names)) {
             this.item.removeList("male_names");
             return;
         }
 
-        ClausewitzList list = this.item.getList("male_names");
-
-        if (list != null) {
-            list.setAll(maleNames.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("male_names", maleNames.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("male_names")
+                 .ifPresentOrElse(list -> list.setAll(names.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("male_names", names.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getFemaleNames() {
-        ClausewitzList list = this.item.getList("female_names");
-        return list == null ? null : list.getValues();
+        return this.item.getList("female_names").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
-    public void setFemaleNames(List<String> femaleNames) {
-        if (CollectionUtils.isEmpty(femaleNames)) {
+    public void setFemaleNames(List<String> names) {
+        if (CollectionUtils.isEmpty(names)) {
             this.item.removeList("female_names");
             return;
         }
 
-        ClausewitzList list = this.item.getList("female_names");
-
-        if (list != null) {
-            list.setAll(femaleNames.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("female_names", femaleNames.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("female_names")
+                 .ifPresentOrElse(list -> list.setAll(names.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("female_names", names.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getDynastyNames() {
-        ClausewitzList list = this.item.getList("dynasty_names");
-        return list == null ? null : list.getValues();
+        return this.item.getList("dynasty_names").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
-    public void setDynastyNames(List<String> dynastyNames) {
-        if (CollectionUtils.isEmpty(dynastyNames)) {
+    public void setDynastyNames(List<String> names) {
+        if (CollectionUtils.isEmpty(names)) {
             this.item.removeList("dynasty_names");
             return;
         }
 
-        ClausewitzList list = this.item.getList("dynasty_names");
-
-        if (list != null) {
-            list.setAll(dynastyNames.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("dynasty_names", dynastyNames.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("dynasty_names")
+                 .ifPresentOrElse(list -> list.setAll(names.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("dynasty_names", names.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
-    public Modifiers getCountryModifiers() {
-        return new Modifiers(this.item.getChild("country"));
+    public Optional<Modifiers> getCountryModifiers() {
+        return this.item.getChild("country").map(Modifiers::new);
     }
 
-    public Modifiers getProvinceModifiers() {
-        return new Modifiers(this.item.getChild("province"));
+    public Optional<Modifiers> getProvinceModifiers() {
+        return this.item.getChild("province").map(Modifiers::new);
     }
 
     public Game getGame() {

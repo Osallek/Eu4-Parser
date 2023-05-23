@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
-import fr.osallek.eu4parser.model.game.effects.Effects;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
@@ -38,24 +37,24 @@ public class AgeAbility {
     }
 
     public ConditionAnd getAllow() {
-        return Optional.ofNullable(this.item.getChild("allow")).map(ConditionAnd::new).orElse(null);
+        return this.item.getChild("allow").map(ConditionAnd::new).orElse(null);
     }
 
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("modifier"));
+    public Optional<Modifiers> getModifiers() {
+        return this.item.getChild("modifier").map(Modifiers::new);
     }
 
-    public Effects getEffects() {
-        return Optional.ofNullable(this.item.getChild("effect")).map(i -> new Effects(i, this.game)).orElse(null);
+    public Optional<Modifiers> getEffects() {
+        return this.item.getChild("effect").map(Modifiers::new);
     }
 
     public List<String> getRules() {
-        return Optional.ofNullable(this.item.getChild("rule"))
-                       .map(ClausewitzItem::getVariables)
-                       .map(Collection::stream)
-                       .map(s -> s.map(ClausewitzVariable::getName))
-                       .map(Stream::toList)
-                       .orElse(null);
+        return this.item.getChild("rule")
+                        .map(ClausewitzItem::getVariables)
+                        .map(Collection::stream)
+                        .map(s -> s.map(ClausewitzVariable::getName))
+                        .map(Stream::toList)
+                        .orElse(null);
     }
 
     public File getImage() {

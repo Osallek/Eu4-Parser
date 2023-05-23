@@ -54,7 +54,7 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
     }
 
     public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("modifier"));
+        return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     public boolean isInRange(int range) {

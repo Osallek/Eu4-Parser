@@ -131,12 +131,10 @@ public class SaveAdvisor {
     }
 
     public Modifiers getModifiers() {
-        if (getGameAdvisor().getSkillScaledModifier() == null) {
-            return getGameAdvisor().getModifiers();
-        } else {
-            return ModifiersUtils.sumModifiers(getGameAdvisor().getModifiers(),
-                                               ModifiersUtils.scaleModifiers(getGameAdvisor().getSkillScaledModifier(), getSkill()));
-        }
+        return getGameAdvisor().getSkillScaledModifier()
+                               .map(modifiers -> ModifiersUtils.sumModifiers(getGameAdvisor().getModifiers(),
+                                                                             ModifiersUtils.scaleModifiers(modifiers, getSkill())))
+                               .orElse(getGameAdvisor().getModifiers());
     }
 
     private void refreshAttributes() {

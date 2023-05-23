@@ -48,7 +48,7 @@ public class HolyOrder {
     }
 
     public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("modifier"));
+        return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     @Override

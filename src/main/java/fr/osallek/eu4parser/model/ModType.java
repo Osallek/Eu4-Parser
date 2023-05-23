@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model;
 import java.util.regex.Pattern;
 
 public enum ModType {
-    LOCAL(Pattern.compile(".*")), STEAM(Pattern.compile("^ugc_[0-9]+(.mod)?$")), PDX(Pattern.compile("^pdx_[0-9]+(.mod)?$"));
+    LOCAL(Pattern.compile(".*")), STEAM(Pattern.compile("^ugc_\\d+(.mod)?$")), PDX(Pattern.compile("^pdx_\\d+(.mod)?$"));
 
     public final Pattern pattern;
 

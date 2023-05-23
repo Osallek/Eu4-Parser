@@ -40,14 +40,14 @@ public class Age {
     }
 
     public int getStart() {
-        return this.item.getVarAsInt("start");
+        return this.item.getVarAsInt("start").get();
     }
 
     public void setStart(int start) {
         this.item.setVariable("start", start);
     }
 
-    public Boolean getReligiousConflict() {
+    public Optional<Boolean> getReligiousConflict() {
         return this.item.getVarAsBool("religious_conflicts");
     }
 
@@ -59,12 +59,11 @@ public class Age {
         }
     }
 
-    public ConditionAnd getCanStart() {
-        ClausewitzItem child = item.getChild("can_start");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getCanStart() {
+        return this.item.getChild("can_start").map(ConditionAnd::new);
     }
 
-    public Double getPapacy() {
+    public Optional<Double> getPapacy() {
         return this.item.getVarAsDouble("papacy");
     }
 
@@ -77,24 +76,21 @@ public class Age {
     }
 
     public Map<String, Double> getAbsolutism() {
-        return Optional.ofNullable(this.item.getChild("absolutism"))
-                       .map(ClausewitzItem::getVariables)
-                       .map(Collection::stream)
-                       .map(s -> s.collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble)))
-                       .orElse(null);
+        return this.item.getChild("absolutism")
+                        .map(ClausewitzItem::getVariables)
+                        .map(Collection::stream)
+                        .map(s -> s.collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble)))
+                        .orElse(null);
     }
 
     public void setAbsolutism(Map<String, Integer> absolutism) {
         if (MapUtils.isEmpty(absolutism)) {
             this.item.removeChild("absolutism");
         } else {
-            ClausewitzItem child = this.item.getChild("absolutism");
-
-            if (child == null) {
-                child = this.item.addChild("absolutism");
-            } else {
-                child.removeAllVariables();
-            }
+            ClausewitzItem child = this.item.getChild("absolutism").map(item1 -> {
+                item1.removeAllVariables();
+                return item1;
+            }).orElse(this.item.addChild("absolutism"));
 
             ClausewitzItem finalChild = child;
             absolutism.forEach((s, integer) -> {
@@ -106,21 +102,21 @@ public class Age {
     }
 
     public List<AgeObjective> getObjectives() {
-        return Optional.ofNullable(this.item.getChild("objectives"))
-                       .map(ClausewitzItem::getChildren)
-                       .map(Collection::stream)
-                       .map(s -> s.map(i -> new AgeObjective(i, this.game)))
-                       .map(Stream::toList)
-                       .orElse(null);
+        return this.item.getChild("objectives")
+                        .map(ClausewitzItem::getChildren)
+                        .map(Collection::stream)
+                        .map(s -> s.map(i -> new AgeObjective(i, this.game)))
+                        .map(Stream::toList)
+                        .orElse(null);
     }
 
     public List<AgeAbility> getAbilities() {
-        return Optional.ofNullable(this.item.getChild("abilities"))
-                       .map(ClausewitzItem::getChildren)
-                       .map(Collection::stream)
-                       .map(s -> s.map(i -> new AgeAbility(i, this.game)))
-                       .map(Stream::toList)
-                       .orElse(null);
+        return this.item.getChild("abilities")
+                        .map(ClausewitzItem::getChildren)
+                        .map(Collection::stream)
+                        .map(s -> s.map(i -> new AgeAbility(i, this.game)))
+                        .map(Stream::toList)
+                        .orElse(null);
     }
 
     public File getImage() {
