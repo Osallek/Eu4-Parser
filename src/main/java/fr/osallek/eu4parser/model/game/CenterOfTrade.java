@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 public class CenterOfTrade implements Comparable<CenterOfTrade> {
 
@@ -34,14 +35,14 @@ public class CenterOfTrade implements Comparable<CenterOfTrade> {
     }
 
     public int getLevel() {
-        return this.item.getVarAsInt("level");
+        return this.item.getVarAsInt("level").orElse(1);
     }
 
     public void setLevel(int level) {
         this.item.setVariable("level", level);
     }
 
-    public Integer getCost() {
+    public Optional<Integer> getCost() {
         return this.item.getVarAsInt("cost");
     }
 
@@ -53,7 +54,7 @@ public class CenterOfTrade implements Comparable<CenterOfTrade> {
         }
     }
 
-    public Integer getDevelopment() {
+    public Optional<Integer> getDevelopment() {
         return this.item.getVarAsInt("development");
     }
 
@@ -66,23 +67,23 @@ public class CenterOfTrade implements Comparable<CenterOfTrade> {
     }
 
     public CenterOfTradeType getType() {
-        return CenterOfTradeType.valueOf(this.item.getVarAsString("type").toUpperCase());
+        return CenterOfTradeType.valueOf(this.item.getVarAsString("type").get().toUpperCase());
     }
 
     public void setType(CenterOfTradeType type) {
         this.item.setVariable("type", type.name().toLowerCase());
     }
 
-    public Modifiers getProvinceModifiers() {
-        return new Modifiers(this.item.getChild("province_modifiers"));
+    public Optional<Modifiers> getProvinceModifiers() {
+        return this.item.getChild("province_modifiers").map(Modifiers::new);
     }
 
-    public Modifiers getStateModifiers() {
-        return new Modifiers(this.item.getChild("state_modifiers"));
+    public Optional<Modifiers> getStateModifiers() {
+        return this.item.getChild("state_modifiers").map(Modifiers::new);
     }
 
-    public Modifiers getGlobalModifiers() {
-        return new Modifiers(this.item.getChild("global_modifiers"));
+    public Optional<Modifiers> getGlobalModifiers() {
+        return this.item.getChild("global_modifiers").map(Modifiers::new);
     }
 
     public boolean isValid(SaveProvince province) {

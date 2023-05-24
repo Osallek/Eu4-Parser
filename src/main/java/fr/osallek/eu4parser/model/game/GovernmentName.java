@@ -2,6 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Map;
 import java.util.Objects;

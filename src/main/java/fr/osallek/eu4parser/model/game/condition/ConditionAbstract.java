@@ -1,7 +1,9 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.condition;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.game.Country;
+import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;

@@ -1,5 +1,8 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.eu4parser.model.game.condition.ConditionAbstract;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import fr.osallek.eu4parser.model.game.condition.ConditionNot;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;

@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.save.war.Combatant;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Battle {
 
@@ -13,14 +14,9 @@ public class Battle {
 
     private final LocalDate date;
 
-    private Combatant attacker;
-
-    private Combatant defender;
-
     public Battle(LocalDate date, ClausewitzItem item) {
         this.item = item;
         this.date = date;
-        refreshAttributes();
     }
 
     public LocalDate getDate() {
@@ -28,48 +24,34 @@ public class Battle {
     }
 
     public String getName() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+        return this.item.getVarAsString("name").map(ClausewitzUtils::removeQuotes).orElse("");
     }
 
     public void setName(String name) {
         this.item.setVariable("name", name);
     }
 
-    public Integer getLocation() {
-        return this.item.getVarAsInt("location");
+    public int getLocation() {
+        return this.item.getVarAsInt("location").orElse(0);
     }
 
-    public Combatant getAttacker() {
-        return attacker;
+    public Optional<Combatant> getAttacker() {
+        return this.item.getChild("attacker").map(Combatant::new);
     }
 
-    public Combatant getDefender() {
-        return defender;
+    public Optional<Combatant> getDefender() {
+        return this.item.getChild("defender").map(Combatant::new);
     }
 
     public boolean getResult() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("result"));
+        return this.item.getVarAsBool("result").map(BooleanUtils::toBoolean).orElse(false);
     }
 
-    public Double getWinnerAlliance() {
+    public Optional<Double> getWinnerAlliance() {
         return this.item.getVarAsDouble("winner_alliance");
     }
 
-    public Double getLoserAlliance() {
+    public Optional<Double> getLoserAlliance() {
         return this.item.getVarAsDouble("loser_alliance");
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem attackerItem = this.item.getChild("attacker");
-
-        if (attackerItem != null) {
-            this.attacker = new Combatant(attackerItem);
-        }
-
-        ClausewitzItem defenderItem = this.item.getChild("defender");
-
-        if (defenderItem != null) {
-            this.defender = new Combatant(defenderItem);
-        }
     }
 }

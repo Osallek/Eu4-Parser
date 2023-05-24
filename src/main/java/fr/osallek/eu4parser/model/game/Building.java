@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Localised;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -14,9 +15,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Building extends Nodded implements Localised {
 
@@ -57,7 +60,7 @@ public class Building extends Nodded implements Localised {
         return this.game.getBuildingFlagImage(this);
     }
 
-    public Integer getCost() {
+    public Optional<Integer> getCost() {
         return this.item.getVarAsInt("cost");
     }
 
@@ -69,7 +72,7 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public Integer getTime() {
+    public Optional<Integer> getTime() {
         return this.item.getVarAsInt("time");
     }
 
@@ -81,8 +84,8 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public String getMakeObsolete() {
-        return this.item.getVarAsString("make_obsolete");
+    public Optional<String> getMakeObsolete() {
+        return this.item.getVarAsString("make_obsolete").filter(StringUtils::isNotBlank);
     }
 
     public void setMakeObsolete(String makeObsolete) {
@@ -94,14 +97,14 @@ public class Building extends Nodded implements Localised {
     }
 
     public boolean makeObsolete() {
-        return StringUtils.isNotBlank(getMakeObsolete());
+        return getMakeObsolete().isPresent();
     }
 
-    public Building getMakeObsoleteBuilding() {
-        return StringUtils.isBlank(getMakeObsolete()) ? null : this.game.getBuilding(getMakeObsolete());
+    public Optional<Building> getMakeObsoleteBuilding() {
+        return getMakeObsolete().map(this.game::getBuilding);
     }
 
-    public Boolean onePerCountry() {
+    public Optional<Boolean> onePerCountry() {
         return this.item.getVarAsBool("one_per_country");
     }
 
@@ -113,7 +116,7 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public Boolean allowInGoldProvince() {
+    public Optional<Boolean> allowInGoldProvince() {
         return this.item.getVarAsBool("allow_in_gold_provinces");
     }
 
@@ -125,7 +128,7 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public Boolean indestructible() {
+    public Optional<Boolean> indestructible() {
         return this.item.getVarAsBool("indestructible");
     }
 
@@ -137,7 +140,7 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public Boolean onMap() {
+    public Optional<Boolean> onMap() {
         return this.item.getVarAsBool("onmap");
     }
 
@@ -149,7 +152,7 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public Boolean influencingFort() {
+    public Optional<Boolean> influencingFort() {
         return this.item.getVarAsBool("influencing_fort");
     }
 
@@ -162,8 +165,7 @@ public class Building extends Nodded implements Localised {
     }
 
     public List<String> getManufactoryFor() {
-        ClausewitzList list = this.item.getList("manufactory");
-        return list == null ? null : list.getValues();
+        return this.item.getList("manufactory").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setManufactoryFor(List<String> manufactoryFor) {
@@ -172,18 +174,13 @@ public class Building extends Nodded implements Localised {
             return;
         }
 
-        ClausewitzList list = this.item.getList("manufactory");
-
-        if (list != null) {
-            list.setAll(manufactoryFor.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("manufactory", manufactoryFor.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("manufactory")
+                 .ifPresentOrElse(list -> list.setAll(manufactoryFor.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("manufactory", manufactoryFor.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getBonusManufactory() {
-        ClausewitzList list = this.item.getList("bonus_manufactory");
-        return list == null ? null : list.getValues();
+        return this.item.getList("bonus_manufactory").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setBonusManufactory(List<String> bonusManufactory) {
@@ -192,16 +189,12 @@ public class Building extends Nodded implements Localised {
             return;
         }
 
-        ClausewitzList list = this.item.getList("bonus_manufactory");
-
-        if (list != null) {
-            list.setAll(bonusManufactory.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("bonus_manufactory", bonusManufactory.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("bonus_manufactory")
+                 .ifPresentOrElse(list -> list.setAll(bonusManufactory.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("bonus_manufactory", bonusManufactory.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
-    public Boolean governmentSpecific() {
+    public Optional<Boolean> governmentSpecific() {
         return this.item.getVarAsBool("government_specific");
     }
 
@@ -213,7 +206,7 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public Boolean showSeparate() {
+    public Optional<Boolean> showSeparate() {
         return this.item.getVarAsBool("show_separate");
     }
 
@@ -225,35 +218,25 @@ public class Building extends Nodded implements Localised {
         }
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     public boolean onlyInPort() {
-        ConditionAnd condition = getTrigger();
-        return condition != null && "yes".equals(condition.getCondition("has_port"));
+        return getTrigger().map(condition -> "yes".equals(condition.getCondition("has_port"))).orElse(false);
     }
 
     public boolean onlyNative() {
-        ConditionAnd condition = getTrigger();
-
-        if (condition == null) {
-            return false;
-        }
-
-        List<? extends ConditionAbstract> conditions = condition.getScopes("owner");
-
-        if (CollectionUtils.isEmpty(conditions)) {
-            return false;
-        }
-
-        return conditions.stream().anyMatch(c -> MapUtils.isNotEmpty(c.getConditions()) && c.getCondition("government") != null &&
-                                                 c.getConditions().get("government").stream().anyMatch("native"::equals));
+        return getTrigger().map(t -> t.getScopes("owner"))
+                           .filter(CollectionUtils::isNotEmpty)
+                           .map(conditions -> conditions.stream()
+                                                        .anyMatch(c -> MapUtils.isNotEmpty(c.getConditions()) && c.getCondition("government") != null
+                                                                       && c.getConditions().get("government").stream().anyMatch("native"::equals)))
+                           .orElse(false);
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("build_trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("build_trigger").map(ConditionAnd::new);
     }
 
     public void writeImageTo(Path dest) throws IOException {

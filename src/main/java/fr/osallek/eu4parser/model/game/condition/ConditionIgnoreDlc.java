@@ -1,4 +1,4 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.condition;
 
 import java.util.function.Predicate;
 import java.util.stream.Collectors;

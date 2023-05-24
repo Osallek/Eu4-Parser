@@ -1503,8 +1503,8 @@ public class SaveProvince extends Province {
             }
         }
 
-        if (getCenterOfTrade() != null && getCenterOfTrade().getProvinceModifiers().hasModifier(modifier)) {
-            list.add(getCenterOfTrade().getProvinceModifiers().getModifier(modifier));
+        if (getCenterOfTrade() != null) {
+            getCenterOfTrade().getProvinceModifiers().map(m -> m.getModifier(modifier)).ifPresent(list::add);
         }
 
         return ModifiersUtils.sumModifiers(modifier, list);

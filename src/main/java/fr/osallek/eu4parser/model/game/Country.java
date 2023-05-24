@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -74,8 +75,7 @@ public class Country {
                                 .stream()
                                 .filter(child -> Eu4Utils.DATE_PATTERN.matcher(child.getName()).matches())
                                 .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                          child -> new CountryHistoryItem(child, this.game, this),
-                                                          (o1, o2) -> o1, TreeMap::new));
+                                                          child -> new CountryHistoryItem(child, this.game, this), (o1, o2) -> o1, TreeMap::new));
     }
 
     public Game getGame() {
@@ -109,7 +109,7 @@ public class Country {
         this.writenTo = writenTo;
     }
 
-    public String getGraphicalCulture() {
+    public Optional<String> getGraphicalCulture() {
         return this.commonItem.getVarAsString("graphical_culture");
     }
 
@@ -117,7 +117,7 @@ public class Country {
         this.commonItem.setVariable("graphical_culture", graphicalCulture);
     }
 
-    public String getHistoricalCouncil() {
+    public Optional<String> getHistoricalCouncil() {
         return this.commonItem.getVarAsString("historical_council");
     }
 
@@ -125,7 +125,7 @@ public class Country {
         this.commonItem.setVariable("historical_council", historicalCouncil);
     }
 
-    public Integer getHistoricalScore() {
+    public Optional<Integer> getHistoricalScore() {
         return this.commonItem.getVarAsInt("historical_score");
     }
 
@@ -138,11 +138,12 @@ public class Country {
     }
 
     public List<IdeaGroup> getHistoricalIdeaGroups() {
-        return this.commonItem.hasList("historical_idea_groups") ? this.commonItem.getList("historical_idea_groups")
-                                                                                  .getValues()
-                                                                                  .stream()
-                                                                                  .map(this.game::getIdeaGroup)
-                                                                                  .toList() : null;
+        return this.commonItem.getList("historical_idea_groups")
+                              .map(ClausewitzList::getValues)
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .map(this.game::getIdeaGroup)
+                              .toList();
     }
 
     public void setHistoricalIdeaGroups(Collection<IdeaGroup> historicalIdeaGroups) {
@@ -150,42 +151,27 @@ public class Country {
     }
 
     public void setHistoricalIdeaGroups(List<String> historicalIdeaGroups) {
-        ClausewitzList list = this.commonItem.getList("historical_idea_groups");
-
-        if (list == null) {
-            this.commonItem.addList("historical_idea_groups", historicalIdeaGroups);
-        } else {
-            list.setAll(historicalIdeaGroups);
-        }
+        this.commonItem.getList("historical_idea_groups")
+                       .ifPresentOrElse(list -> list.setAll(historicalIdeaGroups),
+                                        () -> this.commonItem.addList("historical_idea_groups", historicalIdeaGroups));
     }
 
     public Map<String, Integer> getMonarchNames() {
-        return this.commonItem.hasChild("monarch_names") ? this.commonItem.getChild("monarch_names")
-                                                                          .getVariables()
-                                                                          .stream()
-                                                                          .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt,
-                                                                                                    (a, b) -> a))
-                                                         : null;
+        return this.commonItem.getChild("monarch_names")
+                              .map(ClausewitzItem::getVariables)
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsInt, (a, b) -> a));
     }
 
     public void setMonarchNames(Map<String, Integer> monarchNames) {
-        ClausewitzItem item = this.commonItem.getChild("monarch_names");
-
-        if (item == null) {
-            item = this.commonItem.addChild("monarch_names");
-        }
-
+        ClausewitzItem item = this.commonItem.getChild("monarch_names").orElse(this.commonItem.addChild("monarch_names"));
         item.removeAllVariables();
-        ClausewitzItem finalItem = item;
-        monarchNames.forEach((name, weight) -> finalItem.addVariable(ClausewitzUtils.addQuotes(name), weight));
+        monarchNames.forEach((name, weight) -> item.addVariable(ClausewitzUtils.addQuotes(name), weight));
     }
 
     public List<Unit> getHistoricalUnits() {
-        return this.commonItem.hasList("historical_units") ? this.commonItem.getList("historical_units")
-                                                                            .getValues()
-                                                                            .stream()
-                                                                            .map(this.game::getUnit)
-                                                                            .toList() : null;
+        return this.commonItem.getList("historical_units").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.game::getUnit).toList();
     }
 
     public void setHistoricalUnits(Collection<Unit> historicalUnits) {
@@ -193,138 +179,98 @@ public class Country {
     }
 
     public void setHistoricalUnits(List<String> historicalUnits) {
-        ClausewitzList list = this.commonItem.getList("historical_units");
-
-        if (list == null) {
-            this.commonItem.addList("historical_units", historicalUnits);
-        } else {
-            list.setAll(historicalUnits);
-        }
+        this.commonItem.getList("historical_units")
+                       .ifPresentOrElse(list -> list.setAll(historicalUnits), () -> this.commonItem.addList("historical_units", historicalUnits));
     }
 
     public List<String> getLeaderNames() {
-        return this.commonItem.hasList("leader_names") ? this.commonItem.getList("leader_names")
-                                                                        .getValues()
-                                                                        .stream()
-                                                                        .map(ClausewitzUtils::removeQuotes)
-                                                                        .toList() : null;
+        return this.commonItem.getList("leader_names")
+                              .map(ClausewitzList::getValues)
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .map(ClausewitzUtils::removeQuotes)
+                              .toList();
     }
 
-    public void setLeaderNames(List<String> leaderNames) {
-        ClausewitzList list = this.commonItem.getList("leader_names");
-
-        leaderNames = leaderNames.stream().map(ClausewitzUtils::addQuotes).toList();
-
-        if (list == null) {
-            this.commonItem.addList("leader_names", leaderNames);
-        } else {
-            list.setAll(leaderNames);
-        }
+    public void setLeaderNames(List<String> names) {
+        names = names.stream().map(ClausewitzUtils::addQuotes).toList();
+        List<String> finalNames = names;
+        this.commonItem.getList("leader_names").ifPresentOrElse(list -> list.setAll(finalNames), () -> this.commonItem.addList("leader_names", finalNames));
     }
 
     public List<String> getShipNames() {
-        return this.commonItem.hasList("ship_names") ? this.commonItem.getList("ship_names")
-                                                                      .getValues()
-                                                                      .stream()
-                                                                      .map(ClausewitzUtils::removeQuotes)
-                                                                      .toList() : null;
+        return this.commonItem.getList("ship_names")
+                              .map(ClausewitzList::getValues)
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .map(ClausewitzUtils::removeQuotes)
+                              .toList();
     }
 
-    public void setShipNames(List<String> shipNames) {
-        ClausewitzList list = this.commonItem.getList("ship_names");
-
-        shipNames = shipNames.stream().map(ClausewitzUtils::addQuotes).toList();
-
-        if (list == null) {
-            this.commonItem.addList("ship_names", shipNames);
-        } else {
-            list.setAll(shipNames);
-        }
+    public void setShipNames(List<String> names) {
+        names = names.stream().map(ClausewitzUtils::addQuotes).toList();
+        List<String> finalNames = names;
+        this.commonItem.getList("ship_names").ifPresentOrElse(list -> list.setAll(finalNames), () -> this.commonItem.addList("ship_names", finalNames));
     }
 
     public List<String> getArmyNames() {
-        return this.commonItem.hasList("army_names") ? this.commonItem.getList("army_names")
-                                                                      .getValues()
-                                                                      .stream()
-                                                                      .map(ClausewitzUtils::removeQuotes)
-                                                                      .toList() : null;
+        return this.commonItem.getList("army_names")
+                              .map(ClausewitzList::getValues)
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .map(ClausewitzUtils::removeQuotes)
+                              .toList();
     }
 
-    public void setArmyNames(List<String> armyNames) {
-        ClausewitzList list = this.commonItem.getList("army_names");
-
-        armyNames = armyNames.stream().map(ClausewitzUtils::addQuotes).toList();
-
-        if (list == null) {
-            this.commonItem.addList("army_names", armyNames);
-        } else {
-            list.setAll(armyNames);
-        }
+    public void setArmyNames(List<String> names) {
+        names = names.stream().map(ClausewitzUtils::addQuotes).toList();
+        List<String> finalNames = names;
+        this.commonItem.getList("army_names").ifPresentOrElse(list -> list.setAll(finalNames), () -> this.commonItem.addList("army_names", finalNames));
     }
 
     public List<String> getFleetNames() {
-        return this.commonItem.hasList("fleet_names") ? this.commonItem.getList("fleet_names")
-                                                                       .getValues()
-                                                                       .stream()
-                                                                       .map(ClausewitzUtils::removeQuotes)
-                                                                       .toList() : null;
+        return this.commonItem.getList("fleet_names")
+                              .map(ClausewitzList::getValues)
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .map(ClausewitzUtils::removeQuotes)
+                              .toList();
     }
 
-    public void setFleetNames(List<String> fleetNames) {
-        ClausewitzList list = this.commonItem.getList("fleet_names");
-
-        fleetNames = fleetNames.stream().map(ClausewitzUtils::addQuotes).toList();
-
-        if (list == null) {
-            this.commonItem.addList("fleet_names", fleetNames);
-        } else {
-            list.setAll(fleetNames);
-        }
+    public void setFleetNames(List<String> names) {
+        names = names.stream().map(ClausewitzUtils::addQuotes).toList();
+        List<String> finalNames = names;
+        this.commonItem.getList("fleet_names").ifPresentOrElse(list -> list.setAll(finalNames), () -> this.commonItem.addList("fleet_names", finalNames));
     }
 
-    public Color getColor() {
-        ClausewitzList colorList = this.commonItem.getList("color");
-
-        if (colorList == null) {
-            return null;
-        }
-
-        return new Color(colorList);
+    public Optional<Color> getColor() {
+        return this.commonItem.getList("color").map(Color::new);
     }
 
     public void setColor(java.awt.Color color) {
-        ClausewitzList colorList = this.commonItem.getList("color");
-
-        if (colorList == null) {
-            Color.addToItem(this.commonItem, "color", color.getRed(), color.getGreen(), color.getBlue());
-        } else {
-            Color c = new Color(colorList);
+        this.commonItem.getList("color").ifPresentOrElse(list -> {
+            Color c = new Color(list);
             c.setRed(color.getRed());
             c.setGreen(color.getGreen());
             c.setBlue(color.getBlue());
-        }
+        }, () -> Color.addToItem(this.commonItem, "color", color.getRed(), color.getGreen(), color.getBlue()));
     }
 
     public List<java.awt.Color> getRevolutionaryColors() {
-        ClausewitzList colorList = this.commonItem.getList("revolutionary_colors");
-
-        if (colorList == null) {
-            return null;
-        }
-
-        return colorList.getValuesAsInt().stream().map(Eu4Utils.REVOLUTIONARY_COLORS::get).toList();
+        return this.commonItem.getList("revolutionary_colors")
+                              .map(ClausewitzList::getValuesAsInt)
+                              .stream()
+                              .flatMap(Collection::stream)
+                              .map(Eu4Utils.REVOLUTIONARY_COLORS::get)
+                              .toList();
     }
 
     public void setRevolutionaryColor(List<Integer> colors) {
-        ClausewitzList colorList = this.commonItem.getList("revolutionary_colors");
-
-        if (colorList == null) {
-            this.commonItem.addList("revolutionary_colors", colors.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-        } else {
-            colorList.set(0, colors.get(0));
-            colorList.set(1, colors.get(1));
-            colorList.set(2, colors.get(2));
-        }
+        this.commonItem.getList("revolutionary_colors").ifPresentOrElse(list -> {
+            list.set(0, colors.get(0));
+            list.set(1, colors.get(1));
+            list.set(2, colors.get(2));
+        }, () -> this.commonItem.addList("revolutionary_colors", colors.stream().filter(Objects::nonNull).toArray(Integer[]::new)));
     }
 
     public FileNode getCommonFileNode() {
@@ -344,11 +290,11 @@ public class Country {
     }
 
     public CountryHistoryItems getHistoryItemAt(LocalDate date) {
-        List<CountryHistoryItemI> items = Stream.concat(Stream.of(this.defaultHistoryItem),
-                                                        this.historyItems.entrySet()
-                                                                         .stream()
-                                                                         .filter(e -> date.isAfter(e.getKey()) || date.equals(e.getKey()))
-                                                                         .map(Map.Entry::getValue))
+        List<CountryHistoryItemI> items = Stream.concat(Stream.of(this.defaultHistoryItem), this.historyItems.entrySet()
+                                                                                                             .stream()
+                                                                                                             .filter(e -> date.isAfter(e.getKey())
+                                                                                                                          || date.equals(e.getKey()))
+                                                                                                             .map(Map.Entry::getValue))
                                                 .collect(Collectors.toList());
         Collections.reverse(items);
         return new CountryHistoryItems(items);
@@ -393,9 +339,7 @@ public class Country {
     }
 
     public Stream<Country> getSubjectsAt(LocalDate date) {
-        return this.game.getCountries()
-                        .stream()
-                        .filter(c -> this.equals(c.getOverlordAt(date)));
+        return this.game.getCountries().stream().filter(c -> this.equals(c.getOverlordAt(date)));
     }
 
     public Stream<ProvinceHistoryItemI> getOwnedProvinceAt(LocalDate date) {
@@ -407,7 +351,8 @@ public class Country {
     }
 
     public Stream<War> getWarsAt(LocalDate date) {
-        return this.game.getWars().stream()
+        return this.game.getWars()
+                        .stream()
                         .filter(war -> war.getStart().equals(date) || war.getStart().isBefore(date))
                         .filter(war -> war.getEnd() == null || war.getEnd().equals(date) || war.getEnd().isBefore(date))
                         .filter(war -> war.getAttackersAt(date).contains(this.tag) || war.getDefendersAt(date).contains(this.tag));

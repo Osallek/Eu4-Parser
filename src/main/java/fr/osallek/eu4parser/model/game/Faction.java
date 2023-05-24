@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Power;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;

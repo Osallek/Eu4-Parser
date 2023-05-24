@@ -6,6 +6,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.common.NumbersUtils;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;

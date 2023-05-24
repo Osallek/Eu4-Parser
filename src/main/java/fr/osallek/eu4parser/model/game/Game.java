@@ -16,6 +16,7 @@ import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.Save;

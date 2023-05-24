@@ -2,6 +2,8 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public class ChangeEstateLandShare {
 
     private final ClausewitzItem item;
@@ -13,11 +15,11 @@ public class ChangeEstateLandShare {
         this.game = game;
     }
 
-    public Estate getEstate() {
-        return this.game.getEstate(getEstateName());
+    public Optional<Estate> getEstate() {
+        return getEstateName().map(this.game::getEstate);
     } //Null => all
 
-    public String getEstateName() {
+    public Optional<String> getEstateName() {
         return this.item.getVarAsString("estate");
     }
 
@@ -29,7 +31,7 @@ public class ChangeEstateLandShare {
         setEstate(estate.getName());
     }
 
-    public Double getShare() {
+    public Optional<Double> getShare() {
         return this.item.getVarAsDouble("share");
     }
 

@@ -2,10 +2,13 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class CasusBelli {
 
@@ -23,7 +26,7 @@ public class CasusBelli {
         this.item.setName(name);
     }
 
-    public Boolean isValidForSubject() {
+    public Optional<Boolean> isValidForSubject() {
         return this.item.getVarAsBool("valid_for_subject");
     }
 
@@ -35,7 +38,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean isTriggeredOnly() {
+    public Optional<Boolean> isTriggeredOnly() {
         return this.item.getVarAsBool("is_triggered_only");
     }
 
@@ -47,7 +50,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean isExclusive() {
+    public Optional<Boolean> isExclusive() {
         return this.item.getVarAsBool("exclusive");
     }
 
@@ -59,7 +62,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean isIndependence() {
+    public Optional<Boolean> isIndependence() {
         return this.item.getVarAsBool("independence");
     }
 
@@ -71,7 +74,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean isNoOpinionHit() {
+    public Optional<Boolean> isNoOpinionHit() {
         return this.item.getVarAsBool("no_opinion_hit");
     }
 
@@ -83,7 +86,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean isCoalition() {
+    public Optional<Boolean> isCoalition() {
         return this.item.getVarAsBool("coalition");
     }
 
@@ -95,7 +98,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean supportRebels() {
+    public Optional<Boolean> supportRebels() {
         return this.item.getVarAsBool("support_rebels");
     }
 
@@ -107,7 +110,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean isLeague() {
+    public Optional<Boolean> isLeague() {
         return this.item.getVarAsBool("league");
     }
 
@@ -119,7 +122,7 @@ public class CasusBelli {
         }
     }
 
-    public Boolean isCallEmpireMembers() {
+    public Optional<Boolean> isCallEmpireMembers() {
         return this.item.getVarAsBool("call_empire_members");
     }
 
@@ -131,7 +134,7 @@ public class CasusBelli {
         }
     }
 
-    public Integer getAiPeaceDesire() {
+    public Optional<Integer> getAiPeaceDesire() {
         return this.item.getVarAsInt("ai_peace_desire");
     }
 
@@ -143,7 +146,7 @@ public class CasusBelli {
         }
     }
 
-    public Integer getMonths() {
+    public Optional<Integer> getMonths() {
         return this.item.getVarAsInt("months");
     }
 
@@ -155,7 +158,7 @@ public class CasusBelli {
         }
     }
 
-    public String getWarGoal() {
+    public Optional<String> getWarGoal() {
         return this.item.getVarAsString("war_goal");
     }
 
@@ -167,14 +170,12 @@ public class CasusBelli {
         }
     }
 
-    public ConditionAnd getPrerequisites() {
-        ClausewitzItem child = this.item.getChild("prerequisites");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPrerequisites() {
+        return this.item.getChild("prerequisites").map(ConditionAnd::new);
     }
 
     public List<String> getAttackerDisabledPo() {
-        ClausewitzList list = this.item.getList("attacker_disabled_po");
-        return list == null ? null : list.getValues();
+        return this.item.getList("attacker_disabled_po").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setAttackerDisabledPo(List<String> attackerDisabledPo) {
@@ -183,13 +184,9 @@ public class CasusBelli {
             return;
         }
 
-        ClausewitzList list = this.item.getList("attacker_disabled_po");
-
-        if (list != null) {
-            list.setAll(attackerDisabledPo.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("attacker_disabled_po", attackerDisabledPo.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("manufactory")
+                 .ifPresentOrElse(list -> list.setAll(attackerDisabledPo.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("attacker_disabled_po", attackerDisabledPo.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     @Override

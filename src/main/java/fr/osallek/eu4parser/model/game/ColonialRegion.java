@@ -8,10 +8,13 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ColonialRegion extends Nodded {
@@ -35,9 +38,8 @@ public class ColonialRegion extends Nodded {
         this.item.setName(name);
     }
 
-    public Color getColor() {
-        ClausewitzList list = this.item.getList("color");
-        return list == null ? null : new Color(list);
+    public Optional<Color> getColor() {
+        return this.item.getList("color").map(Color::new);
     }
 
     public void setColor(Color color) {
@@ -46,21 +48,17 @@ public class ColonialRegion extends Nodded {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
-            Color actualColor = new Color(list);
-            actualColor.setRed(color.getRed());
-            actualColor.setGreen(color.getGreen());
-            actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        this.item.getList("color").ifPresentOrElse(list -> {
+                                                       Color actualColor = new Color(list);
+                                                       actualColor.setRed(color.getRed());
+                                                       actualColor.setGreen(color.getGreen());
+                                                       actualColor.setBlue(color.getBlue());
+                                                   },
+                                                   () -> Color.addToItem(this.item, "color", color));
     }
 
     public List<Integer> getProvinces() {
-        ClausewitzList list = this.item.getList("provinces");
-        return list == null ? null : list.getValuesAsInt();
+        return this.item.getList("provinces").map(ClausewitzList::getValuesAsInt).orElse(new ArrayList<>());
     }
 
     public void setProvinces(List<Integer> provinces) {
@@ -69,35 +67,23 @@ public class ColonialRegion extends Nodded {
             return;
         }
 
-        ClausewitzList list = this.item.getList("provinces");
-
-        if (list != null) {
-            list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-        } else {
-            this.item.addList("provinces", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-        }
+        this.item.getList("provinces")
+                 .ifPresentOrElse(list -> list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)),
+                                  () -> this.item.addList("provinces", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)));
     }
 
     public void addProvince(int province) {
-        ClausewitzList list = this.item.getList("provinces");
-
-        if (list != null) {
+        this.item.getList("provinces").ifPresentOrElse(list -> {
             list.add(province);
             list.sortInt();
-        } else {
-            this.item.addList("provinces", province);
-        }
+        }, () -> this.item.addList("provinces", province));
     }
 
     public void removeProvince(int province) {
-        ClausewitzList list = this.item.getList("provinces");
-
-        if (list != null) {
-            list.remove(String.valueOf(province));
-        }
+        this.item.getList("provinces").ifPresent(list -> list.remove(String.valueOf(province)));
     }
 
-    public Integer getTaxIncome() {
+    public Optional<Integer> getTaxIncome() {
         return this.item.getVarAsInt("tax_income");
     }
 
@@ -109,7 +95,7 @@ public class ColonialRegion extends Nodded {
         }
     }
 
-    public Integer getNativeSize() {
+    public Optional<Integer> getNativeSize() {
         return this.item.getVarAsInt("native_size");
     }
 
@@ -121,7 +107,7 @@ public class ColonialRegion extends Nodded {
         }
     }
 
-    public Integer getNativeFerocity() {
+    public Optional<Integer> getNativeFerocity() {
         return this.item.getVarAsInt("native_ferocity");
     }
 
@@ -133,7 +119,7 @@ public class ColonialRegion extends Nodded {
         }
     }
 
-    public Integer getNativeHostileness() {
+    public Optional<Integer> getNativeHostileness() {
         return this.item.getVarAsInt("native_hostileness");
     }
 
@@ -146,29 +132,31 @@ public class ColonialRegion extends Nodded {
     }
 
     public Map<TradeGood, Integer> getTradeGoods() {
-        ClausewitzItem child = item.getChild("trade_goods");
-        return child == null ? null : child.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(variable -> game.getTradeGood(variable.getName()), ClausewitzVariable::getAsInt));
+        return this.item.getChild("trade_goods")
+                        .map(ClausewitzItem::getVariables)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toMap(variable -> this.game.getTradeGood(variable.getName()), ClausewitzVariable::getAsInt));
     }
 
     public Map<Culture, Integer> getCultures() {
-        ClausewitzItem child = item.getChild("culture");
-        return child == null ? null : child.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(variable -> game.getCulture(variable.getName()), ClausewitzVariable::getAsInt));
+        return this.item.getChild("culture")
+                        .map(ClausewitzItem::getVariables)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toMap(variable -> this.game.getCulture(variable.getName()), ClausewitzVariable::getAsInt));
     }
 
     public Map<Religion, Integer> getReligions() {
-        ClausewitzItem child = item.getChild("religion");
-        return child == null ? null : child.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(variable -> game.getReligion(variable.getName()), ClausewitzVariable::getAsInt));
+        return this.item.getChild("religion")
+                        .map(ClausewitzItem::getVariables)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toMap(variable -> this.game.getReligion(variable.getName()), ClausewitzVariable::getAsInt));
     }
 
     public List<Names> getColonialNames() {
-        List<ClausewitzItem> names = item.getChildren("names");
-        return names.stream().map(Names::new).toList();
+        return this.item.getChildren("names").stream().map(Names::new).toList();
     }
 
     public boolean isRandom() {

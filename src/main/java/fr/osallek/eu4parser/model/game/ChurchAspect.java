@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class ChurchAspect {
 
@@ -20,11 +21,11 @@ public class ChurchAspect {
         this.item.setName(name);
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
-    public Integer getCost() {
+    public Optional<Integer> getCost() {
         return this.item.getVarAsInt("cost");
     }
 

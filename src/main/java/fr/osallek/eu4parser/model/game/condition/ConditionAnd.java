@@ -1,32 +1,33 @@
-package fr.osallek.eu4parser.model.game;
+package fr.osallek.eu4parser.model.game.condition;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.common.ConditionsUtils;
+import fr.osallek.eu4parser.model.game.Country;
+import fr.osallek.eu4parser.model.game.Province;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class ConditionNot extends ConditionAbstract {
-
+public class ConditionAnd extends ConditionAbstract {
+    
     @SafeVarargs
-    public ConditionNot(Pair<String, String>... conditions) {
+    public ConditionAnd(Pair<String, String>... conditions) {
         super(s -> true, conditions);
     }
 
-    public ConditionNot(ClausewitzItem item, String... ignore) {
+    public ConditionAnd(ClausewitzItem item, String... ignore) {
         super(s -> true, item, ignore);
     }
 
-    public ConditionNot(ConditionAbstract other) {
+    public ConditionAnd(ConditionAbstract other) {
         super(other.filter);
         this.name = other.name;
         this.conditions = other.conditions;
         this.scopes = other.getScopes();
     }
 
-    @Override
     public boolean apply(SaveCountry root, SaveCountry from) {
         if (this.conditions != null &&
             this.conditions.entrySet()
@@ -34,11 +35,11 @@ public class ConditionNot extends ConditionAbstract {
                            .filter(e -> this.filter.test(e.getKey()))
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
+                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
             return false;
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToCountry(root, from, scope))) {
+        if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
             return false;
         }
 
@@ -52,11 +53,11 @@ public class ConditionNot extends ConditionAbstract {
                            .filter(e -> this.filter.test(e.getKey()))
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
+                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
             return false;
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToCountry(root, from, scope))) {
+        if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToCountry(root, from, scope))) {
             return false;
         }
 
@@ -70,11 +71,11 @@ public class ConditionNot extends ConditionAbstract {
                            .filter(e -> this.filter.test(e.getKey()))
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
+                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
             return false;
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToProvince(province, scope))) {
+        if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
             return false;
         }
 
@@ -88,11 +89,11 @@ public class ConditionNot extends ConditionAbstract {
                            .filter(e -> this.filter.test(e.getKey()))
                            .anyMatch(entry -> entry.getValue()
                                                    .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
+                                                   .anyMatch(s -> !ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
             return false;
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToProvince(province, scope))) {
+        if (getScopes() != null && getScopes().stream().anyMatch(scope -> !ConditionsUtils.applyScopeToProvince(province, scope))) {
             return false;
         }
 
@@ -106,15 +107,15 @@ public class ConditionNot extends ConditionAbstract {
                               .filter(e -> this.filter.test(e.getKey()))
                               .anyMatch(entry -> entry.getValue()
                                                       .stream()
-                                                      .anyMatch(s -> ConditionsUtils.applyConditionToCountry(country, country, country, entry.getKey(), s)))) {
+                                                      .anyMatch(s -> !ConditionsUtils.applyConditionToCountry(country, country, country, entry.getKey(), s)))) {
             return false;
         }
 
         if (getScopes() != null && getScopes().stream().anyMatch(scope -> {
             if ("FROM".equals(scope.name)) {
-                return ConditionsUtils.applyScopeToProvince(from, scope);
+                return !ConditionsUtils.applyScopeToProvince(from, scope);
             } else {
-                return ConditionsUtils.applyScopeToCountry(country, country, scope);
+                return !ConditionsUtils.applyScopeToCountry(country, country, scope);
             }
         })) {
             return false;

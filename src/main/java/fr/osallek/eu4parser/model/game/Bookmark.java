@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Bookmark extends Nodded {
 
@@ -26,14 +27,14 @@ public class Bookmark extends Nodded {
     }
 
     public String getName() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+        return this.item.getVarAsString("name").map(ClausewitzUtils::removeQuotes).orElse("");
     }
 
     public void setName(String name) {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public String getDesc() {
+    public Optional<String> getDesc() {
         return this.item.getVarAsString("desc");
     }
 
@@ -41,7 +42,7 @@ public class Bookmark extends Nodded {
         this.item.setVariable("desc", desc);
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -49,7 +50,7 @@ public class Bookmark extends Nodded {
         this.item.setVariable("date", date);
     }
 
-    public Integer getCenter() {
+    public Optional<Integer> getCenter() {
         return this.item.getVarAsInt("center");
     }
 
@@ -57,7 +58,7 @@ public class Bookmark extends Nodded {
         this.item.setVariable("center", center);
     }
 
-    public Boolean isDefault() {
+    public Optional<Boolean> isDefault() {
         return this.item.getVarAsBool("default");
     }
 

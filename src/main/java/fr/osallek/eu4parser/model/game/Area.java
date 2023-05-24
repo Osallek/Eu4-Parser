@@ -71,7 +71,7 @@ public class Area extends Nodded {
             this.list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
         } else if (this.item != null) {
             this.item.getList("")
-                     .ifPresentOrElse(list -> list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)),
+                     .ifPresentOrElse(l -> l.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)),
                                       () -> this.item.addList("", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)));
         }
     }
@@ -80,7 +80,7 @@ public class Area extends Nodded {
         if (this.list != null) {
             this.list.add(province);
         } else if (this.item != null) {
-            this.item.getList("").ifPresentOrElse(list -> list.setAll(province), () -> this.item.addList("", province));
+            this.item.getList("").ifPresentOrElse(l -> l.setAll(province), () -> this.item.addList("", province));
         }
     }
 
@@ -88,7 +88,7 @@ public class Area extends Nodded {
         if (this.list != null) {
             this.list.remove(String.valueOf(province));
         } else if (this.item != null) {
-            this.item.getList("").ifPresent(list -> list.remove(String.valueOf(province)));
+            this.item.getList("").ifPresent(l -> l.remove(String.valueOf(province)));
         }
     }
 
@@ -115,8 +115,8 @@ public class Area extends Nodded {
             this.object = this.item;
         }
 
-        this.item.getList("color").ifPresentOrElse(list -> {
-            Color actualColor = new Color(list);
+        this.item.getList("color").ifPresentOrElse(l -> {
+            Color actualColor = new Color(l);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
@@ -142,11 +142,9 @@ public class Area extends Nodded {
             return true;
         }
 
-        if (!(o instanceof Area)) {
+        if (!(o instanceof Area area)) {
             return false;
         }
-
-        Area area = (Area) o;
 
         return Objects.equals(getName(), area.getName());
     }
