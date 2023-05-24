@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class CountryHistoryItems implements CountryHistoryItemI {
 
@@ -17,82 +18,82 @@ public class CountryHistoryItems implements CountryHistoryItemI {
     }
 
     @Override
-    public TechGroup getTechnologyGroup() {
-        return this.items.stream().map(CountryHistoryItemI::getTechnologyGroup).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<TechGroup> getTechnologyGroup() {
+        return this.items.stream().map(CountryHistoryItemI::getTechnologyGroup).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public String getUnitType() {
-        return this.items.stream().map(CountryHistoryItemI::getUnitType).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<String> getUnitType() {
+        return this.items.stream().map(CountryHistoryItemI::getUnitType).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getMercantilism() {
-        return this.items.stream().map(CountryHistoryItemI::getMercantilism).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getMercantilism() {
+        return this.items.stream().map(CountryHistoryItemI::getMercantilism).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Province getCapital() {
-        return this.items.stream().map(CountryHistoryItemI::getCapital).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Province> getCapital() {
+        return this.items.stream().map(CountryHistoryItemI::getCapital).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Country getChangedTagFrom() {
-        return this.items.stream().map(CountryHistoryItemI::getChangedTagFrom).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Country> getChangedTagFrom() {
+        return this.items.stream().map(CountryHistoryItemI::getChangedTagFrom).flatMap(Optional::stream).findFirst();
     }
 
     public List<Country> getChangedTagsFrom() {
-        return this.items.stream().map(CountryHistoryItemI::getChangedTagFrom).filter(Objects::nonNull).toList();
+        return this.items.stream().map(CountryHistoryItemI::getChangedTagFrom).flatMap(Optional::stream).toList();
     }
 
     @Override
-    public Province getFixedCapital() {
-        return this.items.stream().map(CountryHistoryItemI::getFixedCapital).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Province> getFixedCapital() {
+        return this.items.stream().map(CountryHistoryItemI::getFixedCapital).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Government getGovernment() {
-        return this.items.stream().map(CountryHistoryItemI::getGovernment).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Government> getGovernment() {
+        return this.items.stream().map(CountryHistoryItemI::getGovernment).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public String getReligiousSchool() {
-        return this.items.stream().map(CountryHistoryItemI::getReligiousSchool).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<String> getReligiousSchool() {
+        return this.items.stream().map(CountryHistoryItemI::getReligiousSchool).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Power getNationalFocus() {
-        return this.items.stream().map(CountryHistoryItemI::getNationalFocus).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Power> getNationalFocus() {
+        return this.items.stream().map(CountryHistoryItemI::getNationalFocus).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getGovernmentLevel() {
-        return this.items.stream().map(CountryHistoryItemI::getGovernmentLevel).filter(Objects::nonNull).findFirst().orElse(2);
+    public Optional<Integer> getGovernmentLevel() {
+        return this.items.stream().map(CountryHistoryItemI::getGovernmentLevel).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public GovernmentRank getGovernmentRank() {
-        return this.items.stream().map(CountryHistoryItemI::getGovernmentRank).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<GovernmentRank> getGovernmentRank() {
+        return this.items.stream().map(CountryHistoryItemI::getGovernmentRank).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Culture getPrimaryCulture() {
-        return this.items.stream().map(CountryHistoryItemI::getPrimaryCulture).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Culture> getPrimaryCulture() {
+        return this.items.stream().map(CountryHistoryItemI::getPrimaryCulture).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Religion getReligion() {
-        return this.items.stream().map(CountryHistoryItemI::getReligion).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Religion> getReligion() {
+        return this.items.stream().map(CountryHistoryItemI::getReligion).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Religion getJoinLeague() {
-        return this.items.stream().map(CountryHistoryItemI::getJoinLeague).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Religion> getJoinLeague() {
+        return this.items.stream().map(CountryHistoryItemI::getJoinLeague).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Double getAddArmyProfessionalism() {
-        return this.items.stream().map(CountryHistoryItemI::getAddArmyProfessionalism).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Double> getAddArmyProfessionalism() {
+        return this.items.stream().map(CountryHistoryItemI::getAddArmyProfessionalism).flatMap(Optional::stream).findFirst();
     }
 
     @Override
@@ -125,18 +126,18 @@ public class CountryHistoryItems implements CountryHistoryItemI {
     }
 
     @Override
-    public Boolean getElector() {
-        return this.items.stream().map(CountryHistoryItemI::getElector).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Boolean> getElector() {
+        return this.items.stream().map(CountryHistoryItemI::getElector).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Boolean getRevolutionTarget() {
-        return this.items.stream().map(CountryHistoryItemI::getRevolutionTarget).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Boolean> getRevolutionTarget() {
+        return this.items.stream().map(CountryHistoryItemI::getRevolutionTarget).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Boolean getClearScriptedPersonalities() {
-        return this.items.stream().map(CountryHistoryItemI::getClearScriptedPersonalities).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Boolean> getClearScriptedPersonalities() {
+        return this.items.stream().map(CountryHistoryItemI::getClearScriptedPersonalities).flatMap(Optional::stream).findFirst();
     }
 
     @Override
@@ -189,18 +190,18 @@ public class CountryHistoryItems implements CountryHistoryItemI {
     }
 
     @Override
-    public Heir getHeir() {
-        return this.items.stream().map(CountryHistoryItemI::getHeir).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Heir> getHeir() {
+        return this.items.stream().map(CountryHistoryItemI::getHeir).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Monarch getMonarch() {
-        return this.items.stream().map(CountryHistoryItemI::getMonarch).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Monarch> getMonarch() {
+        return this.items.stream().map(CountryHistoryItemI::getMonarch).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Queen getQueen() {
-        return this.items.stream().map(CountryHistoryItemI::getQueen).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Queen> getQueen() {
+        return this.items.stream().map(CountryHistoryItemI::getQueen).flatMap(Optional::stream).findFirst();
     }
 
     @Override

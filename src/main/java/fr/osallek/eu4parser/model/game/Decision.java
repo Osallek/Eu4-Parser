@@ -35,7 +35,7 @@ public class Decision extends Nodded {
         this.item.setName(name);
     }
 
-    public Boolean isMajor() {
+    public Optional<Boolean> isMajor() {
         return this.item.getVarAsBool("major");
     }
 
@@ -47,7 +47,7 @@ public class Decision extends Nodded {
         }
     }
 
-    public Integer getAiImportance() {
+    public Optional<Integer> getAiImportance() {
         return this.item.getVarAsInt("ai_importance");
     }
 
@@ -59,7 +59,7 @@ public class Decision extends Nodded {
         }
     }
 
-    public Integer getDoNotCore() {
+    public Optional<Integer> getDoNotCore() {
         return this.item.getVarAsInt("do_not_core");
     }
 
@@ -71,7 +71,7 @@ public class Decision extends Nodded {
         }
     }
 
-    public String getDoNotIntegrate() {
+    public Optional<String> getDoNotIntegrate() {
         return this.item.getVarAsString("do_not_integrate");
     }
 
@@ -83,20 +83,20 @@ public class Decision extends Nodded {
         }
     }
 
-    public ConditionAnd getPotential() {
-        return Optional.ofNullable(this.item.getChild("potential")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getProvincesToHighlight() {
-        return Optional.ofNullable(this.item.getChild("provinces_to_highlight")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getProvincesToHighlight() {
+        return this.item.getChild("provinces_to_highlight").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getAllow() {
-        return Optional.ofNullable(this.item.getChild("allow")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
-    public Modifiers getEffects() {
-        return new Modifiers(this.item.getChild("effect"));
+    public Optional<Modifiers> getEffects() {
+        return this.item.getChild("effect").map(Modifiers::new);
     }
 
     @Override

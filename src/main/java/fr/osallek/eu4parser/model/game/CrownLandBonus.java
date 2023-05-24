@@ -2,8 +2,8 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
-import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 public class CrownLandBonus implements Comparable<CrownLandBonus> {
 
@@ -21,7 +21,7 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
         this.item.setName(name);
     }
 
-    public Double getRangeFrom() {
+    public Optional<Double> getRangeFrom() {
         return this.item.getVarAsDouble("range_from");
     }
 
@@ -33,7 +33,7 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
         }
     }
 
-    public Double getRangeTo() {
+    public Optional<Double> getRangeTo() {
         return this.item.getVarAsDouble("range_to");
     }
 
@@ -45,12 +45,12 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
         }
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     public boolean isInRange(double range) {
-        return (getRangeFrom() == null || getRangeFrom() <= range) && (getRangeTo() == null || getRangeTo() > range);
+        return (getRangeFrom().isEmpty() || getRangeFrom().get() <= range) && (getRangeTo().isEmpty() || getRangeTo().get() > range);
     }
 
     @Override
@@ -78,6 +78,6 @@ public class CrownLandBonus implements Comparable<CrownLandBonus> {
 
     @Override
     public int compareTo(CrownLandBonus o) {
-        return Comparator.comparingDouble(CrownLandBonus::getRangeFrom).compare(this, o);
+        return getRangeFrom().orElse(0d).compareTo(o.getRangeFrom().orElse(0d));
     }
 }

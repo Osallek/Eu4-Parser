@@ -22,7 +22,7 @@ public class CustomizableLocalization extends Nodded {
     }
 
     public String getName() {
-        return this.item.getVarAsString("name");
+        return this.item.getVarAsString("name").orElse("");
     }
 
     public void setName(String name) {
@@ -30,7 +30,7 @@ public class CustomizableLocalization extends Nodded {
     }
 
     public boolean random() {
-        return BooleanUtils.toBooleanDefaultIfNull(this.item.getVarAsBool("random"), true);
+        return this.item.getVarAsBool("random").map(b -> BooleanUtils.toBooleanDefaultIfNull(b, true)).orElse(true);
     }
 
     public void setRandom(boolean random) {

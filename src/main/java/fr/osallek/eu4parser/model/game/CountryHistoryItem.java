@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.Power;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class CountryHistoryItem implements CountryHistoryItemI {
@@ -26,8 +28,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public TechGroup getTechnologyGroup() {
-        return this.item.hasVar("technology_group") ? this.game.getTechGroup(this.item.getVarAsString("technology_group")) : null;
+    public Optional<TechGroup> getTechnologyGroup() {
+        return this.item.getVarAsString("technology_group").map(this.game::getTechGroup);
     }
 
     public void setTechnologyGroup(String technologyGroup) {
@@ -35,7 +37,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public String getUnitType() {
+    public Optional<String> getUnitType() {
         return this.item.getVarAsString("unit_type");
     }
 
@@ -44,7 +46,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Integer getMercantilism() {
+    public Optional<Integer> getMercantilism() {
         return this.item.getVarAsInt("mercantilism");
     }
 
@@ -53,8 +55,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Province getCapital() {
-        return this.item.hasVar("capital") ? this.game.getProvince(this.item.getVarAsInt("capital")) : null;
+    public Optional<Province> getCapital() {
+        return this.item.getVarAsInt("capital").map(this.game::getProvince);
     }
 
     public void setCapital(Province capital) {
@@ -66,8 +68,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Country getChangedTagFrom() {
-        return this.item.hasVar("changed_tag_from") ? this.game.getCountry(this.item.getVarAsString("changed_tag_from")) : null;
+    public Optional<Country> getChangedTagFrom() {
+        return this.item.getVarAsString("changed_tag_from").map(this.game::getCountry);
     }
 
     public void setChangedTagFrom(Country country) {
@@ -79,8 +81,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Province getFixedCapital() {
-        return this.item.hasVar("fixed_capital") ?  this.game.getProvince(this.item.getVarAsInt("fixed_capital")) : null;
+    public Optional<Province> getFixedCapital() {
+        return this.item.getVarAsInt("fixed_capital").map(this.game::getProvince);
     }
 
     public void setFixedCapital(Province capital) {
@@ -92,8 +94,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Government getGovernment() {
-        return this.item.hasVar("government") ? this.game.getGovernment(this.item.getVarAsString("government")) : null;
+    public Optional<Government> getGovernment() {
+        return this.item.getVarAsString("government").map(this.game::getGovernment);
     }
 
     public void setGovernment(Government government) {
@@ -105,7 +107,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public String getReligiousSchool() {
+    public Optional<String> getReligiousSchool() {
         return this.item.getVarAsString("religious_school");
     }
 
@@ -114,8 +116,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Power getNationalFocus() {
-        return this.item.hasVar("national_focus") ? Power.byName(this.item.getVarAsString("national_focus")) : null;
+    public Optional<Power> getNationalFocus() {
+        return this.item.getVarAsString("national_focus").map(Power::byName);
     }
 
     public void setNationalFocus(Power nationalFocus) {
@@ -127,13 +129,13 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Integer getGovernmentLevel() {
+    public Optional<Integer> getGovernmentLevel() {
         return this.item.getVarAsInt("government_rank");
     }
 
     @Override
-    public GovernmentRank getGovernmentRank() {
-        return getGovernmentLevel() == null ? null : this.game.getGovernmentRank(getGovernmentLevel());
+    public Optional<GovernmentRank> getGovernmentRank() {
+        return getGovernmentLevel().map(this.game::getGovernmentRank);
     }
 
     public void setGovernmentRank(Integer governmentRank) {
@@ -149,8 +151,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Culture getPrimaryCulture() {
-        return this.item.hasVar("primary_culture") ? this.game.getCulture(this.item.getVarAsString("primary_culture")) : null;
+    public Optional<Culture> getPrimaryCulture() {
+        return this.item.getVarAsString("primary_culture").map(this.game::getCulture);
     }
 
     public void setPrimaryCulture(Culture primaryCulture) {
@@ -162,8 +164,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Religion getReligion() {
-        return this.item.hasVar("religion") ? this.game.getReligion(this.item.getVarAsString("religion")) : null;
+    public Optional<Religion> getReligion() {
+        return this.item.getVarAsString("religion").map(this.game::getReligion);
     }
 
     public void setReligion(Religion religion) {
@@ -175,8 +177,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Religion getJoinLeague() {
-        return this.item.hasVar("join_league") ? null : this.game.getReligion(this.item.getVarAsString("join_league"));
+    public Optional<Religion> getJoinLeague() {
+        return this.item.getVarAsString("join_league").map(this.game::getReligion);
     }
 
     public void setJoinLeague(Religion religion) {
@@ -192,7 +194,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Double getAddArmyProfessionalism() {
+    public Optional<Double> getAddArmyProfessionalism() {
         return this.item.getVarAsDouble("add_army_professionalism");
     }
 
@@ -228,7 +230,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
         List<String> acceptedCultures = this.item.getVarsAsStrings("add_accepted_culture");
 
         if (!acceptedCultures.contains(culture)) {
-            this.item.addVariable("add_accepted_culture", culture, this.item.getVar("primary_culture").getOrder() + 1);
+            this.item.addVariable("add_accepted_culture", culture, this.item.getVar("primary_culture").map(ClausewitzVariable::getOrder).orElse(0) + 1);
         }
     }
 
@@ -242,8 +244,8 @@ public class CountryHistoryItem implements CountryHistoryItemI {
                                                                     .filter(culture -> culture.getName().equals(acceptedCulture))
                                                                     .findFirst()
                                                                     .ifPresentOrElse(cultures::remove,
-                                                                                  () -> this.item.removeVariable("remove_accepted_culture",
-                                                                                                                 acceptedCulture)));
+                                                                                     () -> this.item.removeVariable("remove_accepted_culture",
+                                                                                                                    acceptedCulture)));
 
         cultures.forEach(this::removeAcceptedCulture);
     }
@@ -256,7 +258,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
         List<String> removeAcceptedCulture = this.item.getVarsAsStrings("remove_accepted_culture");
 
         if (!removeAcceptedCulture.contains(culture)) {
-            this.item.addVariable("remove_accepted_culture", culture, this.item.getVar("primary_culture").getOrder() + 1);
+            this.item.addVariable("remove_accepted_culture", culture, this.item.getVar("primary_culture").map(ClausewitzVariable::getOrder).orElse(0) + 1);
         }
     }
 
@@ -284,7 +286,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
         List<String> historicalFriends = this.item.getVarsAsStrings("historical_friend");
 
         if (!historicalFriends.contains(friend)) {
-            this.item.addVariable("historical_friend", friend, this.item.getVar("capital").getOrder() + 1);
+            this.item.addVariable("historical_friend", friend, this.item.getVar("capital").map(ClausewitzVariable::getOrder).orElse(0) + 1);
         }
     }
 
@@ -310,12 +312,12 @@ public class CountryHistoryItem implements CountryHistoryItemI {
         List<String> historicalEnemies = this.item.getVarsAsStrings("historical_rival");
 
         if (!historicalEnemies.contains(enemy)) {
-            this.item.addVariable("historical_rival", enemy, this.item.getVar("capital").getOrder() + 1);
+            this.item.addVariable("historical_rival", enemy, this.item.getVar("capital").map(ClausewitzVariable::getOrder).orElse(0) + 1);
         }
     }
 
     @Override
-    public Boolean getElector() {
+    public Optional<Boolean> getElector() {
         return this.item.getVarAsBool("elector");
     }
 
@@ -324,7 +326,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Boolean getRevolutionTarget() {
+    public Optional<Boolean> getRevolutionTarget() {
         return this.item.getVarAsBool("revolution_target");
     }
 
@@ -333,7 +335,7 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Boolean getClearScriptedPersonalities() {
+    public Optional<Boolean> getClearScriptedPersonalities() {
         return this.item.getVarAsBool("clear_scripted_personalities");
     }
 
@@ -524,22 +526,22 @@ public class CountryHistoryItem implements CountryHistoryItemI {
     }
 
     @Override
-    public Heir getHeir() {
-        return this.item.hasChild("heir") ? new Heir(this.item.getChild("heir"), this.country) : null;
+    public Optional<Heir> getHeir() {
+        return this.item.getChild("heir").map(c -> new Heir(c, this.country));
     }
 
     @Override
-    public Monarch getMonarch() {
-        return this.item.hasChild("monarch") ? new Monarch(this.item.getChild("monarch"), this.country) : null;
+    public Optional<Monarch> getMonarch() {
+        return this.item.getChild("monarch").map(c -> new Monarch(c, this.country));
     }
 
     @Override
-    public Queen getQueen() {
-        return this.item.hasChild("queen") ? new Queen(this.item.getChild("queen"), this.country) : null;
+    public Optional<Queen> getQueen() {
+        return this.item.getChild("queen").map(c -> new Queen(c, this.country));
     }
 
     @Override
     public List<Leader> getLeaders() {
-        return this.item.getChildren("leader").stream().map(i -> new Leader(i, this.country)).toList();
+        return this.item.getChildren("leader").stream().map(c -> new Leader(c, this.country)).toList();
     }
 }

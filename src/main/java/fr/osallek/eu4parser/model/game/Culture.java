@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Culture extends AbstractCulture {
@@ -14,7 +15,7 @@ public class Culture extends AbstractCulture {
         this.cultureGroup = cultureGroup;
     }
 
-    public String getPrimary() {
+    public Optional<String> getPrimary() {
         return this.item.getVarAsString("primary");
     }
 

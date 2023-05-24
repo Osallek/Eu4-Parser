@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
 
@@ -22,14 +23,14 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
     }
 
     public int getLevel() {
-        return this.item.getVarAsInt("level");
+        return this.item.getVarAsInt("level").orElse(0);
     }
 
     public void setLevel(int level) {
         this.item.setVariable("level", level);
     }
     
-    public Integer getRangeFrom() {
+    public Optional<Integer> getRangeFrom() {
         return this.item.getVarAsInt("range_from");
     }
 
@@ -41,7 +42,7 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
         }
     }
 
-    public Integer getRangeTo() {
+    public Optional<Integer> getRangeTo() {
         return this.item.getVarAsInt("range_to");
     }
 
@@ -53,12 +54,12 @@ public class DefenderOfFaith implements Comparable<DefenderOfFaith> {
         }
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     public boolean isInRange(int range) {
-        return (getRangeFrom() == null || getRangeFrom() <= range) && (getRangeTo() == null || getRangeTo() > range);
+        return (getRangeFrom().isEmpty() || getRangeFrom().get() <= range) && (getRangeTo().isEmpty() || getRangeTo().get() > range);
     }
 
     @Override

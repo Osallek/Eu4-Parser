@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class CustomizableLocalizationText {
 
@@ -13,7 +14,7 @@ public class CustomizableLocalizationText {
         this.item = item;
     }
 
-    public String getLocalisationKey() {
+    public Optional<String> getLocalisationKey() {
         return this.item.getVarAsString("localisation_key");
     }
 
@@ -21,9 +22,8 @@ public class CustomizableLocalizationText {
         this.item.setVariable("localisation_key", localisationKey);
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     @Override
@@ -46,6 +46,6 @@ public class CustomizableLocalizationText {
 
     @Override
     public String toString() {
-        return getLocalisationKey();
+        return getLocalisationKey().orElse("");
     }
 }

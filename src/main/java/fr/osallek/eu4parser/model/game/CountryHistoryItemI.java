@@ -3,38 +3,39 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.eu4parser.model.Power;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CountryHistoryItemI {
 
-    TechGroup getTechnologyGroup();
+    Optional<TechGroup> getTechnologyGroup();
 
-    String getUnitType();
+    Optional<String> getUnitType();
 
-    Integer getMercantilism();
+    Optional<Integer> getMercantilism();
 
-    Province getCapital();
+    Optional<Province> getCapital();
 
-    Country getChangedTagFrom();
+    Optional<Country> getChangedTagFrom();
 
-    Province getFixedCapital();
+    Optional<Province> getFixedCapital();
 
-    Government getGovernment();
+    Optional<Government> getGovernment();
 
-    String getReligiousSchool();
+    Optional<String> getReligiousSchool();
 
-    Power getNationalFocus();
+    Optional<Power> getNationalFocus();
 
-    Integer getGovernmentLevel();
+    Optional<Integer> getGovernmentLevel();
 
-    GovernmentRank getGovernmentRank();
+    Optional<GovernmentRank> getGovernmentRank();
 
-    Culture getPrimaryCulture();
+    Optional<Culture> getPrimaryCulture();
 
-    Religion getReligion();
+    Optional<Religion> getReligion();
 
-    Religion getJoinLeague();
+    Optional<Religion> getJoinLeague();
 
-    Double getAddArmyProfessionalism();
+    Optional<Double> getAddArmyProfessionalism();
 
     List<String> getAddAcceptedCultures();
 
@@ -46,11 +47,11 @@ public interface CountryHistoryItemI {
 
     List<Country> getHistoricalEnemies();
 
-    Boolean getElector();
+    Optional<Boolean> getElector();
 
-    Boolean getRevolutionTarget();
+    Optional<Boolean> getRevolutionTarget();
 
-    Boolean getClearScriptedPersonalities();
+    Optional<Boolean> getClearScriptedPersonalities();
 
     List<ChangeEstateLandShare> getChangeEstateLandShares();
 
@@ -70,11 +71,11 @@ public interface CountryHistoryItemI {
 
     List<String> getCumulatedCountryFlags();
 
-    Heir getHeir();
+    Optional<Heir> getHeir();
 
-    Monarch getMonarch();
+    Optional<Monarch> getMonarch();
 
-    Queen getQueen();
+    Optional<Queen> getQueen();
 
     List<Leader> getLeaders();
 }

@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Decree {
 
@@ -20,7 +21,7 @@ public class Decree {
         this.item.setName(name);
     }
 
-    public Integer getCost() {
+    public Optional<Integer> getCost() {
         return this.item.getVarAsInt("cost");
     }
 
@@ -32,7 +33,7 @@ public class Decree {
         }
     }
 
-    public Integer getDuration() {
+    public Optional<Integer> getDuration() {
         return this.item.getVarAsInt("time");
     }
 
@@ -44,7 +45,7 @@ public class Decree {
         }
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 

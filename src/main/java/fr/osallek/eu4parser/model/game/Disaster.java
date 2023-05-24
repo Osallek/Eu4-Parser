@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Disaster extends Nodded {
@@ -52,46 +51,52 @@ public class Disaster extends Nodded {
         this.item.setName(name);
     }
 
-    public ConditionAnd getPotential() {
-        return Optional.ofNullable(this.item.getChild("potential")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanStart() {
-        return Optional.ofNullable(this.item.getChild("can_start")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getCanStart() {
+        return this.item.getChild("can_start").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanStop() {
-        return Optional.ofNullable(this.item.getChild("can_stop")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getCanStop() {
+        return this.item.getChild("can_stop").map(ConditionAnd::new);
     }
 
-    public Modifiers getProgress() {
-        return new Modifiers(this.item.getChild("progress"));
+    public Optional<Modifiers> getProgress() {
+        return this.item.getChild("progress").map(Modifiers::new);
     }
 
-    public Modifiers getModifier() {
+    public Optional<Modifiers> getModifier() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
-    public String getOnStart() {
+    public Optional<String> getOnStart() {
         return this.item.getVarAsString("on_start");
     }
 
-    public String getOnEnd() {
+    public Optional<String> getOnEnd() {
         return this.item.getVarAsString("on_end");
     }
 
     public List<String> getMonthlyEvents() {
-        return Optional.ofNullable(this.item.getChild("on_monthly")).map(i -> i.getList("events")).map(ClausewitzList::getValues).orElse(null);
+        return this.item.getChild("on_monthly")
+                        .map(i -> i.getList("events"))
+                        .stream()
+                        .flatMap(Optional::stream)
+                        .map(ClausewitzList::getValues)
+                        .flatMap(Collection::stream)
+                        .toList();
     }
 
     public Map<String, Integer> getRandomEvents() {
-        return Optional.ofNullable(this.item.getChild("on_monthly"))
-                       .map(i -> i.getChild("random_events"))
-                       .map(ClausewitzItem::getVariables)
-                       .map(Collection::stream)
-                       .stream()
-                       .flatMap(Function.identity())
-                       .collect(Collectors.toMap(ClausewitzVariable::getValue, v -> NumbersUtils.toInt(v.getName())));
+        return this.item.getChild("on_monthly")
+                        .map(i -> i.getChild("random_events"))
+                        .stream()
+                        .flatMap(Optional::stream)
+                        .map(ClausewitzItem::getVariables)
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toMap(ClausewitzVariable::getValue, v -> NumbersUtils.toInt(v.getName())));
     }
 
     public BufferedImage getImage() throws IOException {
