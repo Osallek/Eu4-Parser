@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Fervor {
 
@@ -21,15 +22,15 @@ public class Fervor {
     }
 
     public int getCost() {
-        return this.item.getVarAsInt("cost");
+        return this.item.getVarAsInt("cost").orElse(0);
     }
 
     public void setCost(int cost) {
         this.item.setVariable("cost", cost);
     }
 
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("effect"));
+    public Optional<Modifiers> getModifiers() {
+        return this.item.getChild("effect").map(Modifiers::new);
     }
 
     @Override

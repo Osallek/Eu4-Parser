@@ -36,61 +36,63 @@ public class Dlc extends Nodded {
     }
 
     public String getName() {
-        return this.item.getVarAsString("name");
+        return this.item.getVarAsString("name").orElse(null);
     }
 
     public Integer getId() {
-        return this.item.getVarAsInt("id");
+        return this.item.getVarAsInt("id").orElse(null);
     }
 
     public String getCategory() {
-        return this.item.getVarAsString("category");
+        return this.item.getVarAsString("category").orElse(null);
     }
 
-    public String getHideIfDlcOwned() {
+    public Optional<String> getHideIfDlcOwned() {
         return this.item.getVarAsString("hide_if_dlc_owned");
     }
 
-    public String getChangeLandingPage() {
+    public Optional<String> getChangeLandingPage() {
         return this.item.getVarAsString("change_landingpage");
     }
     public boolean getShowExampleImage() {
-        return Optional.ofNullable(this.item.getVarAsBool("show_example_image")).orElse(false);
+        return this.item.getVarAsBool("show_example_image").orElse(false);
     }
 
     public boolean getShowExampleImageTooltips() {
-        return Optional.ofNullable(this.item.getVarAsBool("show_example_image_tooltips")).orElse(false);
+        return this.item.getVarAsBool("show_example_image_tooltips").orElse(false);
     }
 
     public boolean getHideIfUnowned() {
-        return Optional.ofNullable(this.item.getVarAsBool("hide_if_unowned")).orElse(false);
+        return this.item.getVarAsBool("hide_if_unowned").orElse(false);
     }
 
     public List<String> getRecommendations() {
-        return Optional.ofNullable(this.item.getList("recommendations")).map(ClausewitzList::getValues).orElse(new ArrayList<>());
+        return this.item.getList("recommendations").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public List<String> getInterestingCountries() {
-        return Optional.ofNullable(this.item.getList("interesting_countries")).map(ClausewitzList::getValues).orElse(new ArrayList<>());
+        return this.item.getList("interesting_countries").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public List<String> getRequiredDlc() {
-        return Optional.ofNullable(this.item.getList("required_dlc")).map(ClausewitzList::getValues).orElse(new ArrayList<>());
+        return this.item.getList("required_dlc").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
-    public String getIcon() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("icon"));
+    public Optional<String> getIcon() {
+        return this.item.getVarAsString("icon").map(ClausewitzUtils::removeQuotes);
     }
 
-    public File getImage() {
-        return this.game.getSpriteTypeImageFile(getIcon());
+    public Optional<File> getImage() {
+        return getIcon().map(this.game::getSpriteTypeImageFile);
     }
 
     public void writeImageTo(Path dest) throws IOException {
-        FileUtils.forceMkdirParent(dest.toFile());
-        ImageIO.write(ImageIO.read(getImage()), "png", dest.toFile());
-        Eu4Utils.optimizePng(dest, dest);
-        this.writenTo = dest;
+        if (getImage().isPresent()) {
+            FileUtils.forceMkdirParent(dest.toFile());
+            ImageIO.write(ImageIO.read(getImage().get()), "png", dest.toFile());
+            Eu4Utils.optimizePng(dest, dest);
+            this.writenTo = dest;
+        }
     }
 
     public Path getWritenTo() {
@@ -112,13 +114,11 @@ public class Dlc extends Nodded {
             return true;
         }
 
-        if (!(o instanceof Dlc)) {
+        if (!(o instanceof Dlc dlc)) {
             return false;
         }
 
-        Dlc area = (Dlc) o;
-
-        return Objects.equals(getName(), area.getName());
+        return Objects.equals(getName(), dlc.getName());
     }
 
     @Override

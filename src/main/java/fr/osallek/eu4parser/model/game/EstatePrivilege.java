@@ -2,15 +2,15 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.eu4parser.common.NumbersUtils;
-import java.io.File;
-
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class EstatePrivilege {
 
@@ -41,7 +41,7 @@ public class EstatePrivilege {
         this.estate = estate;
     }
 
-    public String getIcon() {
+    public Optional<String> getIcon() {
         return this.item.getVarAsString("icon");
     }
 
@@ -53,12 +53,12 @@ public class EstatePrivilege {
         }
     }
 
-    public File getImage() {
-        return this.game.getSpriteTypeImageFile(getIcon());
+    public Optional<File> getImage() {
+        return getIcon().map(this.game::getSpriteTypeImageFile);
     }
 
     public double getLoyalty() {
-        return this.item.getVarAsDouble("loyalty");
+        return this.item.getVarAsDouble("loyalty").orElse(0d);
     }
 
     public void setLoyalty(Integer loyalty) {
@@ -70,7 +70,7 @@ public class EstatePrivilege {
     }
 
 
-    public Double getInfluence() {
+    public Optional<Double> getInfluence() {
         return this.item.getVarAsDouble("influence");
     }
 
@@ -82,34 +82,23 @@ public class EstatePrivilege {
         }
     }
 
-    public ConditionAnd getIsValid() {
-        ClausewitzItem child = this.item.getChild("is_valid");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getIsValid() {
+        return this.item.getChild("is_valid").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanSelect() {
-        ClausewitzItem child = this.item.getChild("can_select");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getCanSelect() {
+        return this.item.getChild("can_select").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanRevoke() {
-        ClausewitzItem child = this.item.getChild("can_revoke");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getCanRevoke() {
+        return this.item.getChild("can_revoke").map(ConditionAnd::new);
     }
 
     public Modifiers getModifiers() {
         Modifiers modifiers = new Modifiers();
-        modifiers.addModifier(ModifiersUtils.getModifier("max_absolutism"), NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("max_absolutism")));
-
-        ClausewitzItem child = this.item.getChild("penalties");
-        if (child != null) {
-            modifiers.addAll(new Modifiers(child.getVariables()));
-        }
-
-        child = item.getChild("benefits");
-        if (child != null) {
-            modifiers.addAll(new Modifiers(child.getVariables()));
-        }
+        this.item.getVarAsDouble("max_absolutism").ifPresent(d -> modifiers.addModifier(ModifiersUtils.getModifier("max_absolutism"), d));
+        this.item.getChild("penalties").ifPresent(child -> modifiers.addAll(new Modifiers(child.getVariables())));
+        this.item.getChild("benefits").ifPresent(child -> modifiers.addAll(new Modifiers(child.getVariables())));
 
         return modifiers;
     }
@@ -118,13 +107,12 @@ public class EstatePrivilege {
         return this.item.getChildren("conditional_modifier").stream().map(EstatePrivilegeModifier::new).toList();
     }
 
-    public Modifiers getModifierByLandOwnership() {
-        return new Modifiers(this.item.getChild("modifier_by_land_ownership"));
+    public Optional<Modifiers> getModifierByLandOwnership() {
+        return this.item.getChild("modifier_by_land_ownership").map(Modifiers::new);
     }
 
     public List<String> getMechanics() {
-        ClausewitzList list = this.item.getList("mechanics");
-        return list == null ? null : list.getValues();
+        return this.item.getList("mechanics").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setMechanics(List<String> mechanics) {
@@ -133,16 +121,12 @@ public class EstatePrivilege {
             return;
         }
 
-        ClausewitzList list = this.item.getList("mechanics");
-
-        if (list != null) {
-            list.setAll(mechanics.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("mechanics", mechanics.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("mechanics")
+                 .ifPresentOrElse(list -> list.setAll(mechanics.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("mechanics", mechanics.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
-    public Integer getCooldownYears() {
+    public Optional<Integer> getCooldownYears() {
         return this.item.getVarAsInt("cooldown_years");
     }
 

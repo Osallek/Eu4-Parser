@@ -5,20 +5,23 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.imageio.ImageIO;
-
-import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 
 public class Estate {
 
@@ -52,7 +55,7 @@ public class Estate {
         this.modifierDefinitions = modifierDefinitions;
     }
 
-    public Integer getIcon() {
+    public Optional<Integer> getIcon() {
         return this.item.getVarAsInt("icon");
     }
 
@@ -64,28 +67,27 @@ public class Estate {
         }
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
-    public Modifiers getCountryModifierHappy() {
-        return new Modifiers(this.item.getChild("country_modifier_happy"));
+    public Optional<Modifiers> getCountryModifierHappy() {
+        return this.item.getChild("country_modifier_happy").map(Modifiers::new);
     }
 
-    public Modifiers getCountryModifierNeutral() {
-        return new Modifiers(this.item.getChild("country_modifier_neutral"));
+    public Optional<Modifiers> getCountryModifierNeutral() {
+        return this.item.getChild("country_modifier_neutral").map(Modifiers::new);
     }
 
-    public Modifiers getCountryModifierAngry() {
-        return new Modifiers(this.item.getChild("country_modifier_angry"));
+    public Optional<Modifiers> getCountryModifierAngry() {
+        return this.item.getChild("country_modifier_angry").map(Modifiers::new);
     }
 
-    public Modifiers getLandOwnershipModifier() {
-        return new Modifiers(this.item.getChild("land_ownership_modifier"));
+    public Optional<Modifiers> getLandOwnershipModifier() {
+        return this.item.getChild("land_ownership_modifier").map(Modifiers::new);
     }
 
-    public Double getBaseInfluence() {
+    public Optional<Double> getBaseInfluence() {
         return this.item.getVarAsDouble("base_influence");
     }
 
@@ -97,7 +99,7 @@ public class Estate {
         }
     }
 
-    public Double getInfluenceFromDevModifier() {
+    public Optional<Double> getInfluenceFromDevModifier() {
         return this.item.getVarAsDouble("influence_from_dev_modifier");
     }
 
@@ -128,13 +130,12 @@ public class Estate {
         return names.stream().map(Names::new).toList();
     }
 
-    public Color getColor() {
+    public Optional<Color> getColor() {
         if (this.item == null) {
             return null;
         }
 
-        ClausewitzList clausewitzList = this.item.getList("color");
-        return clausewitzList == null ? null : new Color(clausewitzList);
+        return this.item.getList("color").map(Color::new);
     }
 
     public void setColor(Color color) {
@@ -143,19 +144,15 @@ public class Estate {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
+        this.item.getList("color").ifPresentOrElse(list -> {
             Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
-    public Boolean contributesToCuriaTreasury() {
+    public Optional<Boolean> contributesToCuriaTreasury() {
         return this.item.getVarAsBool("contributes_to_curia_treasury");
     }
 
@@ -168,15 +165,16 @@ public class Estate {
     }
 
     public Map<String, EstatePrivilege> getPrivileges() {
-        ClausewitzList list = this.item.getList("privileges");
-        return list == null ? null :
-               list.getValues().stream().map(this.game::getEstatePrivilege).collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(),
-                                                                                                     (a, b) -> b, LinkedHashMap::new));
+        return this.item.getList("privileges")
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(this.game::getEstatePrivilege)
+                        .collect(Collectors.toMap(EstatePrivilege::getName, Function.identity(), (a, b) -> b, LinkedHashMap::new));
     }
 
     public List<String> getAgendas() {
-        ClausewitzList list = this.item.getList("agendas");
-        return list == null ? null : list.getValues();
+        return this.item.getList("agendas").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setAgendas(List<String> agendas) {
@@ -185,29 +183,28 @@ public class Estate {
             return;
         }
 
-        ClausewitzList list = this.item.getList("agendas");
-
-        if (list != null) {
-            list.setAll(agendas.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("agendas", agendas.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("agendas").ifPresentOrElse(list -> list.setAll(agendas.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                                     () -> this.item.addList("agendas", agendas.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
-    public BufferedImage getImage() throws IOException {
+    public Optional<BufferedImage> getImage() throws IOException {
         return getSubImage(ImageReader.convertFileToImage(this.game.getEstatesImage()));
     }
 
-    public BufferedImage getSubImage(BufferedImage image) {
-        double size = (double) image.getWidth() / this.game.getEstatesNbFrames();
-        return image.getSubimage((int) ((getIcon() - 1) * size), 0, (int) size, image.getHeight());
+    public Optional<BufferedImage> getSubImage(BufferedImage image) {
+        return getIcon().map(integer -> {
+            double size = (double) image.getWidth() / this.game.getEstatesNbFrames();
+            return image.getSubimage((int) ((integer - 1) * size), 0, (int) size, image.getHeight());
+        });
     }
 
     public void writeImageTo(Path dest) throws IOException {
-        FileUtils.forceMkdirParent(dest.toFile());
-        ImageIO.write(getImage(), "png", dest.toFile());
-        Eu4Utils.optimizePng(dest, dest);
-        this.writenTo = dest;
+        if (getImage().isPresent()) {
+            FileUtils.forceMkdirParent(dest.toFile());
+            ImageIO.write(getImage().get(), "png", dest.toFile());
+            Eu4Utils.optimizePng(dest, dest);
+            this.writenTo = dest;
+        }
     }
 
     public void setWritenTo(Path writenTo) {

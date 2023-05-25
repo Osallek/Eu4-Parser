@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Event {
 
@@ -14,14 +15,14 @@ public class Event {
     }
 
     public String getId() {
-        return this.item.getVarAsString("id");
+        return this.item.getVarAsString("id").orElse(null);
     }
 
     public void setId(String id) {
         this.item.setVariable("id", id);
     }
 
-    public String getTitle() {
+    public Optional<String> getTitle() {
         return this.item.getVarAsString("title");
     }
 
@@ -29,7 +30,7 @@ public class Event {
         this.item.setVariable("id", title);
     }
 
-    public String getDesc() {
+    public Optional<String> getDesc() {
         return this.item.getVarAsString("desc");
     }
 
@@ -37,7 +38,7 @@ public class Event {
         this.item.setVariable("desc", desc);
     }
 
-    public String getPicture() {
+    public Optional<String> getPicture() {
         return this.item.getVarAsString("picture");
     }
 
@@ -57,7 +58,7 @@ public class Event {
         this.item.setName(type.type);
     }
 
-    public Boolean fireOnlyOnce() {
+    public Optional<Boolean> fireOnlyOnce() {
         return this.item.getVarAsBool("fire_only_once");
     }
 

@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class EstateModifier {
 
@@ -17,7 +18,7 @@ public class EstateModifier {
         this.modifierName = modifierName;
     }
 
-    public String getDesc() {
+    public Optional<String> getDesc() {
         return this.item.getVarAsString("desc");
     }
 
@@ -29,13 +30,12 @@ public class EstateModifier {
         }
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     public double getAmount() {
-        return this.item.getVarAsDouble(this.modifierName);
+        return this.item.getVarAsDouble(this.modifierName).orElse(0d);
     }
 
     public void setAmount(double amount) {
@@ -62,6 +62,6 @@ public class EstateModifier {
 
     @Override
     public String toString() {
-        return getDesc();
+        return getDesc().orElse("");
     }
 }

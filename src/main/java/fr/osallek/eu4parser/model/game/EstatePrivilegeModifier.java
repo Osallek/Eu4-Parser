@@ -3,6 +3,8 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
+import java.util.Optional;
+
 public class EstatePrivilegeModifier {
 
     private final ClausewitzItem item;
@@ -11,16 +13,15 @@ public class EstatePrivilegeModifier {
         this.item = item;
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
-    public Boolean isBad() {
+    public Optional<Boolean> isBad() {
         return this.item.getVarAsBool("is_bad");
     }
 

@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class EventModifier extends GameModifier {
 
@@ -15,7 +16,7 @@ public class EventModifier extends GameModifier {
         return new Modifiers(this.item.getVarsNot("picture"));
     }
 
-    public String getPicture() {
+    public Optional<String> getPicture() {
         return this.item.getVarAsString("picture");
     }
 

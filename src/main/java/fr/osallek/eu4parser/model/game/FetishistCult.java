@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class FetishistCult {
 
@@ -25,21 +26,17 @@ public class FetishistCult {
         return new Modifiers(item.getVarsNot("sprite"));
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = this.item.getChild("allow");
-
-        if (child == null) {
-            return null;
-        } else {
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(child -> {
             ConditionAnd allow = new ConditionAnd(child);
             allow.removeCondition("has_unlocked_cult", this.getName()); //Prevent endless recursive
 
             return allow;
-        }
+        });
     }
 
     public int getSprite() {
-        return this.item.getVarAsInt("sprite");
+        return this.item.getVarAsInt("sprite").orElse(0);
     }
 
     public void setSprite(int sprite) {

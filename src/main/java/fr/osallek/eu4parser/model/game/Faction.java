@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Faction {
 
@@ -35,9 +36,8 @@ public class Faction {
         this.item.setName(name);
     }
 
-    public Power getCategory() {
-        ClausewitzVariable variable = item.getVar("monarch_power");
-        return variable == null ? null : Power.byName(variable.getValue());
+    public Optional<Power> getCategory() {
+        return this.item.getVar("monarch_power").map(ClausewitzVariable::getValue).map(Power::byName);
     }
 
     public void setCategory(Power category) {
@@ -53,7 +53,7 @@ public class Faction {
         return namesItems.stream().map(Names::new).toList();
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 

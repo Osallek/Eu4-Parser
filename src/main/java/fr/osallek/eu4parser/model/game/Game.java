@@ -1828,7 +1828,7 @@ public class Game {
     public List<Event> getFireOnlyOnceEvents() {
         return this.events.values()
                           .stream()
-                          .filter(event -> BooleanUtils.isTrue(event.fireOnlyOnce()))
+                          .filter(event -> event.fireOnlyOnce().filter(BooleanUtils::isTrue).isPresent())
                           .toList();
     }
 
