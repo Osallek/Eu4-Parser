@@ -46,11 +46,11 @@ public class Institution implements Comparable<Institution> {
         return index;
     }
 
-    public Modifiers getBonuses() {
-        return new Modifiers(this.item.getChild("bonus"));
+    public Optional<Modifiers> getBonuses() {
+        return this.item.getChild("bonus").map(Modifiers::new);
     }
 
-    public Double getTradeCompanyEfficiency() {
+    public Optional<Double> getTradeCompanyEfficiency() {
         return this.item.getVarAsDouble("trade_company_efficiency");
     }
 
@@ -62,7 +62,7 @@ public class Institution implements Comparable<Institution> {
         }
     }
 
-    public Integer getStartChance() {
+    public Optional<Integer> getStartChance() {
         return this.item.getVarAsInt("start_chance");
     }
 
@@ -74,7 +74,7 @@ public class Institution implements Comparable<Institution> {
         }
     }
 
-    public String getOnStart() {
+    public Optional<String> getOnStart() {
         return this.item.getVarAsString("on_start");
     }
 
@@ -86,7 +86,7 @@ public class Institution implements Comparable<Institution> {
         }
     }
 
-    public Integer getHistoricalStartProvince() {
+    public Optional<Integer> getHistoricalStartProvince() {
         return this.item.getVarAsInt("historical_start_province");
     }
 
@@ -98,7 +98,7 @@ public class Institution implements Comparable<Institution> {
         }
     }
 
-    public LocalDate getHistoricalStartDate() {
+    public Optional<LocalDate> getHistoricalStartDate() {
         return this.item.getVarAsDate("historical_start_date");
     }
 
@@ -110,20 +110,20 @@ public class Institution implements Comparable<Institution> {
         }
     }
 
-    public ConditionAnd getHistory() {
-        return Optional.ofNullable(this.item.getChild("history")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getHistory() {
+        return this.item.getChild("history").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanStart() {
-        return Optional.ofNullable(this.item.getChild("can_start")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getCanStart() {
+        return this.item.getChild("can_start").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanEmbrace() {
-        return Optional.ofNullable(this.item.getChild("can_embrace")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getCanEmbrace() {
+        return this.item.getChild("can_embrace").map(ConditionAnd::new);
     }
 
-    public Modifiers getEmbracementSpeed() {
-        return Optional.ofNullable(this.item.getChild("embracement_speed")).map(Modifiers::new).orElse(null);
+    public Optional<Modifiers> getEmbracementSpeed() {
+        return this.item.getChild("embracement_speed").map(Modifiers::new);
     }
 
     public File getImage() {

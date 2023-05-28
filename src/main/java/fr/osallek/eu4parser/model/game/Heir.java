@@ -2,13 +2,15 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public class Heir extends Monarch {
 
     public Heir(ClausewitzItem item, Country country) {
         super(item, country);
     }
 
-    public Double getClaim() {
+    public Optional<Double> getClaim() {
         return this.item.getVarAsDouble("claim");
     }
 

@@ -7,7 +7,6 @@ import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
@@ -15,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GovernmentReform {
@@ -162,17 +162,14 @@ public class GovernmentReform {
         this.game = game;
         this.item = item;
 
-        ClausewitzItem child = item.getChild("custom_attributes");
-        this.customAttributes = child == null ? null : child.getVariables()
-                                                            .stream()
-                                                            .collect(Collectors.toMap(ClausewitzVariable::getName,
-                                                                                      ClausewitzVariable::getValue,
-                                                                                      (a, b) -> b,
-                                                                                      LinkedHashMap::new));
+        this.customAttributes = item.getChild("custom_attributes")
+                                    .map(child -> child.getVariables()
+                                                       .stream()
+                                                       .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getValue, (a, b) -> b,
+                                                                                 LinkedHashMap::new)))
+                                    .orElse(null);
 
-        ClausewitzList list = item.getList("government_abilities");
-        this.governmentAbilities = list == null ? null : list.getValues();
-
+        this.governmentAbilities = item.getList("government_abilities").map(ClausewitzList::getValues).orElse(null);
         readAttributes(item);
 
         List<ClausewitzItem> children = item.getChildren("conditional");
@@ -249,99 +246,94 @@ public class GovernmentReform {
     }
 
     private void readAttributes(ClausewitzItem item) {
-        ClausewitzItem child = item.getChild("allow");
-        ConditionAnd condition = child == null ? null : new ConditionAnd(item.getChild("allow"));
+        ConditionAnd condition = item.getChild("allow").map(ConditionAnd::new).orElse(null);
 
-        Boolean aBoolean;
-        Integer integer;
-        Double aDouble;
-        String s;
-
-        ClausewitzList list = item.getList("disallowed_trade_goods");
-        this.disallowedTradeGoods = list == null ? this.disallowedTradeGoods
-                                                 : Pair.of(list.getValues().stream().map(game::getTradeGood).toList(), condition);
-
-        list = item.getList("factions");
-        this.factions = list == null ? this.factions : Pair.of(list.getValues(), condition);
-
-        child = item.getChild("assimilation_cultures");
-        this.assimilationCultures = child == null ? null : Pair.of(child.getChildren()
-                                                                        .stream()
-                                                                        .collect(Collectors.toMap(ClausewitzObject::getName, Modifiers::new)), condition);
-        child = item.getChild("states_general_mechanic");
-        this.statesGeneralMechanic = child == null ? null : Pair.of(child.getChildren()
-                                                                         .stream()
-                                                                         .map(Modifiers::new)
-                                                                         .toList(), condition);
-
-        this.basicReform = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("basic_reform")), condition);
-        this.legacyGovernment = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("legacy_government")), condition);
-        this.legacyEquivalent = Pair.of(item.getVarAsString("legacy_equivalent"), condition);
-        this.lockLevelWhenSelected = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("lock_level_when_selected")), condition);
-        this.icon = StringUtils.isBlank(s = item.getVarAsString("icon")) ? this.icon : Pair.of(s, condition);
-        this.validForNewCountry = (aBoolean = item.getVarAsBool("valid_for_new_country")) == null ? this.validForNewCountry : Pair.of(aBoolean, condition);
-        this.allowConvert = (aBoolean = item.getVarAsBool("allow_convert")) == null ? this.allowConvert : Pair.of(aBoolean, condition);
-        this.rulersCanBeGenerals = (aBoolean = item.getVarAsBool("rulers_can_be_generals")) == null ? this.rulersCanBeGenerals : Pair.of(aBoolean, condition);
-        this.heirsCanBeGenerals = (aBoolean = item.getVarAsBool("heirs_can_be_generals")) == null ? this.heirsCanBeGenerals : Pair.of(aBoolean, condition);
-        this.fixedRank = (integer = item.getVarAsInt("fixed_rank")) == null ? this.fixedRank : Pair.of(integer, condition);
-        this.republicanName = (aBoolean = item.getVarAsBool("republican_name")) == null ? this.republicanName : Pair.of(aBoolean, condition);
-        this.militarisedSociety = (aBoolean = item.getVarAsBool("militarised_society")) == null ? this.militarisedSociety : Pair.of(aBoolean, condition);
-        this.claimStates = (aBoolean = item.getVarAsBool("claim_states")) == null ? this.claimStates : Pair.of(aBoolean, condition);
-        this.religion = (aBoolean = item.getVarAsBool("religion")) == null ? this.religion : Pair.of(aBoolean, condition);
-        this.republic = (aBoolean = item.getVarAsBool("republic")) == null ? this.republic : Pair.of(aBoolean, condition);
-        this.dictatorship = (aBoolean = item.getVarAsBool("dictatorship")) == null ? this.dictatorship : Pair.of(aBoolean, condition);
-        this.isElective = (aBoolean = item.getVarAsBool("is_elective")) == null ? this.isElective : Pair.of(aBoolean, condition);
-        this.queen = (aBoolean = item.getVarAsBool("queen")) == null ? this.queen : Pair.of(aBoolean, condition);
-        this.heir = (aBoolean = item.getVarAsBool("heir")) == null ? this.heir : Pair.of(aBoolean, condition);
-        this.hasParliament = (aBoolean = item.getVarAsBool("has_parliament")) == null ? this.hasParliament : Pair.of(aBoolean, condition);
-        this.hasDevotion = (aBoolean = item.getVarAsBool("has_devotion")) == null ? this.hasDevotion : Pair.of(aBoolean, condition);
-        this.hasMeritocracy = (aBoolean = item.getVarAsBool("has_meritocracy")) == null ? this.hasMeritocracy : Pair.of(aBoolean, condition);
-        this.allowForceTributary = (aBoolean = item.getVarAsBool("allow_force_tributary")) == null ? this.allowForceTributary : Pair.of(aBoolean, condition);
-        this.duration = (integer = item.getVarAsInt("duration")) == null ? this.duration : Pair.of(integer, condition);
-        this.electionOnDeath = (aBoolean = item.getVarAsBool("election_on_death")) == null ? this.electionOnDeath : Pair.of(aBoolean, condition);
-        this.monarchy = (aBoolean = item.getVarAsBool("monarchy")) == null ? this.monarchy : Pair.of(aBoolean, condition);
-        this.tribal = (aBoolean = item.getVarAsBool("tribal")) == null ? this.tribal : Pair.of(aBoolean, condition);
-        this.differentReligionAcceptance = (integer = item.getVarAsInt("different_religion_acceptance")) == null ? this.differentReligionAcceptance
-                                                                                                                 : Pair.of(integer, condition);
-        this.differentReligionGroupAcceptance = (integer = item.getVarAsInt("different_religion_group_acceptance")) == null
-                                                ? this.differentReligionGroupAcceptance : Pair.of(integer, condition);
-        this.boostIncome = (aBoolean = item.getVarAsBool("boost_income")) == null ? this.boostIncome : Pair.of(aBoolean, condition);
-        this.monastic = (aBoolean = item.getVarAsBool("monastic")) == null ? this.monastic : Pair.of(aBoolean, condition);
-        this.canUseTradePost = (aBoolean = item.getVarAsBool("can_use_trade_post")) == null ? this.canUseTradePost : Pair.of(aBoolean, condition);
-        this.nativeMechanic = (aBoolean = item.getVarAsBool("native_mechanic")) == null ? this.nativeMechanic : Pair.of(aBoolean, condition);
-        this.canFormTradeLeague = (aBoolean = item.getVarAsBool("can_form_trade_league")) == null ? this.canFormTradeLeague : Pair.of(aBoolean, condition);
-        this.freeCity = (aBoolean = item.getVarAsBool("free_city")) == null ? this.freeCity : Pair.of(aBoolean, condition);
-        this.isTradingCity = (aBoolean = item.getVarAsBool("is_trading_city")) == null ? this.isTradingCity : Pair.of(aBoolean, condition);
-        this.tradeCityReform = StringUtils.isBlank(s = item.getVarAsString("trade_city_reform")) ? this.tradeCityReform : Pair.of(s, condition);
-        this.maintainDynasty = (aBoolean = item.getVarAsBool("maintain_dynasty")) == null ? this.maintainDynasty : Pair.of(aBoolean, condition);
-        this.allowMigration = (aBoolean = item.getVarAsBool("allow_migration")) == null ? this.allowMigration : Pair.of(aBoolean, condition);
-        this.nationDesignerCost = (integer = item.getVarAsInt("nation_designer_cost")) == null ? this.nationDesignerCost : Pair.of(integer, condition);
-        this.papacy = (aBoolean = item.getVarAsBool("papacy")) == null ? this.papacy : Pair.of(aBoolean, condition);
-        this.hasHarem = (aBoolean = item.getVarAsBool("has_harem")) == null ? this.hasHarem : Pair.of(aBoolean, condition);
-        this.hasPashas = (aBoolean = item.getVarAsBool("has_pashas")) == null ? this.hasPashas : Pair.of(aBoolean, condition);
-        this.allowVassalWar = (aBoolean = item.getVarAsBool("allow_vassal_war")) == null ? this.allowVassalWar : Pair.of(aBoolean, condition);
-        this.allowVassalAlliance = (aBoolean = item.getVarAsBool("allow_vassal_alliance")) == null ? this.allowVassalAlliance : Pair.of(aBoolean, condition);
-        this.minAutonomy = (aDouble = item.getVarAsDouble("min_autonomy")) == null ? this.minAutonomy : Pair.of(aDouble, condition);
-        this.factionsFrame = (integer = item.getVarAsInt("factions_frame")) == null ? this.factionsFrame : Pair.of(integer, condition);
-        this.foreignSlaveRulers = (aBoolean = item.getVarAsBool("foreign_slave_rulers")) == null ? this.foreignSlaveRulers : Pair.of(aBoolean, condition);
-        this.royalMarriage = (aBoolean = item.getVarAsBool("royal_marriage")) == null ? this.royalMarriage : Pair.of(aBoolean, condition);
-        this.nomad = (aBoolean = item.getVarAsBool("nomad")) == null ? this.nomad : Pair.of(aBoolean, condition);
-        this.validForNationDesigner = (aBoolean = item.getVarAsBool("valid_for_nation_designer")) == null ? this.validForNationDesigner
-                                                                                                          : Pair.of(aBoolean, condition);
-        this.allowNormalConversion = (aBoolean = item.getVarAsBool("allow_normal_conversion")) == null ? this.allowNormalConversion
-                                                                                                       : Pair.of(aBoolean, condition);
-        this.startTerritoryToEstates = (aDouble = item.getVarAsDouble("start_territory_to_estates")) == null ? this.startTerritoryToEstates
-                                                                                                             : Pair.of(aDouble, condition);
-        this.hasTermElection = (aBoolean = item.getVarAsBool("has_term_election")) == null ? this.hasTermElection : Pair.of(aBoolean, condition);
-        this.forceAdmiralLeader = (aBoolean = item.getVarAsBool("force_admiral_leader")) == null ? this.forceAdmiralLeader : Pair.of(aBoolean, condition);
-        this.admiralsBecomeRulers = (aBoolean = item.getVarAsBool("admirals_become_rulers")) == null ? this.admiralsBecomeRulers : Pair.of(aBoolean, condition);
-        this.generalsBecomeRulers = (aBoolean = item.getVarAsBool("generals_become_rulers")) == null ? this.generalsBecomeRulers : Pair.of(aBoolean, condition);
-        this.allowBanners = (aBoolean = item.getVarAsBool("allow_banners")) == null ? this.allowBanners : Pair.of(aBoolean, condition);
-        this.usesRevolutionaryZeal = (aBoolean = item.getVarAsBool("uses_revolutionary_zeal")) == null ? this.usesRevolutionaryZeal
-                                                                                                       : Pair.of(aBoolean, condition);
-        this.revolutionary = (aBoolean = item.getVarAsBool("revolutionary")) == null ? this.revolutionary : Pair.of(aBoolean, condition);
-        this.revolutionaryClientState = (aBoolean = item.getVarAsBool("revolutionary_client_state")) == null ? this.revolutionaryClientState
-                                                                                                             : Pair.of(aBoolean, condition);
+        this.disallowedTradeGoods = item.getList("disallowed_trade_goods")
+                                        .map(list -> Pair.of(list.getValues().stream().map(game::getTradeGood).toList(), condition))
+                                        .orElse(this.disallowedTradeGoods);
+        this.factions = item.getList("factions").map(list -> Pair.of(list.getValues(), condition)).orElse(this.factions);
+        this.assimilationCultures = item.getChild("assimilation_cultures")
+                                        .map(child -> Pair.of(child.getChildren().stream().collect(Collectors.toMap(ClausewitzObject::getName, Modifiers::new)),
+                                                              condition))
+                                        .orElse(null);
+        this.statesGeneralMechanic = item.getChild("states_general_mechanic")
+                                         .map(child -> Pair.of(child.getChildren().stream().map(Modifiers::new).toList(), condition))
+                                         .orElse(null);
+        this.basicReform = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("basic_reform").orElse(null)), condition);
+        this.legacyGovernment = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("legacy_government").orElse(null)), condition);
+        this.legacyEquivalent = Pair.of(item.getVarAsString("legacy_equivalent").orElse(null), condition);
+        this.lockLevelWhenSelected = Pair.of(BooleanUtils.toBoolean(item.getVarAsBool("lock_level_when_selected").orElse(null)), condition);
+        this.icon = item.getVarAsString("icon").map(s -> Pair.of(s, condition)).orElse(this.icon);
+        this.validForNewCountry = item.getVarAsBool("valid_for_new_country").map(b -> Pair.of(b, condition)).orElse(this.validForNewCountry);
+        this.allowConvert = item.getVarAsBool("allow_convert").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.allowConvert);
+        this.rulersCanBeGenerals = item.getVarAsBool("rulers_can_be_generals").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.rulersCanBeGenerals);
+        this.heirsCanBeGenerals = item.getVarAsBool("heirs_can_be_generals").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.heirsCanBeGenerals);
+        this.fixedRank = item.getVarAsInt("fixed_rank").map(integer -> Pair.of(integer, condition)).orElse(this.fixedRank);
+        this.republicanName = item.getVarAsBool("republican_name").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.republicanName);
+        this.militarisedSociety = item.getVarAsBool("militarised_society").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.militarisedSociety);
+        this.claimStates = item.getVarAsBool("claim_states").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.claimStates);
+        this.religion = item.getVarAsBool("religion").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.religion);
+        this.republic = item.getVarAsBool("republic").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.republic);
+        this.dictatorship = item.getVarAsBool("dictatorship").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.dictatorship);
+        this.isElective = item.getVarAsBool("is_elective").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.isElective);
+        this.queen = item.getVarAsBool("queen").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.queen);
+        this.heir = item.getVarAsBool("heir").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.heir);
+        this.hasParliament = item.getVarAsBool("has_parliament").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.hasParliament);
+        this.hasDevotion = item.getVarAsBool("has_devotion").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.hasDevotion);
+        this.hasMeritocracy = item.getVarAsBool("has_meritocracy").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.hasMeritocracy);
+        this.allowForceTributary = item.getVarAsBool("allow_force_tributary").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.allowForceTributary);
+        this.duration = item.getVarAsInt("duration").map(integer -> Pair.of(integer, condition)).orElse(this.duration);
+        this.electionOnDeath = item.getVarAsBool("election_on_death").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.electionOnDeath);
+        this.monarchy = item.getVarAsBool("monarchy").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.monarchy);
+        this.tribal = item.getVarAsBool("tribal").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.tribal);
+        this.differentReligionAcceptance = item.getVarAsInt("different_religion_acceptance")
+                                               .map(integer -> Pair.of(integer, condition))
+                                               .orElse(this.differentReligionAcceptance);
+        this.differentReligionGroupAcceptance = item.getVarAsInt("different_religion_group_acceptance")
+                                                    .map(integer -> Pair.of(integer, condition))
+                                                    .orElse(this.differentReligionGroupAcceptance);
+        this.boostIncome = item.getVarAsBool("boost_income").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.boostIncome);
+        this.monastic = item.getVarAsBool("monastic").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.monastic);
+        this.canUseTradePost = item.getVarAsBool("can_use_trade_post").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.canUseTradePost);
+        this.nativeMechanic = item.getVarAsBool("native_mechanic").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.nativeMechanic);
+        this.canFormTradeLeague = item.getVarAsBool("can_form_trade_league").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.canFormTradeLeague);
+        this.freeCity = item.getVarAsBool("free_city").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.freeCity);
+        this.isTradingCity = item.getVarAsBool("is_trading_city").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.isTradingCity);
+        this.tradeCityReform = item.getVarAsString("trade_city_reform").map(s -> Pair.of(s, condition)).orElse(this.tradeCityReform);
+        this.maintainDynasty = item.getVarAsBool("maintain_dynasty").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.maintainDynasty);
+        this.allowMigration = item.getVarAsBool("allow_migration").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.allowMigration);
+        this.nationDesignerCost = item.getVarAsInt("nation_designer_cost").map(integer -> Pair.of(integer, condition)).orElse(this.nationDesignerCost);
+        this.papacy = item.getVarAsBool("papacy").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.papacy);
+        this.hasHarem = item.getVarAsBool("has_harem").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.hasHarem);
+        this.hasPashas = item.getVarAsBool("has_pashas").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.hasPashas);
+        this.allowVassalWar = item.getVarAsBool("allow_vassal_war").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.allowVassalWar);
+        this.allowVassalAlliance = item.getVarAsBool("allow_vassal_alliance").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.allowVassalAlliance);
+        this.minAutonomy = item.getVarAsDouble("min_autonomy").map(aDouble -> Pair.of(aDouble, condition)).orElse(this.minAutonomy);
+        this.factionsFrame = item.getVarAsInt("factions_frame").map(integer -> Pair.of(integer, condition)).orElse(this.factionsFrame);
+        this.foreignSlaveRulers = item.getVarAsBool("foreign_slave_rulers").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.foreignSlaveRulers);
+        this.royalMarriage = item.getVarAsBool("royal_marriage").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.royalMarriage);
+        this.nomad = item.getVarAsBool("nomad").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.nomad);
+        this.validForNationDesigner = item.getVarAsBool("valid_for_nation_designer")
+                                          .map(aBoolean -> Pair.of(aBoolean, condition))
+                                          .orElse(this.validForNationDesigner);
+        this.allowNormalConversion = item.getVarAsBool("allow_normal_conversion")
+                                         .map(aBoolean -> Pair.of(aBoolean, condition))
+                                         .orElse(this.allowNormalConversion);
+        this.startTerritoryToEstates = item.getVarAsDouble("start_territory_to_estates")
+                                           .map(aDouble -> Pair.of(aDouble, condition))
+                                           .orElse(this.startTerritoryToEstates);
+        this.hasTermElection = item.getVarAsBool("has_term_election").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.hasTermElection);
+        this.forceAdmiralLeader = item.getVarAsBool("force_admiral_leader").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.forceAdmiralLeader);
+        this.admiralsBecomeRulers = item.getVarAsBool("admirals_become_rulers").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.admiralsBecomeRulers);
+        this.generalsBecomeRulers = item.getVarAsBool("generals_become_rulers").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.generalsBecomeRulers);
+        this.allowBanners = item.getVarAsBool("allow_banners").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.allowBanners);
+        this.usesRevolutionaryZeal = item.getVarAsBool("uses_revolutionary_zeal")
+                                         .map(aBoolean -> Pair.of(aBoolean, condition))
+                                         .orElse(this.usesRevolutionaryZeal);
+        this.revolutionary = item.getVarAsBool("revolutionary").map(aBoolean -> Pair.of(aBoolean, condition)).orElse(this.revolutionary);
+        this.revolutionaryClientState = item.getVarAsBool("revolutionary_client_state")
+                                            .map(aBoolean -> Pair.of(aBoolean, condition))
+                                            .orElse(this.revolutionaryClientState);
     }
 
     public String getName() {
@@ -352,17 +344,16 @@ public class GovernmentReform {
         this.item.setName(name);
     }
 
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("modifiers"));
+    public Optional<Modifiers> getModifiers() {
+        return this.item.getChild("modifiers").map(Modifiers::new);
     }
 
     public Map<String, String> getCustomAttributes() {
         return customAttributes;
     }
 
-    public ConditionAnd getPotential() {
-        ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
     public Pair<Boolean, ConditionAnd> isBasicReform() {
@@ -529,9 +520,8 @@ public class GovernmentReform {
         return allowMigration;
     }
 
-    public ConditionAnd getNationDesignerTrigger() {
-        ClausewitzItem child = this.item.getChild("nation_designer_trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getNationDesignerTrigger() {
+        return this.item.getChild("nation_designer_trigger").map(ConditionAnd::new);
     }
 
     public Pair<Integer, ConditionAnd> getNationDesignerCost() {
@@ -644,11 +634,9 @@ public class GovernmentReform {
             return true;
         }
 
-        if (!(o instanceof GovernmentReform)) {
+        if (!(o instanceof GovernmentReform governmentReform)) {
             return false;
         }
-
-        GovernmentReform governmentReform = (GovernmentReform) o;
 
         return Objects.equals(getName(), governmentReform.getName());
     }

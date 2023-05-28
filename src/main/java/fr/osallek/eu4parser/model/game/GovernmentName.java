@@ -1,13 +1,14 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 public class GovernmentName {
 
@@ -26,22 +27,11 @@ public class GovernmentName {
     }
 
     public Map<Integer, String> getRanks() {
-        ClausewitzItem child = this.item.getChild("rank");
-
-        if (child != null) {
+        return this.item.getChild("rank").map(child -> {
             SortedMap<Integer, String> ranks = new TreeMap<>();
-            ClausewitzVariable variable;
-
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    ranks.putIfAbsent(i, variable.getValue());
-                }
-            }
-
+            IntStream.rangeClosed(1, child.getNbVariables()).forEach(i -> child.getVar(String.valueOf(i)).ifPresent(v -> ranks.putIfAbsent(i, v.getValue())));
             return ranks;
-        } else {
-            return null;
-        }
+        }).orElse(new TreeMap<>());
     }
 
     public String getRank(int level) {
@@ -49,12 +39,7 @@ public class GovernmentName {
     }
 
     public void setRanks(SortedMap<Integer, String> ranks) {
-        ClausewitzItem child = this.item.getChild("rank");
-
-        if (child == null) {
-            child = this.item.addChild("rank");
-        }
-
+        ClausewitzItem child = this.item.getChild("rank").orElse(this.item.addChild("rank"));
         child.removeAllVariables();
 
         for (Map.Entry<Integer, String> entry : ranks.entrySet()) {
@@ -63,230 +48,133 @@ public class GovernmentName {
     }
 
     public Map<Integer, String> getRulersMale() {
-        ClausewitzItem child = this.item.getChild("ruler_male");
-
-        if (child != null) {
-            SortedMap<Integer, String> rulersMale = new TreeMap<>();
-            ClausewitzVariable variable;
-
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    rulersMale.putIfAbsent(i, variable.getValue());
-                }
-            }
-
-            return rulersMale;
-        } else {
-            return null;
-        }
+        return this.item.getChild("ruler_male").map(child -> {
+            SortedMap<Integer, String> rulers = new TreeMap<>();
+            IntStream.rangeClosed(1, child.getNbVariables()).forEach(i -> child.getVar(String.valueOf(i)).ifPresent(v -> rulers.putIfAbsent(i, v.getValue())));
+            return rulers;
+        }).orElse(new TreeMap<>());
     }
 
     public String getRulerMale(int level) {
         return getRulersMale().get(level);
     }
 
-    public void setRulersMale(SortedMap<Integer, String> rulersMale) {
-        ClausewitzItem child = this.item.getChild("ruler_male");
-
-        if (child == null) {
-            child = this.item.addChild("rank");
-        }
-
+    public void setRulersMale(SortedMap<Integer, String> rulers) {
+        ClausewitzItem child = this.item.getChild("ruler_male").orElse(this.item.addChild("ruler_male"));
         child.removeAllVariables();
 
-        for (Map.Entry<Integer, String> entry : rulersMale.entrySet()) {
+        for (Map.Entry<Integer, String> entry : rulers.entrySet()) {
             child.addVariable(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 
     public Map<Integer, String> getRulersFemale() {
-        ClausewitzItem child = this.item.getChild("ruler_female");
-
-        if (child != null) {
-            SortedMap<Integer, String> rulersFemale = new TreeMap<>();
-            ClausewitzVariable variable;
-
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    rulersFemale.putIfAbsent(i, variable.getValue());
-                }
-            }
-
-            return rulersFemale;
-        } else {
-            return null;
-        }
+        return this.item.getChild("ruler_female").map(child -> {
+            SortedMap<Integer, String> rulers = new TreeMap<>();
+            IntStream.rangeClosed(1, child.getNbVariables()).forEach(i -> child.getVar(String.valueOf(i)).ifPresent(v -> rulers.putIfAbsent(i, v.getValue())));
+            return rulers;
+        }).orElse(new TreeMap<>());
     }
 
     public String getRulerFemale(int level) {
         return getRulersFemale().get(level);
     }
 
-    public void setRulersFemale(SortedMap<Integer, String> rulersFemale) {
-        ClausewitzItem child = this.item.getChild("ruler_female");
-
-        if (child == null) {
-            child = this.item.addChild("rank");
-        }
-
+    public void setRulersFemale(SortedMap<Integer, String> rulers) {
+        ClausewitzItem child = this.item.getChild("ruler_female").orElse(this.item.addChild("ruler_female"));
         child.removeAllVariables();
 
-        for (Map.Entry<Integer, String> entry : rulersFemale.entrySet()) {
+        for (Map.Entry<Integer, String> entry : rulers.entrySet()) {
             child.addVariable(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 
     public Map<Integer, String> getConsortsMale() {
-        ClausewitzItem child = this.item.getChild("consort_male");
-
-        if (child != null) {
-            SortedMap<Integer, String> consortsMale = new TreeMap<>();
-            ClausewitzVariable variable;
-
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    consortsMale.putIfAbsent(i, variable.getValue());
-                }
-            }
-
-            return consortsMale;
-        } else {
-            return null;
-        }
+        return this.item.getChild("consort_male").map(child -> {
+            SortedMap<Integer, String> rulers = new TreeMap<>();
+            IntStream.rangeClosed(1, child.getNbVariables()).forEach(i -> child.getVar(String.valueOf(i)).ifPresent(v -> rulers.putIfAbsent(i, v.getValue())));
+            return rulers;
+        }).orElse(new TreeMap<>());
     }
 
     public String getConsortMale(int level) {
         return getConsortsMale().get(level);
     }
 
-    public void setConsortsMale(SortedMap<Integer, String> consortsMale) {
-        ClausewitzItem child = this.item.getChild("consort_male");
-
-        if (child == null) {
-            child = this.item.addChild("rank");
-        }
-
+    public void setConsortsMale(SortedMap<Integer, String> consorts) {
+        ClausewitzItem child = this.item.getChild("consort_male").orElse(this.item.addChild("consort_male"));
         child.removeAllVariables();
 
-        for (Map.Entry<Integer, String> entry : consortsMale.entrySet()) {
+        for (Map.Entry<Integer, String> entry : consorts.entrySet()) {
             child.addVariable(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 
     public Map<Integer, String> getConsortsFemale() {
-        ClausewitzItem child = this.item.getChild("consort_female");
-
-        if (child != null) {
-            SortedMap<Integer, String> consortsFemale = new TreeMap<>();
-            ClausewitzVariable variable;
-
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    consortsFemale.putIfAbsent(i, variable.getValue());
-                }
-            }
-
-            return consortsFemale;
-        } else {
-            return null;
-        }
+        return this.item.getChild("consort_female").map(child -> {
+            SortedMap<Integer, String> rulers = new TreeMap<>();
+            IntStream.rangeClosed(1, child.getNbVariables()).forEach(i -> child.getVar(String.valueOf(i)).ifPresent(v -> rulers.putIfAbsent(i, v.getValue())));
+            return rulers;
+        }).orElse(new TreeMap<>());
     }
 
     public String getConsortFemale(int level) {
         return getConsortsFemale().get(level);
     }
 
-    public void setConsortsFemale(SortedMap<Integer, String> consortsFemale) {
-        ClausewitzItem child = this.item.getChild("consort_female");
-
-        if (child == null) {
-            child = this.item.addChild("rank");
-        }
-
+    public void setConsortsFemale(SortedMap<Integer, String> consorts) {
+        ClausewitzItem child = this.item.getChild("consort_female").orElse(this.item.addChild("consort_female"));
         child.removeAllVariables();
 
-        for (Map.Entry<Integer, String> entry : consortsFemale.entrySet()) {
+        for (Map.Entry<Integer, String> entry : consorts.entrySet()) {
             child.addVariable(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 
     public Map<Integer, String> getHeirsMale() {
-        ClausewitzItem child = this.item.getChild("heir_male");
-
-        if (child != null) {
-            SortedMap<Integer, String> heirsMale = new TreeMap<>();
-            ClausewitzVariable variable;
-
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    heirsMale.putIfAbsent(i, variable.getValue());
-                }
-            }
-
-            return heirsMale;
-        } else {
-            return null;
-        }
+        return this.item.getChild("heir_male").map(child -> {
+            SortedMap<Integer, String> rulers = new TreeMap<>();
+            IntStream.rangeClosed(1, child.getNbVariables()).forEach(i -> child.getVar(String.valueOf(i)).ifPresent(v -> rulers.putIfAbsent(i, v.getValue())));
+            return rulers;
+        }).orElse(new TreeMap<>());
     }
 
     public String getHeirMale(int level) {
         return getHeirsMale().get(level);
     }
 
-    public void setHeirsMale(SortedMap<Integer, String> heirsMale) {
-        ClausewitzItem child = this.item.getChild("heir_male");
-
-        if (child == null) {
-            child = this.item.addChild("rank");
-        }
-
+    public void setHeirsMale(SortedMap<Integer, String> heirs) {
+        ClausewitzItem child = this.item.getChild("heir_male").orElse(this.item.addChild("heir_male"));
         child.removeAllVariables();
 
-        for (Map.Entry<Integer, String> entry : heirsMale.entrySet()) {
+        for (Map.Entry<Integer, String> entry : heirs.entrySet()) {
             child.addVariable(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 
     public Map<Integer, String> getHeirsFemale() {
-        ClausewitzItem child = this.item.getChild("heir_female");
-
-        if (child != null) {
-            SortedMap<Integer, String> heirsFemale = new TreeMap<>();
-            ClausewitzVariable variable;
-
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    heirsFemale.putIfAbsent(i, variable.getValue());
-                }
-            }
-
-            return heirsFemale;
-        } else {
-            return null;
-        }
+        return this.item.getChild("heir_female").map(child -> {
+            SortedMap<Integer, String> rulers = new TreeMap<>();
+            IntStream.rangeClosed(1, child.getNbVariables()).forEach(i -> child.getVar(String.valueOf(i)).ifPresent(v -> rulers.putIfAbsent(i, v.getValue())));
+            return rulers;
+        }).orElse(new TreeMap<>());
     }
 
     public String getHeirFemale(int level) {
         return getHeirsFemale().get(level);
     }
 
-    public void setHeirsFemale(SortedMap<Integer, String> heirsFemale) {
-        ClausewitzItem child = this.item.getChild("heir_female");
-
-        if (child == null) {
-            child = this.item.addChild("rank");
-        }
-
+    public void setHeirsFemale(SortedMap<Integer, String> heirs) {
+        ClausewitzItem child = this.item.getChild("heir_female").orElse(this.item.addChild("heir_female"));
         child.removeAllVariables();
 
-        for (Map.Entry<Integer, String> entry : heirsFemale.entrySet()) {
+        for (Map.Entry<Integer, String> entry : heirs.entrySet()) {
             child.addVariable(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     @Override

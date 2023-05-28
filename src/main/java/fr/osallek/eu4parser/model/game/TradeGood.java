@@ -80,7 +80,7 @@ public class TradeGood {
     }
 
     public Modifiers getProvinceModifiers() {
-        return new Modifiers(this.item.getChild("province"));
+        return this.item.getChild("province").map(Modifiers::new);
     }
 
     public Double getBasePrice() {

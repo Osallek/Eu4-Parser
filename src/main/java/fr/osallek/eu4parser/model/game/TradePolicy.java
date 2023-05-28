@@ -78,15 +78,15 @@ public class TradePolicy {
     }
 
     public Modifiers getTradePower() {
-        return new Modifiers(this.item.getChild("trade_power"));
+        return this.item.getChild("trade_power").map(Modifiers::new);
     }
 
     public Modifiers getCountriesWithMerchantModifier() {
-        return new Modifiers(this.item.getChild("countries_with_merchant_modifier"));
+        return this.item.getChild("countries_with_merchant_modifier").map(Modifiers::new);
     }
 
     public Modifiers getNodeProvinceModifier() {
-        return new Modifiers(this.item.getChild("node_province_modifier"));
+        return this.item.getChild("node_province_modifier").map(Modifiers::new);
     }
 
     @Override

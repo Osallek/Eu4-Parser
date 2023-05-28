@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class HolyOrder {
 
@@ -23,7 +24,7 @@ public class HolyOrder {
         this.item.setName(name);
     }
 
-    public String getIcon() {
+    public Optional<String> getIcon() {
         return this.item.getVarAsString("icon");
     }
 
@@ -36,19 +37,18 @@ public class HolyOrder {
     }
 
     public Power getCategory() {
-        return Power.byName(this.item.getVarAsString("cost_type").replace("_power", ""));
+        return Power.byName(this.item.getVarAsString("cost_type").get().replace("_power", ""));
     }
 
     public void setCategory(Power category) {
         this.item.setVariable("cost_type", category.name().toLowerCase() + "_power");
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 

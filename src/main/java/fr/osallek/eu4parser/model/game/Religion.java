@@ -422,7 +422,7 @@ public class Religion {
     }
 
     public Modifiers getCountry() {
-        return new Modifiers(this.item.getChild("country"));
+        return this.item.getChild("country").map(Modifiers::new);
     }
 
     public Modifiers getCountryAsSecondary() {

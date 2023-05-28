@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Investment {
 
@@ -26,7 +27,7 @@ public class Investment {
         this.item.setName(name);
     }
 
-    public String getCategory() {
+    public Optional<String> getCategory() {
         return this.item.getVarAsString("category");
     }
 
@@ -38,7 +39,7 @@ public class Investment {
         }
     }
 
-    public Double getCost() {
+    public Optional<Double> getCost() {
         return this.item.getVarAsDouble("cost");
     }
 
@@ -50,12 +51,12 @@ public class Investment {
         }
     }
 
-    public Investment getUpgradesTo() {
-        return this.item.getVarAsString("upgrades_to") == null ? null : this.game.getInvestment(this.item.getVarAsString("upgrades_to"));
+    public Optional<Investment> getUpgradesTo() {
+        return this.item.getVarAsString("upgrades_to").map(this.game::getInvestment);
     }
 
-    public String getSprite() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("sprite"));
+    public Optional<String> getSprite() {
+        return this.item.getVarAsString("sprite").map(ClausewitzUtils::removeQuotes);
     }
 
     public void setSprite(String sprite) {
@@ -66,29 +67,28 @@ public class Investment {
         }
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
-    public Modifiers getOwnerModifier() {
-        return new Modifiers(this.item.getChild("owner_modifier"));
+    public Optional<Modifiers> getOwnerModifier() {
+        return this.item.getChild("owner_modifier").map(Modifiers::new);
     }
 
-    public Modifiers getCompanyProvinceAreaModifier() {
-        return new Modifiers(this.item.getChild("company_province_area_modifier"));
+    public Optional<Modifiers> getCompanyProvinceAreaModifier() {
+        return this.item.getChild("company_province_area_modifier").map(Modifiers::new);
     }
 
-    public Modifiers getAreaModifier() {
-        return new Modifiers(this.item.getChild("area_modifier"));
+    public Optional<Modifiers> getAreaModifier() {
+        return this.item.getChild("area_modifier").map(Modifiers::new);
     }
 
-    public Modifiers getOwnerCompanyRegionModifier() { //Apply to the owner in the region (ie: country modifiers)
-        return new Modifiers(this.item.getChild("owner_company_region_modifier"));
+    public Optional<Modifiers> getOwnerCompanyRegionModifier() { //Apply to the owner in the region (ie: country modifiers)
+        return this.item.getChild("owner_company_region_modifier").map(Modifiers::new);
     }
 
-    public Modifiers getCompanyRegionModifier() { //Apply to provinces in region (ie: province modifiers)
-        return new Modifiers(this.item.getChild("company_region_modifier"));
+    public Optional<Modifiers> getCompanyRegionModifier() { //Apply to provinces in region (ie: province modifiers)
+        return this.item.getChild("company_region_modifier").map(Modifiers::new);
     }
 
     @Override
@@ -102,11 +102,9 @@ public class Investment {
             return true;
         }
 
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Investment investment)) {
             return false;
         }
-
-        Investment investment = (Investment) o;
 
         return Objects.equals(getName(), investment.getName());
     }

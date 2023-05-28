@@ -2,6 +2,8 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public class ImperialReformEffect {
 
     private final ClausewitzItem item;
@@ -10,7 +12,7 @@ public class ImperialReformEffect {
         this.item = item;
     }
 
-    public Boolean isImperialBanAllowed() {
+    public Optional<Boolean> isImperialBanAllowed() {
         return this.item.getVarAsBool("imperial_ban_allowed");
     }
 
@@ -22,7 +24,7 @@ public class ImperialReformEffect {
         }
     }
 
-    public Boolean isInternalHreCb() {
+    public Optional<Boolean> isInternalHreCb() {
         return this.item.getVarAsBool("internal_hre_cb");
     }
 
@@ -34,7 +36,7 @@ public class ImperialReformEffect {
         }
     }
 
-    public Boolean enableImperialRealmWar() {
+    public Optional<Boolean> enableImperialRealmWar() {
         return this.item.getVarAsBool("enable_imperial_realm_war");
     }
 
@@ -46,7 +48,7 @@ public class ImperialReformEffect {
         }
     }
 
-    public Boolean hreInheritable() {
+    public Optional<Boolean> hreInheritable() {
         return this.item.getVarAsBool("hre_inheritable");
     }
 

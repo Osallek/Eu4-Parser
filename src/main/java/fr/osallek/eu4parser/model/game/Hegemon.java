@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Hegemon {
 
@@ -21,21 +22,20 @@ public class Hegemon {
         this.item.setName(name);
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
-    public Modifiers getBase() {
-        return new Modifiers(item.getChild("base"));
+    public Optional<Modifiers> getBase() {
+        return this.item.getChild("base").map(Modifiers::new);
     }
 
-    public Modifiers getScale() {
-        return new Modifiers(item.getChild("scale"));
+    public Optional<Modifiers> getScale() {
+        return this.item.getChild("scale").map(Modifiers::new);
     }
 
-    public Modifiers getMax() {
-        return new Modifiers(item.getChild("max"));
+    public Optional<Modifiers> getMax() {
+        return this.item.getChild("max").map(Modifiers::new);
     }
 
     @Override
@@ -49,12 +49,11 @@ public class Hegemon {
             return true;
         }
 
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Hegemon hegemon)) {
             return false;
         }
 
-        Hegemon that = (Hegemon) o;
-        return Objects.equals(getName(), that.getName());
+        return Objects.equals(getName(), hegemon.getName());
     }
 
     @Override

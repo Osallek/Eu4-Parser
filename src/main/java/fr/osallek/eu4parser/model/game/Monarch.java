@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Monarch {
 
@@ -19,7 +20,7 @@ public class Monarch {
         this.game = country.getGame();
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -27,7 +28,7 @@ public class Monarch {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public String getMonarchName() {
+    public Optional<String> getMonarchName() {
         return this.item.getVarAsString("monarch_name");
     }
 
@@ -39,7 +40,7 @@ public class Monarch {
         return country;
     }
 
-    public Integer getAdm() {
+    public Optional<Integer> getAdm() {
         return this.item.getVarAsInt("adm");
     }
 
@@ -47,7 +48,7 @@ public class Monarch {
         this.item.setVariable("adm", adm);
     }
 
-    public Integer getDip() {
+    public Optional<Integer> getDip() {
         return this.item.getVarAsInt("dip");
     }
 
@@ -55,7 +56,7 @@ public class Monarch {
         this.item.setVariable("dip", dip);
     }
 
-    public Integer getMil() {
+    public Optional<Integer> getMil() {
         return this.item.getVarAsInt("mil");
     }
 
@@ -63,19 +64,19 @@ public class Monarch {
         this.item.setVariable("mil", mil);
     }
 
-    public Boolean getFemale() {
+    public Optional<Boolean> getFemale() {
         return this.item.getVarAsBool("female");
     }
 
-    public Boolean getRegent() {
+    public Optional<Boolean> getRegent() {
         return this.item.getVarAsBool("regent");
     }
 
-    public Culture getCulture() {
-        return this.game.getCulture(getCultureName());
+    public Optional<Culture> getCulture() {
+        return getCultureName().map(this.game::getCulture);
     }
 
-    public String getCultureName() {
+    public Optional<String> getCultureName() {
         return this.item.getVarAsString("culture");
     }
 
@@ -83,11 +84,11 @@ public class Monarch {
         this.item.setVariable("culture", culture.getName());
     }
 
-    public Religion getReligion() {
-        return this.game.getReligion(getReligionName());
+    public Optional<Religion> getReligion() {
+        return getReligionName().map(this.game::getReligion);
     }
 
-    public String getReligionName() {
+    public Optional<String> getReligionName() {
         return this.item.getVarAsString("religion");
     }
 
@@ -95,7 +96,7 @@ public class Monarch {
         this.item.setVariable("religion", religion.getName());
     }
 
-    public String getDynasty() {
+    public Optional<String> getDynasty() {
         return this.item.getVarAsString("dynasty");
     }
 
@@ -103,7 +104,7 @@ public class Monarch {
         this.item.setVariable("dynasty", ClausewitzUtils.addQuotes(dynasty));
     }
 
-    public LocalDate getBirthDate() {
+    public Optional<LocalDate> getBirthDate() {
         return this.item.getVarAsDate("birth_date");
     }
 
@@ -111,7 +112,7 @@ public class Monarch {
         this.item.setVariable("birth_date", birthDate);
     }
 
-    public LocalDate getDeathDate() {
+    public Optional<LocalDate> getDeathDate() {
         return this.item.getVarAsDate("death_date");
     }
 
@@ -119,8 +120,8 @@ public class Monarch {
         this.item.setVariable("death_date", deathDate);
     }
 
-    public Personalities getPersonalities() {
-        return this.item.hasChild("personalities") ? new Personalities(this.item.getChild("personalities"), this.game) : null;
+    public Optional<Personalities> getPersonalities() {
+        return this.item.getChild("personalities").map(i -> new Personalities(i, this.game));
     }
 
     public void addPersonality(RulerPersonality personality) {
@@ -128,30 +129,32 @@ public class Monarch {
             this.item.addChild("personalities");
         }
 
-        getPersonalities().addPersonality(personality);
+        getPersonalities().ifPresent(p -> p.addPersonality(personality));
     }
 
     public void removePersonality(int index) {
-        if (getPersonalities() != null) {
-            getPersonalities().removePersonality(index);
+        Optional<Personalities> personalities = getPersonalities();
+        if (personalities.isPresent()) {
+            personalities.get().removePersonality(index);
 
-            if (getPersonalities().item().getAllOrdered().isEmpty()) {
+            if (personalities.get().item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
             }
         }
     }
 
     public void removePersonality(RulerPersonality personality) {
-        if (getPersonalities() != null) {
-            getPersonalities().removePersonality(personality);
+        Optional<Personalities> personalities = getPersonalities();
+        if (personalities.isPresent()) {
+            personalities.get().removePersonality(personality);
 
-            if (getPersonalities().item().getAllOrdered().isEmpty()) {
+            if (personalities.get().item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
             }
         }
     }
 
-    public Leader getLeader() {
-        return this.item.hasChild("leader") ? new Leader(this.item.getChild("leader"), this.country) : null;
+    public Optional<Leader> getLeader() {
+        return this.item.getChild("leader").map(i -> new Leader(i, this.country));
     }
 }

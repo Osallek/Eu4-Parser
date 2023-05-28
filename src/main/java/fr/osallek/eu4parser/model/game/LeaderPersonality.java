@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import fr.osallek.eu4parser.model.save.country.Leader;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class LeaderPersonality {
 
@@ -22,9 +23,8 @@ public class LeaderPersonality {
         this.item.setName(name);
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
     public Modifiers getModifiers() {
@@ -32,7 +32,7 @@ public class LeaderPersonality {
     }
 
     public boolean isLeaderValid(Leader leader) {
-        return getAllow() == null || !getAllow().apply(leader);
+        return getAllow().filter(a -> a.apply(leader)).isPresent();
     }
 
     @Override

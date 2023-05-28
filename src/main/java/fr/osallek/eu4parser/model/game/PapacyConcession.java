@@ -19,10 +19,10 @@ public class PapacyConcession {
     }
 
     public Modifiers getHarshModifiers() {
-        return new Modifiers(this.item.getChild("harsh"));
+        return this.item.getChild("harsh").map(Modifiers::new);
     }
 
     public Modifiers getConcilatoryModifiers() {
-        return new Modifiers(this.item.getChild("concilatory"));
+        return this.item.getChild("concilatory").map(Modifiers::new);
     }
 }

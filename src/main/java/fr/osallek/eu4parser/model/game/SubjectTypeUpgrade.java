@@ -39,11 +39,11 @@ public class SubjectTypeUpgrade extends Nodded {
     }
 
     public Modifiers getModifiersOverlord() {
-        return new Modifiers(this.item.getChild("modifier_overlord"));
+        return this.item.getChild("modifier_overlord").map(Modifiers::new);
     }
 
     public Modifiers getModifiersSubject() {
-        return new Modifiers(this.item.getChild("modifier_subject"));
+        return this.item.getChild("modifier_subject").map(Modifiers::new);
     }
 
     @Override

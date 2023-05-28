@@ -2,6 +2,9 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.Optional;
 
 public class Icon {
 
@@ -19,11 +22,11 @@ public class Icon {
         this.item.setName(name);
     }
 
-    public ConditionAnd getAllow() {
-        return new ConditionAnd(item.getChild("allow"));
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
-    public Modifiers getModifiers() {
-        return new Modifiers(item.getVariables());
+    public Optional<Modifiers> getModifiers() {
+        return Optional.ofNullable(this.item.getVariables()).filter(CollectionUtils::isNotEmpty).map(Modifiers::new);
     }
 }

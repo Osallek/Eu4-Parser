@@ -4,8 +4,10 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class GoldenBull {
 
@@ -24,8 +26,7 @@ public class GoldenBull {
     }
 
     public List<String> getMechanics() {
-        ClausewitzList list = this.item.getList("mechanics");
-        return list == null ? null : list.getValues();
+        return this.item.getList("mechanics").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setMechanics(List<String> mechanics) {
@@ -34,16 +35,11 @@ public class GoldenBull {
             return;
         }
 
-        ClausewitzList list = this.item.getList("mechanics");
-
-        if (list != null) {
-            list.setAll(mechanics.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("mechanics", mechanics.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("mechanics").ifPresentOrElse(list -> list.setAll(mechanics.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                                       () -> this.item.addList("mechanics", mechanics.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 

@@ -8,11 +8,8 @@ public class GreatProjectTier {
 
     private final ClausewitzItem item;
 
-    private final Game game;
-
-    public GreatProjectTier(ClausewitzItem item, Game game) {
+    public GreatProjectTier(ClausewitzItem item) {
         this.item = item;
-        this.game = game;
     }
 
     public String getName() {
@@ -23,48 +20,37 @@ public class GreatProjectTier {
         this.item.setName(name);
     }
 
-    public Time getTime() {
-        ClausewitzItem child = item.getChild("upgrade_time");
-        return child == null ? null : new Time(child);
+    public Optional<Time> getTime() {
+        return this.item.getChild("upgrade_time").map(Time::new);
     }
 
     public void setTime(int months) {
-        ClausewitzItem child = item.getChild("upgrade_time");
-
-        if (child == null) {
-            child = this.item.addChild("upgrade_time");
-        }
-
+        ClausewitzItem child = item.getChild("upgrade_time").orElse(this.item.addChild("upgrade_time"));
         new Time(child).setMonths(months);
     }
 
     public int getBuildCost() {
-        return this.item.getChild("cost_to_upgrade").getVarAsInt("factor");
+        return this.item.getChild("cost_to_upgrade").flatMap(c -> c.getVarAsInt("factor")).orElse(0);
     }
 
     public void setBuildCost(int buildCost) {
-        ClausewitzItem child = this.item.getChild("cost_to_upgrade");
-
-        if (child == null) {
-            child = this.item.addChild("cost_to_upgrade");
-        }
-
+        ClausewitzItem child = this.item.getChild("cost_to_upgrade").orElse(this.item.addChild("cost_to_upgrade"));
         child.setVariable("factor", buildCost);
     }
 
-    public Modifiers getProvinceModifiers() {
-        return new Modifiers(this.item.getChild("province_modifiers"));
+    public Optional<Modifiers> getProvinceModifiers() {
+        return this.item.getChild("province_modifiers").map(Modifiers::new);
     }
 
-    public Modifiers getAreaModifier() {
-        return new Modifiers(this.item.getChild("area_modifier"));
+    public Optional<Modifiers> getAreaModifier() {
+        return this.item.getChild("area_modifier").map(Modifiers::new);
     }
 
-    public Modifiers getCountryModifiers() {
-        return new Modifiers(this.item.getChild("country_modifiers"));
+    public Optional<Modifiers> getCountryModifiers() {
+        return this.item.getChild("country_modifiers").map(Modifiers::new);
     }
 
-    public Modifiers getOnUpgraded() {
-        return Optional.ofNullable(this.item.getChild("on_upgraded")).map(Modifiers::new).orElse(null);
+    public Optional<Modifiers> getOnUpgraded() {
+        return this.item.getChild("on_upgraded").map(Modifiers::new);
     }
 }

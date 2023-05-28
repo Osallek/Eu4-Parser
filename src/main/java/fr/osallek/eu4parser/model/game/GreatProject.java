@@ -35,14 +35,14 @@ public class GreatProject {
     }
 
     public int getStart() {
-        return this.item.getVarAsInt("start");
+        return this.item.getVarAsInt("start").orElse(1);
     }
 
     public void setStart(int start) {
         this.item.setVariable("start", start);
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -50,7 +50,7 @@ public class GreatProject {
         this.item.setVariable("date", date);
     }
 
-    public Integer getMoveDaysPerUnitDistance() {
+    public Optional<Integer> getMoveDaysPerUnitDistance() {
         return this.item.getVarAsInt("move_days_per_unit_distance");
     }
 
@@ -58,23 +58,17 @@ public class GreatProject {
         this.item.setVariable("move_days_per_unit_distance", days);
     }
 
-    public Time getTime() {
-        ClausewitzItem child = item.getChild("time");
-        return child == null ? null : new Time(child);
+    public Optional<Time> getTime() {
+        return this.item.getChild("time").map(Time::new);
     }
 
     public void setTime(int months) {
-        ClausewitzItem child = item.getChild("time");
-
-        if (child == null) {
-            child = this.item.addChild("time");
-        }
-
+        ClausewitzItem child = this.item.getChild("time").orElse(this.item.addChild("time"));
         new Time(child).setMonths(months);
     }
 
     public int getBuildCost() {
-        return this.item.getVarAsInt("build_cost");
+        return this.item.getVarAsInt("build_cost").orElse(0);
     }
 
     public void setBuildCost(int buildCost) {
@@ -82,7 +76,7 @@ public class GreatProject {
     }
 
     public int getStartingTier() {
-        return this.item.getVarAsInt("starting_tier");
+        return this.item.getVarAsInt("starting_tier").orElse(0);
     }
 
     public void setStartingTier(int startingTier) {
@@ -90,7 +84,7 @@ public class GreatProject {
     }
 
     public GreatProjectType getType() {
-        return GreatProjectType.valueOf(this.item.getVarAsString("type").toUpperCase());
+        return GreatProjectType.valueOf(this.item.getVarAsString("type").get().toUpperCase());
     }
 
     public void setType(GreatProjectType type) {
@@ -98,7 +92,7 @@ public class GreatProject {
     }
 
     public boolean isCanBeMoved() {
-        return BooleanUtils.toBoolean(item.getVarAsBool("can_be_moved"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("can_be_moved").orElse(false));
     }
 
     public void setCanBeMoved(boolean canBeMoved) {
@@ -106,35 +100,35 @@ public class GreatProject {
     }
 
     public List<GreatProjectTier> getTiers() {
-        return this.item.getChildrenStartWith("tier_").stream().map(item1 -> new GreatProjectTier(item1, this.game)).toList();
+        return this.item.getChildrenStartWith("tier_").stream().map(item1 -> new GreatProjectTier(item1)).toList();
     }
 
     public int getMaxLevel() {
         return Math.max(0, CollectionUtils.size(this.item.getChildrenStartWith("tier_")) - 1);
     }
 
-    public ConditionAnd getCanUpgradeTrigger() {
-        return Optional.ofNullable(this.item.getChild("can_upgrade_trigger")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getCanUpgradeTrigger() {
+        return this.item.getChild("can_upgrade_trigger").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanUseModifiersTrigger() {
-        return Optional.ofNullable(this.item.getChild("can_use_modifiers_trigger")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getCanUseModifiersTrigger() {
+        return this.item.getChild("can_use_modifiers_trigger").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getKeepTrigger() {
-        return Optional.ofNullable(this.item.getChild("keep_trigger")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getKeepTrigger() {
+        return this.item.getChild("keep_trigger").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getBuildTrigger() {
-        return Optional.ofNullable(this.item.getChild("build_trigger")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getBuildTrigger() {
+        return this.item.getChild("build_trigger").map(ConditionAnd::new);
     }
 
-    public Modifiers getOnBuilt() {
-        return Optional.ofNullable(this.item.getChild("on_built")).map(Modifiers::new).orElse(null);
+    public Optional<Modifiers> getOnBuilt() {
+        return this.item.getChild("on_built").map(Modifiers::new);
     }
 
-    public Modifiers getOnDestroy() {
-        return Optional.ofNullable(this.item.getChild("on_destroy")).map(Modifiers::new).orElse(null);
+    public Optional<Modifiers> getOnDestroy() {
+        return this.item.getChild("on_destroy").map(Modifiers::new);
     }
 
     public File getImageFile() {

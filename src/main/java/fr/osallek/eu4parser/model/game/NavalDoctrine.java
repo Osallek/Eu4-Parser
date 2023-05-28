@@ -39,7 +39,7 @@ public class NavalDoctrine {
     }
 
     public Modifiers getModifiers() {
-        return new Modifiers(this.item.getChild("country_modifier"));
+        return this.item.getChild("country_modifier").map(Modifiers::new);
     }
 
     @Override

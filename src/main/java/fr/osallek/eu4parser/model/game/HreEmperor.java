@@ -2,6 +2,8 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public class HreEmperor {
 
     private final ClausewitzItem item;
@@ -10,7 +12,7 @@ public class HreEmperor {
         this.item = item;
     }
 
-    public String getTag() {
+    public Optional<String> getTag() {
         return this.item.getVarAsString("emperor");
     }
 

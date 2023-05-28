@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
@@ -42,9 +43,8 @@ public class IdeaGroup {
         this.item.setName(name);
     }
 
-    public Power getCategory() {
-        ClausewitzVariable variable = item.getVar("category");
-        return variable == null ? null : Power.byName(variable.getValue());
+    public Optional<Power> getCategory() {
+        return this.item.getVar("category").map(v -> Power.byName(v.getValue()));
     }
 
     public void setCategory(Power power) {
@@ -52,7 +52,7 @@ public class IdeaGroup {
     }
 
     public boolean isFree() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("free"));
+        return BooleanUtils.toBoolean(this.item.getVarAsBool("free").orElse(false));
     }
 
     public void setFree(Boolean free) {
@@ -63,17 +63,16 @@ public class IdeaGroup {
         }
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
-    public Modifiers getStart() {
-        return new Modifiers(this.item.getChild("start"));
+    public Optional<Modifiers> getStart() {
+        return this.item.getChild("start").map(Modifiers::new);
     }
 
-    public Modifiers getBonus() {
-        return new Modifiers(this.item.getChild("bonus"));
+    public Optional<Modifiers> getBonus() {
+        return this.item.getChild("bonus").map(Modifiers::new);
     }
 
     public Map<String, Modifiers> getIdeas() {
@@ -86,8 +85,9 @@ public class IdeaGroup {
         List<Double> modifiers = new ArrayList<>();
         level = Math.min(level, getIdeas().size());
 
-        if (level >= 0 && getStart().hasModifier(modifier)) {
-            modifiers.add(getStart().getModifier(modifier));
+        Optional<Modifiers> start = getStart();
+        if (level >= 0 && start.isPresent() && start.get().hasModifier(modifier)) {
+            modifiers.add(start.get().getModifier(modifier));
         }
 
         Iterator<Modifiers> modifiersIterator = getIdeas().values().iterator();
@@ -99,8 +99,9 @@ public class IdeaGroup {
             }
         }
 
-        if (level >= getIdeas().size() && getBonus().hasModifier(modifier)) {
-            modifiers.add(getBonus().getModifier(modifier));
+        Optional<Modifiers> bonus = getBonus();
+        if (level >= getIdeas().size() && bonus.isPresent() && bonus.get().hasModifier(modifier)) {
+            modifiers.add(bonus.get().getModifier(modifier));
         }
 
         return ModifiersUtils.sumModifiers(modifier, modifiers);

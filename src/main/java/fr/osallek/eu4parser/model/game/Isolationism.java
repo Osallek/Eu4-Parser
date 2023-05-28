@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Isolationism implements Comparable<Isolationism> {
 
@@ -22,14 +23,14 @@ public class Isolationism implements Comparable<Isolationism> {
     }
 
     public int getIsolationValue() {
-        return this.item.getVarAsInt("isolation_value");
+        return this.item.getVarAsInt("isolation_value").orElse(0);
     }
 
     public void setIsolationValue(int isolationValue) {
         this.item.setVariable("isolation_value", isolationValue);
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 

@@ -8,10 +8,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Government {
@@ -33,16 +35,12 @@ public class Government {
         this.item.setName(name);
     }
 
-    public String getBasicReform() {
+    public Optional<String> getBasicReform() {
         return this.item.getVarAsString("basic_reform");
     }
 
-    public GovernmentReform getBasicGovernmentReform() {
-        if (getBasicReform() != null) {
-            return this.game.getGovernmentReform(getBasicReform());
-        }
-
-        return null;
+    public Optional<GovernmentReform> getBasicGovernmentReform() {
+        return getBasicReform().map(this.game::getGovernmentReform);
     }
 
     public void setBasicReform(String basicReform) {
@@ -53,9 +51,8 @@ public class Government {
         }
     }
 
-    public Color getColor() {
-        ClausewitzList list = this.item.getList("color");
-        return list == null ? null : new Color(list);
+    public Optional<Color> getColor() {
+        return this.item.getList("color").map(Color::new);
     }
 
     public void setColor(Color color) {
@@ -64,21 +61,16 @@ public class Government {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
+        this.item.getList("color").ifPresentOrElse(list -> {
             Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
     public List<String> getLegacyGovernment() {
-        ClausewitzList list = this.item.getList("legacy_government");
-        return list == null ? null : list.getValues();
+        return this.item.getList("legacy_government").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setLegacyGovernment(List<String> legacyGovernment) {
@@ -87,18 +79,13 @@ public class Government {
             return;
         }
 
-        ClausewitzList list = this.item.getList("legacy_government");
-
-        if (list != null) {
-            list.setAll(legacyGovernment.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("legacy_government", legacyGovernment.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("legacy_government")
+                 .ifPresentOrElse(list -> list.setAll(legacyGovernment.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("legacy_government", legacyGovernment.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getExclusiveReforms() {
-        ClausewitzList list = this.item.getList("exclusive_reforms");
-        return list == null ? null : list.getValues();
+        return this.item.getList("exclusive_reforms").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setExclusiveReforms(List<String> exclusiveReforms) {
@@ -107,30 +94,25 @@ public class Government {
             return;
         }
 
-        ClausewitzList list = this.item.getList("exclusive_reforms");
-
-        if (list != null) {
-            list.setAll(exclusiveReforms.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("exclusive_reforms", exclusiveReforms.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("exclusive_reforms")
+                 .ifPresentOrElse(list -> list.setAll(exclusiveReforms.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("exclusive_reforms", exclusiveReforms.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public Map<String, List<GovernmentReform>> getReformLevels() {
-        ClausewitzItem child = this.item.getChild("reform_levels");
-        if (child != null) {
-            return child.getChildren()
+        return this.item.getChild("reform_levels")
+                        .map(ClausewitzItem::getChildren)
+                        .filter(CollectionUtils::isNotEmpty)
                         .stream()
-                        .collect(Collectors.toMap(ClausewitzObject::getName, clausewitzItem -> {
-                            ClausewitzList reformsList = clausewitzItem.getList("reforms");
-
-                            return reformsList == null ? new ArrayList<>() : reformsList.getValues()
-                                                                                        .stream()
-                                                                                        .map(this.game::getGovernmentReform)
-                                                                                        .toList();
-                        }, (reforms, reforms1) -> reforms, LinkedHashMap::new));
-        }
-
-        return null;
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toMap(ClausewitzObject::getName,
+                                                  clausewitzItem -> clausewitzItem.getList("reforms")
+                                                                                  .map(list -> list.getValues()
+                                                                                                   .stream()
+                                                                                                   .map(this.game::getGovernmentReform)
+                                                                                                   .toList())
+                                                                                  .orElse(new ArrayList<>()),
+                                                  (reforms, reforms1) -> reforms,
+                                                  LinkedHashMap::new));
     }
 }

@@ -4,8 +4,10 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class ImperialReform implements Comparable<ImperialReform> {
 
@@ -26,32 +28,24 @@ public class ImperialReform implements Comparable<ImperialReform> {
         this.item.setName(name);
     }
 
-    public ConditionAnd getPotential() {
-        ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
     public List<String> dlcRequired() {
-        ConditionAnd potential = getPotential();
-        return potential == null ? null : potential.getConditions().get("has_dlc");
+        return getPotential().map(potential -> potential.getConditions().get("has_dlc")).orElse(new ArrayList<>());
     }
 
     public List<String> dlcRequiredNot() {
-        ConditionAnd potential = getPotential();
-
-        if (potential == null) {
-            return null;
-        }
-
-        return potential.getScopes()
-                        .stream()
-                        .filter(condition -> "NOT".equals(condition.getName()))
-                        .map(condition -> condition.getConditions().get("has_dlc"))
-                        .flatMap(Collection::stream)
-                        .toList();
+        return getPotential().map(potential -> potential.getScopes()
+                                                        .stream()
+                                                        .filter(condition -> "NOT".equals(condition.getName()))
+                                                        .map(condition -> condition.getConditions().get("has_dlc"))
+                                                        .flatMap(Collection::stream)
+                                                        .toList()).orElse(new ArrayList<>());
     }
 
-    public String getEmpire() {
+    public Optional<String> getEmpire() {
         return this.item.getVarAsString("empire");
     }
 
@@ -63,36 +57,36 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public Modifiers getProvinceModifiers() {
-        return new Modifiers(this.item.getChild("province"));
+    public Optional<Modifiers> getProvinceModifiers() {
+        return this.item.getChild("province").map(Modifiers::new);
     }
 
-    public Modifiers getEmperorModifiers() {
-        return new Modifiers(this.item.getChild("emperor"));
+    public Optional<Modifiers> getEmperorModifiers() {
+        return this.item.getChild("emperor").map(Modifiers::new);
     }
 
-    public Modifiers getAllModifiers() {
-        return new Modifiers(this.item.getChild("all"));
+    public Optional<Modifiers> getAllModifiers() {
+        return this.item.getChild("all").map(Modifiers::new);
     }
 
-    public Modifiers getMemberModifiers() {
-        return new Modifiers(this.item.getChild("member"));
+    public Optional<Modifiers> getMemberModifiers() {
+        return this.item.getChild("member").map(Modifiers::new);
     }
 
-    public Modifiers getEmperorPerPrinceModifiers() {
-        return new Modifiers(this.item.getChild("emperor_per_prince"));
+    public Optional<Modifiers> getEmperorPerPrinceModifiers() {
+        return this.item.getChild("emperor_per_prince").map(Modifiers::new);
     }
 
-    public Modifiers getElectorPerPrinceModifiers() {
-        return new Modifiers(this.item.getChild("elector_per_prince"));
+    public Optional<Modifiers> getElectorPerPrinceModifiers() {
+        return this.item.getChild("elector_per_prince").map(Modifiers::new);
     }
 
-    public String getDisabledByName() {
+    public Optional<String> getDisabledByName() {
         return this.item.getVarAsString("disabled_by");
     }
 
-    public ImperialReform getDisabledBy() {
-        return StringUtils.isBlank(getDisabledByName()) ? null : this.game.getImperialReform(getDisabledByName());
+    public Optional<ImperialReform> getDisabledBy() {
+        return getDisabledByName().map(this.game::getImperialReform);
     }
 
     public void setDisabledBy(String reform) {
@@ -103,12 +97,12 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public String getRequiredReformName() {
+    public Optional<String> getRequiredReformName() {
         return this.item.getVarAsString("required_reform");
     }
 
-    public ImperialReform getRequiredReform() {
-        return StringUtils.isBlank(getRequiredReformName()) ? null : this.game.getImperialReform(getRequiredReformName());
+    public Optional<ImperialReform> getRequiredReform() {
+        return getRequiredReformName().map(this.game::getImperialReform);
     }
 
     public void setRequiredReform(String reform) {
@@ -119,7 +113,7 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public String getGuiContainer() {
+    public Optional<String> getGuiContainer() {
         return this.item.getVarAsString("gui_container");
     }
 
@@ -131,35 +125,34 @@ public class ImperialReform implements Comparable<ImperialReform> {
         }
     }
 
-    public ImperialReformEffect getOnEffect() {
-        ClausewitzItem child = this.item.getChild("on_effect");
-        return child == null ? null : new ImperialReformEffect(child);
+    public Optional<ImperialReformEffect> getOnEffect() {
+        return this.item.getChild("on_effect").map(ImperialReformEffect::new);
     }
 
-    public ImperialReformEffect getOffEffect() {
-        ClausewitzItem child = this.item.getChild("off_effect");
-        return child == null ? null : new ImperialReformEffect(child);
+    public Optional<ImperialReformEffect> getOffEffect() {
+        return this.item.getChild("off_effect").map(ImperialReformEffect::new);
     }
 
     public boolean isMainLine() {
-        return getGuiContainer() == null || "mainline".equals(getGuiContainer()) || "nodlc".equals(getGuiContainer());
+        Optional<String> container = getGuiContainer();
+        return container.isEmpty() || "mainline".equals(container.get()) || "nodlc".equals(container.get());
     }
 
     public boolean isLeftBranch() {
-        return "left_branch".equals(getGuiContainer());
+        return getGuiContainer().filter("left_branch"::equals).isPresent();
     }
 
     public boolean isRightBranch() {
-        return "right_branch".equals(getGuiContainer());
+        return getGuiContainer().filter("right_branch"::equals).isPresent();
     }
 
     private Integer getDepth() {
         int i = 0;
-        ImperialReform reform = this;
+        Optional<ImperialReform> reform = Optional.of(this);
 
-        while (reform.getRequiredReform() != null) {
+        while (reform.isPresent() && reform.get().getRequiredReform().isPresent()) {
             i++;
-            reform = reform.getRequiredReform();
+            reform = reform.get().getRequiredReform();
         }
 
         return i;
