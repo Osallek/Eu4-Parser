@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class MissionsTree extends Nodded {
 
@@ -30,7 +31,7 @@ public class MissionsTree extends Nodded {
         this.item.setName(name);
     }
 
-    public Integer getSlot() {
+    public Optional<Integer> getSlot() {
         return this.item.getVarAsInt("slot");
     }
 
@@ -42,7 +43,7 @@ public class MissionsTree extends Nodded {
         }
     }
 
-    public Boolean isGeneric() {
+    public Optional<Boolean> isGeneric() {
         return this.item.getVarAsBool("generic");
     }
 
@@ -54,7 +55,7 @@ public class MissionsTree extends Nodded {
         }
     }
 
-    public Boolean isAi() {
+    public Optional<Boolean> isAi() {
         return this.item.getVarAsBool("ai");
     }
 
@@ -66,7 +67,7 @@ public class MissionsTree extends Nodded {
         }
     }
 
-    public Boolean hasCountryShield() {
+    public Optional<Boolean> hasCountryShield() {
         return this.item.getVarAsBool("has_country_shield");
     }
 
@@ -78,14 +79,12 @@ public class MissionsTree extends Nodded {
         }
     }
 
-    public ConditionAnd getPotentialOnLoad() {
-        ClausewitzItem child = this.item.getChild("potential_on_load");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPotentialOnLoad() {
+        return this.item.getChild("potential_on_load").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getPotential() {
-        ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
     public List<Mission> getMissions() {

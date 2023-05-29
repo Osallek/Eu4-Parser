@@ -25,7 +25,7 @@ public class Leader {
         return country;
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -33,21 +33,15 @@ public class Leader {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public LeaderType getType() {
-        String type = this.item.getVarAsString("type");
-
-        if (type != null) {
-            return LeaderType.valueOf(type.toUpperCase());
-        }
-
-        return null;
+    public Optional<LeaderType> getType() {
+        return this.item.getVarAsString("type").map(String::toUpperCase).map(LeaderType::valueOf);
     }
 
     public void setType(LeaderType type) {
         this.item.setVariable("type", type.name().toLowerCase());
     }
 
-    public Boolean getFemale() {
+    public Optional<Boolean> getFemale() {
         return this.item.getVarAsBool("female");
     }
 
@@ -56,7 +50,7 @@ public class Leader {
     }
 
     public int getManuever() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("manuever"));
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("manuever").orElse(0));
     }
 
     public void setManuever(int manuever) {
@@ -64,7 +58,7 @@ public class Leader {
     }
 
     public int getFire() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("fire"));
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("fire").orElse(0));
     }
 
     public void setFire(int fire) {
@@ -72,7 +66,7 @@ public class Leader {
     }
 
     public int getShock() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("shock"));
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("shock").orElse(0));
     }
 
     public void setShock(int shock) {
@@ -80,26 +74,26 @@ public class Leader {
     }
 
     public int getSiege() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("siege"));
+        return NumbersUtils.intOrDefault(this.item.getVarAsInt("siege").orElse(0));
     }
 
     public void setSiege(int siege) {
         this.item.setVariable("siege", siege);
     }
 
-    public String getPersonalityName() {
+    public Optional<String> getPersonalityName() {
         return this.item.getVarAsString("personality");
     }
 
-    public LeaderPersonality getPersonality() {
-        return Optional.ofNullable(getPersonalityName()).map(p -> this.country.getGame().getLeaderPersonality(p)).orElse(null);
+    public Optional<LeaderPersonality> getPersonality() {
+        return getPersonalityName().map(p -> this.country.getGame().getLeaderPersonality(p));
     }
 
     public void setPersonality(LeaderPersonality personality) {
         this.item.setVariable("personality", personality.getName());
     }
 
-    public LocalDate getBirthDate() {
+    public Optional<LocalDate> getBirthDate() {
         return this.item.getVarAsDate("birth_date");
     }
 
@@ -107,7 +101,7 @@ public class Leader {
         this.item.setVariable("birth_date", birthDate);
     }
 
-    public LocalDate getDeathDate() {
+    public Optional<LocalDate> getDeathDate() {
         return this.item.getVarAsDate("death_date");
     }
 
@@ -130,8 +124,8 @@ public class Leader {
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, Leader leader) {
-        return addToItem(parent, leader.getName(), leader.getType(), leader.getManuever(), leader.getFire(), leader.getShock(), leader.getSiege(),
-                         leader.getPersonality(), leader.getBirthDate(), leader.getCountry());
+        return addToItem(parent, leader.getName().orElse(null), leader.getType().orElse(LeaderType.GENERAL), leader.getManuever(), leader.getFire(),
+                         leader.getShock(), leader.getSiege(), leader.getPersonality().orElse(null), leader.getBirthDate().orElse(null), leader.getCountry());
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege,
@@ -157,6 +151,6 @@ public class Leader {
 
     @Override
     public String toString() {
-        return getName();
+        return getName().orElse("");
     }
 }

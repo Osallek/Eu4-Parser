@@ -1,13 +1,10 @@
 package fr.osallek.eu4parser.model.game;
 
-import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
@@ -16,9 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Mission extends Nodded {
 
@@ -49,7 +47,7 @@ public class Mission extends Nodded {
         return missionsTree;
     }
 
-    public String getIcon() {
+    public Optional<String> getIcon() {
         return this.item.getVarAsString("icon");
     }
 
@@ -61,16 +59,15 @@ public class Mission extends Nodded {
         }
     }
 
-    public Path getIconPath(String extension) {
-        SpriteType spriteType = this.game.getSpriteType(getIcon());
-        return Path.of(FilenameUtils.removeExtension(ClausewitzUtils.removeQuotes(spriteType.getTextureFile())) + "." + extension);
+    public Optional<Path> getIconPath(String extension) {
+        return getIcon().map(this.game::getSpriteType).map(type -> type.getTextureFilePath(extension));
     }
 
-    public File getIconFile() {
-        return this.game.getSpriteTypeImageFile(getIcon());
+    public Optional<File> getIconFile() {
+        return getIcon().map(this.game::getSpriteTypeImageFile);
     }
 
-    public Boolean isGeneric() {
+    public Optional<Boolean> isGeneric() {
         return this.item.getVarAsBool("generic");
     }
 
@@ -82,7 +79,7 @@ public class Mission extends Nodded {
         }
     }
 
-    public Integer getPosition() {
+    public Optional<Integer> getPosition() {
         return this.item.getVarAsInt("position");
     }
 
@@ -94,7 +91,7 @@ public class Mission extends Nodded {
         }
     }
 
-    public LocalDate getCompletedBy() {
+    public Optional<LocalDate> getCompletedBy() {
         return this.item.getVarAsDate("completed_by");
     }
 
@@ -106,48 +103,39 @@ public class Mission extends Nodded {
         }
     }
 
-    public ConditionAnd getProvincesToHighlight() {
-        ClausewitzItem child = this.item.getChild("provinces_to_highlight");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getProvincesToHighlight() {
+        return this.item.getChild("provinces_to_highlight").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     public List<Mission> getRequiredMissions() {
-        ClausewitzList list = this.item.getList("required_missions");
-        return list == null ? null : list.getValues().stream().map(this.game::getMission).filter(Objects::nonNull).toList();
+        return this.item.getList("required_missions")
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(this.game::getMission)
+                        .filter(Objects::nonNull)
+                        .toList();
     }
 
     public void setRequiredMissions(List<String> requiredMissions) {
-        if (CollectionUtils.isEmpty(requiredMissions)) {
-            ClausewitzList list = this.item.getList("required_missions");
-
-            if (list != null) {
-                list.clear();
-            } else {
-                this.item.addList("required_missions", new ArrayList<>());
-            }
-
-            return;
-        }
-
-        ClausewitzList list = this.item.getList("required_missions");
-
-        if (list != null) {
-            list.setAll(requiredMissions.stream().filter(Objects::nonNull).toList());
-        } else {
-            this.item.addList("required_missions", requiredMissions.stream().filter(Objects::nonNull).toList());
-        }
+        this.item.getList("required_missions")
+                 .ifPresentOrElse(list -> list.setAll(requiredMissions.stream().filter(Objects::nonNull).toList()),
+                                  () -> this.item.addList("required_missions", requiredMissions.stream().filter(Objects::nonNull).toList()));
     }
 
     public void writeImageTo(Path dest) throws IOException {
-        FileUtils.forceMkdirParent(dest.toFile());
-        ImageIO.write(ImageIO.read(getIconFile()), "png", dest.toFile());
-        Eu4Utils.optimizePng(dest, dest);
-        this.writenTo = dest;
+        Optional<File> icon = getIconFile();
+
+        if (icon.isPresent()) {
+            FileUtils.forceMkdirParent(dest.toFile());
+            ImageIO.write(ImageIO.read(icon.get()), "png", dest.toFile());
+            Eu4Utils.optimizePng(dest, dest);
+            this.writenTo = dest;
+        }
     }
 
     public Path getWritenTo() {
