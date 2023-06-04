@@ -1,14 +1,15 @@
 package fr.osallek.eu4parser.model.game;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProvinceHistoryItemI {
 
     Province getProvince();
 
-    Country getOwner();
+    Optional<Country> getOwner();
 
-    Country getController();
+    Optional<Country> getController();
 
     List<Country> getCumulatedCores();
 
@@ -16,47 +17,47 @@ public interface ProvinceHistoryItemI {
 
     List<Country> getRemoveCores();
 
-    Boolean getCity();
+    Optional<Boolean> getCity();
 
-    Culture getCulture();
+    Optional<Culture> getCulture();
 
-    Religion getReligion();
+    Optional<Religion> getReligion();
 
-    Integer getBaseTax();
+    Optional<Integer> getBaseTax();
 
-    Integer getBaseProduction();
+    Optional<Integer> getBaseProduction();
 
-    Integer getBaseManpower();
+    Optional<Integer> getBaseManpower();
 
-    TradeGood getTradeGoods();
+    Optional<TradeGood> getTradeGoods();
 
-    Boolean getHre();
+    Optional<Boolean> getHre();
 
-    String getCapital();
+    Optional<String> getCapital();
 
     List<TechGroup> getDiscoveredBy();
 
-    Boolean getReformationCenter();
+    Optional<Boolean> getReformationCenter();
 
-    Boolean getSeatInParliament();
+    Optional<Boolean> getSeatInParliament();
 
-    Integer getUnrest();
+    Optional<Integer> getUnrest();
 
-    Integer getCenterOfTrade();
+    Optional<Integer> getCenterOfTrade();
 
-    Integer getExtraCost();
+    Optional<Integer> getExtraCost();
 
-    Integer getNativeSize();
+    Optional<Integer> getNativeSize();
 
-    Integer getNativeHostileness();
+    Optional<Integer> getNativeHostileness();
 
-    Integer getNativeFerocity();
+    Optional<Integer> getNativeFerocity();
 
     List<ModifierApply> getPermanentModifier();
 
     List<ModifierApply> getRemoveModifier();
 
-    ProvinceRevolt getRevolt();
+    Optional<ProvinceRevolt> getRevolt();
 
     List<Building> getBuildings();
 

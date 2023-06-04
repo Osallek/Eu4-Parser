@@ -8,11 +8,13 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public record Revolution(ClausewitzItem item, Save save) {
 
-    public SaveCountry getRevolutionTarget() {
-        return this.save.getCountry(this.item.getVarAsString("revolution_target"));
+    public Optional<SaveCountry> getRevolutionTarget() {
+        return this.item.getVarAsString("revolution_target").map(this.save::getCountry);
     }
 
     public void setRevolutionTarget(SaveCountry country) {
@@ -21,7 +23,7 @@ public record Revolution(ClausewitzItem item, Save save) {
         setDismantleDate(null);
     }
 
-    public String getRevolutionTargetOriginalName() {
+    public Optional<String> getRevolutionTargetOriginalName() {
         return this.item.getVarAsString("revolution_target_original_name");
     }
 
@@ -29,7 +31,7 @@ public record Revolution(ClausewitzItem item, Save save) {
         this.item.setVariable("revolution_target_original_name", revolutionTargetOriginalName);
     }
 
-    public Boolean hasFirstRevolutionStarted() {
+    public Optional<Boolean> hasFirstRevolutionStarted() {
         return this.item.getVarAsBool("has_first_revolution_started");
     }
 
@@ -37,14 +39,8 @@ public record Revolution(ClausewitzItem item, Save save) {
         this.item.setVariable("has_first_revolution_started", hasFirstRevolutionStarted);
     }
 
-    public LocalDate getDismantleDate() {
-        LocalDate date = this.item.getVarAsDate("dismantle_date");
-
-        if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
-            return null;
-        }
-
-        return date;
+    public Optional<LocalDate> getDismantleDate() {
+        return this.item.getVarAsDate("dismantle_date").filter(Predicate.not(Eu4Utils.DEFAULT_DATE::equals));
     }
 
     public void setDismantleDate(LocalDate dismantleDate) {
@@ -55,19 +51,15 @@ public record Revolution(ClausewitzItem item, Save save) {
         this.item.setVariable("dismantle_date", dismantleDate);
     }
 
-    public LocalDate getClaimed() {
-        LocalDate date = this.item.getVarAsDate("claimed");
-
-        if (date == null || this.save.getStartDate().equals(date)) {
-            return null;
-        }
-
-        return date;
+    public Optional<LocalDate> getClaimed() {
+        return this.item.getVarAsDate("claimed")
+                        .filter(localDate -> this.save.getStartDate().isPresent())
+                        .filter(date -> !this.save.getStartDate().get().equals(date));
     }
 
     public void setClaimed(LocalDate claimed) {
         if (claimed == null) {
-            claimed = this.save.getStartDate();
+            claimed = this.save.getStartDate().get();
         }
 
         this.item.setVariable("claimed", claimed);
@@ -78,20 +70,10 @@ public record Revolution(ClausewitzItem item, Save save) {
     }
 
     public void addPastTarget(SaveCountry country) {
-        ClausewitzList list = this.item.getList("past_targets");
-
-        if (list == null) {
-            this.item.addList("past_targets", country.getTag());
-        } else {
-            list.add(country.getTag());
-        }
+        this.item.getList("past_targets").ifPresentOrElse(list -> list.add(country.getTag()), () -> this.item.addList("past_targets", country.getTag()));
     }
 
     public void removePastTarget(SaveCountry country) {
-        ClausewitzList list = this.item.getList("past_targets");
-
-        if (list != null) {
-            list.remove(country.getTag());
-        }
+        this.item.getList("past_targets").ifPresent(list -> list.remove(country.getTag()));
     }
 }

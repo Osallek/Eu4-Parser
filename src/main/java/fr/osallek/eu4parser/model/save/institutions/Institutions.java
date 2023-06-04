@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.List;
+import java.util.Optional;
 
 public record Institutions(ClausewitzList origins, ClausewitzList available, Save save) {
 
@@ -14,7 +15,7 @@ public record Institutions(ClausewitzList origins, ClausewitzList available, Sav
     }
 
     public boolean isAvailable(int institution) {
-        return this.available.getAsInt(institution) == 1;
+        return this.available.getAsInt(institution).filter(integer -> integer == 1).isPresent();
     }
 
     public boolean isAvailable(Institution institution) {
@@ -29,11 +30,11 @@ public record Institutions(ClausewitzList origins, ClausewitzList available, Sav
         return this.origins.getValuesAsInt().stream().map(this.save::getProvince).toList();
     }
 
-    public SaveProvince getOrigin(int institution) {
-        return this.save.getProvince(this.origins.getAsInt(institution));
+    public Optional<SaveProvince> getOrigin(int institution) {
+        return this.origins.getAsInt(institution).map(this.save::getProvince);
     }
 
-    public SaveProvince getOrigin(Institution institution) {
+    public Optional<SaveProvince> getOrigin(Institution institution) {
         return getOrigin(institution.getIndex());
     }
 

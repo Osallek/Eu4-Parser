@@ -33,7 +33,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -343,7 +342,7 @@ public class Eu4Parser {
     }
 
     public static List<String> getMods(Path path, Map<Integer, String> tokens) throws IOException {
-        ClausewitzObject object;
+        Optional<ClausewitzObject> object;
 
         if (!isValid(path)) {
             return new ArrayList<>();
@@ -364,8 +363,13 @@ public class Eu4Parser {
                 return new ArrayList<>();
             }
 
-            if (object != null && ClausewitzItem.class.equals(object.getClass())) {
-                return ((ClausewitzItem) object).getChildren().stream().map(item -> item.getVarAsString("filename")).filter(Objects::nonNull).toList();
+            if (object.isPresent() && ClausewitzItem.class.equals(object.get().getClass())) {
+                return ((ClausewitzItem) object.get()).getChildren()
+                                                      .stream()
+                                                      .map(item -> item.getVarAsString("filename"))
+                                                      .filter(Optional::isPresent)
+                                                      .map(Optional::get)
+                                                      .toList();
             }
         }
 

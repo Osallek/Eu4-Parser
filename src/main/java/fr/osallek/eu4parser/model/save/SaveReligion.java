@@ -16,6 +16,7 @@ import fr.osallek.eu4parser.model.save.religion.SavePapacy;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public class SaveReligion {
 
@@ -54,7 +55,7 @@ public class SaveReligion {
     }
 
     public boolean hasDate() {
-        return this.gameReligion != null && this.gameReligion.getDate() != null;
+        return this.gameReligion != null && this.gameReligion.getDate().isPresent();
     }
 
     public boolean hasDefenderOfFaith() {
@@ -73,11 +74,11 @@ public class SaveReligion {
         return this.gameReligion == null ? null : this.gameReligion.getReligionGroup();
     }
 
-    public Integer getAmountOfProvinces() {
+    public Optional<Integer> getAmountOfProvinces() {
         return this.religionsItem.getVarAsInt("amount_of_provinces");
     }
 
-    public LocalDate getEnable() {
+    public Optional<LocalDate> getEnable() {
         return this.religionsItem.getVarAsDate("enable");
     }
 
@@ -86,11 +87,7 @@ public class SaveReligion {
     }
 
     public List<SaveCountry> getInLeague() {
-        return this.religionsItem.getVarsAsStrings("league")
-                                 .stream()
-                                 .map(ClausewitzUtils::removeQuotes)
-                                 .map(this.save::getCountry)
-                                 .toList();
+        return this.religionsItem.getVarsAsStrings("league").stream().map(ClausewitzUtils::removeQuotes).map(this.save::getCountry).toList();
     }
 
     public void addToLeague(SaveCountry country) {
@@ -111,29 +108,27 @@ public class SaveReligion {
         this.religionsItem.setVariable("hre_religion", hreReligion);
     }
 
-    public Boolean isHreHereticReligion() {
+    public Optional<Boolean> isHreHereticReligion() {
         return this.religionsItem.getVarAsBool("hre_heretic_religion");
     }
 
-    public Boolean isHreReligion() {
+    public Optional<Boolean> isHreReligion() {
         return this.religionsItem.getVarAsBool("hre_religion");
     }
 
-    public Boolean getOriginalHreReligion() {
+    public Optional<Boolean> getOriginalHreReligion() {
         return this.religionsItem.getVarAsBool("original_hre_religion");
     }
 
-    public Boolean getOriginalHreHereticReligion() {
+    public Optional<Boolean> getOriginalHreHereticReligion() {
         return this.religionsItem.getVarAsBool("original_hre_heretic_religion");
     }
 
-    public SaveCountry getDefender() {
-        String defenderTag = this.religionInstanceDataItem.getVarAsString("defender");
-
-        return defenderTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(defenderTag));
+    public Optional<SaveCountry> getDefender() {
+        return this.religionInstanceDataItem.getVarAsString("defender").map(ClausewitzUtils::removeQuotes).map(this.save::getCountry);
     }
 
-    public LocalDate getDefenderDate() {
+    public Optional<LocalDate> getDefenderDate() {
         return this.religionInstanceDataItem.getVarAsDate("defender_date");
     }
 
@@ -142,20 +137,14 @@ public class SaveReligion {
             this.religionInstanceDataItem.removeVariable("defender");
             this.religionInstanceDataItem.removeVariable("defender_date");
         } else {
-            LocalDate defenderDate = this.religionInstanceDataItem.getVarAsDate("defender_date");
-
-            if (defenderDate != null) {
-                this.religionInstanceDataItem.setVariable("defender", ClausewitzUtils.addQuotes(defender.getTag()));
-            }
+            this.religionInstanceDataItem.getVarAsDate("defender_date")
+                                         .ifPresent(localDate -> this.religionInstanceDataItem.setVariable("defender",
+                                                                                                           ClausewitzUtils.addQuotes(defender.getTag())));
         }
     }
 
     public void setDefenderDate(LocalDate defenderDate) {
-        String defender = this.religionInstanceDataItem.getVarAsString("defender");
-
-        if (defender != null) {
-            this.religionInstanceDataItem.setVariable("defender_date", defenderDate);
-        }
+        this.religionInstanceDataItem.getVarAsString("defender").ifPresent(s -> this.religionInstanceDataItem.setVariable("defender_date", defenderDate));
     }
 
     public void setDefender(SaveCountry defender, LocalDate defenderDate) {
@@ -168,26 +157,26 @@ public class SaveReligion {
         }
     }
 
-    public DefenderOfFaith getDefenderOfFaith() {
-        SaveCountry defender = getDefender();
+    public Optional<DefenderOfFaith> getDefenderOfFaith() {
+        Optional<SaveCountry> defender = getDefender();
 
-        if (defender == null) {
-            return null;
+        if (defender.isEmpty()) {
+            return Optional.empty();
         }
 
         int nbCountries = (int) this.save.getCountries()
                                          .values()
                                          .stream()
                                          .filter(SaveCountry::isAlive)
-                                         .filter(country -> defender.getReligion().equals(country.getReligion()))
+                                         .filter(country -> defender.get().getReligion().equals(country.getReligion()))
                                          .count();
 
-        return this.save.getGame()
-                        .getDefenderOfFaith()
-                        .stream()
-                        .filter(defenderOfFaith -> defenderOfFaith.isInRange(nbCountries))
-                        .findFirst()
-                        .orElse(this.save.getGame().getDefenderOfFaith().iterator().next());
+        return Optional.ofNullable(this.save.getGame()
+                                            .getDefenderOfFaith()
+                                            .stream()
+                                            .filter(defenderOfFaith -> defenderOfFaith.isInRange(nbCountries))
+                                            .findFirst()
+                                            .orElse(this.save.getGame().getDefenderOfFaith().iterator().next()));
     }
 
     public List<MuslimRelation> getRelations() {
@@ -200,8 +189,7 @@ public class SaveReligion {
         }
 
         this.relations.stream()
-                      .filter(muslimRelation -> first.equals(muslimRelation.getFirst()) &&
-                                                second.equals(muslimRelation.getSecond()))
+                      .filter(muslimRelation -> first.equals(muslimRelation.getFirst()) && second.equals(muslimRelation.getSecond()))
                       .findFirst()
                       .ifPresent(muslimRelation -> muslimRelation.setRelation(relation));
     }
@@ -247,19 +235,12 @@ public class SaveReligion {
 
     private void refreshAttributes() {
         if (this.religionInstanceDataItem != null) {
-            List<ClausewitzItem> relationsItems = this.religionInstanceDataItem.getChildren("relation");
-            this.relations = relationsItems.stream().map(MuslimRelation::new).toList();
-
-            ClausewitzItem papacyItem = this.religionInstanceDataItem.getChild("papacy");
-
-            if (papacyItem != null) {
-                this.papacy = new SavePapacy(papacyItem, this, this.save);
-            }
-
-            List<ClausewitzItem> reformationCentersItems = this.religionInstanceDataItem.getChildren("reformation_center");
-            this.reformationCenters = reformationCentersItems.stream()
-                                                             .map(item -> new ReformationCenter(this.save, item))
-                                                             .toList();
+            this.relations = this.religionInstanceDataItem.getChildren("relation").stream().map(MuslimRelation::new).toList();
+            this.papacy = this.religionInstanceDataItem.getChild("papacy").map(item -> new SavePapacy(item, this, this.save)).orElse(null);
+            this.reformationCenters = this.religionInstanceDataItem.getChildren("reformation_center")
+                                                                   .stream()
+                                                                   .map(item -> new ReformationCenter(this.save, item))
+                                                                   .toList();
         }
     }
 }

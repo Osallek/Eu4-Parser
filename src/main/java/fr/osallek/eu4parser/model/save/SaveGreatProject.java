@@ -30,7 +30,7 @@ public class SaveGreatProject {
         this.item.setName(ClausewitzUtils.addQuotes(name));
     }
 
-    public Integer getProvinceId() {
+    public Optional<Integer> getProvinceId() {
         return this.item.getVarAsInt("province");
     }
 
@@ -38,15 +38,15 @@ public class SaveGreatProject {
         this.item.setVariable("province", provinceId);
     }
 
-    public SaveProvince getProvince() {
-        return Optional.ofNullable(getProvinceId()).map(this.save::getProvince).orElse(null);
+    public Optional<SaveProvince> getProvince() {
+        return getProvinceId().map(this.save::getProvince);
     }
 
     public void setProvince(SaveProvince province) {
         setProvinceId(Optional.ofNullable(province).map(SaveProvince::getId).orElse(null));
     }
 
-    public Integer getDevelopmentTier() {
+    public Optional<Integer> getDevelopmentTier() {
         return this.item.getVarAsInt("development_tier");
     }
 
@@ -54,7 +54,7 @@ public class SaveGreatProject {
         this.item.setVariable("development_tier", developmentTier);
     }
 
-    public LocalDate getDateBuilt() {
+    public Optional<LocalDate> getDateBuilt() {
         return this.item.getVarAsDate("date_built");
     }
 
@@ -62,7 +62,7 @@ public class SaveGreatProject {
         this.item.setVariable("date_built", developmentTier);
     }
 
-    public LocalDate getDateDestroyed() {
+    public Optional<LocalDate> getDateDestroyed() {
         return this.item.getVarAsDate("date_destroyed");
     }
 
@@ -77,10 +77,10 @@ public class SaveGreatProject {
     public GreatProjectTier getTier() {
         GreatProject greatProject = getGreatProject();
 
-        if (getDevelopmentTier() == null || greatProject == null || CollectionUtils.isEmpty(greatProject.getTiers())) {
+        if (getDevelopmentTier().isEmpty() || greatProject == null || CollectionUtils.isEmpty(greatProject.getTiers())) {
             return null;
         }
 
-        return IterableUtils.get(greatProject.getTiers(), getDevelopmentTier());
+        return IterableUtils.get(greatProject.getTiers(), getDevelopmentTier().get());
     }
 }

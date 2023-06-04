@@ -5,7 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 public record GameplayOptions(ClausewitzList list) {
 
     public Difficulty getDifficulty() {
-        return Difficulty.ofValue(this.list.getAsInt(0));
+        return Difficulty.ofValue(this.list.getAsInt(0).get());
     }
 
     public void setDifficulty(Difficulty difficulty) {
@@ -13,11 +13,11 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public LuckyNations getLuckyNations() {
-        return LuckyNations.values()[this.list.getAsInt(2)];
+        return LuckyNations.values()[this.list.getAsInt(2).get()];
     }
 
     public boolean getAllowHotjoin() {
-        return this.list.getAsInt(3) == 1;
+        return this.list.getAsInt(3).filter(integer -> integer == 1).isPresent();
     }
 
     public void setAllowHotjoin(boolean terraIncognita) {
@@ -25,7 +25,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getAllowCoop() {
-        return this.list.getAsInt(4) == 1;
+        return this.list.getAsInt(4).filter(integer -> integer == 1).isPresent();
     }
 
     public void setAllowCoop(boolean allowCoop) {
@@ -33,7 +33,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getTerraIncognita() {
-        return this.list.getAsInt(7) == 1;
+        return this.list.getAsInt(7).filter(integer -> integer == 1).isPresent();
     }
 
     public void setTerraIncognita(boolean terraIncognita) {
@@ -41,7 +41,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getOnlyHostAndObserversCanSave() {
-        return this.list.getAsInt(8) == 1;
+        return this.list.getAsInt(8).filter(integer -> integer == 1).isPresent();
     }
 
     public void setOnlyHostAndObserversCanSave(boolean onlyHostAndObserversCanSave) {
@@ -49,7 +49,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getSaveEditable() {
-        return this.list.getAsInt(9) == 1;
+        return this.list.getAsInt(9).filter(integer -> integer == 1).isPresent();
     }
 
     public void setSaveEditable(boolean saveEditable) {
@@ -57,7 +57,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getLockedLedger() {
-        return this.list.getAsInt(10) == 1;
+        return this.list.getAsInt(10).filter(integer -> integer == 1).isPresent();
     }
 
     public void setLockedLedger(boolean lockedLedger) {
@@ -65,7 +65,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getDynamicProvinceNames() {
-        return this.list.getAsInt(11) == 1;
+        return this.list.getAsInt(11).filter(integer -> integer == 1).isPresent();
     }
 
     public void setDynamicProvinceNames(boolean dynamicProvinceNames) {
@@ -73,7 +73,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public CustomNationDifficulty getCustomNationDifficulty() {
-        return CustomNationDifficulty.values()[this.list.getAsInt(12)];
+        return CustomNationDifficulty.values()[this.list.getAsInt(12).get()];
     }
 
     public void setCustomNationDifficulty(CustomNationDifficulty customNationDifficulty) {
@@ -81,15 +81,15 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public NationSetup getNationSetup() {
-        return NationSetup.values()[this.list.getAsInt(13)];
+        return NationSetup.values()[this.list.getAsInt(13).get()];
     }
 
     public ProvinceTaxManpower getProvinceTaxManpower() {
-        return ProvinceTaxManpower.values()[this.list.getAsInt(14)];
+        return ProvinceTaxManpower.values()[this.list.getAsInt(14).get()];
     }
 
     public boolean getAddNationsToGame() {
-        return this.list.getAsInt(15) == 1;
+        return this.list.getAsInt(15).filter(integer -> integer == 1).isPresent();
     }
 
     public void setAddNationsToGame(boolean addNationsToGame) {
@@ -97,11 +97,11 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public RandomNations getRandomNations() {
-        return RandomNations.values()[this.list.getAsInt(16)];
+        return RandomNations.values()[this.list.getAsInt(16).get()];
     }
 
     public boolean getShowMonthlyTaxIncome() {
-        return this.list.getAsInt(17) == 1;
+        return this.list.getAsInt(17).filter(integer -> integer == 1).isPresent();
     }
 
     public void setShowMonthlyTaxIncome(boolean showMonthlyTaxIncome) {
@@ -109,7 +109,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getColorWastelands() {
-        return this.list.getAsInt(18) == 1;
+        return this.list.getAsInt(18).filter(integer -> integer == 1).isPresent();
     }
 
     public void setColorWastelands(boolean colorWastelands) {
@@ -117,7 +117,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getExclavesRegionName() {
-        return this.list.getAsInt(19) == 1;
+        return this.list.getAsInt(19).filter(integer -> integer == 1).isPresent();
     }
 
     public void setExclavesRegionName(boolean exclavesRegionName) {
@@ -125,11 +125,11 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getEnableVictoryCards() {
-        return this.list.getAsInt(20) == 1;
+        return this.list.getAsInt(20).filter(integer -> integer == 1).isPresent();
     }
 
     public boolean getBlockNationRuining() {
-        return this.list.getAsInt(21) == 1;
+        return this.list.getAsInt(21).filter(integer -> integer == 1).isPresent();
     }
 
     public void setBlockNationRuining(boolean blockNationRuining) {
@@ -137,11 +137,11 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public FantasyRandomNewWorld getFantasyRandomNewWorld() {
-        return FantasyRandomNewWorld.values()[this.list.getAsInt(22)];
+        return FantasyRandomNewWorld.values()[this.list.getAsInt(22).get()];
     }
 
     public boolean getLimitedLedger() {
-        return this.list.getAsInt(23) == 1;
+        return this.list.getAsInt(23).filter(integer -> integer == 1).isPresent();
     }
 
     public void setLimitedLedger(boolean limitedLedger) {
@@ -149,7 +149,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getUnlimitedIdeaGroups() {
-        return this.list.getAsInt(24) == 1;
+        return this.list.getAsInt(24).filter(integer -> integer == 1).isPresent();
     }
 
     public void setUnlimitedIdeaGroups(boolean unlimitedIdeaGroups) {
@@ -157,7 +157,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getAllowNameChange() {
-        return this.list.getAsInt(25) == 1;
+        return this.list.getAsInt(25).filter(integer -> integer == 1).isPresent();
     }
 
     public void setAllowNameChange(boolean allowNameChange) {
@@ -165,7 +165,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getOnlyHostCanPause() {
-        return this.list.getAsInt(26) == 1;
+        return this.list.getAsInt(26).filter(integer -> integer == 1).isPresent();
     }
 
     public void setOnlyHostCanPause(boolean onlyHostCanPause) {
@@ -173,15 +173,15 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getShowLoadingScreen() {
-        return this.list.getAsInt(27) == 1;
+        return this.list.getAsInt(27).filter(integer -> integer == 1).isPresent();
     }
 
     public boolean getUseAgeScoring() {
-        return this.list.getAsInt(28) == 1;
+        return this.list.getAsInt(28).filter(integer -> integer == 1).isPresent();
     }
 
     public boolean getAllowTeams() {
-        return this.list.getAsInt(29) == 1;
+        return this.list.getAsInt(29).filter(integer -> integer == 1).isPresent();
     }
 
     public void setAllowTeams(boolean allowTeams) {
@@ -189,7 +189,7 @@ public record GameplayOptions(ClausewitzList list) {
     }
 
     public boolean getAllowFreeTeamCreation() {
-        return this.list.getAsInt(30) == 1;
+        return this.list.getAsInt(30).filter(integer -> integer == 1).isPresent();
     }
 
     public void setAllowFreeTeamCreation(boolean allowFreeTeamCreation) {

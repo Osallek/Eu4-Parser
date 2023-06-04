@@ -5,6 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -51,9 +52,8 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Country getOwner() {
-        ClausewitzVariable variable = this.item.getVar("owner");
-        return variable == null ? null : this.game.getCountry(variable.getValue());
+    public Optional<Country> getOwner() {
+        return this.item.getVar("owner").map(ClausewitzVariable::getValue).map(this.game::getCountry);
     }
 
     public void setOwner(Country owner) {
@@ -69,9 +69,8 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Country getController() {
-        ClausewitzVariable variable = this.item.getVar("controller");
-        return variable == null ? null : this.game.getCountry(variable.getValue());
+    public Optional<Country> getController() {
+        return this.item.getVar("controller").map(ClausewitzVariable::getValue).map(this.game::getCountry);
     }
 
     public void setController(Country controller) {
@@ -137,7 +136,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Boolean getCity() {
+    public Optional<Boolean> getCity() {
         return this.item.getVarAsBool("is_city");
     }
 
@@ -150,8 +149,8 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Culture getCulture() {
-        return this.game.getCulture(this.item.getVarAsString("culture"));
+    public Optional<Culture> getCulture() {
+        return this.item.getVarAsString("culture").map(this.game::getCulture);
     }
 
     public void setCulture(String culture) {
@@ -163,8 +162,8 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Religion getReligion() {
-        return this.game.getReligion(this.item.getVarAsString("religion"));
+    public Optional<Religion> getReligion() {
+        return this.item.getVarAsString("religion").map(this.game::getReligion);
     }
 
     public void setReligion(String religion) {
@@ -176,7 +175,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Integer getBaseTax() {
+    public Optional<Integer> getBaseTax() {
         return this.item.getVarAsInt("base_tax");
     }
 
@@ -189,7 +188,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Integer getBaseProduction() {
+    public Optional<Integer> getBaseProduction() {
         return this.item.getVarAsInt("base_production");
     }
 
@@ -202,7 +201,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Integer getBaseManpower() {
+    public Optional<Integer> getBaseManpower() {
         return this.item.getVarAsInt("base_manpower");
     }
 
@@ -215,8 +214,8 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public TradeGood getTradeGoods() {
-        return this.game.getTradeGood(this.item.getVarAsString("trade_goods"));
+    public Optional<TradeGood> getTradeGoods() {
+        return this.item.getVarAsString("trade_goods").map(this.game::getTradeGood);
     }
 
     public void setTradeGood(String tradeGood) {
@@ -228,7 +227,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Boolean getHre() {
+    public Optional<Boolean> getHre() {
         return this.item.getVarAsBool("hre");
     }
 
@@ -241,8 +240,8 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public String getCapital() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("capital"));
+    public Optional<String> getCapital() {
+        return this.item.getVarAsString("capital").filter(StringUtils::isNotBlank).map(ClausewitzUtils::removeQuotes);
     }
 
     public void setCapital(String capital) {
@@ -271,7 +270,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Boolean getReformationCenter() {
+    public Optional<Boolean> getReformationCenter() {
         return this.item.getVarAsBool("reformation_center");
     }
 
@@ -284,7 +283,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Boolean getSeatInParliament() {
+    public Optional<Boolean> getSeatInParliament() {
         return this.item.getVarAsBool("seat_in_parliament");
     }
 
@@ -297,7 +296,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Integer getUnrest() {
+    public Optional<Integer> getUnrest() {
         return this.item.getVarAsInt("unrest");
     }
 
@@ -310,7 +309,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Integer getCenterOfTrade() {
+    public Optional<Integer> getCenterOfTrade() {
         return this.item.getVarAsInt("center_of_trade");
     }
 
@@ -323,7 +322,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Integer getExtraCost() {
+    public Optional<Integer> getExtraCost() {
         return this.item.getVarAsInt("extra_cost");
     }
 
@@ -336,7 +335,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Integer getNativeSize() {
+    public Optional<Integer> getNativeSize() {
         return this.item.getVarAsInt("native_size");
     }
 
@@ -344,12 +343,12 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
         if (nativeSize == null) {
             this.item.removeVariable("native_size");
         } else {
-            this.item.setVariable("native_size", nativeSize, this.item.getVar("base_tax").getOrder());
+            this.item.setVariable("native_size", nativeSize, this.item.getVar("base_tax").map(ClausewitzVariable::getOrder).orElse(1));
         }
     }
 
     @Override
-    public Integer getNativeHostileness() {
+    public Optional<Integer> getNativeHostileness() {
         return this.item.getVarAsInt("native_hostileness");
     }
 
@@ -357,12 +356,12 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
         if (nativeHostileness == null) {
             this.item.removeVariable("native_hostileness");
         } else {
-            this.item.setVariable("native_hostileness", nativeHostileness, this.item.getVar("base_tax").getOrder());
+            this.item.setVariable("native_hostileness", nativeHostileness, this.item.getVar("base_tax").map(ClausewitzVariable::getOrder).orElse(1));
         }
     }
 
     @Override
-    public Integer getNativeFerocity() {
+    public Optional<Integer> getNativeFerocity() {
         return this.item.getVarAsInt("native_ferocity");
     }
 
@@ -370,7 +369,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
         if (nativeFerocity == null) {
             this.item.removeVariable("native_ferocity");
         } else {
-            this.item.setVariable("native_ferocity", nativeFerocity, this.item.getVar("base_tax").getOrder());
+            this.item.setVariable("native_ferocity", nativeFerocity, this.item.getVar("base_tax").map(ClausewitzVariable::getOrder).orElse(1));
         }
     }
 
@@ -393,19 +392,15 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     }
 
     @Override
-    public ProvinceRevolt getRevolt() {
-        if (this.item.hasChild("revolt")) {
-            return new ProvinceRevolt(this.item.getChild("revolt"));
-        } else {
-            return null;
-        }
+    public Optional<ProvinceRevolt> getRevolt() {
+        return this.item.getChild("revolt").map(ProvinceRevolt::new);
     }
 
     @Override
     public List<Building> getBuildings() {
         return this.game.getBuildings()
                         .stream()
-                        .filter(building -> this.item.hasVar(building.getName()) && BooleanUtils.toBoolean(this.item.getVarAsBool(building.getName())))
+                        .filter(building -> this.item.getVar(building.getName()).map(ClausewitzVariable::getAsBool).map(BooleanUtils::toBoolean).orElse(false))
                         .toList();
     }
 
@@ -413,7 +408,7 @@ public class ProvinceHistoryItem implements ProvinceHistoryItemI {
     public List<Building> getRemoveBuildings() {
         return this.game.getBuildings()
                         .stream()
-                        .filter(building -> this.item.hasVar(building.getName()) && !BooleanUtils.toBoolean(this.item.getVarAsBool(building.getName())))
+                        .filter(building -> this.item.getVar(building.getName()).map(ClausewitzVariable::getAsBool).map(BooleanUtils::toBoolean).orElse(false))
                         .toList();
     }
 

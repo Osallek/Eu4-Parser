@@ -6,11 +6,12 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 public record SaveTeam(ClausewitzItem item, Save save) {
 
     public String name() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+        return this.item.getVarAsString("name").map(ClausewitzUtils::removeQuotes).orElse("");
     }
 
     public void setName(String name) {

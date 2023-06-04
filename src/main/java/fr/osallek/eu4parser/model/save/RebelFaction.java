@@ -9,8 +9,9 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class RebelFaction {
 
@@ -36,47 +37,47 @@ public class RebelFaction {
         return id;
     }
 
-    public String getType() {
+    public Optional<String> getType() {
         return this.item.getVarAsString("type");
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
-    public Double getProgress() {
+    public Optional<Double> getProgress() {
         return this.item.getVarAsDouble("progress");
     }
 
-    public String getHeretic() {
+    public Optional<String> getHeretic() {
         return this.item.getVarAsString("heretic");
     }
 
-    public SaveCountry getCountry() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("country")));
+    public Optional<SaveCountry> getCountry() {
+        return this.item.getVarAsString("country").map(ClausewitzUtils::removeQuotes).map(this.save::getCountry);
     }
 
-    public SaveCountry getIndependence() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("independence")));
+    public Optional<SaveCountry> getIndependence() {
+        return this.item.getVarAsString("independence").map(ClausewitzUtils::removeQuotes).map(this.save::getCountry);
     }
 
-    public SaveReligion getReligion() {
-        return this.save.getReligions().getReligion(ClausewitzUtils.removeQuotes(this.item.getVarAsString("religion")));
+    public Optional<SaveReligion> getReligion() {
+        return this.item.getVarAsString("religion").map(ClausewitzUtils::removeQuotes).map(s -> this.save.getReligions().getReligion(s));
     }
 
-    public Culture getCulture() {
-        return this.save.getGame().getCulture(ClausewitzUtils.removeQuotes(this.item.getVarAsString("culture")));
+    public Optional<Culture> getCulture() {
+        return this.item.getVarAsString("culture").map(ClausewitzUtils::removeQuotes).map(s -> this.save.getGame().getCulture(s));
     }
 
-    public String getGovernment() {
+    public Optional<String> getGovernment() {
         return this.item.getVarAsString("government");
     }
 
-    public SaveProvince getProvince() {
-        return this.save.getProvince(this.item.getVarAsInt("province"));
+    public Optional<SaveProvince> getProvince() {
+        return this.item.getVarAsInt("province").map(this.save::getProvince);
     }
 
-    public Integer getSeed() {
+    public Optional<Integer> getSeed() {
         return this.item.getVarAsInt("seed");
     }
 
@@ -84,11 +85,11 @@ public class RebelFaction {
         return general;
     }
 
-    public SaveCountry getSupportiveCountry() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("supportive_country")));
+    public Optional<SaveCountry> getSupportiveCountry() {
+        return this.item.getVarAsString("supportive_country").map(ClausewitzUtils::removeQuotes).map(this.save::getCountry);
     }
 
-    public LocalDate getSupportiveCountryDate() {
+    public Optional<LocalDate> getSupportiveCountryDate() {
         return this.item.getVarAsDate("supportive_country_date");
     }
 
@@ -97,52 +98,26 @@ public class RebelFaction {
     }
 
     public List<SaveProvince> getPossibleProvinces() {
-        ClausewitzList list = this.item.getList("possible_provinces");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
+        return this.item.getList("possible_provinces")
+                        .map(ClausewitzList::getValuesAsInt)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(this.save::getProvince)
+                        .toList();
     }
 
     public List<SaveCountry> getFriends() {
-        ClausewitzList list = this.item.getList("friend");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues().stream().map(this.save::getCountry).toList();
+        return this.item.getList("friend").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.save::getCountry).toList();
     }
 
-    public Boolean isActive() {
+    public Optional<Boolean> isActive() {
         return this.item.getVarAsBool("active");
     }
 
     private void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem leaderItem = this.item.getChild("leader");
-
-        if (leaderItem != null && leaderItem.getVarAsInt("id") != 0) {
-            this.leader = new Id(leaderItem);
-        }
-
-        ClausewitzItem armyItem = this.item.getChild("army");
-
-        if (armyItem != null) {
-            this.army = new Id(leaderItem);
-        }
-
-        ClausewitzItem generalItem = this.item.getChild("general");
-
-        if (generalItem != null) {
-            this.general = new Leader(generalItem, null);
-        }
+        this.id = this.item.getChild("id").map(Id::new).orElse(null);
+        this.leader = this.item.getChild("leader").filter(i -> i.getVarAsInt("id").filter(integer -> integer != 0).isPresent()).map(Id::new).orElse(null);
+        this.army = this.item.getChild("army").map(Id::new).orElse(null);
+        this.general = this.item.getChild("general").map(i -> new Leader(i, null)).orElse(null);
     }
 }

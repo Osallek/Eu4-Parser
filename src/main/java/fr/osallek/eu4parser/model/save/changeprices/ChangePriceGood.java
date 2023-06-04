@@ -3,10 +3,12 @@ package fr.osallek.eu4parser.model.save.changeprices;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.TradeGood;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public class ChangePriceGood {
 
@@ -33,7 +35,7 @@ public class ChangePriceGood {
         return this.item.getName();
     }
 
-    public Double getCurrentPrice() {
+    public Optional<Double> getCurrentPrice() {
         return this.item.getVarAsDouble("current_price");
     }
 
@@ -50,15 +52,14 @@ public class ChangePriceGood {
         ChangePrice.addToItem(this.item, key, percent, expiryDate);
         refreshAttributes();
         return this.changePrices.stream()
-                                .filter(changePrice -> key.equalsIgnoreCase(changePrice.getKey()))
+                                .filter(changePrice -> changePrice.getKey().isPresent() && key.equalsIgnoreCase(changePrice.getKey().get()))
                                 .findFirst()
                                 .orElse(null);
     }
 
     public void setChangePrices(List<ChangePrice> changePrices) {
-        changePrices.removeIf(changePrice -> this.changePrices.contains(changePrice));
-        changePrices.forEach(changePrice -> addChangePrice(changePrice.getKey(), changePrice.getValue(),
-                                                           changePrice.getExpiryDate()));
+        changePrices.removeIf(change -> this.changePrices.contains(change));
+        changePrices.forEach(change -> addChangePrice(change.getKey().orElse(null), change.getValue(), change.getExpiryDate().orElse(null)));
         refreshAttributes();
     }
 
@@ -67,10 +68,7 @@ public class ChangePriceGood {
     }
 
     private void refreshAttributes() {
-        this.changePrices = this.item.getChildren("change_price")
-                                     .stream()
-                                     .map(changePriceItem -> new ChangePrice(changePriceItem))
-                                     .toList();
+        this.changePrices = this.item.getChildren("change_price").stream().map(changePriceItem -> new ChangePrice(changePriceItem)).toList();
 
         if (isValid()) {
             setCurrentPrice();
@@ -78,9 +76,7 @@ public class ChangePriceGood {
     }
 
     private void setCurrentPrice() {
-        double modifiersSum = this.changePrices.stream()
-                                               .mapToDouble(ChangePrice::getValue)
-                                               .sum();
+        double modifiersSum = this.changePrices.stream().mapToDouble(ChangePrice::getValue).sum();
 
         BigDecimal newPrice = BigDecimal.valueOf(getBasicPrice())
                                         .multiply(BigDecimal.valueOf(100).add(BigDecimal.valueOf(modifiersSum)))

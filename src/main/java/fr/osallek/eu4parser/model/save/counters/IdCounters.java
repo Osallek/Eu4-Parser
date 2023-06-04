@@ -2,9 +2,11 @@ package fr.osallek.eu4parser.model.save.counters;
 
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 
+import java.util.Optional;
+
 public record IdCounters(ClausewitzList list) {
 
-    public Integer getCounter(Counter counter) {
+    public Optional<Integer> getCounter(Counter counter) {
         return this.list.getAsInt(counter.ordinal());
     }
 
@@ -13,24 +15,17 @@ public record IdCounters(ClausewitzList list) {
     }
 
     public void incrementCounter(Counter counter) {
-        Integer value = getCounter(counter);
-
-        if (value == null) {
-            this.list.set(counter.ordinal(), 1);
-        } else {
-            this.list.set(counter.ordinal(), value + 1);
-        }
+        getCounter(counter).ifPresentOrElse(value -> this.list.set(counter.ordinal(), value + 1), () -> this.list.set(counter.ordinal(), 1));
     }
 
     public Integer getAndIncrement(Counter counter) {
-        Integer value = getCounter(counter);
-
-        if (value == null) {
-            this.list.set(counter.ordinal(), 1);
-        } else {
+        return getCounter(counter).map(value -> {
             this.list.set(counter.ordinal(), value + 1);
-        }
 
-        return value;
+            return value;
+        }).orElseGet(() -> {
+            this.list.set(counter.ordinal(), 1);
+            return 1;
+        });
     }
 }

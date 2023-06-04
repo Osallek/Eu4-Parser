@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -138,8 +139,8 @@ public class Save {
         this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true, launcherSettings);
     }
 
-    private Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
-                 boolean compressed, LauncherSettings launcherSettings) throws IOException {
+    private Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed,
+                 LauncherSettings launcherSettings) throws IOException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
@@ -175,7 +176,7 @@ public class Save {
         return game;
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.metaItem.getVarAsDate("date");
     }
 
@@ -183,7 +184,7 @@ public class Save {
         this.metaItem.setVariable("date", date);
     }
 
-    public String getPlayer() {
+    public Optional<String> getPlayer() {
         return this.metaItem.getVarAsString("player");
     }
 
@@ -195,57 +196,46 @@ public class Save {
         }
     }
 
-    public SaveCountry getPlayedCountry() {
-        return getCountry(ClausewitzUtils.removeQuotes(getPlayer()));
+    public Optional<SaveCountry> getPlayedCountry() {
+        return getPlayer().map(ClausewitzUtils::removeQuotes).map(this::getCountry);
     }
 
-    public String getDisplayedCountryName() {
+    public Optional<String> getDisplayedCountryName() {
         return this.metaItem.getVarAsString("displayed_country_name");
     }
 
     public List<String> getSavegameVersions() {
-        ClausewitzList list = this.metaItem.getList("savegame_versions");
-
-        if (list != null) {
-            return list.getValues();
-        }
-
-        return new ArrayList<>();
+        return this.metaItem.getList("savegame_versions").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public List<String> getDlcEnabled() {
-        ClausewitzList list = this.metaItem.getList("dlc_enabled");
-
-        if (list != null) {
-            return list.getValues();
-        }
-
-        return new ArrayList<>();
+        return this.metaItem.getList("dlc_enabled").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public List<String> getModEnabled() {
-        ClausewitzItem child = this.metaItem.getChild("mods_enabled_names");
-
-        if (child != null) {
-            return child.getChildren().stream().map(item -> item.getVarAsString("filename")).filter(Objects::nonNull).toList();
-        }
-
-        return new ArrayList<>();
+        return this.metaItem.getChild("mods_enabled_names")
+                            .map(ClausewitzItem::getChildren)
+                            .stream()
+                            .flatMap(Collection::stream)
+                            .map(item -> item.getVarAsString("filename"))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .toList();
     }
 
     public boolean isMultiPlayer() {
-        return BooleanUtils.toBoolean(this.metaItem.getVarAsBool("multi_player"));
+        return this.metaItem.getVarAsBool("multi_player").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public boolean isRandomNewWorld() {
-        return BooleanUtils.toBoolean(this.metaItem.getVarAsBool("is_random_new_world"));
+        return this.metaItem.getVarAsBool("is_random_new_world").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public GameplayOptions getGameplayOptions() {
         return this.gameplayOptions;
     }
 
-    public Integer getSpeed() {
+    public Optional<Integer> getSpeed() {
         return this.gamestateItem.getVarAsInt("speed");
     }
 
@@ -263,15 +253,15 @@ public class Save {
         return idCounters;
     }
 
-    public Integer getUnitIdCounter() {
+    public Optional<Integer> getUnitIdCounter() {
         return this.gamestateItem.getVarAsInt("unit");
     }
 
-    public Age getCurrentAge() {
-        return this.game.getAge(ClausewitzUtils.removeQuotes(this.gamestateItem.getVarAsString("current_age")));
+    public Optional<Age> getCurrentAge() {
+        return this.gamestateItem.getVarAsString("current_age").map(ClausewitzUtils::removeQuotes).map(this.game::getAge);
     }
 
-    public Double getNextAgeProgress() {
+    public Optional<Double> getNextAgeProgress() {
         return this.gamestateItem.getVarAsDouble("next_age_progress");
     }
 
@@ -279,16 +269,16 @@ public class Save {
      * Used for units and armies
      */
     public int getAndIncrementUnitIdCounter() {
-        Integer var = this.gamestateItem.getVarAsInt("unit");
+        Optional<Integer> unit = this.gamestateItem.getVarAsInt("unit");
 
-        if (var == null) {
+        if (unit.isEmpty()) {
             this.gamestateItem.addVariable("unit", 2);
 
             return 1;
         } else {
-            this.gamestateItem.setVariable("unit", var + 1);
+            this.gamestateItem.setVariable("unit", unit.get() + 1);
 
-            return var;
+            return unit.get();
         }
     }
 
@@ -300,7 +290,7 @@ public class Save {
         return revolution;
     }
 
-    public LocalDate getStartDate() {
+    public Optional<LocalDate> getStartDate() {
         return this.gamestateItem.getVarAsDate("start_date");
     }
 
@@ -312,11 +302,11 @@ public class Save {
         return areas;
     }
 
-    public Double getTotalMilitaryPower() {
+    public Optional<Double> getTotalMilitaryPower() {
         return this.gamestateItem.getVarAsDouble("total_military_power");
     }
 
-    public Double getAverageMilitaryPower() {
+    public Optional<Double> getAverageMilitaryPower() {
         return this.gamestateItem.getVarAsDouble("average_military_power");
     }
 
@@ -335,7 +325,8 @@ public class Save {
             saveHegemon.get().setCountry(country);
             saveHegemon.get().setProgress(progress);
         } else {
-            SaveHegemon.addToItem(this.gamestateItem, hegemon.getName(), country, progress, this.gamestateItem.getList("institutions").getOrder() + 1);
+            SaveHegemon.addToItem(this.gamestateItem, hegemon.getName(), country, progress,
+                                  this.gamestateItem.getList("institutions").map(ClausewitzList::getOrder).orElse(0) + 1);
             refreshAttributes();
         }
     }
@@ -354,27 +345,23 @@ public class Save {
 
     public Map<TradeGood, SaveCountry> getProductionLeaders() {
         Map<TradeGood, SaveCountry> productionLeaders = new LinkedHashMap<>();
-        ClausewitzList productionLeaderList = this.gamestateItem.getList("production_leader_tag");
-
-        if (productionLeaderList != null) {
+        this.gamestateItem.getList("production_leader_tag").ifPresent(list -> {
             //Start from 1 because first leader is for empty trade good
-            for (int i = 1; i < productionLeaderList.size(); i++) {
-                productionLeaders.put(this.game.getTradeGood(i - 1), getCountry(productionLeaderList.get(i)));
+            for (int i = 1; i < list.size(); i++) {
+                productionLeaders.put(this.game.getTradeGood(i - 1), getCountry(list.get(i).get()));
             }
-        }
+        });
 
         return productionLeaders;
     }
 
     public Map<TradeGood, String> getGoodsTotalProduced() {
         Map<TradeGood, String> productionLeaders = new LinkedHashMap<>();
-        ClausewitzList totalProducedList = this.gamestateItem.getList("tradegoods_total_produced");
-
-        if (totalProducedList != null) {
-            for (int i = 0; i < totalProducedList.size(); i++) {
-                productionLeaders.put(this.game.getTradeGood(i - 1), totalProducedList.get(i));
+        this.gamestateItem.getList("tradegoods_total_produced").ifPresent(list -> {
+            for (int i = 0; i < list.size(); i++) {
+                productionLeaders.put(this.game.getTradeGood(i - 1), list.get(i).get());
             }
-        }
+        });
 
         return productionLeaders;
     }
@@ -399,20 +386,16 @@ public class Save {
         return celestialEmpire;
     }
 
-    public Boolean getHreLeaguesActive() {
-        Integer hreLeaguesStatus = this.gamestateItem.getVarAsInt("hre_leagues_status");
-
-        return hreLeaguesStatus == null ? null : hreLeaguesStatus == 1;
+    public Optional<Boolean> getHreLeaguesActive() {
+        return this.gamestateItem.getVarAsInt("hre_leagues_status").map(integer -> integer == 1);
     }
 
     public void setHreLeaguesActive(boolean hreLeaguesActive) {
         this.gamestateItem.setVariable("hre_leagues_status", hreLeaguesActive ? 1 : 0);
     }
 
-    public HreReligionStatus getHreReligionStatus() {
-        Integer hreLeaguesStatus = this.gamestateItem.getVarAsInt("hre_religion_status");
-
-        return hreLeaguesStatus == null ? null : HreReligionStatus.values()[hreLeaguesStatus];
+    public Optional<HreReligionStatus> getHreReligionStatus() {
+        return this.gamestateItem.getVarAsInt("hre_religion_status").map(integer -> HreReligionStatus.values()[integer]);
     }
 
     public void setHreReligionStatus(HreReligionStatus hreReligionStatus) {
@@ -427,7 +410,7 @@ public class Save {
                 }
 
                 SaveReligion protestant = this.religions.getReligion("protestant");
-                if (protestant != null && protestant.getEnable() != null) {
+                if (protestant != null && protestant.getEnable().isPresent()) {
                     protestant.setHreHereticReligion(true);
                     protestant.setHreReligion(false);
                 }
@@ -441,7 +424,7 @@ public class Save {
                 }
 
                 SaveReligion protestant = this.religions.getReligion("protestant");
-                if (protestant != null && protestant.getEnable() != null) {
+                if (protestant != null && protestant.getEnable().isPresent()) {
                     protestant.setHreHereticReligion(false);
                     protestant.setHreReligion(true);
                 }
@@ -503,22 +486,22 @@ public class Save {
     }
 
     public List<SaveTeam> getTeams() {
-        ClausewitzItem teamsItem = this.gamestateItem.getChild("teams");
-
-        if (teamsItem != null) {
-            return teamsItem.getChildren("team").stream().map(item -> new SaveTeam(item, this)).toList();
-        } else {
-            return new ArrayList<>();
-        }
+        return this.gamestateItem.getChild("teams")
+                                 .map(ClausewitzItem::getChildren)
+                                 .stream()
+                                 .flatMap(Collection::stream)
+                                 .map(item -> new SaveTeam(item, this))
+                                 .toList();
     }
 
     public void addTeam(String name, List<String> members) {
-        ClausewitzItem teamsItem = this.gamestateItem.getChild("teams");
+        ClausewitzItem teamsItem = this.gamestateItem.getChild("teams").orElseGet(() -> {
+            ClausewitzItem i = new ClausewitzItem(this.gamestateItem, "teams",
+                                                  this.gamestateItem.getChild("players_countries").map(ClausewitzItem::getOrder).orElse(1));
+            this.gamestateItem.addChild(i, true);
 
-        if (teamsItem == null) {
-            teamsItem = new ClausewitzItem(this.gamestateItem, "teams", this.gamestateItem.getChild("players_countries").getOrder());
-            this.gamestateItem.addChild(teamsItem, true);
-        }
+            return i;
+        });
 
         ClausewitzItem teamItem = teamsItem.addChild("team");
         SaveTeam team = new SaveTeam(teamItem, this);
@@ -527,13 +510,11 @@ public class Save {
     }
 
     public void removeTeam(String name) {
-        ClausewitzItem teamsItem = this.gamestateItem.getChild("teams");
-
-        if (teamsItem == null) {
-            return;
-        }
-
-        getTeams().stream().filter(saveTeam -> name.equals(saveTeam.name())).findFirst().ifPresent(saveTeam -> teamsItem.removeChild(saveTeam.item()));
+        this.gamestateItem.getChild("teams")
+                          .ifPresent(item -> getTeams().stream()
+                                                       .filter(saveTeam -> name.equals(saveTeam.name()))
+                                                       .findFirst()
+                                                       .ifPresent(saveTeam -> item.removeChild(saveTeam.item())));
     }
 
     public void setAiPrefsForNotConfiguredPlayers(boolean startWars, boolean keepAlliances, boolean keepTreaties, boolean quickPeace, boolean moveTraders,
@@ -601,16 +582,12 @@ public class Save {
     }
 
     public boolean getAchievementOk() {
-        return BooleanUtils.toBoolean(this.gamestateItem.getVarAsBool("achievement_ok"));
+        return this.gamestateItem.getVarAsBool("achievement_ok").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void addTradeCompany(String name, SaveProvince province) {
-        ClausewitzItem tradeCompanyManagerItem = this.gamestateItem.getChild("trade_company_manager");
-
-        if (tradeCompanyManagerItem == null) {
-            tradeCompanyManagerItem = this.gamestateItem.addChild("trade_company_manager");
-        }
-
+        ClausewitzItem tradeCompanyManagerItem = this.gamestateItem.getChild("trade_company_manager")
+                                                                   .orElse(this.gamestateItem.addChild("trade_company_manager"));
         SaveTradeCompany.addToItem(this, tradeCompanyManagerItem, name, province);
         refreshAttributes();
     }
@@ -623,7 +600,7 @@ public class Save {
         return ideaDates;
     }
 
-    public String getChecksum() {
+    public Optional<String> getChecksum() {
         return this.gamestateItem.getVarAsString("checksum");
     }
 
@@ -634,13 +611,12 @@ public class Save {
     }
 
     public List<SaveGreatProject> getGreatProjects() {
-        ClausewitzItem greatProjectsItem = this.gamestateItem.getChild("great_projects");
-
-        if (greatProjectsItem == null) {
-            return new ArrayList<>();
-        }
-
-        return greatProjectsItem.getChildren().stream().map(item -> new SaveGreatProject(this, item)).toList();
+        return this.gamestateItem.getChild("great_projects")
+                                 .map(ClausewitzItem::getChildren)
+                                 .stream()
+                                 .flatMap(Collection::stream)
+                                 .map(item -> new SaveGreatProject(this, item))
+                                 .toList();
     }
 
     public SaveGreatProject getGreatProject(String name) {
@@ -680,148 +656,87 @@ public class Save {
     }
 
     private void refreshAttributes() {
-        ClausewitzItem gameplaySettings = this.gamestateItem.getChild("gameplaysettings");
+        this.gameplayOptions = this.gamestateItem.getChild("gameplaysettings")
+                                                 .flatMap(item -> item.getList("setgameplayoptions"))
+                                                 .filter(Predicate.not(ClausewitzList::isEmpty))
+                                                 .map(GameplayOptions::new)
+                                                 .orElse(null);
+        this.flags = this.gamestateItem.getChild("flags").map(ListOfDates::new).orElse(null);
+        this.revolution = this.gamestateItem.getChild("revolution").map(item -> new Revolution(item, this)).orElse(null);
+        this.idCounters = this.gamestateItem.getList("id_counters").map(IdCounters::new).orElse(null);
 
-        if (gameplaySettings != null) {
-            ClausewitzList gameplayOptionsList = gameplaySettings.getList("setgameplayoptions");
-
-            if (gameplayOptionsList != null && !gameplayOptionsList.isEmpty()) {
-                this.gameplayOptions = new GameplayOptions(gameplayOptionsList);
-            }
+        Optional<ClausewitzList> institutionOrigins = this.gamestateItem.getList("institution_origin");
+        Optional<ClausewitzList> institutionAvailable = this.gamestateItem.getList("institutions");
+        if (institutionOrigins.isPresent() && institutionAvailable.isPresent()) {
+            this.institutions = new Institutions(institutionOrigins.get(), institutionAvailable.get(), this);
         }
 
-        ClausewitzItem flagsItem = this.gamestateItem.getChild("flags");
-
-        if (flagsItem != null) {
-            this.flags = new ListOfDates(flagsItem);
-        }
-
-        ClausewitzItem revolutionItem = this.gamestateItem.getChild("revolution");
-
-        if (revolutionItem != null) {
-            this.revolution = new Revolution(revolutionItem, this);
-        }
-
-        ClausewitzList idCountersList = this.gamestateItem.getList("id_counters");
-
-        if (idCountersList != null) {
-            this.idCounters = new IdCounters(idCountersList);
-        }
-
-        ClausewitzList institutionOrigins = this.gamestateItem.getList("institution_origin");
-        ClausewitzList institutionAvailable = this.gamestateItem.getList("institutions");
-
-        if (institutionOrigins != null && institutionAvailable != null) {
-            this.institutions = new Institutions(institutionOrigins, institutionAvailable, this);
-        }
-
-        ClausewitzItem tradeItem = this.gamestateItem.getChild("trade");
-
-        if (tradeItem != null) {
+        this.gamestateItem.getChild("trade").ifPresentOrElse(item -> {
             AtomicInteger i = new AtomicInteger(1);
-            this.tradeNodes = tradeItem.getChildren("node")
-                                       .stream()
-                                       .map(item -> new SaveTradeNode(item, this, i.getAndIncrement()))
-                                       .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()), Function.identity()));
-        }
+            this.tradeNodes = item.getChildren("node")
+                                  .stream()
+                                  .map(clausewitzItem -> new SaveTradeNode(clausewitzItem, this, i.getAndIncrement()))
+                                  .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()), Function.identity()));
+        }, () -> this.tradeNodes = null);
 
-        ClausewitzItem changePricesItem = this.gamestateItem.getChild("change_price");
-
-        if (changePricesItem != null) {
-            this.changePrices = new ChangePrices(changePricesItem, this.game);
-        }
-
-        List<ClausewitzItem> idsItems = this.gamestateItem.getChildren("id");
-        this.ids = idsItems.stream().map(Id::new).collect(Collectors.toMap(Id::getType, Function.identity()));
+        this.changePrices = this.gamestateItem.getChild("change_price").map(item -> new ChangePrices(item, this.game)).orElse(null);
+        this.ids = this.gamestateItem.getChildren("id").stream().map(Id::new).collect(Collectors.toMap(Id::getType, Function.identity()));
 
         List<ClausewitzItem> rebelFactionItems = this.gamestateItem.getChildren("rebel_faction");
         this.rebelFactions = rebelFactionItems.stream()
                                               .map(child -> new RebelFaction(child, this))
                                               .collect(Collectors.toMap(RebelFaction::getId, Function.identity(), (a, b) -> b));
+        this.hre = this.gamestateItem.getChild("empire").map(item -> new Hre(item, this)).orElse(null);
+        this.celestialEmpire = this.gamestateItem.getChild("celestial_empire").map(item -> new CelestialEmpire(item, this)).orElse(null);
 
-        ClausewitzItem hreItem = this.gamestateItem.getChild("empire");
+        Optional<ClausewitzItem> religionsItem = this.gamestateItem.getChild("religions");
+        Optional<ClausewitzItem> religionInstantDateItem = this.gamestateItem.getChild("religion_instance_data");
 
-        if (hreItem != null) {
-            this.hre = new Hre(hreItem, this);
+        if (religionsItem.isPresent() || religionInstantDateItem.isPresent()) {
+            this.religions = new Religions(religionsItem.get(), religionInstantDateItem.get(), this);
         }
 
-        ClausewitzItem celestialEmpireItem = this.gamestateItem.getChild("celestial_empire");
+        this.firedEvents = this.gamestateItem.getChild("fired_events").map(item -> new FiredEvents(item, this.game)).orElse(null);
+        this.pendingEvents = this.gamestateItem.getChild("pending_events").map(PendingEvents::new).orElse(null);
 
-        if (celestialEmpireItem != null) {
-            this.celestialEmpire = new CelestialEmpire(celestialEmpireItem, this);
-        }
-
-        ClausewitzItem religionsItem = this.gamestateItem.getChild("religions");
-        ClausewitzItem religionInstantDateItem = this.gamestateItem.getChild("religion_instance_data");
-
-        if (religionsItem != null || religionInstantDateItem != null) {
-            this.religions = new Religions(religionsItem, religionInstantDateItem, this);
-        }
-
-        ClausewitzItem firedEventsItem = this.gamestateItem.getChild("fired_events");
-
-        if (firedEventsItem != null) {
-            this.firedEvents = new FiredEvents(firedEventsItem, this.game);
-        }
-
-        ClausewitzItem pendingEventsItem = this.gamestateItem.getChild("pending_events");
-
-        if (pendingEventsItem != null) {
-            this.pendingEvents = new PendingEvents(pendingEventsItem);
-        }
-
-        ClausewitzItem countriesItem = this.gamestateItem.getChild("countries");
-
-        if (countriesItem != null) {
-            this.countries = countriesItem.getChildren()
-                                          .stream()
-                                          .map(countryItem -> new SaveCountry(countryItem, this))
-                                          .collect(Collectors.toMap(SaveCountry::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
+        this.gamestateItem.getChild("countries").ifPresent(item -> {
+            this.countries = item.getChildren()
+                                 .stream()
+                                 .map(countryItem -> new SaveCountry(countryItem, this))
+                                 .collect(Collectors.toMap(SaveCountry::getTag, Function.identity(), (x, y) -> y, LinkedHashMap::new));
             this.playableCountries = this.countries.values().stream().filter(SaveCountry::isPlayable).toList();
-        }
+        });
 
-        ClausewitzList playersCountriesList = this.gamestateItem.getList("players_countries");
-
-        if (playersCountriesList != null) {
-            for (int i = playersCountriesList.getValues().size() - 1; i > 0; i -= 2) {
-                if (this.countries.containsKey(ClausewitzUtils.removeQuotes(playersCountriesList.get(i)))) {
-                    this.getCountry(ClausewitzUtils.removeQuotes(playersCountriesList.get(i))).addPlayer(playersCountriesList.get(i - 1));
+        this.gamestateItem.getList("players_countries").ifPresent(list -> {
+            for (int i = list.getValues().size() - 1; i > 0; i -= 2) {
+                if (this.countries.containsKey(ClausewitzUtils.removeQuotes(list.get(i).get()))) {
+                    this.getCountry(ClausewitzUtils.removeQuotes(list.get(i).get())).addPlayer(list.get(i - 1).get());
                 }
             }
-        }
+        });
 
-        this.hegemons = this.game.getHegemons().stream().flatMap(hegemon -> {
-            ClausewitzItem child = this.gamestateItem.getChild(hegemon.getName());
-
-            if (child != null) {
-                SaveHegemon saveHegemon = new SaveHegemon(child, this, hegemon);
-                saveHegemon.getCountry().setHegemon(saveHegemon);
-                return Stream.of(saveHegemon);
-            }
-
-            return Stream.empty();
-        }).toList();
+        this.hegemons = this.game.getHegemons().stream().flatMap(hegemon -> this.gamestateItem.getChild(hegemon.getName()).map(item -> {
+            SaveHegemon saveHegemon = new SaveHegemon(item, this, hegemon);
+            saveHegemon.getCountry().setHegemon(saveHegemon);
+            return Stream.of(saveHegemon);
+        }).orElseGet(Stream::empty)).toList();
 
         List<ClausewitzItem> tradeLeaguesItems = this.gamestateItem.getChildren("trade_league");
         this.tradeLeagues = tradeLeaguesItems.stream().map(child -> new TradeLeague(child, this)).toList();
         this.tradeLeagues.forEach(tradeLeague -> tradeLeague.getMembers().forEach(member -> member.setTradeLeague(tradeLeague)));
 
-        ClausewitzItem greatPowersItem = this.gamestateItem.getChild("great_powers");
-
-        if (greatPowersItem != null) {
-            greatPowersItem.getChildren("original").forEach(child -> {
-                SaveCountry country = this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("country")));
-                getInternalGreatPowers().put(child.getVarAsInt("rank"), country);
+        this.gamestateItem.getChild("great_powers").ifPresent(item -> {
+            item.getChildren("original").forEach(child -> {
+                SaveCountry country = this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("country").get()));
+                getInternalGreatPowers().put(child.getVarAsInt("rank").get(), country);
             });
 
             this.greatPowers.forEach((key, value) -> value.setGreatPowerRank(key));
-        }
+        });
 
-        ClausewitzItem provincesItems = this.gamestateItem.getChild("provinces");
-
-        if (provincesItems != null) {
+        this.gamestateItem.getChild("provinces").ifPresent(item -> {
             this.provinces = new HashMap<>();
-            provincesItems.getChildren().forEach(provinceItem -> {
+            item.getChildren().forEach(provinceItem -> {
                 Province province = this.game.getProvince(Math.abs(Integer.parseInt(provinceItem.getName())));
                 if (province != null) {
                     SaveProvince saveProvince = new SaveProvince(provinceItem, province, this);
@@ -836,125 +751,74 @@ public class Save {
                                         .filter(SaveProvince::isCity)
                                         .sorted((o1, o2) -> Eu4Utils.COLLATOR.compare(o1.getName(), o2.getName()))
                                         .toList();
-        }
+        });
 
-        ClausewitzItem mapAreaDataItem = this.gamestateItem.getChild("map_area_data");
-
-        if (mapAreaDataItem != null) {
-            this.areas = mapAreaDataItem.getChildren()
-                                        .stream()
-                                        .filter(child -> child.getChild("state") != null || child.getChild("investments") != null)
-                                        .map(child -> new SaveArea(child, this))
-                                        .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()), Function.identity()));
+        this.gamestateItem.getChild("map_area_data").ifPresent(item -> {
+            this.areas = item.getChildren()
+                             .stream()
+                             .filter(child -> child.getChild("state").isPresent() || child.getChild("investments").isPresent())
+                             .map(child -> new SaveArea(child, this))
+                             .collect(Collectors.toMap(area -> ClausewitzUtils.removeQuotes(area.getName()), Function.identity()));
             this.areas.values()
                       .forEach(saveArea -> saveArea.getProvinces().stream().filter(Objects::nonNull).forEach(province -> province.setSaveArea(saveArea)));
-        }
+        });
 
-        ClausewitzItem activeAdvisorsItem = this.gamestateItem.getChild("active_advisors");
+        this.gamestateItem.getChild("active_advisors").ifPresent(item -> item.getChildren().forEach(child -> {
+            SaveCountry country = getCountry(ClausewitzUtils.removeQuotes(child.getName()));
+            child.getChildren("advisor")
+                 .stream()
+                 .map(Id::new)
+                 .forEach(id -> country.getActiveAdvisors().put(id.getId(), getInternalAdvisors().get(id.getId())));
+        }));
 
-        if (activeAdvisorsItem != null) {
-            activeAdvisorsItem.getChildren().forEach(child -> {
-                SaveCountry country = getCountry(ClausewitzUtils.removeQuotes(child.getName()));
-                child.getChildren("advisor")
-                     .stream()
-                     .map(Id::new)
-                     .forEach(id -> country.getActiveAdvisors().put(id.getId(), getInternalAdvisors().get(id.getId())));
-            });
-        }
+        this.diplomacy = this.gamestateItem.getChild("diplomacy").map(item -> new Diplomacy(item, this)).orElse(null);
+        this.combats = this.gamestateItem.getChild("combat").map(item -> new Combats(item, this)).orElse(null);
+        this.activeWars = this.gamestateItem.getChildren("active_war").stream().map(item -> new ActiveWar(item, this)).toList();
+        this.previousWars = this.gamestateItem.getChildren("previous_war").stream().map(item -> new PreviousWar(item, this)).toList();
 
-        ClausewitzItem diplomacyItem = this.gamestateItem.getChild("diplomacy");
+        this.gamestateItem.getChild("income_statistics")
+                          .ifPresent(item -> item.getChildren("ledger_data")
+                                                 .forEach(child -> child.getChild("data")
+                                                                        .ifPresent(dataItem -> getCountry(ClausewitzUtils.removeQuotes(
+                                                                                child.getVarAsString("name").get())).putAllIncomeStatistics(
+                                                                                dataItem.getVariables()
+                                                                                        .stream()
+                                                                                        .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()),
+                                                                                                                  ClausewitzVariable::getAsInt))))));
+        this.gamestateItem.getChild("nation_size_statistics")
+                          .ifPresent(item -> item.getChildren("ledger_data")
+                                                 .forEach(child -> child.getChild("data")
+                                                                        .ifPresent(dataItem -> getCountry(ClausewitzUtils.removeQuotes(
+                                                                                child.getVarAsString("name").get())).putAllNationSizeStatistics(
+                                                                                dataItem.getVariables()
+                                                                                        .stream()
+                                                                                        .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()),
+                                                                                                                  ClausewitzVariable::getAsInt))))));
+        this.gamestateItem.getChild("score_statistics")
+                          .ifPresent(item -> item.getChildren("ledger_data")
+                                                 .forEach(child -> child.getChild("data")
+                                                                        .ifPresent(dataItem -> getCountry(ClausewitzUtils.removeQuotes(
+                                                                                child.getVarAsString("name").get())).putAllScoreStatistics(
+                                                                                dataItem.getVariables()
+                                                                                        .stream()
+                                                                                        .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()),
+                                                                                                                  ClausewitzVariable::getAsInt))))));
+        this.gamestateItem.getChild("inflation_statistics")
+                          .ifPresent(item -> item.getChildren("ledger_data")
+                                                 .forEach(child -> child.getChild("data")
+                                                                        .ifPresent(dataItem -> getCountry(ClausewitzUtils.removeQuotes(
+                                                                                child.getVarAsString("name").get())).putAllInflationStatistics(
+                                                                                dataItem.getVariables()
+                                                                                        .stream()
+                                                                                        .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()),
+                                                                                                                  ClausewitzVariable::getAsInt))))));
 
-        if (diplomacyItem != null) {
-            this.diplomacy = new Diplomacy(diplomacyItem, this);
-        }
+        this.gamestateItem.getChild("trade_company_manager").ifPresent(item -> item.getChildren("trade_company").forEach(child -> {
+            SaveTradeCompany company = new SaveTradeCompany(child, this);
+            company.getOwner().addTradeCompany(company);
+        }));
 
-        ClausewitzItem combatItem = this.gamestateItem.getChild("combat");
-
-        if (combatItem != null) {
-            this.combats = new Combats(combatItem, this);
-        }
-
-        List<ClausewitzItem> activeWarsItems = this.gamestateItem.getChildren("active_war");
-        this.activeWars = activeWarsItems.stream().map(item -> new ActiveWar(item, this)).toList();
-
-        List<ClausewitzItem> previousWarsItems = this.gamestateItem.getChildren("previous_war");
-        this.previousWars = previousWarsItems.stream().map(item -> new PreviousWar(item, this)).toList();
-
-        ClausewitzItem incomeStatisticsItem = this.gamestateItem.getChild("income_statistics");
-
-        if (incomeStatisticsItem != null) {
-            incomeStatisticsItem.getChildren("ledger_data").forEach(child -> {
-                ClausewitzItem dataItem = child.getChild("data");
-                if (dataItem != null) {
-                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .putAllIncomeStatistics(dataItem.getVariables()
-                                                        .stream()
-                                                        .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
-                }
-            });
-        }
-
-        ClausewitzItem nationSizeStatisticsItem = this.gamestateItem.getChild("nation_size_statistics");
-
-        if (nationSizeStatisticsItem != null) {
-            nationSizeStatisticsItem.getChildren("ledger_data").forEach(child -> {
-                ClausewitzItem dataItem = child.getChild("data");
-                if (dataItem != null) {
-                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .putAllNationSizeStatistics(dataItem.getVariables()
-                                                            .stream()
-                                                            .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
-                }
-            });
-        }
-
-        ClausewitzItem scoreStatisticsItem = this.gamestateItem.getChild("score_statistics");
-
-        if (scoreStatisticsItem != null) {
-            scoreStatisticsItem.getChildren("ledger_data").forEach(child -> {
-                ClausewitzItem dataItem = child.getChild("data");
-                if (dataItem != null) {
-                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .putAllScoreStatistics(dataItem.getVariables()
-                                                       .stream()
-                                                       .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
-                }
-            });
-        }
-
-        ClausewitzItem inflationStatisticsItem = this.gamestateItem.getChild("inflation_statistics");
-
-        if (inflationStatisticsItem != null) {
-            inflationStatisticsItem.getChildren("ledger_data").forEach(child -> {
-                ClausewitzItem dataItem = child.getChild("data");
-                if (dataItem != null) {
-                    this.getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name")))
-                        .putAllInflationStatistics(dataItem.getVariables()
-                                                           .stream()
-                                                           .collect(Collectors.toMap(var -> Integer.valueOf(var.getName()), ClausewitzVariable::getAsInt)));
-                }
-            });
-        }
-
-        ClausewitzItem tradeCompanyManagerItem = this.gamestateItem.getChild("trade_company_manager");
-
-        if (tradeCompanyManagerItem != null) {
-            tradeCompanyManagerItem.getChildren("trade_company").forEach(child -> {
-                SaveTradeCompany company = new SaveTradeCompany(child, this);
-                company.getOwner().addTradeCompany(company);
-            });
-        }
-
-        ClausewitzItem techLevelDatesItem = this.gamestateItem.getChild("tech_level_dates");
-
-        if (techLevelDatesItem != null) {
-            this.techLevelDates = new TechLevelDates(techLevelDatesItem);
-        }
-
-        ClausewitzItem ideaDatesItem = this.gamestateItem.getChild("idea_dates");
-
-        if (ideaDatesItem != null) {
-            this.ideaDates = new ListOfDates(ideaDatesItem);
-        }
+        this.techLevelDates = this.gamestateItem.getChild("tech_level_dates").map(TechLevelDates::new).orElse(null);
+        this.ideaDates = this.gamestateItem.getChild("idea_dates").map(ListOfDates::new).orElse(null);
     }
 }

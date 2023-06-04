@@ -1,8 +1,10 @@
 package fr.osallek.eu4parser.model.save.changeprices;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ChangePrice {
 
@@ -16,19 +18,19 @@ public class ChangePrice {
         this.item = item;
     }
 
-    public String getKey() {
+    public Optional<String> getKey() {
         return this.item.getVarAsString("key");
     }
 
     public int getValue() {
-        return (int) (this.item.getVarAsDouble("value") * 100);
+        return this.item.getVarAsDouble("value").map(aDouble -> aDouble * 100).map(Double::intValue).orElse(0);
     }
 
     public void setValue(int percent) {
         this.item.setVariable("value", (double) percent / 100);
     }
 
-    public LocalDate getExpiryDate() {
+    public Optional<LocalDate> getExpiryDate() {
         return this.item.getVarAsDate("expiry_date");
     }
 
@@ -59,7 +61,8 @@ public class ChangePrice {
             return false;
         }
 
-        return getKey().equalsIgnoreCase(that.getKey()) && getValue() == that.getValue() && getExpiryDate().equals(that.getExpiryDate());
+        return getKey().isPresent() && that.getKey().isPresent() && getKey().get().equalsIgnoreCase(that.getKey().get()) && getValue() == that.getValue()
+               && getExpiryDate().equals(that.getExpiryDate());
     }
 
     @Override

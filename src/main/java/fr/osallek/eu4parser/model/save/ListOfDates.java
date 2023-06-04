@@ -6,6 +6,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public record ListOfDates(ClausewitzItem item) {
@@ -19,10 +20,10 @@ public record ListOfDates(ClausewitzItem item) {
     }
 
     public boolean contains(String name) {
-        return this.item.getVar(name) != null;
+        return this.item.getVar(name).isPresent();
     }
 
-    public LocalDate get(String name) {
+    public Optional<LocalDate> get(String name) {
         return this.item.getVarAsDate(name);
     }
 

@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.game.Game;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,14 +36,8 @@ public class ChangePrices {
         return this.goods.values().toArray(new ChangePriceGood[] {})[index];
     }
 
-    public Double getCurrentPrice(String good) {
-        ChangePriceGood changePriceGood = this.goods.get(good);
-
-        if (changePriceGood != null) {
-            return changePriceGood.getCurrentPrice();
-        }
-
-        return null;
+    public Optional<Double> getCurrentPrice(String good) {
+        return Optional.ofNullable(this.goods.get(good)).flatMap(ChangePriceGood::getCurrentPrice);
     }
 
     public void addChangePrice(String good, String key, int percent, LocalDate expiryDate) {

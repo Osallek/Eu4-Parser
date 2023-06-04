@@ -3,11 +3,12 @@ package fr.osallek.eu4parser.model.save;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public record Id(ClausewitzItem item) {
 
     public Integer getId() {
-        return this.item.getVarAsInt("id");
+        return this.item.getVarAsInt("id").orElse(1);
     }
 
     public Integer incrementId() {
@@ -22,7 +23,7 @@ public record Id(ClausewitzItem item) {
     }
 
     public Integer getType() {
-        return this.item.getVarAsInt("type");
+        return this.item.getVarAsInt("type").get();
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, int type) {
@@ -54,11 +55,10 @@ public record Id(ClausewitzItem item) {
             return true;
         }
 
-        if (!(o instanceof Id)) {
+        if (!(o instanceof Id id)) {
             return false;
         }
 
-        Id id = (Id) o;
         return Objects.equals(getId(), id.getId()) && Objects.equals(getType(), id.getType());
     }
 

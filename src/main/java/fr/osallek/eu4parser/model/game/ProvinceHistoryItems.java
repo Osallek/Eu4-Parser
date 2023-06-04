@@ -6,6 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ProvinceHistoryItems implements ProvinceHistoryItemI {
 
@@ -24,13 +25,13 @@ public class ProvinceHistoryItems implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Country getOwner() {
-        return this.items.stream().map(ProvinceHistoryItemI::getOwner).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Country> getOwner() {
+        return this.items.stream().map(ProvinceHistoryItemI::getOwner).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Country getController() {
-        return this.items.stream().map(ProvinceHistoryItemI::getController).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Country> getController() {
+        return this.items.stream().map(ProvinceHistoryItemI::getController).flatMap(Optional::stream).findFirst();
     }
 
     @Override
@@ -56,48 +57,48 @@ public class ProvinceHistoryItems implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Boolean getCity() {
-        return this.items.stream().map(ProvinceHistoryItemI::getCity).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Boolean> getCity() {
+        return this.items.stream().map(ProvinceHistoryItemI::getCity).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Culture getCulture() {
-        return this.items.stream().map(ProvinceHistoryItemI::getCulture).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Culture> getCulture() {
+        return this.items.stream().map(ProvinceHistoryItemI::getCulture).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Religion getReligion() {
-        return this.items.stream().map(ProvinceHistoryItemI::getReligion).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Religion> getReligion() {
+        return this.items.stream().map(ProvinceHistoryItemI::getReligion).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getBaseTax() {
-        return this.items.stream().map(ProvinceHistoryItemI::getBaseTax).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getBaseTax() {
+        return this.items.stream().map(ProvinceHistoryItemI::getBaseTax).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getBaseProduction() {
-        return this.items.stream().map(ProvinceHistoryItemI::getBaseProduction).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getBaseProduction() {
+        return this.items.stream().map(ProvinceHistoryItemI::getBaseProduction).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getBaseManpower() {
-        return this.items.stream().map(ProvinceHistoryItemI::getBaseManpower).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getBaseManpower() {
+        return this.items.stream().map(ProvinceHistoryItemI::getBaseManpower).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public TradeGood getTradeGoods() {
-        return this.items.stream().map(ProvinceHistoryItemI::getTradeGoods).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<TradeGood> getTradeGoods() {
+        return this.items.stream().map(ProvinceHistoryItemI::getTradeGoods).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Boolean getHre() {
-        return this.items.stream().map(ProvinceHistoryItemI::getHre).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Boolean> getHre() {
+        return this.items.stream().map(ProvinceHistoryItemI::getHre).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public String getCapital() {
-        return this.items.stream().map(ProvinceHistoryItemI::getCapital).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<String> getCapital() {
+        return this.items.stream().map(ProvinceHistoryItemI::getCapital).flatMap(Optional::stream).findFirst();
     }
 
     @Override
@@ -106,43 +107,43 @@ public class ProvinceHistoryItems implements ProvinceHistoryItemI {
     }
 
     @Override
-    public Boolean getReformationCenter() {
-        return this.items.stream().map(ProvinceHistoryItemI::getReformationCenter).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Boolean> getReformationCenter() {
+        return this.items.stream().map(ProvinceHistoryItemI::getReformationCenter).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Boolean getSeatInParliament() {
-        return this.items.stream().map(ProvinceHistoryItemI::getSeatInParliament).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Boolean> getSeatInParliament() {
+        return this.items.stream().map(ProvinceHistoryItemI::getSeatInParliament).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getUnrest() {
-        return this.items.stream().map(ProvinceHistoryItemI::getUnrest).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getUnrest() {
+        return this.items.stream().map(ProvinceHistoryItemI::getUnrest).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getCenterOfTrade() {
-        return this.items.stream().map(ProvinceHistoryItemI::getCenterOfTrade).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getCenterOfTrade() {
+        return this.items.stream().map(ProvinceHistoryItemI::getCenterOfTrade).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getExtraCost() {
-        return this.items.stream().map(ProvinceHistoryItemI::getExtraCost).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getExtraCost() {
+        return this.items.stream().map(ProvinceHistoryItemI::getExtraCost).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getNativeSize() {
-        return this.items.stream().map(ProvinceHistoryItemI::getNativeSize).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getNativeSize() {
+        return this.items.stream().map(ProvinceHistoryItemI::getNativeSize).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getNativeHostileness() {
-        return this.items.stream().map(ProvinceHistoryItemI::getNativeHostileness).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getNativeHostileness() {
+        return this.items.stream().map(ProvinceHistoryItemI::getNativeHostileness).flatMap(Optional::stream).findFirst();
     }
 
     @Override
-    public Integer getNativeFerocity() {
-        return this.items.stream().map(ProvinceHistoryItemI::getNativeFerocity).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<Integer> getNativeFerocity() {
+        return this.items.stream().map(ProvinceHistoryItemI::getNativeFerocity).flatMap(Optional::stream).findFirst();
     }
 
     @Override
@@ -156,8 +157,8 @@ public class ProvinceHistoryItems implements ProvinceHistoryItemI {
     }
 
     @Override
-    public ProvinceRevolt getRevolt() {
-        return this.items.stream().map(ProvinceHistoryItemI::getRevolt).filter(Objects::nonNull).findFirst().orElse(null);
+    public Optional<ProvinceRevolt> getRevolt() {
+        return this.items.stream().map(ProvinceHistoryItemI::getRevolt).flatMap(Optional::stream).findFirst();
     }
 
     @Override
