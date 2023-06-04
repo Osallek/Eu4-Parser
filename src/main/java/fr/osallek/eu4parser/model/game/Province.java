@@ -133,20 +133,20 @@ public class Province {
             return;
         }
 
-        this.cityX = positions.getAsDouble(0);
-        this.cityY = positions.getAsDouble(1);
-        this.unitX = positions.getAsDouble(2);
-        this.unitY = positions.getAsDouble(3);
-        this.nameTextX = positions.getAsDouble(4);
-        this.nameTextY = positions.getAsDouble(5);
-        this.portX = positions.getAsDouble(6);
-        this.portY = positions.getAsDouble(7);
-        this.tradeRouteX = positions.getAsDouble(8);
-        this.tradeRouteY = positions.getAsDouble(9);
-        this.fightingUnitX = positions.getAsDouble(10);
-        this.fightingUnitY = positions.getAsDouble(11);
-        this.tradeWindX = positions.getAsDouble(12);
-        this.tradeWindY = positions.getAsDouble(13);
+        this.cityX = positions.getAsDouble(0).orElse(0d);
+        this.cityY = positions.getAsDouble(1).orElse(0d);
+        this.unitX = positions.getAsDouble(2).orElse(0d);
+        this.unitY = positions.getAsDouble(3).orElse(0d);
+        this.nameTextX = positions.getAsDouble(4).orElse(0d);
+        this.nameTextY = positions.getAsDouble(5).orElse(0d);
+        this.portX = positions.getAsDouble(6).orElse(0d);
+        this.portY = positions.getAsDouble(7).orElse(0d);
+        this.tradeRouteX = positions.getAsDouble(8).orElse(0d);
+        this.tradeRouteY = positions.getAsDouble(9).orElse(0d);
+        this.fightingUnitX = positions.getAsDouble(10).orElse(0d);
+        this.fightingUnitY = positions.getAsDouble(11).orElse(0d);
+        this.tradeWindX = positions.getAsDouble(12).orElse(0d);
+        this.tradeWindY = positions.getAsDouble(13).orElse(0d);
     }
 
     public void setHistory(ClausewitzItem item, Game game, FileNode historyMod) {

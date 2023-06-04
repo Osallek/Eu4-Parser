@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.Color;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class StateEdict {
 
@@ -23,43 +24,20 @@ public class StateEdict {
         this.item.setName(name);
     }
 
-    public ConditionAnd getPotential() {
-        ClausewitzItem child = item.getChild("potential");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
-    public void setPotential(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("potential");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("potential");
-        //Todo Condition => item
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
-    }
-
-    public void setAllow(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("allow");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("allow");
-        //Todo Condition => item
-    }
-
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
-    public Color getColor() {
-        ClausewitzList list = this.item.getList("color");
-        return list == null ? null : new Color(list);
+    public Optional<Color> getColor() {
+        return this.item.getList("color").map(Color::new);
     }
 
     public void setColor(Color color) {
@@ -68,16 +46,12 @@ public class StateEdict {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
+        this.item.getList("color").ifPresentOrElse(list -> {
             Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
     @Override

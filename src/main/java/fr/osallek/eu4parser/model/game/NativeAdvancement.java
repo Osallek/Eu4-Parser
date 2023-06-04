@@ -35,7 +35,7 @@ public class NativeAdvancement {
     }
 
     public Modifiers getModifiers() {
-        return new Modifiers(item.getVariables());
+        return new Modifiers(this.item.getVariables());
     }
 
     @Override

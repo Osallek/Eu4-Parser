@@ -2,8 +2,10 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class TriggeredModifier extends GameModifier {
 
@@ -12,18 +14,16 @@ public class TriggeredModifier extends GameModifier {
     }
 
     @Override
-    public Modifiers getModifier() {
-        return new Modifiers(this.item.getVariables());
+    public Optional<Modifiers> getModifier() {
+        return Optional.of(this.item.getVariables()).filter(CollectionUtils::isNotEmpty).map(Modifiers::new);
     }
 
-    public ConditionAnd getPotential() {
-        ClausewitzItem child = this.item.getChild("potential");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     @Override

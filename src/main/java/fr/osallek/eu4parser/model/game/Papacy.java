@@ -2,7 +2,9 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class Papacy {
 
@@ -13,14 +15,10 @@ public class Papacy {
     }
 
     public List<PapacyConcession> getConcessions() {
-        ClausewitzItem child = this.item.getChild("concessions");
-        return child == null ? null : child.getChildren()
-                                           .stream()
-                                           .map(PapacyConcession::new)
-                                           .toList();
+        return this.item.getChild("concessions").map(ClausewitzItem::getChildren).stream().flatMap(Collection::stream).map(PapacyConcession::new).toList();
     }
 
-    public String getPapacyTag() {
+    public Optional<String> getPapacyTag() {
         return this.item.getVarAsString("papal_tag");
     }
 
@@ -28,7 +26,7 @@ public class Papacy {
         this.item.setVariable("papal_tag", tag);
     }
 
-    public Integer getElectionCost() {
+    public Optional<Integer> getElectionCost() {
         return this.item.getVarAsInt("election_cost");
     }
 
@@ -36,15 +34,15 @@ public class Papacy {
         this.item.setVariable("election_cost", electionCost);
     }
 
-    public Modifiers getHarshModifiers() {
+    public Optional<Modifiers> getHarshModifiers() {
         return this.item.getChild("harsh").map(Modifiers::new);
     }
 
-    public Modifiers getNeutralModifiers() {
+    public Optional<Modifiers> getNeutralModifiers() {
         return this.item.getChild("neutral").map(Modifiers::new);
     }
 
-    public Modifiers getConcilatoryModifiers() {
+    public Optional<Modifiers> getConcilatoryModifiers() {
         return this.item.getChild("concilatory").map(Modifiers::new);
     }
 }

@@ -5,8 +5,11 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class TradeNodeOutgoing {
@@ -17,8 +20,8 @@ public class TradeNodeOutgoing {
         this.item = item;
     }
 
-    public String getName() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+    public Optional<String> getName() {
+        return this.item.getVarAsString("name").map(ClausewitzUtils::removeQuotes);
     }
 
     public void setName(String name) {
@@ -26,24 +29,19 @@ public class TradeNodeOutgoing {
     }
 
     public List<Integer> getPath() {
-        ClausewitzList list = this.item.getList("path");
-        return list == null ? null : list.getValuesAsInt();
+        return this.item.getList("path").map(ClausewitzList::getValuesAsInt).stream().flatMap(Collection::stream).toList();
     }
 
     public void setPath(List<Integer> path) {
-        this.item.getList("path").setAll(path.stream().filter(Objects::nonNull).map(String::valueOf).toList());
+        this.item.getList("path").get().setAll(path.stream().filter(Objects::nonNull).map(String::valueOf).toList());
     }
 
     public List<Pair<Double, Double>> getControl() {
-        ClausewitzList list = this.item.getList("control");
-
-        if (list != null) {
-            return IntStream.iterate(0, i -> i < list.size(), i -> i + 2)
-                            .mapToObj(i -> Pair.of(list.getAsDouble(i), list.getAsDouble(i + 1)))
-                            .toList();
-        } else {
-            return null;
-        }
+        return this.item.getList("control")
+                        .map(list -> IntStream.iterate(0, i -> i < list.size(), i -> i + 2)
+                                              .mapToObj(i -> Pair.of(list.getAsDouble(i).get(), list.getAsDouble(i + 1).get()))
+                                              .toList())
+                        .orElse(new ArrayList<>());
     }
 
     @Override
@@ -66,6 +64,6 @@ public class TradeNodeOutgoing {
 
     @Override
     public String toString() {
-        return getName();
+        return getName().orElse("");
     }
 }

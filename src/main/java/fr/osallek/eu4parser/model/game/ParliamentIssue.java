@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class ParliamentIssue extends GameModifier {
 
@@ -13,26 +14,20 @@ public class ParliamentIssue extends GameModifier {
     }
 
     @Override
-    public Modifiers getModifier() {
+    public Optional<Modifiers> getModifier() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
     public Power getCategory() {
-        return Power.byParliamentType(this.item.getVarAsInt("category"));
+        return this.item.getVarAsInt("category").map(Power::byParliamentType).get();
     }
 
     public void setCategory(Power category) {
         this.item.setVariable("category", category.name());
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
-    }
-
-    @Override
-    public String toString() {
-        return getName();
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
     @Override

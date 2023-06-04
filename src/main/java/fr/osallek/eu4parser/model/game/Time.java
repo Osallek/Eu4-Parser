@@ -11,7 +11,7 @@ public class Time {
     }
 
     public int getMonths() {
-        return this.item.getVarAsInt("months");
+        return this.item.getVarAsInt("months").orElse(0);
     }
 
     public void setMonths(int months) {

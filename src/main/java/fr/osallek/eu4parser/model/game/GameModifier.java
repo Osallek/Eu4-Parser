@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class GameModifier {
 
@@ -22,14 +23,14 @@ public abstract class GameModifier {
         this.item.setName(name);
     }
 
-    public abstract Modifiers getModifier();
+    public abstract Optional<Modifiers> getModifier();
 
-    public Double getModifier(SaveCountry country, Modifier modifierName) {
-        return getModifier().hasModifier(modifierName) ? getModifier().getModifier(modifierName) : null;
+    public Optional<Double> getModifier(SaveCountry country, Modifier modifierName) {
+        return getModifier().map(m -> m.getModifier(modifierName));
     }
 
-    public Double getModifier(SaveProvince province, Modifier modifierName) {
-        return getModifier().hasModifier(modifierName) ? getModifier().getModifier(modifierName) : null;
+    public Optional<Double> getModifier(SaveProvince province, Modifier modifierName) {
+        return getModifier().map(m -> m.getModifier(modifierName));
     }
 
     @Override

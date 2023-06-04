@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class TerrainCategory extends Nodded {
 
@@ -33,9 +34,8 @@ public class TerrainCategory extends Nodded {
         this.item.setName(name);
     }
 
-    public Color getColor() {
-        ClausewitzList list = this.item.getList("color");
-        return list == null ? null : new Color(list);
+    public Optional<Color> getColor() {
+        return this.item.getList("color").map(Color::new);
     }
 
     public void setColor(Color color) {
@@ -44,19 +44,15 @@ public class TerrainCategory extends Nodded {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
+        this.item.getList("color").ifPresentOrElse(list -> {
             fr.osallek.eu4parser.model.Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
-    public String getSoundType() {
+    public Optional<String> getSoundType() {
         return this.item.getVarAsString("sound_type");
     }
 
@@ -64,7 +60,7 @@ public class TerrainCategory extends Nodded {
         this.item.setVariable("sound_type", soundType);
     }
 
-    public Boolean isWater() {
+    public Optional<Boolean> isWater() {
         return this.item.getVarAsBool("is_water");
     }
 
@@ -76,7 +72,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Boolean isInlandSea() {
+    public Optional<Boolean> isInlandSea() {
         return this.item.getVarAsBool("inland_sea");
     }
 
@@ -88,7 +84,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Integer getDefence() {
+    public Optional<Integer> getDefence() {
         return this.item.getVarAsInt("defence");
     }
 
@@ -100,7 +96,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Integer getAllowedNumOfBuildings() {
+    public Optional<Integer> getAllowedNumOfBuildings() {
         return this.item.getVarAsInt("allowed_num_of_buildings");
     }
 
@@ -112,7 +108,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Integer getSupplyLimit() {
+    public Optional<Integer> getSupplyLimit() {
         return this.item.getVarAsInt("supply_limit");
     }
 
@@ -124,7 +120,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Double getMovementCost() {
+    public Optional<Double> getMovementCost() {
         return this.item.getVarAsDouble("movement_cost");
     }
 
@@ -136,7 +132,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Double getLocalDevelopmentCost() {
+    public Optional<Double> getLocalDevelopmentCost() {
         return this.item.getVarAsDouble("local_development_cost");
     }
 
@@ -148,7 +144,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Double getNationDesignerCostMultiplier() {
+    public Optional<Double> getNationDesignerCostMultiplier() {
         return this.item.getVarAsDouble("nation_designer_cost_multiplier");
     }
 
@@ -160,7 +156,7 @@ public class TerrainCategory extends Nodded {
         }
     }
 
-    public Double getLocalDefensiveness() {
+    public Optional<Double> getLocalDefensiveness() {
         return this.item.getVarAsDouble("local_defensiveness");
     }
 
@@ -173,8 +169,7 @@ public class TerrainCategory extends Nodded {
     }
 
     public List<Integer> getProvinces() {
-        ClausewitzList list = this.item.getList("terrain_override");
-        return list == null ? null : list.getValuesAsInt();
+        return this.item.getList("terrain_override").map(ClausewitzList::getValuesAsInt).orElse(new ArrayList<>());
     }
 
     public void setProvinces(List<Integer> provinces) {
@@ -183,32 +178,20 @@ public class TerrainCategory extends Nodded {
             return;
         }
 
-        ClausewitzList list = this.item.getList("terrain_override");
-
-        if (list != null) {
-            list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-        } else {
-            this.item.addList("terrain_override", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-        }
+        this.item.getList("terrain_override")
+                 .ifPresentOrElse(list -> list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)),
+                                  () -> this.item.addList("terrain_override", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)));
     }
 
     public void addProvince(int province) {
-        ClausewitzList list = this.item.getList("terrain_override");
-
-        if (list != null) {
+        this.item.getList("terrain_override").ifPresentOrElse(list -> {
             list.add(province);
             list.sortInt();
-        } else {
-            this.item.addList("terrain_override", province);
-        }
+        }, () -> this.item.addList("terrain_override", province));
     }
 
     public void removeProvince(int province) {
-        ClausewitzList list = this.item.getList("terrain_override");
-
-        if (list != null) {
-            list.remove(String.valueOf(province));
-        }
+        this.item.getList("terrain_override").ifPresent(list -> list.remove(String.valueOf(province)));
     }
 
     public List<Integer> getComputedProvinces() {

@@ -2,9 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
-import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -12,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SubjectType {
@@ -217,147 +216,141 @@ public class SubjectType {
     private String subjectOpinionModifier;
 
     public SubjectType(ClausewitzItem item, Collection<SubjectType> subjectTypes) {
-        subjectTypes.stream()
-                    .filter(subjectType -> StringUtils.isNotBlank(subjectType.getSprite()))
-                    .filter(subjectType -> subjectType.getName().equalsIgnoreCase(item.getVarAsString("copy_from")))
-                    .findFirst()
-                    .ifPresent(this::copy);
+        item.getVarAsString("copy_from")
+            .flatMap(s -> subjectTypes.stream()
+                                      .filter(subjectType -> StringUtils.isNotBlank(subjectType.getSprite()))
+                                      .filter(subjectType -> subjectType.getName().equalsIgnoreCase(s))
+                                      .findFirst())
+            .ifPresent(this::copy);
 
         this.item = item;
 
-        this.sprite = StringUtils.defaultIfBlank(item.getVarAsString("sprite"), this.sprite);
-        this.diplomacyOverlordSprite = StringUtils.defaultIfBlank(item.getVarAsString("diplomacy_overlord_sprite"), this.diplomacyOverlordSprite);
-        this.diplomacySubjectSprite = StringUtils.defaultIfBlank(item.getVarAsString("diplomacy_subject_sprite"), this.diplomacySubjectSprite);
-        this.hasOverlordsRuler = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("has_overlords_ruler"), this.hasOverlordsRuler);
-        this.canFightIndependenceWar = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_fight_independence_war"), this.canFightIndependenceWar);
-        this.isVoluntary = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("is_voluntary"), this.isVoluntary);
-        this.transferTradePower = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("transfer_trade_power"), this.transferTradePower);
-        this.transferTradeIfMerchantRepublic = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("transfer_trade_if_merchant_republic"),
-                                                                                   this.transferTradeIfMerchantRepublic);
-        this.joinsOverlordsWars = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("joins_overlords_wars"), this.joinsOverlordsWars);
-        this.joinsColonialWars = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("joins_colonial_wars"), this.joinsColonialWars);
-        this.canBeIntegrated = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_be_integrated"), this.canBeIntegrated);
-        this.canReleaseAndPlay = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_release_and_play"), this.canReleaseAndPlay);
-        this.usesTariffs = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("uses_tariffs"), this.usesTariffs);
-        this.dynamicallyCreatedDuringHistory = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("dynamically_created_during_history"),
-                                                                                   this.dynamicallyCreatedDuringHistory);
-        this.eatsOverlordsColonies = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("eats_overlords_colonies"), this.eatsOverlordsColonies);
-        this.hasColonialParent = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("has_colonial_parent"), this.hasColonialParent);
-        this.overlordCanAttack = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("overlord_can_attack"), this.overlordCanAttack);
-        this.overlordCanBeSubject = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("overlord_can_be_subject"), this.overlordCanBeSubject);
-        this.canHaveSubjectsOfOtherTypes = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_have_subjects_of_other_types"),
-                                                                               this.canHaveSubjectsOfOtherTypes);
-        this.canBeAnnexed = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_be_annexed"), this.canBeAnnexed);
-        this.takesDiploSlot = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("takes_diplo_slot"), this.takesDiploSlot);
-        this.hasPowerProjection = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("has_power_projection"), this.hasPowerProjection);
-        this.canReleaseInPeace = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_release_in_peace"), this.canReleaseInPeace);
-        this.usesMilitaryFocus = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("uses_military_focus"), this.usesMilitaryFocus);
-        this.overlordProtectsExternal = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("overlord_protects_external"), this.overlordProtectsExternal);
-        this.countsForBorders = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("counts_for_borders"), this.countsForBorders);
-        this.overlordEnforcePeaceAttacking = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("overlord_enforce_peace_attacking"),
-                                                                                 this.overlordEnforcePeaceAttacking);
-        this.canUseClaims = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_use_claims"), this.canUseClaims);
-        this.givesDaimyoBonuses = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("gives_daimyo_bonuses"), this.givesDaimyoBonuses);
-        this.getsHelpWithRebels = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("gets_help_with_rebels"), this.getsHelpWithRebels);
-        this.shareRebelPopup = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("share_rebel_popup"), this.shareRebelPopup);
-        this.separatistsBecomeSubjects = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("separatists_become_subjects"), this.separatistsBecomeSubjects);
-        this.allowsTakingLandWithoutIndependence = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("allows_taking_land_without_independence"),
-                                                                                       this.allowsTakingLandWithoutIndependence);
-        this.canTransferInPeace = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_transfer_in_peace"), this.canTransferInPeace);
-        this.canSetMilFocus = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_set_mil_focus"), this.canSetMilFocus);
-        this.canSendMissionaryToSubject = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_send_missionary_to_subject"),
-                                                                              this.canSendMissionaryToSubject);
-        this.canUnionBreak = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("can_union_break"), this.canUnionBreak);
-        this.overlordCanFabricateFor = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("overlord_can_fabricate_for"), this.overlordCanFabricateFor);
-        this.maxGovernmentRank = NumbersUtils.intOrDefault(item.getVarAsInt("max_government_rank"), this.maxGovernmentRank);
-        this.citiesRequiredForBonuses = NumbersUtils.intOrDefault(item.getVarAsInt("cities_required_for_bonuses"), this.citiesRequiredForBonuses);
-        this.trustOnStart = NumbersUtils.intOrDefault(item.getVarAsInt("trust_on_start"), this.trustOnStart);
-        this.baseLibertyDesire = NumbersUtils.doubleOrDefault(item.getVarAsDouble("base_liberty_desire"), this.baseLibertyDesire);
-        this.libertyDesireNegativePrestige = NumbersUtils.doubleOrDefault(item.getVarAsDouble("liberty_desire_negative_prestige"),
-                                                                          this.libertyDesireNegativePrestige);
-        this.libertyDesireDevelopmentRatio = NumbersUtils.doubleOrDefault(item.getVarAsDouble("liberty_desire_development_ratio"),
-                                                                          this.libertyDesireDevelopmentRatio);
-        this.libertyDesireSameDynasty = NumbersUtils.doubleOrDefault(item.getVarAsDouble("liberty_desire_same_dynasty"), this.libertyDesireSameDynasty);
-        this.libertyDesireRevolution = NumbersUtils.doubleOrDefault(item.getVarAsDouble("liberty_desire_revolution"), this.libertyDesireRevolution);
-        this.paysOverlord = NumbersUtils.doubleOrDefault(item.getVarAsDouble("pays_overlord"), this.paysOverlord);
-        this.forcelimitBonus = NumbersUtils.doubleOrDefault(item.getVarAsDouble("forcelimit_bonus"), this.forcelimitBonus);
-        this.forcelimitToOverlord = NumbersUtils.doubleOrDefault(item.getVarAsDouble("forcelimit_to_overlord"), this.forcelimitToOverlord);
-        this.militaryFocus = NumbersUtils.doubleOrDefault(item.getVarAsDouble("military_focus"), this.militaryFocus);
-        this.relativePowerClass = NumbersUtils.doubleOrDefault(item.getVarAsDouble("relative_power_class"), this.relativePowerClass);
-        this.diplomacyViewClass = NumbersUtils.intOrDefault(item.getVarAsInt("diplomacy_view_class"), this.diplomacyViewClass);
-        this.embargoRivals = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("embargo_rivals"), this.embargoRivals);
-        this.supportLoyalists = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("support_loyalists"), this.supportLoyalists);
-        this.subsidizeArmies = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("subsidize_armies"), this.subsidizeArmies);
-        this.scutage = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("scutage"), this.scutage);
-        this.sendOfficers = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("send_officers"), this.sendOfficers);
-        this.divertTrade = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("divert_trade"), this.divertTrade);
-        this.placateRulers = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("placate_rulers"), this.placateRulers);
-        this.placeRelativeOnThrone = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("place_relative_on_throne"), this.placeRelativeOnThrone);
-        this.enforceReligion = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("enforce_religion"), this.enforceReligion);
-        this.customizeSubject = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("customize_subject"), this.customizeSubject);
-        this.replaceGovernor = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("replace_governor"), this.replaceGovernor);
-        this.grantProvince = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("grant_province"), this.grantProvince);
-        this.enforceCulture = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("enforce_culture"), this.enforceCulture);
-        this.siphonIncome = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("siphon_income"), this.siphonIncome);
-        this.fortifyMarch = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("fortify_march"), this.fortifyMarch);
-        this.seizeTerritory = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("seize_territory"), this.seizeTerritory);
-        this.startColonialWar = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("start_colonial_war"), this.startColonialWar);
-        this.grantCoreClaim = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("grant_core_claim"), this.grantCoreClaim);
-        this.sacrificeRuler = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("sacrifice_ruler"), this.sacrificeRuler);
-        this.sacrificeHeir = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("sacrifice_heir"), this.sacrificeHeir);
-        this.increaseTariffs = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("increase_tariffs"), this.increaseTariffs);
-        this.decreaseTariffs = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("decrease_tariffs"), this.decreaseTariffs);
-        this.takeOnDebt = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("takeondebt"), this.takeOnDebt);
-        this.bestowGifts = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("bestow_gifts"), this.bestowGifts);
-        this.sendAdditionalTroops = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("send_additional_troops"), this.sendAdditionalTroops);
-        this.demandArtifacts = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("demand_artifacts"), this.demandArtifacts);
-        this.demandAdditionalTribute = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("demand_additional_tribute"), this.demandAdditionalTribute);
-        this.forceSeppuku = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("force_seppuku"), this.forceSeppuku);
-        this.pressSailors = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("press_sailors"), this.pressSailors);
-        this.contributeToCapital = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("contribute_to_capital"), this.contributeToCapital);
-        this.forceIsolation = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("force_isolation"), this.forceIsolation);
-        this.returnLand = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("return_land"), this.returnLand);
-        this.conscriptGeneral = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("conscript_general"), this.conscriptGeneral);
-        this.knowledgeSharing = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("knowledge_sharing"), this.knowledgeSharing);
-        this.blockSettlementGrowth = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("block_settlement_growth"), this.blockSettlementGrowth);
-        this.allowSettlementGrowth = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("allow_settlement_growth"), this.allowSettlementGrowth);
-        this.swordHunt = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("sword_hunt"), this.swordHunt);
-        this.sankinKotai = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("sankin_kotai"), this.sankinKotai);
-        this.expelRonin = BooleanUtils.toBooleanDefaultIfNull(item.getVarAsBool("expel_ronin"), this.expelRonin);
-        this.overlordOpinionModifier = StringUtils.defaultIfBlank(item.getVarAsString("overlord_opinion_modifier"), this.overlordOpinionModifier);
-        this.subjectOpinionModifier = StringUtils.defaultIfBlank(item.getVarAsString("subject_opinion_modifier"), this.subjectOpinionModifier);
+        this.sprite = item.getVarAsString("sprite").filter(StringUtils::isNotBlank).orElse(this.sprite);
+        this.diplomacyOverlordSprite = item.getVarAsString("diplomacy_overlord_sprite").filter(StringUtils::isNotBlank).orElse(this.diplomacyOverlordSprite);
+        this.diplomacySubjectSprite = item.getVarAsString("diplomacy_subject_sprite").filter(StringUtils::isNotBlank).orElse(this.diplomacySubjectSprite);
+        this.hasOverlordsRuler = item.getVarAsBool("has_overlords_ruler").orElse(this.hasOverlordsRuler);
+        this.canFightIndependenceWar = item.getVarAsBool("can_fight_independence_war").orElse(this.canFightIndependenceWar);
+        this.isVoluntary = item.getVarAsBool("is_voluntary").orElse(this.isVoluntary);
+        this.transferTradePower = item.getVarAsBool("transfer_trade_power").orElse(this.transferTradePower);
+        this.transferTradeIfMerchantRepublic = item.getVarAsBool("transfer_trade_if_merchant_republic").orElse(this.transferTradeIfMerchantRepublic);
+        this.joinsOverlordsWars = item.getVarAsBool("joins_overlords_wars").orElse(this.joinsOverlordsWars);
+        this.joinsColonialWars = item.getVarAsBool("joins_colonial_wars").orElse(this.joinsColonialWars);
+        this.canBeIntegrated = item.getVarAsBool("can_be_integrated").orElse(this.canBeIntegrated);
+        this.canReleaseAndPlay = item.getVarAsBool("can_release_and_play").orElse(this.canReleaseAndPlay);
+        this.usesTariffs = item.getVarAsBool("uses_tariffs").orElse(this.usesTariffs);
+        this.dynamicallyCreatedDuringHistory = item.getVarAsBool("dynamically_created_during_history").orElse(this.dynamicallyCreatedDuringHistory);
+        this.eatsOverlordsColonies = item.getVarAsBool("eats_overlords_colonies").orElse(this.eatsOverlordsColonies);
+        this.hasColonialParent = item.getVarAsBool("has_colonial_parent").orElse(this.hasColonialParent);
+        this.overlordCanAttack = item.getVarAsBool("overlord_can_attack").orElse(this.overlordCanAttack);
+        this.overlordCanBeSubject = item.getVarAsBool("overlord_can_be_subject").orElse(this.overlordCanBeSubject);
+        this.canHaveSubjectsOfOtherTypes = item.getVarAsBool("can_have_subjects_of_other_types").orElse(this.canHaveSubjectsOfOtherTypes);
+        this.canBeAnnexed = item.getVarAsBool("can_be_annexed").orElse(this.canBeAnnexed);
+        this.takesDiploSlot = item.getVarAsBool("takes_diplo_slot").orElse(this.takesDiploSlot);
+        this.hasPowerProjection = item.getVarAsBool("has_power_projection").orElse(this.hasPowerProjection);
+        this.canReleaseInPeace = item.getVarAsBool("can_release_in_peace").orElse(this.canReleaseInPeace);
+        this.usesMilitaryFocus = item.getVarAsBool("uses_military_focus").orElse(this.usesMilitaryFocus);
+        this.overlordProtectsExternal = item.getVarAsBool("overlord_protects_external").orElse(this.overlordProtectsExternal);
+        this.countsForBorders = item.getVarAsBool("counts_for_borders").orElse(this.countsForBorders);
+        this.overlordEnforcePeaceAttacking = item.getVarAsBool("overlord_enforce_peace_attacking").orElse(this.overlordEnforcePeaceAttacking);
+        this.canUseClaims = item.getVarAsBool("can_use_claims").orElse(this.canUseClaims);
+        this.givesDaimyoBonuses = item.getVarAsBool("gives_daimyo_bonuses").orElse(this.givesDaimyoBonuses);
+        this.getsHelpWithRebels = item.getVarAsBool("gets_help_with_rebels").orElse(this.getsHelpWithRebels);
+        this.shareRebelPopup = item.getVarAsBool("share_rebel_popup").orElse(this.shareRebelPopup);
+        this.separatistsBecomeSubjects = item.getVarAsBool("separatists_become_subjects").orElse(this.separatistsBecomeSubjects);
+        this.allowsTakingLandWithoutIndependence = item.getVarAsBool("allows_taking_land_without_independence")
+                                                       .orElse(this.allowsTakingLandWithoutIndependence);
+        this.canTransferInPeace = item.getVarAsBool("can_transfer_in_peace").orElse(this.canTransferInPeace);
+        this.canSetMilFocus = item.getVarAsBool("can_set_mil_focus").orElse(this.canSetMilFocus);
+        this.canSendMissionaryToSubject = item.getVarAsBool("can_send_missionary_to_subject").orElse(this.canSendMissionaryToSubject);
+        this.canUnionBreak = item.getVarAsBool("can_union_break").orElse(this.canUnionBreak);
+        this.overlordCanFabricateFor = item.getVarAsBool("overlord_can_fabricate_for").orElse(this.overlordCanFabricateFor);
+        this.maxGovernmentRank = item.getVarAsInt("max_government_rank").orElse(maxGovernmentRank);
+        this.citiesRequiredForBonuses = item.getVarAsInt("cities_required_for_bonuses").orElse(citiesRequiredForBonuses);
+        this.trustOnStart = item.getVarAsInt("trust_on_start").orElse(trustOnStart);
+        this.baseLibertyDesire = item.getVarAsDouble("base_liberty_desire").orElse(baseLibertyDesire);
+        this.libertyDesireNegativePrestige = item.getVarAsDouble("liberty_desire_negative_prestige").orElse(libertyDesireNegativePrestige);
+        this.libertyDesireDevelopmentRatio = item.getVarAsDouble("liberty_desire_development_ratio").orElse(libertyDesireDevelopmentRatio);
+        this.libertyDesireSameDynasty = item.getVarAsDouble("liberty_desire_same_dynasty").orElse(libertyDesireSameDynasty);
+        this.libertyDesireRevolution = item.getVarAsDouble("liberty_desire_revolution").orElse(libertyDesireRevolution);
+        this.paysOverlord = item.getVarAsDouble("pays_overlord").orElse(paysOverlord);
+        this.forcelimitBonus = item.getVarAsDouble("forcelimit_bonus").orElse(forcelimitBonus);
+        this.forcelimitToOverlord = item.getVarAsDouble("forcelimit_to_overlord").orElse(forcelimitToOverlord);
+        this.militaryFocus = item.getVarAsDouble("military_focus").orElse(militaryFocus);
+        this.relativePowerClass = item.getVarAsDouble("relative_power_class").orElse(relativePowerClass);
+        this.diplomacyViewClass = item.getVarAsInt("diplomacy_view_class").orElse(diplomacyViewClass);
+        this.embargoRivals = item.getVarAsBool("embargo_rivals").orElse(this.embargoRivals);
+        this.supportLoyalists = item.getVarAsBool("support_loyalists").orElse(this.supportLoyalists);
+        this.subsidizeArmies = item.getVarAsBool("subsidize_armies").orElse(this.subsidizeArmies);
+        this.scutage = item.getVarAsBool("scutage").orElse(this.scutage);
+        this.sendOfficers = item.getVarAsBool("send_officers").orElse(this.sendOfficers);
+        this.divertTrade = item.getVarAsBool("divert_trade").orElse(this.divertTrade);
+        this.placateRulers = item.getVarAsBool("placate_rulers").orElse(this.placateRulers);
+        this.placeRelativeOnThrone = item.getVarAsBool("place_relative_on_throne").orElse(this.placeRelativeOnThrone);
+        this.enforceReligion = item.getVarAsBool("enforce_religion").orElse(this.enforceReligion);
+        this.customizeSubject = item.getVarAsBool("customize_subject").orElse(this.customizeSubject);
+        this.replaceGovernor = item.getVarAsBool("replace_governor").orElse(this.replaceGovernor);
+        this.grantProvince = item.getVarAsBool("grant_province").orElse(this.grantProvince);
+        this.enforceCulture = item.getVarAsBool("enforce_culture").orElse(this.enforceCulture);
+        this.siphonIncome = item.getVarAsBool("siphon_income").orElse(this.siphonIncome);
+        this.fortifyMarch = item.getVarAsBool("fortify_march").orElse(this.fortifyMarch);
+        this.seizeTerritory = item.getVarAsBool("seize_territory").orElse(this.seizeTerritory);
+        this.startColonialWar = item.getVarAsBool("start_colonial_war").orElse(this.startColonialWar);
+        this.grantCoreClaim = item.getVarAsBool("grant_core_claim").orElse(this.grantCoreClaim);
+        this.sacrificeRuler = item.getVarAsBool("sacrifice_ruler").orElse(this.sacrificeRuler);
+        this.sacrificeHeir = item.getVarAsBool("sacrifice_heir").orElse(this.sacrificeHeir);
+        this.increaseTariffs = item.getVarAsBool("increase_tariffs").orElse(this.increaseTariffs);
+        this.decreaseTariffs = item.getVarAsBool("decrease_tariffs").orElse(this.decreaseTariffs);
+        this.takeOnDebt = item.getVarAsBool("takeondebt").orElse(this.takeOnDebt);
+        this.bestowGifts = item.getVarAsBool("bestow_gifts").orElse(this.bestowGifts);
+        this.sendAdditionalTroops = item.getVarAsBool("send_additional_troops").orElse(this.sendAdditionalTroops);
+        this.demandArtifacts = item.getVarAsBool("demand_artifacts").orElse(this.demandArtifacts);
+        this.demandAdditionalTribute = item.getVarAsBool("demand_additional_tribute").orElse(this.demandAdditionalTribute);
+        this.forceSeppuku = item.getVarAsBool("force_seppuku").orElse(this.forceSeppuku);
+        this.pressSailors = item.getVarAsBool("press_sailors").orElse(this.pressSailors);
+        this.contributeToCapital = item.getVarAsBool("contribute_to_capital").orElse(this.contributeToCapital);
+        this.forceIsolation = item.getVarAsBool("force_isolation").orElse(this.forceIsolation);
+        this.returnLand = item.getVarAsBool("return_land").orElse(this.returnLand);
+        this.conscriptGeneral = item.getVarAsBool("conscript_general").orElse(this.conscriptGeneral);
+        this.knowledgeSharing = item.getVarAsBool("knowledge_sharing").orElse(this.knowledgeSharing);
+        this.blockSettlementGrowth = item.getVarAsBool("block_settlement_growth").orElse(this.blockSettlementGrowth);
+        this.allowSettlementGrowth = item.getVarAsBool("allow_settlement_growth").orElse(this.allowSettlementGrowth);
+        this.swordHunt = item.getVarAsBool("sword_hunt").orElse(this.swordHunt);
+        this.sankinKotai = item.getVarAsBool("sankin_kotai").orElse(this.sankinKotai);
+        this.expelRonin = item.getVarAsBool("expel_ronin").orElse(this.expelRonin);
+        this.overlordOpinionModifier = item.getVarAsString("overlord_opinion_modifier").filter(StringUtils::isNotBlank).orElse(this.overlordOpinionModifier);
+        this.subjectOpinionModifier = item.getVarAsString("subject_opinion_modifier").filter(StringUtils::isNotBlank).orElse(this.subjectOpinionModifier);
+        this.canFight = item.getChild("can_fight")
+                            .map(ClausewitzItem::getVariables)
+                            .stream()
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
+                                                           Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.canRival = item.getChild("can_rival")
+                            .map(ClausewitzItem::getVariables)
+                            .stream()
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
+                                                           Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.canAlly = item.getChild("can_ally")
+                            .map(ClausewitzItem::getVariables)
+                            .stream()
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
+                                                           Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
+        this.canMarry = item.getChild("can_marry")
+                            .map(ClausewitzItem::getVariables)
+                            .stream()
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
+                                                           Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
 
-        ClausewitzItem child = item.getChild("can_fight");
-        this.canFight = child == null ? null : child.getVariables()
-                                                    .stream()
-                                                    .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
-                                                                                   Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-        child = item.getChild("can_rival");
-        this.canRival = child == null ? null : child.getVariables()
-                                                    .stream()
-                                                    .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
-                                                                                   Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-        child = item.getChild("can_ally");
-        this.canAlly = child == null ? null : child.getVariables()
-                                                   .stream()
-                                                   .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
-                                                                                  Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-        child = item.getChild("can_marry");
-        this.canMarry = child == null ? null : child.getVariables()
-                                                    .stream()
-                                                    .collect(Collectors.groupingBy(variable -> SubjectTypeRelation.valueOf(variable.getName().toUpperCase()),
-                                                                                   Collectors.mapping(ClausewitzVariable::getValue, Collectors.toList())));
-
-        if ("clear".equalsIgnoreCase(item.getVarAsString("modifier_subject"))) {
+        if (item.getVarAsString("modifier_subject").isPresent() && "clear".equalsIgnoreCase(item.getVarAsString("modifier_subject").get())) {
             this.modifierSubjects.clear();
         }
 
         item.getChildren("modifier_subject").stream().map(ModifierSubject::new).forEach(this.modifierSubjects::add);
 
-        if ("clear".equalsIgnoreCase(item.getVarAsString("modifier_overlord"))) {
+        if (item.getVarAsString("modifier_overlord").isPresent() && "clear".equalsIgnoreCase(item.getVarAsString("modifier_overlord").get())) {
             this.modifierOverlord.clear();
         }
 
@@ -474,9 +467,8 @@ public class SubjectType {
         this.item.setName(name);
     }
 
-    public ConditionAnd isPotentialOverlord() {
-        ClausewitzItem child = this.item.getChild("is_potential_overlord");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> isPotentialOverlord() {
+        return this.item.getChild("is_potential_overlord").map(ConditionAnd::new);
     }
 
     public String getSprite() {

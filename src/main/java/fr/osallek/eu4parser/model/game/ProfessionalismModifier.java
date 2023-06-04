@@ -2,9 +2,11 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ProfessionalismModifier implements Comparable<ProfessionalismModifier> {
 
@@ -14,27 +16,18 @@ public class ProfessionalismModifier implements Comparable<ProfessionalismModifi
         this.item = item;
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
-    public void setTrigger(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("trigger");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("trigger");
-        //Todo Condition => item
-    }
-
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getVarsNot("marker_sprite", "unit_sprite_start", "army_professionalism", "hidden"));
+    public Optional<Modifiers> getModifiers() {
+        return Optional.of(this.item.getVarsNot("marker_sprite", "unit_sprite_start", "army_professionalism", "hidden"))
+                       .filter(CollectionUtils::isNotEmpty)
+                       .map(Modifiers::new);
     }
 
     public double getArmyProfessionalism() {
-        return this.item.getVarAsDouble("army_professionalism");
+        return this.item.getVarAsDouble("army_professionalism").orElse(0d);
     }
 
     public void setArmyProfessionalism(double armyProfessionalism) {

@@ -39,7 +39,7 @@ public class Technology {
     }
 
     public int getYear() {
-        return this.item.getVarAsInt("year");
+        return this.item.getVarAsInt("year").orElse(0);
     }
 
     public void setYear(int year) {

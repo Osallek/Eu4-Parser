@@ -11,7 +11,7 @@ public class ModifierApply {
     }
 
     public String getModifier() {
-        return this.item.getVarAsString("name");
+        return this.item.getVarAsString("name").orElse("");
     }
 
     public void setModifier(String modifier) {
@@ -19,7 +19,7 @@ public class ModifierApply {
     }
 
     public int getDuration() {
-        return this.item.getVarAsInt("duration");
+        return this.item.getVarAsInt("duration").orElse(0);
     }
 
     public void setDuration(int duration) {

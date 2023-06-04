@@ -4,6 +4,8 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+
 public class ProvinceRevolt {
 
     private final ClausewitzItem item;
@@ -12,7 +14,7 @@ public class ProvinceRevolt {
         this.item = item;
     }
 
-    public String getType() {
+    public Optional<String> getType() {
         return this.item.getVarAsString("type");
     }
 
@@ -20,8 +22,8 @@ public class ProvinceRevolt {
         this.item.setVariable("type", type);
     }
 
-    public String getLeader() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("leader"));
+    public Optional<String> getLeader() {
+        return this.item.getVarAsString("leader").map(ClausewitzUtils::removeQuotes);
     }
 
     public void setLeader(String leader) {
@@ -32,7 +34,7 @@ public class ProvinceRevolt {
         }
     }
 
-    public Integer getSize() {
+    public Optional<Integer> getSize() {
         return this.item.getVarAsInt("size");
     }
 
@@ -45,6 +47,6 @@ public class ProvinceRevolt {
     }
 
     public boolean isClearing() {
-        return getSize() == null;
+        return getSize().isEmpty();
     }
 }

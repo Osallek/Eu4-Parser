@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class ParliamentBribe {
 
@@ -24,9 +25,8 @@ public class ParliamentBribe {
         this.item.setName(name);
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     public Game getGame() {

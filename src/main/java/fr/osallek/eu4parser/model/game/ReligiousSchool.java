@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -30,32 +31,32 @@ public class ReligiousSchool {
         this.item.setName(name);
     }
 
-    public ConditionAnd getPotentialInviteScholar() {
-        return Optional.ofNullable(this.item.getChild("potential_invite_scholar")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getPotentialInviteScholar() {
+        return this.item.getChild("potential_invite_scholar").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanInviteScholar() {
-        return Optional.ofNullable(this.item.getChild("can_invite_scholar")).map(ConditionAnd::new).orElse(null);
+    public Optional<ConditionAnd> getCanInviteScholar() {
+        return this.item.getChild("can_invite_scholar").map(ConditionAnd::new);
     }
 
-    public Modifiers getOnInviteScholar() {
-        return Optional.ofNullable(this.item.getChild("on_invite_scholar")).map(Modifiers::new).orElse(null);
+    public Optional<Modifiers> getOnInviteScholar() {
+        return this.item.getChild("on_invite_scholar").map(Modifiers::new);
     }
 
-    public String getInviteScholarModifierDisplay() {
+    public Optional<String> getInviteScholarModifierDisplay() {
         return this.item.getVarAsString("invite_scholar_modifier_display");
     }
 
-    public String getPicture() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("picture"));
+    public Optional<String> getPicture() {
+        return this.item.getVarAsString("picture").map(ClausewitzUtils::removeQuotes);
     }
 
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getVarsNot("picture", "invite_scholar_modifier_display"));
+    public Optional<Modifiers> getModifiers() {
+        return Optional.of(this.item.getVarsNot("picture", "invite_scholar_modifier_display")).filter(CollectionUtils::isNotEmpty).map(Modifiers::new);
     }
 
-    public File getImageFile() {
-        return this.game.getSpriteTypeImageFile(getPicture());
+    public Optional<File> getImageFile() {
+        return getPicture().map(this.game::getSpriteTypeImageFile);
     }
 
     public Path getWritenTo() {

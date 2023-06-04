@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class NavalDoctrine {
 
@@ -21,7 +22,7 @@ public class NavalDoctrine {
         this.item.setName(name);
     }
 
-    public Integer getButtonGfx() {
+    public Optional<Integer> getButtonGfx() {
         return this.item.getVarAsInt("button_gfx");
     }
 
@@ -33,12 +34,11 @@ public class NavalDoctrine {
         }
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = this.item.getChild("can_select");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("can_select").map(ConditionAnd::new);
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("country_modifier").map(Modifiers::new);
     }
 

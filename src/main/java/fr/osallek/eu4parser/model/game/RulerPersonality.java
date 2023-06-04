@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.save.country.Monarch;
 import fr.osallek.eu4parser.model.save.country.Queen;
 import java.io.File;
 import java.util.Objects;
+import java.util.Optional;
 
 public class RulerPersonality {
 
@@ -27,64 +28,20 @@ public class RulerPersonality {
         this.item.setName(name);
     }
 
-    public ConditionAnd getRulerAllow() {
-        ClausewitzItem child = item.getChild("ruler_allow");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getRulerAllow() {
+        return this.item.getChild("ruler_allow").map(ConditionAnd::new);
     }
 
-    public void setRulerAllow(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("ruler_allow");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("ruler_allow");
-        //Todo Condition => item
+    public Optional<ConditionAnd> getHeirAllow() {
+        return this.item.getChild("heir_allow").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getHeirAllow() {
-        ClausewitzItem child = item.getChild("heir_allow");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getConsortAllow() {
+        return this.item.getChild("consort_allow").map(ConditionAnd::new);
     }
 
-    public void setHeirAllow(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("heir_allow");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("heir_allow");
-        //Todo Condition => item
-    }
-
-    public ConditionAnd getConsortAllow() {
-        ClausewitzItem child = item.getChild("consort_allow");
-        return child == null ? null : new ConditionAnd(child);
-    }
-
-    public void setConsortAllow(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("consort_allow");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("consort_allow");
-        //Todo Condition => item
-    }
-
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
-    }
-
-    public void setAllow(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("allow");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("allow");
-        //Todo Condition => item
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
     public Modifiers getModifiers() {
@@ -92,19 +49,19 @@ public class RulerPersonality {
     }
 
     public boolean isMonarchValid(Monarch monarch) {
-        if (getAllow() != null && !getAllow().apply(monarch.getCountry(), monarch.getCountry())) {
+        if (getAllow().isPresent() && !getAllow().get().apply(monarch.getCountry(), monarch.getCountry())) {
             return false;
         }
 
-        if (Monarch.class.equals(monarch.getClass()) && (getRulerAllow() == null || getRulerAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+        if (Monarch.class.equals(monarch.getClass()) && (getRulerAllow().isEmpty() || getRulerAllow().get().apply(monarch.getCountry(), monarch.getCountry()))) {
             return false;
         }
 
-        if (Heir.class.equals(monarch.getClass()) && (getHeirAllow() == null || getHeirAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+        if (Heir.class.equals(monarch.getClass()) && (getHeirAllow().isEmpty() || getHeirAllow().get().apply(monarch.getCountry(), monarch.getCountry()))) {
             return false;
         }
 
-        if (Queen.class.equals(monarch.getClass()) && (getConsortAllow() == null || getConsortAllow().apply(monarch.getCountry(), monarch.getCountry()))) {
+        if (Queen.class.equals(monarch.getClass()) && (getConsortAllow().isEmpty() || getConsortAllow().get().apply(monarch.getCountry(), monarch.getCountry()))) {
             return false;
         }
 

@@ -3,6 +3,8 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
+import java.util.Optional;
+
 public class NationDesignerCost {
 
     private final ClausewitzItem item;
@@ -11,8 +13,8 @@ public class NationDesignerCost {
         this.item = item;
     }
 
-    public ConditionAnd getTrigger() {
-        return this.item.getChild("trigger") == null ? null : new ConditionAnd(item.getChild("trigger"));
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     public void setTrigger(ConditionAnd condition) {
@@ -21,12 +23,12 @@ public class NationDesignerCost {
             return;
         }
 
-        ClausewitzItem triggerChild = this.item.getChild("trigger");
+//        ClausewitzItem triggerChild = this.item.getChild("trigger");
         //Todo Condition => item
     }
 
     public int getValue() {
-        return this.item.getVarAsInt("value");
+        return this.item.getVarAsInt("value").orElse(0);
     }
 
     public void setValue(int value) {

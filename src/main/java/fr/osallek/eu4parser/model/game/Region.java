@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.MonthDay;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,8 +49,7 @@ public class Region extends Nodded {
     }
 
     public List<Area> getAreas() {
-        ClausewitzList list = this.item.getList("areas");
-        return list == null ? null : list.getValues().stream().map(this.game::getArea).toList();
+        return this.item.getList("areas").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.game::getArea).toList();
     }
 
     public void setAreas(List<String> areas) {
@@ -58,45 +58,31 @@ public class Region extends Nodded {
             return;
         }
 
-        ClausewitzList list = this.item.getList("areas");
-
-        if (list != null) {
-            list.setAll(areas.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("areas", areas.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("areas")
+                 .ifPresentOrElse(list -> list.setAll(areas.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("areas", areas.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public void addArea(String area) {
-        ClausewitzList list = this.item.getList("areas");
-
-        if (list != null) {
+        this.item.getList("areas").ifPresentOrElse(list -> {
             list.add(area);
             list.sort();
-        } else {
-            this.item.addList("areas", area);
-        }
+        }, () -> this.item.addList("areas", area));
     }
 
     public void removeArea(String area) {
-        ClausewitzList list = this.item.getList("areas");
-
-        if (list != null) {
-            list.remove(area);
-        }
+        this.item.getList("areas").ifPresent(list -> list.remove(area));
     }
 
     public Map<MonthDay, MonthDay> getMonsoon() {
         List<ClausewitzList> lists = this.item.getLists("monsoon");
 
         return lists.stream()
-                    .collect(Collectors.toMap(
-                            l -> MonthDay.of(
-                                    Integer.parseInt(l.get(0).substring(l.get(0).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
-                                    Integer.parseInt(l.get(0).substring(l.get(0).lastIndexOf(".") + 1))),
-                            l -> MonthDay.of(
-                                    Integer.parseInt(l.get(1).substring(l.get(1).indexOf(".") + 1, l.get(0).lastIndexOf("."))),
-                                    Integer.parseInt(l.get(1).substring(l.get(1).lastIndexOf(".") + 1)))));
+                    .collect(Collectors.toMap(l -> MonthDay.of(
+                            Integer.parseInt(l.get(0).orElse("").substring(l.get(0).orElse("").indexOf(".") + 1, l.get(0).orElse("").lastIndexOf("."))),
+                            Integer.parseInt(l.get(0).orElse("").substring(l.get(0).orElse("").lastIndexOf(".") + 1))), l -> MonthDay.of(
+                            Integer.parseInt(l.get(1).orElse("").substring(l.get(1).orElse("").indexOf(".") + 1, l.get(0).orElse("").lastIndexOf("."))),
+                            Integer.parseInt(l.get(1).orElse("").substring(l.get(1).orElse("").lastIndexOf(".") + 1)))));
     }
 
     public void setMonsoon(Map<MonthDay, MonthDay> monsoon) {
@@ -123,8 +109,8 @@ public class Region extends Nodded {
 
         return monsoon != null && monsoon.entrySet()
                                          .stream()
-                                         .anyMatch(entry -> entry.getKey().equals(monthDay) || entry.getValue().equals(monthDay)
-                                                            || (entry.getKey().isBefore(monthDay) && entry.getValue().isBefore(monthDay)));
+                                         .anyMatch(entry -> entry.getKey().equals(monthDay) || entry.getValue().equals(monthDay) || (
+                                                 entry.getKey().isBefore(monthDay) && entry.getValue().isBefore(monthDay)));
     }
 
     @Override

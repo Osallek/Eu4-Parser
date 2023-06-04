@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzList;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,7 +32,7 @@ public class ReligionGroup {
     }
 
     public boolean defenderOfFaith() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("defender_of_faith"));
+        return this.item.getVarAsBool("defender_of_faith").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setDefenderOfFaith(Boolean primitive) {
@@ -45,7 +44,7 @@ public class ReligionGroup {
     }
 
     public boolean canFormPersonalUnions() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("can_form_personal_unions"));
+        return this.item.getVarAsBool("can_form_personal_unions").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setCanFormPersonalUnions(Boolean primitive) {
@@ -56,7 +55,7 @@ public class ReligionGroup {
         }
     }
 
-    public Integer getCenterOfReligion() {
+    public Optional<Integer> getCenterOfReligion() {
         return this.item.getVarAsInt("center_of_religion");
     }
 
@@ -68,7 +67,7 @@ public class ReligionGroup {
         }
     }
 
-    public Integer getFlagsWithEmblemPercentage() {
+    public Optional<Integer> getFlagsWithEmblemPercentage() {
         return this.item.getVarAsInt("flags_with_emblem_percentage");
     }
 
@@ -86,27 +85,24 @@ public class ReligionGroup {
         }
     }
 
-    public Pair<Integer, Integer> getFlagEmblemIndexRange() {
-        ClausewitzList list = this.item.getList("flag_emblem_index_range");
-        return list == null ? null : Pair.of(list.getAsInt(0), list.getAsInt(1));
+    public Optional<Pair<Integer, Integer>> getFlagEmblemIndexRange() {
+        return this.item.getList("flag_emblem_index_range")
+                        .filter(list -> list.getAsInt(0).isPresent() && list.getAsInt(1).isPresent())
+                        .map(list -> Pair.of(list.getAsInt(0).get(), list.getAsInt(1).get()));
     }
 
     public void setFlagEmblemIndexRange(Integer flagEmblemIndexRangeMin, Integer flagEmblemIndexRangeMax) {
         if (flagEmblemIndexRangeMin == null || flagEmblemIndexRangeMax == null) {
             this.item.removeList("flag_emblem_index_range");
         } else {
-            ClausewitzList list = this.item.getList("flag_emblem_index_range");
-
-            if (list != null) {
+            this.item.getList("flag_emblem_index_range").ifPresentOrElse(list -> {
                 list.set(0, flagEmblemIndexRangeMin);
                 list.set(1, flagEmblemIndexRangeMax);
-            } else {
-                this.item.addList("flag_emblem_index_range", flagEmblemIndexRangeMin, flagEmblemIndexRangeMax);
-            }
+            }, () -> this.item.addList("flag_emblem_index_range", flagEmblemIndexRangeMin, flagEmblemIndexRangeMax));
         }
     }
 
-    public String getHarmonizedModifier() {
+    public Optional<String> getHarmonizedModifier() {
         return this.item.getVarAsString("harmonized_modifier");
     }
 
@@ -118,7 +114,7 @@ public class ReligionGroup {
         }
     }
 
-    public String getCrusadeName() {
+    public Optional<String> getCrusadeName() {
         return this.item.getVarAsString("crusade_name");
     }
 
@@ -131,17 +127,14 @@ public class ReligionGroup {
     }
 
     public List<Religion> getReligions() {
-        return this.item.getChildrenNot("religious_schools")
-                        .stream()
-                        .map(child -> new Religion(child, this))
-                        .toList();
+        return this.item.getChildrenNot("religious_schools").stream().map(child -> new Religion(child, this)).toList();
     }
 
     public List<ReligiousSchool> getReligiousSchools() {
         if (this.religiousSchools == null) {
-            this.religiousSchools = Optional.ofNullable(this.item.getChild("religious_schools"))
-                                            .map(i -> i.getChildren().stream().map(ii -> new ReligiousSchool(ii, this.game)).toList())
-                                            .orElse(new ArrayList<>());
+            this.religiousSchools = this.item.getChild("religious_schools")
+                                             .map(i -> i.getChildren().stream().map(ii -> new ReligiousSchool(ii, this.game)).toList())
+                                             .orElse(new ArrayList<>());
         }
 
         return this.religiousSchools;

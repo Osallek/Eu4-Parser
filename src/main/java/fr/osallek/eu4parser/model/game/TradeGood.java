@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
@@ -48,13 +47,12 @@ public class TradeGood {
         this.item.setName(name);
     }
 
-    public Color getColor() {
+    public Optional<Color> getColor() {
         if (this.item == null) {
-            return null;
+            return Optional.empty();
         }
 
-        ClausewitzList clausewitzList = this.item.getList("color");
-        return clausewitzList == null ? null : new Color(clausewitzList, true);
+        return this.item.getList("color").map(l -> new Color(l, true));
     }
 
     public void setColor(Color color) {
@@ -63,28 +61,24 @@ public class TradeGood {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
+        this.item.getList("color").ifPresentOrElse(list -> {
             Color actualColor = new Color(list, true);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
-    public Modifiers getModifiers() {
+    public Optional<Modifiers> getModifiers() {
         return this.item.getChild("modifier").map(Modifiers::new);
     }
 
-    public Modifiers getProvinceModifiers() {
+    public Optional<Modifiers> getProvinceModifiers() {
         return this.item.getChild("province").map(Modifiers::new);
     }
 
-    public Double getBasePrice() {
-        return this.priceItem == null ? 1 : this.priceItem.getVarAsDouble("base_price");
+    public double getBasePrice() {
+        return this.priceItem.getVarAsDouble("base_price").orElse(1d);
     }
 
     public void setBasePrice(Double basePrice) {
@@ -99,8 +93,8 @@ public class TradeGood {
         }
     }
 
-    public Boolean isGoldType() {
-        return Optional.ofNullable(this.priceItem).map(i -> i.getVarAsBool("goldtype")).orElse(null);
+    public Optional<Boolean> isGoldType() {
+        return Optional.ofNullable(this.priceItem).flatMap(i -> i.getVarAsBool("goldtype"));
     }
 
     public void setGoldType(Boolean goldType) {

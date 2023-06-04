@@ -6,9 +6,12 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Tree extends Nodded {
 
@@ -35,23 +38,21 @@ public class Tree extends Nodded {
     }
 
     public List<Color> getFileColors() {
-        ClausewitzList list = this.item.getList("color");
-        return list == null ? null : list.getValuesAsInt().stream().map(this.fileColors::get).toList();
+        return this.item.getList("color").map(ClausewitzList::getValuesAsInt).stream().flatMap(Collection::stream).map(this.fileColors::get).toList();
     }
 
     public void setColor(List<Integer> indexes) {
         indexes.removeIf(index -> index < 0 || index >= this.fileColors.size());
 
-        ClausewitzList list = this.item.getList("color");
-        list.setAll(indexes.toArray(Integer[]::new));
+        this.item.getList("color").get().setAll(indexes.toArray(Integer[]::new));
     }
 
-    public String getTerrainName() {
+    public Optional<String> getTerrainName() {
         return this.item.getVarAsString("terrain");
     }
 
-    public TerrainCategory getTerrain() {
-        return this.game.getTerrainCategory(getTerrainName());
+    public Optional<TerrainCategory> getTerrain() {
+        return getTerrainName().map(this.game::getTerrainCategory);
     }
 
     public void setTerrain(String terrain) {

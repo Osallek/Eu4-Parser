@@ -30,7 +30,7 @@ public class War extends Nodded {
 
     @Override
     public String getName() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name"));
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name").get());
     }
 
     @Override
@@ -43,7 +43,7 @@ public class War extends Nodded {
     }
 
     public WarGoal getWarGoal() {
-        return new WarGoal(this.item.getChild("war_goal"), this.game);
+        return new WarGoal(this.item.getChild("war_goal").get(), this.game);
     }
 
     public LocalDate getStart() {

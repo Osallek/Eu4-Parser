@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class StaticModifier extends GameModifier {
 
@@ -13,22 +14,22 @@ public class StaticModifier extends GameModifier {
     }
 
     @Override
-    public Modifiers getModifier() {
-        return null;
+    public Optional<Modifiers> getModifier() {
+        return Optional.empty();
     }
 
     @Override
-    public Double getModifier(SaveCountry country, Modifier modifierName) {
+    public Optional<Double> getModifier(SaveCountry country, Modifier modifierName) {
         StaticModifiers staticModifiers = StaticModifiers.value(getName());
-        return staticModifiers.modifiers.hasModifier(modifierName) ? staticModifiers.applyToCountry.apply(country, staticModifiers).getModifier(modifierName)
-                                                                   : null;
+        return Optional.ofNullable(staticModifiers.modifiers.getModifier(modifierName))
+                       .map(d -> staticModifiers.applyToCountry.apply(country, staticModifiers).getModifier(modifierName));
     }
 
     @Override
-    public Double getModifier(SaveProvince province, Modifier modifierName) {
+    public Optional<Double> getModifier(SaveProvince province, Modifier modifierName) {
         StaticModifiers staticModifiers = StaticModifiers.value(getName());
-        return staticModifiers.modifiers.hasModifier(modifierName) ? staticModifiers.applyToProvince.apply(province, staticModifiers).getModifier(modifierName)
-                                                                   : null;
+        return Optional.ofNullable(staticModifiers.modifiers.getModifier(modifierName))
+                       .map(d -> staticModifiers.applyToProvince.apply(province, staticModifiers).getModifier(modifierName));
     }
 
     @Override
@@ -42,15 +43,5 @@ public class StaticModifier extends GameModifier {
         }
 
         return Objects.equals(getName(), staticModifier.getName());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getName());
-    }
-
-    @Override
-    public String toString() {
-        return getName();
     }
 }

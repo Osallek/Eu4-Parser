@@ -25,8 +25,7 @@ public class NativeAdvancements {
     }
 
     public Power getCategory() {
-        ClausewitzVariable variable = item.getVar("category");
-        return variable == null ? null : Power.byName(variable.getValue());
+        return this.item.getVar("category").map(ClausewitzVariable::getValue).map(Power::byName).get();
     }
 
     public void setCategory(Power power) {
@@ -47,11 +46,9 @@ public class NativeAdvancements {
             return true;
         }
 
-        if (!(o instanceof NativeAdvancements)) {
+        if (!(o instanceof NativeAdvancements nativeAdvancements)) {
             return false;
         }
-
-        NativeAdvancements nativeAdvancements = (NativeAdvancements) o;
 
         return Objects.equals(getName(), nativeAdvancements.getName());
     }

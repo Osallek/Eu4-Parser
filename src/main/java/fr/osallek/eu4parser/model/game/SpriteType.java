@@ -6,6 +6,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class SpriteType {
 
@@ -15,7 +16,7 @@ public class SpriteType {
         this.item = item;
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -23,23 +24,23 @@ public class SpriteType {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public String getTextureFile() {
+    public Optional<String> getTextureFile() {
         return this.item.getVarAsString("texturefile");
     }
 
-    public Path getTextureFilePath() {
-        return Path.of(ClausewitzUtils.removeQuotes(getTextureFile()));
+    public Optional<Path> getTextureFilePath() {
+        return getTextureFile().map(ClausewitzUtils::removeQuotes).map(Path::of);
     }
 
-    public Path getTextureFilePath(String extension) {
-        return Path.of(FilenameUtils.removeExtension(ClausewitzUtils.removeQuotes(getTextureFile())) + "." + extension);
+    public Optional<Path> getTextureFilePath(String extension) {
+        return getTextureFile().map(ClausewitzUtils::removeQuotes).map(FilenameUtils::removeExtension).map(s -> s + "." + extension).map(Path::of);
     }
 
     public void setTextureFile(String textureFile) {
         this.item.setVariable("texturefile", ClausewitzUtils.addQuotes(textureFile));
     }
 
-    public Boolean getTransparenceCheck() {
+    public Optional<Boolean> getTransparenceCheck() {
         return this.item.getVarAsBool("transparencecheck");
     }
 
@@ -51,7 +52,7 @@ public class SpriteType {
         }
     }
 
-    public String getLoadType() {
+    public Optional<String> getLoadType() {
         return this.item.getVarAsString("loadType");
     }
 
@@ -63,7 +64,7 @@ public class SpriteType {
         }
     }
 
-    public String getEffectFile() {
+    public Optional<String> getEffectFile() {
         return this.item.getVarAsString("effectFile");
     }
 
@@ -75,7 +76,7 @@ public class SpriteType {
         }
     }
 
-    public Integer getNoOfFrames() {
+    public Optional<Integer> getNoOfFrames() {
         return this.item.getVarAsInt("noofframes");
     }
 
@@ -87,7 +88,7 @@ public class SpriteType {
         }
     }
 
-    public Boolean getNoRefCount() {
+    public Optional<Boolean> getNoRefCount() {
         return this.item.getVarAsBool("norefcount");
     }
 
@@ -101,6 +102,6 @@ public class SpriteType {
 
     @Override
     public String toString() {
-        return getName();
+        return getName().orElse("");
     }
 }

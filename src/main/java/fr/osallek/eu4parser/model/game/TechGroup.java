@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 
 public class TechGroup extends Nodded {
 
@@ -29,7 +30,7 @@ public class TechGroup extends Nodded {
     }
 
     public int getStartLevel() {
-        return this.item.getVarAsInt("start_level");
+        return this.item.getVarAsInt("start_level").orElse(0);
     }
 
     public void setStartLevel(int startLevel) {
@@ -37,7 +38,7 @@ public class TechGroup extends Nodded {
     }
 
     public double getStartCostModifier() {
-        return this.item.getVarAsDouble("start_cost_modifier");
+        return this.item.getVarAsDouble("start_cost_modifier").orElse(0d);
     }
 
     public void setStartCostModifier(double startCostModifier) {
@@ -45,7 +46,7 @@ public class TechGroup extends Nodded {
     }
 
     public boolean isPrimitive() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_primitive"));
+        return this.item.getVarAsBool("is_primitive").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setPrimitive(Boolean primitive) {
@@ -56,7 +57,7 @@ public class TechGroup extends Nodded {
         }
     }
 
-    public String getNationDesignerUnitType() {
+    public Optional<String> getNationDesignerUnitType() {
         return this.item.getVarAsString("nation_designer_unit_type");
     }
 
@@ -68,34 +69,12 @@ public class TechGroup extends Nodded {
         }
     }
 
-    public NationDesignerCost getNationDesignerCost() {
-        ClausewitzItem costChild = this.item.getChild("nation_designer_cost");
-        return costChild == null ? null : new NationDesignerCost(costChild);
+    public Optional<NationDesignerCost> getNationDesignerCost() {
+        return this.item.getChild("nation_designer_cost").map(NationDesignerCost::new);
     }
 
-    public void setNationDesignerCostValue(NationDesignerCost nationDesignerCost) {
-        if (nationDesignerCost == null) {
-            this.item.removeChild("nation_designer_trigger");
-            return;
-        }
-
-        ClausewitzItem costChild = this.item.getChild("nation_designer_cost");
-        //Todo NationDesignerCost => item
-    }
-
-    public ConditionAnd getNationDesignerTrigger() {
-        ClausewitzItem triggerChild = this.item.getChild("nation_designer_trigger");
-        return triggerChild == null ? null : new ConditionAnd(triggerChild);
-    }
-
-    public void setNationDesignerTrigger(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("nation_designer_trigger");
-            return;
-        }
-
-        ClausewitzItem triggerChild = this.item.getChild("nation_designer_trigger");
-        //Todo Condition => item
+    public Optional<ConditionAnd> getNationDesignerTrigger() {
+        return this.item.getChild("nation_designer_trigger").map(ConditionAnd::new);
     }
 
     @Override

@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ReligiousReforms {
@@ -23,34 +24,12 @@ public class ReligiousReforms {
         this.item.setName(name);
     }
 
-    public ConditionAnd getCanBuyIdea() {
-        ClausewitzItem child = item.getChild("can_buy_idea");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getCanBuyIdea() {
+        return this.item.getChild("can_buy_idea").map(ConditionAnd::new);
     }
 
-    public void setCanBuyIdea(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("can_buy_idea");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("can_buy_idea");
-        //Todo Condition => item
-    }
-
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
-    }
-
-    public void setTrigger(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("trigger");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("trigger");
-        //Todo Condition => item
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
     public List<ReligiousReform> getReforms() {

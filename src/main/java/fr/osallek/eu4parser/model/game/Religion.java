@@ -16,8 +16,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Religion {
 
@@ -40,13 +43,12 @@ public class Religion {
         this.item.setName(name);
     }
 
-    public Color getColor() {
+    public Optional<Color> getColor() {
         if (this.item == null) {
-            return null;
+            return Optional.empty();
         }
 
-        ClausewitzList clausewitzList = this.item.getList("color");
-        return clausewitzList == null ? null : new Color(clausewitzList);
+        return this.item.getList("color").map(Color::new);
     }
 
     public void setColor(Color color) {
@@ -55,19 +57,15 @@ public class Religion {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
+        this.item.getList("color").ifPresentOrElse(list -> {
             Color actualColor = new Color(list, true);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
-    public Integer getIcon() {
+    public Optional<Integer> getIcon() {
         return this.item.getVarAsInt("icon");
     }
 
@@ -80,7 +78,7 @@ public class Religion {
     }
 
     public boolean isHreReligion() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_religion"));
+        return this.item.getVarAsBool("hre_religion").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setHreReligion(Boolean hreReligion) {
@@ -92,7 +90,7 @@ public class Religion {
     }
 
     public boolean isHreHereticReligion() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_heretic_religion"));
+        return this.item.getVarAsBool("hre_heretic_religion").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setHreHereticReligion(Boolean hreHereticReligion) {
@@ -104,7 +102,7 @@ public class Religion {
     }
 
     public boolean isUseAuthority() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("use_authority"));
+        return this.item.getVarAsBool("use_authority").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUseAuthority(Boolean useAuthority) {
@@ -116,7 +114,7 @@ public class Religion {
     }
 
     public boolean useReligiousReforms() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("use_religious_reforms"));
+        return this.item.getVarAsBool("use_religious_reforms").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUseReligiousReforms(Boolean useReligiousReforms) {
@@ -128,7 +126,7 @@ public class Religion {
     }
 
     public boolean usesAnglicanPower() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_anglican_power"));
+        return this.item.getVarAsBool("uses_anglican_power").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsesAnglicanPower(Boolean usesAnglicanPower) {
@@ -140,7 +138,7 @@ public class Religion {
     }
 
     public boolean usesHussitePower() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_hussite_power"));
+        return this.item.getVarAsBool("uses_hussite_power").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsesHussitePower(Boolean usesHussitePower) {
@@ -152,7 +150,7 @@ public class Religion {
     }
 
     public boolean usesChurchPower() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_church_power"));
+        return this.item.getVarAsBool("uses_church_power").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsesChurchPower(Boolean usesChurchPower) {
@@ -164,7 +162,7 @@ public class Religion {
     }
 
     public boolean useFervor() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("use_fervor"));
+        return this.item.getVarAsBool("use_fervor").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUseFervor(Boolean useFervor) {
@@ -176,7 +174,7 @@ public class Religion {
     }
 
     public boolean hasPatriarchs() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("has_patriarchs"));
+        return this.item.getVarAsBool("has_patriarchs").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setHasPatriarchs(Boolean hasPatriarchs) {
@@ -188,7 +186,7 @@ public class Religion {
     }
 
     public boolean misguidedHeretic() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("misguided_heretic"));
+        return this.item.getVarAsBool("misguided_heretic").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setMisguidedHeretic(Boolean misguidedHeretic) {
@@ -200,7 +198,7 @@ public class Religion {
     }
 
     public boolean useFetishistCult() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("fetishist_cult"));
+        return this.item.getVarAsBool("fetishist_cult").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUseFetishistCult(Boolean useFetishistCult) {
@@ -212,7 +210,7 @@ public class Religion {
     }
 
     public boolean useDoom() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("doom"));
+        return this.item.getVarAsBool("doom").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setDoom(Boolean doom) {
@@ -224,7 +222,7 @@ public class Religion {
     }
 
     public boolean usePersonalDeity() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("personal_deity"));
+        return this.item.getVarAsBool("personal_deity").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsePersonalDeity(Boolean usePersonalDeity) {
@@ -236,7 +234,7 @@ public class Religion {
     }
 
     public boolean usesIsolationism() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_isolationism"));
+        return this.item.getVarAsBool("uses_isolationism").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsesIsolationism(Boolean usesIsolationism) {
@@ -248,7 +246,7 @@ public class Religion {
     }
 
     public boolean usesKarma() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_karma"));
+        return this.item.getVarAsBool("uses_karma").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsesKarma(Boolean usesKarma) {
@@ -260,7 +258,7 @@ public class Religion {
     }
 
     public boolean usesPiety() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_piety"));
+        return this.item.getVarAsBool("uses_piety").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsesPiety(Boolean usesPiety) {
@@ -272,7 +270,7 @@ public class Religion {
     }
 
     public boolean usesHarmony() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("uses_harmony"));
+        return this.item.getVarAsBool("uses_harmony").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setUsesHarmony(Boolean usesHarmony) {
@@ -284,7 +282,7 @@ public class Religion {
     }
 
     public boolean canHaveSecondaryReligion() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("can_have_secondary_religion"));
+        return this.item.getVarAsBool("can_have_secondary_religion").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setCanHaveSecondaryReligion(Boolean canHaveSecondaryReligion) {
@@ -296,8 +294,7 @@ public class Religion {
     }
 
     public List<String> getAllowedCenterConversion() {
-        ClausewitzList list = this.item.getList("allowed_center_conversion");
-        return list == null ? null : list.getValues();
+        return this.item.getList("allowed_center_conversion").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setAllowedCenterConversion(List<String> allowedCenterConversion) {
@@ -306,18 +303,14 @@ public class Religion {
             return;
         }
 
-        ClausewitzList list = this.item.getList("allowed_center_conversion");
-
-        if (list != null) {
-            list.setAll(allowedCenterConversion.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("allowed_center_conversion", allowedCenterConversion.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("allowed_center_conversion")
+                 .ifPresentOrElse(list -> list.setAll(allowedCenterConversion.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("allowed_center_conversion",
+                                                          allowedCenterConversion.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getAspects() {
-        ClausewitzList list = this.item.getList("aspects");
-        return list == null ? null : list.getValues();
+        return this.item.getList("aspects").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setAspects(List<String> aspects) {
@@ -326,18 +319,13 @@ public class Religion {
             return;
         }
 
-        ClausewitzList list = this.item.getList("aspects");
-
-        if (list != null) {
-            list.setAll(aspects.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("aspects", aspects.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("aspects")
+                 .ifPresentOrElse(list -> list.setAll(aspects.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("aspects", aspects.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getBlessings() {
-        ClausewitzList list = this.item.getList("blessings");
-        return list == null ? null : list.getValues();
+        return this.item.getList("blessings").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setBlessings(List<String> blessings) {
@@ -346,18 +334,13 @@ public class Religion {
             return;
         }
 
-        ClausewitzList list = this.item.getList("blessings");
-
-        if (list != null) {
-            list.setAll(blessings.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("blessings", blessings.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("blessings")
+                 .ifPresentOrElse(list -> list.setAll(blessings.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("blessings", blessings.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getHeretic() {
-        ClausewitzList list = this.item.getList("heretic");
-        return list == null ? null : list.getValues();
+        return this.item.getList("heretic").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setHeretic(List<String> heretic) {
@@ -366,18 +349,13 @@ public class Religion {
             return;
         }
 
-        ClausewitzList list = this.item.getList("heretic");
-
-        if (list != null) {
-            list.setAll(heretic.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("heretic", heretic.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("heretic")
+                 .ifPresentOrElse(list -> list.setAll(heretic.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("heretic", heretic.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
     public List<String> getHolySites() {
-        ClausewitzList list = this.item.getList("holy_sites");
-        return list == null ? null : list.getValues();
+        return this.item.getList("holy_sites").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void setHolySites(List<String> holySites) {
@@ -386,16 +364,12 @@ public class Religion {
             return;
         }
 
-        ClausewitzList list = this.item.getList("holy_sites");
-
-        if (list != null) {
-            list.setAll(holySites.stream().filter(Objects::nonNull).toArray(String[]::new));
-        } else {
-            this.item.addList("holy_sites", holySites.stream().filter(Objects::nonNull).toArray(String[]::new));
-        }
+        this.item.getList("holy_sites")
+                 .ifPresentOrElse(list -> list.setAll(holySites.stream().filter(Objects::nonNull).toArray(String[]::new)),
+                                  () -> this.item.addList("holy_sites", holySites.stream().filter(Objects::nonNull).toArray(String[]::new)));
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -407,34 +381,31 @@ public class Religion {
         }
     }
 
-    public Papacy getPapacy() {
-        ClausewitzItem child = this.item.getChild("papacy");
-        return child == null ? null : new Papacy(child);
+    public Optional<Papacy> getPapacy() {
+        return this.item.getChild("papacy").map(Papacy::new);
     }
 
     public List<Icon> getIcons() {
-        ClausewitzItem child = this.item.getChild("orthodox_icons");
-        return child == null ? null : child.getChildren().stream().map(Icon::new).toList();
+        return this.item.getChild("orthodox_icons").map(ClausewitzItem::getChildren).stream().flatMap(Collection::stream).map(Icon::new).toList();
     }
 
     public ReligionGroup getReligionGroup() {
         return religionGroup;
     }
 
-    public Modifiers getCountry() {
+    public Optional<Modifiers> getCountry() {
         return this.item.getChild("country").map(Modifiers::new);
     }
 
-    public Modifiers getCountryAsSecondary() {
-        return new Modifiers(item.getChild("country_as_secondary"));
+    public Optional<Modifiers> getCountryAsSecondary() {
+        return this.item.getChild("country_as_secondary").map(Modifiers::new);
     }
 
-    public ConditionAnd getWillGetCenter() {
-        ClausewitzItem child = this.item.getChild("will_get_center");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getWillGetCenter() {
+        return this.item.getChild("will_get_center").map(ConditionAnd::new);
     }
 
-    public String getHarmonizedModifier() {
+    public Optional<String> getHarmonizedModifier() {
         return this.item.getVarAsString("harmonized_modifier");
     }
 
@@ -446,20 +417,27 @@ public class Religion {
         }
     }
 
-    public BufferedImage getImage() throws IOException {
+    public Optional<BufferedImage> getImage() throws IOException {
         return getSubImage(ImageReader.convertFileToImage(this.religionGroup.getGame().getReligionsImage()));
     }
 
-    public BufferedImage getSubImage(BufferedImage image) {
-        double size = (double) image.getWidth() / this.religionGroup.getGame().getReligionsNbFrames();
-        return image.getSubimage((int) ((getIcon() - 1) * size), 0, (int) size, image.getHeight());
+    public Optional<BufferedImage> getSubImage(BufferedImage image) {
+        return getIcon().map(i -> {
+            double size = (double) image.getWidth() / this.religionGroup.getGame().getReligionsNbFrames();
+            return image.getSubimage((int) ((i - 1) * size), 0, (int) size, image.getHeight());
+        });
+
     }
 
     public void writeImageTo(Path dest) throws IOException {
-        FileUtils.forceMkdirParent(dest.toFile());
-        ImageIO.write(getImage(), "png", dest.toFile());
-        Eu4Utils.optimizePng(dest, dest);
-        this.writenTo = dest;
+        Optional<BufferedImage> image = getImage();
+
+        if (image.isPresent()) {
+            FileUtils.forceMkdirParent(dest.toFile());
+            ImageIO.write(image.get(), "png", dest.toFile());
+            Eu4Utils.optimizePng(dest, dest);
+            this.writenTo = dest;
+        }
     }
 
     public Path getWritenTo() {

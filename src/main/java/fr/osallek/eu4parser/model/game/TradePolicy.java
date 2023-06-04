@@ -6,6 +6,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class TradePolicy {
 
@@ -23,7 +24,7 @@ public class TradePolicy {
         this.item.setName(name);
     }
 
-    public String getButtonGfx() {
+    public Optional<String> getButtonGfx() {
         return this.item.getVarAsString("button_gfx");
     }
 
@@ -35,7 +36,7 @@ public class TradePolicy {
         }
     }
 
-    public Boolean isUnique() {
+    public Optional<Boolean> isUnique() {
         return this.item.getVarAsBool("unique");
     }
 
@@ -47,7 +48,7 @@ public class TradePolicy {
         }
     }
 
-    public Boolean showAlert() {
+    public Optional<Boolean> showAlert() {
         return this.item.getVarAsBool("show_alert");
     }
 
@@ -60,32 +61,30 @@ public class TradePolicy {
     }
 
     public boolean isCenterOfReformation() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("center_of_reformation"));
+        return this.item.getVarAsBool("center_of_reformation").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setCenterOfReformation(boolean centerOfReformation) {
         this.item.setVariable("center_of_reformation", centerOfReformation);
     }
 
-    public ConditionAnd getCanSelect() {
-        ClausewitzItem child = item.getChild("can_select");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getCanSelect() {
+        return this.item.getChild("can_select").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getCanMaintain() {
-        ClausewitzItem child = item.getChild("can_maintain");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getCanMaintain() {
+        return this.item.getChild("can_maintain").map(ConditionAnd::new);
     }
 
-    public Modifiers getTradePower() {
+    public Optional<Modifiers> getTradePower() {
         return this.item.getChild("trade_power").map(Modifiers::new);
     }
 
-    public Modifiers getCountriesWithMerchantModifier() {
+    public Optional<Modifiers> getCountriesWithMerchantModifier() {
         return this.item.getChild("countries_with_merchant_modifier").map(Modifiers::new);
     }
 
-    public Modifiers getNodeProvinceModifier() {
+    public Optional<Modifiers> getNodeProvinceModifier() {
         return this.item.getChild("node_province_modifier").map(Modifiers::new);
     }
 

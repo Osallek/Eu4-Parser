@@ -4,6 +4,8 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.UnitType;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+
 public class Unit {
 
     private final ClausewitzItem item;
@@ -21,7 +23,7 @@ public class Unit {
     }
 
     public String getUnitType() {
-        return this.item.getVarAsString("unit_type");
+        return this.item.getVarAsString("unit_type").get();
     }
 
     public void setUnitType(String unitType) {
@@ -33,14 +35,14 @@ public class Unit {
     }
 
     public UnitType getType() {
-        return UnitType.value(this.item.getVarAsString("type"));
+        return UnitType.value(this.item.getVarAsString("type").get());
     }
 
     public void setType(UnitType type) {
         this.item.setVariable("type", type.name().toLowerCase());
     }
 
-    public Integer getManeuver() {
+    public Optional<Integer> getManeuver() {
         return this.item.getVarAsInt("maneuver");
     }
 
@@ -52,7 +54,7 @@ public class Unit {
         }
     }
     
-    public Integer getOffensiveMorale() {
+    public Optional<Integer> getOffensiveMorale() {
         return this.item.getVarAsInt("offensive_morale");
     }
 
@@ -64,7 +66,7 @@ public class Unit {
         }
     }
 
-    public Integer getDefensiveMorale() {
+    public Optional<Integer> getDefensiveMorale() {
         return this.item.getVarAsInt("defensive_morale");
     }
 
@@ -76,7 +78,7 @@ public class Unit {
         }
     }
 
-    public Integer getOffensiveFire() {
+    public Optional<Integer> getOffensiveFire() {
         return this.item.getVarAsInt("offensive_fire");
     }
 
@@ -88,7 +90,7 @@ public class Unit {
         }
     }
 
-    public Integer getDefensiveFire() {
+    public Optional<Integer> getDefensiveFire() {
         return this.item.getVarAsInt("defensive_fire");
     }
 
@@ -100,7 +102,7 @@ public class Unit {
         }
     }
 
-    public Integer getOffensiveShock() {
+    public Optional<Integer> getOffensiveShock() {
         return this.item.getVarAsInt("offensive_shock");
     }
 
@@ -112,7 +114,7 @@ public class Unit {
         }
     }
     
-    public Integer getDefensiveShock() {
+    public Optional<Integer> getDefensiveShock() {
         return this.item.getVarAsInt("defensive_shock");
     }
 
@@ -124,7 +126,7 @@ public class Unit {
         }
     }
     
-    public Integer getHullSize() {
+    public Optional<Integer> getHullSize() {
         return this.item.getVarAsInt("hull_size");
     }
 
@@ -136,7 +138,7 @@ public class Unit {
         }
     }
     
-    public Integer getBaseCannons() {
+    public Optional<Integer> getBaseCannons() {
         return this.item.getVarAsInt("base_cannons");
     }
 
@@ -148,7 +150,7 @@ public class Unit {
         }
     }
 
-    public Double getSailSpeed() {
+    public Optional<Double> getSailSpeed() {
         return this.item.getVarAsDouble("sail_speed");
     }
 
@@ -160,7 +162,7 @@ public class Unit {
         }
     }
 
-    public Integer getSpriteLevel() {
+    public Optional<Integer> getSpriteLevel() {
         return this.item.getVarAsInt("sprite_level");
     }
 

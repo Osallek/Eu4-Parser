@@ -2,8 +2,10 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class PersonalDeity {
 
@@ -21,7 +23,7 @@ public class PersonalDeity {
         this.item.setName(name);
     }
 
-    public int getSprite() {
+    public Optional<Integer> getSprite() {
         return this.item.getVarAsInt("sprite");
     }
 
@@ -29,13 +31,12 @@ public class PersonalDeity {
         this.item.setVariable("sprite", sprite);
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = this.item.getChild("allow");
-        return child == null ? null : new ConditionAnd(this.item.getChild("allow"));
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getVarsNot("sprite"));
+    public Optional<Modifiers> getModifiers() {
+        return Optional.of(this.item.getVarsNot("sprite")).filter(CollectionUtils::isNotEmpty).map(Modifiers::new);
     }
 
     @Override

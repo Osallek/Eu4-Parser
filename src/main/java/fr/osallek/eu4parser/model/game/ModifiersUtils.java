@@ -611,12 +611,14 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("galley_hullsize", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("transport_cannons", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("transport_hullsize", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
-        ModifiersUtils.addModifier("loyalty_change_on_revoked", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY, "MODIFIER_ESTATE_LOYALTY_CHANGE_ON_REVOKED");
+        ModifiersUtils.addModifier("loyalty_change_on_revoked", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY,
+                                   "MODIFIER_ESTATE_LOYALTY_CHANGE_ON_REVOKED");
         ModifiersUtils.addModifier("estate_interaction_cooldown_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("all_estate_possible_privileges", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("allow_mercenary_drill", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("merc_leader_army_tradition", ModifierType.ADDITIVE, ModifierScope.COUNTRY, "MODIFIER_MERCENARY_LEADER_ARMY_TRADITION");
-        ModifiersUtils.addModifier("merc_independent_from_trade_range", ModifierType.BOOLEAN, ModifierScope.COUNTRY, "MODIFIER_MERCENARY_INDEPENDENT_FROM_TRADE_RANGE");
+        ModifiersUtils.addModifier("merc_independent_from_trade_range", ModifierType.BOOLEAN, ModifierScope.COUNTRY,
+                                   "MODIFIER_MERCENARY_INDEPENDENT_FROM_TRADE_RANGE");
         ModifiersUtils.addModifier("allow_mercenaries_to_split", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("centralize_state_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("local_centralize_state_cost", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
@@ -974,7 +976,7 @@ public class ModifiersUtils {
 
     public static Modifiers scaleWithTradeRefusal(SaveCountry country, Modifiers modifiers) {
         int tradeRefusal = (int) country.getTradeEmbargoes().stream().filter(c -> !country.getRivals().containsKey(c.getTag())).count();
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(tradeRefusal));
+        return ModifiersUtils.scaleModifiers(modifiers, tradeRefusal);
     }
 
     public static Modifiers scaleWithMercantilism(SaveCountry country, Modifiers modifiers) {
@@ -1022,7 +1024,7 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithNumOfProvinces(SaveCountry country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers, NumbersUtils.intOrDefault(country.getOwnedProvinces().size()));
+        return ModifiersUtils.scaleModifiers(modifiers, country.getOwnedProvinces().size());
     }
 
     public static Modifiers scaleWithTribalAllegiance(SaveCountry country, Modifiers modifiers) {
@@ -1362,11 +1364,9 @@ public class ModifiersUtils {
     }
 
     public static Modifiers scaleWithMaintainedForts(SaveCountry country, Modifiers modifiers) {
-        return ModifiersUtils.scaleModifiers(modifiers,
-                                             NumbersUtils.intOrDefault(country.getTotalFortLevel())
-                                             / (NumbersUtils.doubleOrDefault(country.getRawDevelopment())
-                                                / country.getSave().getGame().getFortPerDevRatio())
-                                             / country.getHighestPossibleFort());
+        return ModifiersUtils.scaleModifiers(modifiers, country.getTotalFortLevel() /
+                                                        (NumbersUtils.doubleOrDefault(country.getRawDevelopment()) / country.getSave().getGame().getFortPerDevRatio())
+                                                        / country.getHighestPossibleFort());
     }
 
     public static boolean equals(Map<String, Double> a, Map<Modifier, Double> b) {

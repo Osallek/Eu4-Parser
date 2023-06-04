@@ -3,8 +3,10 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.Power;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Policy {
 
@@ -23,45 +25,23 @@ public class Policy {
     }
 
     public Power getCategory() {
-        return Power.byName(this.item.getVarAsString("monarch_power"));
+        return this.item.getVarAsString("monarch_power").map(Power::byName).get();
     }
 
     public void setCategory(Power category) {
         this.item.setVariable("monarch_power", category.name());
     }
 
-    public ConditionAnd getPotential() {
-        ClausewitzItem child = item.getChild("potential");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getPotential() {
+        return this.item.getChild("potential").map(ConditionAnd::new);
     }
 
-    public void setPotential(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("potential");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("potential");
-        //Todo Condition => item
+    public Optional<ConditionAnd> getAllow() {
+        return this.item.getChild("allow").map(ConditionAnd::new);
     }
 
-    public ConditionAnd getAllow() {
-        ClausewitzItem child = item.getChild("allow");
-        return child == null ? null : new ConditionAnd(child);
-    }
-
-    public void setAllow(ConditionAnd condition) {
-        if (condition == null) {
-            this.item.removeChild("allow");
-            return;
-        }
-
-        ClausewitzItem child = this.item.getChild("allow");
-        //Todo Condition => item
-    }
-
-    public Modifiers getModifiers() {
-        return new Modifiers(this.item.getVarsNot("monarch_power"));
+    public Optional<Modifiers> getModifiers() {
+        return Optional.of(this.item.getVarsNot("monarch_power")).filter(CollectionUtils::isNotEmpty).map(Modifiers::new);
     }
 
     @Override

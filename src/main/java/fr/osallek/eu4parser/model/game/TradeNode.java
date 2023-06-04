@@ -8,9 +8,11 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class TradeNode extends Nodded {
 
@@ -33,7 +35,7 @@ public class TradeNode extends Nodded {
         this.item.setName(name);
     }
 
-    public Integer getLocation() {
+    public Optional<Integer> getLocation() {
         return this.item.getVarAsInt("location");
     }
 
@@ -41,9 +43,8 @@ public class TradeNode extends Nodded {
         this.item.setVariable("location", location);
     }
 
-    public Color getColor() {
-        ClausewitzList list = this.item.getList("color");
-        return list == null ? null : new Color(list);
+    public Optional<Color> getColor() {
+        return this.item.getList("color").map(Color::new);
     }
 
     public void setColor(Color color) {
@@ -52,20 +53,16 @@ public class TradeNode extends Nodded {
             return;
         }
 
-        ClausewitzList list = this.item.getList("color");
-
-        if (list != null) {
+        this.item.getList("color").ifPresentOrElse(list -> {
             Color actualColor = new Color(list);
             actualColor.setRed(color.getRed());
             actualColor.setGreen(color.getGreen());
             actualColor.setBlue(color.getBlue());
-        } else {
-            Color.addToItem(this.item, "color", color);
-        }
+        }, () -> Color.addToItem(this.item, "color", color));
     }
 
     public boolean isInland() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("inland"));
+        return this.item.getVarAsBool("inland").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setInland(Boolean inland) {
@@ -77,7 +74,7 @@ public class TradeNode extends Nodded {
     }
 
     public boolean isAiWillPropagateThroughTrade() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("ai_will_propagate_through_trade"));
+        return this.item.getVarAsBool("ai_will_propagate_through_trade").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setAiWillPropagateThroughTrade(Boolean aiWillPropagateThroughTrade) {
@@ -89,7 +86,7 @@ public class TradeNode extends Nodded {
     }
 
     public boolean isEnd() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("end"));
+        return this.item.getVarAsBool("end").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setEnd(Boolean end) {
@@ -101,8 +98,7 @@ public class TradeNode extends Nodded {
     }
 
     public List<Integer> getProvinces() {
-        ClausewitzList list = this.item.getList("members");
-        return list == null ? null : list.getValuesAsInt();
+        return this.item.getList("members").map(ClausewitzList::getValuesAsInt).stream().flatMap(Collection::stream).toList();
     }
 
     public void setProvinces(List<Integer> provinces) {
@@ -111,32 +107,20 @@ public class TradeNode extends Nodded {
             return;
         }
 
-        ClausewitzList list = this.item.getList("members");
-
-        if (list != null) {
-            list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-        } else {
-            this.item.addList("members", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new));
-        }
+        this.item.getList("members")
+                 .ifPresentOrElse(list -> list.setAll(provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)),
+                                  () -> this.item.addList("members", provinces.stream().filter(Objects::nonNull).toArray(Integer[]::new)));
     }
 
     public void addProvince(int province) {
-        ClausewitzList list = this.item.getList("members");
-
-        if (list != null) {
+        this.item.getList("members").ifPresentOrElse(list -> {
             list.add(province);
             list.sortInt();
-        } else {
-            this.item.addList("members", province);
-        }
+        }, () -> this.item.addList("members", province));
     }
 
     public void removeProvince(int province) {
-        ClausewitzList list = this.item.getList("members");
-
-        if (list != null) {
-            list.remove(String.valueOf(province));
-        }
+        this.item.getList("members").ifPresent(l -> l.remove(String.valueOf(province)));
     }
 
     public List<TradeNodeOutgoing> getOutgoings() {

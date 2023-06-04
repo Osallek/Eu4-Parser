@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SubjectTypeUpgrade extends Nodded {
 
@@ -25,7 +26,7 @@ public class SubjectTypeUpgrade extends Nodded {
         this.item.setName(name);
     }
 
-    public Integer getCost() {
+    public Optional<Integer> getCost() {
         return this.item.getVarAsInt("cost");
     }
 
@@ -33,16 +34,15 @@ public class SubjectTypeUpgrade extends Nodded {
         this.item.setVariable("cost", cost);
     }
 
-    public ConditionAnd getCanUpgradeTrigger() {
-        ClausewitzItem child = this.item.getChild("can_upgrade_trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getCanUpgradeTrigger() {
+        return this.item.getChild("can_upgrade_trigger").map(ConditionAnd::new);
     }
 
-    public Modifiers getModifiersOverlord() {
+    public Optional<Modifiers> getModifiersOverlord() {
         return this.item.getChild("modifier_overlord").map(Modifiers::new);
     }
 
-    public Modifiers getModifiersSubject() {
+    public Optional<Modifiers> getModifiersSubject() {
         return this.item.getChild("modifier_subject").map(Modifiers::new);
     }
 

@@ -3,6 +3,8 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
+import java.util.Optional;
+
 public class ModifierSubject {
 
     private final ClausewitzItem item;
@@ -11,7 +13,7 @@ public class ModifierSubject {
         this.item = item;
     }
     
-    public String getModifier() {
+    public Optional<String> getModifier() {
         return this.item.getVarAsString("modifier");
     }
 
@@ -19,12 +21,11 @@ public class ModifierSubject {
         this.item.setVariable("modifier", modifier);
     }
 
-    public ConditionAnd getTrigger() {
-        ClausewitzItem child = this.item.getChild("trigger");
-        return child == null ? null : new ConditionAnd(child);
+    public Optional<ConditionAnd> getTrigger() {
+        return this.item.getChild("trigger").map(ConditionAnd::new);
     }
 
-    public String getExpirationMessageOverlord() {
+    public Optional<String> getExpirationMessageOverlord() {
         return this.item.getVarAsString("expiration_message_overlord");
     }
 
@@ -32,7 +33,7 @@ public class ModifierSubject {
         this.item.setVariable("expiration_message_overlord", expirationMessageOverlord);
     }
 
-    public String getExpirationMessageSubject() {
+    public Optional<String> getExpirationMessageSubject() {
         return this.item.getVarAsString("expiration_message_subject");
     }
 

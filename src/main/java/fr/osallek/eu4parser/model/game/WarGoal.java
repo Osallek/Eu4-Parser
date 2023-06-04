@@ -2,6 +2,8 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public final class WarGoal {
 
     private final ClausewitzItem item;
@@ -13,7 +15,7 @@ public final class WarGoal {
         this.game = game;
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -21,19 +23,19 @@ public final class WarGoal {
         this.item.setVariable("name", name);
     }
 
-    public String getType() {
+    public Optional<String> getType() {
         return this.item.getVarAsString("type");
     }
 
-    public CasusBelli getCasusBelli() {
-        return this.game.getCasusBelli(this.item.getVarAsString("casus_belli"));
+    public Optional<CasusBelli> getCasusBelli() {
+        return this.item.getVarAsString("casus_belli").map(this.game::getCasusBelli);
     }
 
-    public String getTag() {
+    public Optional<String> getTag() {
         return this.item.getVarAsString("tag");
     }
 
-    public Integer getProvince() {
+    public Optional<Integer> getProvince() {
         return this.item.getVarAsInt("province");
     }
 }

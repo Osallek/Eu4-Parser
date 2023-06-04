@@ -3,21 +3,23 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
+import java.util.Optional;
+
 public class Queen extends Monarch {
 
     public Queen(ClausewitzItem item, Country country) {
         super(item, country);
     }
 
-    public Boolean getConsort() {
+    public Optional<Boolean> getConsort() {
         return this.item.getVarAsBool("consort");
     }
 
-    public Boolean getQueenRegent() {
+    public Optional<Boolean> getQueenRegent() {
         return this.item.getVarAsBool("queen_regent");
     }
 
-    public String getCountryOfOrigin() {
+    public Optional<String> getCountryOfOrigin() {
         return this.item.getVarAsString("country_of_origin");
     }
 

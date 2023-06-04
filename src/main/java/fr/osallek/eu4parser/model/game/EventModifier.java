@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -12,8 +13,8 @@ public class EventModifier extends GameModifier {
     }
 
     @Override
-    public Modifiers getModifier() {
-        return new Modifiers(this.item.getVarsNot("picture"));
+    public Optional<Modifiers> getModifier() {
+        return Optional.of(this.item.getVarsNot("picture")).filter(CollectionUtils::isNotEmpty).map(Modifiers::new);
     }
 
     public Optional<String> getPicture() {
