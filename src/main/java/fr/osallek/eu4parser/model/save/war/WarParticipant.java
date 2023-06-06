@@ -2,16 +2,16 @@ package fr.osallek.eu4parser.model.save.war;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.save.country.Losses;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 public record WarParticipant(ClausewitzItem item) {
 
-    public Double getValue() {
+    public Optional<Double> getValue() {
         return this.item.getVarAsDouble("value");
     }
 
@@ -19,12 +19,12 @@ public record WarParticipant(ClausewitzItem item) {
         this.item.setVariable("value", value);
     }
 
-    public String getTag() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("tag"));
+    public Optional<String> getTag() {
+        return this.item.getVarAsString("tag").map(ClausewitzUtils::removeQuotes);
     }
 
     public boolean getPromisedLand() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("promised_land"));
+        return this.item.getVarAsBool("promised_land").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setPromisedLand(boolean promisedLand) {
@@ -32,21 +32,14 @@ public record WarParticipant(ClausewitzItem item) {
     }
 
     public Map<Losses, Integer> getLosses() {
-        Map<Losses, Integer> lossesMap = new EnumMap<>(Losses.class);
-        ClausewitzItem lossesItem = this.item.getChild("losses");
-
-        if (lossesItem != null) {
-            ClausewitzList list = lossesItem.getList("members");
-
-            if (list == null) {
-                return lossesMap;
-            }
+        return this.item.getChild("losses").flatMap(i -> i.getList("members")).map(list -> {
+            Map<Losses, Integer> lossesMap = new EnumMap<>(Losses.class);
 
             for (Losses losses : Losses.values()) {
-                lossesMap.put(losses, list.getAsInt(losses.ordinal()));
+                list.getAsInt(losses.ordinal()).ifPresent(integer -> lossesMap.put(losses, integer));
             }
-        }
 
-        return lossesMap;
+            return lossesMap;
+        }).orElse(new EnumMap<>(Losses.class));
     }
 }

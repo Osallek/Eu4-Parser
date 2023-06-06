@@ -3,45 +3,47 @@ package fr.osallek.eu4parser.model.save.war;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public record Combatant(ClausewitzItem item) {
 
-    public Integer getCavalry() {
+    public Optional<Integer> getCavalry() {
         return this.item.getVarAsInt("cavalry");
     }
 
-    public Integer getArtillery() {
+    public Optional<Integer> getArtillery() {
         return this.item.getVarAsInt("artillery");
     }
 
-    public Integer getInfantry() {
+    public Optional<Integer> getInfantry() {
         return this.item.getVarAsInt("infantry");
     }
 
-    public Integer getGalley() {
+    public Optional<Integer> getGalley() {
         return this.item.getVarAsInt("galley");
     }
 
-    public Integer getLightShip() {
+    public Optional<Integer> getLightShip() {
         return this.item.getVarAsInt("light_ship");
     }
 
-    public Integer getHeavyShip() {
+    public Optional<Integer> getHeavyShip() {
         return this.item.getVarAsInt("heavy_ship");
     }
 
-    public Integer getTransport() {
+    public Optional<Integer> getTransport() {
         return this.item.getVarAsInt("transport");
     }
 
-    public Integer getLosses() {
+    public Optional<Integer> getLosses() {
         return this.item.getVarAsInt("losses");
     }
 
-    public String getCountry() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("country"));
+    public Optional<String> getCountry() {
+        return this.item.getVarAsString("country").map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getCommander() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("commander"));
+    public Optional<String> getCommander() {
+        return this.item.getVarAsString("commander").map(ClausewitzUtils::removeQuotes);
     }
 }
