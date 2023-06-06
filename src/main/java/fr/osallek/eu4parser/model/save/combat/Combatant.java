@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class Combatant {
 
@@ -22,7 +23,7 @@ public abstract class Combatant {
         refreshAttributes();
     }
 
-    public Integer getDice() {
+    public Optional<Integer> getDice() {
         return this.item.getVarAsInt("dice");
     }
 
@@ -35,14 +36,14 @@ public abstract class Combatant {
     }
 
     public boolean isAttacker() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_attacker"));
+        return this.item.getVarAsBool("is_attacker").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public Id getUnit() {
         return unit;
     }
 
-    public Double getTotalLosses() {
+    public Optional<Double> getTotalLosses() {
         return this.item.getVarAsDouble("losses");
     }
 
@@ -51,14 +52,10 @@ public abstract class Combatant {
     }
 
     public boolean arranged() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("arranged"));
+        return this.item.getVarAsBool("arranged").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("unit");
-
-        if (idChild != null) {
-            this.unit = new Id(idChild);
-        }
+        this.unit = this.item.getChild("unit").map(Id::new).orElse(null);
     }
 }

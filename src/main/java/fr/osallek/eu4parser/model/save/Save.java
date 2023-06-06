@@ -176,8 +176,8 @@ public class Save {
         return game;
     }
 
-    public Optional<LocalDate> getDate() {
-        return this.metaItem.getVarAsDate("date");
+    public LocalDate getDate() {
+        return this.metaItem.getVarAsDate("date").get();
     }
 
     public void setDate(LocalDate date) {

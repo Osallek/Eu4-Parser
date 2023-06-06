@@ -6,6 +6,8 @@ import fr.osallek.eu4parser.model.save.Save;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 public class SiegeCombat extends Combat<SiegeCombatant> {
 
@@ -13,7 +15,7 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
         super(item, save, SiegeCombatant::new);
     }
 
-    public Double getMorale() {
+    public Optional<Double> getMorale() {
         return this.item.getVarAsDouble("morale");
     }
 
@@ -21,7 +23,7 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
         this.item.setVariable("morale", morale);
     }
 
-    public Integer getBreach() {
+    public Optional<Integer> getBreach() {
         return this.item.getVarAsInt("breach");
     }
 
@@ -33,7 +35,7 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
         this.item.setVariable("breach", breach);
     }
 
-    public Integer getRoll() {
+    public Optional<Integer> getRoll() {
         return this.item.getVarAsInt("roll");
     }
 
@@ -45,7 +47,7 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
         this.item.setVariable("roll", roll);
     }
 
-    public Integer getTotal() {
+    public Optional<Integer> getTotal() {
         return this.item.getVarAsInt("total");
     }
 
@@ -57,29 +59,23 @@ public class SiegeCombat extends Combat<SiegeCombatant> {
         this.item.setVariable("total", total);
     }
 
-    public LocalDate getLastAssault() {
-        LocalDate date = this.item.getVarAsDate("last_assault");
-
-        if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
-            return null;
-        }
-
-        return date;
+    public Optional<LocalDate> getLastAssault() {
+        return this.item.getVarAsDate("last_assault").filter(Predicate.not(Eu4Utils.DEFAULT_DATE::equals));
     }
 
     public void setLastAssault(LocalDate lastAssault) {
         this.item.setVariable("last_assault", lastAssault);
     }
 
-    public Integer getLastImpact() {
+    public Optional<Integer> getLastImpact() {
         return this.item.getVarAsInt("last_impact");
     }
 
-    public Integer getImpact() {
+    public Optional<Integer> getImpact() {
         return this.item.getVarAsInt("impact");
     }
 
     public boolean active() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("active"));
+        return this.item.getVarAsBool("active").map(BooleanUtils::toBoolean).orElse(false);
     }
 }

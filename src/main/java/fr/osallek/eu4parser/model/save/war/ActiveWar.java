@@ -288,14 +288,15 @@ public class ActiveWar implements Comparable<ActiveWar> {
             this.defenders = new LinkedHashMap<>();
             participantsItems.forEach(participantsItem -> {
                 WarParticipant warParticipant = new WarParticipant(participantsItem);
-                SaveCountry country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
-                country.addWar(this);
+                warParticipant.getTag().map(this.save::getCountry).ifPresent(country -> {
+                    country.addWar(this);
 
-                if (attackersList.get().getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
-                    this.attackers.put(country, warParticipant);
-                } else if (defendersList.get().getValues().contains(ClausewitzUtils.removeQuotes(warParticipant.getTag()))) {
-                    this.defenders.put(country, warParticipant);
-                }
+                    if (attackersList.get().getValues().stream().map(ClausewitzUtils::removeQuotes).anyMatch(s -> s.equals(country.getTag()))) {
+                        this.attackers.put(country, warParticipant);
+                    } else if (defendersList.get().getValues().stream().map(ClausewitzUtils::removeQuotes).anyMatch(s -> s.equals(country.getTag()))) {
+                        this.defenders.put(country, warParticipant);
+                    }
+                });
             });
         }
 
@@ -307,20 +308,19 @@ public class ActiveWar implements Comparable<ActiveWar> {
             this.persistentDefenders = new LinkedHashMap<>();
             participantsItems.forEach(participantsItem -> {
                 WarParticipant warParticipant = new WarParticipant(participantsItem);
-                SaveCountry country = this.save.getCountry(ClausewitzUtils.removeQuotes(warParticipant.getTag()));
-                country.addWar(this);
+                warParticipant.getTag().map(this.save::getCountry).ifPresent(country -> {
+                    country.addWar(this);
 
-                if (persistentAttackersList.get().getValues()
-                                           .stream()
-                                           .map(ClausewitzUtils::removeQuotes)
-                                           .anyMatch(s -> s.equals(ClausewitzUtils.removeQuotes(warParticipant.getTag())))) {
-                    this.persistentAttackers.put(country, warParticipant);
-                } else if (persistentDefendersList.get().getValues()
-                                                  .stream()
-                                                  .map(ClausewitzUtils::removeQuotes)
-                                                  .anyMatch(s -> s.equals(ClausewitzUtils.removeQuotes(warParticipant.getTag())))) {
-                    this.persistentDefenders.put(country, warParticipant);
-                }
+                    if (persistentAttackersList.get().getValues().stream().map(ClausewitzUtils::removeQuotes).anyMatch(s -> s.equals(country.getTag()))) {
+                        this.persistentAttackers.put(country, warParticipant);
+                    } else if (persistentDefendersList.get()
+                                                      .getValues()
+                                                      .stream()
+                                                      .map(ClausewitzUtils::removeQuotes)
+                                                      .anyMatch(s -> s.equals(country.getTag()))) {
+                        this.persistentDefenders.put(country, warParticipant);
+                    }
+                });
             });
         }
     }

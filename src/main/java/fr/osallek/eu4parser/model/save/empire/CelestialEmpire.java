@@ -21,11 +21,7 @@ public class CelestialEmpire extends Empire {
     @Override
     public void dismantle() {
         super.dismantle();
-        ClausewitzItem decreeItem = this.item.getChild("decree");
-
-        if (decreeItem != null) {
-            decreeItem.removeAll();
-        }
+        this.item.getChild("decree").ifPresent(ClausewitzItem::removeAll);
 
         refreshAttributes();
     }
@@ -46,10 +42,6 @@ public class CelestialEmpire extends Empire {
     @Override
     protected void refreshAttributes() {
         super.refreshAttributes();
-        ClausewitzItem decreeItem = this.item.getChild("decree");
-
-        if (decreeItem != null) {
-            this.decree = new SaveDecree(decreeItem, this.save);
-        }
+        this.decree = this.item.getChild("decree").map(i -> new SaveDecree(i, this.save)).orElse(null);
     }
 }

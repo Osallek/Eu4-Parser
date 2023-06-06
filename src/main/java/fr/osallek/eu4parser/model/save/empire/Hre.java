@@ -10,7 +10,9 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class Hre extends Empire {
 
@@ -36,20 +38,20 @@ public class Hre extends Empire {
     public void addPassedReform(ImperialReform reform) {
         super.addPassedReform(reform);
 
-        if (BooleanUtils.toBoolean(reform.getOnEffect().isImperialBanAllowed())) {
-            this.setImperialBanAllowed(true);
+        if (reform.getOnEffect().filter(e -> e.isImperialBanAllowed().filter(BooleanUtils::toBoolean).isPresent()).isPresent()) {
+            setImperialBanAllowed(true);
         }
 
-        if (BooleanUtils.toBoolean(reform.getOnEffect().isInternalHreCb())) {
-            this.setInternalHreCb(true);
+        if (reform.getOnEffect().filter(e -> e.isInternalHreCb().filter(BooleanUtils::toBoolean).isPresent()).isPresent()) {
+            setInternalHreCb(true);
         }
 
-        if (BooleanUtils.toBoolean(reform.getOnEffect().hreInheritable())) {
-            this.setHreInheritable(true);
+        if (reform.getOnEffect().filter(e -> e.hreInheritable().filter(BooleanUtils::toBoolean).isPresent()).isPresent()) {
+            setHreInheritable(true);
         }
 
-        if (BooleanUtils.toBoolean(reform.getOnEffect().enableImperialRealmWar())) {
-            this.setImperialBanAllowed(true);
+        if (reform.getOnEffect().filter(e -> e.enableImperialRealmWar().filter(BooleanUtils::toBoolean).isPresent()).isPresent()) {
+            setImperialBanAllowed(true);
         }
     }
 
@@ -57,29 +59,29 @@ public class Hre extends Empire {
     public void removePassedReform(ImperialReform reform) {
         super.removePassedReform(reform);
 
-        if (BooleanUtils.isFalse(reform.getOnEffect().isImperialBanAllowed())) {
-            this.setImperialBanAllowed(false);
+        if (reform.getOnEffect().filter(e -> e.isImperialBanAllowed().filter(BooleanUtils::isFalse).isPresent()).isPresent()) {
+            setImperialBanAllowed(false);
         }
 
-        if (BooleanUtils.isFalse(reform.getOnEffect().isInternalHreCb())) {
-            this.setInternalHreCb(false);
+        if (reform.getOnEffect().filter(e -> e.isInternalHreCb().filter(BooleanUtils::isFalse).isPresent()).isPresent()) {
+            setInternalHreCb(false);
         }
 
-        if (BooleanUtils.isFalse(reform.getOnEffect().hreInheritable())) {
-            this.setHreInheritable(false);
+        if (reform.getOnEffect().filter(e -> e.hreInheritable().filter(BooleanUtils::isFalse).isPresent()).isPresent()) {
+            setHreInheritable(false);
         }
 
-        if (BooleanUtils.isFalse(reform.getOnEffect().enableImperialRealmWar())) {
-            this.setImperialBanAllowed(false);
+        if (reform.getOnEffect().filter(e -> e.enableImperialRealmWar().filter(BooleanUtils::isFalse).isPresent()).isPresent()) {
+            setImperialBanAllowed(false);
         }
     }
 
-    public ProvinceList getContinent() {
+    public Optional<ProvinceList> getContinent() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
-        return this.save.getGame().getContinent(this.item.getVarAsInt("continent"));
+        return this.item.getVarAsInt("continent").map(i -> this.save.getGame().getContinent(i));
     }
 
     public void setContinent(int continent) {
@@ -90,9 +92,9 @@ public class Hre extends Empire {
         this.item.setVariable("continent", continent);
     }
 
-    public Boolean getImperialBanAllowed() {
+    public Optional<Boolean> getImperialBanAllowed() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
         return this.item.getVarAsBool("imperial_ban_allowed");
@@ -106,9 +108,9 @@ public class Hre extends Empire {
         ClausewitzVariable var = this.item.setVariable("imperial_ban_allowed", imperialBanAllowed);
     }
 
-    public Boolean getInternalHreCb() {
+    public Optional<Boolean> getInternalHreCb() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
         return this.item.getVarAsBool("internal_hre_cb");
@@ -122,9 +124,9 @@ public class Hre extends Empire {
         this.item.setVariable("internal_hre_cb", internalHreCb);
     }
 
-    public Boolean getHreInheritable() {
+    public Optional<Boolean> getHreInheritable() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
         return this.item.getVarAsBool("hre_inheritable");
@@ -138,9 +140,9 @@ public class Hre extends Empire {
         this.item.setVariable("hre_inheritable", hreInheritable);
     }
 
-    public Boolean getAllowsFemaleEmperor() {
+    public Optional<Boolean> getAllowsFemaleEmperor() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
         return this.item.getVarAsBool("allows_female_emperor");
@@ -159,20 +161,11 @@ public class Hre extends Empire {
             return new ArrayList<>();
         }
 
-        ClausewitzList list = this.item.getList("electors");
-        return list == null ? new ArrayList<>() : list.getValues()
-                                                      .stream()
-                                                      .map(this.save::getCountry)
-                                                      .toList();
+        return this.item.getList("electors").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.save::getCountry).toList();
     }
 
     public void setElectors(List<SaveCountry> electors) {
-        ClausewitzList list = this.item.getList("electors");
-
-        if (list != null) {
-            list.clear();
-        }
-
+        this.item.getList("electors").ifPresent(ClausewitzList::clear);
         electors.forEach(this::addElector);
     }
 
@@ -182,15 +175,11 @@ public class Hre extends Empire {
         }
 
         String tag = country.getTag();
-        ClausewitzList list = this.item.getList("electors");
-
-        if (list != null) {
+        this.item.getList("electors").ifPresentOrElse(list -> {
             if (!list.contains(tag)) {
                 list.add(tag);
             }
-        } else {
-            this.item.addList("electors", tag);
-        }
+        }, () -> this.item.addList("electors", tag));
     }
 
     public void removeElector(SaveCountry country) {
@@ -198,17 +187,12 @@ public class Hre extends Empire {
             return;
         }
 
-        String tag = country.getTag();
-        ClausewitzList list = this.item.getList("electors");
-
-        if (list != null) {
-            list.remove(tag);
-        }
+        this.item.getList("electors").ifPresent(list -> list.remove(country.getTag()));
     }
 
-    public Integer getEmperorPreviousRank() {
+    public Optional<Integer> getEmperorPreviousRank() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
         return this.item.getVarAsInt("emperor_previous_rank");
@@ -222,9 +206,9 @@ public class Hre extends Empire {
         this.item.setVariable("emperor_previous_rank", id);
     }
 
-    public Boolean getImperialRealmWar() {
+    public Optional<Boolean> getImperialRealmWar() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
         return this.item.getVarAsBool("imperial_realm_war");
@@ -250,10 +234,6 @@ public class Hre extends Empire {
     @Override
     protected void refreshAttributes() {
         super.refreshAttributes();
-        ClausewitzItem incidentItem = this.item.getChild("active_incident");
-
-        if (incidentItem != null) {
-            this.activeIncident = new HreIncident(incidentItem);
-        }
+        this.activeIncident = this.item.getChild("active_incident").map(HreIncident::new).orElse(null);
     }
 }

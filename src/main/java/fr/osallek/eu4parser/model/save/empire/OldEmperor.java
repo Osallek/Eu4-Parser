@@ -4,18 +4,19 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record OldEmperor(ClausewitzItem item) {
 
-    public Integer getId() {
+    public Optional<Integer> getId() {
         return this.item.getVarAsInt("id");
     }
 
-    public String getCountry() {
+    public Optional<String> getCountry() {
         return this.item.getVarAsString("country");
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 

@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 public abstract class Combat<C extends Combatant> {
@@ -32,15 +33,15 @@ public abstract class Combat<C extends Combatant> {
         return id;
     }
 
-    public SaveProvince getLocation() {
-        return this.save.getProvince(this.item.getVarAsInt("location"));
+    public Optional<SaveProvince> getLocation() {
+        return this.item.getVarAsInt("location").map(this.save::getProvince);
     }
 
-    public Integer getPhase() {
+    public Optional<Integer> getPhase() {
         return this.item.getVarAsInt("phase");
     }
 
-    public Integer getDay() {
+    public Optional<Integer> getDay() {
         return this.item.getVarAsInt("day");
     }
 
@@ -52,7 +53,7 @@ public abstract class Combat<C extends Combatant> {
         this.item.setVariable("day", day);
     }
 
-    public Integer getDuration() {
+    public Optional<Integer> getDuration() {
         return this.item.getVarAsInt("duration");
     }
 
@@ -65,22 +66,8 @@ public abstract class Combat<C extends Combatant> {
     }
 
     private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
-        }
-
-        ClausewitzItem attackerItem = this.item.getChild("attacker");
-
-        if (attackerItem != null) {
-            this.attacker = supplier.apply(attackerItem, this.save);
-        }
-
-        ClausewitzItem defenderItem = this.item.getChild("defender");
-
-        if (defenderItem != null) {
-            this.defender = supplier.apply(defenderItem, this.save);
-        }
+        this.id = this.item.getChild("id").map(Id::new).orElse(null);
+        this.attacker = this.item.getChild("attacker").map(i -> this.supplier.apply(i, this.save)).orElse(null);
+        this.defender = this.item.getChild("defender").map(i -> this.supplier.apply(i, this.save)).orElse(null);
     }
 }

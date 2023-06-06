@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.game.Decree;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class SaveDecree {
 
@@ -22,11 +23,11 @@ public class SaveDecree {
         refreshAttributes();
     }
 
-    public String getType() {
+    public Optional<String> getType() {
         return this.saveItem.getVarAsString("decree_name");
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.saveItem.getVarAsDate("decree_date");
     }
 
@@ -75,6 +76,6 @@ public class SaveDecree {
     }
 
     private void refreshAttributes() {
-        this.decree = this.save.getGame().getDecree(ClausewitzUtils.removeQuotes(this.getType()));
+        this.decree = getType().map(ClausewitzUtils::removeQuotes).map(s -> this.save.getGame().getDecree(s)).orElse(null);
     }
 }

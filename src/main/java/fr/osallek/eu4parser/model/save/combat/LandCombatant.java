@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class LandCombatant extends Combatant {
 
@@ -14,27 +15,26 @@ public class LandCombatant extends Combatant {
     }
 
     public Map<Losses, Double> getLosses() {
-        Map<Losses, Double> lossesMap = new EnumMap<>(Losses.class);
-        ClausewitzList lossesList = this.item.getList("losses_type");
+        return this.item.getList("losses_type").map(list -> {
+            Map<Losses, Double> lossesMap = new EnumMap<>(Losses.class);
 
-        if (lossesList != null) {
             for (Losses losses : Losses.values()) {
-                lossesMap.put(losses, lossesList.getAsDouble(losses.ordinal()));
+                list.getAsDouble(losses.ordinal()).ifPresent(integer -> lossesMap.put(losses, integer));
             }
-        }
 
-        return lossesMap;
+            return lossesMap;
+        }).orElse(new EnumMap<>(Losses.class));
     }
 
-    public Double getCavalry() {
+    public Optional<Double> getCavalry() {
         return this.item.getVarAsDouble("cavalry");
     }
 
-    public Double getArtillery() {
+    public Optional<Double> getArtillery() {
         return this.item.getVarAsDouble("artillery");
     }
 
-    public Double getInfantry() {
+    public Optional<Double> getInfantry() {
         return this.item.getVarAsDouble("infantry");
     }
 }

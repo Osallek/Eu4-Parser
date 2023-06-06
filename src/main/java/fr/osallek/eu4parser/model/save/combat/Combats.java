@@ -38,17 +38,17 @@ public class Combats {
     private void refreshAttributes() {
         List<ClausewitzItem> siegeCombatsItems = this.item.getChildren("siege_combat");
         this.siegeCombats = siegeCombatsItems.stream()
-                                             .map(child -> new fr.osallek.eu4parser.model.save.combat.SiegeCombat(child, this.save))
+                                             .map(child -> new SiegeCombat(child, this.save))
                                              .toList();
 
         List<ClausewitzItem> landCombatsItems = this.item.getChildren("land_combat");
         this.landCombats = landCombatsItems.stream()
-                                           .map(child -> new fr.osallek.eu4parser.model.save.combat.LandCombat(child, this.save))
+                                           .map(child -> new LandCombat(child, this.save))
                                            .toList();
 
         List<ClausewitzItem> navalCombatsItems = this.item.getChildren("naval_combat");
         this.navalCombats = navalCombatsItems.stream()
-                                             .map(child -> new fr.osallek.eu4parser.model.save.combat.NavalCombat(child, this.save))
+                                             .map(child -> new NavalCombat(child, this.save))
                                              .toList();
     }
 }

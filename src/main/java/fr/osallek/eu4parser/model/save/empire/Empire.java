@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,18 +35,14 @@ public abstract class Empire {
                                         .getImperialReforms()
                                         .stream()
                                         .filter(imperialReform -> getId().equals(imperialReform.getEmpire()))
-                                        .filter(imperialReform -> imperialReform.dlcRequired() == null
-                                                                  || this.save.getDlcEnabled()
-                                                                              .stream()
-                                                                              .map(ClausewitzUtils::removeQuotes)
-                                                                              .collect(Collectors.toSet())
-                                                                              .containsAll(imperialReform.dlcRequired()))
-                                        .filter(imperialReform -> imperialReform.dlcRequiredNot() == null
-                                                                  || Collections.disjoint(this.save.getDlcEnabled()
-                                                                                                   .stream()
-                                                                                                   .map(ClausewitzUtils::removeQuotes)
-                                                                                                   .collect(Collectors.toSet()),
-                                                                                          imperialReform.dlcRequiredNot()))
+                                        .filter(imperialReform -> imperialReform.dlcRequired() == null || this.save.getDlcEnabled()
+                                                                                                                   .stream()
+                                                                                                                   .map(ClausewitzUtils::removeQuotes)
+                                                                                                                   .collect(Collectors.toSet())
+                                                                                                                   .containsAll(imperialReform.dlcRequired()))
+                                        .filter(imperialReform -> imperialReform.dlcRequiredNot() == null || Collections.disjoint(
+                                                this.save.getDlcEnabled().stream().map(ClausewitzUtils::removeQuotes).collect(Collectors.toSet()),
+                                                imperialReform.dlcRequiredNot()))
                                         .collect(Collectors.toMap(ImperialReform::getName, Function.identity()));
         refreshAttributes();
     }
@@ -53,7 +50,7 @@ public abstract class Empire {
     protected abstract String getId();
 
     public boolean dismantled() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_dismantled"));
+        return this.item.getVarAsBool("hre_dismantled").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void dismantle() {
@@ -63,14 +60,12 @@ public abstract class Empire {
         this.item.removeVariables("passed_reform");
     }
 
-    public SaveCountry getEmperor() {
+    public Optional<SaveCountry> getEmperor() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
-        String emperor = this.item.getVarAsString("emperor");
-
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(emperor));
+        return this.item.getVarAsString("emperor").map(this.save::getCountry);
     }
 
     public void setEmperor(SaveCountry country) {
@@ -83,20 +78,20 @@ public abstract class Empire {
             return;
         }
 
-        if (!ClausewitzUtils.removeQuotes(this.item.getVarAsString("emperor")).equals(country.getTag())) {
+        this.item.getVarAsString("emperor").map(ClausewitzUtils::removeQuotes).filter(s -> !s.equals(country.getTag())).ifPresent(s -> {
             this.item.setVariable("emperor", ClausewitzUtils.addQuotes(country.getTag()));
 
-            if (getImperialInfluence() == null) {
+            if (getImperialInfluence().isEmpty()) {
                 this.item.addVariable("imperial_influence", 0d);
             }
 
             addOldEmperor(country);
-        }
+        });
     }
 
-    public Double getImperialInfluence() {
+    public Optional<Double> getImperialInfluence() {
         if (dismantled()) {
-            return null;
+            return Optional.empty();
         }
 
         return this.item.getVarAsDouble("imperial_influence");
@@ -127,12 +122,7 @@ public abstract class Empire {
             return new ArrayList<>();
         }
 
-        return this.item.getVarsAsStrings("passed_reform")
-                        .stream()
-                        .map(ClausewitzUtils::removeQuotes)
-                        .map(this.imperialReforms::get)
-                        .sorted()
-                        .toList();
+        return this.item.getVarsAsStrings("passed_reform").stream().map(ClausewitzUtils::removeQuotes).map(this.imperialReforms::get).sorted().toList();
     }
 
     public List<ImperialReform> getMainLinePassedReforms() {
@@ -183,7 +173,7 @@ public abstract class Empire {
                 this.item.addVariable("passed_reform", ClausewitzUtils.addQuotes(reform.getName()));
             }
 
-            reform = reform.getRequiredReform();
+            reform = reform.getRequiredReform().orElse(null);
         } while (reform != null);
     }
 
