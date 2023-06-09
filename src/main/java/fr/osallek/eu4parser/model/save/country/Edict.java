@@ -6,18 +6,19 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.StateEdict;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record Edict(ClausewitzItem item, Game game) {
 
-    public StateEdict getWhich() {
-        return this.game.getStateEdict(ClausewitzUtils.removeQuotes(this.item.getVarAsString("which")));
+    public Optional<StateEdict> getWhich() {
+        return this.item.getVarAsString("which").map(this.game::getStateEdict);
     }
 
     public void setWhich(StateEdict which) {
         this.item.setVariable("which", ClausewitzUtils.addQuotes(which.getName()));
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 

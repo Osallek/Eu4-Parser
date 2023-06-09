@@ -2,6 +2,8 @@ package fr.osallek.eu4parser.model.save.province;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.clausewitzparser.model.ClausewitzObject;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.Building;
@@ -11,7 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SaveProvinceHistoryEvent {
@@ -29,15 +31,15 @@ public class SaveProvinceHistoryEvent {
         return Eu4Utils.stringToDate(this.item.getName());
     }
 
-    public String getCapital() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("capital"));
+    public Optional<String> getCapital() {
+        return this.item.getLastVarAsString("capital").map(ClausewitzUtils::removeQuotes);
     }
 
-    public Double getColonySize() {
+    public Optional<Double> getColonySize() {
         return this.item.getLastVarAsDouble("colonysize");
     }
 
-    public Double getUnrest() {
+    public Optional<Double> getUnrest() {
         return this.item.getLastVarAsDouble("unrest");
     }
 
@@ -57,100 +59,87 @@ public class SaveProvinceHistoryEvent {
         return this.item.getVarsAsStrings("remove_claim").stream().map(ClausewitzUtils::removeQuotes).toList();
     }
 
-    public Boolean getHre() {
+    public Optional<Boolean> getHre() {
         return this.item.getLastVarAsBool("hre");
     }
 
-    public Double getBaseTax() {
+    public Optional<Double> getBaseTax() {
         return this.item.getLastVarAsDouble("base_tax");
     }
 
-    public Double getBaseProduction() {
+    public Optional<Double> getBaseProduction() {
         return this.item.getLastVarAsDouble("base_production");
     }
 
-    public Double getBaseManpower() {
+    public Optional<Double> getBaseManpower() {
         return this.item.getLastVarAsDouble("base_manpower");
     }
 
-    public String getTradeGood() {
+    public Optional<String> getTradeGood() {
         return this.item.getLastVarAsString("trade_goods");
     }
 
-    public Pair<String, String> getName() {
-        if (this.item.hasChild("name")) {
-            return Pair.of(this.item.getLastChild("name").getVarAsString("name"), this.item.getLastChild("name").getVarAsString("old_name"));
-        }
-
-        return null;
+    public Optional<Pair<String, String>> getName() {
+        return this.item.getLastChild("name")
+                        .map(i -> Pair.of(i.getVarAsString("name"), i.getVarAsString("old_name")))
+                        .filter(pair -> pair.getKey().isPresent() && pair.getValue().isPresent())
+                        .map(pair -> Pair.of(pair.getKey().get(), pair.getValue().get()));
     }
 
-    public String getTribalOwner() {
+    public Optional<String> getTribalOwner() {
         return this.item.getLastVarAsString("tribal_owner");
     }
 
-    public SaveAdvisor getAdvisor() {
-        if (this.item.hasChild("advisor")) {
-            return new SaveAdvisor(this.item.getLastChild("advisor"), this.province.getSave());
-        }
-
-        return null;
+    public Optional<SaveAdvisor> getAdvisor() {
+        return this.item.getLastChild("advisor").map(i -> new SaveAdvisor(i, this.province.getSave()));
     }
 
-    public Integer getNativeHostileness() {
+    public Optional<Integer> getNativeHostileness() {
         return this.item.getLastVarAsInt("native_hostileness");
     }
 
-    public Integer getNativeFerocity() {
+    public Optional<Integer> getNativeFerocity() {
         return this.item.getLastVarAsInt("native_ferocity");
     }
 
-    public Integer getNativeSize() {
-        return NumbersUtils.doubleToInt(this.item.getLastVarAsDouble("native_size"));
+    public Optional<Integer> getNativeSize() {
+        return this.item.getLastVarAsDouble("native_size").map(NumbersUtils::doubleToInt);
     }
 
-    public String getOwner() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("owner"));
+    public Optional<String> getOwner() {
+        return this.item.getLastVarAsString("owner").map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getFakeOwner() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("fake_owner"));
+    public Optional<String> getFakeOwner() {
+        return this.item.getLastVarAsString("fake_owner").map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getController() {
-        if (this.item.hasChild("controller") && this.item.getLastChild("controller").hasVar("tag")) {
-            return ClausewitzUtils.removeQuotes(this.item.getLastChild("controller").getVarAsString("tag"));
-        }
-
-        return null;
+    public Optional<String> getController() {
+        return this.item.getLastChild("controller").filter(i -> i.hasVar("tag")).flatMap(i -> i.getVarAsString("tag")).map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getRemoveClaim() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("remove_claim"));
+    public Optional<String> getRemoveClaim() {
+        return this.item.getLastVarAsString("remove_claim").map(ClausewitzUtils::removeQuotes);
     }
 
     public List<String> getDiscoveredBy() {
         return this.item.getVarsAsStrings("discovered_by").stream().map(ClausewitzUtils::removeQuotes).toList();
     }
 
-    public String getCulture() {
+    public Optional<String> getCulture() {
         return this.item.getLastVarAsString("culture");
     }
 
-    public String getReligion() {
+    public Optional<String> getReligion() {
         return this.item.getLastVarAsString("religion");
     }
 
-    public Boolean getIsCity() {
+    public Optional<Boolean> getIsCity() {
         return this.item.getLastVarAsBool("is_city");
     }
 
-    public ProvinceRevolt getRevolt() {
-        if (this.item.hasChild("revolt")) {
-            return new ProvinceRevolt(this.item.getLastChild("revolt"));
-        }
-
-        return null;
+    public Optional<ProvinceRevolt> getRevolt() {
+        return this.item.getLastChild("revolt").map(ProvinceRevolt::new);
     }
 
     public Map<String, Boolean> getBuildings() {
@@ -159,7 +148,9 @@ public class SaveProvinceHistoryEvent {
                             .getBuildings()
                             .stream()
                             .map(Building::getName)
-                            .filter(this.item::hasVar)
-                            .collect(Collectors.toMap(Function.identity(), this.item::getVarAsBool));
+                            .map(this.item::getVar)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toMap(ClausewitzObject::getName, ClausewitzVariable::getAsBool));
     }
 }

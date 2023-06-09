@@ -6,10 +6,11 @@ import fr.osallek.eu4parser.model.game.Building;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
 
-    public LocalDate getStartDate() {
+    public Optional<LocalDate> getStartDate() {
         return this.item.getVarAsDate("start_date");
     }
 
@@ -19,7 +20,7 @@ public record ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
         }
     }
 
-    public Integer getTotal() {
+    public Optional<Integer> getTotal() {
         return this.item.getVarAsInt("total");
     }
 
@@ -27,7 +28,7 @@ public record ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
         this.item.setVariable("total", total);
     }
 
-    public Integer getOriginalTotal() {
+    public Optional<Integer> getOriginalTotal() {
         return this.item.getVarAsInt("original_total");
     }
 
@@ -35,15 +36,15 @@ public record ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
         this.item.setVariable("original_total", total);
     }
 
-    public Double getProgress() {
+    public Optional<Double> getProgress() {
         return this.item.getVarAsDouble("progress");
     }
 
-    public Integer getEnvoy() {
+    public Optional<Integer> getEnvoy() {
         return this.item.getVarAsInt("envoy");
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -53,15 +54,15 @@ public record ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
         }
     }
 
-    public SaveCountry getCountry() {
-        return this.province.getSave().getCountry(this.item.getVarAsString("country"));
+    public Optional<SaveCountry> getCountry() {
+        return this.item.getVarAsString("country").map(s -> this.province.getSave().getCountry(s));
     }
 
     public void setCountry(SaveCountry country) {
         this.item.setVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
-    public Double getCost() {
+    public Optional<Double> getCost() {
         return this.item.getVarAsDouble("cost");
     }
 
@@ -69,8 +70,8 @@ public record ProvinceConstruction(ClausewitzItem item, SaveProvince province) {
         this.item.setVariable("cost", cost);
     }
 
-    public Building getBuilding() {
-        return this.province.getSave().getGame().getBuildings().get(this.item.getVarAsInt("building"));
+    public Optional<Building> getBuilding() {
+        return this.item.getVarAsInt("building").map(integer -> this.province.getSave().getGame().getBuildings().get(integer));
     }
 
     public void setBuilding(Building building) {

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -164,8 +165,8 @@ public class TradeNodeCountry {
         return this.item.getVarAsDouble("already_sent");
     }
 
-    public TradePolicy getTradePolicy() {
-        return this.game.getTradePolicy(ClausewitzUtils.removeQuotes(this.item.getVarAsString("trading_policy")));
+    public Optional<TradePolicy> getTradePolicy() {
+        return this.item.getVarAsString("trading_policy").map(ClausewitzUtils::removeQuotes).map(this.game::getTradePolicy);
     }
 
     public LocalDate getTradePolicyDate() {

@@ -12,14 +12,17 @@ import fr.osallek.eu4parser.model.game.CenterOfTrade;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.GameModifier;
 import fr.osallek.eu4parser.model.game.GreatProjectTier;
+import fr.osallek.eu4parser.model.game.HolyOrder;
 import fr.osallek.eu4parser.model.game.ImperialReform;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.Investment;
 import fr.osallek.eu4parser.model.game.Modifier;
+import fr.osallek.eu4parser.model.game.Modifiers;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.game.Names;
 import fr.osallek.eu4parser.model.game.ParliamentBribe;
 import fr.osallek.eu4parser.model.game.Province;
+import fr.osallek.eu4parser.model.game.StateEdict;
 import fr.osallek.eu4parser.model.game.StaticModifier;
 import fr.osallek.eu4parser.model.game.StaticModifiers;
 import fr.osallek.eu4parser.model.game.TradeCompany;
@@ -35,6 +38,7 @@ import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.AbstractRegiment;
 import fr.osallek.eu4parser.model.save.country.Army;
 import fr.osallek.eu4parser.model.save.country.CountryState;
+import fr.osallek.eu4parser.model.save.country.Edict;
 import fr.osallek.eu4parser.model.save.country.Navy;
 import fr.osallek.eu4parser.model.save.country.Regiment;
 import fr.osallek.eu4parser.model.save.country.SaveArea;
@@ -59,6 +63,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -112,7 +117,7 @@ public class SaveProvince extends Province {
         super(province);
         this.item = item;
         this.save = save;
-        this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(getOwnerTag()));
+        this.country = getOwnerTag().map(this.save::getCountry).orElse(null);
         refreshAttributes();
     }
 
@@ -120,8 +125,8 @@ public class SaveProvince extends Province {
         return save;
     }
 
-    public SaveCountry getOwner() {
-        return country;
+    public Optional<SaveCountry> getOwner() {
+        return Optional.ofNullable(this.country);
     }
 
     //Not override because prefer using the parent when possible
@@ -139,7 +144,7 @@ public class SaveProvince extends Province {
 
     @Override
     public String getName() {
-        return this.item.getVarAsString("name");
+        return this.item.getVarAsString("name").orElse("");
     }
 
     public void setName(String name) {
@@ -151,16 +156,16 @@ public class SaveProvince extends Province {
     }
 
     public Map<String, Double> getVariables() {
-        return Optional.ofNullable(this.item.getChild("variables"))
-                       .map(i -> i.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble)))
-                       .orElse(null);
+        return this.item.getChild("variables")
+                        .map(i -> i.getVariables().stream().collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsDouble)))
+                        .orElse(null);
     }
 
-    public String getTerritorialCore() {
+    public Optional<String> getTerritorialCore() {
         return this.item.getVarAsString("territorial_core");
     }
 
-    public String getOwnerTag() {
+    public Optional<String> getOwnerTag() {
         return this.item.getVarAsString("owner");
     }
 
@@ -177,43 +182,43 @@ public class SaveProvince extends Province {
         }
     }
 
-    public String getControllerTag() {
+    public Optional<String> getControllerTag() {
         return this.item.getVarAsString("controller");
     }
 
-    public SaveCountry getController() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
+    public Optional<SaveCountry> getController() {
+        return getControllerTag().map(this.save::getCountry);
     }
 
     public void setController(SaveCountry controller) {
-        if (getController() != null) {
-            getController().removeControlledProvince(this);
-            setPreviousController(getController());
-        }
+        getController().ifPresent(country -> {
+            country.removeControlledProvince(this);
+            setPreviousController(country);
+        });
 
         this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
         controller.addControlledProvince(this);
         this.history.addEvent(this.save.getDate(), "controller", "tag", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
-    public String getPreviousControllerTag() {
+    public Optional<String> getPreviousControllerTag() {
         return this.item.getVarAsString("previous_controller");
     }
 
-    public SaveCountry getPreviousController() {
-        return this.save.getCountry(getPreviousControllerTag());
+    public Optional<SaveCountry> getPreviousController() {
+        return getPreviousControllerTag().map(this.save::getCountry);
     }
 
     public void setPreviousController(SaveCountry previousController) {
         this.item.setVariable("previous_controller", ClausewitzUtils.addQuotes(previousController.getTag()));
     }
 
-    public String getOriginalColoniserTag() {
+    public Optional<String> getOriginalColoniserTag() {
         return this.item.getVarAsString("original_coloniser");
     }
 
-    public SaveCountry getOriginalColoniser() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(getOriginalColoniserTag()));
+    public Optional<SaveCountry> getOriginalColoniser() {
+        return getOriginalColoniserTag().map(this.save::getCountry);
     }
 
     public void setOriginalColoniser(SaveCountry originalColoniser) {
@@ -239,42 +244,22 @@ public class SaveProvince extends Province {
     }
 
     public List<Double> getInstitutionsProgress() {
-        ClausewitzList list = this.item.getList("institutions");
-
-        if (list != null) {
-            return list.getValuesAsDouble();
-        }
-
-        return new ArrayList<>();
+        return this.item.getList("institutions").map(ClausewitzList::getValuesAsDouble).orElse(new ArrayList<>());
     }
 
-    public Double getInstitutionsProgress(int institution) {
-        ClausewitzList list = this.item.getList("institutions");
-
-        if (list != null) {
-            return list.getAsDouble(institution);
-        }
-
-        return null;
+    public Optional<Double> getInstitutionsProgress(int institution) {
+        return this.item.getList("institutions").flatMap(list -> list.getAsDouble(institution));
     }
 
     public void setInstitutionProgress(int institution, double progress) {
-        ClausewitzList list = this.item.getList("institutions");
-
-        if (list != null) {
-            list.set(institution, progress);
-        }
+        this.item.getList("institutions").ifPresent(list -> list.set(institution, progress));
     }
 
     public void setInstitutionProgress(Institution institution, double progress) {
-        ClausewitzList list = this.item.getList("institutions");
-
-        if (list != null) {
-            list.set(institution.getIndex(), progress);
-        }
+        setInstitutionProgress(institution.getIndex(), progress);
     }
 
-    public LocalDate getExploitDate() {
+    public Optional<LocalDate> getExploitDate() {
         return this.item.getVarAsDate("exploit_date");
     }
 
@@ -283,13 +268,7 @@ public class SaveProvince extends Province {
     }
 
     public List<String> getCoresTags() {
-        ClausewitzList list = this.item.getList("cores");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues();
+        return this.item.getList("cores").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public List<SaveCountry> getCores() {
@@ -297,40 +276,38 @@ public class SaveProvince extends Province {
     }
 
     public void setCores(List<SaveCountry> countries) {
-        getCores().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
-                                                                                                              () -> removeCore(core)));
+        getCores().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove, () -> removeCore(core)));
 
         countries.forEach(this::addCore);
     }
 
     public void addCore(SaveCountry country) {
-        ClausewitzList list = this.item.getList("cores");
+        Optional<ClausewitzList> clausewitzList = this.item.getList("cores");
 
-        if (!list.contains(country.getTag())) {
-            list.add(country.getTag());
-            country.addCoreProvince(this);
-            this.history.addEvent(this.save.getDate(), "add_core", ClausewitzUtils.addQuotes(country.getTag()));
+        if (clausewitzList.isPresent()) {
+            if (clausewitzList.get().contains(country.getTag())) {
+                return;
+            }
+
+            clausewitzList.get().add(country.getTag());
+        } else {
+            this.item.addList("cores", country.getTag());
         }
+
+        country.addCoreProvince(this);
+        this.history.addEvent(this.save.getDate(), "add_core", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
     public void removeCore(SaveCountry country) {
-        ClausewitzList list = this.item.getList("cores");
-
-        if (list != null) {
+        this.item.getList("cores").ifPresent(list -> {
             list.remove(country.getTag());
             country.removeCoreProvince(this);
             this.history.addEvent(this.save.getDate(), "remove_core", ClausewitzUtils.addQuotes(country.getTag()));
-        }
+        });
     }
 
     public List<String> getClaimsTags() {
-        ClausewitzList list = this.item.getList("claims");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues();
+        return this.item.getList("claims").map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public List<SaveCountry> getClaims() {
@@ -338,38 +315,42 @@ public class SaveProvince extends Province {
     }
 
     public void setClaims(List<SaveCountry> countries) {
-        getClaims().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
-                                                                                                               () -> removeClaim(core)));
+        getClaims().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove, () -> removeClaim(core)));
 
         countries.forEach(this::addClaim);
     }
 
     public void addClaim(SaveCountry country) {
-        ClausewitzList list = this.item.getList("claims");
+        Optional<ClausewitzList> clausewitzList = this.item.getList("claims");
 
-        if (!list.contains(country.getTag())) {
-            list.add(country.getTag());
-            country.addClaimProvince(this);
-            this.history.addEvent(this.save.getDate(), "add_claim", ClausewitzUtils.addQuotes(country.getTag()));
+        if (clausewitzList.isPresent()) {
+            if (clausewitzList.get().contains(country.getTag())) {
+                return;
+            }
+
+            clausewitzList.get().add(country.getTag());
+        } else {
+            this.item.addList("claims", country.getTag());
         }
+
+        country.addClaimProvince(this);
+        this.history.addEvent(this.save.getDate(), "add_claim", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
     public void removeClaim(SaveCountry country) {
-        ClausewitzList list = this.item.getList("claims");
-
-        if (list != null) {
+        this.item.getList("claims").ifPresent(list -> {
             list.remove(country.getTag());
             country.removeClaimProvince(this);
             this.history.addEvent(this.save.getDate(), "remove_claim", ClausewitzUtils.addQuotes(country.getTag()));
-        }
+        });
     }
 
-    public String getTrade() {
+    public Optional<String> getTrade() {
         return this.item.getVarAsString("trade");
     }
 
-    public TradeNode getTradeNode() {
-        return this.save.getGame().getTradeNode(ClausewitzUtils.removeQuotes(getTrade()));
+    public Optional<TradeNode> getTradeNode() {
+        return getTrade().map(s -> this.save.getGame().getTradeNode(s));
     }
 
     public void setTradeNode(TradeNode tradeNode) {
@@ -479,39 +460,43 @@ public class SaveProvince extends Province {
                                                     .sum();
     }
 
-    public Boolean activeTradeCompany() {
+    public Optional<Boolean> activeTradeCompany() {
         return this.item.getVarAsBool("active_trade_company");
     }
 
     public void setActiveTradeCompany(boolean activeTradeCompany, Eu4Language language) {
-        if (BooleanUtils.toBoolean(activeTradeCompany()) == activeTradeCompany) {
+        Optional<SaveCountry> owner = getOwner();
+
+        if (owner.isEmpty()) {
             return;
         }
 
-        if (BooleanUtils.toBoolean(activeTradeCompany())) {
-            getOwner().getTradeCompanies().forEach(c -> c.removeProvince(this));
-        } else {
-            TradeCompany company = this.save.getGame().getTradeCompanies().stream().filter(c -> c.getProvinces().contains(getId())).findFirst().orElse(null);
+        if (BooleanUtils.toBoolean(activeTradeCompany().orElse(false)) == activeTradeCompany) {
+            return;
+        }
 
-            if (company == null) {
+        if (BooleanUtils.toBoolean(activeTradeCompany().orElse(false))) {
+            getOwner().map(SaveCountry::getTradeCompanies).ifPresent(companies -> companies.forEach(c -> c.removeProvince(this)));
+        } else {
+            Optional<TradeCompany> company = this.save.getGame().getTradeCompanies().stream().filter(c -> c.getProvinces().contains(getId())).findFirst();
+
+            if (company.isEmpty()) {
                 return;
             }
 
-            Optional<SaveTradeCompany> tradeCompany = getOwner().getTradeCompanies()
-                                                                .stream()
-                                                                .filter(c -> CollectionUtils.containsAny(company.getProvinces(), c.getProvinces()))
-                                                                .findFirst();
+            Optional<SaveTradeCompany> tradeCompany = getSaveTradeCompany();
 
             if (tradeCompany.isPresent()) {
                 tradeCompany.get().addProvince(this);
             } else {
-                String key = company.getNames()
+                String key = company.get()
+                                    .getNames()
                                     .stream()
-                                    .filter(names -> names.getTrigger() == null || names.getTrigger().apply(getOwner(), getOwner()))
+                                    .filter(names -> names.getTrigger().isEmpty() || names.getTrigger().get().apply(owner.get(), owner.get()))
                                     .findFirst()
-                                    .map(Names::getName)
+                                    .flatMap(Names::getName)
                                     .map(ClausewitzUtils::removeQuotes)
-                                    .orElse(company.getName());
+                                    .orElse(company.get().getName());
 
                 this.save.addTradeCompany(this.save.getGame().getComputedLocalisation(getSave(), getOwner(), key, language), this);
             }
@@ -520,101 +505,101 @@ public class SaveProvince extends Province {
         this.item.setVariable("active_trade_company", activeTradeCompany);
     }
 
-    public SaveTradeCompany getSaveTradeCompany() {
-        if (!BooleanUtils.toBoolean(activeTradeCompany())) {
-            return null;
+    public Optional<SaveTradeCompany> getSaveTradeCompany() {
+        Optional<SaveCountry> owner = getOwner();
+
+        if (owner.isEmpty()) {
+            return Optional.empty();
         }
 
-        TradeCompany company = this.save.getGame().getTradeCompanies().stream().filter(c -> c.getProvinces().contains(getId())).findFirst().orElse(null);
-
-        if (company == null) {
-            return null;
+        if (!BooleanUtils.toBoolean(activeTradeCompany().orElse(false))) {
+            return Optional.empty();
         }
 
-        Optional<SaveTradeCompany> tradeCompany = getOwner().getTradeCompanies()
-                                                            .stream()
-                                                            .filter(c -> CollectionUtils.containsAny(company.getProvinces(), c.getProvinces()))
-                                                            .findFirst();
+        Optional<TradeCompany> company = this.save.getGame().getTradeCompanies().stream().filter(c -> c.getProvinces().contains(getId())).findFirst();
 
-        return tradeCompany.orElse(null);
+        return company.flatMap(tradeCompany -> owner.get()
+                                                    .getTradeCompanies()
+                                                    .stream()
+                                                    .filter(c -> CollectionUtils.containsAny(tradeCompany.getProvinces(), c.getProvinces()))
+                                                    .findFirst());
+
     }
 
     public boolean centerOfReligion() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("center_of_religion"));
+        return this.item.getVarAsBool("center_of_religion").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setCenterOfReligion(boolean centerOfReligion) {
         this.item.setVariable("center_of_religion", centerOfReligion);
     }
 
-    public String getOriginalCultureName() {
+    public Optional<String> getOriginalCultureName() {
         return this.item.getVarAsString("original_culture");
     }
 
-    public Culture getOriginalCulture() {
-        return this.save.getGame().getCulture(getOriginalCultureName());
+    public Optional<Culture> getOriginalCulture() {
+        return getOriginalCultureName().map(s -> this.save.getGame().getCulture(s));
     }
 
     public void setOriginalCulture(Culture originalCulture) {
         this.item.setVariable("original_culture", originalCulture.getName());
     }
 
-    public String getCultureName() {
+    public Optional<String> getCultureName() {
         return this.item.getVarAsString("culture");
     }
 
-    public Culture getCulture() {
-        return this.save.getGame().getCulture(getCultureName());
+    public Optional<Culture> getCulture() {
+        return getCultureName().map(s -> this.save.getGame().getCulture(s));
     }
 
     public void setCulture(Culture culture) {
         this.item.setVariable("culture", culture.getName());
     }
 
-    public String getOriginalReligionName() {
+    public Optional<String> getOriginalReligionName() {
         return this.item.getVarAsString("original_religion");
     }
 
-    public SaveReligion getOriginalReligion() {
-        return this.save.getReligions().getReligion(getOriginalReligionName());
+    public Optional<SaveReligion> getOriginalReligion() {
+        return getOriginalReligionName().map(s -> this.save.getReligions().getReligion(s));
     }
 
     public void setOriginalReligion(SaveReligion originalReligion) {
         this.item.setVariable("original_religion", originalReligion.getName());
     }
 
-    public String getReligionName() {
+    public Optional<String> getReligionName() {
         return this.item.getVarAsString("religion");
     }
 
-    public SaveReligion getReligion() {
-        return this.save.getReligions().getReligion(getReligionName());
+    public Optional<SaveReligion> getReligion() {
+        return getReligionName().map(s -> this.save.getReligions().getReligion(s));
     }
 
     public void setReligion(SaveReligion religion) {
         this.item.setVariable("religion", religion.getName());
     }
 
-    public String getCapital() {
+    public Optional<String> getCapital() {
         return this.item.getVarAsString("capital");
     }
 
     public void setCapital(String capital) {
-        if (getCapital() != null) {
-            this.item.setVariable("capital", ClausewitzUtils.addQuotes(capital));
-        }
+        getCapital().ifPresent(s -> this.item.setVariable("capital", ClausewitzUtils.addQuotes(capital)));
     }
 
     public boolean isOccupied() {
-        return getOwner() != null;
+        return getOwner().isPresent();
     }
 
     public boolean isCity() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("is_city"));
+        return this.item.getVarAsBool("is_city").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public boolean isColony() {
-        return !isCity() && getOwner() != null;
+        return !isCity() && isOccupied();
     }
 
     public void colonize(SaveCountry country) {
@@ -632,7 +617,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Double getColonySize() {
+    public Optional<Double> getColonySize() {
         return this.item.getVarAsDouble("colonysize");
     }
 
@@ -646,21 +631,15 @@ public class SaveProvince extends Province {
         this.item.setVariable("colonysize", colonySize);
     }
 
-    public Integer getNativeSizeBeforeMigration() {
-        Double value = this.item.getVarAsDouble("native_size_before_migration");
-
-        if (value != null) {
-            return value.intValue();
-        }
-
-        return null;
+    public Optional<Integer> getNativeSizeBeforeMigration() {
+        return this.item.getVarAsDouble("native_size_before_migration").map(Double::intValue);
     }
 
     public void setNativeSizeBeforeMigration(int nativeSizeBeforeMigration) {
         this.item.setVariable("native_size_before_migration", (double) nativeSizeBeforeMigration);
     }
 
-    public Double getGarrison() {
+    public Optional<Double> getGarrison() {
         return this.item.getVarAsDouble("garrison");
     }
 
@@ -668,21 +647,15 @@ public class SaveProvince extends Province {
         this.item.setVariable("garrison", garrison);
     }
 
-    public Integer getSiege() {
-        Double value = this.item.getVarAsDouble("siege");
-
-        if (value != null) {
-            return value.intValue();
-        }
-
-        return null;
+    public Optional<Integer> getSiege() {
+        return this.item.getVarAsDouble("siege").map(Double::intValue);
     }
 
     public void setSiege(int siege) {
         this.item.setVariable("siege", (double) siege);
     }
 
-    public Double getBaseTax() {
+    public Optional<Double> getBaseTax() {
         return this.item.getVarAsDouble("base_tax");
     }
 
@@ -690,7 +663,7 @@ public class SaveProvince extends Province {
         this.item.setVariable("base_tax", baseTax);
     }
 
-    public Double getOriginalTax() {
+    public Optional<Double> getOriginalTax() {
         return this.item.getVarAsDouble("original_tax");
     }
 
@@ -698,7 +671,7 @@ public class SaveProvince extends Province {
         this.item.setVariable("original_tax", originalTax);
     }
 
-    public Double getBaseProduction() {
+    public Optional<Double> getBaseProduction() {
         return this.item.getVarAsDouble("base_production");
     }
 
@@ -706,7 +679,7 @@ public class SaveProvince extends Province {
         this.item.setVariable("base_production", baseProduction);
     }
 
-    public Double getBaseManpower() {
+    public Optional<Double> getBaseManpower() {
         return this.item.getVarAsDouble("base_manpower");
     }
 
@@ -714,20 +687,20 @@ public class SaveProvince extends Province {
         this.item.setVariable("base_manpower", baseManpower);
     }
 
-    public Double getDevelopment() {
-        return NumbersUtils.doubleOrDefault(getBaseManpower()) + NumbersUtils.doubleOrDefault(getBaseProduction())
-               + NumbersUtils.doubleOrDefault(getBaseTax());
+    public Optional<Double> getDevelopment() {
+        return getBaseManpower().flatMap(manpower -> getBaseProduction().map(prod -> prod + manpower))
+                                .flatMap(aDouble -> getBaseTax().map(tax -> tax + aDouble));
     }
 
-    public Double getUnrest() {
+    public Optional<Double> getUnrest() {
         return this.item.getVarAsDouble("unrest");
     }
 
-    public String getRebels() {
+    public Optional<String> getRebels() {
         return this.item.getVarAsString("likely_rebels");
     }
 
-    public Double getMissionaryProgress() {
+    public Optional<Double> getMissionaryProgress() {
         return this.item.getVarAsDouble("missionary_progress");
     }
 
@@ -741,43 +714,32 @@ public class SaveProvince extends Province {
         this.item.setVariable("missionary_progress", missionaryProgress);
     }
 
-    public String getTradeGoods() {
+    public Optional<String> getTradeGoods() {
         return this.item.getVarAsString("trade_goods");
     }
 
-    public TradeGood getTradeGood() {
-        return this.save.getGame().getTradeGood(getTradeGoods());
+    public Optional<TradeGood> getTradeGood() {
+        return getTradeGoods().map(s -> this.save.getGame().getTradeGood(s));
     }
 
     public void setTradeGoods(String tradeGoods) {
         this.item.setVariable("trade_goods", tradeGoods);
     }
 
-    public String getLatentTradeGoods() {
-        ClausewitzList list = this.item.getList("latent_trade_goods");
-
-        if (list != null && !list.isEmpty()) {
-            return list.get(0);
-        } else {
-            return null;
-        }
+    public Optional<String> getLatentTradeGoods() {
+        return this.item.getList("latent_trade_goods").flatMap(list -> list.get(0));
     }
 
-    public TradeGood getLatentTradeGood() {
-        return this.save.getGame().getTradeGood(getLatentTradeGoods());
+    public Optional<TradeGood> getLatentTradeGood() {
+        return getLatentTradeGoods().map(s -> this.save.getGame().getTradeGood(s));
     }
 
     public void setLatentTradeGoods(String latentTradeGoods) {
-        ClausewitzList list = this.item.getList("latent_trade_goods");
-
-        if (list == null) {
-            this.item.addList("latent_trade_goods", latentTradeGoods);
-        } else {
-            list.set(0, latentTradeGoods);
-        }
+        this.item.getList("latent_trade_goods")
+                 .ifPresentOrElse(list -> list.set(0, latentTradeGoods), () -> this.item.addList("latent_trade_goods", latentTradeGoods));
     }
 
-    public Double getDevastation() {
+    public Optional<Double> getDevastation() {
         return this.item.getVarAsDouble("devastation");
     }
 
@@ -795,29 +757,29 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Double getLocalAutonomy() { //Fixme get country modifier min_autonomy
+    public double getLocalAutonomy() { //Fixme get country modifier min_autonomy
         if (this.localAutonomy == null) {
             this.localAutonomy = Math.max(NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("min_local_autonomy"))),
-                                          NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("local_autonomy")));
+                                          this.item.getVarAsDouble("local_autonomy").orElse(0d));
         }
 
         return this.localAutonomy;
     }
 
-    public Double getTrueLocalAutonomy() {
-        return NumbersUtils.doubleOrDefault(this.item.getVarAsDouble("local_autonomy"));
+    public Optional<Double> getTrueLocalAutonomy() {
+        return this.item.getVarAsDouble("local_autonomy");
     }
 
     public void setLocalAutonomy(double localAutonomy) {
         this.item.setVariable("local_autonomy", localAutonomy);
     }
 
-    public Boolean ub() {
+    public Optional<Boolean> ub() {
         return this.item.getVarAsBool("ub");
     }
 
     public boolean inHre() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre"));
+        return this.item.getVarAsBool("hre").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setInHre(boolean inHre) {
@@ -825,10 +787,10 @@ public class SaveProvince extends Province {
     }
 
     public boolean blockade() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("blockade"));
+        return this.item.getVarAsBool("blockade").map(BooleanUtils::toBoolean).orElse(false);
     }
 
-    public Double getBlockadeEfficiency() {
+    public Optional<Double> getBlockadeEfficiency() {
         return this.item.getVarAsDouble("blockade_efficiency");
     }
 
@@ -848,8 +810,7 @@ public class SaveProvince extends Province {
 
         if (this.country != null) {
             this.save.getGame().getBuildings().forEach(building -> {
-                if (building.onlyNative() && this.country != null
-                    && !"native".equals(this.country.getGovernment().getType().getName())) {
+                if (building.onlyNative() && this.country != null && !"native".equals(this.country.getGovernment().getType().getName())) {
                     return;
                 }
 
@@ -857,8 +818,9 @@ public class SaveProvince extends Province {
                     return;
                 }
 
-                if (CollectionUtils.isNotEmpty(building.getManufactoryFor()) && !building.getManufactoryFor().contains("all")
-                    && !building.getManufactoryFor().contains(getTradeGoods())) {
+                if (CollectionUtils.isNotEmpty(building.getManufactoryFor()) && !building.getManufactoryFor().contains("all") && !building.getManufactoryFor()
+                                                                                                                                          .contains(
+                                                                                                                                                  getTradeGoods())) {
                     return;
                 }
 
@@ -873,35 +835,31 @@ public class SaveProvince extends Province {
         return Eu4Utils.buildingsTree(getAvailableBuildings());
     }
 
-    public void setBuildings(List<Building> newBuildings) {
+    public void setBuildings(Collection<Building> newBuildings) {
+        setBuildings(newBuildings.stream().map(Building::getName).toList());
+    }
+
+    public void setBuildings(List<String> newBuildings) {
         Iterator<ProvinceBuilding> iterator = this.buildings.iterator();
 
         while (iterator.hasNext()) {
             ProvinceBuilding provinceBuilding = iterator.next();
 
-            if (!newBuildings.contains(provinceBuilding)) {
+            if (!newBuildings.contains(provinceBuilding.getName())) {
                 removeBuildingNoRefresh(provinceBuilding.getName());
                 iterator.remove();
             }
 
-            newBuildings.remove(provinceBuilding);
+            newBuildings.remove(provinceBuilding.getName());
         }
 
-        newBuildings.forEach(building -> addBuilding(building.getName(), getControllerTag()));
+        getControllerTag().ifPresent(s -> newBuildings.forEach(building -> addBuilding(building, s)));
     }
 
     public void addBuilding(String name, String builder) {
         if (isColonizable()) {
-            ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders");
-            ClausewitzItem buildingsItem = this.item.getChild("buildings");
-
-            if (buildingsBuildersItem == null) {
-                buildingsBuildersItem = this.item.addChild("building_builders");
-            }
-
-            if (buildingsItem == null) {
-                buildingsItem = this.item.addChild("buildings");
-            }
+            ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders").orElse(this.item.addChild("building_builders"));
+            ClausewitzItem buildingsItem = this.item.getChild("buildings").orElse(this.item.addChild("buildings"));
 
             if (!buildingsItem.hasVar(name)) {
                 buildingsItem.addVariable(name, true);
@@ -914,16 +872,8 @@ public class SaveProvince extends Province {
     }
 
     private void removeBuildingNoRefresh(String name) {
-        ClausewitzItem buildingsBuildersItem = this.item.getChild("building_builders");
-        ClausewitzItem buildingsItem = this.item.getChild("buildings");
-
-        if (buildingsBuildersItem != null) {
-            buildingsBuildersItem.removeVariable(name);
-        }
-
-        if (buildingsItem != null) {
-            buildingsItem.removeVariable(name);
-        }
+        this.item.getChild("building_builders").ifPresent(item -> item.removeVariable(name));
+        this.item.getChild("buildings").ifPresent(item -> item.removeVariable(name));
     }
 
     public void removeBuilding(String name) {
@@ -932,20 +882,20 @@ public class SaveProvince extends Province {
     }
 
     public List<SaveGreatProject> getGreatProjects() {
-        ClausewitzList list = this.item.getList("great_projects");
-
-        if (list != null) {
-            return list.getValues().stream().map(this.save::getGreatProject).filter(Objects::nonNull).toList();
-        } else {
-            return new ArrayList<>();
-        }
+        return this.item.getList("great_projects")
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(this.save::getGreatProject)
+                        .filter(Objects::nonNull)
+                        .toList();
     }
 
     public SaveProvinceHistory getHistory() {
         return history;
     }
 
-    public Integer getPatrol() {
+    public Optional<Integer> getPatrol() {
         return this.item.getVarAsInt("patrol");
     }
 
@@ -958,37 +908,27 @@ public class SaveProvince extends Province {
     }
 
     public List<SaveCountry> getDiscoveredBy() {
-        ClausewitzList list = this.item.getList("discovered_by");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues().stream().map(this.save::getCountry).toList();
+        return this.item.getList("discovered_by").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.save::getCountry).toList();
     }
 
     public void setDiscoveredBy(List<SaveCountry> countries) {
-        getDiscoveredBy().forEach(core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove,
-                                                                                                                     () -> removeDiscoveredBy(core)));
+        getDiscoveredBy().forEach(
+                core -> countries.stream().filter(c -> c.equals(core)).findFirst().ifPresentOrElse(countries::remove, () -> removeDiscoveredBy(core)));
 
         countries.forEach(this::addDiscoveredBy);
     }
 
     public void addDiscoveredBy(SaveCountry country) {
-        ClausewitzList list = this.item.getList("discovered_by");
-
-        if (!list.contains(country.getTag())) {
-            list.add(country.getTag());
-            this.history.addEvent(this.save.getDate(), "discovered_by", ClausewitzUtils.addQuotes(country.getTag()));
-        }
+        this.item.getList("discovered_by").ifPresent(list -> {
+            if (!list.contains(country.getTag())) {
+                list.add(country.getTag());
+                this.history.addEvent(this.save.getDate(), "discovered_by", ClausewitzUtils.addQuotes(country.getTag()));
+            }
+        });
     }
 
     public void removeDiscoveredBy(SaveCountry country) {
-        ClausewitzList list = this.item.getList("discovered_by");
-
-        if (list != null) {
-            list.remove(country.getTag());
-        }
+        this.item.getList("discovered_by").ifPresent(list -> list.remove(country.getTag()));
     }
 
     public Map<String, Integer> getImproveCount() {
@@ -1039,28 +979,16 @@ public class SaveProvince extends Province {
         this.item.removeVariable("applied_triggered_modifier", appliedTriggeredModifier);
     }
 
-    public Integer getFormerNativeSize() {
-        Double value = this.item.getVarAsDouble("former_native_size");
-
-        if (value != null) {
-            return (int) (value * 1000);
-        }
-
-        return null;
+    public Optional<Integer> getFormerNativeSize() {
+        return this.item.getVarAsDouble("former_native_size").map(value -> (int) (value * 1000));
     }
 
     public void setFormerNativeSize(int formerNativeSize) {
         this.item.setVariable("former_native_size", ((double) formerNativeSize / 1000));
     }
 
-    public Integer getNativeSize() {
-        Double value = this.item.getVarAsDouble("native_size");
-
-        if (value != null) {
-            return (int) (value * 100);
-        }
-
-        return null;
+    public Optional<Integer> getNativeSize() {
+        return this.item.getVarAsDouble("native_size").map(value -> (int) (value * 1000));
     }
 
     public void setNativeSize(Integer nativeSize) {
@@ -1071,7 +999,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Integer getNativeHostileness() {
+    public Optional<Integer> getNativeHostileness() {
         return this.item.getVarAsInt("native_hostileness");
     }
 
@@ -1083,7 +1011,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Integer getNativeFerocity() {
+    public Optional<Integer> getNativeFerocity() {
         return this.item.getVarAsInt("native_ferocity");
     }
 
@@ -1095,7 +1023,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Integer getNationalism() {
+    public Optional<Integer> getNationalism() {
         return this.item.getVarAsInt("nationalism");
     }
 
@@ -1103,11 +1031,11 @@ public class SaveProvince extends Province {
         this.item.setVariable("nationalism", nationalism);
     }
 
-    public Integer getWinterLevel() {
+    public Optional<Integer> getWinterLevel() {
         return this.item.getVarAsInt("winter");
     }
 
-    public Integer getPreviousWinter() {
+    public Optional<Integer> getPreviousWinter() {
         return this.item.getVarAsInt("previous_winter");
     }
 
@@ -1151,12 +1079,12 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Integer getFortInfluencing() {
+    public Optional<Integer> getFortInfluencing() {
         return this.item.getVarAsInt("fort_influencing");
     }
 
     public boolean fortMothballed() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("mothball_command"));
+        return this.item.getVarAsBool("mothball_command").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setFortMothballed(boolean fortMothballed) {
@@ -1170,6 +1098,8 @@ public class SaveProvince extends Province {
 
         OptionalDouble fortLevel = getBuildings().stream()
                                                  .map(b -> b.getBuilding().getModifiers())
+                                                 .filter(Optional::isPresent)
+                                                 .map(Optional::get)
                                                  .filter(m -> m.getModifier("fort_level") != null)
                                                  .mapToDouble(m -> m.getModifier("fort_level"))
                                                  .max();
@@ -1177,11 +1107,11 @@ public class SaveProvince extends Province {
         if (fortLevel.isEmpty()) {
             return 0;
         } else {
-            return (int) (fortLevel.getAsDouble() + ((getOwner() != null && getOwner().getCapital().equals(this)) ? 1 : 0));
+            return (int) (fortLevel.getAsDouble() + ((getOwner().isPresent() && getOwner().get().getCapital().equals(this)) ? 1 : 0));
         }
     }
 
-    public Double getTradePower() {
+    public Optional<Double> getTradePower() {
         return this.item.getVarAsDouble("trade_power");
     }
 
@@ -1190,18 +1120,18 @@ public class SaveProvince extends Province {
     }
 
     public boolean userChangedName() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("user_changed_name"));
+        return this.item.getVarAsBool("user_changed_name").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public boolean hreLiberated() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("hre_liberated"));
+        return this.item.getVarAsBool("hre_liberated").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setHreLiberated(boolean hreLiberated) {
         this.item.setVariable("hre_liberated", hreLiberated);
     }
 
-    public Double getLootRemaining() {
+    public Optional<Double> getLootRemaining() {
         return this.item.getVarAsDouble("loot_remaining");
     }
 
@@ -1215,7 +1145,7 @@ public class SaveProvince extends Province {
         this.item.setVariable("loot_remaining", lootRemaining);
     }
 
-    public LocalDate getLastLooted() {
+    public Optional<LocalDate> getLastLooted() {
         return this.item.getVarAsDate("last_looted");
     }
 
@@ -1223,7 +1153,7 @@ public class SaveProvince extends Province {
         this.item.setVariable("last_looted", lastLooted);
     }
 
-    public LocalDate getLastRazed() {
+    public Optional<LocalDate> getLastRazed() {
         return this.item.getVarAsDate("last_razed");
     }
 
@@ -1231,8 +1161,8 @@ public class SaveProvince extends Province {
         this.item.setVariable("last_razed", lastRazed);
     }
 
-    public SaveCountry getLastRazedBy() {
-        return this.save.getCountry(this.item.getVarAsString("last_razed_by"));
+    public Optional<SaveCountry> getLastRazedBy() {
+        return this.item.getVarAsString("last_razed_by").map(this.save::getCountry);
     }
 
     public void setLastRazedBy(SaveCountry lastRazedBy) {
@@ -1259,7 +1189,7 @@ public class SaveProvince extends Province {
         return false;
     }
 
-    public String getLastNativeUprising() {
+    public Optional<String> getLastNativeUprising() {
         return this.item.getVarAsString("last_native_uprising");
     }
 
@@ -1267,12 +1197,12 @@ public class SaveProvince extends Province {
         this.item.setVariable("last_native_uprising", ClausewitzUtils.addQuotes(lastNativeUprising));
     }
 
-    public Integer getCenterOfTradeLevel() {
+    public Optional<Integer> getCenterOfTradeLevel() {
         return this.item.getVarAsInt("center_of_trade");
     }
 
-    public CenterOfTrade getCenterOfTrade() {
-        return this.save.getGame().getCentersOfTrade().stream().filter(centerOfTrade -> centerOfTrade.isValid(this)).findFirst().orElse(null);
+    public Optional<CenterOfTrade> getCenterOfTrade() {
+        return this.save.getGame().getCentersOfTrade().stream().filter(centerOfTrade -> centerOfTrade.isValid(this)).findFirst();
     }
 
     public void setCenterOfTrade(CenterOfTrade centerOfTrade) {
@@ -1291,7 +1221,7 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Integer getExpandInfrastructure() {
+    public Optional<Integer> getExpandInfrastructure() {
         return this.item.getVarAsInt("expand_infrastructure");
     }
 
@@ -1303,11 +1233,11 @@ public class SaveProvince extends Province {
         }
     }
 
-    public Double getFortFlipProgress() {
+    public Optional<Double> getFortFlipProgress() {
         return this.item.getVarAsDouble("fort_flip_progress");
     }
 
-    public Integer getFortFlipperProv() {
+    public Optional<Integer> getFortFlipperProv() {
         return this.item.getVarAsInt("fort_flipper_prov");
     }
 
@@ -1324,34 +1254,32 @@ public class SaveProvince extends Province {
     }
 
     public double getTolerance() {
-        if (getOwner() == null || !getOwner().isAlive()) {
+        Optional<SaveCountry> owner = getOwner();
+        Optional<SaveReligion> religion = getReligion();
+
+        if (owner.filter(Predicate.not(SaveCountry::isAlive)).isEmpty() || religion.isEmpty()) {
             return 0;
-        } else if (getReligion().equals(getOwner().getReligion())) {
-            return getOwner().getToleranceOwn();
-        } else if (getReligion().getReligionGroup().equals(getOwner().getReligion().getReligionGroup())) {
-            return getOwner().getToleranceHeretic();
+        } else if (religion.get().equals(owner.get().getReligion())) {
+            return owner.get().getToleranceOwn();
+        } else if (religion.get().getReligionGroup().equals(owner.get().getReligion().getReligionGroup())) {
+            return owner.get().getToleranceHeretic();
         } else {
-            return getOwner().getToleranceHeathen();
+            return owner.get().getToleranceHeathen();
         }
     }
 
     public double getLandForceLimit() {
-        return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit")))
-                * (100 - NumbersUtils.doubleOrDefault(getLocalAutonomy())) / 100)
-               * (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier")));
+        return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("land_forcelimit"))) * (100 - getLocalAutonomy()) / 100) *
+               (1 + getModifier(ModifiersUtils.getModifier("land_forcelimit_modifier")));
     }
 
     public double getNavalForceLimit() {
-        if (!isPort() || getOwner() != null && getOwner().isAlive() && getOwner().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
-            if (getTradeGood().getProvinceModifiers().hasModifier(ModifiersUtils.getModifier("naval_forcelimit"))) {
-                return getTradeGood().getProvinceModifiers().getModifier(ModifiersUtils.getModifier("naval_forcelimit"));
-            } else {
-                return 0;
-            }
+        Optional<SaveCountry> owner = getOwner();
+        if (!isPort() || owner.isPresent() && owner.get().isAlive() && owner.get().getOwnedProvinces().size() < 5) { //DON'T ASK MY WHY
+            return getTradeGood().flatMap(TradeGood::getProvinceModifiers).map(m -> m.getModifier(ModifiersUtils.getModifier("naval_forcelimit"))).orElse(0d);
         } else {
-            return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit")))
-                    * (100 - NumbersUtils.doubleOrDefault(getLocalAutonomy())) / 100)
-                   * (1 + getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier")));
+            return (NumbersUtils.doubleOrDefault(getModifier(ModifiersUtils.getModifier("naval_forcelimit"))) * (100 - getLocalAutonomy()) / 100) *
+                   (1 + getModifier(ModifiersUtils.getModifier("naval_forcelimit_modifier")));
         }
     }
 
@@ -1362,7 +1290,8 @@ public class SaveProvince extends Province {
         if (CollectionUtils.isNotEmpty(getBuildings())) {
             list.addAll(getBuildings().stream()
                                       .map(b -> b.getBuilding().getModifiers())
-                                      .filter(Objects::nonNull)
+                                      .filter(Optional::isPresent)
+                                      .map(Optional::get)
                                       .filter(m -> m.hasModifier(modifier))
                                       .map(m -> m.getModifier(modifier))
                                       .toList());
@@ -1377,33 +1306,34 @@ public class SaveProvince extends Province {
                                       .toList());
         }
 
-        if (getCulture() != null) {
-            getCulture().getProvinceModifiers().filter(m -> m.hasModifier(modifier)).ifPresent(m -> list.add(m.getModifier(modifier)));
-        }
-
-        if (getTradeGood() != null && getTradeGood().getProvinceModifiers().hasModifier(modifier)) {
-            list.add(getTradeGood().getProvinceModifiers().getModifier(modifier));
-        }
+        getCulture().flatMap(culture -> culture.getProvinceModifiers().filter(m -> m.hasModifier(modifier))).ifPresent(m -> list.add(m.getModifier(modifier)));
+        getTradeGood().flatMap(TradeGood::getProvinceModifiers).map(m -> m.getModifier(modifier)).ifPresent(list::add);
 
         if (inHre() && !this.save.getHre().dismantled()) {
             list.addAll(this.save.getHre()
                                  .getPassedReforms()
                                  .stream()
                                  .map(ImperialReform::getProvinceModifiers)
-                                 .filter(Objects::nonNull)
+                                 .filter(Optional::isPresent)
+                                 .map(Optional::get)
                                  .filter(m -> m.hasModifier(modifier))
                                  .map(m -> m.getModifier(modifier))
                                  .filter(Objects::nonNull)
                                  .toList());
         }
 
-        if (getOwner() != null && getOwner().isAlive() && !this.save.getCelestialEmpire().dismantled()
-            && getOwner().equals(this.save.getCelestialEmpire().getEmperor())) {
+        Optional<SaveCountry> owner = getOwner();
+
+        if (owner.filter(SaveCountry::isAlive).isPresent() && !this.save.getCelestialEmpire().dismantled() &&
+            owner.filter(c -> this.save.getCelestialEmpire().getEmperor().isPresent())
+                 .filter(c -> c.equals(this.save.getCelestialEmpire().getEmperor().get()))
+                 .isPresent()) {
             list.addAll(this.save.getCelestialEmpire()
                                  .getPassedReforms()
                                  .stream()
                                  .map(ImperialReform::getProvinceModifiers)
-                                 .filter(Objects::nonNull)
+                                 .filter(Optional::isPresent)
+                                 .map(Optional::get)
                                  .filter(m -> m.hasModifier(modifier))
                                  .map(m -> m.getModifier(modifier))
                                  .toList());
@@ -1414,202 +1344,159 @@ public class SaveProvince extends Province {
                                           .map(SaveGreatProject::getTier)
                                           .filter(Objects::nonNull)
                                           .map(GreatProjectTier::getProvinceModifiers)
-                                          .filter(Objects::nonNull)
+                                          .filter(Optional::isPresent)
+                                          .map(Optional::get)
                                           .filter(m -> m.hasModifier(modifier))
                                           .map(m -> m.getModifier(modifier))
                                           .toList());
         }
 
-        if (getSaveArea() != null && getOwner() != null && getOwner().isAlive()) {
+        if (getSaveArea() != null && owner.filter(SaveCountry::isAlive).isPresent()) {
             if (getSaveArea().getCountriesStates() != null) {
-                CountryState countryState = getSaveArea().getCountryState(getOwner());
+                CountryState countryState = getSaveArea().getCountryState(owner.get());
 
                 if (countryState != null) {
-                    if (countryState.getActiveEdict() != null
-                        && countryState.getActiveEdict().getWhich().getModifiers().getProvinceModifiers().hasModifier(modifier)) {
-                        list.add(countryState.getActiveEdict().getWhich().getModifiers().getProvinceModifiers().getModifier(modifier));
-                    }
-
-                    if (countryState.getHolyOrder() != null
-                        && countryState.getHolyOrder().getModifiers().getProvinceModifiers().hasModifier(modifier)) {
-                        list.add(countryState.getHolyOrder().getModifiers().getProvinceModifiers().getModifier(modifier));
-                    }
+                    countryState.getActiveEdict()
+                                .flatMap(Edict::getWhich)
+                                .flatMap(StateEdict::getModifiers)
+                                .map(Modifiers::getProvinceModifiers)
+                                .map(m -> m.getModifier(modifier))
+                                .ifPresent(list::add);
+                    countryState.getHolyOrder()
+                                .flatMap(HolyOrder::getModifiers)
+                                .map(Modifiers::getProvinceModifiers)
+                                .map(m -> m.getModifier(modifier))
+                                .ifPresent(list::add);
                 }
             }
 
-            SaveInvestment investment = getSaveArea().getInvestment(getOwner());
-
-            if (investment != null && CollectionUtils.isNotEmpty(investment.getInvestments())) {
-                list.addAll(investment.getInvestments()
-                                      .stream()
-                                      .map(Investment::getAreaModifier)
-                                      .filter(Objects::nonNull)
-                                      .filter(m -> m.hasModifier(modifier))
-                                      .map(m -> m.getModifier(modifier))
-                                      .toList());
-
-                if (BooleanUtils.toBoolean(activeTradeCompany())) {
+            owner.map(c -> getSaveArea().getInvestment(c)).ifPresent(investment -> {
+                if (CollectionUtils.isNotEmpty(investment.getInvestments())) {
                     list.addAll(investment.getInvestments()
                                           .stream()
-                                          .map(Investment::getCompanyProvinceAreaModifier)
-                                          .filter(Objects::nonNull)
+                                          .map(Investment::getAreaModifier)
+                                          .filter(Optional::isPresent)
+                                          .map(Optional::get)
                                           .filter(m -> m.hasModifier(modifier))
                                           .map(m -> m.getModifier(modifier))
                                           .toList());
 
-                    getOwner().getTradeCompanies()
-                              .stream()
-                              .filter(company -> company.getProvinces().contains(this))
-                              .findFirst()
-                              .ifPresent(company -> list.addAll(company.getProvinces()
-                                                                       .stream()
-                                                                       .map(SaveProvince::getSaveArea)
-                                                                       .distinct()
-                                                                       .filter(Objects::nonNull)
-                                                                       .map(saveArea -> saveArea.getInvestment(getOwner()))
-                                                                       .filter(Objects::nonNull)
-                                                                       .map(SaveInvestment::getInvestments)
-                                                                       .flatMap(Collection::stream)
-                                                                       .map(Investment::getCompanyRegionModifier)
-                                                                       .filter(Objects::nonNull)
-                                                                       .filter(m -> m.hasModifier(modifier))
-                                                                       .map(m -> m.getModifier(modifier))
-                                                                       .toList()));
-                }
-            }
+                    if (activeTradeCompany().map(BooleanUtils::toBoolean).orElse(false)) {
+                        list.addAll(investment.getInvestments()
+                                              .stream()
+                                              .map(Investment::getCompanyProvinceAreaModifier)
+                                              .filter(Optional::isPresent)
+                                              .map(Optional::get)
+                                              .filter(m -> m.hasModifier(modifier))
+                                              .map(m -> m.getModifier(modifier))
+                                              .toList());
 
-            getSaveArea().getProvinces().stream().filter(saveProvince -> saveProvince.getCenterOfTrade() != null).findFirst().ifPresent(saveProvince -> {
-                if (saveProvince.getCenterOfTrade().getStateModifiers().hasModifier(modifier)) {
-                    list.add(saveProvince.getCenterOfTrade().getStateModifiers().getModifier(modifier));
+                        owner.get()
+                             .getTradeCompanies()
+                             .stream()
+                             .filter(company -> company.getProvinces().contains(this))
+                             .findFirst()
+                             .ifPresent(company -> list.addAll(company.getProvinces()
+                                                                      .stream()
+                                                                      .map(SaveProvince::getSaveArea)
+                                                                      .distinct()
+                                                                      .filter(Objects::nonNull)
+                                                                      .map(saveArea -> saveArea.getInvestment(owner.get()))
+                                                                      .filter(Objects::nonNull)
+                                                                      .map(SaveInvestment::getInvestments)
+                                                                      .flatMap(Collection::stream)
+                                                                      .map(Investment::getCompanyRegionModifier)
+                                                                      .filter(Optional::isPresent)
+                                                                      .map(Optional::get)
+                                                                      .filter(m -> m.hasModifier(modifier))
+                                                                      .map(m -> m.getModifier(modifier))
+                                                                      .toList()));
+                    }
                 }
             });
+
+            getSaveArea().getProvinces()
+                         .stream()
+                         .map(SaveProvince::getCenterOfTrade)
+                         .filter(Optional::isPresent)
+                         .map(Optional::get)
+                         .findFirst()
+                         .flatMap(CenterOfTrade::getStateModifiers)
+                         .ifPresent(modifiers -> {
+                             if (modifiers.hasModifier(modifier)) {
+                                 list.add(modifiers.getModifier(modifier));
+                             }
+                         });
         }
 
-        if (getOwner() != null && getOwner().isAlive()) {
-            TradeNodeCountry tradeNodeCountry = this.save.getTradeNode(ClausewitzUtils.removeQuotes(getTrade())).getCountry(getOwner());
+        if (owner.filter(SaveCountry::isAlive).isPresent() && getTrade().isPresent()) {
+            TradeNodeCountry tradeNodeCountry = this.save.getTradeNode(ClausewitzUtils.removeQuotes(getTrade().get())).getCountry(owner.get());
 
             if (tradeNodeCountry != null) {
-                TradePolicy tradePolicy = tradeNodeCountry.getTradePolicy();
-
-                if (tradePolicy != null) {
-                    if (tradePolicy.getNodeProvinceModifier().getProvinceModifiers().hasModifier(modifier)) {
-                        list.add(tradePolicy.getNodeProvinceModifier().getProvinceModifiers().getModifier(modifier));
-                    }
-
-                    if (tradePolicy.getTradePower().getProvinceModifiers().hasModifier(modifier)) {
-                        list.add(tradePolicy.getTradePower().getProvinceModifiers().getModifier(modifier));
-                    }
-                }
+                tradeNodeCountry.getTradePolicy().ifPresent(tradePolicy -> {
+                    tradePolicy.getNodeProvinceModifier().filter(m -> m.getProvinceModifiers().hasModifier(modifier)).ifPresent(m -> {
+                        list.add(m.getModifier(modifier));
+                    });
+                    tradePolicy.getTradePower().filter(m -> m.getProvinceModifiers().hasModifier(modifier)).ifPresent(m -> {
+                        list.add(m.getModifier(modifier));
+                    });
+                });
             }
         }
 
-        if (getCenterOfTrade() != null) {
-            getCenterOfTrade().getProvinceModifiers().map(m -> m.getModifier(modifier)).ifPresent(list::add);
-        }
+        getCenterOfTrade().flatMap(CenterOfTrade::getProvinceModifiers).map(m -> m.getModifier(modifier)).ifPresent(list::add);
 
         return ModifiersUtils.sumModifiers(modifier, list);
     }
 
     private void refreshAttributes() {
-        ClausewitzItem flagsItem = this.item.getChild("flags");
+        this.flags = this.item.getChild("flags").map(ListOfDates::new).orElse(null);
+        this.occupyingRebelFaction = this.item.getChild("occupying_rebel_faction").map(Id::new).orElse(null);
+        this.seatInParliament = this.item.getChild("seat_in_parliament").map(i -> new SeatInParliament(i, this.save)).orElse(null);
+        Optional<ClausewitzItem> historyItem = this.item.getChild("history");
+        this.history = historyItem.map(i -> new SaveProvinceHistory(i, this)).orElse(null);
 
-        if (flagsItem != null) {
-            this.flags = new ListOfDates(flagsItem);
-        }
-
-        ClausewitzItem occupyingRebelFactionItem = this.item.getChild("occupying_rebel_faction");
-
-        if (occupyingRebelFactionItem != null) {
-            this.occupyingRebelFaction = new Id(occupyingRebelFactionItem);
-        }
-
-        ClausewitzItem seatInParliamentItem = this.item.getChild("seat_in_parliament");
-
-        if (seatInParliamentItem != null) {
-            this.seatInParliament = new SeatInParliament(seatInParliamentItem, this.save);
-        }
-
-        ClausewitzItem historyItem = this.item.getChild("history");
-
-        if (historyItem != null) {
-            this.history = new SaveProvinceHistory(historyItem, this);
-        }
-
-        ClausewitzItem buildersItem = this.item.getChild("building_builders");
         this.buildings = new ArrayList<>(0);
-
-        if (buildersItem != null) {
-            buildersItem.getVariables().forEach(var -> {
-                if (historyItem == null) {
-                    this.buildings.add(new ProvinceBuilding(var.getName(), var.getValue(), null, this.save.getGame().getBuilding(var.getName())));
+        this.item.getChild("building_builders").ifPresent(buildersItem -> {
+            buildersItem.getVariables().forEach(v -> {
+                if (historyItem.isEmpty()) {
+                    this.buildings.add(new ProvinceBuilding(v.getName(), v.getValue(), null, this.save.getGame().getBuilding(v.getName())));
                 } else {
-                    historyItem.getChildren()
+                    historyItem.get()
+                               .getChildren()
                                .stream()
-                               .filter(child -> child.hasVar(var.getName()))
+                               .filter(child -> child.hasVar(v.getName()))
                                .findFirst()
-                               .ifPresentOrElse(child -> this.buildings.add(new ProvinceBuilding(var.getName(),
-                                                                                                 var.getValue(),
-                                                                                                 Eu4Utils.stringToDate(child.getName()),
-                                                                                                 this.save.getGame().getBuilding(var.getName()))),
-                                                () -> this.buildings.add(new ProvinceBuilding(var.getName(),
-                                                                                              var.getValue(),
-                                                                                              null,
-                                                                                              this.save.getGame().getBuilding(var.getName()))));
+                               .ifPresentOrElse(child -> this.buildings.add(
+                                                        new ProvinceBuilding(v.getName(), v.getValue(), Eu4Utils.stringToDate(child.getName()),
+                                                                             this.save.getGame().getBuilding(v.getName()))),
+                                                () -> this.buildings.add(
+                                                        new ProvinceBuilding(v.getName(), v.getValue(), null, this.save.getGame().getBuilding(v.getName()))));
                 }
             });
             this.buildings.sort(ProvinceBuilding::compareTo);
-        }
+        });
 
-        ClausewitzItem discoveryDatesItem = this.item.getChild("discovery_dates2");
+        this.discoveryDates = this.item.getChild("discovery_dates2").map(ListOfDates::new).orElse(null);
+        this.discoveryReligionDates = this.item.getChild("discovery_religion_dates2").map(ListOfDates::new).orElse(null);
 
-        if (discoveryDatesItem != null) {
-            this.discoveryDates = new ListOfDates(discoveryDatesItem);
-        }
-
-        ClausewitzItem discoveryReligionDatesItem = this.item.getChild("discovery_religion_dates2");
-
-        if (discoveryReligionDatesItem != null) {
-            this.discoveryReligionDates = new ListOfDates(discoveryReligionDatesItem);
-        }
-
-        ClausewitzItem improveCountItem = this.item.getChild("country_improve_count");
-
-        if (improveCountItem != null) {
+        this.item.getChild("country_improve_count").ifPresent(improveCountItem -> {
             this.improveCount = new HashMap<>();
             for (int i = 0; i < improveCountItem.getVariables().size() - 1; i += 2) {
                 this.improveCount.put(ClausewitzUtils.removeQuotes(improveCountItem.getVariables().get(i).getValue()),
                                       improveCountItem.getVariables().get(i + 1).getAsInt());
             }
-        }
+        });
 
         List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
         this.modifiers = modifierItems.stream()
                                       .map(child -> new SaveModifier(child, this.save.getGame()))
                                       .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifierName()), Function.identity()));
 
-        ClausewitzItem rebelFactionItem = this.item.getChild("rebel_faction");
-
-        if (rebelFactionItem != null) {
-            this.rebelFaction = new Id(rebelFactionItem);
-        }
-
-        ClausewitzItem child = this.item.getChild("building_construction");
-
-        if (child != null) {
-            this.buildingConstruction = new ProvinceConstruction(child, this);
-        }
-
-        child = this.item.getChild("colony_construction");
-
-        if (child != null) {
-            this.colonyConstruction = new ProvinceConstruction(child, this);
-        }
-
-        child = this.item.getChild("missionary_construction");
-
-        if (child != null) {
-            this.missionaryConstruction = new ProvinceConstruction(child, this);
-        }
+        this.rebelFaction = this.item.getChild("rebel_faction").map(Id::new).orElse(null);
+        this.buildingConstruction = this.item.getChild("building_construction").map(i -> new ProvinceConstruction(i, this)).orElse(null);
+        this.colonyConstruction = this.item.getChild("colony_construction").map(i -> new ProvinceConstruction(i, this)).orElse(null);
+        this.missionaryConstruction = this.item.getChild("missionary_construction").map(i -> new ProvinceConstruction(i, this)).orElse(null);
 
         List<ClausewitzItem> unitsItems = this.item.getChildren("unit");
 
@@ -1617,20 +1504,8 @@ public class SaveProvince extends Province {
             this.armies = new ArrayList<>(0);
             this.navies = new ArrayList<>(0);
             unitsItems.stream().map(Id::new).forEach(unitId -> {
-                this.save.getCountries()
-                         .values()
-                         .stream()
-                         .map(c -> c.getArmy(unitId))
-                         .filter(Objects::nonNull)
-                         .findFirst()
-                         .ifPresent(this.armies::add);
-                this.save.getCountries()
-                         .values()
-                         .stream()
-                         .map(c -> c.getNavy(unitId))
-                         .filter(Objects::nonNull)
-                         .findFirst()
-                         .ifPresent(this.navies::add);
+                this.save.getCountries().values().stream().map(c -> c.getArmy(unitId)).filter(Objects::nonNull).findFirst().ifPresent(this.armies::add);
+                this.save.getCountries().values().stream().map(c -> c.getNavy(unitId)).filter(Objects::nonNull).findFirst().ifPresent(this.navies::add);
             });
         }
 

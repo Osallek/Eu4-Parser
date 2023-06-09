@@ -12,7 +12,7 @@ import org.apache.commons.collections4.MapUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -45,19 +45,19 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
 
     @Override
     public LocalDate getDate() {
-        return this.province.getSave().getStartDate();
+        return this.province.getSave().getStartDate().orElse(null);
     }
 
-    public Boolean getSeatInParliament() {
+    public Optional<Boolean> getSeatInParliament() {
         return this.item.getLastVarAsBool("seat_in_parliament");
     }
 
-    public Double getExtraCost() {
+    public Optional<Double> getExtraCost() {
         return this.item.getLastVarAsDouble("extra_cost");
     }
 
-    public Integer getFormerNativeSize() {
-        return NumbersUtils.doubleToInt(this.item.getLastVarAsDouble("former_native_size"));
+    public Optional<Integer> getFormerNativeSize() {
+        return this.item.getLastVarAsDouble("former_native_size").map(NumbersUtils::doubleToInt);
     }
 
     public List<SaveProvinceHistoryEvent> getEvents() {
@@ -122,7 +122,7 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
                                .stream()
                                .filter(child -> child.hasVar("owner"))
                                .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                         child -> this.province.getSave().getCountry(child.getVarAsString("owner")),
+                                                         child -> this.province.getSave().getCountry(child.getVarAsString("owner").get()),
                                                          (a, b) -> b,
                                                          TreeMap::new));
         this.claims = this.item.getChildren()
@@ -130,16 +130,16 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
                                .filter(child -> child.hasVar("add_claim"))
                                .collect(Collectors.groupingBy(child -> Eu4Utils.stringToDate(child.getName()),
                                                               TreeMap::new,
-                                                              Collectors.mapping(child -> this.province.getSave().getCountry(child.getVarAsString("add_claim")),
+                                                              Collectors.mapping(child -> this.province.getSave().getCountry(child.getVarAsString("add_claim").get()),
                                                                                  Collectors.toList())));
         //No startDate because already in history
 
         this.controllers = this.item.getChildren()
                                     .stream()
-                                    .filter(child -> child.hasChild("controller"))
-                                    .filter(child -> child.getChild("controller").hasVar("tag"))
+                                    .filter(child -> child.getChild("controller").filter(child2 -> child2.hasVar("tag")).isPresent())
                                     .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                              child -> this.province.getSave().getCountry(child.getChild("controller").getVarAsString("tag")),
+                                                              child -> this.province.getSave()
+                                                                                    .getCountry(child.getChild("controller").get().getVarAsString("tag").get()),
                                                               (a, b) -> a, //Take a because only happens when changing tag
                                                               TreeMap::new));
 
@@ -152,47 +152,45 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
         }
 
 
-        ClausewitzItem controllerItem = this.item.getChild("controller");
-
-        if (controllerItem != null) {
-            this.controllers.put(this.province.getSave().getStartDate(), this.province.getSave().getCountry(controllerItem.getVarAsString("tag")));
-        }
+        this.item.getChild("controller")
+                 .flatMap(controllerItem -> controllerItem.getVarAsString("tag"))
+                 .map(s -> this.province.getSave().getCountry(s))
+                 .ifPresent(country -> this.controllers.put(this.province.getSave().getStartDate().get(), country));
 
         this.religions = this.item.getChildrenNot("advisor")
                                   .stream()
-                                  .filter(child -> child.hasVar("religion"))
+                                  .filter(child -> child.getVarAsString("religion").map(s -> this.province.getSave().getReligions().getReligion(s)).isPresent())
                                   .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                            child -> this.province.getSave().getReligions().getReligion(child.getVarAsString("religion")),
+                                                            child -> this.province.getSave().getReligions().getReligion(child.getVarAsString("religion").get()),
                                                             (a, b) -> b,
                                                             TreeMap::new));
-        this.religions.put(this.province.getSave().getStartDate(), this.province.getSave().getReligions().getReligion(this.item.getVarAsString("religion")));
+        this.item.getVarAsString("religion")
+                 .map(s -> this.province.getSave().getReligions().getReligion(s))
+                 .ifPresent(r -> this.religions.put(this.province.getSave().getStartDate().get(), r));
 
         this.cultures = this.item.getChildrenNot("advisor")
                                  .stream()
-                                 .filter(child -> child.hasVar("culture"))
-                                 .filter(child -> this.province.getSave().getGame().getCulture(child.getVarAsString("culture")) != null)
+                                 .filter(child -> child.getVarAsString("culture").map(s -> this.province.getSave().getGame().getCulture(s)).isPresent())
                                  .collect(Collectors.toMap(child -> Eu4Utils.stringToDate(child.getName()),
-                                                           child -> this.province.getSave().getGame().getCulture(child.getVarAsString("culture")),
+                                                           child -> this.province.getSave().getGame().getCulture(child.getVarAsString("culture").get()),
                                                            (a, b) -> b,
                                                            TreeMap::new));
 
-        if (this.province.getSave().getGame().getCulture(this.item.getVarAsString("culture")) != null) {
-            this.cultures.put(this.province.getSave().getStartDate(), this.province.getSave().getGame().getCulture(this.item.getVarAsString("culture")));
-        }
+        this.item.getVarAsString("culture")
+                 .map(s -> this.province.getSave().getGame().getCulture(s))
+                 .ifPresent(culture -> this.cultures.put(this.province.getSave().getStartDate().get(), culture));
 
         this.advisors = this.item.getChildren()
                                  .stream()
                                  .map(child -> child.getChild("advisor"))
-                                 .filter(Objects::nonNull)
-                                 .map(child -> new SaveAdvisor(child, this.province.getSave()))
+                                 .filter(Optional::isPresent)
+                                 .map(child -> new SaveAdvisor(child.get(), this.province.getSave()))
                                  .collect(Collectors.toMap(advisor -> advisor.getId().getId(), Function.identity()));
 
-        ClausewitzItem advisorItem = this.item.getChild("advisor");
-
-        if (advisorItem != null) {
+        this.item.getChild("advisor").ifPresent(advisorItem -> {
             SaveAdvisor advisor = new SaveAdvisor(advisorItem, this.province.getSave());
             this.advisors.put(advisor.getId().getId(), advisor);
-        }
+        });
 
         if (!this.advisors.isEmpty()) {
             if (!this.owners.isEmpty()) {

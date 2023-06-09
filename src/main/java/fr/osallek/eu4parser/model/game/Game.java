@@ -1786,7 +1786,7 @@ public class Game {
     }
 
     public TradeNode getTradeNode(String name) {
-        return this.tradeNodes.get(name);
+        return this.tradeNodes.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Building> getBuildings() {
@@ -2397,7 +2397,7 @@ public class Game {
     }
 
     public HolyOrder getHolyOrder(String name) {
-        return this.holyOrders.get(name);
+        return this.holyOrders.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Isolationism> getIsolationisms() {
@@ -2475,7 +2475,7 @@ public class Game {
     }
 
     public StateEdict getStateEdict(String name) {
-        return this.stateEdicts.get(name);
+        return this.stateEdicts.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<TradePolicy> getTradePolicies() {

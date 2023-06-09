@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.game.StateEdict;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class CountryState {
 
@@ -22,7 +23,7 @@ public class CountryState {
         refreshAttributes();
     }
 
-    public Double getProsperity() {
+    public Optional<Double> getProsperity() {
         return this.item.getVarAsDouble("prosperity");
     }
 
@@ -30,7 +31,7 @@ public class CountryState {
         this.item.setVariable("prosperity", prosperity);
     }
 
-    public Boolean hasStatePatriarch() {
+    public Optional<Boolean> hasStatePatriarch() {
         return this.item.getVarAsBool("has_state_patriach");
     }
 
@@ -38,7 +39,7 @@ public class CountryState {
         this.item.setVariable("has_state_patriach", hasStatePatriach);
     }
 
-    public Boolean hasStatePasha() {
+    public Optional<Boolean> hasStatePasha() {
         return this.item.getVarAsBool("has_state_pasha");
     }
 
@@ -46,12 +47,12 @@ public class CountryState {
         this.item.setVariable("has_state_pasha", hasStatePatriach);
     }
 
-    public SaveCountry getCountry() {
-        return this.save.getCountry(this.item.getVarAsString("country"));
+    public Optional<SaveCountry> getCountry() {
+        return this.item.getVarAsString("country").map(this.save::getCountry);
     }
 
-    public Edict getActiveEdict() {
-        return activeEdict;
+    public Optional<Edict> getActiveEdict() {
+        return Optional.ofNullable(this.activeEdict);
     }
 
     public void setActiveEdict(StateEdict which, LocalDate date) {
@@ -69,24 +70,20 @@ public class CountryState {
         this.activeEdict = null;
     }
 
-    public HolyOrder getHolyOrder() {
-        return this.save.getGame().getHolyOrder(ClausewitzUtils.removeQuotes(this.item.getVarAsString("holy_order")));
+    public Optional<HolyOrder> getHolyOrder() {
+        return this.item.getVarAsString("holy_order").map(s -> this.save.getGame().getHolyOrder(s));
     }
 
     public void setHolyOrder(HolyOrder holyOrder) {
         this.item.setVariable("holy_order", ClausewitzUtils.addQuotes(holyOrder.getName()));
     }
 
-    public SaveCountry getHolyOrderFounder() {
-        return this.save.getCountry(this.item.getVarAsString("holy_order_founder"));
+    public Optional<SaveCountry> getHolyOrderFounder() {
+        return this.item.getVarAsString("holy_order_founder").map(this.save::getCountry);
     }
 
     private void refreshAttributes() {
-        ClausewitzItem activeEditItem = this.item.getChild("active_edict");
-
-        if (activeEditItem != null) {
-            this.activeEdict = new Edict(activeEditItem, this.save.getGame());
-        }
+        this.activeEdict = this.item.getChild("active_edict").map(i -> new Edict(i, this.save.getGame())).orElse(null);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country) {

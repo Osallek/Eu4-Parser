@@ -12,6 +12,7 @@ import fr.osallek.eu4parser.model.save.SaveReligion;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class SaveAdvisor {
 
@@ -26,7 +27,7 @@ public class SaveAdvisor {
     public SaveAdvisor(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        this.gameAdvisor = this.save.getGame().getAdvisor(getType());
+        this.gameAdvisor = getType().map(s -> this.save.getGame().getAdvisor(s)).orElse(null);
         refreshAttributes();
     }
 
@@ -38,7 +39,7 @@ public class SaveAdvisor {
         return id;
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -50,7 +51,7 @@ public class SaveAdvisor {
         return gameAdvisor;
     }
 
-    public String getType() {
+    public Optional<String> getType() {
         return this.item.getVarAsString("type");
     }
 
@@ -58,7 +59,7 @@ public class SaveAdvisor {
         this.item.setVariable("type", type);
     }
 
-    public Integer getSkill() {
+    public Optional<Integer> getSkill() {
         return this.item.getVarAsInt("skill");
     }
 
@@ -66,23 +67,23 @@ public class SaveAdvisor {
         this.item.setVariable("skill", skill);
     }
 
-    public SaveProvince getLocation() {
-        return this.save.getProvince(this.item.getVarAsInt("location"));
+    public Optional<SaveProvince> getLocation() {
+        return this.item.getVarAsInt("location").map(this.save::getProvince);
     }
 
     public void setLocation(SaveProvince location) {
         this.item.setVariable("location", location.getId());
     }
 
-    public Boolean getFemale() {
+    public Optional<Boolean> getFemale() {
         return this.item.getVarAsBool("female");
     }
 
-    public Culture getCulture() {
-        return this.save.getGame().getCulture(this.item.getVarAsString("culture"));
+    public Optional<Culture> getCulture() {
+        return this.item.getVarAsString("culture").map(s -> this.save.getGame().getCulture(s));
     }
 
-    public String getCultureName() {
+    public Optional<String> getCultureName() {
         return this.item.getVarAsString("culture");
     }
 
@@ -90,11 +91,11 @@ public class SaveAdvisor {
         this.item.setVariable("culture", culture.getName());
     }
 
-    public SaveReligion getReligion() {
-        return this.save.getReligions().getReligion(this.item.getVarAsString("religion"));
+    public Optional<SaveReligion> getReligion() {
+        return this.item.getVarAsString("religion").map(s -> this.save.getReligions().getReligion(s));
     }
 
-    public String getReligionName() {
+    public Optional<String> getReligionName() {
         return this.item.getVarAsString("religion");
     }
 
@@ -102,7 +103,7 @@ public class SaveAdvisor {
         this.item.setVariable("religion", religion.getName());
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -110,7 +111,7 @@ public class SaveAdvisor {
         this.item.setVariable("date", date);
     }
 
-    public LocalDate getHireDate() {
+    public Optional<LocalDate> getHireDate() {
         return this.item.getVarAsDate("hire_date");
     }
 
@@ -118,7 +119,7 @@ public class SaveAdvisor {
         this.item.setVariable("hire_date", hireDate);
     }
 
-    public LocalDate getDeathDate() {
+    public Optional<LocalDate> getDeathDate() {
         return this.item.getVarAsDate("death_date");
     }
 
@@ -133,15 +134,11 @@ public class SaveAdvisor {
     public Modifiers getModifiers() {
         return getGameAdvisor().getSkillScaledModifier()
                                .map(modifiers -> ModifiersUtils.sumModifiers(getGameAdvisor().getModifiers(),
-                                                                             ModifiersUtils.scaleModifiers(modifiers, getSkill())))
+                                                                             ModifiersUtils.scaleModifiers(modifiers, getSkill().orElse(0))))
                                .orElse(getGameAdvisor().getModifiers());
     }
 
     private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
-        }
+        this.id = this.item.getChild("id").map(Id::new).orElse(null);
     }
 }
