@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class QuantifyDatableRelation extends DatableRelation {
 
@@ -11,7 +12,7 @@ public class QuantifyDatableRelation extends DatableRelation {
         super(item, save);
     }
 
-    public Double getAmount() {
+    public Optional<Double> getAmount() {
         return this.item.getVarAsDouble("amount");
     }
 

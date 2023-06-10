@@ -64,7 +64,8 @@ public class Diplomacy {
     public void removeDependency(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.dependencies.size(); i++) {
             Dependency dependency = this.dependencies.get(i);
-            if (dependency.getFirst().equals(first) && dependency.getSecond().equals(second)) {
+            if (dependency.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                dependency.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 first.removeSubject(second);
                 second.removeOverlord();
                 this.item.removeChild("dependency", i);
@@ -89,8 +90,10 @@ public class Diplomacy {
     public void removeAlliance(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.alliances.size(); i++) {
             DatableRelation alliance = this.alliances.get(i);
-            if ((alliance.getFirst().equals(first) && alliance.getSecond().equals(second))
-                || (alliance.getFirst().equals(second) && alliance.getSecond().equals(first))) {
+            if ((alliance.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                 alliance.getSecond().filter(country -> country.equals(second)).isPresent())
+                || (alliance.getFirst().filter(country -> country.equals(second)).isPresent() &&
+                    alliance.getSecond().filter(country -> country.equals(first)).isPresent())) {
                 first.removeAlly(second);
                 second.removeAlly(first);
                 this.item.removeChild("alliance", i);
@@ -114,7 +117,8 @@ public class Diplomacy {
     public void removeGuarantee(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.guarantees.size(); i++) {
             DatableRelation guarantee = this.guarantees.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            if (guarantee.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                guarantee.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 first.removeGuarantee(second);
                 this.item.removeChild("guarantee", i);
                 break;
@@ -135,8 +139,9 @@ public class Diplomacy {
 
     public void removeKnowledgeSharing(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.knowledgeSharing.size(); i++) {
-            DatableRelation guarantee = this.knowledgeSharing.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation knowledgeSharing = this.knowledgeSharing.get(i);
+            if (knowledgeSharing.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                knowledgeSharing.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 this.item.removeChild("knowledge_sharing", i);
                 break;
             }
@@ -156,8 +161,9 @@ public class Diplomacy {
 
     public void removeSubsidies(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.subsidies.size(); i++) {
-            DatableRelation guarantee = this.subsidies.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation subsidie = this.subsidies.get(i);
+            if (subsidie.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                subsidie.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 this.item.removeChild("subsidies", i);
                 break;
             }
@@ -179,9 +185,11 @@ public class Diplomacy {
 
     public void removeRoyalMarriage(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.royalMarriage.size(); i++) {
-            DatableRelation guarantee = this.royalMarriage.get(i);
-            if ((guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second))
-                || (guarantee.getFirst().equals(second) && guarantee.getSecond().equals(first))) {
+            DatableRelation royalMarriage = this.royalMarriage.get(i);
+            if ((royalMarriage.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                 royalMarriage.getSecond().filter(country -> country.equals(second)).isPresent())
+                || (royalMarriage.getFirst().filter(country -> country.equals(second)).isPresent() &&
+                    royalMarriage.getSecond().filter(country -> country.equals(first)).isPresent())) {
                 first.removeRoyalMarriage(second);
                 second.removeRoyalMarriage(first);
                 this.item.removeChild("royal_marriage", i);
@@ -203,8 +211,9 @@ public class Diplomacy {
 
     public void removeMilitaryAccess(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.militaryAccesses.size(); i++) {
-            DatableRelation guarantee = this.militaryAccesses.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation militaryAccess = this.militaryAccesses.get(i);
+            if (militaryAccess.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                militaryAccess.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 this.item.removeChild("military_access", i);
                 break;
             }
@@ -224,8 +233,9 @@ public class Diplomacy {
 
     public void removeFleetAccess(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.fleetAccesses.size(); i++) {
-            DatableRelation guarantee = this.fleetAccesses.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation access = this.fleetAccesses.get(i);
+            if (access.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                access.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 this.item.removeChild("fleet_access", i);
                 break;
             }
@@ -246,7 +256,8 @@ public class Diplomacy {
     public void removeCasusBelli(SaveCountry first, SaveCountry second, fr.osallek.eu4parser.model.game.CasusBelli type) {
         for (int i = 0; i < this.casusBellis.size(); i++) {
             CasusBelli casusBelli = this.casusBellis.get(i);
-            if (casusBelli.getFirst().equals(first) && casusBelli.getSecond().equals(second) && casusBelli.getType().equals(type)) {
+            if (casusBelli.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                casusBelli.getSecond().filter(country -> country.equals(second)).isPresent() && casusBelli.getType().equals(type)) {
                 this.item.removeChild("casus_belli", i);
                 break;
             }
@@ -267,8 +278,9 @@ public class Diplomacy {
 
     public void removeSupportIndependence(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.supportIndependence.size(); i++) {
-            DatableRelation guarantee = this.supportIndependence.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation support = this.supportIndependence.get(i);
+            if (support.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                support.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 second.removeIndependenceSupportedBy(first);
                 this.item.removeChild("support_independence", i);
                 break;
@@ -293,8 +305,9 @@ public class Diplomacy {
 
     public void removeTransferTradePower(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.transferTradePowers.size(); i++) {
-            DatableRelation guarantee = this.transferTradePowers.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation transfer = this.transferTradePowers.get(i);
+            if (transfer.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                transfer.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 second.removeTransferTradePowerTo(first);
                 first.removeTransferTradePowerFrom(second);
                 this.item.removeChild("transfer_trade_power", i);
@@ -317,8 +330,9 @@ public class Diplomacy {
 
     public void removeWarReparations(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.warReparations.size(); i++) {
-            DatableRelation guarantee = this.warReparations.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation warReparation = this.warReparations.get(i);
+            if (warReparation.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                warReparation.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 first.removeWarReparations(second);
                 this.item.removeChild("war_reparations", i);
                 break;
@@ -341,8 +355,9 @@ public class Diplomacy {
 
     public void removeWarning(SaveCountry first, SaveCountry second) {
         for (int i = 0; i < this.warnings.size(); i++) {
-            DatableRelation guarantee = this.warnings.get(i);
-            if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
+            DatableRelation warning = this.warnings.get(i);
+            if (warning.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                warning.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 first.removeWarning(second);
                 this.item.removeChild("warning", i);
                 break;
@@ -368,7 +383,8 @@ public class Diplomacy {
         List<Integration> integrations = getIntegrations();
         for (int i = 0; i < integrations.size(); i++) {
             Integration integration = integrations.get(i);
-            if (integration.getFirst().equals(first) && integration.getSecond().equals(second)) {
+            if (integration.getFirst().filter(country -> country.equals(first)).isPresent() &&
+                integration.getSecond().filter(country -> country.equals(second)).isPresent()) {
                 this.item.removeChild("integration", i);
                 break;
             }
@@ -382,10 +398,10 @@ public class Diplomacy {
                                      .stream()
                                      .map(child -> new Dependency(child, this.save))
                                      .toList();
-        this.dependencies.forEach(dependency -> {
-            dependency.getSecond().setSubjectType(dependency.getSubjectType());
-            dependency.getSecond().setSubjectStartDate(dependency.getStartDate());
-        });
+        this.dependencies.forEach(dependency -> dependency.getSecond().ifPresent(country -> {
+            dependency.getSubjectType().ifPresent(country::setSubjectType);
+            dependency.getStartDate().ifPresent(country::setSubjectStartDate);
+        }));
 
         this.alliances = this.item.getChildren("alliance")
                                   .stream()

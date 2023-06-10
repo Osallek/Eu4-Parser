@@ -3,21 +3,23 @@ package fr.osallek.eu4parser.model.save.trade;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
+import java.util.Optional;
+
 public record TradeNodeIncoming(ClausewitzItem item, Save save) {
 
-    public SaveTradeNode getFrom() {
-        return this.save.getTradeNode(getFromIndex());
+    public Optional<SaveTradeNode> getFrom() {
+        return getFromIndex().map(this.save::getTradeNode);
     }
 
-    public Integer getFromIndex() {
+    public Optional<Integer> getFromIndex() {
         return this.item.getVarAsInt("from");
     }
 
-    public Double getValue() {
+    public Optional<Double> getValue() {
         return this.item.getVarAsDouble("value");
     }
 
-    public Double getAdd() {
+    public Optional<Double> getAdd() {
         return this.item.getVarAsDouble("add");
     }
 }

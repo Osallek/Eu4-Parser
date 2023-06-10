@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class DatableRelation {
 
@@ -18,23 +19,23 @@ public class DatableRelation {
         this.item = item;
     }
 
-    public SaveCountry getFirst() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("first")));
+    public Optional<SaveCountry> getFirst() {
+        return this.item.getVarAsString("first").map(this.save::getCountry);
     }
 
     public void setFirst(SaveCountry country) {
         this.item.setVariable("first", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
-    public SaveCountry getSecond() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("second")));
+    public Optional<SaveCountry> getSecond() {
+        return this.item.getVarAsString("second").map(this.save::getCountry);
     }
 
     public void setSecond(SaveCountry country) {
         this.item.setVariable("second", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
-    public LocalDate getStartDate() {
+    public Optional<LocalDate> getStartDate() {
         return this.item.getVarAsDate("start_date");
     }
 

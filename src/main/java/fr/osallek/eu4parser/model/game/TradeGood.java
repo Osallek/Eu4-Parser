@@ -109,20 +109,27 @@ public class TradeGood {
         }
     }
 
-    public BufferedImage getImage() throws IOException {
+    public Optional<BufferedImage> getImage() throws IOException {
         return getSubImage(ImageReader.convertFileToImage(this.game.getResourcesImage()));
     }
 
-    public BufferedImage getSubImage(BufferedImage image) {
-        double size = (double) image.getWidth() / this.game.getResourcesNbFrames();
-        return image.getSubimage((int) (this.index * size), 0, (int) size, image.getHeight());
+    public Optional<BufferedImage> getSubImage(BufferedImage image) {
+        if (this.game.getResourcesNbFrames().isPresent()) {
+            double size = (double) image.getWidth() / this.game.getResourcesNbFrames().get();
+            return Optional.ofNullable(image.getSubimage((int) (this.index * size), 0, (int) size, image.getHeight()));
+        }
+
+        return Optional.empty();
     }
 
     public void writeImageTo(Path dest) throws IOException {
-        FileUtils.forceMkdirParent(dest.toFile());
-        ImageIO.write(getImage(), "png", dest.toFile());
-        Eu4Utils.optimizePng(dest, dest);
-        this.writenTo = dest;
+        Optional<BufferedImage> image = getImage();
+        if (image.isPresent()) {
+            FileUtils.forceMkdirParent(dest.toFile());
+            ImageIO.write(image.get(), "png", dest.toFile());
+            Eu4Utils.optimizePng(dest, dest);
+            this.writenTo = dest;
+        }
     }
 
     public void setWritenTo(Path writenTo) {

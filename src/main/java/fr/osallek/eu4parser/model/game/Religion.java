@@ -422,8 +422,8 @@ public class Religion {
     }
 
     public Optional<BufferedImage> getSubImage(BufferedImage image) {
-        return getIcon().map(i -> {
-            double size = (double) image.getWidth() / this.religionGroup.getGame().getReligionsNbFrames();
+        return getIcon().filter(integer -> this.religionGroup.getGame().getReligionsNbFrames().isPresent()).map(i -> {
+            double size = (double) image.getWidth() / this.religionGroup.getGame().getReligionsNbFrames().get();
             return image.getSubimage((int) ((i - 1) * size), 0, (int) size, image.getHeight());
         });
 

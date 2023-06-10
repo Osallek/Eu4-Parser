@@ -12,7 +12,7 @@ public class TransferTradePower extends QuantifyDatableRelation {
     }
 
     public boolean isEnforced() {
-        return this.item.getVarAsBool("is_enforced");
+        return this.item.getVarAsBool("is_enforced").orElse(false);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, LocalDate startDate, double amount, boolean isEnforced) {

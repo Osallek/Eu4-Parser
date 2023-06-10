@@ -6,17 +6,19 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.util.Optional;
+
 public record ReformationCenter(Save save, ClausewitzItem item) {
 
-    public SaveProvince getProvince() {
-        return this.save.getProvince(this.item.getVarAsInt("province_id"));
+    public Optional<SaveProvince> getProvince() {
+        return this.item.getVarAsInt("province_id").map(this.save::getProvince);
     }
 
     public void setProvinceId(SaveProvince province) {
         this.item.setVariable("province_id", province.getId());
     }
 
-    public Integer getCurrentlyConverting() {
+    public Optional<Integer> getCurrentlyConverting() {
         return this.item.getVarAsInt("any_target_province");
     }
 
@@ -24,7 +26,7 @@ public record ReformationCenter(Save save, ClausewitzItem item) {
         this.item.setVariable("any_target_province", provinceId);
     }
 
-    public Double getConversionProgress() {
+    public Optional<Double> getConversionProgress() {
         return this.item.getVarAsDouble("missionary_progress");
     }
 
@@ -32,15 +34,15 @@ public record ReformationCenter(Save save, ClausewitzItem item) {
         this.item.setVariable("missionary_progress", conversionProgress);
     }
 
-    public SaveReligion getReligion() {
-        return this.save.getReligions().getReligion(this.item.getVarAsString("religion"));
+    public Optional<SaveReligion> getReligion() {
+        return this.item.getVarAsString("religion").map(s -> this.save.getReligions().getReligion(s));
     }
 
-    public Double getMaxSpeed() {
+    public Optional<Double> getMaxSpeed() {
         return this.item.getVarAsDouble("max_speed");
     }
 
-    public String getType() {
+    public Optional<String> getType() {
         return this.item.getVarAsString("type");
     }
 

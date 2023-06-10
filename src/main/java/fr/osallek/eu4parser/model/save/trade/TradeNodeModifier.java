@@ -3,21 +3,23 @@ package fr.osallek.eu4parser.model.save.trade;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public record TradeNodeModifier(ClausewitzItem item) {
 
-    public String getKey() {
+    public Optional<String> getKey() {
         return this.item.getVarAsString("key");
     }
 
-    public Integer getDuration() {
+    public Optional<Integer> getDuration() {
         return this.item.getVarAsInt("duration");
     }
 
-    public Double getPower() {
+    public Optional<Double> getPower() {
         return this.item.getVarAsDouble("power");
     }
 
-    public Double getPowerModifier() {
+    public Optional<Double> getPowerModifier() {
         return this.item.getVarAsDouble("power_modifier");
     }
 

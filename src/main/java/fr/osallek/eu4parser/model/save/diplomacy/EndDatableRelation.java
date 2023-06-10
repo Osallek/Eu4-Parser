@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class EndDatableRelation extends DatableRelation {
 
@@ -11,7 +12,7 @@ public class EndDatableRelation extends DatableRelation {
         super(item, save);
     }
 
-    public LocalDate getEndDate() {
+    public Optional<LocalDate> getEndDate() {
         return this.item.getVarAsDate("end_date");
     }
 

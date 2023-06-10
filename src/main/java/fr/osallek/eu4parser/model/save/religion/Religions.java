@@ -38,7 +38,8 @@ public class Religions {
     private void refreshAttributes() {
         this.religions = this.religionsItem.getChildren()
                                            .stream()
-                                           .map(item -> new SaveReligion(item, religionInstanceDataItem.getChild(item.getName()), this.save))
+                                           .filter(item -> this.religionInstanceDataItem.getChild(item.getName()).isPresent())
+                                           .map(item -> new SaveReligion(item, this.religionInstanceDataItem.getChild(item.getName()).get(), this.save))
                                            .collect(Collectors.toMap(SaveReligion::getName, Function.identity(), (e1, e2) -> e1, LinkedHashMap::new));
 
         this.religionInstanceDataItem.getChildren().forEach(religion -> {

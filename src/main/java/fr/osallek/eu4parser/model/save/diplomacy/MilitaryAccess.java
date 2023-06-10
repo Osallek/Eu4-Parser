@@ -13,7 +13,7 @@ public class MilitaryAccess extends DatableRelation {
     }
 
     public boolean enforcePeace() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("enforce_peace"));
+        return this.item.getVarAsBool("enforce_peace").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setEnforcePeace(boolean enforcePeace) {

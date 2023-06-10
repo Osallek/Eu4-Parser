@@ -20,8 +20,8 @@ public class Dependency extends DatableRelation {
         super(item, save);
     }
 
-    public SubjectType getSubjectType() {
-        return this.save.getGame().getSubjectType(ClausewitzUtils.removeQuotes(this.item.getVarAsString("subject_type")));
+    public Optional<SubjectType> getSubjectType() {
+        return this.item.getVarAsString("subject_type").map(s -> this.save.getGame().getSubjectType(s));
     }
 
     public void setSubjectType(SubjectType subjectType) {
@@ -29,14 +29,14 @@ public class Dependency extends DatableRelation {
     }
 
     public List<SubjectTypeUpgrade> getSubjectTypeUpgrades() {
-        return Optional.ofNullable(this.item.getList("subject_type_upgrades"))
-                       .map(ClausewitzList::getValues)
-                       .map(strings -> strings.stream()
-                                              .map(s -> this.save.getGame().getSubjectTypeUpgrade(s))
-                                              .filter(Objects::nonNull)
-                                              .collect(Collectors.toList()))
-                       .filter(CollectionUtils::isNotEmpty)
-                       .orElse(null);
+        return this.item.getList("subject_type_upgrades")
+                        .map(ClausewitzList::getValues)
+                        .map(strings -> strings.stream()
+                                               .map(s -> this.save.getGame().getSubjectTypeUpgrade(s))
+                                               .filter(Objects::nonNull)
+                                               .collect(Collectors.toList()))
+                        .filter(CollectionUtils::isNotEmpty)
+                        .orElse(null);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String first, String second, LocalDate startDate, SubjectType type) {

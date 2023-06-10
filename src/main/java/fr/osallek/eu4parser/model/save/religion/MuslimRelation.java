@@ -3,36 +3,20 @@ package fr.osallek.eu4parser.model.save.religion;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public record MuslimRelation(ClausewitzItem item) {
 
-    public MuslimRelationSchool getFirst() {
-        String value = this.item.getVarAsString("first");
-
-        if (value == null) {
-            return null;
-        }
-
-        return MuslimRelationSchool.valueOf(ClausewitzUtils.removeQuotes(value).toUpperCase());
+    public Optional<MuslimRelationSchool> getFirst() {
+        return this.item.getVarAsString("first").map(String::toUpperCase).map(ClausewitzUtils::removeQuotes).map(MuslimRelationSchool::valueOf);
     }
 
-    public MuslimRelationSchool getSecond() {
-        String value = this.item.getVarAsString("second");
-
-        if (value == null) {
-            return null;
-        }
-
-        return MuslimRelationSchool.valueOf(ClausewitzUtils.removeQuotes(value).toUpperCase());
+    public Optional<MuslimRelationSchool> getSecond() {
+        return this.item.getVarAsString("second").map(String::toUpperCase).map(ClausewitzUtils::removeQuotes).map(MuslimRelationSchool::valueOf);
     }
 
-    public MuslimRelationValue getRelation() {
-        String value = this.item.getVarAsString("value");
-
-        if (value == null) {
-            return null;
-        }
-
-        return MuslimRelationValue.valueOf(value.toUpperCase());
+    public Optional<MuslimRelationValue> getRelation() {
+        return this.item.getVarAsString("value").map(String::toUpperCase).map(MuslimRelationValue::valueOf);
     }
 
     public void setRelation(MuslimRelationValue relation) {

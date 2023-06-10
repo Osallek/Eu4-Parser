@@ -14,17 +14,18 @@ import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
-import java.util.Optional;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -47,32 +48,20 @@ public class SavePapacy {
         refreshAttributes();
     }
 
-    public Papacy getGamePapacy() {
+    public Optional<Papacy> getGamePapacy() {
         return this.save.getGame().getReligion(this.religion.getName()).getPapacy();
     }
 
-    public SaveCountry getCrusadeTarget() {
-        String target = this.item.getVarAsString("crusade_target");
-
-        if (target == null || Eu4Utils.DEFAULT_TAG_QUOTES.equals(target)) {
-            return null;
-        }
-
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(target));
+    public Optional<SaveCountry> getCrusadeTarget() {
+        return this.item.getVarAsString("crusade_target").filter(Predicate.not(Eu4Utils.DEFAULT_TAG_QUOTES::equals)).map(this.save::getCountry);
     }
 
-    public LocalDate getCrusadeStart() {
-        LocalDate date = this.item.getVarAsDate("crusade_start");
-
-        if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
-            return null;
-        }
-
-        return date;
+    public Optional<LocalDate> getCrusadeStart() {
+        return this.item.getVarAsDate("crusade_start").filter(Predicate.not(Eu4Utils.DEFAULT_DATE::equals));
     }
 
     public void setCrusadeTarget(SaveCountry target) {
-        if (target != getCrusadeTarget()) {
+        if (getCrusadeTarget().isEmpty() || target != getCrusadeTarget().get()) {
             if (target == null) {
                 removeCrusade();
             } else {
@@ -87,7 +76,7 @@ public class SavePapacy {
         this.item.setVariable("crusade_start", Eu4Utils.DEFAULT_DATE);
     }
 
-    public Double getReformDesire() {
+    public Optional<Double> getReformDesire() {
         return this.item.getVarAsDouble("reform_desire");
     }
 
@@ -95,41 +84,35 @@ public class SavePapacy {
         this.item.setVariable("reform_desire", reformDesire);
     }
 
-    public String getControllerTag() {
+    public Optional<String> getControllerTag() {
         return this.item.getVarAsString("controller");
     }
 
-    public SaveCountry getController() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(getControllerTag()));
+    public Optional<SaveCountry> getController() {
+        return getControllerTag().map(this.save::getCountry);
     }
 
     public void setController(SaveCountry controller) {
         this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
-    public SaveCountry getPreviousController() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("previous_controller")));
+    public Optional<SaveCountry> getPreviousController() {
+        return this.item.getVarAsString("previous_controller").map(this.save::getCountry);
     }
 
     public void setPreviousController(SaveCountry previousController) {
         this.item.setVariable("previous_controller", ClausewitzUtils.addQuotes(previousController.getTag()));
     }
 
-    public LocalDate getLastExcommunication() {
-        LocalDate date = this.item.getVarAsDate("last_excom");
-
-        if (date == null || Eu4Utils.DEFAULT_DATE.equals(date)) {
-            return null;
-        }
-
-        return date;
+    public Optional<LocalDate> getLastExcommunication() {
+        return this.item.getVarAsDate("last_excom").filter(Predicate.not(Eu4Utils.DEFAULT_DATE::equals));
     }
 
     public void setLastExcommunication(LocalDate lastExcommunication) {
         this.item.setVariable("last_excom", lastExcommunication);
     }
 
-    public Boolean getPapacyActive() {
+    public Optional<Boolean> getPapacyActive() {
         return this.item.getVarAsBool("papacy_active");
     }
 
@@ -137,7 +120,7 @@ public class SavePapacy {
         this.item.setVariable("papacy_active", papacyActive);
     }
 
-    public Boolean getCouncilActive() {
+    public Optional<Boolean> getCouncilActive() {
         return this.item.getVarAsBool("council_active");
     }
 
@@ -145,7 +128,7 @@ public class SavePapacy {
         this.item.setVariable("council_active", councilActive);
     }
 
-    public Boolean getCouncilFinished() {
+    public Optional<Boolean> getCouncilFinished() {
         return this.item.getVarAsBool("council_finished");
     }
 
@@ -153,7 +136,7 @@ public class SavePapacy {
         this.item.setVariable("council_finished", councilFinished);
     }
 
-    public Double getPapalInvestment() {
+    public Optional<Double> getPapalInvestment() {
         return this.item.getVarAsDouble("papal_investment");
     }
 
@@ -165,7 +148,7 @@ public class SavePapacy {
         this.item.setVariable("papal_investment", papalInvestment);
     }
 
-    public Double getCuriaTreasury() {
+    public Optional<Double> getCuriaTreasury() {
         return this.item.getVarAsDouble("curia_treasury");
     }
 
@@ -177,14 +160,8 @@ public class SavePapacy {
         this.item.setVariable("curia_treasury", curiaTreasury);
     }
 
-    public GoldenBull getGoldenBull() {
-        String bull = this.item.getVarAsString("golden_bull");
-
-        if (bull == null) {
-            return null;
-        } else {
-            return this.save.getGame().getGoldenBull(ClausewitzUtils.removeQuotes(bull));
-        }
+    public Optional<GoldenBull> getGoldenBull() {
+        return this.item.getVarAsString("golden_bull").map(s -> this.save.getGame().getGoldenBull(s));
     }
 
     public void setGoldenBull(GoldenBull goldenBull) {
@@ -196,25 +173,15 @@ public class SavePapacy {
     }
 
     public Map<Integer, Integer> getInvestInCardinals() {
-        ClausewitzItem investItem = this.item.getChild("invest_in_cardinal");
-
-        if (investItem == null) {
-            return new HashMap<>();
-        }
-
-        return investItem.getVariables()
-                         .stream()
-                         .collect(Collectors.toMap(var -> Integer.parseInt(var.getName()),
-                                                   ClausewitzVariable::getAsInt));
+        return this.item.getChild("invest_in_cardinal")
+                        .map(ClausewitzItem::getVariables)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toMap(var -> Integer.parseInt(var.getName()), ClausewitzVariable::getAsInt));
     }
 
     public void investInCardinals(Integer id, Integer value) {
-        ClausewitzItem investItem = this.item.getChild("invest_in_cardinal");
-
-        if (investItem == null) {
-            investItem = this.item.addChild("papal_investment");
-        }
-
+        ClausewitzItem investItem = this.item.getChild("invest_in_cardinal").orElse(this.item.addChild("papal_investment"));
         investItem.setVariable(id.toString(), value);
     }
 
@@ -223,28 +190,26 @@ public class SavePapacy {
     }
 
     public void addCardinal(Integer provinceId) {
-        ClausewitzItem activeCardinalsItem = this.item.getChild("active_cardinals");
-
-        if (activeCardinalsItem != null) {
+        this.item.getChild("active_cardinals").ifPresent(activeCardinalsItem -> {
             Integer id = getCardinals().stream()
                                        .map(Cardinal::getId)
+                                       .filter(Optional::isPresent)
+                                       .map(Optional::get)
                                        .map(Id::getId)
                                        .max(Integer::compareTo)
                                        .orElse(new Random().nextInt(90000));
             Cardinal.addToItem(activeCardinalsItem, id, provinceId);
-        }
 
-        refreshAttributes();
+            refreshAttributes();
+        });
+
     }
 
     public void removeCardinal(Integer index) {
-        ClausewitzItem activeCardinalsItem = this.item.getChild("active_cardinals");
-
-        if (activeCardinalsItem != null) {
+        this.item.getChild("active_cardinals").ifPresent(activeCardinalsItem -> {
             activeCardinalsItem.removeChild("cardinal", index);
-        }
-
-        refreshAttributes();
+            refreshAttributes();
+        });
     }
 
     public List<String> getColonyClaims() {
@@ -274,52 +239,49 @@ public class SavePapacy {
     public Map<String, List<String>> getConcessions() {
         Map<String, List<String>> concessions = new LinkedHashMap<>();
 
-        if (!BooleanUtils.toBoolean(getCouncilActive())) {
+        if (getGamePapacy().isEmpty() || !getCouncilActive().map(BooleanUtils::toBoolean).orElse(false)) {
             return concessions;
         }
 
-        ClausewitzList list = this.item.getList("concessions");
-
-        if (list == null) {
-            return concessions;
-        }
-
-        for (int i = 0; i < list.size(); i++) {
-            String choose = getGamePapacy().getConcessions().get(i).getName() + (list.getAsInt(i) == 1 ? "_harsh" : "_concilatory");
-            concessions.put(choose,
-                            Arrays.asList(getGamePapacy().getConcessions().get(i).getName() + "_harsh",
-                                          getGamePapacy().getConcessions().get(i).getName() + "_concilatory"));
-        }
+        this.item.getList("concessions").ifPresent(list -> {
+            Papacy papacy = getGamePapacy().get();
+            for (int i = 0; i < list.size(); i++) {
+                String choose = papacy.getConcessions().get(i).getName() + (list.getAsInt(i).filter(integer -> integer == 1).isPresent() ? "_harsh"
+                                                                                                                                         : "_concilatory");
+                concessions.put(choose,
+                                Arrays.asList(papacy.getConcessions().get(i).getName() + "_harsh",
+                                              papacy.getConcessions().get(i).getName() + "_concilatory"));
+            }
+        });
 
         return concessions;
     }
 
     public void setConcessions(List<String> concessions) {
-        ClausewitzList list = this.item.getList("concessions");
         List<Integer> concessionsIds = concessions.stream()
                                                   .map(concession -> concession.endsWith("harsh") ? 1 : 2)
                                                   .toList();
 
-        if (list == null) {
-            this.item.addList("concessions", concessionsIds.toArray(new Integer[0]));
-        } else {
+        this.item.getList("concessions").ifPresentOrElse(list -> {
             list.clear();
             list.addAll(concessionsIds.toArray(new Integer[0]));
-        }
+        }, () -> this.item.addList("concessions", concessionsIds.toArray(new Integer[0])));
     }
 
     public Map<PapacyConcession, Integer> getConcessionsChoices() {
-        if (!BooleanUtils.toBoolean(getCouncilActive())) {
+        if (!getCouncilActive().map(BooleanUtils::toBoolean).orElse(false)) {
             return new LinkedHashMap<>();
         }
 
-        ClausewitzList list = this.item.getList("concessions");
+        Optional<ClausewitzList> list = this.item.getList("concessions");
 
-        if (list == null) {
+        if (list.isEmpty() || getGamePapacy().isEmpty()) {
             return new LinkedHashMap<>();
         }
 
-        return IntStream.range(0, list.size()).boxed().collect(Collectors.toMap(i -> getGamePapacy().getConcessions().get(i), list::getAsInt));
+        return IntStream.range(0, list.get().size())
+                        .boxed()
+                        .collect(Collectors.toMap(i -> getGamePapacy().get().getConcessions().get(i), integer -> list.get().getAsInt(integer).get()));
     }
 
     public Double getConcessionsModifiers(Modifier modifier) {
@@ -328,41 +290,32 @@ public class SavePapacy {
                                                                             .filter(entry -> entry.getValue() != 0)
                                                                             .map(entry -> entry.getValue() == 1 ? entry.getKey().getHarshModifiers()
                                                                                                                 : entry.getKey().getConcilatoryModifiers())
+                                                                            .filter(Optional::isPresent)
+                                                                            .map(Optional::get)
                                                                             .filter(m -> m.hasModifier(modifier))
                                                                             .map(m -> m.getModifier(modifier))
                                                                             .toList());
     }
 
     public List<SaveCountry> getConcilatory() {
-        ClausewitzList list = this.item.getList("concilatory");
-
-        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).toList();
+        return this.item.getList("concilatory").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getNeutral() {
-        ClausewitzList list = this.item.getList("neutral");
-
-        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).toList();
+        return this.item.getList("neutral").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.save::getCountry).toList();
     }
 
     public List<SaveCountry> getHarsh() {
-        ClausewitzList list = this.item.getList("harsh");
-
-        return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).toList();
+        return this.item.getList("harsh").map(ClausewitzList::getValues).stream().flatMap(Collection::stream).map(this.save::getCountry).toList();
     }
 
     private void refreshAttributes() {
-        ClausewitzItem activeCardinalsItem = this.item.getChild("active_cardinals");
-
-        if (activeCardinalsItem != null) {
-            List<ClausewitzItem> cardinalsItems = activeCardinalsItem.getChildren("cardinal");
-            this.cardinals = cardinalsItems.stream().map(child -> new Cardinal(child, this.save)).toList();
-        }
-
-        ClausewitzList claimsList = this.item.getList("colony_claim");
-
-        if (claimsList != null) {
-            this.coloniesClaims = new ColoniesClaims(claimsList);
-        }
+        this.cardinals = this.item.getChild("active_cardinals")
+                                  .map(i -> i.getChildren("cardinal"))
+                                  .stream()
+                                  .flatMap(Collection::stream)
+                                  .map(i -> new Cardinal(i, this.save))
+                                  .toList();
+        this.coloniesClaims = this.item.getList("colony_claim").map(ColoniesClaims::new).orElse(null);
     }
 }

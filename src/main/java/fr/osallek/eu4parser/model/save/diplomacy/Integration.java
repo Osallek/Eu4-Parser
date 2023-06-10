@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Integration extends DatableRelation {
 
@@ -11,7 +12,7 @@ public class Integration extends DatableRelation {
         super(item, save);
     }
 
-    public Double getProgress() {
+    public Optional<Double> getProgress() {
         return this.item.getVarAsDouble("progress");
     }
 
@@ -19,7 +20,7 @@ public class Integration extends DatableRelation {
         this.item.setVariable("progress", progress);
     }
 
-    public Integer getEnvoy() {
+    public Optional<Integer> getEnvoy() {
         return this.item.getVarAsInt("envoy");
     }
 

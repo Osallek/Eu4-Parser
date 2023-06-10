@@ -192,8 +192,8 @@ public class Estate {
     }
 
     public Optional<BufferedImage> getSubImage(BufferedImage image) {
-        return getIcon().map(integer -> {
-            double size = (double) image.getWidth() / this.game.getEstatesNbFrames();
+        return getIcon().filter(integer -> this.game.getEstatesNbFrames().isPresent()).map(integer -> {
+            double size = (double) image.getWidth() / this.game.getEstatesNbFrames().get();
             return image.getSubimage((int) ((integer - 1) * size), 0, (int) size, image.getHeight());
         });
     }

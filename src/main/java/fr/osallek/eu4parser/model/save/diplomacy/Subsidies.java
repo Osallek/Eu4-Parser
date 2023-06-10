@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Subsidies extends QuantifyDatableRelation {
 
@@ -11,7 +12,7 @@ public class Subsidies extends QuantifyDatableRelation {
         super(item, save);
     }
 
-    public Integer getDuration() {
+    public Optional<Integer> getDuration() {
         return this.item.getVarAsInt("duration");
     }
 

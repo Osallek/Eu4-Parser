@@ -189,7 +189,8 @@ public class SaveReligion {
         }
 
         this.relations.stream()
-                      .filter(muslimRelation -> first.equals(muslimRelation.getFirst()) && second.equals(muslimRelation.getSecond()))
+                      .filter(muslimRelation -> muslimRelation.getFirst().isPresent() && muslimRelation.getSecond().isPresent())
+                      .filter(muslimRelation -> first.equals(muslimRelation.getFirst().get()) && second.equals(muslimRelation.getSecond().get()))
                       .findFirst()
                       .ifPresent(muslimRelation -> muslimRelation.setRelation(relation));
     }
@@ -223,7 +224,7 @@ public class SaveReligion {
 
             if (index != null) {
                 this.religionInstanceDataItem.removeChild("reformation_center", index);
-                reformationCenter.getProvince().setCenterOfReligion(false);
+                reformationCenter.getProvince().ifPresent(p -> p.setCenterOfReligion(false));
                 refreshAttributes();
             }
         }

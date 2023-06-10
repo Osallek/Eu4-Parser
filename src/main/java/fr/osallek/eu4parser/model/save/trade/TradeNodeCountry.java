@@ -33,64 +33,64 @@ public class TradeNodeCountry {
         return ClausewitzUtils.removeQuotes(this.item.getName());
     }
 
-    public Integer getType() {
+    public Optional<Integer> getType() {
         return this.item.getVarAsInt("type");
     }
 
-    public Double getVal() {
+    public Optional<Double> getVal() {
         return this.item.getVarAsDouble("val");
     }
 
-    public Double getPotential() {
+    public Optional<Double> getPotential() {
         return this.item.getVarAsDouble("potential");
     }
 
-    public Double getPrev() {
+    public Optional<Double> getPrev() {
         return this.item.getVarAsDouble("prev");
     }
 
-    public Double getMaxPower() {
+    public Optional<Double> getMaxPower() {
         return this.item.getVarAsDouble("max_pow");
     }
 
-    public Double getMaxDemand() {
+    public Optional<Double> getMaxDemand() {
         return this.item.getVarAsDouble("max_demand");
     }
 
-    public Double getProvincePower() {
+    public Optional<Double> getProvincePower() {
         return this.item.getVarAsDouble("province_power");
     }
 
-    public Double getShipPower() {
+    public Optional<Double> getShipPower() {
         return this.item.getVarAsDouble("ship_power");
     }
 
-    public Double getSteerPower() {
+    public Optional<Double> getSteerPower() {
         return this.item.getVarAsDouble("steer_power");
     }
 
-    public Double getPowerFaction() {
+    public Optional<Double> getPowerFaction() {
         return this.item.getVarAsDouble("power_fraction");
     }
 
-    public Double getMoney() {
+    public Optional<Double> getMoney() {
         return this.item.getVarAsDouble("money");
     }
 
-    public Double getTotal() {
+    public Optional<Double> getTotal() {
         return this.item.getVarAsDouble("total");
     }
 
-    public Double getAdd() {
+    public Optional<Double> getAdd() {
         return this.item.getVarAsDouble("add");
     }
 
     public boolean hasTrader() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("has_trader"));
+        return this.item.getVarAsBool("has_trader").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public boolean hasCapital() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("has_capital"));
+        return this.item.getVarAsBool("has_capital").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public Map<String, TradeNodeModifier> getModifiers() {
@@ -115,53 +115,39 @@ public class TradeNodeCountry {
         refreshAttributes();
     }
 
-    public Integer getNbLightShip() {
+    public Optional<Integer> getNbLightShip() {
         return this.item.getVarAsInt("light_ship");
     }
 
-    public Double getTotalPowerFromTransfer() {
+    public Optional<Double> getTotalPowerFromTransfer() {
         return this.item.getVarAsDouble("t_in");
     }
 
-    public Double getTotalPowerTransferred() {
+    public Optional<Double> getTotalPowerTransferred() {
         return this.item.getVarAsDouble("t_out");
     }
 
     public Map<String, Double> getPowerFromTransfer() {
         Map<String, Double> powerFromTransfer = new HashMap<>();
-
-        ClausewitzItem powerFromTransferItem = this.item.getChild("t_from");
-
-        if (powerFromTransferItem != null) {
-            powerFromTransferItem.getVariables()
-                                 .forEach(var -> powerFromTransfer.put(var.getName(), var.getAsDouble()));
-        }
-
+        this.item.getChild("t_from").ifPresent(item -> item.getVariables().forEach(v -> powerFromTransfer.put(v.getName(), v.getAsDouble())));
         return powerFromTransfer;
     }
 
     public Map<String, Double> getPowerTransferred() {
         Map<String, Double> powerTransferred = new HashMap<>();
-
-        ClausewitzItem powerFromTransferItem = this.item.getChild("t_to");
-
-        if (powerFromTransferItem != null) {
-            powerFromTransferItem.getVariables()
-                                 .forEach(var -> powerTransferred.put(var.getName(), var.getAsDouble()));
-        }
-
+        this.item.getChild("t_to").ifPresent(item -> item.getVariables().forEach(v -> powerTransferred.put(v.getName(), v.getAsDouble())));
         return powerTransferred;
     }
 
-    public Double getPrivateerMission() {
+    public Optional<Double> getPrivateerMission() {
         return this.item.getVarAsDouble("privateer_mission");
     }
 
-    public Double getPrivateerMoney() {
+    public Optional<Double> getPrivateerMoney() {
         return this.item.getVarAsDouble("privateer_money");
     }
 
-    public Double getAlreadySent() {
+    public Optional<Double> getAlreadySent() {
         return this.item.getVarAsDouble("already_sent");
     }
 
@@ -169,7 +155,7 @@ public class TradeNodeCountry {
         return this.item.getVarAsString("trading_policy").map(ClausewitzUtils::removeQuotes).map(this.game::getTradePolicy);
     }
 
-    public LocalDate getTradePolicyDate() {
+    public Optional<LocalDate> getTradePolicyDate() {
         return this.item.getVarAsDate("trading_policy_date");
     }
 

@@ -1378,7 +1378,7 @@ public class Game {
         return getSpriteType("GFX_resource_icon");
     }
 
-    public Integer getResourcesNbFrames() {
+    public Optional<Integer> getResourcesNbFrames() {
         return getResourcesSprite().getNoOfFrames();
     }
 
@@ -1390,7 +1390,7 @@ public class Game {
         return getSpriteType("GFX_icon_religion");
     }
 
-    public Integer getReligionsNbFrames() {
+    public Optional<Integer> getReligionsNbFrames() {
         return getReligionsSprite().getNoOfFrames();
     }
 
@@ -1398,7 +1398,7 @@ public class Game {
         return getSpriteType("GFX_estates_icons_colour-stroke");
     }
 
-    public Integer getEstatesNbFrames() {
+    public Optional<Integer> getEstatesNbFrames() {
         return getEstatesSprite().getNoOfFrames();
     }
 
@@ -1654,11 +1654,11 @@ public class Game {
     public File getSpriteTypeImageFile(String key) {
         SpriteType spriteType = getSpriteType(key);
 
-        if (spriteType == null) {
+        if (spriteType == null || spriteType.getTextureFile().isEmpty()) {
             return null;
         }
 
-        String relativePath = Path.of(ClausewitzUtils.removeQuotes(spriteType.getTextureFile())).toString();
+        String relativePath = Path.of(ClausewitzUtils.removeQuotes(spriteType.getTextureFile().get())).toString();
         File file = getAbsoluteFile(relativePath);
 
         if (file != null && file.exists()) {
@@ -1818,7 +1818,7 @@ public class Game {
     }
 
     public GoldenBull getGoldenBull(String name) {
-        return this.goldenBulls.get(name);
+        return this.goldenBulls.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Event> getEvents() {
@@ -2201,7 +2201,7 @@ public class Game {
     }
 
     public SubjectType getSubjectType(String name) {
-        return this.subjectTypes.get(name);
+        return this.subjectTypes.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<SubjectTypeUpgrade> getSubjectTypeUpgrades() {
@@ -2915,13 +2915,15 @@ public class Game {
         getPaths(Eu4Utils.INTERFACE_FOLDER_PATH, fileNode -> Files.isRegularFile(fileNode.getPath()),
                  fileNode -> fileNode.getPath().toString().endsWith(".gfx")).forEach(path -> {
             ClausewitzItem rootItem = ClausewitzParser.parse(path.toFile(), 0);
-            rootItem.getChild("spriteTypes").ifPresent(spriteTypesItem -> {
-                this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
-                                                       .stream()
-                                                       .map(SpriteType::new)
-                                                       .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(spriteType.getName()),
-                                                                                 Function.identity(), (a, b) -> a)));
-            });
+            rootItem.getChild("spriteTypes")
+                    .ifPresent(spriteTypesItem ->
+                                       this.spriteTypes.putAll(spriteTypesItem.getChildren("spriteType")
+                                                                              .stream()
+                                                                              .map(SpriteType::new)
+                                                                              .filter(spriteType -> spriteType.getName().isPresent())
+                                                                              .collect(Collectors.toMap(spriteType -> ClausewitzUtils.removeQuotes(
+                                                                                                                spriteType.getName().get()), Function.identity(),
+                                                                                                        (a, b) -> a))));
         });
     }
 
@@ -3199,11 +3201,14 @@ public class Game {
                                                  this.terrains.values()
                                                               .stream()
                                                               .filter(t -> t.getFileColors().contains(new Color(color)))
+                                                              .map(Terrain::getCategory)
+                                                              .filter(Optional::isPresent)
+                                                              .map(Optional::get)
                                                               .findFirst()
-                                                              .ifPresent(terrain -> {
+                                                              .ifPresent(category -> {
                                                                   Province p = this.provincesByColor.get(provinceColor);
-                                                                  p.setTerrainCategory(terrain.getCategory());
-                                                                  terrain.getCategory().getComputedProvinces().add(p.getId());
+                                                                  p.setTerrainCategory(category);
+                                                                  category.getComputedProvinces().add(p.getId());
                                                               }));
 
                 this.terrainCategories.values()
@@ -3712,8 +3717,10 @@ public class Game {
         modifierDefinitions.values()
                            .stream()
                            .flatMap(Collection::stream)
-                           .forEach(modifierDefinition -> ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE,
-                                                                                     ModifierScope.COUNTRY));
+                           .map(ModifierDefinition::getKey)
+                           .filter(Optional::isPresent)
+                           .map(Optional::get)
+                           .forEach(key -> ModifiersUtils.addModifier(key, ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY));
 
         this.estatePrivileges = new HashMap<>();
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estate_privileges", this::isRegularTxtFile)
