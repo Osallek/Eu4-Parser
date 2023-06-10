@@ -6,10 +6,11 @@ import fr.osallek.eu4parser.model.game.Game;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public record Church(ClausewitzItem item, Game game) {
 
-    public Double getPower() {
+    public Optional<Double> getPower() {
         return this.item.getVarAsDouble("power");
     }
 

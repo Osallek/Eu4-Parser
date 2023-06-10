@@ -2,13 +2,13 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.LeaderPersonality;
 import fr.osallek.eu4parser.model.save.Id;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Leader {
 
@@ -16,25 +16,20 @@ public class Leader {
 
     private final SaveCountry country;
 
-    private Id id;
-
-    private Id monarchId;
-
     public Leader(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
-        refreshAttributes();
     }
 
     public SaveCountry getCountry() {
         return country;
     }
 
-    public Id getId() {
-        return id;
+    public Optional<Id> getId() {
+        return this.item.getChild("id").map(Id::new);
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -42,21 +37,15 @@ public class Leader {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public LeaderType getType() {
-        String type = this.item.getVarAsString("type");
-
-        if (type != null) {
-            return LeaderType.valueOf(type.toUpperCase());
-        }
-
-        return null;
+    public Optional<LeaderType> getType() {
+        return this.item.getVarAsString("type").map(String::toUpperCase).map(LeaderType::valueOf);
     }
 
     public void setType(LeaderType type) {
         this.item.setVariable("type", type.name().toLowerCase());
     }
 
-    public Boolean getFemale() {
+    public Optional<Boolean> getFemale() {
         return this.item.getVarAsBool("female");
     }
 
@@ -65,7 +54,7 @@ public class Leader {
     }
 
     public int getManuever() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("manuever"));
+        return this.item.getVarAsInt("manuever").orElse(0);
     }
 
     public void setManuever(int manuever) {
@@ -73,7 +62,7 @@ public class Leader {
     }
 
     public int getFire() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("fire"));
+        return this.item.getVarAsInt("fire").orElse(0);
     }
 
     public void setFire(int fire) {
@@ -81,7 +70,7 @@ public class Leader {
     }
 
     public int getShock() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("shock"));
+        return this.item.getVarAsInt("shock").orElse(0);
     }
 
     public void setShock(int shock) {
@@ -89,22 +78,22 @@ public class Leader {
     }
 
     public int getSiege() {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt("siege"));
+        return this.item.getVarAsInt("siege").orElse(0);
     }
 
     public void setSiege(int siege) {
         this.item.setVariable("siege", siege);
     }
 
-    public LeaderPersonality getPersonality() {
-        return this.country.getSave().getGame().getLeaderPersonality(this.item.getVarAsString("personality"));
+    public Optional<LeaderPersonality> getPersonality() {
+        return this.item.getVarAsString("personality").map(s -> this.country.getSave().getGame().getLeaderPersonality(s));
     }
 
     public void setPersonality(LeaderPersonality personality) {
         this.item.setVariable("personality", personality.getName());
     }
 
-    public LocalDate getActivation() {
+    public Optional<LocalDate> getActivation() {
         return this.item.getVarAsDate("activation");
     }
 
@@ -112,7 +101,7 @@ public class Leader {
         this.item.setVariable("activation", activation);
     }
 
-    public LocalDate getBirthDate() {
+    public Optional<LocalDate> getBirthDate() {
         return this.item.getVarAsDate("birth_date");
     }
 
@@ -120,7 +109,7 @@ public class Leader {
         this.item.setVariable("birth_date", birthDate);
     }
 
-    public LocalDate getDeathDate() {
+    public Optional<LocalDate> getDeathDate() {
         return this.item.getVarAsDate("death_date");
     }
 
@@ -128,8 +117,8 @@ public class Leader {
         this.item.setVariable("death_date", deathDate);
     }
 
-    public Id getMonarchId() {
-        return monarchId;
+    public Optional<Id> getMonarchId() {
+        return this.item.getChild("monarch_id").map(Id::new);
     }
 
     public int getTotalPips() {
@@ -141,27 +130,19 @@ public class Leader {
     }
 
     public int getNbStars() {
-        return BigDecimal.valueOf(getFire()).add(BigDecimal.valueOf(getShock())).divide(BigDecimal.valueOf(6), 0, RoundingMode.HALF_EVEN)
+        return BigDecimal.valueOf(getFire())
+                         .add(BigDecimal.valueOf(getShock()))
+                         .divide(BigDecimal.valueOf(6), 0, RoundingMode.HALF_EVEN)
                          .add(BigDecimal.valueOf(getManuever()).add(BigDecimal.valueOf(getSiege())).divide(BigDecimal.valueOf(18), 0, RoundingMode.HALF_EVEN))
-                         .add(BigDecimal.ONE).min(BigDecimal.valueOf(3)).intValue();
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
-        }
-        ClausewitzItem monarchIdChild = this.item.getChild("monarch_id"); //10305
-
-        if (monarchIdChild != null) {
-            this.monarchId = new Id(monarchIdChild);
-        }
+                         .add(BigDecimal.ONE)
+                         .min(BigDecimal.valueOf(3))
+                         .intValue();
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, Leader leader) {
-        return addToItem(parent, leader.getName(), leader.getType(), leader.getManuever(), leader.getFire(), leader.getShock(), leader.getSiege(),
-                         leader.getPersonality(), leader.getActivation(), leader.getBirthDate(), leader.getId().getId(), leader.getCountry());
+        return addToItem(parent, leader.getName().orElse(""), leader.getType().orElse(null), leader.getManuever(), leader.getFire(), leader.getShock(),
+                         leader.getSiege(), leader.getPersonality().orElse(null), leader.getActivation().orElse(null), leader.getBirthDate().orElse(null),
+                         leader.getId().get().getId(), leader.getCountry());
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LeaderType type, int manuever, int fire, int shock, int siege,
@@ -190,6 +171,6 @@ public class Leader {
 
     @Override
     public String toString() {
-        return "id=" + id.getId();
+        return String.valueOf(getId().map(Id::getId).orElse(0));
     }
 }

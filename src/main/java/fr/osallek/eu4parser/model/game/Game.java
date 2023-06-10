@@ -2117,7 +2117,7 @@ public class Game {
     }
 
     public Unit getUnit(String name) {
-        return this.units.get(name);
+        return this.units.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public Collection<Area> getAreas() {
@@ -2257,7 +2257,7 @@ public class Game {
     }
 
     public EstatePrivilege getEstatePrivilege(String name) {
-        return this.estatePrivileges.get(name);
+        return this.estatePrivileges.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Estate> getEstates() {
@@ -2313,7 +2313,7 @@ public class Game {
     }
 
     public Policy getPolicy(String name) {
-        return this.policies.get(name);
+        return this.policies.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Hegemon> getHegemons() {
@@ -2439,7 +2439,7 @@ public class Game {
     }
 
     public ParliamentIssue getParliamentIssue(String name) {
-        return this.parliamentIssues.get(name);
+        return this.parliamentIssues.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<ParliamentBribe> getParliamentBribes() {

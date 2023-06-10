@@ -7,14 +7,15 @@ import fr.osallek.eu4parser.model.game.EstatePrivilege;
 import fr.osallek.eu4parser.model.game.Game;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record EstateInteraction(Game game, ClausewitzList list) {
 
-    public EstatePrivilege getPrivilege() {
-        return this.game.getEstatePrivilege(ClausewitzUtils.removeQuotes(this.list.get(0)));
+    public Optional<EstatePrivilege> getPrivilege() {
+        return this.list.get(0).map(this.game::getEstatePrivilege);
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.list.getAsDate(1);
     }
 

@@ -5,6 +5,8 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 
+import java.util.Optional;
+
 public class Regiment extends AbstractRegiment {
 
     private final Army army;
@@ -19,7 +21,7 @@ public class Regiment extends AbstractRegiment {
         return army;
     }
 
-    public Double getDrill() {
+    public Optional<Double> getDrill() {
         return this.item.getLastVarAsDouble("drill");
     }
 

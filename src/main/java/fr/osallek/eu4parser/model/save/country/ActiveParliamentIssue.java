@@ -6,10 +6,11 @@ import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.ParliamentIssue;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record ActiveParliamentIssue(ClausewitzItem item, Game game) {
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -17,12 +18,12 @@ public record ActiveParliamentIssue(ClausewitzItem item, Game game) {
         this.item.setVariable("date", date);
     }
 
-    public Integer getBack() {
+    public Optional<Integer> getBack() {
         return this.item.getVarAsInt("back");
     }
 
-    public ParliamentIssue getWhich() {
-        return this.game.getParliamentIssue(ClausewitzUtils.removeQuotes(this.item.getVarAsString("which")));
+    public Optional<ParliamentIssue> getWhich() {
+        return this.item.getVarAsString("which").map(this.game::getParliamentIssue);
     }
 
     public void setWhich(ParliamentIssue which) {

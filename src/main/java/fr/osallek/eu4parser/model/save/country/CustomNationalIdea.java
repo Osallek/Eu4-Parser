@@ -2,9 +2,11 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public record CustomNationalIdea(ClausewitzItem item) {
 
-    public Integer getLevel() {
+    public Optional<Integer> getLevel() {
         return this.item.getVarAsInt("level");
     }
 
@@ -12,7 +14,7 @@ public record CustomNationalIdea(ClausewitzItem item) {
         this.item.setVariable("level", Math.max(0, level));
     }
 
-    public Integer getIndex() {
+    public Optional<Integer> getIndex() {
         return this.item.getVarAsInt("index");
     }
 
@@ -20,11 +22,11 @@ public record CustomNationalIdea(ClausewitzItem item) {
         this.item.setVariable("index", index);
     }
 
-    public String getCountry() {
+    public Optional<String> getCountry() {
         return this.item.getVarAsString("country");
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -32,7 +34,7 @@ public record CustomNationalIdea(ClausewitzItem item) {
         this.item.setVariable("name", name);
     }
 
-    public String getDesc() {
+    public Optional<String> getDesc() {
         return this.item.getVarAsString("desc");
     }
 

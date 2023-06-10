@@ -702,8 +702,9 @@ public class SaveCountry {
         return colors;
     }
 
-    public Color getColor() {
-        return this.equals(this.save.getRevolution().getRevolutionTarget()) ? this.colors.getRevolutionaryColors() : this.colors.getMapColor();
+    public Optional<Color> getColor() {
+        return this.save.getRevolution().getRevolutionTarget().filter(country -> country.equals(this)).isPresent() ? this.colors.getRevolutionaryColors()
+                                                                                                                   : this.colors.getMapColor();
     }
 
     public List<String> getIgnoreDecision() {
@@ -1158,7 +1159,7 @@ public class SaveCountry {
     }
 
     public SaveEstate getEstate(String name) {
-        return this.estates.stream().filter(estate -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(estate.getType()))).findFirst().orElse(null);
+        return this.estates.stream().filter(estate -> ClausewitzUtils.removeQuotes(name).equalsIgnoreCase(ClausewitzUtils.removeQuotes(estate.getType()))).findFirst().orElse(null);
     }
 
     public CrownLandBonus getCrownLandBonus() {

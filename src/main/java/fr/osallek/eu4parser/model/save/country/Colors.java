@@ -4,73 +4,40 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.Color;
 
+import java.util.Optional;
+
 public class Colors {
 
     private final ClausewitzItem item;
 
-    private CustomColors customColors;
-
-    private Color revolutionaryColors;
-
-    private Color mapColor;
-
-    private Color countryColor;
-
     public Colors(ClausewitzItem item) {
         this.item = item;
-        refreshAttributes();
     }
 
-    public CustomColors getCustomColors() {
-        return customColors;
+    public Optional<CustomColors> getCustomColors() {
+        return this.item.getChild("custom_colors").map(CustomColors::new);
     }
 
-    public Color getRevolutionaryColors() {
-        return revolutionaryColors;
+    public Optional<Color> getRevolutionaryColors() {
+        return this.item.getList("revolutionary_colors").map(Color::new);
     }
 
-    public Color getMapColor() {
-        return mapColor;
+    public Optional<Color> getMapColor() {
+        return this.item.getList("map_color").map(Color::new);
     }
 
     public void setMapColor(int red, int green, int blue) {
-        if (this.mapColor != null) {
-            this.mapColor.setRed(red);
-            this.mapColor.setGreen(green);
-            this.mapColor.setBlue(blue);
+        Optional<Color> mapColor = getMapColor();
+        if (mapColor.isPresent()) {
+            mapColor.get().setRed(red);
+            mapColor.get().setGreen(green);
+            mapColor.get().setBlue(blue);
         } else {
             Color.addToItem(this.item, "map_color", red, green, blue);
-            refreshAttributes();
         }
     }
 
-    public Color getCountryColor() {
-        return countryColor;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem customColorsItem = this.item.getChild("custom_colors");
-
-        if (customColorsItem != null) {
-            this.customColors = new CustomColors(customColorsItem);
-        }
-
-        ClausewitzList revolutionaryColorsList = this.item.getList("revolutionary_colors");
-
-        if (revolutionaryColorsList != null) {
-            this.revolutionaryColors = new Color(revolutionaryColorsList);
-        }
-
-        ClausewitzList mapColorList = this.item.getList("map_color");
-
-        if (mapColorList != null) {
-            this.mapColor = new Color(mapColorList);
-        }
-
-        ClausewitzList countryColorList = this.item.getList("country_color");
-
-        if (countryColorList != null) {
-            this.countryColor = new Color(countryColorList);
-        }
+    public Optional<Color> getCountryColor() {
+        return this.item.getList("country_color").map(Color::new);
     }
 }

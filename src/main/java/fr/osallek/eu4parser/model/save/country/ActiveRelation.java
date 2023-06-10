@@ -5,6 +5,7 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public class ActiveRelation {
 
@@ -28,7 +29,7 @@ public class ActiveRelation {
         return this.save.getCountry(this.item.getName());
     }
 
-    public Integer getTrustValue() {
+    public Optional<Integer> getTrustValue() {
         return this.item.getVarAsInt("trust_value");
     }
 
@@ -42,11 +43,11 @@ public class ActiveRelation {
         this.item.setVariable("trust_value", trustValue);
     }
 
-    public Integer getCachedSum() {
+    public Optional<Integer> getCachedSum() {
         return this.item.getVarAsInt("cached_sum");
     }
 
-    public LocalDate getLastSendDiplomat() {
+    public Optional<LocalDate> getLastSendDiplomat() {
         return this.item.getVarAsDate("last_send_diplomat");
     }
 
@@ -54,7 +55,7 @@ public class ActiveRelation {
         this.item.setVariable("last_send_diplomat", lastSendDiplomat);
     }
 
-    public LocalDate getLastSpyDiscovery() {
+    public Optional<LocalDate> getLastSpyDiscovery() {
         return this.item.getVarAsDate("last_spy_discovery");
     }
 
@@ -62,9 +63,8 @@ public class ActiveRelation {
         this.item.setVariable("last_spy_discovery", lastSpyDiscovery);
     }
 
-    public Integer getSpyNetwork() {
-        Integer spyNetwork = this.item.getVarAsInt("spy_network");
-        return spyNetwork == null ? null : (spyNetwork / 100);
+    public Optional<Integer> getSpyNetwork() {
+        return this.item.getVarAsInt("spy_network").map(integer -> integer / 100);
     }
 
     public void setSpyNetwork(Integer spyNetwork) {
@@ -77,7 +77,7 @@ public class ActiveRelation {
         this.item.setVariable("spy_network", spyNetwork * 100);
     }
 
-    public LocalDate getLastWar() {
+    public Optional<LocalDate> getLastWar() {
         return this.item.getVarAsDate("last_war");
     }
 
@@ -85,7 +85,7 @@ public class ActiveRelation {
         this.item.setVariable("last_war", lastWar);
     }
 
-    public Integer getLastWarScore() {
+    public Optional<Integer> getLastWarScore() {
         return this.item.getVarAsInt("last_warscore");
     }
 
@@ -99,15 +99,15 @@ public class ActiveRelation {
         this.item.setVariable("last_warscore", lastWarScore);
     }
 
-    public String getAttitude() {
+    public Optional<String> getAttitude() {
         return this.item.getVarAsString("attitude");
     }
 
-    public Boolean isEmbargoing() {
+    public Optional<Boolean> isEmbargoing() {
         return this.item.getVarAsBool("is_embargoing");
     }
 
-    public Boolean truce() {
+    public Optional<Boolean> truce() {
         return this.item.getVarAsBool("truce");
     }
 
@@ -115,27 +115,27 @@ public class ActiveRelation {
         this.item.setVariable("is_embargoing", embargoing);
     }
 
-    public Boolean isBuildingSpyNetwork() {
+    public Optional<Boolean> isBuildingSpyNetwork() {
         return this.item.getVarAsBool("is_building_spy_network");
     }
 
-    public Boolean getRecalcAttitude() {
+    public Optional<Boolean> getRecalcAttitude() {
         return this.item.getVarAsBool("recalc_attitude");
     }
 
-    public Boolean hasCultureGroupClaim() {
+    public Optional<Boolean> hasCultureGroupClaim() {
         return this.item.getVarAsBool("has_culture_group_claim");
     }
 
-    public Boolean hasClaim() {
+    public Optional<Boolean> hasClaim() {
         return this.item.getVarAsBool("has_claim");
     }
 
-    public Boolean hasSuccessionClaim() {
+    public Optional<Boolean> hasSuccessionClaim() {
         return this.item.getVarAsBool("has_succession_claim");
     }
 
-    public Boolean hasCoreClaim() {
+    public Optional<Boolean> hasCoreClaim() {
         return this.item.getVarAsBool("has_core_claim");
     }
 

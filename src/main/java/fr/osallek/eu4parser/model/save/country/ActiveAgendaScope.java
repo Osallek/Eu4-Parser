@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ActiveAgendaScope {
 
@@ -19,12 +20,12 @@ public class ActiveAgendaScope {
         refreshAttributes();
     }
 
-    public Boolean scopeIsValid() {
+    public Optional<Boolean> scopeIsValid() {
         return this.item.getVarAsBool("scope_is_valid");
     }
 
-    public SaveCountry getCountry() {
-        return this.activeAgenda.country().getSave().getCountry(this.item.getVarAsString("country"));
+    public Optional<SaveCountry> getCountry() {
+        return this.item.getVarAsString("country").map(s -> this.activeAgenda.country().getSave().getCountry(s));
     }
 
     public void setCountry(SaveCountry country) {

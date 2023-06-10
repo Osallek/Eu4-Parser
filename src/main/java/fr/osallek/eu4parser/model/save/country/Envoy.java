@@ -3,17 +3,19 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public record Envoy(ClausewitzItem item) {
 
-    public Integer getType() {
+    public Optional<Integer> getType() {
         return this.item.getVarAsInt("type");
     }
 
-    public Integer getAction() {
+    public Optional<Integer> getAction() {
         return this.item.getVarAsInt("action");
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -21,7 +23,7 @@ public record Envoy(ClausewitzItem item) {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public Integer getId() {
+    public Optional<Integer> getId() {
         return this.item.getVarAsInt("id");
     }
 }

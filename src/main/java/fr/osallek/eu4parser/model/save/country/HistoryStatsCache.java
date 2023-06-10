@@ -2,9 +2,11 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public record HistoryStatsCache(ClausewitzItem item) {
 
-    public Integer getStartingNumOfStates() {
+    public Optional<Integer> getStartingNumOfStates() {
         return this.item.getVarAsInt("starting_num_of_states");
     }
 
@@ -12,7 +14,7 @@ public record HistoryStatsCache(ClausewitzItem item) {
         this.item.setVariable("starting_num_of_states", startingNumOfStates);
     }
 
-    public Double getStartingDevelopment() {
+    public Optional<Double> getStartingDevelopment() {
         return this.item.getVarAsDouble("starting_development");
     }
 
@@ -20,7 +22,7 @@ public record HistoryStatsCache(ClausewitzItem item) {
         this.item.setVariable("starting_development", startingDevelopment);
     }
 
-    public Double getStartingIncome() {
+    public Optional<Double> getStartingIncome() {
         return this.item.getVarAsDouble("starting_income");
     }
 

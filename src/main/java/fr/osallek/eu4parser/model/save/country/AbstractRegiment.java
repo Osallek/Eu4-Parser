@@ -7,29 +7,26 @@ import fr.osallek.eu4parser.model.game.Unit;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 
+import java.util.Optional;
+
 public abstract class AbstractRegiment {
 
     protected final Save save;
 
     protected final ClausewitzItem item;
 
-    private Id id;
-
-    private Id lastTarget;
-
     protected AbstractRegiment(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        refreshAttributes();
     }
 
-    public Id getId() {
-        return id;
+    public Optional<Id> getId() {
+        return this.item.getChild("id").map(Id::new);
     }
 
     public abstract AbstractArmy getArmy();
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -37,7 +34,7 @@ public abstract class AbstractRegiment {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public Integer getHome() {
+    public Optional<Integer> getHome() {
         return this.item.getVarAsInt("home");
     }
 
@@ -45,23 +42,23 @@ public abstract class AbstractRegiment {
         this.item.setVariable("home", home);
     }
 
-    public Unit getType() {
-        return this.save.getGame().getUnit(ClausewitzUtils.removeQuotes(getTypeName()));
+    public Optional<Unit> getType() {
+        return getTypeName().map(s -> this.save.getGame().getUnit(s));
     }
 
-    public String getTypeName() {
+    public Optional<String> getTypeName() {
         return this.item.getVarAsString("type");
     }
 
-    public UnitType getUnitType() {
-        return getType().getType();
+    public Optional<UnitType> getUnitType() {
+        return getType().map(Unit::getType);
     }
 
     public void setType(Unit unit) {
         this.item.setVariable("type", ClausewitzUtils.addQuotes(unit.getName()));
     }
 
-    public Double getMorale() {
+    public Optional<Double> getMorale() {
         return this.item.getLastVarAsDouble("morale");
     }
 
@@ -81,12 +78,12 @@ public abstract class AbstractRegiment {
     //6=Rajputs
     //7=Marines
     //?=Revolutionary Guard
-    public Integer getCategory() {
+    public Optional<Integer> getCategory() {
         return this.item.getVarAsInt("category");
     }
 
-    public Id getLastTarget() {
-        return lastTarget;
+    public Optional<Id> getLastTarget() {
+        return this.item.getChild("last_target").map(Id::new);
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale) {
@@ -100,19 +97,5 @@ public abstract class AbstractRegiment {
         parent.addChild(toItem);
 
         return toItem;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem lastTargetItem = this.item.getChild("last_target");
-
-        if (lastTargetItem != null) {
-            this.lastTarget = new Id(lastTargetItem);
-        }
     }
 }

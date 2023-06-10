@@ -8,6 +8,7 @@ import fr.osallek.eu4parser.model.save.Id;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class AbstractArmy {
 
@@ -15,25 +16,20 @@ public abstract class AbstractArmy {
 
     protected final SaveCountry country;
 
-    protected Id id;
-
-    protected Id leader;
-
     protected AbstractArmy(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
-        refreshAttributes();
     }
 
-    public Id getId() {
-        return id;
+    public Optional<Id> getId() {
+        return this.item.getChild("id").map(Id::new);
     }
 
     public SaveCountry getCountry() {
         return country;
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -41,37 +37,31 @@ public abstract class AbstractArmy {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
     }
 
-    public Id getLeader() {
-        return leader;
+    public Optional<Id> getLeader() {
+        return this.item.getChild("leader").map(Id::new);
     }
 
     public void removeLeader() {
         this.item.removeChild("leader");
     }
 
-    public Integer getPrevious() {
+    public Optional<Integer> getPrevious() {
         return this.item.getVarAsInt("previous");
     }
 
-    public Integer getPreviousWar() {
+    public Optional<Integer> getPreviousWar() {
         return this.item.getVarAsInt("previous_war");
     }
 
-    public Double getMovementProgress() {
+    public Optional<Double> getMovementProgress() {
         return this.item.getVarAsDouble("movement_progress");
     }
 
     public List<Integer> getPath() {
-        ClausewitzList list = this.item.getList("path");
-
-        if (list != null) {
-            return list.getValuesAsInt();
-        }
-
-        return new ArrayList<>();
+        return this.item.getList("path").map(ClausewitzList::getValuesAsInt).orElse(new ArrayList<>());
     }
 
-    public Integer getLocation() {
+    public Optional<Integer> getLocation() {
         return this.item.getVarAsInt("location");
     }
 
@@ -79,11 +69,11 @@ public abstract class AbstractArmy {
         this.item.setVariable("location", location);
     }
 
-    public LocalDate getMovementProgressLastUpdated() {
+    public Optional<LocalDate> getMovementProgressLastUpdated() {
         return this.item.getVarAsDate("movement_progress_last_updated");
     }
 
-    public String getGraphicalCulture() {
+    public Optional<String> getGraphicalCulture() {
         return this.item.getVarAsString("graphical_culture");
     }
 
@@ -91,7 +81,7 @@ public abstract class AbstractArmy {
         this.item.setVariable("graphical_culture", ClausewitzUtils.addQuotes(graphicalCulture));
     }
 
-    public Boolean getMainArmy() {
+    public Optional<Boolean> getMainArmy() {
         return this.item.getVarAsBool("main_army");
     }
 
@@ -101,19 +91,19 @@ public abstract class AbstractArmy {
      * battle. They will also protect their own besieging forces, intercepting enemies and acting as defensive screen.
      * https://eu4.paradoxwikis.com/Artificial_intelligence#Improvements_over_EUIII
      */
-    public Boolean getHunterKiller() {
+    public Optional<Boolean> getHunterKiller() {
         return this.item.getVarAsBool("hunter_killer");
     }
 
-    public Double getAttritionLevel() {
+    public Optional<Double> getAttritionLevel() {
         return this.item.getVarAsDouble("attrition_level");
     }
 
-    public Boolean getVisibleToAi() {
+    public Optional<Boolean> getVisibleToAi() {
         return this.item.getVarAsBool("visible_to_ai");
     }
 
-    public Boolean canAttach() {
+    public Optional<Boolean> canAttach() {
         return this.item.getVarAsBool("can_attach");
     }
 
@@ -121,11 +111,11 @@ public abstract class AbstractArmy {
         this.item.setVariable("can_attach", canAttach);
     }
 
-    public Boolean getMovementLocked() {
+    public Optional<Boolean> getMovementLocked() {
         return this.item.getVarAsBool("movement_locked");
     }
 
-    public Boolean getAttrition() {
+    public Optional<Boolean> getAttrition() {
         return this.item.getVarAsBool("attrition");
     }
 
@@ -138,19 +128,5 @@ public abstract class AbstractArmy {
         parent.addChild(toItem);
 
         return toItem;
-    }
-
-    protected void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem leaderItem = this.item.getChild("leader");
-
-        if (leaderItem != null) {
-            this.leader = new Id(leaderItem);
-        }
     }
 }

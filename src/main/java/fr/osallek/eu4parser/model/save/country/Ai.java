@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Ai {
 
@@ -30,74 +31,74 @@ public class Ai {
         refreshAttributes();
     }
 
-    public Boolean getInitialized() {
+    public Optional<Boolean> getInitialized() {
         return this.item.getVarAsBool("initialized");
     }
 
-    public Boolean getInitializedAttitudes() {
+    public Optional<Boolean> getInitializedAttitudes() {
         return this.item.getVarAsBool("initialized_attitudes");
     }
 
-    public Boolean getStatic() {
+    public Optional<Boolean> getStatic() {
         return this.item.getVarAsBool("static");
     }
 
-    public String getPersonality() {
+    public Optional<String> getPersonality() {
         return this.item.getVarAsString("personality");
     }
 
-    public LocalDate getLastRecalcDate() {
+    public Optional<LocalDate> getLastRecalcDate() {
         return this.item.getVarAsDate("last_recalc_date");
     }
 
-    public Boolean getHreInterest() {
+    public Optional<Boolean> getHreInterest() {
         return this.item.getVarAsBool("hre_interest");
     }
 
-    public Boolean getPapacyInterest() {
+    public Optional<Boolean> getPapacyInterest() {
         return this.item.getVarAsBool("papacy_interest");
     }
 
-    public Integer getNeedsRegiments() {
+    public Optional<Integer> getNeedsRegiments() {
         return this.item.getVarAsInt("needs_regiments");
     }
 
-    public Boolean getNeedsMoney() {
+    public Optional<Boolean> getNeedsMoney() {
         return this.item.getVarAsBool("needs_money");
     }
 
-    public Boolean getNeedsBuildings() {
+    public Optional<Boolean> getNeedsBuildings() {
         return this.item.getVarAsBool("needs_buildings");
     }
 
-    public Boolean getNeedsShips() {
+    public Optional<Boolean> getNeedsShips() {
         return this.item.getVarAsBool("needs_ships");
     }
 
     public Map<Power, Integer> getPowers() {
-        ClausewitzList list = this.item.getList("powers");
         Map<Power, Integer> powers = new EnumMap<>(Power.class);
+        Optional<ClausewitzList> list = this.item.getList("powers");
 
-        if (list == null) {
+        if (list.isEmpty()) {
             return powers;
         }
 
         for (Power power : Power.values()) {
-            powers.put(power, list.getAsInt(power.ordinal()));
+            list.get().getAsInt(power.ordinal()).ifPresent(integer -> powers.put(power, integer));
         }
 
         return powers;
     }
 
-    public Double getTreasury() {
+    public Optional<Double> getTreasury() {
         return this.item.getVarAsDouble("treasury");
     }
 
-    public String getPowerBalanceThreat() {
+    public Optional<String> getPowerBalanceThreat() {
         return this.item.getVarAsString("power_balance_threat");
     }
 
-    public String getPowerBalanceThreatCache() {
+    public Optional<String> getPowerBalanceThreatCache() {
         return this.item.getVarAsString("power_balance_threat_cache");
     }
 
@@ -125,7 +126,7 @@ public class Ai {
         return militaryAccesses;
     }
 
-    public Integer getDefendedHomeStrait() {
+    public Optional<Integer> getDefendedHomeStrait() {
         return this.item.getVarAsInt("defended_home_strait");
     }
 

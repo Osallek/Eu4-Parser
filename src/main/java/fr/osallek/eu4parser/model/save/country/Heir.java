@@ -4,6 +4,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Country;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Heir extends Monarch {
 
@@ -15,7 +16,7 @@ public class Heir extends Monarch {
         super(item, country, date);
     }
 
-    public Double getClaim() {
+    public Optional<Double> getClaim() {
         return this.item.getVarAsDouble("claim");
     }
 

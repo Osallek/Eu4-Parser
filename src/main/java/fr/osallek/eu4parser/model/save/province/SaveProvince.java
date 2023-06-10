@@ -28,7 +28,6 @@ import fr.osallek.eu4parser.model.game.StaticModifiers;
 import fr.osallek.eu4parser.model.game.TradeCompany;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.game.TradeNode;
-import fr.osallek.eu4parser.model.game.TradePolicy;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
@@ -377,7 +376,9 @@ public class SaveProvince extends Province {
         return this.armies == null ? new ArrayList<>() : this.armies.stream()
                                                                     .map(Army::getRegiments)
                                                                     .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType()))
+                                                                    .filter(regiment -> regiment.getUnitType()
+                                                                                                .filter(UnitType.INFANTRY::equals)
+                                                                                                .isPresent())
                                                                     .toList();
     }
 
@@ -385,7 +386,9 @@ public class SaveProvince extends Province {
         return this.armies == null ? new ArrayList<>() : this.armies.stream()
                                                                     .map(Army::getRegiments)
                                                                     .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType()))
+                                                                    .filter(regiment -> regiment.getUnitType()
+                                                                                                .filter(UnitType.CAVALRY::equals)
+                                                                                                .isPresent())
                                                                     .toList();
     }
 
@@ -393,7 +396,9 @@ public class SaveProvince extends Province {
         return this.armies == null ? new ArrayList<>() : this.armies.stream()
                                                                     .map(Army::getRegiments)
                                                                     .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType()))
+                                                                    .filter(regiment -> regiment.getUnitType()
+                                                                                                .filter(UnitType.ARTILLERY::equals)
+                                                                                                .isPresent())
                                                                     .toList();
     }
 
@@ -401,7 +406,9 @@ public class SaveProvince extends Province {
         return this.navies == null ? new ArrayList<>() : this.navies.stream()
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType()))
+                                                                    .filter(regiment -> regiment.getUnitType()
+                                                                                                .filter(UnitType.HEAVY_SHIP::equals)
+                                                                                                .isPresent())
                                                                     .toList();
     }
 
@@ -409,7 +416,9 @@ public class SaveProvince extends Province {
         return this.navies == null ? new ArrayList<>() : this.navies.stream()
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType()))
+                                                                    .filter(regiment -> regiment.getUnitType()
+                                                                                                .filter(UnitType.LIGHT_SHIP::equals)
+                                                                                                .isPresent())
                                                                     .toList();
     }
 
@@ -417,7 +426,9 @@ public class SaveProvince extends Province {
         return this.navies == null ? new ArrayList<>() : this.navies.stream()
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType()))
+                                                                    .filter(regiment -> regiment.getUnitType()
+                                                                                                .filter(UnitType.GALLEY::equals)
+                                                                                                .isPresent())
                                                                     .toList();
     }
 
@@ -425,7 +436,9 @@ public class SaveProvince extends Province {
         return this.navies == null ? new ArrayList<>() : this.navies.stream()
                                                                     .map(Navy::getShips)
                                                                     .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType()))
+                                                                    .filter(regiment -> regiment.getUnitType()
+                                                                                                .filter(UnitType.TRANSPORT::equals)
+                                                                                                .isPresent())
                                                                     .toList();
     }
 
@@ -446,7 +459,7 @@ public class SaveProvince extends Province {
         return this.armies == null ? 0 : this.armies.stream()
                                                     .mapToLong(army -> army.getRegiments()
                                                                            .stream()
-                                                                           .filter(regiment -> type.equals(regiment.getTypeName()))
+                                                                           .filter(regiment -> regiment.getTypeName().filter(type::equals).isPresent())
                                                                            .count())
                                                     .sum();
     }
@@ -455,7 +468,7 @@ public class SaveProvince extends Province {
         return this.armies == null ? 0 : this.armies.stream()
                                                     .mapToLong(army -> army.getRegiments()
                                                                            .stream()
-                                                                           .filter(regiment -> Objects.equals(regiment.getCategory(), category))
+                                                                           .filter(regiment -> regiment.getCategory().filter(i -> i == category).isPresent())
                                                                            .count())
                                                     .sum();
     }
@@ -603,7 +616,7 @@ public class SaveProvince extends Province {
     }
 
     public void colonize(SaveCountry country) {
-        if (!isCity() && getColonySize() == null) {
+        if (!isCity() && getColonySize().isEmpty()) {
             setOwner(country);
             setController(country);
             setOriginalColoniser(country);
@@ -818,9 +831,9 @@ public class SaveProvince extends Province {
                     return;
                 }
 
-                if (CollectionUtils.isNotEmpty(building.getManufactoryFor()) && !building.getManufactoryFor().contains("all") && !building.getManufactoryFor()
-                                                                                                                                          .contains(
-                                                                                                                                                  getTradeGoods())) {
+                Optional<String> good = getTradeGoods();
+                if (CollectionUtils.isNotEmpty(building.getManufactoryFor()) && !building.getManufactoryFor().contains("all") &&
+                    good.isPresent() && !building.getManufactoryFor().contains(good.get())) {
                     return;
                 }
 
@@ -872,8 +885,8 @@ public class SaveProvince extends Province {
     }
 
     private void removeBuildingNoRefresh(String name) {
-        this.item.getChild("building_builders").ifPresent(item -> item.removeVariable(name));
-        this.item.getChild("buildings").ifPresent(item -> item.removeVariable(name));
+        this.item.getChild("building_builders").ifPresent(i -> i.removeVariable(name));
+        this.item.getChild("buildings").ifPresent(i -> i.removeVariable(name));
     }
 
     public void removeBuilding(String name) {
@@ -1422,9 +1435,9 @@ public class SaveProvince extends Province {
                          .map(Optional::get)
                          .findFirst()
                          .flatMap(CenterOfTrade::getStateModifiers)
-                         .ifPresent(modifiers -> {
-                             if (modifiers.hasModifier(modifier)) {
-                                 list.add(modifiers.getModifier(modifier));
+                         .ifPresent(m -> {
+                             if (m.hasModifier(modifier)) {
+                                 list.add(m.getModifier(modifier));
                              }
                          });
         }

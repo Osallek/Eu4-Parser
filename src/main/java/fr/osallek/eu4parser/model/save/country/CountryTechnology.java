@@ -10,11 +10,12 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 public record CountryTechnology(Save save, ClausewitzItem item) {
 
-    public Integer getAdm() {
+    public Optional<Integer> getAdm() {
         return this.item.getVarAsInt("adm_tech");
     }
 
@@ -22,7 +23,7 @@ public record CountryTechnology(Save save, ClausewitzItem item) {
         this.item.setVariable("adm_tech", adm);
     }
 
-    public Integer getDip() {
+    public Optional<Integer> getDip() {
         return this.item.getVarAsInt("dip_tech");
     }
 
@@ -30,7 +31,7 @@ public record CountryTechnology(Save save, ClausewitzItem item) {
         this.item.setVariable("dip_tech", dip);
     }
 
-    public Integer getMil() {
+    public Optional<Integer> getMil() {
         return this.item.getVarAsInt("mil_tech");
     }
 
@@ -38,8 +39,8 @@ public record CountryTechnology(Save save, ClausewitzItem item) {
         this.item.setVariable("mil_tech", mil);
     }
 
-    public Integer getTotal() {
-        return NumbersUtils.intOrDefault(getAdm()) + NumbersUtils.intOrDefault(getDip()) + NumbersUtils.intOrDefault(getMil());
+    public Optional<Integer> getTotal() {
+        return getAdm().flatMap(adm -> getDip().map(dip -> dip + adm)).flatMap(aDouble -> getMil().map(mil -> mil + aDouble));
     }
 
     public Double getModifier(Power power, Integer level, Modifier modifier) {
