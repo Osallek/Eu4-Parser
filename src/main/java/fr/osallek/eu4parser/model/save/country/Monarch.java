@@ -3,7 +3,6 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Culture;
-import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Personalities;
 import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.RulerPersonality;
@@ -12,49 +11,35 @@ import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Monarch {
 
     protected final ClausewitzItem item;
 
-    protected final Game game;
-
     protected SaveCountry saveCountry;
 
     protected LocalDate monarchDate;
-
-    protected Id id;
-
     protected Personalities personalities;
-
-    protected HasDeclaredWar hasDeclaredWar;
-
-    protected ListOfDates rulerFlags;
-
-    protected Id leaderId;
 
     protected Leader leader;
 
     public Monarch(ClausewitzItem item, SaveCountry saveCountry) {
         this.item = item;
         this.saveCountry = saveCountry;
-        this.game = saveCountry.getSave().getGame();
-        refreshAttributes();
     }
 
     public Monarch(ClausewitzItem item, SaveCountry saveCountry, LocalDate date) {
         this.item = item;
         this.saveCountry = saveCountry;
-        this.game = saveCountry.getSave().getGame();
         this.monarchDate = date;
-        refreshAttributes();
     }
 
-    public Id getId() {
-        return id;
+    public Optional<Id> getId() {
+        return this.item.getChild("id").map(Id::new);
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -62,9 +47,9 @@ public class Monarch {
         this.item.setVariable("name", ClausewitzUtils.addQuotes(name));
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setName(name);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setName(name));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setName(name);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setName(name));
         }
     }
 
@@ -76,7 +61,7 @@ public class Monarch {
         return this.saveCountry;
     }
 
-    public Integer getAdm() {
+    public Optional<Integer> getAdm() {
         return this.item.getVarAsInt("ADM");
     }
 
@@ -84,13 +69,13 @@ public class Monarch {
         this.item.setVariable("ADM", adm);
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setAdm(adm);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setAdm(adm));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setAdm(adm);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setAdm(adm));
         }
     }
 
-    public Integer getDip() {
+    public Optional<Integer> getDip() {
         return this.item.getVarAsInt("DIP");
     }
 
@@ -98,13 +83,13 @@ public class Monarch {
         this.item.setVariable("DIP", dip);
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setDip(dip);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setDip(dip));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setDip(dip);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setDip(dip));
         }
     }
 
-    public Integer getMil() {
+    public Optional<Integer> getMil() {
         return this.item.getVarAsInt("MIL");
     }
 
@@ -112,25 +97,25 @@ public class Monarch {
         this.item.setVariable("MIL", mil);
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setMil(mil);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setMil(mil));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setMil(mil);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setMil(mil));
         }
     }
 
-    public Boolean getFemale() {
+    public Optional<Boolean> getFemale() {
         return this.item.getVarAsBool("female");
     }
 
-    public Boolean getRegent() {
+    public Optional<Boolean> getRegent() {
         return this.item.getVarAsBool("regent");
     }
 
-    public Culture getCulture() {
-        return this.game.getCulture(this.item.getVarAsString("culture"));
+    public Optional<Culture> getCulture() {
+        return this.item.getVarAsString("culture").map(s -> this.saveCountry.getSave().getGame().getCulture(s));
     }
 
-    public String getCultureName() {
+    public Optional<String> getCultureName() {
         return this.item.getVarAsString("culture");
     }
 
@@ -138,17 +123,17 @@ public class Monarch {
         this.item.setVariable("culture", culture.getName());
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setCulture(culture);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setCulture(culture));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setCulture(culture);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setCulture(culture));
         }
     }
 
-    public Religion getReligion() {
-        return this.game.getReligion(this.item.getVarAsString("religion"));
+    public Optional<Religion> getReligion() {
+        return this.item.getVarAsString("religion").map(s -> this.saveCountry.getSave().getGame().getReligion(s));
     }
 
-    public String getReligionName() {
+    public Optional<String> getReligionName() {
         return this.item.getVarAsString("religion");
     }
 
@@ -156,13 +141,13 @@ public class Monarch {
         this.item.setVariable("religion", religion.getName());
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setReligion(religion);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setReligion(religion));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setReligion(religion);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setReligion(religion));
         }
     }
 
-    public String getDynasty() {
+    public Optional<String> getDynasty() {
         return this.item.getVarAsString("dynasty");
     }
 
@@ -170,13 +155,13 @@ public class Monarch {
         this.item.setVariable("dynasty", ClausewitzUtils.addQuotes(dynasty));
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setDynasty(dynasty);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setDynasty(dynasty));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setDynasty(dynasty);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setDynasty(dynasty));
         }
     }
 
-    public LocalDate getBirthDate() {
+    public Optional<LocalDate> getBirthDate() {
         return this.item.getVarAsDate("birth_date");
     }
 
@@ -184,13 +169,13 @@ public class Monarch {
         this.item.setVariable("birth_date", birthDate);
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setBirthDate(birthDate);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setBirthDate(birthDate));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setBirthDate(birthDate);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setBirthDate(birthDate));
         }
     }
 
-    public LocalDate getDeathDate() {
+    public Optional<LocalDate> getDeathDate() {
         return this.item.getVarAsDate("death_date");
     }
 
@@ -198,17 +183,17 @@ public class Monarch {
         this.item.setVariable("death_date", deathDate);
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setDeathDate(deathDate);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setDeathDate(deathDate));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setDeathDate(deathDate);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setDeathDate(deathDate));
         }
     }
 
-    public Boolean getSucceeded() {
+    public Optional<Boolean> getSucceeded() {
         return this.item.getVarAsBool("succeeded");
     }
 
-    public String getMonarchName() {
+    public Optional<String> getMonarchName() {
         return this.item.getVarAsString("monarch_name");
     }
 
@@ -216,28 +201,27 @@ public class Monarch {
         this.item.setVariable("monarch_name", ClausewitzUtils.addQuotes(monarchName));
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).setMonarchName(monarchName);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).setMonarchName(monarchName));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).setMonarchName(monarchName);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).setMonarchName(monarchName));
         }
     }
 
-    public Personalities getPersonalities() {
-        return personalities;
+    public Optional<Personalities> getPersonalities() {
+        return this.item.getChild("personalities").map(i -> new Personalities(i, this.saveCountry.getSave().getGame()));
     }
 
     public void addPersonality(RulerPersonality personality) {
         if (this.personalities == null) {
             this.item.addChild("personalities");
-            refreshAttributes();
         }
 
         this.personalities.addPersonality(personality);
 
         if (this.item.getName().endsWith("_heir")) {
-            this.saveCountry.getHistory().getHeir(this.getId().getId()).addPersonality(personality);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).addPersonality(personality));
         } else if (this.item.getName().endsWith("_consort")) {
-            this.saveCountry.getHistory().getQueen(this.getId().getId()).addPersonality(personality);
+            getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).addPersonality(personality));
         }
     }
 
@@ -246,14 +230,13 @@ public class Monarch {
             this.personalities.removePersonality(index);
 
             if (this.item.getName().endsWith("_heir")) {
-                this.saveCountry.getHistory().getHeir(this.getId().getId()).removePersonality(index);
+                getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).removePersonality(index));
             } else if (this.item.getName().endsWith("_consort")) {
-                this.saveCountry.getHistory().getQueen(this.getId().getId()).removePersonality(index);
+                getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).removePersonality(index));
             }
 
             if (this.personalities.item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
-                refreshAttributes();
             }
         }
     }
@@ -263,43 +246,42 @@ public class Monarch {
             this.personalities.removePersonality(personality);
 
             if (this.item.getName().endsWith("_heir")) {
-                this.saveCountry.getHistory().getHeir(this.getId().getId()).removePersonality(personality);
+                getId().ifPresent(id -> this.saveCountry.getHistory().getHeir(id.getId()).removePersonality(personality));
             } else if (this.item.getName().endsWith("_consort")) {
-                this.saveCountry.getHistory().getQueen(this.getId().getId()).removePersonality(personality);
+                getId().ifPresent(id -> this.saveCountry.getHistory().getQueen(id.getId()).removePersonality(personality));
             }
 
             if (this.personalities.item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
-                refreshAttributes();
             }
         }
     }
 
-    public HasDeclaredWar getHasDeclaredWar() {
-        return hasDeclaredWar;
+    public Optional<HasDeclaredWar> getHasDeclaredWar() {
+        return this.item.getChild("has_declared_war").map(HasDeclaredWar::new);
     }
 
-    public Id getLeaderId() {
-        return leaderId;
+    public Optional<Id> getLeaderId() {
+        return this.item.getChild("leader_id").map(Id::new);
     }
 
-    public Leader getLeader() {
-        return leader;
+    public Optional<Leader> getLeader() {
+        return this.item.getChild("leader").map(i -> new Leader(i, this.saveCountry));
     }
 
-    public ListOfDates getRulerFlags() {
-        return rulerFlags;
+    public Optional<ListOfDates> getRulerFlags() {
+        return this.item.getChild("ruler_flags").map(ListOfDates::new);
     }
 
-    public SaveCountry getWho() {
-        return this.saveCountry.getSave().getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("who")));
+    public Optional<SaveCountry> getWho() {
+        return this.item.getVarAsString("who").map(s -> this.saveCountry.getSave().getCountry(s));
     }
 
     public void setWho(SaveCountry who) {
         this.item.setVariable("who", ClausewitzUtils.addQuotes(who.getTag()));
     }
 
-    public Double getAmount() {
+    public Optional<Double> getAmount() {
         return this.item.getVarAsDouble("amount");
     }
 
@@ -313,45 +295,7 @@ public class Monarch {
         this.item.setVariable("amount", amount);
     }
 
-    public Boolean getHistory() {
+    public Optional<Boolean> getHistory() {
         return this.item.getVarAsBool("history");
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
-        }
-
-        ClausewitzItem personalitiesItem = this.item.getChild("personalities");
-
-        if (personalitiesItem != null) {
-            this.personalities = new Personalities(personalitiesItem, this.game);
-        }
-
-        ClausewitzItem hasDeclaredWarItem = this.item.getChild("has_declared_war");
-
-        if (hasDeclaredWarItem != null) {
-            this.hasDeclaredWar = new HasDeclaredWar(hasDeclaredWarItem);
-        }
-
-        ClausewitzItem rulerFlagsItem = this.item.getChild("ruler_flags");
-
-        if (rulerFlagsItem != null) {
-            this.rulerFlags = new ListOfDates(rulerFlagsItem);
-        }
-
-        ClausewitzItem leaderIdChild = this.item.getChild("leader_id");
-
-        if (leaderIdChild != null) {
-            this.leaderId = new Id(leaderIdChild);
-        }
-
-        ClausewitzItem leaderChild = this.item.getChild("leader");
-
-        if (leaderChild != null) {
-            this.leader = new Leader(leaderChild, this.saveCountry);
-        }
     }
 }

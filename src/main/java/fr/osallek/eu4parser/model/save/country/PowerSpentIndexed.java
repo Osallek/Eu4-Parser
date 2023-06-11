@@ -12,13 +12,13 @@ public record PowerSpentIndexed(ClausewitzItem item) {
         Map<PowerSpent, Integer> powerSpentIndexed = new EnumMap<>(PowerSpent.class);
 
         for (PowerSpent powerSpent : PowerSpent.values()) {
-            powerSpentIndexed.put(powerSpent, NumbersUtils.intOrDefault(this.item.getVarAsInt(String.valueOf(powerSpent.ordinal()))));
+            powerSpentIndexed.put(powerSpent, this.item.getVarAsInt(String.valueOf(powerSpent.ordinal())).orElse(0));
         }
 
         return powerSpentIndexed;
     }
 
     public Integer getPowerSpent(PowerSpent powerSpent) {
-        return NumbersUtils.intOrDefault(this.item.getVarAsInt(String.valueOf(powerSpent.ordinal())));
+        return this.item.getVarAsInt(String.valueOf(powerSpent.ordinal())).orElse(0);
     }
 }

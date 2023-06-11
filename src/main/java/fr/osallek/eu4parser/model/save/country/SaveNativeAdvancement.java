@@ -38,11 +38,11 @@ public class SaveNativeAdvancement {
     }
 
     public boolean getEmbracedNativeAdvancement(NativeAdvancement nativeAdvancement) {
-        return 1 == this.list.getAsInt(nativeAdvancement.getIndex());
+        return 1 == this.list.getAsInt(nativeAdvancement.getIndex()).orElse(0);
     }
 
     public boolean getEmbracedNativeAdvancement(int nativeAdvancement) {
-        return 1 == this.list.getAsInt(nativeAdvancement);
+        return 1 == this.list.getAsInt(nativeAdvancement).orElse(0);
     }
 
     public long getNbEmbracedNativeAdvancements() {

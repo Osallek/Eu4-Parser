@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.game.Game;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SaveFervor {
 
@@ -18,7 +19,7 @@ public class SaveFervor {
         this.item = item;
     }
 
-    public Double getValue() {
+    public Optional<Double> getValue() {
         return this.item.getVarAsDouble("value");
     }
 

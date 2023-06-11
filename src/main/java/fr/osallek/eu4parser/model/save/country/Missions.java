@@ -50,10 +50,9 @@ public record Missions(ClausewitzItem item, Game game) {
 
         List<ClausewitzObject> missions = this.item.getAllOrdered("mission_slot");
 
-        if (missions.size() > slot) {
-            if (missions.get(slot) instanceof ClausewitzList list) {
+        if (missions.size() > slot && (missions.get(slot) instanceof ClausewitzList list)) {
                 return list.getValues().stream().map(this.game::getMissionsTree).filter(Objects::nonNull).toList();
-            }
+
         }
 
         return null;

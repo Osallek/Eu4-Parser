@@ -5,85 +5,77 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 public record Ledger(ClausewitzItem item) {
 
     public Map<Income, Double> getIncome() {
-        ClausewitzList list = this.item.getList("income");
-        return getIncomeFromList(list);
+        return getIncomeFromList(this.item.getList("income"));
     }
 
     public Map<Expense, Double> getExpense() {
-        ClausewitzList list = this.item.getList("expense");
-        return getExpenseFromList(list);
+        return getExpenseFromList(this.item.getList("expense"));
     }
 
     public Map<Income, Double> getThisMonthIncome() {
-        ClausewitzList list = this.item.getList("thismonthincome");
-        return getIncomeFromList(list);
+        return getIncomeFromList(this.item.getList("thismonthincome"));
     }
 
     public Map<Expense, Double> getThisMonthExpense() {
-        ClausewitzList list = this.item.getList("thismonthexpense");
-        return getExpenseFromList(list);
+        return getExpenseFromList(this.item.getList("thismonthexpense"));
     }
 
-    public Double getLastMonthIncome() {
+    public Optional<Double> getLastMonthIncome() {
         return this.item.getVarAsDouble("lastmonthincome");
     }
 
     public Map<Income, Double> getLastMonthIncomeTable() {
-        ClausewitzList list = this.item.getList("lastmonthincometable");
-        return getIncomeFromList(list);
+        return getIncomeFromList(this.item.getList("lastmonthincometable"));
     }
 
-    public Double getLastMonthExpense() {
+    public Optional<Double> getLastMonthExpense() {
         return this.item.getVarAsDouble("lastmonthexpense");
     }
 
     public Map<Expense, Double> getLastMonthExpenseTable() {
-        ClausewitzList list = this.item.getList("lastmonthexpensetable");
-        return getExpenseFromList(list);
+        return getExpenseFromList(this.item.getList("lastmonthexpensetable"));
     }
 
     public Map<Expense, Double> getTotalExpenseTable() {
-        ClausewitzList list = this.item.getList("totalexpensetable");
-        return getExpenseFromList(list);
+        return getExpenseFromList(this.item.getList("totalexpensetable"));
     }
 
     public Map<Income, Double> getLastYearIncome() {
-        ClausewitzList list = this.item.getList("lastyearincome");
-        return getIncomeFromList(list);
+        return getIncomeFromList(this.item.getList("lastyearincome"));
     }
 
     public Map<Expense, Double> getLastYearExpense() {
-        ClausewitzList list = this.item.getList("lastyearexpense");
-        return getExpenseFromList(list);
+        return getExpenseFromList(this.item.getList("lastyearexpense"));
     }
 
-    private Map<Income, Double> getIncomeFromList(ClausewitzList list) {
+    private Map<Income, Double> getIncomeFromList(Optional<ClausewitzList> list) {
         Map<Income, Double> incomes = new EnumMap<>(Income.class);
 
-        if (list == null) {
+        if (list.isEmpty()) {
             return incomes;
         }
 
         for (Income income : Income.values()) {
-            incomes.put(income, list.getAsDouble(income.ordinal()));
+            list.get().getAsDouble(income.ordinal()).ifPresent(aDouble -> incomes.put(income, aDouble));
         }
 
         return incomes;
     }
 
-    private Map<Expense, Double> getExpenseFromList(ClausewitzList list) {
+    private Map<Expense, Double> getExpenseFromList(Optional<ClausewitzList> list) {
         Map<Expense, Double> expenses = new EnumMap<>(Expense.class);
 
-        if (list == null) {
+        if (list.isEmpty()) {
             return expenses;
         }
 
         for (Expense expense : Expense.values()) {
-            expenses.put(expense, list.getAsDouble(expense.ordinal()));
+            list.get().getAsDouble(expense.ordinal()).ifPresent(aDouble -> expenses.put(expense, aDouble));
         }
 
         return expenses;

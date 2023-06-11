@@ -6,18 +6,19 @@ import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record SupplyDepot(ClausewitzItem item, Save save) {
 
-    public SaveProvince getProvince() {
-        return this.save.getProvince(this.item.getVarAsInt("province"));
+    public Optional<SaveProvince> getProvince() {
+        return this.item.getVarAsInt("province").map(this.save::getProvince);
     }
 
-    public SaveCountry getBuilder() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("builder")));
+    public Optional<SaveCountry> getBuilder() {
+        return this.item.getVarAsString("builder").map(this.save::getCountry);
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 

@@ -3,9 +3,11 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
+import java.util.Optional;
+
 public record VictoryCard(ClausewitzItem item) {
 
-    public String getArea() {
+    public Optional<String> getArea() {
         return this.item.getVarAsString("area");
     }
 
@@ -13,7 +15,7 @@ public record VictoryCard(ClausewitzItem item) {
         this.item.setVariable("area", ClausewitzUtils.addQuotes(area));
     }
 
-    public Integer getLevel() {
+    public Optional<Integer> getLevel() {
         return this.item.getVarAsInt("level");
     }
 
@@ -21,7 +23,7 @@ public record VictoryCard(ClausewitzItem item) {
         this.item.setVariable("level", level);
     }
 
-    public Double getScore() {
+    public Optional<Double> getScore() {
         return this.item.getVarAsDouble("score");
     }
 
@@ -29,7 +31,7 @@ public record VictoryCard(ClausewitzItem item) {
         this.item.setVariable("score", score);
     }
 
-    public Boolean wasFulfilled() {
+    public Optional<Boolean> wasFulfilled() {
         return this.item.getVarAsBool("was_fulfilled");
     }
 

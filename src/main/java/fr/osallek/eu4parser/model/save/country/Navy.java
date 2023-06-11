@@ -2,30 +2,32 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzObject;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Navy extends Army {
-
-    private List<Ship> ships;
 
     public Navy(ClausewitzItem item, SaveCountry country) {
         super(item, country);
     }
 
     public List<Ship> getShips() {
-        return ships;
+        return this.item.getChildren("ship").stream().map(child -> new Ship(child, this.country.getSave(), this)).toList();
     }
 
     public void addShip(String name, String type) {
-        Integer home = 1;
-        Double morale = 0.5d;
+        int home = 1;
+        double morale = 0.5d;
 
-        if (this.ships != null && !this.ships.isEmpty()) {
-            home = this.ships.get(0).getHome();
-            morale = this.ships.get(0).getMorale();
+        List<Ship> ships = getShips();
+        if (CollectionUtils.isNotEmpty(ships)) {
+            home = ships.get(0).getHome().orElse(home);
+            morale = ships.get(0).getMorale().orElse(morale);
         }
 
         addShip(name, home, type, morale);
@@ -33,91 +35,50 @@ public class Navy extends Army {
 
     public void addShip(String name, Integer home, String type, Double morale) {
         AbstractRegiment.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale);
-        refreshAttributes();
     }
 
     public void removeShip(int index) {
         this.item.removeVariable("ship", index);
-        refreshAttributes();
     }
 
     //Todo mission details
-    public String getMission() {
-        ClausewitzItem missionItem = this.item.getChild("mission");
-
-        if (missionItem != null) {
-            return missionItem.getChild(0).getName();
-        }
-
-        return null;
+    public Optional<String> getMission() {
+        return this.item.getChild("mission").flatMap(missionItem -> missionItem.getChild(0)).map(ClausewitzObject::getName);
     }
 
     public void removeMission() {
-        ClausewitzItem missionItem = this.item.getChild("mission");
-
-        if (missionItem != null) {
-            missionItem.removeChild(0);
-        }
+        this.item.getChild("mission").ifPresent(i -> i.removeChild(0));
     }
 
-    public LocalDate getLastAtSea() {
+    public Optional<LocalDate> getLastAtSea() {
         return this.item.getVarAsDate("last_at_sea");
     }
 
-    public Double getBlockageEfficiency() {
+    public Optional<Double> getBlockageEfficiency() {
         return this.item.getVarAsDouble("blockade_efficiency");
     }
 
     public List<Integer> getBlockade() {
-        ClausewitzList list = this.item.getList("blockade");
-
-        if (list != null) {
-            return list.getValuesAsInt();
-        }
-
-        return new ArrayList<>();
+        return this.item.getList("blockade").map(ClausewitzList::getValuesAsInt).orElse(new ArrayList<>());
     }
 
-    public Double getActiveFractionLastMonth() {
+    public Optional<Double> getActiveFractionLastMonth() {
         return this.item.getVarAsDouble("active_fraction_last_month");
     }
 
     public boolean isProtecting() {
-        ClausewitzItem item = this.item.getChild("mission");
-
-        if (item != null) {
-            return item.hasChild("protect_mission");
-        }
-
-        return false;
+        return this.item.getChild("mission").filter(i -> i.hasChild("protect_mission")).isPresent();
     }
 
     public boolean isPrivateering() {
-        ClausewitzItem item = this.item.getChild("mission");
-
-        if (item != null) {
-            return item.hasChild("privateer_mission_2");
-        }
-
-        return false;
+        return this.item.getChild("mission").filter(i -> i.hasChild("privateer_mission_2")).isPresent();
     }
 
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location,
-                                              String graphicalCulture, int shipId, String shipName,
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location, String graphicalCulture, int shipId, String shipName,
                                               int shipHome, String shipType, double shipMorale) {
         ClausewitzItem toItem = AbstractArmy.addToItem(parent, "navy", name, location, graphicalCulture, id);
         AbstractRegiment.addToItem(toItem, shipId, shipName, shipHome, shipType, shipMorale);
 
         return toItem;
-    }
-
-    @Override
-    protected void refreshAttributes() {
-        super.refreshAttributes();
-
-        List<ClausewitzItem> shipsItems = this.item.getChildren("ship");
-        this.ships = shipsItems.stream()
-                               .map(child -> new Ship(child, this.country.getSave(), this))
-                               .toList();
     }
 }

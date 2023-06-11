@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.game.ParliamentIssue;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Parliament {
 
@@ -14,15 +15,12 @@ public class Parliament {
 
     private final ClausewitzItem item;
 
-    private ActiveParliamentIssue activeParliamentIssue;
-
     public Parliament(ClausewitzItem item, Game game) {
         this.game = game;
         this.item = item;
-        refreshAttributes();
     }
 
-    public LocalDate getLastDebate() {
+    public Optional<LocalDate> getLastDebate() {
         return this.item.getVarAsDate("last_debate");
     }
 
@@ -31,26 +29,18 @@ public class Parliament {
     }
 
     public boolean getRecalculateIssues() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("recalculate_issues"));
+        return this.item.getVarAsBool("recalculate_issues").map(BooleanUtils::toBoolean).orElse(false);
     }
 
-    public ParliamentIssue getEnactedParliamentIssue() {
-        return this.game.getParliamentIssue(ClausewitzUtils.removeQuotes(this.item.getVarAsString("enacted_parliament_issue")));
+    public Optional<ParliamentIssue> getEnactedParliamentIssue() {
+        return this.item.getVarAsString("enacted_parliament_issue").map(this.game::getParliamentIssue);
     }
 
     public void setEnactedParliamentIssue(ParliamentIssue enactedParliamentIssue) {
         this.item.setVariable("enacted_parliament_issue", ClausewitzUtils.addQuotes(enactedParliamentIssue.getName()));
     }
 
-    public ActiveParliamentIssue getActiveParliamentIssue() {
-        return activeParliamentIssue;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem activeParliamentIssueItem = this.item.getChild("active_parliament_issue");
-
-        if (activeParliamentIssueItem != null) {
-            this.activeParliamentIssue = new ActiveParliamentIssue(activeParliamentIssueItem, this.game);
-        }
+    public Optional<ActiveParliamentIssue> getActiveParliamentIssue() {
+        return this.item.getChild("active_parliament_issue").map(i -> new ActiveParliamentIssue(i, this.game));
     }
 }

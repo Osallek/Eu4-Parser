@@ -4,9 +4,11 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Faction;
 import fr.osallek.eu4parser.model.game.Game;
 
+import java.util.Optional;
+
 public record SaveFaction(ClausewitzItem item, Game game) {
 
-    public Double getInfluence() {
+    public Optional<Double> getInfluence() {
         return this.item.getVarAsDouble("influence");
     }
 
@@ -14,11 +16,11 @@ public record SaveFaction(ClausewitzItem item, Game game) {
         this.item.setVariable("influence", Math.min(Math.max(0, influence), 100));
     }
 
-    public Faction getType() {
-        return this.game.getFaction(this.item.getVarAsString("type"));
+    public Optional<Faction> getType() {
+        return this.item.getVarAsString("type").map(this.game::getFaction);
     }
 
-    public Double getOldInfluence() {
+    public Optional<Double> getOldInfluence() {
         return this.item.getVarAsDouble("old_influence");
     }
 

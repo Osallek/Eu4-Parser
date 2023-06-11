@@ -5,16 +5,15 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 
+import java.util.Optional;
+
 public class Ship extends AbstractRegiment {
 
     private final Navy navy;
 
-    private FlagShip flagShip;
-
     public Ship(ClausewitzItem item, Save save, Navy navy) {
         super(item, save);
         this.navy = navy;
-        refreshAttributes();
     }
 
     @Override
@@ -26,7 +25,7 @@ public class Ship extends AbstractRegiment {
         return navy;
     }
 
-    public Boolean hasDisengaged() {
+    public Optional<Boolean> hasDisengaged() {
         return this.item.getVarAsBool("has_disengaged");
     }
 
@@ -34,21 +33,10 @@ public class Ship extends AbstractRegiment {
         this.item.setVariable("has_disengaged", hasDisengaged);
     }
 
-    public FlagShip getFlagShip() {
-        return flagShip;
+    public Optional<FlagShip> getFlagShip() {
+        return this.item.getChild("flagship").map(i -> new FlagShip(i, this.save));
     }
 
-    public void setFlagShip(FlagShip flagShip) {
-        this.flagShip = flagShip;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem flagShipItem = this.item.getChild("flagship");
-
-        if (flagShipItem != null) {
-            this.flagShip = new FlagShip(flagShipItem, this.save);
-        }
-    }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale, boolean hasDisengaged) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "regiment", parent.getOrder() + 1);

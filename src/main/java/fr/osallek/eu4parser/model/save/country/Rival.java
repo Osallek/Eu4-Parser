@@ -5,18 +5,19 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Save;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record Rival(ClausewitzItem item, Save save) {
 
-    public String getRivalTag() {
+    public Optional<String> getRivalTag() {
         return this.item.getVarAsString("country");
     }
 
-    public SaveCountry getRival() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(getRivalTag()));
+    public Optional<SaveCountry> getRival() {
+        return getRivalTag().map(this.save::getCountry);
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 

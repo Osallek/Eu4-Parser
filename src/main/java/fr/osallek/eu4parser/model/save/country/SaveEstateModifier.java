@@ -3,18 +3,19 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record SaveEstateModifier(ClausewitzItem item) {
 
-    public Double getValue() {
+    public Optional<Double> getValue() {
         return this.item.getVarAsDouble("value");
     }
 
-    public String getDesc() {
+    public Optional<String> getDesc() {
         return this.item.getVarAsString("desc");
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 

@@ -7,17 +7,19 @@ import fr.osallek.eu4parser.model.game.Modifiers;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
 import fr.osallek.eu4parser.model.save.Save;
 
+import java.util.Optional;
+
 public record SaveHegemon(ClausewitzItem item, Save save, Hegemon hegemon) {
 
-    public SaveCountry getCountry() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("country")));
+    public Optional<SaveCountry> getCountry() {
+        return this.item.getVarAsString("country").map(this.save::getCountry);
     }
 
     public void setCountry(SaveCountry country) {
         this.item.setVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
-    public Double getProgress() {
+    public Optional<Double> getProgress() {
         return this.item.getVarAsDouble("progress");
     }
 
@@ -27,9 +29,11 @@ public record SaveHegemon(ClausewitzItem item, Save save, Hegemon hegemon) {
     }
 
     public Modifiers getModifiers() {
-        return ModifiersUtils.sumModifiers(hegemon().getBase(),
-                                           ModifiersUtils.scaleModifiers(hegemon().getScale(), getProgress() / 100),
-                                           getProgress() >= 100d ? hegemon().getMax() : null);
+        return ModifiersUtils.sumModifiers(hegemon().getBase().orElse(null),
+                                           hegemon().getScale()
+                                                    .map(modifiers -> ModifiersUtils.scaleModifiers(modifiers, getProgress().orElse(0d) / 100))
+                                                    .orElse(null),
+                                           hegemon().getMax().filter(modifiers -> getProgress().orElse(0d) >= 100d).orElse(null));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, SaveCountry country, double progress, int order) {

@@ -5,6 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.save.Id;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class MercenaryCompany {
 
@@ -12,21 +13,16 @@ public class MercenaryCompany {
 
     protected final SaveCountry country;
 
-    protected Id id;
-
-    protected Id leader;
-
     public MercenaryCompany(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
-        refreshAttributes();
     }
 
-    public Id getId() {
-        return id;
+    public Optional<Id> getId() {
+        return this.item.getChild("id").map(Id::new);
     }
 
-    public String getTag() {
+    public Optional<String> getTag() {
         return this.item.getVarAsString("tag");
     }
 
@@ -34,19 +30,19 @@ public class MercenaryCompany {
         this.item.setVariable("tag", ClausewitzUtils.addQuotes(tag));
     }
 
-    public Boolean getProgress() {
+    public Optional<Boolean> getProgress() {
         return this.item.getVarAsBool("progress");
     }
 
-    public Id getLeader() {
-        return leader;
+    public Optional<Id> getLeader() {
+        return this.item.getChild("leader").map(Id::new);
     }
 
     public void removeLeader() {
         this.item.removeChild("leader");
     }
 
-    public Double getManpower() {
+    public Optional<Double> getManpower() {
         return this.item.getVarAsDouble("manpower");
     }
 
@@ -58,7 +54,7 @@ public class MercenaryCompany {
         this.item.setVariable("manpower", manpower);
     }
 
-    public Double getStartingManpower() {
+    public Optional<Double> getStartingManpower() {
         return this.item.getVarAsDouble("starting_manpower");
     }
 
@@ -70,25 +66,11 @@ public class MercenaryCompany {
         this.item.setVariable("starting_manpower", manpower);
     }
 
-    public LocalDate getHiringDate() {
+    public Optional<LocalDate> getHiringDate() {
         return this.item.getVarAsDate("hiring_date");
     }
 
-    public LocalDate getDisbandDate() {
+    public Optional<LocalDate> getDisbandDate() {
         return this.item.getVarAsDate("disband_date");
-    }
-
-    protected void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem leaderItem = this.item.getChild("leader");
-
-        if (leaderItem != null) {
-            this.leader = new Id(leaderItem);
-        }
     }
 }

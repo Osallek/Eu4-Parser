@@ -6,7 +6,7 @@ import org.apache.commons.lang3.BooleanUtils;
 public record PlayerAiPrefsCommand(ClausewitzItem item) {
 
     public boolean startWars() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("start_wars"));
+        return this.item.getVarAsBool("start_wars").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setStartWars(boolean startWars) {
@@ -14,7 +14,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean keepAlliances() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("keep_alliances"));
+        return this.item.getVarAsBool("keep_alliances").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setKeepAlliances(boolean keepAlliances) {
@@ -22,7 +22,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean keepTreaties() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("keep_treaties"));
+        return this.item.getVarAsBool("keep_treaties").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setKeepTreaties(boolean keepTreaties) {
@@ -30,7 +30,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean quickPeace() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("quick_peace"));
+        return this.item.getVarAsBool("quick_peace").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setQuickPeace(boolean quickPeace) {
@@ -38,7 +38,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean moveTraders() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("move_traders"));
+        return this.item.getVarAsBool("move_traders").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setMoveTraders(boolean moveTraders) {
@@ -46,7 +46,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean takeDecisions() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("take_decisions"));
+        return this.item.getVarAsBool("take_decisions").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setTakeDecisions(boolean takeDecisions) {
@@ -54,7 +54,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean embraceInstitutions() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("embrace_institutions"));
+        return this.item.getVarAsBool("embrace_institutions").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setEmbraceInstitutions(boolean embraceInstitutions) {
@@ -62,7 +62,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean developProvinces() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("develop_provinces"));
+        return this.item.getVarAsBool("develop_provinces").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setDevelopProvinces(boolean developProvinces) {
@@ -70,7 +70,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean disbandUnits() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("disband_units"));
+        return this.item.getVarAsBool("disband_units").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setDisbandUnits(boolean disbandUnits) {
@@ -78,7 +78,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean changeFleetMissions() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("change_fleet_missions"));
+        return this.item.getVarAsBool("change_fleet_missions").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setChangeFleetMissions(boolean changeFleetMissions) {
@@ -86,7 +86,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean sendMissionaries() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("send_missionaries"));
+        return this.item.getVarAsBool("send_missionaries").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setSendMissionaries(boolean sendMissionaries) {
@@ -94,7 +94,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean convertCultures() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("convert_cultures"));
+        return this.item.getVarAsBool("convert_cultures").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setConvertCultures(boolean convertCultures) {
@@ -102,7 +102,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean promoteCultures() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("promote_cultures"));
+        return this.item.getVarAsBool("promote_cultures").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setPromoteCultures(boolean promoteCultures) {
@@ -110,7 +110,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public boolean braindead() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("braindead"));
+        return this.item.getVarAsBool("braindead").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setBraindead(boolean braindead) {
@@ -118,7 +118,7 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
     }
 
     public int timeout() {
-        return this.item.getVarAsInt("timeout");
+        return this.item.getVarAsInt("timeout").orElse(0);
     }
 
     public void setTimeout(int timeout) {

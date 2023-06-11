@@ -10,6 +10,7 @@ import fr.osallek.eu4parser.model.Power;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,18 +29,12 @@ public class SaveCountryHistoryEvent {
         return Eu4Utils.stringToDate(this.item.getName());
     }
 
-    public Boolean getAbolishedSerfdom() {
+    public Optional<Boolean> getAbolishedSerfdom() {
         return this.item.getLastVarAsBool("abolished_serfdom");
     }
 
-    public Leader getLeader() {
-        ClausewitzItem child = this.item.getLastChild("leader");
-
-        if (child != null) {
-            return new Leader(child, this.country);
-        }
-
-        return null;
+    public Optional<Leader> getLeader() {
+        return this.item.getLastChild("leader").map(i -> new Leader(i, this.country));
     }
 
     public Map<String, Boolean> getIdeasLevel() {
@@ -48,7 +43,7 @@ public class SaveCountryHistoryEvent {
                            .getIdeas()
                            .stream()
                            .filter(this.item::hasVar)
-                           .collect(Collectors.toMap(Function.identity(), this.item::getVarAsBool));
+                           .collect(Collectors.toMap(Function.identity(), s -> this.item.getVarAsBool(s).get()));
     }
 
     public List<String> getAddAcceptedCultures() {
@@ -59,160 +54,112 @@ public class SaveCountryHistoryEvent {
         return this.item.getVarsAsStrings("remove_accepted_culture").stream().map(ClausewitzUtils::removeQuotes).toList();
     }
 
-    public Integer getGovernmentRank() {
+    public Optional<Integer> getGovernmentRank() {
         return this.item.getLastVarAsInt("government_rank");
     }
 
-    public Integer getCapital() {
+    public Optional<Integer> getCapital() {
         return this.item.getLastVarAsInt("capital");
     }
 
-    public String getChangedCountryNameFrom() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("changed_country_name_from"));
+    public Optional<String> getChangedCountryNameFrom() {
+        return this.item.getLastVarAsString("changed_country_name_from").map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getChangedCountryAdjectiveFrom() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("changed_country_adjective_from"));
+    public Optional<String> getChangedCountryAdjectiveFrom() {
+        return this.item.getLastVarAsString("changed_country_adjective_from").map(ClausewitzUtils::removeQuotes);
     }
 
-    public Color getChangedCountryMapcolorFrom() {
-        ClausewitzList list = this.item.getList("changed_country_mapcolor_from");
-
-        if (list != null) {
-            return new Color(list);
-        }
-
-        return null;
+    public Optional<Color> getChangedCountryMapcolorFrom() {
+        return this.item.getList("changed_country_mapcolor_from").map(Color::new);
     }
 
-    public String getAddGovernmentReform() {
+    public Optional<String> getAddGovernmentReform() {
         return this.item.getLastVarAsString("add_government_reform");
     }
 
-    public String getPrimaryCulture() {
+    public Optional<String> getPrimaryCulture() {
         return this.item.getLastVarAsString("primary_culture");
     }
 
-    public String getGovernment() {
+    public Optional<String> getGovernment() {
         return this.item.getLastVarAsString("government");
     }
 
-    public String getReligion() {
+    public Optional<String> getReligion() {
         return this.item.getLastVarAsString("religion");
     }
 
-    public String getSecondaryReligion() {
+    public Optional<String> getSecondaryReligion() {
         return this.item.getLastVarAsString("secondary_religion");
     }
 
-    public String getTechnologyGroup() {
+    public Optional<String> getTechnologyGroup() {
         return this.item.getLastVarAsString("technology_group");
     }
 
-    public String getUnitType() {
+    public Optional<String> getUnitType() {
         return this.item.getLastVarAsString("unit_type");
     }
 
-    public String getChangedTagFrom() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("changed_tag_from"));
+    public Optional<String> getChangedTagFrom() {
+        return this.item.getLastVarAsString("changed_tag_from").map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getReligiousSchool() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("religious_school"));
+    public Optional<String> getReligiousSchool() {
+        return this.item.getLastVarAsString("religious_school").map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getSetCountryFlag() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("set_country_flag"));
+    public Optional<String> getSetCountryFlag() {
+        return this.item.getLastVarAsString("set_country_flag").map(ClausewitzUtils::removeQuotes);
     }
 
-    public String getDecision() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("decision"));
+    public Optional<String> getDecision() {
+        return this.item.getLastVarAsString("decision").map(ClausewitzUtils::removeQuotes);
     }
 
-    public Queen getQueen() {
-        ClausewitzItem child = this.item.getLastChild("queen");
-
-        if (child != null) {
-            return new Queen(child, this.country);
-        }
-
-        return null;
+    public Optional<Queen> getQueen() {
+        return this.item.getLastChild("queen").map(i -> new Queen(i, this.country));
     }
 
-    public Queen getMonarchConsort() {
-        ClausewitzItem child = this.item.getLastChild("monarch_consort");
-
-        if (child != null) {
-            return new Queen(child, this.country);
-        }
-
-        return null;
+    public Optional<Queen> getMonarchConsort() {
+        return this.item.getLastChild("monarch_consort").map(i -> new Queen(i, this.country));
     }
 
-    public Monarch getMonarch() {
-        ClausewitzItem child = this.item.getLastChild("monarch");
-
-        if (child != null) {
-            return new Monarch(child, this.country);
-        }
-
-        return null;
+    public Optional<Monarch> getMonarch() {
+        return this.item.getLastChild("monarch").map(i -> new Monarch(i, this.country));
     }
 
-    public Heir getMonarchHeir() {
-        ClausewitzItem child = this.item.getLastChild("monarch_heir");
-
-        if (child != null) {
-            return new Heir(child, this.country);
-        }
-
-        return null;
+    public Optional<Heir> getMonarchHeir() {
+        return this.item.getLastChild("monarch_heir").map(i -> new Heir(i, this.country));
     }
 
-    public Heir getHeir() {
-        ClausewitzItem child = this.item.getLastChild("heir");
-
-        if (child != null) {
-            return new Heir(child, this.country);
-        }
-
-        return null;
+    public Optional<Heir> getHeir() {
+        return this.item.getLastChild("heir").map(i -> new Heir(i, this.country));
     }
 
-    public Heir getMonarchForeignHeir() {
-        ClausewitzItem child = this.item.getLastChild("monarch_foreign_heir");
-
-        if (child != null) {
-            return new Heir(child, this.country);
-        }
-
-        return null;
+    public Optional<Heir> getMonarchForeignHeir() {
+        return this.item.getLastChild("monarch_foreign_heir").map(i -> new Heir(i, this.country));
     }
 
-    public Integer getUnion() {
+    public Optional<Integer> getUnion() {
         return this.item.getLastVarAsInt("union");
     }
 
-    public Integer getTradePort() {
+    public Optional<Integer> getTradePort() {
         return this.item.getLastVarAsInt("trade_port");
     }
 
-    public Boolean getElector() {
+    public Optional<Boolean> getElector() {
         return this.item.getLastVarAsBool("elector");
     }
 
-    public Power getNationalFocus() {
-        String variable = this.item.getLastVarAsString("national_focus");
-
-        if (variable != null) {
-            return Power.byName(variable);
-        }
-
-        return null;
+    public Optional<Power> getNationalFocus() {
+        return this.item.getLastVarAsString("national_focus").map(Power::byName);
     }
 
-    public String getSetEstatePrivilege() {
-        return ClausewitzUtils.removeQuotes(this.item.getLastVarAsString("set_estate_privilege"));
+    public Optional<String> getSetEstatePrivilege() {
+        return this.item.getLastVarAsString("set_estate_privilege").map(ClausewitzUtils::removeQuotes);
     }
 
     public SaveCountry getCountry() {

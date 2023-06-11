@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class Queen extends Monarch {
 
@@ -14,16 +15,16 @@ public class Queen extends Monarch {
         super(item, country, date);
     }
 
-    public Boolean getConsort() {
+    public Optional<Boolean> getConsort() {
         return this.item.getVarAsBool("consort");
     }
 
-    public Boolean getQueenRegent() {
+    public Optional<Boolean> getQueenRegent() {
         return this.item.getVarAsBool("queen_regent");
     }
 
-    public SaveCountry getSaveCountryOfOrigin() {
-        return this.saveCountry.getSave().getCountry(this.item.getVarAsString("country_of_origin"));
+    public Optional<SaveCountry> getSaveCountryOfOrigin() {
+        return this.item.getVarAsString("country_of_origin").map(s -> this.saveCountry.getSave().getCountry(s));
     }
 
     public void setCountryOfOrigin(SaveCountry countryOfOrigin) {

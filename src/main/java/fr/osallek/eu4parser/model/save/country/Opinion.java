@@ -3,14 +3,15 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record Opinion(ClausewitzItem item) {
 
-    public String getModifier() {
+    public Optional<String> getModifier() {
         return this.item.getVarAsString("modifier");
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -18,7 +19,7 @@ public record Opinion(ClausewitzItem item) {
         this.item.setVariable("date", date);
     }
 
-    public Double getCurrentOpinion() {
+    public Optional<Double> getCurrentOpinion() {
         return this.item.getVarAsDouble("current_opinion");
     }
 
@@ -26,7 +27,7 @@ public record Opinion(ClausewitzItem item) {
         this.item.setVariable("current_opinion", currentOpinion);
     }
 
-    public Boolean getExpiryDate() {
+    public Optional<Boolean> getExpiryDate() {
         return this.item.getVarAsBool("expiry_date");
     }
 
