@@ -8,43 +8,37 @@ import fr.osallek.eu4parser.model.save.Save;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public record SaveInvestment(ClausewitzItem item, Save save) {
 
-    public SaveCountry getCountry() {
-        return this.save.getCountry(this.item.getVarAsString("tag"));
+    public Optional<SaveCountry> getCountry() {
+        return this.item.getVarAsString("tag").map(this.save::getCountry);
     }
 
     public List<Investment> getInvestments() {
-        ClausewitzList investmentsList = this.item.getList("investments");
-
-        if (investmentsList != null) {
-            return investmentsList.getValues().stream().map(s -> this.save.getGame().getInvestment(s)).filter(Objects::nonNull).toList();
-        }
-
-        return new ArrayList<>();
+        return this.item.getList("investments")
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(s -> this.save.getGame().getInvestment(s))
+                        .filter(Objects::nonNull)
+                        .toList();
     }
 
     public void addInvestment(Investment investment) {
-        ClausewitzList investmentsList = this.item.getList("investments");
-
-        if (investmentsList != null) {
+        this.item.getList("investments").ifPresentOrElse(investmentsList -> {
             if (!investmentsList.contains(investment.getName())) {
                 investmentsList.add(investment.getName());
             }
-        } else {
-            this.item.addList("investments", investment.getName());
-        }
+        }, () -> this.item.addList("investments", investment.getName()));
     }
 
     public void removeInvestment(Investment investment) {
-        ClausewitzList investmentsList = this.item.getList("investments");
-
-        if (investmentsList != null) {
-            investmentsList.remove(investment.getName());
-        }
+        this.item.getList("investments").ifPresent(investmentsList -> investmentsList.remove(investment.getName()));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country, Investment... investments) {

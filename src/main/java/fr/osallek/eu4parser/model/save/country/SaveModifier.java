@@ -8,6 +8,7 @@ import fr.osallek.eu4parser.model.game.Modifier;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class SaveModifier {
 
@@ -20,37 +21,35 @@ public class SaveModifier {
         this.item = item;
     }
 
-    public String getModifierName() {
+    public Optional<String> getModifierName() {
         return this.item.getVarAsString("modifier");
     }
 
-    public GameModifier getModifier() {
-        return this.game.getModifier(this.item.getVarAsString("modifier"));
+    public Optional<GameModifier> getModifier() {
+        return getModifierName().map(this.game::getModifier);
     }
 
-    public Double getModifiers(SaveCountry country, Modifier modifier) {
-        GameModifier gameModifier = getModifier();
-        return gameModifier == null ? null : gameModifier.getModifier(country, modifier);
+    public Optional<Double> getModifiers(SaveCountry country, Modifier modifier) {
+        return getModifier().flatMap(gameModifier -> gameModifier.getModifier(country, modifier));
     }
 
-    public Double getModifiers(SaveProvince province, Modifier modifier) {
-        GameModifier gameModifier = getModifier();
-        return gameModifier == null ? null : gameModifier.getModifier(province, modifier);
+    public Optional<Double> getModifiers(SaveProvince province, Modifier modifier) {
+        return getModifier().flatMap(gameModifier -> gameModifier.getModifier(province, modifier));
     }
 
-    public Boolean getHidden() {
+    public Optional<Boolean> getHidden() {
         return this.item.getVarAsBool("hidden");
     }
 
-    public Boolean isParliamentModifier() {
+    public Optional<Boolean> isParliamentModifier() {
         return this.item.getVarAsBool("parliament_modifier");
     }
 
-    public Boolean rulerModifier() {
+    public Optional<Boolean> rulerModifier() {
         return this.item.getVarAsBool("ruler_modifier");
     }
 
-    public LocalDate getDate() {
+    public Optional<LocalDate> getDate() {
         return this.item.getVarAsDate("date");
     }
 
@@ -66,7 +65,7 @@ public class SaveModifier {
         }
     }
 
-    public Boolean isPermanent() {
+    public Optional<Boolean> isPermanent() {
         return this.item.getVarAsBool("permanent");
     }
 

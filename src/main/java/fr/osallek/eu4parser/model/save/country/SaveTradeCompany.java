@@ -3,15 +3,15 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
-import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.model.game.TradeCompany;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class SaveTradeCompany {
 
@@ -24,7 +24,7 @@ public class SaveTradeCompany {
         this.item = item;
     }
 
-    public String getName() {
+    public Optional<String> getName() {
         return this.item.getVarAsString("name");
     }
 
@@ -33,58 +33,40 @@ public class SaveTradeCompany {
     }
 
     public List<SaveProvince> getProvinces() {
-        ClausewitzList list = this.item.getList("provinces");
-
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
+        return this.item.getList("provinces").map(ClausewitzList::getValuesAsInt).stream().flatMap(Collection::stream).map(this.save::getProvince).toList();
     }
 
     public void addProvince(SaveProvince province) {
-        ClausewitzList list = this.item.getList("provinces");
+        this.item.getList("provinces").ifPresentOrElse(list -> {
+            if (!list.contains(province.getId())) {
+                list.add(province.getId());
+            }
+        }, () -> this.item.addList("provinces", province.getId()));
 
-        if (list == null) {
-            this.item.addList("provinces", province.getId());
-        } else if (!list.contains(province.getId())) {
-            list.add(province.getId());
-        }
-
-        addPower(province.getTradePower());
+        province.getTradePower().ifPresent(this::addPower);
     }
 
     public void removeProvince(SaveProvince province) {
-        ClausewitzList list = this.item.getList("provinces");
-
-        if (list != null) {
-            list.remove(String.valueOf(province.getId()));
-        }
+        this.item.getList("provinces").ifPresent(list -> list.remove(String.valueOf(province.getId())));
     }
 
-    public Double getPower() {
+    public Optional<Double> getPower() {
         return this.item.getVarAsDouble("power");
     }
 
     private void addPower(double power) {
-        ClausewitzVariable variable = this.item.getVar("power");
-
-        if (variable == null) {
-            this.item.addVariable("power", power);
-        } else {
-            variable.setValue(variable.getAsDouble() + power);
-        }
+        this.item.getVar("power").ifPresentOrElse(variable -> variable.setValue(variable.getAsDouble() + power), () -> this.item.addVariable("power", power));
     }
 
-    public SaveCountry getOwner() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("owner")));
+    public Optional<SaveCountry> getOwner() {
+        return this.item.getVarAsString("owner").map(this.save::getCountry);
     }
 
     public void setOwner(SaveCountry owner) {
         this.item.setVariable("owner", ClausewitzUtils.addQuotes(owner.getTag()));
     }
 
-    public Double getTaxIncome() {
+    public Optional<Double> getTaxIncome() {
         return this.item.getVarAsDouble("tax_income");
     }
 
@@ -93,7 +75,7 @@ public class SaveTradeCompany {
     }
 
     public boolean strongCompany() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("strong_company"));
+        return this.item.getVarAsBool("strong_company").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setStrongCompany(boolean strongCompany) {
@@ -101,7 +83,7 @@ public class SaveTradeCompany {
     }
 
     public boolean promoteInvestments() {
-        return BooleanUtils.toBoolean(this.item.getVarAsBool("promote_investments"));
+        return this.item.getVarAsBool("promote_investments").map(BooleanUtils::toBoolean).orElse(false);
     }
 
     public void setPromoteInvestments(boolean promoteInvestments) {
@@ -122,7 +104,7 @@ public class SaveTradeCompany {
         SaveTradeCompany company = new SaveTradeCompany(toItem, save);
         company.setName(name);
         company.addProvince(province);
-        company.setOwner(province.getOwner());
+        province.getOwner().ifPresent(company::setOwner);
         company.setStrongCompany(false);
         company.setPromoteInvestments(false);
         company.setTaxIncome(0d);
