@@ -6,11 +6,13 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Government;
 import fr.osallek.eu4parser.model.game.GovernmentReform;
-import java.util.ArrayList;
+
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SaveGovernment {
@@ -27,12 +29,12 @@ public class SaveGovernment {
         this.country = country;
     }
 
-    public String getTypeName() {
-        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("government"));
+    public Optional<String> getTypeName() {
+        return this.item.getVarAsString("government").map(ClausewitzUtils::removeQuotes);
     }
 
-    public Government getType() {
-        return this.game.getGovernment(ClausewitzUtils.removeQuotes(this.item.getVarAsString("government")));
+    public Optional<Government> getType() {
+        return getTypeName().map(this.game::getGovernment);
     }
 
     public void setType(Government type) {
@@ -40,144 +42,83 @@ public class SaveGovernment {
     }
 
     public List<GovernmentReform> getReforms() {
-        ClausewitzItem reformStack = this.item.getChild("reform_stack");
-
-        if (reformStack != null) {
-            ClausewitzList list = reformStack.getList("reforms");
-
-            if (list != null) {
-                return list.getValues()
-                           .stream()
-                           .map(ClausewitzUtils::removeQuotes)
-                           .map(this.game::getGovernmentReform)
-                           .filter(Objects::nonNull)
-                           .toList();
-            }
-        }
-
-        return new ArrayList<>();
+        return this.item.getChild("reform_stack")
+                        .flatMap(reformStack -> reformStack.getList("reforms"))
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(this.game::getGovernmentReform)
+                        .filter(Objects::nonNull)
+                        .toList();
     }
 
     public List<String> getReformsNames() {
-        ClausewitzItem reformStack = this.item.getChild("reform_stack");
-
-        if (reformStack != null) {
-            ClausewitzList list = reformStack.getList("reforms");
-
-            if (list != null) {
-                return list.getValues()
-                           .stream()
-                           .map(ClausewitzUtils::removeQuotes)
-                           .toList();
-            }
-        }
-
-        return new ArrayList<>();
+        return this.item.getChild("reform_stack")
+                        .flatMap(reformStack -> reformStack.getList("reforms"))
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(ClausewitzUtils::removeQuotes)
+                        .toList();
     }
 
     public void setReforms(List<GovernmentReform> reforms) {
-        ClausewitzItem reformStack = this.item.getChild("reform_stack");
-
-        if (reformStack == null) {
-            reformStack = this.item.addChild("reform_stack");
-        }
-
-        ClausewitzList list = reformStack.getList("reforms");
-
-        if (list == null) {
-            reformStack.addList("reforms", reforms.stream().map(reform -> ClausewitzUtils.addQuotes(reform.getName())).toArray(String[]::new));
-        } else {
+        ClausewitzItem reformStack = this.item.getChild("reform_stack").orElse(this.item.addChild("reform_stack"));
+        reformStack.getList("reforms").ifPresentOrElse(list -> {
             list.clear();
             list.addAll(reforms.stream().map(reform -> ClausewitzUtils.addQuotes(reform.getName())).toArray(String[]::new));
-        }
+        }, () -> reformStack.addList("reforms", reforms.stream().map(reform -> ClausewitzUtils.addQuotes(reform.getName())).toArray(String[]::new)));
     }
 
     public Map<String, List<GovernmentReform>> getAvailableReforms() {
-        return getType().getReformLevels()
-                        .entrySet()
+        return getType().map(Government::getReformLevels)
+                        .map(Map::entrySet)
                         .stream()
+                        .flatMap(Collection::stream)
                         .collect(Collectors.toMap(Map.Entry::getKey,
                                                   entry -> entry.getValue()
                                                                 .stream()
-                                                                .filter(governmentReform -> governmentReform.getPotential() == null
-                                                                                            || governmentReform.getPotential().apply(country, country))
+                                                                .filter(governmentReform -> governmentReform.getPotential()
+                                                                                                            .filter(c -> c.apply(this.country, this.country))
+                                                                                                            .isPresent())
                                                                 .toList(),
                                                   (governmentReforms, governmentReforms2) -> governmentReforms,
                                                   LinkedHashMap::new));
     }
 
     public List<String> getHistory() {
-        ClausewitzItem reformStack = this.item.getChild("reform_stack");
-
-        if (reformStack != null) {
-            ClausewitzList list = reformStack.getList("history");
-
-            if (list != null) {
-                return list.getValues().stream().map(ClausewitzUtils::removeQuotes).toList();
-            }
-        }
-
-        return new ArrayList<>();
+        return this.item.getChild("reform_stack")
+                        .flatMap(reformStack -> reformStack.getList("history"))
+                        .map(ClausewitzList::getValues)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(ClausewitzUtils::removeQuotes)
+                        .toList();
     }
 
     public void addReform(GovernmentReform reform) {
-        ClausewitzItem reformStack = this.item.getChild("reform_stack");
+        ClausewitzItem reformStack = this.item.getChild("reform_stack").orElse(this.item.addChild("reform_stack"));
+        reformStack.getList("reforms").ifPresentOrElse(reforms -> reforms.add(ClausewitzUtils.addQuotes(reform.getName())),
+                                                       () -> reformStack.addList("reforms", ClausewitzUtils.addQuotes(reform.getName())));
 
-        if (reformStack == null) {
-            reformStack = this.item.addChild("reform_stack");
-        }
-
-        ClausewitzList reforms = reformStack.getList("reforms");
-
-        if (reforms != null) {
-            reforms.add(ClausewitzUtils.addQuotes(reform.getName()));
-        } else {
-            reformStack.addList("reforms", ClausewitzUtils.addQuotes(reform.getName()));
-        }
-
-        ClausewitzList history = reformStack.getList("history");
-
-        if (history != null) {
-            history.add(ClausewitzUtils.addQuotes(reform.getName()));
-        } else {
-            reformStack.addList("history", ClausewitzUtils.addQuotes(reform.getName()));
-        }
+        reformStack.getList("history").ifPresentOrElse(history -> history.add(ClausewitzUtils.addQuotes(reform.getName())),
+                                                       () -> reformStack.addList("history", ClausewitzUtils.addQuotes(reform.getName())));
     }
 
     public void changeReform(GovernmentReform previous, GovernmentReform newOne) {
-        ClausewitzItem reformStack = this.item.getChild("reform_stack");
-
-        if (reformStack != null) {
-            ClausewitzList reforms = reformStack.getList("reforms");
-
-            if (reforms != null) {
-                reforms.change(ClausewitzUtils.addQuotes(previous.getName()), ClausewitzUtils.addQuotes(newOne.getName()));
-            }
-
-            ClausewitzList history = reformStack.getList("history");
-
-            if (history != null) {
-                history.change(ClausewitzUtils.addQuotes(previous.getName()), ClausewitzUtils.addQuotes(newOne.getName()));
-            }
-        }
+        this.item.getChild("reform_stack").ifPresent(reformStack -> {
+            reformStack.getList("reforms")
+                       .ifPresent(reforms -> reforms.change(ClausewitzUtils.addQuotes(previous.getName()), ClausewitzUtils.addQuotes(newOne.getName())));
+            reformStack.getList("history")
+                       .ifPresent(history -> history.change(ClausewitzUtils.addQuotes(previous.getName()), ClausewitzUtils.addQuotes(newOne.getName())));
+        });
     }
 
     public void removeReform(GovernmentReform reform) {
-        ClausewitzItem reformStack = this.item.getChild("reform_stack");
-
-        if (reformStack != null) {
-            ClausewitzList reforms = reformStack.getList("reforms");
-
-            if (reforms != null) {
-                reforms.removeLast(ClausewitzUtils.addQuotes(reform.getName()));
-            }
-
-            ClausewitzList history = reformStack.getList("history");
-
-            if (history != null) {
-                history.removeLast(ClausewitzUtils.addQuotes(reform.getName()));
-            }
-        }
+        this.item.getChild("reform_stack").ifPresent(reformStack -> {
+            reformStack.getList("reforms").ifPresent(reforms -> reforms.removeLast(ClausewitzUtils.addQuotes(reform.getName())));
+            reformStack.getList("history").ifPresent(history -> history.removeLast(ClausewitzUtils.addQuotes(reform.getName())));
+        });
     }
 
     public boolean hasMechanic(String mechanic) {

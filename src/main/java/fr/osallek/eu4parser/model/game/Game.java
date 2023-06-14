@@ -2109,7 +2109,7 @@ public class Game {
     }
 
     public GovernmentReform getGovernmentReform(String name) {
-        return this.governmentReforms.get(name);
+        return this.governmentReforms.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public Collection<Unit> getUnits() {
