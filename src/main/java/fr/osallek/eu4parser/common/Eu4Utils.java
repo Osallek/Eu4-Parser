@@ -305,7 +305,7 @@ public final class Eu4Utils {
             if (CollectionUtils.isNotEmpty(building.getManufactoryFor())) {
                 manufactories.add(building);
                 iterator.remove();
-            } else if (ClausewitzUtils.isBlank(building.getMakeObsolete())) {
+            } else if (building.getMakeObsolete().filter(ClausewitzUtils::isNotBlank).isEmpty()) {
                 List<Building> buildingList = new ArrayList<>();
                 buildingList.add(building);
                 tree.add(buildingList);
@@ -319,7 +319,8 @@ public final class Eu4Utils {
             while (iterator.hasNext()) {
                 Building building = iterator.next();
                 for (List<Building> buildingList : tree) {
-                    if (buildingList.get(buildingList.size() - 1).getName().equals(building.getMakeObsolete())) {
+                    if (building.getMakeObsolete().isPresent() &&
+                        buildingList.get(buildingList.size() - 1).getName().equals(building.getMakeObsolete().get())) {
                         buildingList.add(building);
                         iterator.remove();
                     }

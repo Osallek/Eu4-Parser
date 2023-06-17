@@ -2101,7 +2101,7 @@ public class Game {
     }
 
     public GovernmentName getGovernmentName(String name) {
-        return this.governmentNames.get(name);
+        return this.governmentNames.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public Collection<GovernmentReform> getGovernmentReforms() {
@@ -2149,7 +2149,7 @@ public class Game {
     }
 
     public TechGroup getTechGroup(String name) {
-        return this.techGroups.get(name);
+        return this.techGroups.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Advisor> getAdvisors() {
@@ -2217,7 +2217,7 @@ public class Game {
     }
 
     public FetishistCult getFetishistCult(String name) {
-        return this.fetishistCults.get(name);
+        return this.fetishistCults.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<ChurchAspect> getChurchAspects() {
@@ -2265,7 +2265,7 @@ public class Game {
     }
 
     public Estate getEstate(String name) {
-        return this.estates.get(name);
+        return this.estates.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public Map<Power, List<Technology>> getTechnologies() {
@@ -2431,7 +2431,7 @@ public class Game {
     }
 
     public NavalDoctrine getNavalDoctrine(String name) {
-        return this.navalDoctrines.get(name);
+        return this.navalDoctrines.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<ParliamentIssue> getParliamentIssues() {
@@ -2455,7 +2455,7 @@ public class Game {
     }
 
     public PersonalDeity getPersonalDeity(String name) {
-        return this.personalDeities.get(name);
+        return this.personalDeities.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<ReligiousReforms> getReligiousReforms() {
