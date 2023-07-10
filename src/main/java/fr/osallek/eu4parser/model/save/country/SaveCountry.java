@@ -3501,6 +3501,10 @@ public class SaveCountry {
     }
 
     public void removeAeFor(String tag) {
+        removeOpinionFor(tag, "\"aggressive_expansion\"");
+    }
+
+    public void removeOpinionFor(String tag, String modifier) {
         tag = ClausewitzUtils.removeQuotes(tag).toUpperCase();
         ClausewitzItem child = this.item.getChild("active_relations");
 
@@ -3508,7 +3512,7 @@ public class SaveCountry {
             child = child.getChild(tag);
 
             if (child != null && child.getNbChildren() > 0) {
-                child.removeChildIf(item -> "opinion".equals(item.getName()) && item.hasVar("modifier", "\"aggressive_expansion\""));
+                child.removeChildIf(item -> "opinion".equals(item.getName()) && item.hasVar("modifier", modifier));
             }
         }
     }
