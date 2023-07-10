@@ -291,11 +291,11 @@ public class SaveCountry {
         return isCustom() || isColony() || isClientState() || isTradeCity();
     }
 
-    public BufferedImage getCustomFlagImage() throws IOException {
+    public Optional<BufferedImage> getCustomFlagImage() throws IOException {
         if (isCustom()) {
             //Todo
-            return null;
-        } else if (isColony() && getColonialParent() != null) {
+            return Optional.empty();
+        } else if (isColony() && getColonialParent().isPresent()) {
             Optional<ColonialRegion> region = this.save.getGame()
                                                        .getColonialRegions()
                                                        .stream()
@@ -305,32 +305,34 @@ public class SaveCountry {
                                                        .findFirst();
 
             if (region.isEmpty() || region.get().getColor().isEmpty()) {
-                return null;
+                return Optional.empty();
             }
 
-            BufferedImage image = ImageIO.read(getColonialParent().getFlagFile());
+            BufferedImage image = ImageIO.read(getColonialParent().get().getFlagFile());
             Graphics2D g = image.createGraphics();
             g.setColor(region.get().getColor().get().toColor());
             g.fillRect(image.getWidth() / 2, 0, image.getWidth() / 2, image.getHeight());
             g.dispose();
 
-            return image;
+            return Optional.of(image);
         } else if (isClientState()) {
             //Todo
-            return null;
+            return Optional.empty();
         } else if (isTradeCity()) {
             //Todo
-            return null;
+            return Optional.empty();
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 
     public void writeImageTo(Path dest) throws IOException {
-        FileUtils.forceMkdirParent(dest.toFile());
-        ImageIO.write(getCustomFlagImage(), "png", dest.toFile());
-        Eu4Utils.optimizePng(dest, dest);
-        this.writenTo = dest;
+        if (getCustomFlagImage().isPresent()) {
+            FileUtils.forceMkdirParent(dest.toFile());
+            ImageIO.write(getCustomFlagImage().get(), "png", dest.toFile());
+            Eu4Utils.optimizePng(dest, dest);
+            this.writenTo = dest;
+        }
     }
 
     public void writeImageTo(Path dest, BufferedImage image) throws IOException {
@@ -1157,8 +1159,10 @@ public class SaveCountry {
     }
 
     public void removeRival(SaveCountry rival) {
-        this.item.removeChildIf(child -> "rival".equalsIgnoreCase(child.getName()) && ClausewitzUtils.addQuotes(rival.getTag())
-                                                                                                     .equalsIgnoreCase(child.getVarAsString("country")));
+        this.item.removeChildIf(child -> "rival".equalsIgnoreCase(child.getName()) &&
+                                         child.getVarAsString("country")
+                                              .filter(s -> ClausewitzUtils.addQuotes(rival.getTag()).equalsIgnoreCase(s))
+                                              .isPresent());
         refreshAttributes();
     }
 
