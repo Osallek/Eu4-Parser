@@ -182,7 +182,7 @@ public class SavePapacy {
         if (bull == null) {
             return null;
         } else {
-            return this.save.getGame().getGoldenBull(ClausewitzUtils.removeQuotes(bull));
+            return this.save.getGame().getGoldenBull(bull);
         }
     }
 

@@ -5,6 +5,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;

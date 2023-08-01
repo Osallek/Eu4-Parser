@@ -2,7 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.effects.Effects;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -129,12 +129,12 @@ public class GreatProject {
         return Optional.ofNullable(this.item.getChild("build_trigger")).map(ConditionAnd::new).orElse(null);
     }
 
-    public Effects getOnBuilt() {
-        return Optional.ofNullable(this.item.getChild("on_built")).map(i -> new Effects(i, this.game)).orElse(null);
+    public Modifiers getOnBuilt() {
+        return Optional.ofNullable(this.item.getChild("on_built")).map(Modifiers::new).orElse(null);
     }
 
-    public Effects getOnDestroy() {
-        return Optional.ofNullable(this.item.getChild("on_destroy")).map(i -> new Effects(i, this.game)).orElse(null);
+    public Modifiers getOnDestroy() {
+        return Optional.ofNullable(this.item.getChild("on_destroy")).map(Modifiers::new).orElse(null);
     }
 
     public File getImageFile() {

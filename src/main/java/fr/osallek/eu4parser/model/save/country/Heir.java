@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.Country;
 
 import java.time.LocalDate;
 

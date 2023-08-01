@@ -6,6 +6,7 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Government;
 import fr.osallek.eu4parser.model.game.GovernmentReform;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,7 +49,6 @@ public class SaveGovernment {
             if (list != null) {
                 return list.getValues()
                            .stream()
-                           .map(ClausewitzUtils::removeQuotes)
                            .map(this.game::getGovernmentReform)
                            .filter(Objects::nonNull)
                            .toList();

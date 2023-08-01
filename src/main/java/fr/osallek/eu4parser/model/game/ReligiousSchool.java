@@ -2,7 +2,7 @@ package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.effects.Effects;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,8 +38,8 @@ public class ReligiousSchool {
         return Optional.ofNullable(this.item.getChild("can_invite_scholar")).map(ConditionAnd::new).orElse(null);
     }
 
-    public Effects getOnInviteScholar() {
-        return Optional.ofNullable(this.item.getChild("on_invite_scholar")).map(i -> new Effects(i, this.game)).orElse(null);
+    public Modifiers getOnInviteScholar() {
+        return Optional.ofNullable(this.item.getChild("on_invite_scholar")).map(Modifiers::new).orElse(null);
     }
 
     public String getInviteScholarModifierDisplay() {

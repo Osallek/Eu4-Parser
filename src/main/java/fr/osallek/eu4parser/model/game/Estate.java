@@ -5,6 +5,11 @@ import fr.osallek.clausewitzparser.model.ClausewitzList;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.common.ImageReader;
 import fr.osallek.eu4parser.model.Color;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,9 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.imageio.ImageIO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 
 public class Estate {
 

@@ -1,7 +1,6 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
-import fr.osallek.eu4parser.model.game.effects.Effects;
 
 import java.util.Optional;
 
@@ -65,7 +64,7 @@ public class GreatProjectTier {
         return new Modifiers(this.item.getChild("country_modifiers"));
     }
 
-    public Effects getOnUpgraded() {
-        return Optional.ofNullable(this.item.getChild("on_upgraded")).map(i -> new Effects(i, this.game)).orElse(null);
+    public Modifiers getOnUpgraded() {
+        return Optional.ofNullable(this.item.getChild("on_upgraded")).map(Modifiers::new).orElse(null);
     }
 }

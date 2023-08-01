@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public record Edict(ClausewitzItem item, Game game) {
 
     public StateEdict getWhich() {
-        return this.game.getStateEdict(ClausewitzUtils.removeQuotes(this.item.getVarAsString("which")));
+        return this.game.getStateEdict(this.item.getVarAsString("which"));
     }
 
     public void setWhich(StateEdict which) {

@@ -3,7 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
-import fr.osallek.eu4parser.model.game.effects.Effects;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
@@ -45,8 +45,8 @@ public class AgeAbility {
         return new Modifiers(this.item.getChild("modifier"));
     }
 
-    public Effects getEffects() {
-        return Optional.ofNullable(this.item.getChild("effect")).map(i -> new Effects(i, this.game)).orElse(null);
+    public Modifiers getEffects() {
+        return Optional.ofNullable(this.item.getChild("effect")).map(Modifiers::new).orElse(null);
     }
 
     public List<String> getRules() {

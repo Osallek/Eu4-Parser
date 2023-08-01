@@ -4,6 +4,11 @@ import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Power;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.BooleanUtils;
+
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,11 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.BooleanUtils;
-
-import javax.imageio.ImageIO;
 
 public class IdeaGroup {
 

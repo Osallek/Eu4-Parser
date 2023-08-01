@@ -20,11 +20,11 @@ public class Color {
     }
 
     public int getRed() {
-        return Math.max(0, Math.min(255, isDouble ? (int) (list.getAsDouble(0) * 255) : this.list.getAsInt(0)));
+        return Math.max(0, Math.min(255, this.isDouble ? (int) (this.list.getAsDouble(0) * 255) : this.list.getAsInt(0)));
     }
 
     public void setRed(int red) {
-        if (isDouble) {
+        if (this.isDouble) {
             this.list.set(0, (double) red / 255);
         } else {
             this.list.set(0, red);
@@ -32,11 +32,11 @@ public class Color {
     }
 
     public int getGreen() {
-        return Math.max(0, Math.min(255, isDouble ? (int) (list.getAsDouble(1) * 255) : this.list.getAsInt(1)));
+        return Math.max(0, Math.min(255, this.isDouble ? (int) (this.list.getAsDouble(1) * 255) : this.list.getAsInt(1)));
     }
 
     public void setGreen(int green) {
-        if (isDouble) {
+        if (this.isDouble) {
             this.list.set(1, (double) green / 255);
         } else {
             this.list.set(1, green);
@@ -44,11 +44,11 @@ public class Color {
     }
 
     public int getBlue() {
-        return Math.max(0, Math.min(255, isDouble ? (int) (list.getAsDouble(2) * 255) : this.list.getAsInt(2)));
+        return Math.max(0, Math.min(255, this.isDouble ? (int) (this.list.getAsDouble(2) * 255) : this.list.getAsInt(2)));
     }
 
     public void setBlue(int blue) {
-        if (isDouble) {
+        if (this.isDouble) {
             this.list.set(2, (double) blue / 255);
         } else {
             this.list.set(2, blue);

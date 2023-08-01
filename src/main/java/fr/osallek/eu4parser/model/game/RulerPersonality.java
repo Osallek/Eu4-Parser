@@ -1,9 +1,11 @@
 package fr.osallek.eu4parser.model.game;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import fr.osallek.eu4parser.model.save.country.Heir;
 import fr.osallek.eu4parser.model.save.country.Monarch;
 import fr.osallek.eu4parser.model.save.country.Queen;
+
 import java.io.File;
 import java.util.Objects;
 

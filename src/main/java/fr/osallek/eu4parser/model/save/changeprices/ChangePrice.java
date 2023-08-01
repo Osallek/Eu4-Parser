@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.save.changeprices;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+
 import java.time.LocalDate;
 import java.util.Objects;
 

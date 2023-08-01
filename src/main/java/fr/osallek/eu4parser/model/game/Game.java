@@ -17,6 +17,7 @@ import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.ModType;
 import fr.osallek.eu4parser.model.Power;
+import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.Save;
@@ -1786,7 +1787,7 @@ public class Game {
     }
 
     public TradeNode getTradeNode(String name) {
-        return this.tradeNodes.get(name);
+        return this.tradeNodes.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Building> getBuildings() {
@@ -1818,7 +1819,7 @@ public class Game {
     }
 
     public GoldenBull getGoldenBull(String name) {
-        return this.goldenBulls.get(name);
+        return this.goldenBulls.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Event> getEvents() {
@@ -2109,7 +2110,7 @@ public class Game {
     }
 
     public GovernmentReform getGovernmentReform(String name) {
-        return this.governmentReforms.get(name);
+        return this.governmentReforms.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public Collection<Unit> getUnits() {
@@ -2117,7 +2118,7 @@ public class Game {
     }
 
     public Unit getUnit(String name) {
-        return this.units.get(name);
+        return this.units.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public Collection<Area> getAreas() {
@@ -2201,7 +2202,7 @@ public class Game {
     }
 
     public SubjectType getSubjectType(String name) {
-        return this.subjectTypes.get(name);
+        return this.subjectTypes.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<SubjectTypeUpgrade> getSubjectTypeUpgrades() {
@@ -2397,7 +2398,7 @@ public class Game {
     }
 
     public HolyOrder getHolyOrder(String name) {
-        return this.holyOrders.get(name);
+        return this.holyOrders.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<Isolationism> getIsolationisms() {
@@ -2475,7 +2476,7 @@ public class Game {
     }
 
     public StateEdict getStateEdict(String name) {
-        return this.stateEdicts.get(name);
+        return this.stateEdicts.get(ClausewitzUtils.removeQuotes(name));
     }
 
     public List<TradePolicy> getTradePolicies() {

@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.save.changeprices;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.TradeGood;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;

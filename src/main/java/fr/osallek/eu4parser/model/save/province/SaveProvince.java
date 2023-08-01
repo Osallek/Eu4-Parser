@@ -369,7 +369,7 @@ public class SaveProvince extends Province {
     }
 
     public TradeNode getTradeNode() {
-        return this.save.getGame().getTradeNode(ClausewitzUtils.removeQuotes(getTrade()));
+        return this.save.getGame().getTradeNode(getTrade());
     }
 
     public void setTradeNode(TradeNode tradeNode) {

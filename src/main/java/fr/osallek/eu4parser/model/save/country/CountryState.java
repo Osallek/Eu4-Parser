@@ -70,7 +70,7 @@ public class CountryState {
     }
 
     public HolyOrder getHolyOrder() {
-        return this.save.getGame().getHolyOrder(ClausewitzUtils.removeQuotes(this.item.getVarAsString("holy_order")));
+        return this.save.getGame().getHolyOrder(this.item.getVarAsString("holy_order"));
     }
 
     public void setHolyOrder(HolyOrder holyOrder) {

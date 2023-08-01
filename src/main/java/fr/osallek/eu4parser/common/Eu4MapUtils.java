@@ -1,8 +1,6 @@
 package fr.osallek.eu4parser.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.pngtastic.core.PngImage;
-import com.googlecode.pngtastic.core.PngOptimizer;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Province;
 import org.apache.batik.dom.GenericDOMImplementation;
@@ -30,13 +28,9 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;

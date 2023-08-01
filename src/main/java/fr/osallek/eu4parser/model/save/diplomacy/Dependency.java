@@ -21,7 +21,7 @@ public class Dependency extends DatableRelation {
     }
 
     public SubjectType getSubjectType() {
-        return this.save.getGame().getSubjectType(ClausewitzUtils.removeQuotes(this.item.getVarAsString("subject_type")));
+        return this.save.getGame().getSubjectType(this.item.getVarAsString("subject_type"));
     }
 
     public void setSubjectType(SubjectType subjectType) {

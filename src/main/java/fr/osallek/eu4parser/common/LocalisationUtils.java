@@ -8,6 +8,7 @@ import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.CountryHistoryItemI;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.CustomizableLocalization;
+import fr.osallek.eu4parser.model.game.CustomizableLocalizationText;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.GovernmentName;
 import fr.osallek.eu4parser.model.game.HreEmperor;
@@ -667,7 +668,8 @@ public final class LocalisationUtils {
                                return Optional.empty();
                            }
                        })
-                       .map(t -> game.getComputedLocalisation(root, t.getLocalisationKey(), language));
+                       .map(CustomizableLocalizationText::getLocalisationKey)
+                       .map(key -> game.getComputedLocalisation(root, key, language));
     }
 
     public static Optional<SaveProvince> getCapital(SaveCountry country) {
