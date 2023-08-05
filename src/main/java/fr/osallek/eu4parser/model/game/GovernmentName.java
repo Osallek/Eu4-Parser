@@ -1,7 +1,10 @@
 package fr.osallek.eu4parser.model.game;
 
+import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzVariable;
+import fr.osallek.eu4parser.common.Eu4Utils;
+import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 
 import java.util.Map;
@@ -30,12 +33,9 @@ public class GovernmentName {
 
         if (child != null) {
             SortedMap<Integer, String> ranks = new TreeMap<>();
-            ClausewitzVariable variable;
 
-            for (int i = 1; i <= child.getNbVariables(); i++) {
-                if ((variable = child.getVar(String.valueOf(i))) != null) {
-                    ranks.putIfAbsent(i, variable.getValue());
-                }
+            for (ClausewitzVariable variable : child.getVariables()) {
+                NumbersUtils.parseInt(variable.getName()).ifPresent(i -> ranks.putIfAbsent(i, variable.getValue()));
             }
 
             return ranks;
