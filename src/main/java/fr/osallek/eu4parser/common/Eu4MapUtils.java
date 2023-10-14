@@ -1,25 +1,11 @@
 package fr.osallek.eu4parser.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Province;
-import org.apache.batik.dom.GenericDOMImplementation;
-import org.apache.batik.svggen.SVGGeneratorContext;
-import org.apache.batik.svggen.SVGGraphics2D;
-import org.apache.batik.svggen.SVGPolygon;
-import org.apache.batik.util.CSSConstants;
-import org.apache.batik.util.SVGConstants;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.geojson.Feature;
-import org.geojson.FeatureCollection;
-import org.geojson.LngLatAlt;
-import org.geojson.MultiPolygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.imageio.ImageIO;
 import java.awt.BasicStroke;
@@ -29,7 +15,6 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,57 +79,6 @@ public class Eu4MapUtils {
             return new Color(34, 34, 34);
         } else {
             return EMPTY_COLOR;
-        }
-    }
-
-    public static void generateMapSVG(Game game, File file) throws IOException {
-        Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
-
-        DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-        Document document = domImpl.createDocument("http://www.w3.org/2000/svg", "svg", null);
-        SVGGeneratorContext generatorContext = SVGGeneratorContext.createDefault(document);
-        generatorContext.setComment(null);
-        SVGGraphics2D svgGenerator = new SVGGraphics2D(generatorContext, false);
-        SVGPolygon svgPath = new SVGPolygon(generatorContext);
-        Element rootElement = document.getDocumentElement();
-        rootElement.setAttributeNS(null, SVGConstants.SVG_WIDTH_ATTRIBUTE, String.valueOf(game.getProvinceImageWidth()));
-        rootElement.setAttributeNS(null, SVGConstants.SVG_HEIGHT_ATTRIBUTE, String.valueOf(game.getProvinceImageHeight()));
-        rootElement.setAttributeNS(null, SVGConstants.SVG_VIEW_BOX_ATTRIBUTE, "0 0 " + game.getProvinceImageWidth() + " " + game.getProvinceImageHeight());
-        rootElement.setAttributeNS(null, SVGConstants.SVG_FILL_ATTRIBUTE, "#949295");
-        rootElement.setAttributeNS(null, SVGConstants.SVG_STROKE_WIDTH_ATTRIBUTE, "1");
-        rootElement.setAttributeNS(null, SVGConstants.SVG_FILL_OPACITY_ATTRIBUTE, "1");
-        rootElement.setAttributeNS(null, SVGConstants.SVG_STROKE_ATTRIBUTE, "black");
-        rootElement.setAttributeNS(null, SVGConstants.SVG_STROKE_LINECAP_ATTRIBUTE, SVGConstants.SVG_SQUARE_VALUE);
-
-        Element rectBackground = document.createElementNS(SVGConstants.SVG_NAMESPACE_URI, SVGConstants.SVG_RECT_TAG);
-        rectBackground.setAttributeNS(null, SVGConstants.SVG_WIDTH_ATTRIBUTE, String.valueOf(game.getProvinceImageWidth()));
-        rectBackground.setAttributeNS(null, SVGConstants.SVG_HEIGHT_ATTRIBUTE, String.valueOf(game.getProvinceImageHeight()));
-        rectBackground.setAttributeNS(null, SVGConstants.SVG_FILL_ATTRIBUTE, "black");
-        rectBackground.setAttributeNS(null, SVGConstants.SVG_X_ATTRIBUTE, "0");
-        rectBackground.setAttributeNS(null, SVGConstants.SVG_Y_ATTRIBUTE, "0");
-
-        rootElement.appendChild(rectBackground);
-
-        borders.forEach((province, value) -> value.forEach((polygon, contained) -> {
-            Element element = svgPath.toSVG(polygon);
-            element.setAttributeNS(null, "data-pid", String.valueOf(province.getId()));
-
-            //Check if the province in fully inside another to add double sized borders
-            if (BooleanUtils.isTrue(contained)) {
-                element.setAttributeNS(null, SVGConstants.SVG_STROKE_WIDTH_ATTRIBUTE, "1.5");
-            }
-
-            if (province.isOcean() || province.isLake()) {
-                element.setAttributeNS(null, CSSConstants.CSS_FILL_PROPERTY, "#446ba3");
-            } else if (province.isImpassable()) {
-                element.setAttributeNS(null, CSSConstants.CSS_FILL_PROPERTY, "#5e5e5e");
-            }
-
-            rootElement.appendChild(element);
-        }));
-
-        try (FileWriter writer = new FileWriter(file)) {
-            svgGenerator.stream(rootElement, writer);
         }
     }
 
@@ -224,128 +158,6 @@ public class Eu4MapUtils {
                                                                                                               .anyMatch(p -> p.contains(polygon.getBounds())
                                                                                                                              || isInsidePolygon(p, polygon)))),
                                                 (a, b) -> a, LinkedHashMap::new));
-    }
-
-    public static void generateGeoJson(Game game, File file, ObjectMapper objectMapper) throws IOException {
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, generateGeoJson(game));
-    }
-
-    public static FeatureCollection generateGeoJson(Game game) {
-        Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
-
-        FeatureCollection featureCollection = new FeatureCollection();
-
-        borders.forEach((province, polygons) -> {
-            MultiPolygon multiPolygon = new MultiPolygon();
-            polygons.keySet().forEach(polygon -> {
-                List<LngLatAlt> list = new ArrayList<>();
-                for (int i = 0; i < polygon.npoints; i++) {
-                    Direction previousDirection = getDirection(polygon, i - 1);
-                    Direction nextDirection = getDirection(polygon, i);
-
-                    switch (nextDirection) {
-                        case DOWN:
-                            switch (previousDirection) {
-                                case UP:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case LEFT:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case RIGHT:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-                            }
-                            break;
-
-                        case LEFT:
-                            switch (previousDirection) {
-                                case RIGHT:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case DOWN:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case UP:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-                            }
-                            break;
-
-                        case UP:
-                            switch (previousDirection) {
-                                case DOWN:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case RIGHT:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case LEFT:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-                            }
-                            break;
-
-                        case RIGHT:
-                            switch (previousDirection) {
-                                case LEFT:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -((polygon.ypoints[i] + 1) * 140d / game.getProvinceImageHeight() - 70)));
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case UP:
-                                    list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-
-                                case DOWN:
-                                    list.add(new LngLatAlt((polygon.xpoints[i] + 1) * 360d / game.getProvinceImageWidth() - 180,
-                                                           -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                                    break;
-                            }
-                            break;
-
-                        default:
-                            list.add(new LngLatAlt(polygon.xpoints[i] * 360d / game.getProvinceImageWidth() - 180,
-                                                   -(polygon.ypoints[i] * 140d / game.getProvinceImageHeight() - 70)));
-                            break;
-                    }
-                }
-
-                multiPolygon.add(new org.geojson.Polygon(list));
-            });
-
-            Feature feature = new Feature();
-            feature.setId(String.valueOf(province.getId()));
-            feature.setGeometry(multiPolygon);
-
-            featureCollection.add(feature);
-        });
-
-        return featureCollection;
     }
 
     private static boolean sameColor(int rgb, int[] colors, int x, int y, int width, int height) {
@@ -625,39 +437,5 @@ public class Eu4MapUtils {
             }
         }
         return result;
-    }
-
-    private static Direction getDirection(Polygon polygon, int i) {
-        if (polygon.npoints <= 1) {
-            return Direction.SAME;
-        }
-
-        if (i < 0) {
-            i = polygon.npoints + i;
-        }
-
-        int j = polygon.npoints > (i + 1) ? i + 1 : 0;
-
-        if (polygon.xpoints[i] == polygon.xpoints[j] && polygon.ypoints[i] == polygon.ypoints[j]) {
-            return Direction.SAME;
-        }
-
-        if (polygon.xpoints[i] < polygon.xpoints[j] && polygon.ypoints[i] == polygon.ypoints[j]) {
-            return Direction.RIGHT;
-        }
-
-        if (polygon.xpoints[i] == polygon.xpoints[j] && polygon.ypoints[i] < polygon.ypoints[j]) {
-            return Direction.DOWN;
-        }
-
-        if (polygon.xpoints[i] > polygon.xpoints[j] && polygon.ypoints[i] == polygon.ypoints[j]) {
-            return Direction.LEFT;
-        }
-
-        if (polygon.xpoints[i] == polygon.xpoints[j] && polygon.ypoints[i] > polygon.ypoints[j]) {
-            return Direction.UP;
-        }
-
-        return Direction.SAME;
     }
 }
