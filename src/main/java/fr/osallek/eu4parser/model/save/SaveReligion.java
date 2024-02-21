@@ -15,6 +15,7 @@ import fr.osallek.eu4parser.model.save.religion.ReformationCenter;
 import fr.osallek.eu4parser.model.save.religion.SavePapacy;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SaveReligion {
@@ -27,18 +28,11 @@ public class SaveReligion {
 
     private final Religion gameReligion;
 
-    private List<MuslimRelation> relations;
-
-    private SavePapacy papacy;
-
-    private List<ReformationCenter> reformationCenters;
-
     public SaveReligion(ClausewitzItem religionsItem, ClausewitzItem religionInstanceDataItem, Save save) {
         this.religionsItem = religionsItem;
         this.religionInstanceDataItem = religionInstanceDataItem;
         this.save = save;
         this.gameReligion = this.save.getGame().getReligion(getName());
-        refreshAttributes();
     }
 
     public String getName() {
@@ -62,11 +56,11 @@ public class SaveReligion {
     }
 
     public boolean hasPapacy() {
-        return this.papacy != null;
+        return getPapacy() != null;
     }
 
     public boolean hasRelations() {
-        return this.relations != null;
+        return getRelations() != null;
     }
 
     public ReligionGroup getReligionGroup() {
@@ -86,11 +80,7 @@ public class SaveReligion {
     }
 
     public List<SaveCountry> getInLeague() {
-        return this.religionsItem.getVarsAsStrings("league")
-                                 .stream()
-                                 .map(ClausewitzUtils::removeQuotes)
-                                 .map(this.save::getCountry)
-                                 .toList();
+        return this.religionsItem.getVarsAsStrings("league").stream().map(ClausewitzUtils::removeQuotes).map(this.save::getCountry).toList();
     }
 
     public void addToLeague(SaveCountry country) {
@@ -191,7 +181,12 @@ public class SaveReligion {
     }
 
     public List<MuslimRelation> getRelations() {
-        return this.relations;
+        if (this.religionInstanceDataItem == null) {
+            return new ArrayList<>();
+        }
+
+        List<ClausewitzItem> relationsItems = this.religionInstanceDataItem.getChildren("relation");
+        return relationsItems.stream().map(MuslimRelation::new).toList();
     }
 
     public void setRelation(MuslimRelationSchool first, MuslimRelationSchool second, MuslimRelationValue relation) {
@@ -199,26 +194,39 @@ public class SaveReligion {
             return;
         }
 
-        this.relations.stream()
-                      .filter(muslimRelation -> first.equals(muslimRelation.getFirst()) &&
-                                                second.equals(muslimRelation.getSecond()))
+        getRelations().stream()
+                      .filter(muslimRelation -> first.equals(muslimRelation.getFirst()) && second.equals(muslimRelation.getSecond()))
                       .findFirst()
                       .ifPresent(muslimRelation -> muslimRelation.setRelation(relation));
     }
 
     public SavePapacy getPapacy() {
-        return this.papacy;
+        if (this.religionInstanceDataItem == null) {
+            return null;
+        }
+
+        ClausewitzItem papacyItem = this.religionInstanceDataItem.getChild("papacy");
+
+        if (papacyItem != null) {
+            return new SavePapacy(papacyItem, this, this.save);
+        }
+
+        return null;
     }
 
     public List<ReformationCenter> getReformationCenters() {
-        return this.reformationCenters;
+        if (this.religionInstanceDataItem == null) {
+            return new ArrayList<>();
+        }
+
+        List<ClausewitzItem> reformationCentersItems = this.religionInstanceDataItem.getChildren("reformation_center");
+        return reformationCentersItems.stream().map(item -> new ReformationCenter(this.save, item)).toList();
     }
 
     public void addReformationCenter(SaveProvince saveProvince) {
         if (this.religionInstanceDataItem != null) {
             ReformationCenter.addToItem(this.religionInstanceDataItem, saveProvince.getId(), this);
             saveProvince.setCenterOfReligion(true);
-            refreshAttributes();
         }
     }
 
@@ -226,8 +234,9 @@ public class SaveReligion {
         if (this.religionInstanceDataItem != null) {
             Integer index = null;
 
-            for (int i = 0; i < this.reformationCenters.size(); i++) {
-                if (this.reformationCenters.get(i).getProvince().equals(reformationCenter.getProvince())) {
+            List<ReformationCenter> reformationCenters = getReformationCenters();
+            for (int i = 0; i < reformationCenters.size(); i++) {
+                if (reformationCenters.get(i).getProvince().equals(reformationCenter.getProvince())) {
                     index = i;
                     break;
                 }
@@ -236,30 +245,11 @@ public class SaveReligion {
             if (index != null) {
                 this.religionInstanceDataItem.removeChild("reformation_center", index);
                 reformationCenter.getProvince().setCenterOfReligion(false);
-                refreshAttributes();
             }
         }
     }
 
     public Save getSave() {
         return save;
-    }
-
-    private void refreshAttributes() {
-        if (this.religionInstanceDataItem != null) {
-            List<ClausewitzItem> relationsItems = this.religionInstanceDataItem.getChildren("relation");
-            this.relations = relationsItems.stream().map(MuslimRelation::new).toList();
-
-            ClausewitzItem papacyItem = this.religionInstanceDataItem.getChild("papacy");
-
-            if (papacyItem != null) {
-                this.papacy = new SavePapacy(papacyItem, this, this.save);
-            }
-
-            List<ClausewitzItem> reformationCentersItems = this.religionInstanceDataItem.getChildren("reformation_center");
-            this.reformationCenters = reformationCentersItems.stream()
-                                                             .map(item -> new ReformationCenter(this.save, item))
-                                                             .toList();
-        }
     }
 }

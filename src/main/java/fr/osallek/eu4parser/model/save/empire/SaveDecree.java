@@ -13,13 +13,9 @@ public class SaveDecree {
 
     private final Save save;
 
-    private Decree decree;
-
     public SaveDecree(ClausewitzItem saveItem, Save save) {
         this.saveItem = saveItem;
         this.save = save;
-
-        refreshAttributes();
     }
 
     public String getType() {
@@ -32,7 +28,6 @@ public class SaveDecree {
 
     public void setType(String type) {
         this.saveItem.setVariable("decree_name", ClausewitzUtils.addQuotes(type));
-        refreshAttributes();
     }
 
     public void setDate(LocalDate date) {
@@ -51,7 +46,6 @@ public class SaveDecree {
         if (ClausewitzUtils.isBlank(type)) {
             this.saveItem.removeVariable("decree_name");
             this.saveItem.removeVariable("decree_date");
-            refreshAttributes();
             return;
         }
 
@@ -62,7 +56,7 @@ public class SaveDecree {
     }
 
     public Decree getDecree() {
-        return decree;
+        return this.save.getGame().getDecree(ClausewitzUtils.removeQuotes(this.getType()));
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, LocalDate date) {
@@ -72,9 +66,5 @@ public class SaveDecree {
 
         parent.addChild(toItem);
         return toItem;
-    }
-
-    private void refreshAttributes() {
-        this.decree = this.save.getGame().getDecree(ClausewitzUtils.removeQuotes(this.getType()));
     }
 }

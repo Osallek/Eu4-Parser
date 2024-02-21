@@ -16,14 +16,9 @@ public class Leader {
 
     private final SaveCountry country;
 
-    private Id id;
-
-    private Id monarchId;
-
     public Leader(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
-        refreshAttributes();
     }
 
     public SaveCountry getCountry() {
@@ -31,7 +26,9 @@ public class Leader {
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem idChild = this.item.getChild("id");
+
+        return idChild != null ? new Id(idChild) : null;
     }
 
     public String getName() {
@@ -129,7 +126,9 @@ public class Leader {
     }
 
     public Id getMonarchId() {
-        return monarchId;
+        ClausewitzItem monarchIdChild = this.item.getChild("monarch_id"); //10305
+
+        return monarchIdChild != null ? new Id(monarchIdChild) : null;
     }
 
     public int getTotalPips() {
@@ -144,19 +143,6 @@ public class Leader {
         return BigDecimal.valueOf(getFire()).add(BigDecimal.valueOf(getShock())).divide(BigDecimal.valueOf(6), 0, RoundingMode.HALF_EVEN)
                          .add(BigDecimal.valueOf(getManuever()).add(BigDecimal.valueOf(getSiege())).divide(BigDecimal.valueOf(18), 0, RoundingMode.HALF_EVEN))
                          .add(BigDecimal.ONE).min(BigDecimal.valueOf(3)).intValue();
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
-        }
-        ClausewitzItem monarchIdChild = this.item.getChild("monarch_id"); //10305
-
-        if (monarchIdChild != null) {
-            this.monarchId = new Id(monarchIdChild);
-        }
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, Leader leader) {
@@ -190,6 +176,6 @@ public class Leader {
 
     @Override
     public String toString() {
-        return "id=" + id.getId();
+        return "id=" + getId().getId();
     }
 }

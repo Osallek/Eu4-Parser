@@ -23,31 +23,9 @@ public abstract class Empire {
 
     protected final Save save;
 
-    protected List<OldEmperor> oldEmperors;
-
-    protected Map<String, ImperialReform> imperialReforms;
-
     protected Empire(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
-        this.imperialReforms = this.save.getGame()
-                                        .getImperialReforms()
-                                        .stream()
-                                        .filter(imperialReform -> getId().equals(imperialReform.getEmpire()))
-                                        .filter(imperialReform -> imperialReform.dlcRequired() == null
-                                                                  || this.save.getDlcEnabled()
-                                                                              .stream()
-                                                                              .map(ClausewitzUtils::removeQuotes)
-                                                                              .collect(Collectors.toSet())
-                                                                              .containsAll(imperialReform.dlcRequired()))
-                                        .filter(imperialReform -> imperialReform.dlcRequiredNot() == null
-                                                                  || Collections.disjoint(this.save.getDlcEnabled()
-                                                                                                   .stream()
-                                                                                                   .map(ClausewitzUtils::removeQuotes)
-                                                                                                   .collect(Collectors.toSet()),
-                                                                                          imperialReform.dlcRequiredNot()))
-                                        .collect(Collectors.toMap(ImperialReform::getName, Function.identity()));
-        refreshAttributes();
     }
 
     protected abstract String getId();
@@ -110,16 +88,36 @@ public abstract class Empire {
         this.item.setVariable("imperial_influence", imperialInfluence);
     }
 
+    private Map<String, ImperialReform> getImperialReforms() {
+        return this.save.getGame()
+                        .getImperialReforms()
+                        .stream()
+                        .filter(imperialReform -> getId().equals(imperialReform.getEmpire()))
+                        .filter(imperialReform -> imperialReform.dlcRequired() == null
+                                                  || this.save.getDlcEnabled()
+                                                              .stream()
+                                                              .map(ClausewitzUtils::removeQuotes)
+                                                              .collect(Collectors.toSet())
+                                                              .containsAll(imperialReform.dlcRequired()))
+                        .filter(imperialReform -> imperialReform.dlcRequiredNot() == null
+                                                  || Collections.disjoint(this.save.getDlcEnabled()
+                                                                                   .stream()
+                                                                                   .map(ClausewitzUtils::removeQuotes)
+                                                                                   .collect(Collectors.toSet()),
+                                                                          imperialReform.dlcRequiredNot()))
+                        .collect(Collectors.toMap(ImperialReform::getName, Function.identity()));
+    }
+
     public List<ImperialReform> getMainLineReforms() {
-        return this.imperialReforms.values().stream().filter(ImperialReform::isMainLine).sorted().toList();
+        return getImperialReforms().values().stream().filter(ImperialReform::isMainLine).sorted().toList();
     }
 
     public List<ImperialReform> getLeftBranchReforms() {
-        return this.imperialReforms.values().stream().filter(ImperialReform::isLeftBranch).sorted().toList();
+        return getImperialReforms().values().stream().filter(ImperialReform::isLeftBranch).sorted().toList();
     }
 
     public List<ImperialReform> getRightBranchReforms() {
-        return this.imperialReforms.values().stream().filter(ImperialReform::isRightBranch).sorted().toList();
+        return getImperialReforms().values().stream().filter(ImperialReform::isRightBranch).sorted().toList();
     }
 
     public List<ImperialReform> getPassedReforms() {
@@ -130,7 +128,7 @@ public abstract class Empire {
         return this.item.getVarsAsStrings("passed_reform")
                         .stream()
                         .map(ClausewitzUtils::removeQuotes)
-                        .map(this.imperialReforms::get)
+                        .map(getImperialReforms()::get)
                         .sorted()
                         .toList();
     }
@@ -201,22 +199,16 @@ public abstract class Empire {
     }
 
     public List<OldEmperor> getOldEmperors() {
-        return oldEmperors;
+        return this.item.getChildren("old_emperor").stream().map(OldEmperor::new).toList();
     }
 
     public void addOldEmperor(SaveCountry country) {
         String id = Integer.toString(getOldEmperors().stream().map(OldEmperor::getId).max(Integer::compareTo).orElse(RANDOM.nextInt(9000)));
         OldEmperor.addToItem(this.item, id, country.getTag(), this.save.getDate());
-        refreshAttributes();
     }
 
     public void removeOldEmperor(int id) {
         this.item.removeChild("old_emperor", id);
-        refreshAttributes();
-    }
-
-    protected void refreshAttributes() {
-        this.oldEmperors = this.item.getChildren("old_emperor").stream().map(OldEmperor::new).toList();
     }
 
     public Save getSave() {

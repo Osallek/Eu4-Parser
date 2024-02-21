@@ -8,69 +8,42 @@ public class Colors {
 
     private final ClausewitzItem item;
 
-    private CustomColors customColors;
-
-    private Color revolutionaryColors;
-
-    private Color mapColor;
-
-    private Color countryColor;
-
     public Colors(ClausewitzItem item) {
         this.item = item;
-        refreshAttributes();
     }
 
     public CustomColors getCustomColors() {
-        return customColors;
+        ClausewitzItem customColorsItem = this.item.getChild("custom_colors");
+
+        return customColorsItem != null ? new CustomColors(customColorsItem) : null;
     }
 
     public Color getRevolutionaryColors() {
-        return revolutionaryColors;
+        ClausewitzList revolutionaryColorsList = this.item.getList("revolutionary_colors");
+
+        return revolutionaryColorsList != null ? new Color(revolutionaryColorsList) : null;
     }
 
     public Color getMapColor() {
-        return mapColor;
+        ClausewitzList mapColorList = this.item.getList("map_color");
+
+        return mapColorList != null ? new Color(mapColorList) : null;
     }
 
     public void setMapColor(int red, int green, int blue) {
-        if (this.mapColor != null) {
-            this.mapColor.setRed(red);
-            this.mapColor.setGreen(green);
-            this.mapColor.setBlue(blue);
+        Color mapColor = getMapColor();
+        if (mapColor != null) {
+            mapColor.setRed(red);
+            mapColor.setGreen(green);
+            mapColor.setBlue(blue);
         } else {
             Color.addToItem(this.item, "map_color", red, green, blue);
-            refreshAttributes();
         }
     }
 
     public Color getCountryColor() {
-        return countryColor;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem customColorsItem = this.item.getChild("custom_colors");
-
-        if (customColorsItem != null) {
-            this.customColors = new CustomColors(customColorsItem);
-        }
-
-        ClausewitzList revolutionaryColorsList = this.item.getList("revolutionary_colors");
-
-        if (revolutionaryColorsList != null) {
-            this.revolutionaryColors = new Color(revolutionaryColorsList);
-        }
-
-        ClausewitzList mapColorList = this.item.getList("map_color");
-
-        if (mapColorList != null) {
-            this.mapColor = new Color(mapColorList);
-        }
-
         ClausewitzList countryColorList = this.item.getList("country_color");
 
-        if (countryColorList != null) {
-            this.countryColor = new Color(countryColorList);
-        }
+        return countryColorList != null ? new Color(countryColorList) : null;
     }
 }

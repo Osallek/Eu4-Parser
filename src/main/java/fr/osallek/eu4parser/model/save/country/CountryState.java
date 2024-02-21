@@ -14,12 +14,9 @@ public class CountryState {
 
     private final ClausewitzItem item;
 
-    private Edict activeEdict;
-
     public CountryState(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        refreshAttributes();
     }
 
     public Double getProsperity() {
@@ -51,22 +48,23 @@ public class CountryState {
     }
 
     public Edict getActiveEdict() {
-        return activeEdict;
+        ClausewitzItem activeEditItem = this.item.getChild("active_edict");
+
+        return activeEditItem != null ? new Edict(activeEditItem, this.save.getGame()) : null;
     }
 
     public void setActiveEdict(StateEdict which, LocalDate date) {
-        if (this.activeEdict != null) {
-            this.activeEdict.setWhich(which);
-            this.activeEdict.setDate(date);
+        Edict activeEdict = getActiveEdict();
+        if (activeEdict != null) {
+            activeEdict.setWhich(which);
+            activeEdict.setDate(date);
         } else {
             Edict.addToItem(this.item, which, date);
-            refreshAttributes();
         }
     }
 
     public void removeActiveEdict() {
         this.item.removeChild("active_edict");
-        this.activeEdict = null;
     }
 
     public HolyOrder getHolyOrder() {
@@ -79,14 +77,6 @@ public class CountryState {
 
     public SaveCountry getHolyOrderFounder() {
         return this.save.getCountry(this.item.getVarAsString("holy_order_founder"));
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem activeEditItem = this.item.getChild("active_edict");
-
-        if (activeEditItem != null) {
-            this.activeEdict = new Edict(activeEditItem, this.save.getGame());
-        }
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country) {

@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.save.country.SaveCountry;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Diplomacy {
 
@@ -14,40 +15,24 @@ public class Diplomacy {
 
     private final Save save;
 
-    private List<Dependency> dependencies;
-
-    private List<DatableRelation> alliances;
-
-    private List<DatableRelation> guarantees;
-
-    private List<KnowledgeSharing> knowledgeSharing;
-
-    private List<Subsidies> subsidies;
-
-    private List<DatableRelation> royalMarriage;
-
-    private List<MilitaryAccess> militaryAccesses;
-
-    private List<MilitaryAccess> fleetAccesses;
-
-    private List<CasusBelli> casusBellis;
-
-    private List<DatableRelation> supportIndependence;
-
-    private List<TransferTradePower> transferTradePowers;
-
-    private List<EndDatableRelation> warReparations;
-
-    private List<DatableRelation> warnings;
-
     public Diplomacy(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
-        refreshAttributes();
+    }
+
+    public Stream<Dependency> getDependenciesStream() {
+        return this.item.getChildren("dependency")
+                        .stream()
+                        .map(child -> new Dependency(child, this.save));
     }
 
     public List<Dependency> getDependencies() {
-        return dependencies;
+        return getDependenciesStream().map(dependency -> {
+            dependency.getSecond().setSubjectType(dependency.getSubjectType());
+            dependency.getSecond().setSubjectStartDate(dependency.getStartDate());
+
+            return dependency;
+        }).toList();
     }
 
     public void addDependency(SaveCountry first, SaveCountry second, LocalDate startDate, SubjectType subjectType) {
@@ -57,13 +42,13 @@ public class Diplomacy {
             second.setOverlord(first);
             second.setSubjectStartDate(startDate);
             second.setSubjectType(subjectType);
-            refreshAttributes();
         }
     }
 
     public void removeDependency(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.dependencies.size(); i++) {
-            Dependency dependency = this.dependencies.get(i);
+        List<Dependency> dependencies = getDependencies();
+        for (int i = 0; i < dependencies.size(); i++) {
+            Dependency dependency = dependencies.get(i);
             if (dependency.getFirst().equals(first) && dependency.getSecond().equals(second)) {
                 first.removeSubject(second);
                 second.removeOverlord();
@@ -71,215 +56,195 @@ public class Diplomacy {
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<DatableRelation> getAlliances() {
-        return alliances;
+        return this.item.getChildren("alliance").stream().map(child -> new DatableRelation(child, this.save)).toList();
     }
 
     public void addAlliance(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "alliance", first.getTag(), second.getTag(), startDate);
         first.addAlly(second);
         second.addAlly(first);
-        refreshAttributes();
     }
 
     public void removeAlliance(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.alliances.size(); i++) {
-            DatableRelation alliance = this.alliances.get(i);
-            if ((alliance.getFirst().equals(first) && alliance.getSecond().equals(second))
-                || (alliance.getFirst().equals(second) && alliance.getSecond().equals(first))) {
+        List<DatableRelation> alliances = getAlliances();
+        for (int i = 0; i < alliances.size(); i++) {
+            DatableRelation alliance = alliances.get(i);
+            if ((alliance.getFirst().equals(first) && alliance.getSecond().equals(second)) || (alliance.getFirst().equals(second) && alliance.getSecond()
+                                                                                                                                             .equals(first))) {
                 first.removeAlly(second);
                 second.removeAlly(first);
                 this.item.removeChild("alliance", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<DatableRelation> getGuarantees() {
-        return guarantees;
+        return this.item.getChildren("guarantee").stream().map(child -> new DatableRelation(child, this.save)).toList();
     }
 
     public void addGuarantee(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "guarantee", first.getTag(), second.getTag(), startDate);
         first.addGuarantee(second);
-        refreshAttributes();
     }
 
     public void removeGuarantee(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.guarantees.size(); i++) {
-            DatableRelation guarantee = this.guarantees.get(i);
+        List<DatableRelation> guarantees = getGuarantees();
+        for (int i = 0; i < guarantees.size(); i++) {
+            DatableRelation guarantee = guarantees.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 first.removeGuarantee(second);
                 this.item.removeChild("guarantee", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<KnowledgeSharing> getKnowledgeSharing() {
-        return knowledgeSharing;
+        return this.item.getChildren("knowledge_sharing").stream().map(child -> new KnowledgeSharing(child, this.save)).toList();
     }
 
     public void addKnowledgeSharing(SaveCountry first, SaveCountry second, LocalDate startDate) {
         KnowledgeSharing.addToItem(this.item, first.getTag(), second.getTag(), startDate, startDate.plusYears(10), false);
-        refreshAttributes();
     }
 
     public void removeKnowledgeSharing(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.knowledgeSharing.size(); i++) {
-            DatableRelation guarantee = this.knowledgeSharing.get(i);
+        List<KnowledgeSharing> knowledgeSharing = getKnowledgeSharing();
+        for (int i = 0; i < knowledgeSharing.size(); i++) {
+            DatableRelation guarantee = knowledgeSharing.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("knowledge_sharing", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<Subsidies> getSubsidies() {
-        return subsidies;
+        return this.item.getChildren("subsidies").stream().map(child -> new Subsidies(child, this.save)).toList();
     }
 
     public void addSubsidies(SaveCountry first, SaveCountry second, LocalDate startDate, double amount, int duration) {
         Subsidies.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, duration);
-        refreshAttributes();
     }
 
     public void removeSubsidies(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.subsidies.size(); i++) {
-            DatableRelation guarantee = this.subsidies.get(i);
+        List<Subsidies> subsidies = getSubsidies();
+        for (int i = 0; i < subsidies.size(); i++) {
+            DatableRelation guarantee = subsidies.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("subsidies", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<DatableRelation> getRoyalMarriage() {
-        return royalMarriage;
+        return this.item.getChildren("royal_marriage").stream().map(child -> new DatableRelation(child, this.save)).toList();
     }
 
     public void addRoyalMarriage(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "royal_marriage", first.getTag(), second.getTag(), startDate);
         first.addRoyalMarriage(second);
         second.addRoyalMarriage(first);
-        refreshAttributes();
     }
 
     public void removeRoyalMarriage(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.royalMarriage.size(); i++) {
-            DatableRelation guarantee = this.royalMarriage.get(i);
-            if ((guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second))
-                || (guarantee.getFirst().equals(second) && guarantee.getSecond().equals(first))) {
+        List<DatableRelation> royalMarriage = getRoyalMarriage();
+        for (int i = 0; i < royalMarriage.size(); i++) {
+            DatableRelation guarantee = royalMarriage.get(i);
+            if ((guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) || (guarantee.getFirst().equals(second) && guarantee.getSecond()
+                                                                                                                                                 .equals(first))) {
                 first.removeRoyalMarriage(second);
                 second.removeRoyalMarriage(first);
                 this.item.removeChild("royal_marriage", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<MilitaryAccess> getMilitaryAccesses() {
-        return militaryAccesses;
+        return this.item.getChildren("military_access").stream().map(child -> new MilitaryAccess(child, this.save)).toList();
     }
 
     public void addMilitaryAccess(SaveCountry first, SaveCountry second, LocalDate startDate, boolean enforcePeace) {
         MilitaryAccess.addToItem(this.item, "military_access", first.getTag(), second.getTag(), startDate, enforcePeace);
-        refreshAttributes();
     }
 
     public void removeMilitaryAccess(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.militaryAccesses.size(); i++) {
-            DatableRelation guarantee = this.militaryAccesses.get(i);
+        List<MilitaryAccess> militaryAccesses = getMilitaryAccesses();
+        for (int i = 0; i < militaryAccesses.size(); i++) {
+            DatableRelation guarantee = militaryAccesses.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("military_access", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<MilitaryAccess> getFleetAccesses() {
-        return fleetAccesses;
+        return this.item.getChildren("fleet_access").stream().map(child -> new MilitaryAccess(child, this.save)).toList();
     }
 
     public void addFleetAccess(SaveCountry first, SaveCountry second, LocalDate startDate, boolean enforcePeace) {
         MilitaryAccess.addToItem(this.item, "fleet_access", first.getTag(), second.getTag(), startDate, enforcePeace);
-        refreshAttributes();
     }
 
     public void removeFleetAccess(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.fleetAccesses.size(); i++) {
-            DatableRelation guarantee = this.fleetAccesses.get(i);
+        List<MilitaryAccess> fleetAccesses = getFleetAccesses();
+        for (int i = 0; i < fleetAccesses.size(); i++) {
+            DatableRelation guarantee = fleetAccesses.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 this.item.removeChild("fleet_access", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<CasusBelli> getCasusBellis() {
-        return casusBellis;
+        return this.item.getChildren("casus_belli").stream().map(child -> new CasusBelli(child, this.save)).toList();
     }
 
     public void addCasusBelli(SaveCountry first, SaveCountry second, LocalDate startDate, LocalDate endDate, fr.osallek.eu4parser.model.game.CasusBelli type) {
         CasusBelli.addToItem(this.item, first.getTag(), second.getTag(), startDate, endDate, type);
-        refreshAttributes();
     }
 
     public void removeCasusBelli(SaveCountry first, SaveCountry second, fr.osallek.eu4parser.model.game.CasusBelli type) {
-        for (int i = 0; i < this.casusBellis.size(); i++) {
-            CasusBelli casusBelli = this.casusBellis.get(i);
+        List<CasusBelli> casusBellis = getCasusBellis();
+        for (int i = 0; i < casusBellis.size(); i++) {
+            CasusBelli casusBelli = casusBellis.get(i);
             if (casusBelli.getFirst().equals(first) && casusBelli.getSecond().equals(second) && casusBelli.getType().equals(type)) {
                 this.item.removeChild("casus_belli", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<DatableRelation> getSupportIndependence() {
-        return supportIndependence;
+        return this.item.getChildren("support_independence").stream().map(child -> new DatableRelation(child, save)).toList();
     }
 
     public void addSupportIndependence(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "support_independence", first.getTag(), second.getTag(), startDate);
         second.addIndependenceSupportedBy(first);
-        refreshAttributes();
     }
 
     public void removeSupportIndependence(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.supportIndependence.size(); i++) {
-            DatableRelation guarantee = this.supportIndependence.get(i);
+        List<DatableRelation> supportIndependence = getSupportIndependence();
+        for (int i = 0; i < supportIndependence.size(); i++) {
+            DatableRelation guarantee = supportIndependence.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 second.removeIndependenceSupportedBy(first);
                 this.item.removeChild("support_independence", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<TransferTradePower> getTransferTradePowers() {
-        return transferTradePowers;
+        return this.item.getChildren("transfer_trade_power").stream().map(child -> new TransferTradePower(child, save)).toList();
     }
 
     public void addTransferTradePower(SaveCountry first, SaveCountry second, LocalDate startDate, double amount, boolean isEnforced) {
@@ -287,13 +252,13 @@ public class Diplomacy {
             TransferTradePower.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, isEnforced);
             second.addTransferTradePowerTo(first);
             first.addTransferTradePowerFrom(second);
-            refreshAttributes();
         }
     }
 
     public void removeTransferTradePower(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.transferTradePowers.size(); i++) {
-            DatableRelation guarantee = this.transferTradePowers.get(i);
+        List<TransferTradePower> transferTradePowers = getTransferTradePowers();
+        for (int i = 0; i < transferTradePowers.size(); i++) {
+            DatableRelation guarantee = transferTradePowers.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 second.removeTransferTradePowerTo(first);
                 first.removeTransferTradePowerFrom(second);
@@ -301,64 +266,53 @@ public class Diplomacy {
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<EndDatableRelation> getWarReparations() {
-        return warReparations;
+        return this.item.getChildren("war_reparations").stream().map(child -> new EndDatableRelation(child, save)).toList();
     }
 
     public void addWarReparations(SaveCountry first, SaveCountry second, LocalDate startDate, LocalDate endDate) {
         EndDatableRelation.addToItem(this.item, "war_reparations", first.getTag(), second.getTag(), startDate, endDate);
         first.addWarReparations(second);
-        refreshAttributes();
     }
 
     public void removeWarReparations(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.warReparations.size(); i++) {
-            DatableRelation guarantee = this.warReparations.get(i);
+        List<EndDatableRelation> warReparations = getWarReparations();
+        for (int i = 0; i < warReparations.size(); i++) {
+            DatableRelation guarantee = warReparations.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 first.removeWarReparations(second);
                 this.item.removeChild("war_reparations", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<DatableRelation> getWarnings() {
-        return warnings;
+        return this.item.getChildren("warning").stream().map(child -> new DatableRelation(child, save)).toList();
     }
-
 
     public void addWarning(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "warning", first.getTag(), second.getTag(), startDate);
         first.addWarning(second);
-        refreshAttributes();
     }
 
     public void removeWarning(SaveCountry first, SaveCountry second) {
-        for (int i = 0; i < this.warnings.size(); i++) {
-            DatableRelation guarantee = this.warnings.get(i);
+        List<DatableRelation> warnings = getWarnings();
+        for (int i = 0; i < warnings.size(); i++) {
+            DatableRelation guarantee = warnings.get(i);
             if (guarantee.getFirst().equals(first) && guarantee.getSecond().equals(second)) {
                 first.removeWarning(second);
                 this.item.removeChild("warning", i);
                 break;
             }
         }
-
-        refreshAttributes();
     }
 
     public List<Integration> getIntegrations() {
-        return this.item.getChildren("integration")
-                        .stream()
-                        .map(child -> new Integration(child, save))
-                        .toList();
+        return this.item.getChildren("integration").stream().map(child -> new Integration(child, save)).toList();
     }
-
 
     public void addIntegration(SaveCountry first, SaveCountry second, LocalDate startDate, Double progress) {
         Integration.addToItem(this.item, "integration", first.getTag(), second.getTag(), startDate, progress == null ? 0 : progress);
@@ -373,78 +327,5 @@ public class Diplomacy {
                 break;
             }
         }
-
-        refreshAttributes();
-    }
-
-    private void refreshAttributes() {
-        this.dependencies = this.item.getChildren("dependency")
-                                     .stream()
-                                     .map(child -> new Dependency(child, this.save))
-                                     .toList();
-        this.dependencies.forEach(dependency -> {
-            dependency.getSecond().setSubjectType(dependency.getSubjectType());
-            dependency.getSecond().setSubjectStartDate(dependency.getStartDate());
-        });
-
-        this.alliances = this.item.getChildren("alliance")
-                                  .stream()
-                                  .map(child -> new DatableRelation(child, this.save))
-                                  .toList();
-
-        this.guarantees = this.item.getChildren("guarantee")
-                                   .stream()
-                                   .map(child -> new DatableRelation(child, this.save))
-                                   .toList();
-
-        this.knowledgeSharing = this.item.getChildren("knowledge_sharing")
-                                         .stream()
-                                         .map(child -> new KnowledgeSharing(child, this.save))
-                                         .toList();
-
-        this.subsidies = this.item.getChildren("subsidies")
-                                  .stream()
-                                  .map(child -> new Subsidies(child, this.save))
-                                  .toList();
-
-        this.royalMarriage = this.item.getChildren("royal_marriage")
-                                      .stream()
-                                      .map(child -> new DatableRelation(child, this.save))
-                                      .toList();
-
-        this.militaryAccesses = this.item.getChildren("military_access")
-                                         .stream()
-                                         .map(child -> new MilitaryAccess(child, this.save))
-                                         .toList();
-
-        this.fleetAccesses = this.item.getChildren("fleet_access")
-                                      .stream()
-                                      .map(child -> new MilitaryAccess(child, this.save))
-                                      .toList();
-
-        this.casusBellis = this.item.getChildren("casus_belli")
-                                    .stream()
-                                    .map(child -> new CasusBelli(child, this.save))
-                                    .toList();
-
-        this.supportIndependence = this.item.getChildren("support_independence")
-                                            .stream()
-                                            .map(child -> new DatableRelation(child, save))
-                                            .toList();
-
-        this.transferTradePowers = this.item.getChildren("transfer_trade_power")
-                                            .stream()
-                                            .map(child -> new TransferTradePower(child, save))
-                                            .toList();
-
-        this.warReparations = this.item.getChildren("war_reparations")
-                                       .stream()
-                                       .map(child -> new EndDatableRelation(child, save))
-                                       .toList();
-
-        this.warnings = this.item.getChildren("warning")
-                                 .stream()
-                                 .map(child -> new DatableRelation(child, save))
-                                 .toList();
     }
 }

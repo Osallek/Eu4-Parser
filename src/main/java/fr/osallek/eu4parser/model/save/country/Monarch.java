@@ -23,23 +23,10 @@ public class Monarch {
 
     protected LocalDate monarchDate;
 
-    protected Id id;
-
-    protected Personalities personalities;
-
-    protected HasDeclaredWar hasDeclaredWar;
-
-    protected ListOfDates rulerFlags;
-
-    protected Id leaderId;
-
-    protected Leader leader;
-
     public Monarch(ClausewitzItem item, SaveCountry saveCountry) {
         this.item = item;
         this.saveCountry = saveCountry;
         this.game = saveCountry.getSave().getGame();
-        refreshAttributes();
     }
 
     public Monarch(ClausewitzItem item, SaveCountry saveCountry, LocalDate date) {
@@ -47,11 +34,12 @@ public class Monarch {
         this.saveCountry = saveCountry;
         this.game = saveCountry.getSave().getGame();
         this.monarchDate = date;
-        refreshAttributes();
     }
 
-    public Id getId() {
-        return id;
+        public Id getId() {
+        ClausewitzItem idItem = this.item.getChild("id");
+
+        return idItem != null ? new Id(idItem) : null;
     }
 
     public String getName() {
@@ -223,16 +211,18 @@ public class Monarch {
     }
 
     public Personalities getPersonalities() {
-        return personalities;
+        ClausewitzItem personalitiesItem = this.item.getChild("personalities");
+
+        return personalitiesItem != null ? new Personalities(personalitiesItem, this.game) : null;
     }
 
     public void addPersonality(RulerPersonality personality) {
-        if (this.personalities == null) {
+        Personalities personalities = getPersonalities();
+        if (personalities == null) {
             this.item.addChild("personalities");
-            refreshAttributes();
         }
 
-        this.personalities.addPersonality(personality);
+        personalities.addPersonality(personality);
 
         if (this.item.getName().endsWith("_heir")) {
             this.saveCountry.getHistory().getHeir(this.getId().getId()).addPersonality(personality);
@@ -242,8 +232,9 @@ public class Monarch {
     }
 
     public void removePersonality(int index) {
-        if (this.personalities != null) {
-            this.personalities.removePersonality(index);
+        Personalities personalities = getPersonalities();
+        if (personalities != null) {
+            personalities.removePersonality(index);
 
             if (this.item.getName().endsWith("_heir")) {
                 this.saveCountry.getHistory().getHeir(this.getId().getId()).removePersonality(index);
@@ -251,16 +242,16 @@ public class Monarch {
                 this.saveCountry.getHistory().getQueen(this.getId().getId()).removePersonality(index);
             }
 
-            if (this.personalities.item().getAllOrdered().isEmpty()) {
+            if (personalities.item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
-                refreshAttributes();
             }
         }
     }
 
     public void removePersonality(RulerPersonality personality) {
-        if (this.personalities != null) {
-            this.personalities.removePersonality(personality);
+        Personalities personalities = getPersonalities();
+        if (personalities != null) {
+            personalities.removePersonality(personality);
 
             if (this.item.getName().endsWith("_heir")) {
                 this.saveCountry.getHistory().getHeir(this.getId().getId()).removePersonality(personality);
@@ -268,27 +259,34 @@ public class Monarch {
                 this.saveCountry.getHistory().getQueen(this.getId().getId()).removePersonality(personality);
             }
 
-            if (this.personalities.item().getAllOrdered().isEmpty()) {
+            if (personalities.item().getAllOrdered().isEmpty()) {
                 this.item.removeChild("personalities");
-                refreshAttributes();
             }
         }
     }
 
     public HasDeclaredWar getHasDeclaredWar() {
-        return hasDeclaredWar;
+        ClausewitzItem hasDeclaredWarItem = this.item.getChild("has_declared_war");
+
+        return hasDeclaredWarItem != null ? new HasDeclaredWar(hasDeclaredWarItem) : null;
     }
 
     public Id getLeaderId() {
-        return leaderId;
+        ClausewitzItem leaderIdChild = this.item.getChild("leader_id");
+
+        return leaderIdChild != null ? new Id(leaderIdChild) : null;
     }
 
     public Leader getLeader() {
-        return leader;
+        ClausewitzItem leaderChild = this.item.getChild("leader");
+
+        return leaderChild != null ? new Leader(leaderChild, this.saveCountry) : null;
     }
 
     public ListOfDates getRulerFlags() {
-        return rulerFlags;
+        ClausewitzItem rulerFlagsItem = this.item.getChild("ruler_flags");
+
+        return rulerFlagsItem != null ? new ListOfDates(rulerFlagsItem) : null;
     }
 
     public SaveCountry getWho() {
@@ -315,43 +313,5 @@ public class Monarch {
 
     public Boolean getHistory() {
         return this.item.getVarAsBool("history");
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
-        }
-
-        ClausewitzItem personalitiesItem = this.item.getChild("personalities");
-
-        if (personalitiesItem != null) {
-            this.personalities = new Personalities(personalitiesItem, this.game);
-        }
-
-        ClausewitzItem hasDeclaredWarItem = this.item.getChild("has_declared_war");
-
-        if (hasDeclaredWarItem != null) {
-            this.hasDeclaredWar = new HasDeclaredWar(hasDeclaredWarItem);
-        }
-
-        ClausewitzItem rulerFlagsItem = this.item.getChild("ruler_flags");
-
-        if (rulerFlagsItem != null) {
-            this.rulerFlags = new ListOfDates(rulerFlagsItem);
-        }
-
-        ClausewitzItem leaderIdChild = this.item.getChild("leader_id");
-
-        if (leaderIdChild != null) {
-            this.leaderId = new Id(leaderIdChild);
-        }
-
-        ClausewitzItem leaderChild = this.item.getChild("leader");
-
-        if (leaderChild != null) {
-            this.leader = new Leader(leaderChild, this.saveCountry);
-        }
     }
 }

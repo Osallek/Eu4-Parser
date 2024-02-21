@@ -11,12 +11,9 @@ public class Cardinal {
 
     private final Save save;
 
-    private Id id;
-
     public Cardinal(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
-        refreshAttributes();
     }
 
     public SaveProvince getLocation() {
@@ -28,15 +25,9 @@ public class Cardinal {
     }
 
     public Id getId() {
-        return id;
-    }
-
-    private void refreshAttributes() {
         ClausewitzItem idItem = this.item.getChild("id");
 
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
+        return idItem != null ? new Id(idItem) : null;
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, int location) {

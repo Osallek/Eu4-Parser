@@ -261,6 +261,7 @@ public enum StaticModifiers {
     EXPAND_ADMINISTATION_MODIFIER(new ConditionAnd(Pair.of("num_expanded_administration", "1")), null, null),
     OVER_GOVERNING_CAPACITY_MODIFIER(new ConditionAnd(Pair.of("always", "yes")), null, null),
     UNDER_GOVERNING_CAPACITY_MODIFIER(new ConditionAnd(Pair.of("always", "yes")), null, null),
+    REVERSE_UNDER_GOVERNING_CAPACITY_MODIFIER(new ConditionAnd(Pair.of("always", "yes")), null, null),
     MANDATE(new ConditionAnd(Pair.of("is_emperor_of_china", "yes")), null, null),
     IMPERIAL_AUTHORITY(new ConditionAnd(Pair.of("is_emperor", "yes")), null, null),
     POSITIVE_IMPERIAL_AUTHORITY(new ConditionAnd(Pair.of("is_emperor", "yes")), null, null),
@@ -285,7 +286,11 @@ public enum StaticModifiers {
     HEIR_MIL(new ConditionAnd(Pair.of("has_heir", "yes")), null, null),
     CONSORT_ADM(new ConditionAnd(Pair.of("has_consort", "yes")), null, null),
     CONSORT_DIP(new ConditionAnd(Pair.of("has_consort", "yes")), null, null),
-    CONSORT_MIL(new ConditionAnd(Pair.of("has_consort", "yes")), null, null);
+    CONSORT_MIL(new ConditionAnd(Pair.of("has_consort", "yes")), null, null),
+    MANPOWER_PERCENTAGE(new ConditionAnd(Pair.of("always", "yes")), null, null),
+    MANPOWER_PERCENTAGE_REVERSE(new ConditionAnd(Pair.of("always", "yes")), null, null),
+    SAILORS_PERCENTAGE(new ConditionAnd(Pair.of("always", "yes")), null, null),
+    SAILORS_PERCENTAGE_REVERSE(new ConditionAnd(Pair.of("always", "yes")), null, null);
 
     public final ConditionAbstract trigger;
 
@@ -444,7 +449,7 @@ public enum StaticModifiers {
         STRELTSY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStreltsyPercent(country, modif.modifiers);
         POWER_PROJECTION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithCurrentPowerProjection(country, modif.modifiers);
         TRADE_COMPANY_STRONG.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithStrongCompany(country, modif.modifiers);
-//        LARGE_COLONIAL_NATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLargeColony(country, modif.modifiers);
+        //        LARGE_COLONIAL_NATION.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithLargeColony(country, modif.modifiers);
         MARCH_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMarches(country, modif.modifiers);
         VASSAL_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithVassals(country, modif.modifiers);
         DAIMYO_SUBJECT.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithDaimyos(country, modif.modifiers);
@@ -533,6 +538,7 @@ public enum StaticModifiers {
         EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
         OVER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverGoverningCapacity(country, modif.modifiers);
         UNDER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithUnderGoverningCapacity(country, modif.modifiers);
+        REVERSE_UNDER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithUnderGoverningCapacityReverse(country, modif.modifiers);
         MANDATE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMandate(country, modif.modifiers);
         IMPERIAL_AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithImperialAuthority(country, modif.modifiers);
         POSITIVE_IMPERIAL_AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPositiveImperialAuthority(country, modif.modifiers);
@@ -558,6 +564,10 @@ public enum StaticModifiers {
         CONSORT_ADM.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithConsortAdm(country, modif.modifiers);
         CONSORT_DIP.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithConsortDip(country, modif.modifiers);
         CONSORT_MIL.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithConsortMil(country, modif.modifiers);
+        MANPOWER_PERCENTAGE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithManpowerPercent(country, modif.modifiers);
+        MANPOWER_PERCENTAGE_REVERSE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithManpowerPercentReverse(country, modif.modifiers);
+        SAILORS_PERCENTAGE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithSailorsPercent(country, modif.modifiers);
+        SAILORS_PERCENTAGE_REVERSE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithSailorsPercentReverse(country, modif.modifiers);
         DEVELOPMENT.applyToProvince = (province, modif) -> { //Ugly but thanks to Paradox
             Modifiers m = Modifiers.copy(modif.modifiers);
 
@@ -597,9 +607,13 @@ public enum StaticModifiers {
         };
 
         APPLIED_TO_COUNTRY = Arrays.stream(StaticModifiers.values())
+                                   .filter(staticModifiers -> staticModifiers.modifiers != null
+                                                              && !staticModifiers.modifiers.isEmpty())
                                    .filter(staticModifiers -> staticModifiers.applyToCountry != null)
                                    .toList();
         APPLIED_TO_PROVINCE = Arrays.stream(StaticModifiers.values())
+                                    .filter(staticModifiers -> staticModifiers.modifiers != null
+                                                               && !staticModifiers.modifiers.isEmpty())
                                     .filter(staticModifiers -> staticModifiers.applyToProvince != null)
                                     .toList();
     }
@@ -622,8 +636,6 @@ public enum StaticModifiers {
     public static Double applyToModifiersCountry(SaveCountry country, Modifier modifier) {
         return ModifiersUtils.sumModifiers(modifier,
                                            APPLIED_TO_COUNTRY.stream()
-                                                             .filter(staticModifiers -> staticModifiers.modifiers != null
-                                                                                        && !staticModifiers.modifiers.isEmpty())
                                                              .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
                                                              .filter(staticModifiers -> staticModifiers.trigger.apply(country, country))
                                                              .map(staticModifiers -> staticModifiers.applyToCountry.apply(country, staticModifiers)
@@ -633,10 +645,8 @@ public enum StaticModifiers {
 
     public static Double applyToModifiersProvince(SaveProvince province, Modifier modifier) {
         return ModifiersUtils.sumModifiers(modifier, APPLIED_TO_PROVINCE.stream()
-                                                                        .filter(staticModifiers -> staticModifiers.modifiers != null
-                                                                                                   && !staticModifiers.modifiers.isEmpty())
-                                                                        .filter(staticModifiers -> staticModifiers.trigger.apply(province))
                                                                         .filter(staticModifiers -> staticModifiers.modifiers.hasModifier(modifier))
+                                                                        .filter(staticModifiers -> staticModifiers.trigger.apply(province))
                                                                         .map(staticModifiers -> staticModifiers.applyToProvince.apply(province, staticModifiers)
                                                                                                                                .getModifier(modifier))
                                                                         .toList());

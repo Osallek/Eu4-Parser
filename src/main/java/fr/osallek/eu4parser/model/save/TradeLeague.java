@@ -37,7 +37,6 @@ public record TradeLeague(ClausewitzItem item, Save save) {
 
         if (!list.contains(member.getTag())) {
             list.add(member.getTag());
-            member.setTradeLeague(this);
         }
     }
 
@@ -46,7 +45,6 @@ public record TradeLeague(ClausewitzItem item, Save save) {
 
         if (list != null) {
             list.remove(member.getTag());
-            member.setTradeLeague(null);
         }
     }
 

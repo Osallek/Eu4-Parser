@@ -9,7 +9,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -20,12 +19,9 @@ public class TradeNodeCountry {
 
     private final ClausewitzItem item;
 
-    private Map<String, TradeNodeModifier> modifiers;
-
     public TradeNodeCountry(Game game, ClausewitzItem item) {
         this.game = game;
         this.item = item;
-        refreshAttributes();
     }
 
     public String getCountry() {
@@ -93,25 +89,25 @@ public class TradeNodeCountry {
     }
 
     public Map<String, TradeNodeModifier> getModifiers() {
-        return modifiers;
+        return this.item.getChildren("modifier").stream()
+                        .map(TradeNodeModifier::new)
+                        .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getKey()),
+                                                  Function.identity(), (a, b) -> a, LinkedHashMap::new));
     }
 
     public void addModifier(String key, int duration, double power, double powerModifier) {
         TradeNodeModifier.addToItem(this.item, key, duration, power, powerModifier);
-        refreshAttributes();
     }
 
     public void removeModifier(String key) {
         int i = 0;
-        for (String modifier : this.modifiers.keySet()) {
+        for (String modifier : getModifiers().keySet()) {
             if (modifier.equals(ClausewitzUtils.addQuotes(key))) {
                 this.item.removeChild("modifier", i);
                 break;
             }
             i++;
         }
-
-        refreshAttributes();
     }
 
     public Integer getNbLightShip() {
@@ -180,13 +176,5 @@ public class TradeNodeCountry {
     public void removeTradePolicy() {
         this.item.removeVariable("trading_policy");
         this.item.removeVariable("trading_policy_date");
-    }
-
-    private void refreshAttributes() {
-        List<ClausewitzItem> modifiersItems = this.item.getChildren("modifier");
-        this.modifiers = modifiersItems.stream()
-                                       .map(TradeNodeModifier::new)
-                                       .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getKey()),
-                                                                 Function.identity(), (a, b) -> a, LinkedHashMap::new));
     }
 }

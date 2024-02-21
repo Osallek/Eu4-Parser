@@ -21,65 +21,65 @@ public class Province {
     //Todo adjacent province
     //Todo sea province if port
 
-    private final Game game;
+    protected final Game game;
 
-    private final int id;
+    protected final int id;
 
-    private Integer color;
+    protected Integer color;
 
-    private String name;
+    protected String name;
 
-    private boolean isOcean = false;
+    protected boolean isOcean = false;
 
-    private boolean isLake = false;
+    protected boolean isLake = false;
 
-    private String climate;
+    protected String climate;
 
-    private String monsoon;
+    protected String monsoon;
 
-    private String winter;
+    protected String winter;
 
-    private TerrainCategory terrainCategory;
+    protected TerrainCategory terrainCategory;
 
-    private boolean isPort;
+    protected boolean isPort;
 
-    private Area area;
+    protected Area area;
 
-    private ProvinceList continent;
+    protected ProvinceList continent;
 
-    private double cityX;
+    protected double cityX;
 
-    private double cityY;
+    protected double cityY;
 
-    private double unitX;
+    protected double unitX;
 
-    private double unitY;
+    protected double unitY;
 
-    private double nameTextX;
+    protected double nameTextX;
 
-    private double nameTextY;
+    protected double nameTextY;
 
-    private double portX;
+    protected double portX;
 
-    private double portY;
+    protected double portY;
 
-    private double tradeRouteX;
+    protected double tradeRouteX;
 
-    private double tradeRouteY;
+    protected double tradeRouteY;
 
-    private double fightingUnitX;
+    protected double fightingUnitX;
 
-    private double fightingUnitY;
+    protected double fightingUnitY;
 
-    private double tradeWindX;
+    protected double tradeWindX;
 
-    private double tradeWindY;
+    protected double tradeWindY;
 
-    private ProvinceHistoryItem defaultHistoryItem;
+    protected ProvinceHistoryItem defaultHistoryItem;
 
-    private SortedMap<LocalDate, ProvinceHistoryItem> historyItems;
+    protected SortedMap<LocalDate, ProvinceHistoryItem> historyItems;
 
-    private FileNode historyFileNode;
+    protected FileNode historyFileNode;
 
     public Province(String[] csvLine, Game game) {
         this.game = game;

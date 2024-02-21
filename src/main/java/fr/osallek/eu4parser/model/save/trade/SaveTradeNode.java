@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -24,19 +25,10 @@ public class SaveTradeNode {
 
     private final int index;
 
-    private Map<String, TradeNodeCountry> countries;
-
-    private List<TradeNodeIncoming> incoming;
-
-    private Map<String, Double> topProvinces;
-
-    private Map<String, Double> topPower;
-
     public SaveTradeNode(ClausewitzItem item, Save save, int index) {
         this.item = item;
         this.save = save;
         this.index = index;
-        refreshAttributes();
     }
 
     public String getName() {
@@ -124,11 +116,32 @@ public class SaveTradeNode {
     }
 
     public Map<SaveCountry, Double> getTopProvinces() {
-        return topProvinces.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
+        ClausewitzList topProvincesList = this.item.getList("top_provinces");
+        ClausewitzList topProvincesValuesList = this.item.getList("top_provinces_values");
+        Map<SaveCountry, Double> topProvinces = new LinkedHashMap<>();
+
+        if (topProvincesList != null && topProvincesValuesList != null && topProvincesList.size() == topProvincesValuesList.size()) {
+            for (int i = 0; i < topProvincesList.size(); i++) {
+                topProvinces.put(this.save.getCountry(topProvincesList.get(i)), topProvincesValuesList.getAsDouble(i));
+            }
+        }
+
+        return topProvinces;
     }
 
     public Map<SaveCountry, Double> getTopPower() {
-        return topPower.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(entry.getKey()), Map.Entry::getValue));
+        ClausewitzList topPowerList = this.item.getList("top_power");
+        ClausewitzList topPowerValuesList = this.item.getList("top_power_values");
+        Map<SaveCountry, Double> topPower = new LinkedHashMap<>();
+
+        if (topPowerList != null && topPowerValuesList != null
+            && topPowerList.size() == topPowerValuesList.size()) {
+            for (int i = 0; i < topPowerList.size(); i++) {
+                topPower.put(this.save.getCountry(topPowerList.get(i)), topPowerValuesList.getAsDouble(i));
+            }
+        }
+
+        return topPower;
     }
 
     public LocalDate getMostRecentTreasureShipPassage() {
@@ -142,45 +155,18 @@ public class SaveTradeNode {
     }
 
     public Map<SaveCountry, TradeNodeCountry> getCountries() {
-        return countries.entrySet().stream().collect(Collectors.toMap(entry -> this.save.getCountry(ClausewitzUtils.removeQuotes(entry.getKey())), Map.Entry::getValue));
+        return this.item.getChildren()
+                        .stream()
+                        .filter(child -> child.hasVar("max_demand"))
+                        .map(child -> new TradeNodeCountry(this.save.getGame(), child))
+                        .collect(Collectors.toMap(tnc -> this.save.getCountry(ClausewitzUtils.removeQuotes(tnc.getCountry())), Function.identity()));
     }
 
     public TradeNodeCountry getCountry(SaveCountry country) {
-        return this.countries.get(country.getTag());
+        return Optional.ofNullable(this.item.getChild(country.getTag())).map(child -> new TradeNodeCountry(this.save.getGame(), child)).orElse(null);
     }
 
     public List<TradeNodeIncoming> getIncoming() {
-        return incoming;
-    }
-
-    private void refreshAttributes() {
-        this.countries = this.item.getChildren()
-                                  .stream()
-                                  .filter(child -> child.hasVar("max_demand"))
-                                  .map(child -> new TradeNodeCountry(this.save.getGame(), child))
-                                  .collect(Collectors.toMap(TradeNodeCountry::getCountry, Function.identity()));
-
-        ClausewitzList topProvincesList = this.item.getList("top_provinces");
-        ClausewitzList topProvincesValuesList = this.item.getList("top_provinces_values");
-
-        if (topProvincesList != null && topProvincesValuesList != null && topProvincesList.size() == topProvincesValuesList.size()) {
-            this.topProvinces = new LinkedHashMap<>();
-            for (int i = 0; i < topProvincesList.size(); i++) {
-                this.topProvinces.put(ClausewitzUtils.removeQuotes(topProvincesList.get(i)), topProvincesValuesList.getAsDouble(i));
-            }
-        }
-
-        ClausewitzList topPowerList = this.item.getList("top_power");
-        ClausewitzList topPowerValuesList = this.item.getList("top_power_values");
-
-        if (topPowerList != null && topPowerValuesList != null
-            && topPowerList.size() == topPowerValuesList.size()) {
-            this.topPower = new LinkedHashMap<>();
-            for (int i = 0; i < topPowerList.size(); i++) {
-                this.topPower.put(ClausewitzUtils.removeQuotes(topPowerList.get(i)), topPowerValuesList.getAsDouble(i));
-            }
-        }
-
-        this.incoming = this.item.getChildren("incoming").stream().map(child -> new TradeNodeIncoming(child, this.save)).toList();
+        return this.item.getChildren("incoming").stream().map(child -> new TradeNodeIncoming(child, this.save)).toList();
     }
 }

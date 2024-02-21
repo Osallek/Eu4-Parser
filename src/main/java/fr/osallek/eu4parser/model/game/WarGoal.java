@@ -6,11 +6,8 @@ public final class WarGoal {
 
     private final ClausewitzItem item;
 
-    private final Game game;
-
-    public WarGoal(ClausewitzItem item, Game game) {
+    public WarGoal(ClausewitzItem item) {
         this.item = item;
-        this.game = game;
     }
 
     public String getName() {
@@ -25,8 +22,12 @@ public final class WarGoal {
         return this.item.getVarAsString("type");
     }
 
-    public CasusBelli getCasusBelli() {
-        return this.game.getCasusBelli(this.item.getVarAsString("casus_belli"));
+    public String getCasusBelli() {
+        return this.item.getVarAsString("casus_belli");
+    }
+
+    public CasusBelli getCasusBelli(Game game) {
+        return game.getCasusBelli(this.item.getVarAsString("casus_belli"));
     }
 
     public String getTag() {

@@ -19,6 +19,8 @@ public class FileNode implements Comparable<FileNode> {
 
     private final Path relativePath;
 
+    private final Path fileName;
+
     private Mod mod;
 
     public FileNode(Mod mod) {
@@ -30,11 +32,13 @@ public class FileNode implements Comparable<FileNode> {
         this.path = path;
         this.mod = mod;
         this.relativePath = this.root.relativize(this.path);
+        this.fileName = this.relativePath.getFileName();
     }
 
     public FileNode(Path root, Path relativePath) {
         this.root = root;
         this.relativePath = relativePath;
+        this.fileName = this.relativePath.getFileName();
         this.path = this.root.resolve(this.relativePath);
     }
 
@@ -43,6 +47,7 @@ public class FileNode implements Comparable<FileNode> {
         this.path = path;
         this.mod = mod;
         this.relativePath = this.root.relativize(this.path);
+        this.fileName = this.relativePath.getFileName();
     }
 
     public FileNode(Mod mod, Path relativePath) {
@@ -50,6 +55,7 @@ public class FileNode implements Comparable<FileNode> {
         this.path = this.root.resolve(relativePath);
         this.mod = mod;
         this.relativePath = relativePath;
+        this.fileName = this.relativePath.getFileName();
     }
 
     public Path getRoot() {
@@ -62,6 +68,10 @@ public class FileNode implements Comparable<FileNode> {
 
     public Path getRelativePath() {
         return this.relativePath;
+    }
+
+    public Path getFileName() {
+        return fileName;
     }
 
     public static List<FileNode> getChildren(FileNode fileNode) {

@@ -8,28 +8,19 @@ public class PendingEvents {
 
     private final ClausewitzItem item;
 
-    private List<PendingEvent> pendingEvents;
-
     public PendingEvents(ClausewitzItem item) {
         this.item = item;
-        refreshAttributes();
     }
 
     public List<PendingEvent> getPendingEvents() {
-        return this.pendingEvents;
+        return this.item.getChildren().stream().map(PendingEvent::new).toList();
     }
 
     public void removePendingEvent(String pendingEvent) {
         this.item.removeChild(pendingEvent);
-        refreshAttributes();
     }
 
     public void removePendingEvent(int index) {
         this.item.removeChild(index);
-        refreshAttributes();
-    }
-
-    private void refreshAttributes() {
-        this.pendingEvents = this.item.getChildren().stream().map(PendingEvent::new).toList();
     }
 }

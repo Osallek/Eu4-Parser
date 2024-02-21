@@ -14,12 +14,9 @@ public abstract class Combatant {
 
     protected final ClausewitzItem item;
 
-    protected Id unit;
-
     protected Combatant(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        refreshAttributes();
     }
 
     public Integer getDice() {
@@ -39,7 +36,13 @@ public abstract class Combatant {
     }
 
     public Id getUnit() {
-        return unit;
+        ClausewitzItem idChild = this.item.getChild("unit");
+
+        if (idChild != null) {
+            return new Id(idChild);
+        }
+
+        return null;
     }
 
     public Double getTotalLosses() {
@@ -52,13 +55,5 @@ public abstract class Combatant {
 
     public boolean arranged() {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("arranged"));
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("unit");
-
-        if (idChild != null) {
-            this.unit = new Id(idChild);
-        }
     }
 }

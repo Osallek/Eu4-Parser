@@ -5,8 +5,8 @@ import fr.osallek.eu4parser.model.save.Save;
 
 public class PreviousWar extends ActiveWar {
 
-    public PreviousWar(ClausewitzItem item, Save save) {
-        super(item, save);
+    public PreviousWar(ClausewitzItem item) {
+        super(item);
     }
 
     public Integer getOutcome() {

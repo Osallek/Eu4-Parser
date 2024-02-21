@@ -14,12 +14,9 @@ public class Parliament {
 
     private final ClausewitzItem item;
 
-    private ActiveParliamentIssue activeParliamentIssue;
-
     public Parliament(ClausewitzItem item, Game game) {
         this.game = game;
         this.item = item;
-        refreshAttributes();
     }
 
     public LocalDate getLastDebate() {
@@ -43,14 +40,8 @@ public class Parliament {
     }
 
     public ActiveParliamentIssue getActiveParliamentIssue() {
-        return activeParliamentIssue;
-    }
-
-    private void refreshAttributes() {
         ClausewitzItem activeParliamentIssueItem = this.item.getChild("active_parliament_issue");
 
-        if (activeParliamentIssueItem != null) {
-            this.activeParliamentIssue = new ActiveParliamentIssue(activeParliamentIssueItem, this.game);
-        }
+        return activeParliamentIssueItem != null ? new ActiveParliamentIssue(activeParliamentIssueItem, this.game) : null;
     }
 }

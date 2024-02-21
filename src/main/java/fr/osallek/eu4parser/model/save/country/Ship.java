@@ -9,12 +9,9 @@ public class Ship extends AbstractRegiment {
 
     private final Navy navy;
 
-    private FlagShip flagShip;
-
     public Ship(ClausewitzItem item, Save save, Navy navy) {
         super(item, save);
         this.navy = navy;
-        refreshAttributes();
     }
 
     @Override
@@ -35,19 +32,12 @@ public class Ship extends AbstractRegiment {
     }
 
     public FlagShip getFlagShip() {
-        return flagShip;
-    }
-
-    public void setFlagShip(FlagShip flagShip) {
-        this.flagShip = flagShip;
-    }
-
-    private void refreshAttributes() {
         ClausewitzItem flagShipItem = this.item.getChild("flagship");
 
         if (flagShipItem != null) {
-            this.flagShip = new FlagShip(flagShipItem, this.save);
+            return new FlagShip(flagShipItem, this.save);
         }
+        return null;
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale, boolean hasDisengaged) {

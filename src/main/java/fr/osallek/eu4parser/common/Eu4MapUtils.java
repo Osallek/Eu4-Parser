@@ -87,7 +87,7 @@ public class Eu4MapUtils {
         ImageIO.write(pngMapImage, "PNG", file);
     }
 
-    public static BufferedImage generateMapPng(Game game, Function<Province, Color> provinceColorFunction) {
+    public static BufferedImage generateMapPng(Game game, Function<Province, Color> provinceColorFunction) throws IOException {
         Map<Province, Map<Polygon, Boolean>> borders = game.getBorders();
         BufferedImage pngMapImage = new BufferedImage(game.getProvinceImageWidth(), game.getProvinceImageHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D pngMapGraphics = pngMapImage.createGraphics();

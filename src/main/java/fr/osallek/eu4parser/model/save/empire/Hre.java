@@ -14,8 +14,6 @@ import java.util.List;
 
 public class Hre extends Empire {
 
-    private HreIncident activeIncident;
-
     public Hre(ClausewitzItem item, Save save) {
         super(item, save);
     }
@@ -151,7 +149,7 @@ public class Hre extends Empire {
             return;
         }
 
-        ClausewitzVariable var = this.item.setVariable("allows_female_emperor", allowsFemaleEmperor);
+        this.item.setVariable("allows_female_emperor", allowsFemaleEmperor);
     }
 
     public List<SaveCountry> getElectors() {
@@ -239,21 +237,12 @@ public class Hre extends Empire {
     }
 
     public HreIncident getActiveIncident() {
-        return activeIncident;
+        ClausewitzItem incidentItem = this.item.getChild("active_incident");
+
+        return incidentItem != null ? new HreIncident(incidentItem) : null;
     }
 
     public void removeActiveIncident() {
         this.item.removeChild("active_incident");
-        refreshAttributes();
-    }
-
-    @Override
-    protected void refreshAttributes() {
-        super.refreshAttributes();
-        ClausewitzItem incidentItem = this.item.getChild("active_incident");
-
-        if (incidentItem != null) {
-            this.activeIncident = new HreIncident(incidentItem);
-        }
     }
 }

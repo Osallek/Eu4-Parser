@@ -819,8 +819,6 @@ public final class LocalisationUtils {
     public static Optional<SaveAdvisor> getAdmAdvisor(SaveCountry country) {
         return Optional.ofNullable(country)
                        .map(SaveCountry::getActiveAdvisors)
-                       .filter(MapUtils::isNotEmpty)
-                       .map(Map::values)
                        .stream()
                        .flatMap(Collection::stream)
                        .filter(a -> Power.ADM.equals(a.getGameAdvisor().getPower()))
@@ -834,8 +832,6 @@ public final class LocalisationUtils {
     public static Optional<SaveAdvisor> getDipAdvisor(SaveCountry country) {
         return Optional.ofNullable(country)
                        .map(SaveCountry::getActiveAdvisors)
-                       .filter(MapUtils::isNotEmpty)
-                       .map(Map::values)
                        .stream()
                        .flatMap(Collection::stream)
                        .filter(a -> Power.DIP.equals(a.getGameAdvisor().getPower()))
@@ -849,8 +845,6 @@ public final class LocalisationUtils {
     public static Optional<SaveAdvisor> getMilAdvisor(SaveCountry country) {
         return Optional.ofNullable(country)
                        .map(SaveCountry::getActiveAdvisors)
-                       .filter(MapUtils::isNotEmpty)
-                       .map(Map::values)
                        .stream()
                        .flatMap(Collection::stream)
                        .filter(a -> Power.MIL.equals(a.getGameAdvisor().getPower()))

@@ -159,7 +159,7 @@ public class ConditionsUtils {
             case "advisor":
                 return country.getAdvisors().values().stream().anyMatch(advisor -> advisor.getType().equals(value));
             case "advisor_exists":
-                return country.getSave().getAdvisors().containsKey(Integer.parseInt(value));
+                return country.getSave().getAdvisor(Integer.parseInt(value)) != null;
             case "ai":
                 return "yes".equalsIgnoreCase(value) == !country.isHuman();
             case "alliance_with":
@@ -800,7 +800,11 @@ public class ConditionsUtils {
             case "ironman":
                 return false;
             case "is_advisor_employed":
-                return country.getSave().getCountries().values().stream().anyMatch(c -> c.getActiveAdvisors().containsKey(NumbersUtils.toInt(value)));
+                return country.getSave()
+                              .getCountries()
+                              .values()
+                              .stream()
+                              .anyMatch(c -> c.getActiveAdvisors().stream().anyMatch(advisor -> NumbersUtils.toInt(value).equals(advisor.getId().getId())));
             case "is_at_war":
                 return "yes".equalsIgnoreCase(value) == country.isAtWar();
             case "is_bankrupt":
@@ -897,7 +901,9 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (country.getLedger().getLastMonthIncome() < country.getLedger().getLastMonthExpense());
             case "is_in_league_war":
                 return "yes".equalsIgnoreCase(value) == (country.getActiveWars().stream().anyMatch(war -> war.getWarGoal() != null
-                                                                                                          && war.getWarGoal().getCasusBelli().isLeague()));
+                                                                                                          && war.getWarGoal()
+                                                                                                                .getCasusBelli(country.getSave().getGame())
+                                                                                                                .isLeague()));
             case "is_in_trade_league":
                 return "yes".equalsIgnoreCase(value) == (country.getSave().getTradeLeagues().stream().anyMatch(tradeLeague -> tradeLeague.hasMember(country)));
             case "is_in_trade_league_with":
@@ -1922,7 +1928,7 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return country.getActiveWars()
                               .stream()
-                              .anyMatch(war -> war.getOtherSide(country).containsKey(other));
+                              .anyMatch(war -> war.getOtherSide(country).containsKey(other.getTag()));
             case "was_player":
                 return "yes".equalsIgnoreCase(value) == country.wasPlayer();
             case "was_tag":
@@ -3027,29 +3033,23 @@ public class ConditionsUtils {
                 Integer duration = NumbersUtils.toInt(condition.getCondition("duration"));
 
                 return root.getActiveWars().stream().anyMatch(activeWar -> {
-                    if (CollectionUtils.isNotEmpty(attackers)
-                        && activeWar.getAttackers()
-                                    .keySet()
-                                    .containsAll(attackers.stream().map(s -> root.getSave().getCountry(s)).toList())) {
+                    if (CollectionUtils.isNotEmpty(attackers) && activeWar.getAttackers().keySet().containsAll(attackers)) {
                         return false;
                     }
 
-                    if (CollectionUtils.isNotEmpty(defenders)
-                        && activeWar.getDefenders()
-                                    .keySet()
-                                    .containsAll(defenders.stream().map(s -> root.getSave().getCountry(s)).toList())) {
+                    if (CollectionUtils.isNotEmpty(defenders) && activeWar.getDefenders().keySet().containsAll(defenders)) {
                         return false;
                     }
 
-                    if (attackerLeader != null && activeWar.getAttackers().keySet().iterator().next() != root.getSave().getCountry(attackerLeader)) {
+                    if (attackerLeader != null && !activeWar.getAttackers().keySet().iterator().next().equals(attackerLeader)) {
                         return false;
                     }
 
-                    if (defenderLeader != null && activeWar.getDefenders().keySet().iterator().next() != root.getSave().getCountry(defenderLeader)) {
+                    if (defenderLeader != null && !activeWar.getDefenders().keySet().iterator().next().equals(defenderLeader)) {
                         return false;
                     }
 
-                    if (StringUtils.isNotBlank(casusBelli) && !casusBelli.equalsIgnoreCase(activeWar.getWarGoal().getCasusBelli().getName())) {
+                    if (StringUtils.isNotBlank(casusBelli) && !casusBelli.equalsIgnoreCase(activeWar.getWarGoal().getCasusBelli(root.getSave().getGame()).getName())) {
                         return false;
                     }
 
@@ -3179,7 +3179,7 @@ public class ConditionsUtils {
                 return !CollectionUtils.isNotEmpty(root.getActiveWars())
                        && root.getActiveWars()
                               .stream()
-                              .anyMatch(activeWar -> activeWar.getOtherSide(root).containsKey(finalCountry1)
+                              .anyMatch(activeWar -> activeWar.getOtherSide(root).containsKey(finalCountry1.getTag())
                                                      && activeWar.getScore(root) >= NumbersUtils.toDouble(condition.getCondition("value")));
             case "years_in_union_under":
                 country = root.getSave().getCountry(condition.getCondition("who"));
@@ -3268,7 +3268,7 @@ public class ConditionsUtils {
                         return false;
                     }
 
-                    if (StringUtils.isNotBlank(casusBelli) && !casusBelli.equalsIgnoreCase(activeWar.getWarGoal().getCasusBelli().getName())) {
+                    if (StringUtils.isNotBlank(casusBelli) && !casusBelli.equalsIgnoreCase(activeWar.getWarGoal().getCasusBelli(root.getGame()).getName())) {
                         return false;
                     }
 
@@ -3597,6 +3597,7 @@ public class ConditionsUtils {
                                                                        .stream()
                                                                        .map(activeWar -> activeWar.getSide(province.getOwner()).keySet())
                                                                        .flatMap(Collection::stream)
+                                                                       .map(s -> province.getSave().getCountry(s))
                                                                        .anyMatch(country -> country.equals(supplyDepot.getBuilder()))));
             case "has_winter":
                 return value.equalsIgnoreCase(province.getWinter());

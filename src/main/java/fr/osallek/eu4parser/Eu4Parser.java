@@ -9,6 +9,7 @@ import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.Mod;
 import fr.osallek.eu4parser.model.game.Game;
+import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.save.Save;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArchUtils;
@@ -53,6 +54,20 @@ public class Eu4Parser {
 
     public static final Charset SAVE_CHARSET = Charset.forName("Windows-1252");
 
+    public static Optional<Path> detectSaveFolder() {
+        return Eu4Parser.detectSettings().map(LauncherSettings::getSavesFolder);
+    }
+
+    public static Optional<LauncherSettings> detectSettings() {
+        return Eu4Parser.detectInstallationFolder().map(path -> {
+            try {
+                return Eu4Parser.loadSettings(path);
+            } catch (IOException e) {
+                return null;
+            }
+        });
+    }
+
     public static LauncherSettings loadSettings(Path gameFolderPath) throws IOException {
         LauncherSettings launcherSettings = OBJECT_MAPPER.readValue(gameFolderPath.resolve("launcher-settings.json").toFile(), LauncherSettings.class);
         launcherSettings.setGameFolderPath(gameFolderPath);
@@ -79,7 +94,6 @@ public class Eu4Parser {
     }
 
     public static Optional<Path> detectInstallationFolder() {
-
         try {
             Optional<Path> steamFolder = detectSteamFolder();
 
@@ -272,6 +286,17 @@ public class Eu4Parser {
         }
     }
 
+    public static Save loadSave(Path path) throws IOException {
+        Path installationFolder = Eu4Parser.detectInstallationFolder().orElseThrow(() -> {
+            LOGGER.error("Can't detect game installation folder");
+            return new RuntimeException();
+        });
+
+        LauncherSettings launcherSettings = Eu4Parser.loadSettings(installationFolder);
+
+        return loadSave(installationFolder, path, launcherSettings);
+    }
+
     public static Save loadSave(Path gameFolderPath, Path path) throws IOException {
         return loadSave(gameFolderPath, path, loadSettings(gameFolderPath), null, new HashMap<>());
     }
@@ -283,31 +308,46 @@ public class Eu4Parser {
     public static Save loadSave(Path gameFolderPath, Path path, LauncherSettings launcherSettings, Map<Integer, String> tokens,
                                 Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         File file = path.toFile();
-        Save save = null;
+        Game game;
+        ClausewitzItem gameStateItem;
+        ClausewitzItem aiItem;
+        ClausewitzItem metaItem;
+        boolean compressed = false;
 
         if (file.canRead() && isValid(path)) {
             if (isIronman(path)) {
                 try (ZipFile zipFile = new ZipFile(file)) {
-                    save = new Save(file.getName(), gameFolderPath,
-                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.GAMESTATE_FILE, 6, tokens, listeners, SAVE_CHARSET),
-                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.AI_FILE, 6, tokens, listeners, SAVE_CHARSET),
-                                    ClausewitzParser.convertBinary(zipFile, Eu4Utils.META_FILE, 6, tokens, listeners, SAVE_CHARSET),
-                                    launcherSettings);
+                    compressed = true;
+                    gameStateItem = ClausewitzParser.convertBinary(zipFile, Eu4Utils.GAMESTATE_FILE, 6, tokens, listeners, SAVE_CHARSET);
+                    aiItem = ClausewitzParser.convertBinary(zipFile, Eu4Utils.AI_FILE, 6, tokens, listeners, SAVE_CHARSET);
+                    metaItem = ClausewitzParser.convertBinary(zipFile, Eu4Utils.META_FILE, 6, tokens, listeners, SAVE_CHARSET);
+                    game = new Game(gameFolderPath, launcherSettings, Eu4Parser.getMods(path, tokens));
                 }
             } else if (isValidCompressed(path)) {
                 try (ZipFile zipFile = new ZipFile(file)) {
-                    save = new Save(file.getName(), gameFolderPath,
-                                    ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
-                                    ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
-                                    ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
-                                    launcherSettings);
+                    compressed = true;
+                    gameStateItem = ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET);
+                    aiItem = ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET);
+                    metaItem = ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET);
+                    game = new Game(gameFolderPath, launcherSettings, Eu4Parser.getMods(path, tokens));
                 }
             } else if (isValidUncompressed(path)) {
-                save = new Save(file.getName(), gameFolderPath, ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET), launcherSettings);
+                gameStateItem = ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET);
+                metaItem = gameStateItem;
+                aiItem = gameStateItem;
+                game = new Game(gameFolderPath, launcherSettings, Eu4Parser.getMods(path, tokens));
+            } else {
+                return null;
             }
+        } else {
+            return null;
         }
 
-        return save;
+        return new Save(file.getName(), gameStateItem, aiItem, metaItem, compressed, game);
+    }
+
+    public static Save loadSave(Path path, Game game) throws IOException {
+        return loadSave(path, game, null, new HashMap<>());
     }
 
     public static Save loadSave(Path path, Game game, Map<Integer, String> tokens,
@@ -352,14 +392,15 @@ public class Eu4Parser {
         if (path.toFile().canRead()) {
             if (isIronman(path)) {
                 try (ZipFile zipFile = new ZipFile(path.toFile())) {
-                    object = ClausewitzParser.readSingleObjectBinary(zipFile, Eu4Utils.META_FILE, 6, "mods_enabled_names", StandardCharsets.ISO_8859_1, tokens);
+                    object = ClausewitzParser.readSingleObjectBinary(zipFile, Eu4Utils.META_FILE, 6, List.of("mods_enabled_names", "multi_player"),
+                                                                     StandardCharsets.ISO_8859_1, tokens);
                 }
             } else if (isValidCompressed(path)) {
                 try (ZipFile zipFile = new ZipFile(path.toFile())) {
-                    object = ClausewitzParser.readSingleObject(zipFile, Eu4Utils.META_FILE, 1, "mods_enabled_names");
+                    object = ClausewitzParser.findFirstSingleObject(zipFile, Eu4Utils.META_FILE, 1, List.of("mods_enabled_names", "multi_player"));
                 }
             } else if (isValidUncompressed(path)) {
-                object = ClausewitzParser.readSingleObject(path.toFile(), 1, "mods_enabled_names");
+                object = ClausewitzParser.findFirstSingleObject(path.toFile(), 1, List.of("mods_enabled_names", "multi_player"));
             } else {
                 return new ArrayList<>();
             }
@@ -393,7 +434,12 @@ public class Eu4Parser {
     }
 
     public static Game parseGame(Path gameFolderPath, List<String> modEnabled, LauncherSettings launcherSettings, Runnable runnable) throws IOException {
-        return new Game(gameFolderPath, launcherSettings, modEnabled, runnable);
+        return new Game(gameFolderPath, launcherSettings, modEnabled, runnable, null);
+    }
+
+    public static Game parseGame(Path gameFolderPath, List<String> modEnabled, LauncherSettings launcherSettings, Runnable runnable,
+                                 Eu4Language language) throws IOException {
+        return new Game(gameFolderPath, launcherSettings, modEnabled, runnable, language);
     }
 
     public static void writeSave(Save save, Path path) throws IOException {

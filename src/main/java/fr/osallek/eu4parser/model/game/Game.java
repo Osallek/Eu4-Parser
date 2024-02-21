@@ -3,6 +3,7 @@ package fr.osallek.eu4parser.model.game;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.clausewitzparser.parser.LuaParser;
 import fr.osallek.eu4parser.Eu4Parser;
@@ -63,6 +64,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -70,11 +72,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Game {
 
-    public static final int NB_PARTS = 79;
+    public static final int NB_PARTS = 78;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
 
@@ -124,7 +127,11 @@ public class Game {
 
     private Map<String, CultureGroup> cultureGroups;
 
+    private Map<String, Culture> cultures;
+
     private Map<String, ReligionGroup> religionGroups;
+
+    private Map<String, Religion> religions;
 
     private Map<String, Institution> institutions;
 
@@ -307,14 +314,14 @@ public class Game {
     }
 
     public Game(Path gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled) throws IOException {
-        this(gameFolderPath, launcherSettings, modEnabled, () -> {});
+        this(gameFolderPath, launcherSettings, modEnabled, () -> {}, launcherSettings.getGameLanguage());
     }
 
     public Game(Path gameFolderPath, List<String> modEnabled, Runnable runnable) throws IOException {
-        this(gameFolderPath, null, modEnabled, runnable);
+        this(gameFolderPath, null, modEnabled, runnable, null);
     }
 
-    public Game(Path gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled, Runnable runnable) throws IOException {
+    public Game(Path gameFolderPath, LauncherSettings launcherSettings, List<String> modEnabled, Runnable runnable, Eu4Language language) throws IOException {
         this.launcherSettings = Objects.requireNonNullElse(launcherSettings, Eu4Parser.loadSettings(gameFolderPath));
 
         readMods(modEnabled);
@@ -331,17 +338,6 @@ public class Game {
                 Eu4Utils.POOL_EXECUTOR.submit(() -> {
                     try {
                         readProvinces();
-                    } catch (Exception e) {
-                        LOGGER.error(e.getMessage(), e);
-                    } finally {
-                        countDownLatch.countDown();
-                        runnable.run();
-                    }
-                });
-
-                Eu4Utils.POOL_EXECUTOR.submit(() -> {
-                    try {
-                        readBorders();
                     } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     } finally {
@@ -436,7 +432,7 @@ public class Game {
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
-                loadLocalisations();
+                loadLocalisations(language);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
@@ -466,7 +462,6 @@ public class Game {
                 runnable.run();
             }
         });
-
 
         Eu4Utils.POOL_EXECUTOR.submit(() -> {
             try {
@@ -1204,11 +1199,17 @@ public class Game {
 
         this.continents.values().forEach(continent -> continent.getProvinces().forEach(provinceId -> getProvince(provinceId).setContinent(continent)));
         this.areas.values().forEach(area -> area.getProvinces().forEach(provinceId -> getProvince(provinceId).setArea(area)));
-        this.regions.values().stream().filter(region -> region.getAreas() != null).forEach(region -> region.getAreas().forEach(area -> area.setRegion(region)));
+        this.regions.values()
+                    .stream()
+                    .filter(region -> region.getAreas() != null)
+                    .forEach(region -> region.getAreas().stream().filter(Objects::nonNull).forEach(area -> area.setRegion(region)));
         this.superRegions.values()
                          .stream()
                          .filter(superRegion -> superRegion.getRegions() != null)
-                         .forEach(superRegion -> superRegion.getRegions().forEach(region -> region.setSuperRegion(superRegion)));
+                         .forEach(superRegion -> superRegion.getRegions()
+                                                            .stream()
+                                                            .filter(Objects::nonNull)
+                                                            .forEach(region -> region.setSuperRegion(superRegion)));
     }
 
     public void convertImages(Path destFolder, Path... relativePaths) {
@@ -1279,7 +1280,26 @@ public class Game {
     }
 
     private TreeNode<FileNode> getTreeNode(Path relativePath) {
-        return this.filesNode.getRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath()));
+        List<Path> relativePaths = Stream.concat(Stream.of(Path.of("")), IntStream.range(0, relativePath.getNameCount()).mapToObj(relativePath::getName))
+                                         .toList();
+        return getTreeNode(this.filesNode, relativePaths, 0);
+    }
+
+    private TreeNode<FileNode> getTreeNode(TreeNode<FileNode> treeNode, List<Path> relativePaths, int depth) {
+        if (treeNode.getData().getFileName().equals(relativePaths.get(depth))) {
+            if (relativePaths.size() == depth + 1) {
+                return treeNode;
+            } else {
+                for (TreeNode<FileNode> child : treeNode.getChildren()) {
+                    TreeNode<FileNode> toReturn = getTreeNode(child, relativePaths, depth + 1);
+
+                    if (toReturn != null) {
+                        return toReturn;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private FileNode getFileNode(String relativePath) {
@@ -1287,7 +1307,9 @@ public class Game {
     }
 
     private FileNode getFileNode(Path relativePath) {
-        return this.filesNode.getDataRecursive(fileNode -> relativePath.equals(fileNode.getRelativePath()));
+        List<Path> relativePaths = Stream.concat(Stream.of(Path.of("")), IntStream.range(0, relativePath.getNameCount()).mapToObj(relativePath::getName))
+                                         .toList();
+        return Optional.ofNullable(getTreeNode(this.filesNode, relativePaths, 0)).map(TreeNode::getData).orElse(null);
     }
 
     @SafeVarargs
@@ -1712,12 +1734,8 @@ public class Game {
         return this.cultureGroups.values();
     }
 
-    public List<Culture> getCultures() {
-        return this.cultureGroups.values()
-                                 .stream()
-                                 .map(CultureGroup::getCultures)
-                                 .flatMap(Collection::stream)
-                                 .toList();
+    public Collection<Culture> getCultures() {
+        return this.cultures.values();
     }
 
     public Culture getCulture(String name) {
@@ -1725,21 +1743,15 @@ public class Game {
             return null;
         }
 
-        return this.cultureGroups.values()
-                                 .stream()
-                                 .map(CultureGroup::getCultures)
-                                 .flatMap(Collection::stream)
-                                 .filter(culture -> culture.getName().equalsIgnoreCase(name))
-                                 .findFirst()
-                                 .orElse(null);
+        return this.cultures.get(name);
     }
 
     public Collection<ReligionGroup> getReligionGroups() {
         return this.religionGroups.values();
     }
 
-    public List<Religion> getReligions() {
-        return getReligionGroups().stream().map(ReligionGroup::getReligions).flatMap(Collection::stream).toList();
+    public Collection<Religion> getReligions() {
+        return this.religions.values();
     }
 
     public Religion getReligion(String name) {
@@ -1747,12 +1759,7 @@ public class Game {
             return null;
         }
 
-        return getReligionGroups().stream()
-                                  .map(ReligionGroup::getReligions)
-                                  .flatMap(Collection::stream)
-                                  .filter(religion -> religion.getName().equalsIgnoreCase(name))
-                                  .findFirst()
-                                  .orElse(null);
+        return this.religions.get(name);
     }
 
     public List<Institution> getInstitutions() {
@@ -2123,6 +2130,10 @@ public class Game {
 
     public Collection<Area> getAreas() {
         return this.areas.values();
+    }
+
+    public Collection<String> getAreasNames() {
+        return this.areas.keySet();
     }
 
     public Area getArea(String name) {
@@ -2626,7 +2637,11 @@ public class Game {
         return this.dlcs.get(name);
     }
 
-    public Map<Province, Map<Polygon, Boolean>> getBorders() {
+    public Map<Province, Map<Polygon, Boolean>> getBorders() throws IOException {
+        if (this.borders == null) {
+            readBorders();
+        }
+
         return this.borders;
     }
 
@@ -2649,6 +2664,7 @@ public class Game {
 
     private void readMods(List<String> modsEnabled) throws IOException {
         this.mods = new ArrayList<>();
+        //Todo clean root folder
         this.filesNode = new TreeNode<>(null, new FileNode(this.launcherSettings.getGameFolderPath(), (Mod) null), FileNode::getChildren);
 
         if (CollectionUtils.isNotEmpty(modsEnabled)) {
@@ -2794,11 +2810,15 @@ public class Game {
         }
     }
 
-    private void loadLocalisations() {
+    private void loadLocalisations(Eu4Language eu4Language) {
         List<Localisation> list = new ArrayList<>();
 
-        for (Eu4Language language : Eu4Language.values()) {
-            list.addAll(loadLocalisations(language));
+        if (eu4Language == null) {
+            for (Eu4Language language : Eu4Language.values()) {
+                list.addAll(readLocalisations(language));
+            }
+        } else {
+            list.addAll(readLocalisations(eu4Language));
         }
 
         this.localisations = list.stream()
@@ -2813,7 +2833,7 @@ public class Game {
                                                                                                    () -> new EnumMap<>(Eu4Language.class)))));
     }
 
-    private List<Localisation> loadLocalisations(Eu4Language eu4Language) {
+    private List<Localisation> readLocalisations(Eu4Language eu4Language) {
         List<Localisation> list = new ArrayList<>();
 
         getFileNodes(Eu4Utils.LOCALISATION_FOLDER_PATH,
@@ -2941,12 +2961,12 @@ public class Game {
             this.provincesByColor = new HashMap<>();
             try (BufferedReader reader = Files.newBufferedReader(provincesDefinitionFile.toPath(), StandardCharsets.ISO_8859_1)) {
                 String line;
-                reader.readLine(); //Skip csv headers
                 while ((line = reader.readLine()) != null) {
                     if (StringUtils.isNotBlank(line)) {
                         String[] csvLine = line.split(";", -1);
 
-                        if (csvLine.length >= 4 && StringUtils.isNoneBlank(Arrays.copyOf(csvLine, 4))) {
+                        if (csvLine.length >= 4 && Arrays.stream(csvLine).limit(4).noneMatch(StringUtils::isBlank) &&
+                            NumbersUtils.parseInt(csvLine[0]).isPresent()) {
                             Province province = new Province(csvLine, this);
                             this.provinces.put(province.getId(), province);
 
@@ -3102,11 +3122,11 @@ public class Game {
             this.provinceImageWidth = provinceImage.getWidth();
             this.provinceImageHeight = provinceImage.getHeight();
 
-            List<Color> terrainColors = new ArrayList<>();
+            List<Color> terrainModelColors = new ArrayList<>();
             IndexColorModel colorModel = (IndexColorModel) terrainMap.getColorModel();
 
             for (int i = 0; i < colorModel.getMapSize() + 1; i++) {
-                terrainColors.add(new Color(colorModel.getRGB(i)));
+                terrainModelColors.add(new Color(colorModel.getRGB(i)));
             }
 
             List<Color> treesColors = new ArrayList<>();
@@ -3116,37 +3136,44 @@ public class Game {
                 treesColors.add(new Color(colorModel.getRGB(i)));
             }
 
-            Map<Integer, List<Integer>> provinceTerrainColors = new HashMap<>();
+            Map<Integer, List<Integer>> provinceTerrainColors = new HashMap<>(this.provincesByColor.size(), 1f);
+            this.provincesByColor.keySet().forEach(color -> provinceTerrainColors.put(color, new ArrayList<>(10)));
 
+            int previousRgb = -1;
+            Province previousProvince = null;
+            int[] colors = provinceImage.getRGB(0, 0, provinceImage.getWidth(), provinceImage.getHeight(), null, 0, provinceImage.getWidth());
+            int[] terrainColors = terrainMap.getRGB(0, 0, terrainMap.getWidth(), terrainMap.getHeight(), null, 0, terrainMap.getWidth());
             for (int x = 0; x < this.provinceImageWidth; x++) {
                 for (int y = 0; y < this.provinceImageHeight; y++) {
-                    int rgb = provinceImage.getRGB(x, y);
-                    Province province = this.provincesByColor.get(rgb);
+                    int rgb = colors[y * provinceImage.getWidth() + x];
+                    Province province = previousRgb == rgb ? previousProvince : this.provincesByColor.get(rgb);
                     Province other;
+                    boolean port = false;
 
-                    if (province != null && province.isColonizable() && !province.isPort()) {
+                    if (province != null && !province.isPort() && province.isColonizable()) {
                         if (x > 0) {
                             int leftRgb = provinceImage.getRGB(x - 1, y);
                             if (leftRgb != rgb && (other = this.provincesByColor.get(leftRgb)) != null && other.isOcean()) {
                                 province.setPort(true);
+                                port = true;
                             }
                         }
 
-                        if (x < provinceImage.getWidth() - 1) {
+                        if (!port && x < provinceImage.getWidth() - 1) {
                             int rightRgb = provinceImage.getRGB(x + 1, y);
                             if (rightRgb != rgb && (other = this.provincesByColor.get(rightRgb)) != null && other.isOcean()) {
                                 province.setPort(true);
                             }
                         }
 
-                        if (y > 0) {
+                        if (!port && y > 0) {
                             int topRgb = provinceImage.getRGB(x, y - 1);
                             if (topRgb != rgb && (other = this.provincesByColor.get(topRgb)) != null && other.isOcean()) {
                                 province.setPort(true);
                             }
                         }
 
-                        if (y < provinceImage.getHeight() - 1) {
+                        if (!port && y < provinceImage.getHeight() - 1) {
                             int bottomRgb = provinceImage.getRGB(x, y + 1);
                             if (bottomRgb != rgb && (other = this.provincesByColor.get(bottomRgb)) != null && other.isOcean()) {
                                 province.setPort(true);
@@ -3154,19 +3181,15 @@ public class Game {
                         }
                     }
 
-                    int terrainColor = terrainMap.getRGB(x, y);
-                    int provinceColor = provinceImage.getRGB(x, y);
-
-                    if (!provinceTerrainColors.containsKey(provinceColor)) {
-                        provinceTerrainColors.put(provinceColor, new ArrayList<>());
-                    }
-
-                    provinceTerrainColors.get(provinceColor).add(terrainColor);
+                    provinceTerrainColors.get(rgb).add(terrainColors[y * terrainMap.getWidth() + x]);
+                    previousProvince = province;
+                    previousRgb = rgb;
                 }
             }
 
             Map<Integer, Integer> provinceTerrains = provinceTerrainColors.entrySet()
                                                                           .stream()
+                                                                          .filter(e -> !e.getValue().isEmpty())
                                                                           .collect(Collectors.toMap(Map.Entry::getKey,
                                                                                                     entry -> {
                                                                                                         Map<Integer, Long> map = entry.getValue()
@@ -3192,24 +3215,24 @@ public class Game {
                 this.terrains = new HashMap<>();
                 this.terrains.putAll(terrainsItem.getChildren()
                                                  .stream()
-                                                 .map(item -> new Terrain(item, terrainFile, this, terrainColors))
+                                                 .map(item -> new Terrain(item, terrainFile, this, terrainModelColors))
                                                  .collect(Collectors.toMap(Terrain::getName, Function.identity(), (a, b) -> b)));
 
                 ClausewitzItem treesItem = this.terrainItem.getChild("tree");
 
-                this.trees = new HashMap<>();
-                this.trees.putAll(treesItem.getChildren()
-                                           .stream()
-                                           .map(item -> new Tree(item, terrainFile, this, treesColors))
-                                           .collect(Collectors.toMap(Tree::getName, Function.identity(), (a, b) -> b)));
+                this.trees = treesItem.getChildren()
+                                      .stream()
+                                      .map(item -> new Tree(item, terrainFile, this, treesColors))
+                                      .collect(Collectors.toMap(Tree::getName, Function.identity(), (a, b) -> b,
+                                                                () -> HashMap.newHashMap(treesItem.getNbChildren())));
 
                 ClausewitzItem categories = this.terrainItem.getChild("categories");
 
-                this.terrainCategories = new HashMap<>();
-                this.terrainCategories.putAll(categories.getChildren()
-                                                        .stream()
-                                                        .map(item -> new TerrainCategory(item, terrainFile))
-                                                        .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b)));
+                this.terrainCategories = categories.getChildren()
+                                                   .stream()
+                                                   .map(item -> new TerrainCategory(item, terrainFile))
+                                                   .collect(Collectors.toMap(TerrainCategory::getName, Function.identity(), (a, b) -> b,
+                                                                             () -> HashMap.newHashMap(categories.getNbChildren())));
 
                 provinceTerrains.forEach((provinceColor, color) ->
                                                  this.terrains.values()
@@ -3218,8 +3241,11 @@ public class Game {
                                                               .findFirst()
                                                               .ifPresent(terrain -> {
                                                                   Province p = this.provincesByColor.get(provinceColor);
-                                                                  p.setTerrainCategory(terrain.getCategory());
-                                                                  terrain.getCategory().getComputedProvinces().add(p.getId());
+
+                                                                  if (p != null) {
+                                                                      p.setTerrainCategory(terrain.getCategory());
+                                                                      terrain.getCategory().getComputedProvinces().add(p.getId());
+                                                                  }
                                                               }));
 
                 this.terrainCategories.values()
@@ -3238,6 +3264,7 @@ public class Game {
 
     private void readCultures() {
         this.cultureGroups = new HashMap<>();
+        this.cultures = new HashMap<>();
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "cultures", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem cultureGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
@@ -3253,19 +3280,24 @@ public class Game {
                                                  return group;
                                              }
                                          });
+                                         cultureGroup.getCultures().forEach(culture -> this.cultures.put(culture.getName(), culture));
                                      });
                 });
     }
 
     private void readReligion() {
         this.religionGroups = new LinkedHashMap<>();
+        this.religions = new HashMap<>();
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "religions", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem religionGroupsItem = ClausewitzParser.parse(path.toFile(), 0);
                     religionGroupsItem.getChildren()
                                       .stream()
                                       .map(item -> new ReligionGroup(item, this))
-                                      .forEach(religionGroup -> this.religionGroups.put(religionGroup.getName(), religionGroup));
+                                      .forEach(religionGroup -> {
+                                          this.religionGroups.put(religionGroup.getName(), religionGroup);
+                                          religionGroup.getReligions().forEach(religion -> this.religions.put(religion.getName(), religion));
+                                      });
                 });
     }
 
@@ -4140,29 +4172,43 @@ public class Game {
     }
 
     private void readCountry() {
-        this.countries = new HashMap<>();
+        this.countries = new ConcurrentHashMap<>();
 
-        Map<String, FileNode> countriesHistory = new HashMap<>();
+        Map<String, FileNode> countriesHistory = new ConcurrentHashMap<>();
         getFileNodes(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "countries", this::isRegularTxtFile)
                 .forEach(fileNode -> countriesHistory.put(fileNode.getPath().toFile().getName().substring(0, 3).toUpperCase(), fileNode));
 
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "country_tags", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem countryTagsItem = ClausewitzParser.parse(path.toFile(), 0);
-                    countryTagsItem.getVariables()
-                                   .forEach(variable -> {
-                                       FileNode commonFileNode = getFileNode(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator
-                                                                                     + ClausewitzUtils.removeQuotes(variable.getValue())).toString());
-                                       Country country = new Country(variable.getName().toUpperCase(), commonFileNode,
-                                                                     ClausewitzParser.parse(commonFileNode.getPath().toFile(), 0), this);
-                                       FileNode historyFileNode = countriesHistory.get(country.getTag());
+                    List<ClausewitzVariable> variables = countryTagsItem.getVariables();
+                    CountDownLatch countDownLatch = new CountDownLatch(variables.size());
+                    for (ClausewitzVariable variable : variables) {
+                        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                            try {
+                                FileNode commonFileNode = getFileNode(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator
+                                                                              + ClausewitzUtils.removeQuotes(variable.getValue())).toString());
+                                Country country = new Country(variable.getName().toUpperCase(), commonFileNode,
+                                                              ClausewitzParser.parse(commonFileNode.getPath().toFile(), 0), this);
+                                FileNode historyFileNode = countriesHistory.get(country.getTag());
 
-                                       if (historyFileNode != null) {
-                                           country.setHistory(ClausewitzParser.parse(historyFileNode.getPath().toFile(), 0), historyFileNode);
-                                       }
+                                if (historyFileNode != null) {
+                                    country.setHistory(ClausewitzParser.parse(historyFileNode.getPath().toFile(), 0), historyFileNode);
+                                }
 
-                                       this.countries.put(country.getTag(), country);
-                                   });
+                                this.countries.put(country.getTag(), country);
+                            } finally {
+                                countDownLatch.countDown();
+                            }
+                        });
+                    }
+
+                    try {
+                        countDownLatch.await();
+                    } catch (InterruptedException e) {
+                        LOGGER.error("An error occurred while waiting read countries : {}", e.getMessage(), e);
+                        Thread.currentThread().interrupt();
+                    }
                 });
     }
 

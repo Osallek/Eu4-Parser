@@ -11,15 +11,14 @@ public class Loan {
 
     private final ClausewitzItem item;
 
-    private Id id;
-
     public Loan(ClausewitzItem item) {
         this.item = item;
-        refreshAttributes();
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem idItem = this.item.getChild("id");
+
+        return idItem != null ? new Id(idItem) : null;
     }
 
     public String getLender() {
@@ -86,14 +85,6 @@ public class Loan {
 
     public void setEstateLoan(boolean estateLoan) {
         this.item.setVariable("estate_loan", estateLoan);
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, double interest, boolean fixedInterest, int amount, LocalDate expiryDate) {

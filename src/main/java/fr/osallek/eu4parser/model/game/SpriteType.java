@@ -76,7 +76,7 @@ public class SpriteType {
     }
 
     public Integer getNoOfFrames() {
-        return this.item.getVarAsInt("noofframes");
+        return this.item.getVarAsInt("noOfFrames");
     }
 
     public void setNoOfFrames(Integer noOfFrames) {

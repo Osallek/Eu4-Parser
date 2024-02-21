@@ -8,15 +8,14 @@ public class CustomColors {
 
     private final ClausewitzItem item;
 
-    private Color flagColors;
-
     public CustomColors(ClausewitzItem item) {
         this.item = item;
-        refreshAttributes();
     }
 
     public Color getFlagColors() {
-        return flagColors;
+        ClausewitzList flagColorsList = this.item.getList("flag_colors");
+
+        return flagColorsList != null ? new Color(flagColorsList) : null;
     }
 
     public Integer getFlag() {
@@ -43,13 +42,5 @@ public class CustomColors {
 
     public void setSymbolIndex(int symbolIndex) {
         this.item.setVariable("symbol_index", symbolIndex);
-    }
-
-    private void refreshAttributes() {
-        ClausewitzList flagColorsList = this.item.getList("flag_colors");
-
-        if (flagColorsList != null) {
-            this.flagColors = new Color(flagColorsList);
-        }
     }
 }

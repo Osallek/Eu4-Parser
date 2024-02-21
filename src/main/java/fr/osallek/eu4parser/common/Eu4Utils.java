@@ -47,7 +47,7 @@ public final class Eu4Utils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Eu4Utils.class);
 
-    public static final ThreadPoolExecutor POOL_EXECUTOR = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+    public static final ThreadPoolExecutor POOL_EXECUTOR = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static final Collator COLLATOR = Collator.getInstance();
 

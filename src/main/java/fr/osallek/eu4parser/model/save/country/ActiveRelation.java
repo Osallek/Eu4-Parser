@@ -12,12 +12,9 @@ public class ActiveRelation {
 
     private final ClausewitzItem item;
 
-    private List<Opinion> opinions;
-
     public ActiveRelation(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        refreshAttributes();
     }
 
     public String getCountryTag() {
@@ -140,23 +137,14 @@ public class ActiveRelation {
     }
 
     public List<Opinion> getOpinions() {
-        return opinions;
+        return this.item.getChildren("opinion").stream().map(Opinion::new).toList();
     }
 
     public void addOpinion(String modifier, LocalDate date, Double currentOpinion) {
         Opinion.addToItem(this.item, modifier, date, currentOpinion);
-        refreshAttributes();
     }
 
     public void removeOpinion(int index) {
         this.item.removeVariable("opinion", index);
-        refreshAttributes();
-    }
-
-    private void refreshAttributes() {
-        List<ClausewitzItem> naviesItems = this.item.getChildren("opinion");
-        this.opinions = naviesItems.stream()
-                                   .map(Opinion::new)
-                                   .toList();
     }
 }

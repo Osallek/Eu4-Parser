@@ -21,18 +21,9 @@ public class SaveArea {
 
     private final Save save;
 
-    private Map<SaveCountry, CountryState> countriesStates;
-
-    private Map<SaveCountry, SaveInvestment> investments;
-
-    private List<SaveProvince> provinces;
-
-    private List<SupplyDepot> supplyDepots;
-
     public SaveArea(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
-        refreshAttributes();
     }
 
     public String getName() {
@@ -40,19 +31,29 @@ public class SaveArea {
     }
 
     public List<SaveProvince> getProvinces() {
-        return provinces;
+        return this.save.getGame().getArea(getName()).getProvinces().stream().map(this.save::getProvince).toList();
     }
 
     public CountryState getCountryState(SaveCountry country) {
-        return this.countriesStates == null ? null : this.countriesStates.get(country);
+        return getCountriesStates().get(country);
     }
 
     public Map<SaveCountry, CountryState> getCountriesStates() {
+        ClausewitzItem stateItem = this.item.getChild("state");
+        Map<SaveCountry, CountryState> countriesStates = null;
+
+        if (stateItem != null) {
+            List<ClausewitzItem> countryStateItems = stateItem.getChildren("country_state");
+            countriesStates = countryStateItems.stream()
+                                               .map(child -> new CountryState(child, this.save))
+                                               .collect(Collectors.toMap(CountryState::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
+        }
+
         return countriesStates;
     }
 
     public void addCountryState(SaveCountry country) {
-        if (!this.countriesStates.containsKey(country)) {
+        if (getCountryState(country) == null) {
             ClausewitzItem stateItem = this.item.getChild("state");
 
             if (stateItem == null) {
@@ -61,45 +62,45 @@ public class SaveArea {
             }
 
             CountryState.addToItem(stateItem, country);
-            refreshAttributes();
         }
     }
 
     public void removeCountryState(SaveCountry country) {
-        Iterator<Map.Entry<SaveCountry, CountryState>> iterator = this.countriesStates.entrySet().iterator();
+        Iterator<Map.Entry<SaveCountry, CountryState>> iterator = getCountriesStates().entrySet().iterator();
         int i = 0;
         while (iterator.hasNext()) {
             Map.Entry<SaveCountry, CountryState> entry = iterator.next();
             if (entry.getValue().getCountry().equals(country)) {
                 this.item.getChild("state").removeChild("country_state", i);
-                country.getStates().remove(ClausewitzUtils.removeQuotes(getName()));
+                country.getStates().remove(this.save.getAreas().get(ClausewitzUtils.removeQuotes(getName())));
                 break;
             }
         }
-        refreshAttributes();
     }
 
     public SaveInvestment getInvestment(SaveCountry country) {
-        return this.investments.get(country);
+        return getInvestments().get(country);
     }
 
     public Map<SaveCountry, SaveInvestment> getInvestments() {
-        return investments;
+        return this.item.getChildren("investments")
+                        .stream()
+                        .map(child -> new SaveInvestment(child, this.save))
+                        .collect(Collectors.toMap(SaveInvestment::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
     }
 
     public void addInvestments(SaveCountry country, Investment... investments) {
-        SaveInvestment investment = this.investments.get(country);
+        SaveInvestment investment = getInvestment(country);
 
         if (investment != null) {
             Arrays.stream(investments).forEach(investment::addInvestment);
         } else {
             SaveInvestment.addToItem(this.item, country, investments);
-            refreshAttributes();
         }
     }
 
     public void removeInvestments(SaveCountry country) {
-        Iterator<Map.Entry<SaveCountry, SaveInvestment>> iterator = this.investments.entrySet().iterator();
+        Iterator<Map.Entry<SaveCountry, SaveInvestment>> iterator = getInvestments().entrySet().iterator();
         int i = 0;
 
         while (iterator.hasNext()) {
@@ -109,11 +110,10 @@ public class SaveArea {
                 break;
             }
         }
-        refreshAttributes();
     }
 
     public void removeInvestments(SaveCountry country, Investment... investments) {
-        SaveInvestment investment = this.investments.get(country);
+        SaveInvestment investment = getInvestment(country);
 
         if (investment != null) {
             Arrays.stream(investments).forEach(investment::removeInvestment);
@@ -121,33 +121,11 @@ public class SaveArea {
     }
 
     public List<SupplyDepot> getSupplyDepots() {
-        return supplyDepots;
-    }
-
-    private void refreshAttributes() {
-        this.provinces = this.save.getGame().getArea(getName()).getProvinces().stream().map(this.save::getProvince).toList();
-        ClausewitzItem stateItem = this.item.getChild("state");
-
-        if (stateItem != null) {
-            List<ClausewitzItem> countryStateItems = stateItem.getChildren("country_state");
-            this.countriesStates = countryStateItems.stream()
-                                                    .map(child -> new CountryState(child, this.save))
-                                                    .collect(Collectors.toMap(CountryState::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
-            this.countriesStates.forEach((country, countryState) -> country.getStates().put(this, countryState));
-        }
-
-        List<ClausewitzItem> investmentsItems = this.item.getChildren("investments");
-        this.investments = investmentsItems.stream()
-                                           .map(child -> new SaveInvestment(child, this.save))
-                                           .collect(Collectors.toMap(SaveInvestment::getCountry, Function.identity(), (a, b) -> b, LinkedHashMap::new));
-
         ClausewitzItem supplyDepotsItem = this.item.getChild("supply_depots");
-        if (supplyDepotsItem != null) {
-            this.supplyDepots = supplyDepotsItem.getChildren()
-                                                .stream()
-                                                .map(child -> new SupplyDepot(child, this.save))
-                                                .toList();
-        }
+        return supplyDepotsItem != null ? supplyDepotsItem.getChildren()
+                                                          .stream()
+                                                          .map(child -> new SupplyDepot(child, this.save))
+                                                          .toList() : null;
     }
 
     @Override

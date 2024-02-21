@@ -18,22 +18,14 @@ public class RebelFaction {
 
     private final ClausewitzItem item;
 
-    private Id id;
-
-    private Id leader;
-
-    private Id army;
-
-    private Leader general;
-
     public RebelFaction(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        refreshAttributes();
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem child = this.item.getChild("id");
+        return child == null ? null : new Id(child);
     }
 
     public String getType() {
@@ -81,7 +73,13 @@ public class RebelFaction {
     }
 
     public Leader getGeneral() {
-        return general;
+        ClausewitzItem generalItem = this.item.getChild("general");
+
+        if (generalItem != null) {
+            return new Leader(generalItem, null);
+        }
+
+        return null;
     }
 
     public SaveCountry getSupportiveCountry() {
@@ -93,7 +91,13 @@ public class RebelFaction {
     }
 
     public Id getLeader() {
-        return leader;
+        ClausewitzItem leaderItem = this.item.getChild("leader");
+
+        if (leaderItem != null && leaderItem.getVarAsInt("id") != 0) {
+            return new Id(leaderItem);
+        }
+
+        return null;
     }
 
     public List<SaveProvince> getPossibleProvinces() {
@@ -116,33 +120,18 @@ public class RebelFaction {
         return list.getValues().stream().map(this.save::getCountry).toList();
     }
 
-    public Boolean isActive() {
-        return this.item.getVarAsBool("active");
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem leaderItem = this.item.getChild("leader");
-
-        if (leaderItem != null && leaderItem.getVarAsInt("id") != 0) {
-            this.leader = new Id(leaderItem);
-        }
-
+    public Id getArmy() {
         ClausewitzItem armyItem = this.item.getChild("army");
 
         if (armyItem != null) {
-            this.army = new Id(leaderItem);
+            ClausewitzItem leaderItem = this.item.getChild("leader");
+            return leaderItem == null ? null : new Id(leaderItem);
         }
 
-        ClausewitzItem generalItem = this.item.getChild("general");
+        return null;
+    }
 
-        if (generalItem != null) {
-            this.general = new Leader(generalItem, null);
-        }
+    public Boolean isActive() {
+        return this.item.getVarAsBool("active");
     }
 }

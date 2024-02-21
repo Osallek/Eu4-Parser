@@ -701,6 +701,23 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("local_has_man_of_war", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("local_has_galleass", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("block_slave_raid", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("has_marines", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_persian_influence", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("regiment_disembark_speed", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_rajput_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("amount_of_samurai", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_streltsy_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_cossack_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("has_mamluks", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_mamluks_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("amount_of_mamluks", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("has_qizilbash", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("allowed_qizilbash_fraction", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("amount_of_qizilbash", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("local_has_mamluks", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("local_has_qizilbash", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
+        ModifiersUtils.addModifier("monthly_egyptian_westernization", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("monthly_asha_vahishta", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {
@@ -1279,6 +1296,10 @@ public class ModifiersUtils {
         return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, 1 - country.getGoverningCapacityUsedPercent()));
     }
 
+    public static Modifiers scaleWithUnderGoverningCapacityReverse(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, Math.max(0, country.getGoverningCapacityUsedPercent()));
+    }
+
     public static Modifiers scaleWithMandate(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getSave().getCelestialEmpire().dismantled() ? 0 :
                                                         (country.getSave().getCelestialEmpire().getImperialInfluence() / 100));
@@ -1359,6 +1380,22 @@ public class ModifiersUtils {
 
     public static Modifiers scaleWithConsortMil(SaveCountry country, Modifiers modifiers) {
         return ModifiersUtils.scaleModifiers(modifiers, country.getConsort().getMil());
+    }
+
+    public static Modifiers scaleWithManpowerPercent(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getManpower() * 100 / country.getMaxManpower());
+    }
+
+    public static Modifiers scaleWithManpowerPercentReverse(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, (1 - (country.getManpower() / country.getMaxManpower())) * 100);
+    }
+
+    public static Modifiers scaleWithSailorsPercent(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, country.getSailors() * 100 / country.getMaxSailors());
+    }
+
+    public static Modifiers scaleWithSailorsPercentReverse(SaveCountry country, Modifiers modifiers) {
+        return ModifiersUtils.scaleModifiers(modifiers, (1 - (country.getSailors() / country.getMaxSailors())) * 100);
     }
 
     public static Modifiers scaleWithMaintainedForts(SaveCountry country, Modifiers modifiers) {

@@ -12,18 +12,15 @@ public class MercenaryCompany {
 
     protected final SaveCountry country;
 
-    protected Id id;
-
-    protected Id leader;
-
     public MercenaryCompany(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
-        refreshAttributes();
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem idItem = this.item.getChild("id");
+
+        return idItem != null ? new Id(idItem) : null;
     }
 
     public String getTag() {
@@ -39,7 +36,9 @@ public class MercenaryCompany {
     }
 
     public Id getLeader() {
-        return leader;
+        ClausewitzItem leaderItem = this.item.getChild("leader");
+
+        return leaderItem != null ? new Id(leaderItem) : null;
     }
 
     public void removeLeader() {
@@ -76,19 +75,5 @@ public class MercenaryCompany {
 
     public LocalDate getDisbandDate() {
         return this.item.getVarAsDate("disband_date");
-    }
-
-    protected void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem leaderItem = this.item.getChild("leader");
-
-        if (leaderItem != null) {
-            this.leader = new Id(leaderItem);
-        }
     }
 }

@@ -7,24 +7,27 @@ import fr.osallek.eu4parser.model.game.Unit;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.Save;
 
+import java.util.ArrayList;
+
 public abstract class AbstractRegiment {
 
     protected final Save save;
 
     protected final ClausewitzItem item;
 
-    private Id id;
-
-    private Id lastTarget;
-
     protected AbstractRegiment(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
-        refreshAttributes();
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem idItem = this.item.getChild("id");
+
+        if (idItem != null) {
+            return new Id(idItem);
+        }
+
+        return null;
     }
 
     public abstract AbstractArmy getArmy();
@@ -86,7 +89,13 @@ public abstract class AbstractRegiment {
     }
 
     public Id getLastTarget() {
-        return lastTarget;
+        ClausewitzItem lastTargetItem = this.item.getChild("last_target");
+
+        if (lastTargetItem != null) {
+            return new Id(lastTargetItem);
+        }
+
+        return null;
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale) {
@@ -100,19 +109,5 @@ public abstract class AbstractRegiment {
         parent.addChild(toItem);
 
         return toItem;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem lastTargetItem = this.item.getChild("last_target");
-
-        if (lastTargetItem != null) {
-            this.lastTarget = new Id(lastTargetItem);
-        }
     }
 }

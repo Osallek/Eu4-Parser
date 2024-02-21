@@ -35,15 +35,10 @@ public class SavePapacy {
 
     private final Save save;
 
-    private List<Cardinal> cardinals;
-
-    private ColoniesClaims coloniesClaims;
-
     public SavePapacy(ClausewitzItem item, SaveReligion religion, Save save) {
         this.item = item;
         this.religion = religion;
         this.save = save;
-        refreshAttributes();
     }
 
     public Papacy getGamePapacy() {
@@ -218,7 +213,13 @@ public class SavePapacy {
     }
 
     public List<Cardinal> getCardinals() {
-        return cardinals;
+        ClausewitzItem activeCardinalsItem = this.item.getChild("active_cardinals");
+
+        if (activeCardinalsItem != null) {
+            return activeCardinalsItem.getChildren("cardinal").stream().map(child -> new Cardinal(child, this.save)).toList();
+        }
+
+        return null;
     }
 
     public void addCardinal(Integer provinceId) {
@@ -232,8 +233,6 @@ public class SavePapacy {
                                        .orElse(new Random().nextInt(90000));
             Cardinal.addToItem(activeCardinalsItem, id, provinceId);
         }
-
-        refreshAttributes();
     }
 
     public void removeCardinal(Integer index) {
@@ -242,35 +241,41 @@ public class SavePapacy {
         if (activeCardinalsItem != null) {
             activeCardinalsItem.removeChild("cardinal", index);
         }
+    }
 
-        refreshAttributes();
+    public ColoniesClaims getClaims() {
+        ClausewitzList claimsList = this.item.getList("colony_claim");
+
+        if (claimsList != null) {
+            return new ColoniesClaims(claimsList);
+        }
+
+        return null;
     }
 
     public List<String> getColonyClaims() {
-        if (this.coloniesClaims == null) {
-            return new ArrayList<>();
-        }
-
-        return this.coloniesClaims.getColonyClaims();
+        ColoniesClaims coloniesClaims = getClaims();
+        return coloniesClaims == null ? new ArrayList<>() : coloniesClaims.getColonyClaims();
     }
 
     public String getColonyClaim(int index) {
-        if (this.coloniesClaims == null) {
-            return null;
-        }
-
-        return this.coloniesClaims.getColonyClaim(index);
+        ColoniesClaims coloniesClaims = getClaims();
+        return coloniesClaims == null ? null : coloniesClaims.getColonyClaims().get(index);
     }
 
     public void setColonyClaim(int index, SaveCountry country) {
-        if (this.coloniesClaims != null) {
-            this.coloniesClaims.setColonyClaim(index, country);
+        ColoniesClaims coloniesClaims = getClaims();
+
+        if (coloniesClaims != null) {
+            coloniesClaims.setColonyClaim(index, country);
         }
     }
 
     public void removeColonyClaim(int index) {
-        if (this.coloniesClaims != null) {
-            this.coloniesClaims.removeColonyClaim(index);
+        ColoniesClaims coloniesClaims = getClaims();
+
+        if (coloniesClaims != null) {
+            coloniesClaims.removeColonyClaim(index);
         }
     }
 
@@ -352,20 +357,5 @@ public class SavePapacy {
         ClausewitzList list = this.item.getList("harsh");
 
         return list == null ? new ArrayList<>() : list.getValues().stream().map(this.save::getCountry).toList();
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem activeCardinalsItem = this.item.getChild("active_cardinals");
-
-        if (activeCardinalsItem != null) {
-            List<ClausewitzItem> cardinalsItems = activeCardinalsItem.getChildren("cardinal");
-            this.cardinals = cardinalsItems.stream().map(child -> new Cardinal(child, this.save)).toList();
-        }
-
-        ClausewitzList claimsList = this.item.getList("colony_claim");
-
-        if (claimsList != null) {
-            this.coloniesClaims = new ColoniesClaims(claimsList);
-        }
     }
 }

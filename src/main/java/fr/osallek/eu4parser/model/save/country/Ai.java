@@ -13,21 +13,8 @@ public class Ai {
 
     private final ClausewitzItem item;
 
-    private List<ConquerProv> conquerProvs;
-
-    private List<Threat> threats;
-
-    private List<Threat> antagonize;
-
-    private List<Threat> befriends;
-
-    private List<Threat> rivals;
-
-    private List<Threat> militaryAccesses;
-
     public Ai(ClausewitzItem item) {
         this.item = item;
-        refreshAttributes();
     }
 
     public Boolean getInitialized() {
@@ -102,62 +89,30 @@ public class Ai {
     }
 
     public List<ConquerProv> getConquerProvs() {
-        return conquerProvs;
+        return this.item.getChildren("conquer_prov").stream().map(ConquerProv::new).toList();
     }
 
     public List<Threat> getThreats() {
-        return threats;
+        return this.item.getChildren("threat").stream().map(Threat::new).toList();
     }
 
     public List<Threat> getAntagonize() {
-        return antagonize;
+        return this.item.getChildren("antagonize").stream().map(Threat::new).toList();
     }
 
     public List<Threat> getBefriends() {
-        return befriends;
+        return this.item.getChildren("befriend").stream().map(Threat::new).toList();
     }
 
     public List<Threat> getRivals() {
-        return rivals;
+        return this.item.getChildren("rival").stream().map(Threat::new).toList();
     }
 
     public List<Threat> getMilitaryAccesses() {
-        return militaryAccesses;
+        return this.item.getChildren("military_access").stream().map(Threat::new).toList();
     }
 
     public Integer getDefendedHomeStrait() {
         return this.item.getVarAsInt("defended_home_strait");
-    }
-
-    private void refreshAttributes() {
-        List<ClausewitzItem> conquerProvItems = this.item.getChildren("conquer_prov");
-        this.conquerProvs = conquerProvItems.stream()
-                                            .map(ConquerProv::new)
-                                            .toList();
-
-        List<ClausewitzItem> threatItems = this.item.getChildren("threat");
-        this.threats = threatItems.stream()
-                                  .map(Threat::new)
-                                  .toList();
-
-        List<ClausewitzItem> antagonizeItems = this.item.getChildren("antagonize");
-        this.antagonize = antagonizeItems.stream()
-                                         .map(Threat::new)
-                                         .toList();
-
-        List<ClausewitzItem> befriendItems = this.item.getChildren("befriend");
-        this.befriends = befriendItems.stream()
-                                      .map(Threat::new)
-                                      .toList();
-
-        List<ClausewitzItem> rivalsItems = this.item.getChildren("rival");
-        this.rivals = rivalsItems.stream()
-                                 .map(Threat::new)
-                                 .toList();
-
-        List<ClausewitzItem> militaryAccessesItems = this.item.getChildren("military_access");
-        this.militaryAccesses = militaryAccessesItems.stream()
-                                                     .map(Threat::new)
-                                                     .toList();
     }
 }

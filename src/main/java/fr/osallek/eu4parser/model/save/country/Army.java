@@ -7,21 +7,18 @@ import java.util.List;
 
 public class Army extends AbstractArmy {
 
-    private Id mercenaryCompany;
-
-    private List<Regiment> regiments;
-
     public Army(ClausewitzItem item, SaveCountry country) {
         super(item, country);
-        refreshAttributes();
     }
 
     public Id getMercenaryCompany() {
-        return mercenaryCompany;
+        ClausewitzItem child = this.item.getChild("mercenary_company");
+
+        return child != null ? new Id(child) : null;
     }
 
     public List<Regiment> getRegiments() {
-        return regiments;
+        return this.item.getChildren("regiment").stream().map(regimentItem -> new Regiment(regimentItem, this.country.getSave(), this)).toList();
     }
 
     public void addRegiment(String name, String type) {
@@ -29,24 +26,22 @@ public class Army extends AbstractArmy {
         Double morale = 0.5d;
         Double drill = 0d;
 
-        if (this.regiments != null && !this.regiments.isEmpty()) {
-            home = this.regiments.get(0).getHome();
-            morale = this.regiments.get(0).getMorale();
-            drill = this.regiments.get(0).getDrill();
+        List<Regiment> regiments = getRegiments();
+        if (regiments != null && !regiments.isEmpty()) {
+            home = regiments.getFirst().getHome();
+            morale = regiments.getFirst().getMorale();
+            drill = regiments.getFirst().getDrill();
         }
 
         addRegiment(name, home, type, morale, drill);
     }
 
     public void addRegiment(String name, int home, String type, double morale, double drill) {
-        Regiment.addToItem(this.item, this.country.getSave()
-                                                  .getAndIncrementUnitIdCounter(), name, home, type, morale, drill);
-        refreshAttributes();
+        Regiment.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale, drill);
     }
 
     public void removeRegiment(int index) {
         this.item.removeVariable("regiment", index);
-        refreshAttributes();
     }
 
     public boolean isDrilling() {
@@ -82,28 +77,11 @@ public class Army extends AbstractArmy {
         }
     }
 
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location,
-                                              String graphicalCulture, int regimentId, String regimentName,
-                                              int regimentHome, String regimentType, double regimentMorale,
-                                              double regimentDrill) {
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location, String graphicalCulture, int regimentId,
+                                              String regimentName, int regimentHome, String regimentType, double regimentMorale, double regimentDrill) {
         ClausewitzItem toItem = AbstractArmy.addToItem(parent, "army", name, location, graphicalCulture, id);
         Regiment.addToItem(toItem, regimentId, regimentName, regimentHome, regimentType, regimentMorale, regimentDrill);
 
         return toItem;
-    }
-
-    @Override
-    protected void refreshAttributes() {
-        super.refreshAttributes();
-
-        ClausewitzItem child = this.item.getChild("mercenary_company");
-        if (child != null) {
-            this.mercenaryCompany = new Id(child);
-        }
-
-        List<ClausewitzItem> regimentsItems = this.item.getChildren("regiment");
-        this.regiments = regimentsItems.stream()
-                                       .map(regimentItem -> new Regiment(regimentItem, this.country.getSave(), this))
-                                       .toList();
     }
 }

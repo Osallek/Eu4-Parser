@@ -6,11 +6,8 @@ import fr.osallek.eu4parser.model.save.Save;
 
 public class CelestialEmpire extends Empire {
 
-    private SaveDecree decree;
-
     public CelestialEmpire(ClausewitzItem item, Save save) {
         super(item, save);
-        refreshAttributes();
     }
 
     @Override
@@ -26,30 +23,20 @@ public class CelestialEmpire extends Empire {
         if (decreeItem != null) {
             decreeItem.removeAll();
         }
-
-        refreshAttributes();
     }
 
     public SaveDecree getDecree() {
-        return decree;
+        ClausewitzItem decreeItem = this.item.getChild("decree");
+
+        return decreeItem != null ? new SaveDecree(decreeItem, this.save) : null;
     }
 
     public void setDecree(Decree decree) {
-        if (this.decree != null) {
-            this.decree.setDecree(decree);
+        SaveDecree saveDecree = getDecree();
+        if (saveDecree != null) {
+            saveDecree.setDecree(decree);
         } else {
             SaveDecree.addToItem(this.item, decree.getName(), this.save.getDate());
-            refreshAttributes();
-        }
-    }
-
-    @Override
-    protected void refreshAttributes() {
-        super.refreshAttributes();
-        ClausewitzItem decreeItem = this.item.getChild("decree");
-
-        if (decreeItem != null) {
-            this.decree = new SaveDecree(decreeItem, this.save);
         }
     }
 }

@@ -11,12 +11,9 @@ public class ActiveAgendaScope {
 
     private final ClausewitzItem item;
 
-    private List<SavedEventTarget> savedEventTargets;
-
     public ActiveAgendaScope(ClausewitzItem item, ActiveAgenda activeAgenda) {
         this.activeAgenda = activeAgenda;
         this.item = item;
-        refreshAttributes();
     }
 
     public Boolean scopeIsValid() {
@@ -32,15 +29,10 @@ public class ActiveAgendaScope {
     }
 
     public List<SavedEventTarget> getSavedEventTargets() {
-        return savedEventTargets;
+        return this.item.getChildren("saved_event_target").stream().map(child -> new SavedEventTarget(child, this)).toList();
     }
 
     public ActiveAgenda getActiveAgenda() {
         return activeAgenda;
-    }
-
-    private void refreshAttributes() {
-        List<ClausewitzItem> children = this.item.getChildren("saved_event_target");
-        this.savedEventTargets = children.stream().map(child -> new SavedEventTarget(child, this)).toList();
     }
 }

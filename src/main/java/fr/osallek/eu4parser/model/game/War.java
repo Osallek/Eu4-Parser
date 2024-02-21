@@ -43,7 +43,7 @@ public class War extends Nodded {
     }
 
     public WarGoal getWarGoal() {
-        return new WarGoal(this.item.getChild("war_goal"), this.game);
+        return new WarGoal(this.item.getChild("war_goal"));
     }
 
     public LocalDate getStart() {

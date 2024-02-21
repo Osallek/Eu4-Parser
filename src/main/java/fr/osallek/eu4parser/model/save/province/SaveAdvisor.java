@@ -21,13 +21,10 @@ public class SaveAdvisor {
 
     private final Advisor gameAdvisor;
 
-    private Id id;
-
     public SaveAdvisor(ClausewitzItem item, Save save) {
         this.save = save;
         this.item = item;
         this.gameAdvisor = this.save.getGame().getAdvisor(getType());
-        refreshAttributes();
     }
 
     public Save getSave() {
@@ -35,7 +32,9 @@ public class SaveAdvisor {
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem idItem = this.item.getChild("id");
+
+        return idItem != null ? new Id(idItem) : null;
     }
 
     public String getName() {
@@ -136,14 +135,6 @@ public class SaveAdvisor {
         } else {
             return ModifiersUtils.sumModifiers(getGameAdvisor().getModifiers(),
                                                ModifiersUtils.scaleModifiers(getGameAdvisor().getSkillScaledModifier(), getSkill()));
-        }
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
         }
     }
 }

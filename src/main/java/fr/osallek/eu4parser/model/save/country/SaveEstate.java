@@ -28,12 +28,6 @@ public class SaveEstate {
 
     private final SaveCountry country;
 
-    private List<EstateInteraction> grantedPrivileges;
-
-    private List<SaveEstateModifier> influenceModifiers;
-
-    private List<SaveEstateModifier> loyaltyModifiers;
-
     private final Estate estateGame;
 
     public SaveEstate(ClausewitzItem item, SaveCountry country) {
@@ -41,7 +35,6 @@ public class SaveEstate {
         this.game = this.country.getSave().getGame();
         this.item = item;
         this.estateGame = this.game.getEstate(ClausewitzUtils.removeQuotes(getType()));
-        refreshAttributes();
     }
 
     public String getType() {
@@ -57,9 +50,9 @@ public class SaveEstate {
     }
 
     public EstateLoyaltyLevel getLoyaltyLevel() {
-        if (NumbersUtils.doubleOrDefault(getLoyalty()) < this.game.getEstateAngryThreshold()) {
+        if (getLoyalty() < this.game.getEstateAngryThreshold()) {
             return EstateLoyaltyLevel.ANGRY;
-        } else if (NumbersUtils.doubleOrDefault(getLoyalty()) >= this.game.getEstateHappyThreshold()) {
+        } else if (getLoyalty() >= this.game.getEstateHappyThreshold()) {
             return EstateLoyaltyLevel.HAPPY;
         } else {
             return EstateLoyaltyLevel.NEUTRAL;
@@ -67,11 +60,11 @@ public class SaveEstate {
     }
 
     public int getInfluenceLevel() {
-        if (NumbersUtils.doubleOrDefault(getInfluence()) < this.game.getEstateInfluenceLevel1()) {
+        if (getInfluence() < this.game.getEstateInfluenceLevel1()) {
             return 1;
-        } else if (NumbersUtils.doubleOrDefault(getInfluence()) < this.game.getEstateInfluenceLevel2()) {
+        } else if (getInfluence() < this.game.getEstateInfluenceLevel2()) {
             return 2;
-        } else if (NumbersUtils.doubleOrDefault(getInfluence()) < this.game.getEstateInfluenceLevel3()) {
+        } else if (getInfluence() < this.game.getEstateInfluenceLevel3()) {
             return 3;
         } else {
             return 4;
@@ -102,55 +95,53 @@ public class SaveEstate {
         }
 
         if (this.estateGame.getLandOwnershipModifier().hasModifier(modifier)) {
-            modifiers.add(this.estateGame.getLandOwnershipModifier().getModifier(modifier) * NumbersUtils.doubleOrDefault(getTerritory()) / 100);
+            modifiers.add(this.estateGame.getLandOwnershipModifier().getModifier(modifier) * getTerritory() / 100);
         }
 
         if (CollectionUtils.isNotEmpty(getGrantedPrivileges())) {
-            getGrantedPrivileges().stream()
-                                  .map(EstateInteraction::getPrivilege)
-                                  .filter(Objects::nonNull)
-                                  .forEach(privilege -> {
-                                      if (privilege.getModifiers().hasModifier(modifier)) {
-                                          modifiers.add(privilege.getModifiers().getModifier(modifier));
-                                      }
+            getGrantedPrivileges().stream().map(EstateInteraction::getPrivilege).filter(Objects::nonNull).forEach(privilege -> {
+                if (privilege.getModifiers().hasModifier(modifier)) {
+                    modifiers.add(privilege.getModifiers().getModifier(modifier));
+                }
 
-                                      if (privilege.getModifierByLandOwnership().hasModifier(modifier)) {
-                                          modifiers.add(
-                                                  privilege.getModifierByLandOwnership().getModifier(modifier) * NumbersUtils.doubleOrDefault(getTerritory())
-                                                  / 100);
-                                      }
-                                      modifiers.addAll(privilege.getConditionalModifiers()
-                                                                .stream()
-                                                                .filter(m -> m.getTrigger().apply(this.country, this.country))
-                                                                .map(EstatePrivilegeModifier::getModifiers)
-                                                                .filter(m -> m.hasModifier(modifier))
-                                                                .map(m -> m.getModifier(modifier))
-                                                                .toList());
-                                  });
+                if (privilege.getModifierByLandOwnership().hasModifier(modifier)) {
+                    modifiers.add(privilege.getModifierByLandOwnership().getModifier(modifier) * getTerritory() / 100);
+                }
+                modifiers.addAll(privilege.getConditionalModifiers()
+                                          .stream()
+                                          .filter(m -> m.getTrigger().apply(this.country, this.country))
+                                          .map(EstatePrivilegeModifier::getModifiers)
+                                          .filter(m -> m.hasModifier(modifier))
+                                          .map(m -> m.getModifier(modifier))
+                                          .toList());
+            });
         }
 
         return ModifiersUtils.sumModifiers(modifier, modifiers);
     }
 
     public double getInfluence() {
-        return NumbersUtils.doubleOrDefault(getEstateGame().getBaseInfluence())
-               + getInfluenceModifiers().stream().mapToDouble(SaveEstateModifier::getValue).filter(Objects::nonNull).sum()
-               + getGrantedPrivileges().stream()
-                                       .map(EstateInteraction::getPrivilege)
-                                       .filter(Objects::nonNull)
-                                       .map(EstatePrivilege::getInfluence)
-                                       .filter(Objects::nonNull)
-                                       .mapToDouble(Double::doubleValue)
-                                       .sum()
-               + getInfluenceFromTerritory()
-               + this.estateGame.getInfluenceModifiers()
-                                .stream()
-                                .filter(estateModifier -> estateModifier.getTrigger().apply(this.country, this.country))
-                                .map(EstateModifier::getAmount)
-                                .mapToDouble(Double::doubleValue)
-                                .sum()
-               + ((getInfluenceModifierName() == null || ModifiersUtils.getModifier(getInfluenceModifierName()) == null) ? 0 :
-                  NumbersUtils.doubleOrDefault(this.country.getModifier(ModifiersUtils.getModifier(getInfluenceModifierName()))) * 100);
+        return NumbersUtils.doubleOrDefault(getEstateGame().getBaseInfluence()) +
+               getInfluenceModifiers().stream()
+                                      .mapToDouble(SaveEstateModifier::getValue)
+                                      .filter(Objects::nonNull)
+                                      .sum() +
+               getGrantedPrivileges().stream()
+                                     .map(EstateInteraction::getPrivilege)
+                                     .filter(Objects::nonNull)
+                                     .map(EstatePrivilege::getInfluence)
+                                     .filter(Objects::nonNull)
+                                     .mapToDouble(Double::doubleValue)
+                                     .sum() +
+               getInfluenceFromTerritory() +
+               this.estateGame.getInfluenceModifiers()
+                              .stream()
+                              .filter(estateModifier -> estateModifier.getTrigger().apply(this.country, this.country))
+                              .map(EstateModifier::getAmount)
+                              .mapToDouble(Double::doubleValue)
+                              .sum() +
+               ((getInfluenceModifierName() == null || ModifiersUtils.getModifier(getInfluenceModifierName()) == null) ? 0 :
+                NumbersUtils.doubleOrDefault(this.country.getModifier(ModifiersUtils.getModifier(getInfluenceModifierName()))) * 100);
     }
 
     public double getInfluenceFromTerritory() {
@@ -159,14 +150,16 @@ public class SaveEstate {
     }
 
     public String getInfluenceModifierName() {
-        return this.estateGame.getModifierDefinitions() == null ? null :
-               this.estateGame.getModifierDefinitions()
-                              .stream()
-                              .filter(modifierDefinition -> "influence".equalsIgnoreCase(modifierDefinition.getType())
-                                                            && modifierDefinition.getTrigger().apply(this.country, this.country))
-                              .findFirst()
-                              .map(ModifierDefinition::getKey)
-                              .orElse(getType());
+        return this.estateGame.getModifierDefinitions() == null ? null : this.estateGame.getModifierDefinitions()
+                                                                                        .stream()
+                                                                                        .filter(modifierDefinition -> "influence".equalsIgnoreCase(
+                                                                                                modifierDefinition.getType()) &&
+                                                                                                                      modifierDefinition.getTrigger()
+                                                                                                                                        .apply(this.country,
+                                                                                                                                               this.country))
+                                                                                        .findFirst()
+                                                                                        .map(ModifierDefinition::getKey)
+                                                                                        .orElse(getType());
     }
 
     public double getTerritory() {
@@ -178,7 +171,13 @@ public class SaveEstate {
     }
 
     public List<EstateInteraction> getGrantedPrivileges() {
-        return this.grantedPrivileges == null ? new ArrayList<>() : this.grantedPrivileges;
+        ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
+
+        if (grantedPrivilegesItem != null) {
+            return grantedPrivilegesItem.getLists().stream().map(list -> new EstateInteraction(game, list)).toList();
+        }
+
+        return new ArrayList<>();
     }
 
     public void addGrantedPrivilege(EstatePrivilege privilege, LocalDate date) {
@@ -189,7 +188,6 @@ public class SaveEstate {
         }
 
         EstateInteraction.addToItem(grantedPrivilegesItem, privilege.getName(), date);
-        refreshAttributes();
     }
 
     public void removeGrantedPrivilege(EstatePrivilege privilege) {
@@ -216,50 +214,44 @@ public class SaveEstate {
     public void addInteraction(String name, LocalDate date) {
         if (this.item != null) {
             EstateInteraction.addToItem(this.item, name, date);
-            refreshAttributes();
         }
     }
 
     public void removeInteraction(Integer index) {
         if (this.item != null) {
             this.item.removeChild("interaction_use", index);
-            refreshAttributes();
         }
     }
 
     public List<SaveEstateModifier> getInfluenceModifiers() {
-        return influenceModifiers;
+        return this.item.getChildren("influence_modifier").stream().map(SaveEstateModifier::new).toList();
     }
 
     public void addInfluenceModifier(Double value, String desc, LocalDate date) {
         if (this.item != null) {
             SaveEstateModifier.addToItem(this.item, "influence_modifier", value, desc, date);
-            refreshAttributes();
         }
     }
 
     public void removeInfluenceModifier(Integer index) {
         if (this.item != null) {
             this.item.removeChild("influence_modifier", index);
-            refreshAttributes();
         }
     }
 
     public List<SaveEstateModifier> getLoyaltyModifiers() {
-        return loyaltyModifiers;
+        return this.item.getChildren("loyalty_modifier").stream().map(SaveEstateModifier::new).toList();
     }
 
     public void addLoyaltyModifier(Double value, String desc, LocalDate date) {
         if (this.item != null) {
             SaveEstateModifier.addToItem(this.item, "loyalty_modifier", value, desc, date);
-            refreshAttributes();
         }
     }
 
     public void removeLoyaltyModifier(Integer index) {
         if (this.item != null) {
             this.item.removeChild("loyalty_modifier", index);
-            refreshAttributes();
         }
     }
 
@@ -285,21 +277,5 @@ public class SaveEstate {
 
     public Estate getEstateGame() {
         return estateGame;
-    }
-
-    private void refreshAttributes() {
-        List<ClausewitzItem> modifierItems = this.item.getChildren("influence_modifier");
-        this.influenceModifiers = modifierItems.stream().map(SaveEstateModifier::new).toList();
-
-        modifierItems = this.item.getChildren("loyalty_modifier");
-        this.loyaltyModifiers = modifierItems.stream().map(SaveEstateModifier::new).toList();
-
-        ClausewitzItem grantedPrivilegesItem = this.item.getChild("granted_privileges");
-
-        if (grantedPrivilegesItem != null) {
-            this.grantedPrivileges = grantedPrivilegesItem.getLists().stream()
-                                                          .map(list -> new EstateInteraction(game, list))
-                                                          .toList();
-        }
     }
 }

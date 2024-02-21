@@ -106,144 +106,19 @@ public class SaveCountry {
 
     private Save save;
 
-    private boolean isPlayable;
-
-    private GovernmentName governmentName;
-
     private String localizedName;
 
-    private List<String> players;
+    private SubjectType subjectType; //Keep event after clean
 
-    private SaveHegemon hegemon;
+    private LocalDate subjectStartDate; //Keep event after clean
 
-    private Integer greatPowerRank;
-
-    private SaveFervor fervor;
-
-    private PlayerAiPrefsCommand playerAiPrefsCommand;
-
-    private ListOfDates cooldowns;
-
-    private SaveCountryHistory history;
-
-    private ListOfDates flags;
-
-    private ListOfDates hiddenFlags;
-
-    private ListOfDoubles variables;
-
-    private Colors colors;
-
-    private CountryTechnology tech;
-
-    private List<SaveEstate> estates;
-
-    private ActiveAgenda activeAgenda;
-
-    private List<EstateInteraction> interactionsLastUsed;
-
-    private List<SaveFaction> factions;
-
-    private Map<String, Rival> rivals;
-
-    private List<VictoryCard> victoryCards;
-
-    private List<ActivePolicy> activePolicies;
-
-    private List<PowerProjection> powerProjections;
-
-    private Parliament parliament;
-
-    private Ledger ledger;
-
-    private List<Loan> loans;
-
-    private Church church;
-
-    private IdeaGroups ideaGroups;
-
-    private SaveReligiousReforms religiousReforms;
-
-    private SaveNativeAdvancements nativeAdvancements;
-
-    private SaveGovernment government;
-
-    private List<Envoy> colonists;
-
-    private List<Envoy> merchants;
-
-    private List<Envoy> missionaries;
-
-    private List<Envoy> diplomats;
-
-    private List<SaveModifier> modifiers;
-
-    private SubUnit subUnit;
-
-    private Map<Id, Army> armies;
-
-    private Map<Integer, MercenaryCompany> mercenaryCompanies;
-
-    private Map<Id, Navy> navies;
-
-    private Map<String, ActiveRelation> activeRelations;
-
-    private Map<Integer, Leader> leaders;
-
-    private List<Id> previousMonarchs;
-
-    private List<Id> advisorsIds;
-
-    private Map<Integer, SaveAdvisor> advisors;
-
-    private Map<Integer, SaveAdvisor> activeAdvisors;
-
-    private Monarch monarch;
-
-    private Heir heir;
-
-    private Queen queen;
-
-    private PowerSpentIndexed admPowerSpent;
-
-    private PowerSpentIndexed dipPowerSpent;
-
-    private PowerSpentIndexed milPowerSpent;
-
-    private HistoryStatsCache historyStatsCache;
-
-    private List<CustomNationalIdea> customNationalIdeas;
-
-    private Missions countryMissions;
-
-    private final Map<SaveArea, CountryState> states = new HashMap<>();
-
-    private SortedMap<Integer, Integer> incomeStatistics;
-
-    private SortedMap<Integer, Integer> nationSizeStatistics;
-
-    private SortedMap<Integer, Integer> scoreStatistics;
-
-    private SortedMap<Integer, Integer> inflationStatistics;
-
-    private List<SaveTradeCompany> tradeCompanies;
-
-    private final SortedSet<ActiveWar> wars = new TreeSet<>(Comparator.comparing(ActiveWar::getStartDate));
-
-    private SubjectType subjectType;
-
-    private LocalDate subjectStartDate;
-
-    private TradeLeague tradeLeague;
+    private Map<Integer, SaveAdvisor> advisors = new HashMap<>(); //In memory because heavy to compute
 
     private Path writenTo;
 
     public SaveCountry(ClausewitzItem item, Save save) {
         this.item = item;
         this.save = save;
-        this.isPlayable = !"---".equals(getTag()) && !"REB".equals(getTag()) && !"NAT".equals(getTag())
-                          && !"PIR".equals(getTag()) && !getTag().matches("O[0-9]{2}");
-        refreshAttributes();
     }
 
     public SaveCountry(String tag) {
@@ -363,7 +238,8 @@ public class SaveCountry {
     }
 
     public boolean isPlayable() {
-        return isPlayable;
+        return !"---".equals(getTag()) && !"REB".equals(getTag()) && !"NAT".equals(getTag())
+               && !"PIR".equals(getTag()) && !getTag().matches("O\\d{2}");
     }
 
     public boolean isAlive() {
@@ -403,11 +279,7 @@ public class SaveCountry {
     }
 
     public SaveHegemon getHegemon() {
-        return hegemon;
-    }
-
-    public void setHegemon(SaveHegemon hegemon) {
-        this.hegemon = hegemon;
+        return this.save.getHegemons().stream().filter(h -> h.getCountry().equals(this)).findFirst().orElse(null);
     }
 
     public boolean isHuman() {
@@ -427,31 +299,17 @@ public class SaveCountry {
     }
 
     public List<String> getPlayers() {
-        return players;
-    }
-
-    public void setPlayers(List<String> players) {
-        this.players = players;
-    }
-
-    public void addPlayer(String player) {
-        if (this.players == null) {
-            this.players = new ArrayList<>();
-        }
-
-        this.players.add(player);
+        return this.save.getPlayers().entrySet().stream().filter(e -> e.getValue().equals(this)).map(Map.Entry::getKey).toList();
     }
 
     public Integer getGreatPowerRank() {
-        return greatPowerRank;
-    }
-
-    public void setGreatPowerRank(Integer greatPowerRank) {
-        this.greatPowerRank = greatPowerRank;
+        return this.save.getGreatPowersRank(this);
     }
 
     public PlayerAiPrefsCommand getPlayerAiPrefsCommand() {
-        return playerAiPrefsCommand;
+        ClausewitzItem playerAiPrefsCommandItem = this.item.getChild("player_ai_prefs_command");
+
+        return playerAiPrefsCommandItem != null ? new PlayerAiPrefsCommand(playerAiPrefsCommandItem) : null;
     }
 
     public void setPlayerAiPrefsCommand(boolean startWars, boolean keepAlliances, boolean keepTreaties,
@@ -463,7 +321,6 @@ public class SaveCountry {
                                        takeDecisions, embraceInstitutions, developProvinces, disbandUnits,
                                        changeFleetMissions, sendMissionaries, convertCultures, promoteCultures,
                                        braindead, timeout);
-        refreshAttributes();
     }
 
     public Boolean hasSetGovernmentName() {
@@ -488,15 +345,16 @@ public class SaveCountry {
 
     public void setGovernmentRank(String governmentRank) {
         Integer rank = null;
+        GovernmentName governmentName = getGovernmentName();
 
-        if (this.governmentName != null) {
-            rank = this.governmentName.getRanks()
-                                      .entrySet()
-                                      .stream()
-                                      .filter(entry -> entry.getValue().equals(governmentRank))
-                                      .findFirst()
-                                      .map(Map.Entry::getKey)
-                                      .orElse(null);
+        if (governmentName != null) {
+            rank = governmentName.getRanks()
+                                 .entrySet()
+                                 .stream()
+                                 .filter(entry -> entry.getValue().equals(governmentRank))
+                                 .findFirst()
+                                 .map(Map.Entry::getKey)
+                                 .orElse(null);
         }
 
         if (rank != null) {
@@ -505,12 +363,14 @@ public class SaveCountry {
     }
 
     public GovernmentName getGovernmentName() {
-        return this.governmentName;
+        String governmentNameVar = this.item.getVarAsString("government_name");
+
+        return StringUtils.isNotBlank(governmentNameVar) ? this.save.getGame().getGovernmentName(ClausewitzUtils.removeQuotes(governmentNameVar)) : null;
     }
 
     //Fixme compute the value
     public void setGovernmentName(GovernmentName governmentName) {
-        this.governmentName = governmentName;
+        this.item.setVariable("government_name", ClausewitzUtils.addQuotes(governmentName.getName()));
     }
 
     public Integer getSubjectFocus() {
@@ -541,16 +401,15 @@ public class SaveCountry {
     }
 
     public Power getNationalFocus() {
-        String var = this.item.getVarAsString("national_focus");
-
-        return var == null ? null : Power.byName(var);
+        String nationalFocus = this.item.getVarAsString("national_focus");
+        return nationalFocus == null ? null : Power.byName(nationalFocus);
     }
 
     public void setNationalFocus(Power power, LocalDate date) {
         this.item.setVariable("national_focus", power.name());
 
-        if (this.history != null) {
-            this.history.addEvent(date, "national_focus", power.name());
+        if (getHistory() != null) {
+            getHistory().addEvent(date, "national_focus", power.name());
         }
     }
 
@@ -679,31 +538,42 @@ public class SaveCountry {
     }
 
     public ListOfDates getCooldowns() {
-        return cooldowns;
+        ClausewitzItem cooldownsItem = this.item.getChild("cooldowns");
+
+        return cooldownsItem != null ? new ListOfDates(cooldownsItem) : null;
     }
 
     public SaveCountryHistory getHistory() {
-        return history;
+        ClausewitzItem historyItem = this.item.getChild("history");
+        return historyItem != null ? new SaveCountryHistory(historyItem, this) : null;
     }
 
     public ListOfDates getFlags() {
-        return flags;
+        ClausewitzItem flagsItem = this.item.getChild("flags");
+
+        return flagsItem != null ? new ListOfDates(flagsItem) : null;
     }
 
     public ListOfDates getHiddenFlags() {
-        return hiddenFlags;
+        ClausewitzItem hiddenFlagsItem = this.item.getChild("hidden_flags");
+
+        return hiddenFlagsItem != null ? new ListOfDates(hiddenFlagsItem) : null;
     }
 
     public ListOfDoubles getVariables() {
-        return variables;
+        ClausewitzItem variablesItem = this.item.getChild("variables");
+
+        return variablesItem != null ? new ListOfDoubles(variablesItem) : null;
     }
 
     public Colors getColors() {
-        return colors;
+        ClausewitzItem colorsItem = this.item.getChild("colors");
+
+        return colorsItem != null ? new Colors(colorsItem) : null;
     }
 
     public Color getColor() {
-        return this.equals(this.save.getRevolution().getRevolutionTarget()) ? this.colors.getRevolutionaryColors() : this.colors.getMapColor();
+        return this.equals(this.save.getRevolution().getRevolutionTarget()) ? getColors().getRevolutionaryColors() : getColors().getMapColor();
     }
 
     public List<String> getIgnoreDecision() {
@@ -929,7 +799,7 @@ public class SaveCountry {
     public void addHarmonizedReligion(Religion religion) {
         ClausewitzList list = this.item.getList("harmonized_religions");
         Integer index = null;
-        List<Religion> religions = this.save.getGame().getReligions();
+        List<Religion> religions = new ArrayList<>(this.save.getGame().getReligions());
 
         for (int i = 0; i < religions.size(); i++) {
             if (religions.get(i).equals(religion)) {
@@ -952,7 +822,7 @@ public class SaveCountry {
 
         if (list != null) {
             Integer index = null;
-            List<Religion> religions = this.save.getGame().getReligions();
+            List<Religion> religions = new ArrayList<>(this.save.getGame().getReligions());
 
             for (int i = 0; i < religions.size(); i++) {
                 if (religions.get(i).equals(religion)) {
@@ -1061,13 +931,13 @@ public class SaveCountry {
 
         if (!acceptedCultures.contains(culture.getName())) {
             this.item.addVariable("accepted_culture", culture.getName(), this.item.getVar("dominant_culture").getOrder() + 1);
-            this.history.addEvent(this.save.getDate(), "add_accepted_culture", culture.getName());
+            getHistory().addEvent(this.save.getDate(), "add_accepted_culture", culture.getName());
         }
     }
 
     public void removeAcceptedCulture(Culture culture) {
         if (this.item.removeVariable("accepted_culture", culture.getName())) {
-            this.history.addEvent(this.save.getDate(), "remove_accepted_culture", culture.getName());
+            getHistory().addEvent(this.save.getDate(), "remove_accepted_culture", culture.getName());
         }
     }
 
@@ -1122,7 +992,9 @@ public class SaveCountry {
     }
 
     public SaveFervor getFervor() {
-        return fervor;
+        ClausewitzItem fervorItem = this.item.getChild("fervor");
+
+        return fervorItem != null ? new SaveFervor(fervorItem, this.save.getGame()) : null;
     }
 
     public TechGroup getTechnologyGroup() {
@@ -1150,37 +1022,48 @@ public class SaveCountry {
     }
 
     public CountryTechnology getTech() {
-        return tech;
+        ClausewitzItem techItem = this.item.getChild("technology");
+
+        return techItem != null ? new CountryTechnology(this.save, techItem) : null;
     }
 
     public List<SaveEstate> getEstates() {
-        return estates;
+        return this.item.getChildren("estate").stream().map(i -> new SaveEstate(i, this)).toList();
     }
 
     public SaveEstate getEstate(String name) {
-        return this.estates.stream().filter(estate -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(estate.getType()))).findFirst().orElse(null);
+        return getEstates().stream().filter(estate -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(estate.getType()))).findFirst().orElse(null);
     }
 
     public CrownLandBonus getCrownLandBonus() {
-        double crownLand = 100 - this.getEstates().stream().mapToDouble(SaveEstate::getTerritory).sum();
+        double crownLand = 100 - getEstates().stream().mapToDouble(SaveEstate::getTerritory).sum();
 
         return this.save.getGame().getCrownLandBonuses().stream().filter(crownLandBonus -> crownLandBonus.isInRange(crownLand)).findFirst().orElse(null);
     }
 
     public ActiveAgenda getActiveAgenda() {
-        return activeAgenda;
+        ClausewitzItem activeAgendaItem = this.item.getChild("active_agenda");
+
+        return activeAgendaItem != null ? new ActiveAgenda(activeAgendaItem, this) : null;
     }
 
     public List<EstateInteraction> getInteractionsLastUsed() {
-        return interactionsLastUsed;
+        ClausewitzItem interactionsLastUsedItem = this.item.getChild("interactions_last_used");
+
+        return interactionsLastUsedItem != null ? interactionsLastUsedItem.getLists().stream()
+                                                                          .map(list -> new EstateInteraction(this.save.getGame(), list))
+                                                                          .toList() : null;
     }
 
     public List<SaveFaction> getFactions() {
-        return factions;
+        return this.item.getChildren("faction")
+                        .stream()
+                        .map(child -> new SaveFaction(child, this.save.getGame()))
+                        .toList();
     }
 
     public SaveFaction getFaction(String name) {
-        return this.factions.stream()
+        return getFactions().stream()
                             .filter(faction -> name.equalsIgnoreCase(ClausewitzUtils.removeQuotes(faction.getType().getName())))
                             .findFirst()
                             .orElse(null);
@@ -1195,26 +1078,26 @@ public class SaveCountry {
     }
 
     public Map<String, Rival> getRivals() {
-        return rivals;
+        return this.item.getChildren("rival")
+                        .stream()
+                        .map(child -> new Rival(child, this.save))
+                        .collect(Collectors.toMap(rival -> ClausewitzUtils.removeQuotes(rival.getRivalTag()), Function.identity()));
     }
 
     public void addRival(SaveCountry country, LocalDate date) {
-        if (!this.rivals.containsKey(ClausewitzUtils.addQuotes(country.getTag()))) {
+        if (!getRivals().containsKey(ClausewitzUtils.addQuotes(country.getTag()))) {
             int order = this.item.getVar("highest_possible_fort").getOrder();
             Rival.addToItem(this.item, country, date, order);
-            refreshAttributes();
         }
     }
 
     public void removeRival(int index) {
         this.item.removeVariable("rival", index);
-        refreshAttributes();
     }
 
     public void removeRival(SaveCountry rival) {
         this.item.removeChildIf(child -> "rival".equalsIgnoreCase(child.getName())
                                          && ClausewitzUtils.addQuotes(rival.getTag()).equalsIgnoreCase(child.getVarAsString("country")));
-        refreshAttributes();
     }
 
     public Double getStatistsVsMonarchists() {
@@ -1222,11 +1105,15 @@ public class SaveCountry {
     }
 
     public boolean isStatistsInPower() {
-        return NumbersUtils.doubleOrDefault(getStatistsVsMonarchists()) <= 0
-               && getGovernment() != null
-               && getGovernment().getReforms().stream().anyMatch(reform -> reform.getStatesGeneralMechanic() != null
-                                                                           && (reform.getStatesGeneralMechanic().getValue() == null
-                                                                               || reform.getStatesGeneralMechanic().getValue().apply(this, this)));
+        if (NumbersUtils.doubleOrDefault(getStatistsVsMonarchists()) > 0) {
+            return false;
+        }
+
+        SaveGovernment government = getGovernment();
+        return government != null
+               && government.getReforms().stream().anyMatch(reform -> reform.getStatesGeneralMechanic() != null
+                                                                      && (reform.getStatesGeneralMechanic().getValue() == null
+                                                                          || reform.getStatesGeneralMechanic().getValue().apply(this, this)));
     }
 
     public boolean isMonarchistsInPower() {
@@ -1331,13 +1218,18 @@ public class SaveCountry {
         this.item.setVariable("num_of_war_reparations", nbWarReparations - 1);
     }
 
+    public String getOverlordTag() {
+        return this.item.getVarAsString("overlord");
+    }
+
     public SaveCountry getOverlord() {
-        String overlordTag = this.item.getVarAsString("overlord");
+        String overlordTag = getOverlordTag();
 
         return overlordTag == null ? null : this.save.getCountry(ClausewitzUtils.removeQuotes(overlordTag));
     }
 
     public SubjectType getSubjectType() {
+        computeSubject();
         return this.subjectType;
     }
 
@@ -1346,6 +1238,7 @@ public class SaveCountry {
     }
 
     public LocalDate getSubjectStartDate() {
+        computeSubject();
         return subjectStartDate;
     }
 
@@ -1353,6 +1246,14 @@ public class SaveCountry {
         this.subjectStartDate = subjectStartDate;
     }
 
+    private void computeSubject() {
+        if (getOverlordTag() != null && this.subjectType == null) {
+            this.save.getDiplomacy().getDependenciesStream().filter(dependency -> this.equals(dependency.getSecond())).findFirst().ifPresent(dependency -> {
+                this.subjectType = dependency.getSubjectType();
+                this.subjectStartDate = dependency.getStartDate();
+            });
+        }
+    }
 
     public void setOverlord(String countryTag) {
         if (countryTag == null) {
@@ -1366,7 +1267,7 @@ public class SaveCountry {
         if (country == null) {
             this.item.removeVariable("overlord");
         } else {
-            this.item.setVariable("overlord", ClausewitzUtils.addQuotes(country.getTag()));
+            setOverlord(country.getTag());
         }
     }
 
@@ -1490,20 +1391,18 @@ public class SaveCountry {
     }
 
     public List<VictoryCard> getVictoryCards() {
-        return victoryCards;
+        return this.item.getChildren("victory_card").stream().map(VictoryCard::new).toList();
     }
 
     public void addVictoryCard(String area) {
         if (getVictoryCards().stream().noneMatch(victoryCard -> victoryCard.getArea().equalsIgnoreCase(area))) {
             int level = getVictoryCards().stream().mapToInt(VictoryCard::getLevel).max().orElse(0);
             VictoryCard.addToItem(this.item, area, level + 1, 0d, false);
-            refreshAttributes();
         }
     }
 
     public void removeVictoryCard(int index) {
         this.item.removeVariable("victory_card", index);
-        refreshAttributes();
     }
 
     public void removeVictoryCard(String area) {
@@ -1519,7 +1418,6 @@ public class SaveCountry {
 
         if (index != null) {
             this.item.removeVariable("victory_card", index);
-            refreshAttributes();
         }
     }
 
@@ -1581,11 +1479,11 @@ public class SaveCountry {
     }
 
     public List<ActivePolicy> getActivePolicies() {
-        return activePolicies;
+        return this.item.getChildren("active_policy").stream().map(child -> new ActivePolicy(child, this.save.getGame())).toList();
     }
 
     public ActivePolicy getActivePolicy(String policy) {
-        return this.activePolicies.stream()
+        return getActivePolicies().stream()
                                   .filter(activePolicy -> policy.equals(activePolicy.getPolicy().getName()))
                                   .findFirst()
                                   .orElse(null);
@@ -1594,13 +1492,11 @@ public class SaveCountry {
     public void addActivePolicy(Policy policy, LocalDate date) {
         if (getActivePolicies().stream().noneMatch(activePolicy -> activePolicy.getPolicy().equals(policy))) {
             ActivePolicy.addToItem(this.item, policy, date, this.item.getVar("last_election").getOrder() + 1);
-            refreshAttributes();
         }
     }
 
     public void removeActivePolicy(int index) {
         this.item.removeVariable("active_policy", index);
-        refreshAttributes();
     }
 
     public void removeActivePolicy(Policy policy) {
@@ -1616,7 +1512,6 @@ public class SaveCountry {
 
         if (index != null) {
             this.item.removeChild("active_policy", index);
-            refreshAttributes();
         }
     }
 
@@ -1633,12 +1528,12 @@ public class SaveCountry {
     }
 
     public List<PowerProjection> getPowerProjections() {
-        return powerProjections;
+        return this.item.getChildren("power_projection").stream().map(PowerProjection::new).toList();
     }
 
     public void removePowerProjections(int index) {
         this.item.removeVariable("power_projection", index);
-        refreshAttributes();
+        computePowerProjection();
     }
 
     public void removePowerProjections(String modifier) {
@@ -1653,7 +1548,36 @@ public class SaveCountry {
 
         if (index != null) {
             this.item.removeVariable("power_projection", index);
-            refreshAttributes();
+            computePowerProjection();
+        }
+    }
+
+    private void computePowerProjection() {
+        Double powerProjection = null;
+
+        for (PowerProjection projection : getPowerProjections()) {
+            if (projection.getCurrent() != null && !projection.getCurrent().equals(0d)) {
+                double value = BigDecimal.valueOf(projection.getCurrent())
+                                         .setScale(0, RoundingMode.HALF_UP)
+                                         .doubleValue();
+                if (powerProjection == null) {
+                    powerProjection = value;
+                } else {
+                    powerProjection += value;
+                }
+            }
+        }
+
+        if (powerProjection != null) {
+            if (powerProjection <= 0d) {
+                powerProjection = null;
+            } else if (powerProjection >= 100d) {
+                powerProjection = 100d;
+            }
+        }
+
+        if (!Objects.equals(powerProjection, getCurrentPowerProjection())) {
+            setCurrentPowerProjection(powerProjection);
         }
     }
 
@@ -1674,7 +1598,8 @@ public class SaveCountry {
     }
 
     public Parliament getParliament() {
-        return parliament;
+        ClausewitzItem parliamentItem = this.item.getChild("parliament");
+        return parliamentItem != null && parliamentItem.getNbChildren() > 0 ? new Parliament(parliamentItem, this.save.getGame()) : null;
     }
 
     public Double getTariff() {
@@ -2137,9 +2062,7 @@ public class SaveCountry {
     }
 
     public int getNumOfSubjectsOfType(String type) {
-        return (int) getSubjects().stream()
-                                  .filter(subject -> type.equalsIgnoreCase(subject.getSubjectType().getName()))
-                                  .count();
+        return (int) getSubjects().stream().filter(subject -> type.equalsIgnoreCase(subject.getSubjectType().getName())).count();
     }
 
     public int getNumOfLargeColonies() {
@@ -2163,7 +2086,6 @@ public class SaveCountry {
 
         return list.getValues().stream().map(this.save::getCountry).toList();
     }
-
 
     public void addIndependenceSupportedBy(SaveCountry supporter) {
         ClausewitzList list = this.item.getList("support_independence");
@@ -2221,7 +2143,6 @@ public class SaveCountry {
 
         return list.getValues().stream().map(this.save::getCountry).toList();
     }
-
 
     public void addWarning(SaveCountry country) {
         ClausewitzList list = this.item.getList("warnings");
@@ -2309,7 +2230,6 @@ public class SaveCountry {
 
         return list.getValues().stream().map(this.save::getCountry).toList();
     }
-
 
     public void addTransferTradePowerTo(SaveCountry country) {
         ClausewitzList list = this.item.getList("ransfer_trade_power_to");
@@ -2874,7 +2794,8 @@ public class SaveCountry {
     }
 
     public Ledger getLedger() {
-        return ledger;
+        ClausewitzItem ledgerItem = this.item.getChild("ledger");
+        return ledgerItem != null ? new Ledger(ledgerItem) : null;
     }
 
     public Integer getCancelledLoans() {
@@ -2893,12 +2814,11 @@ public class SaveCountry {
     }
 
     public List<Loan> getLoans() {
-        return loans;
+        return this.item.getChildren("loan").stream().map(Loan::new).toList();
     }
 
     public void addLoan(double interest, int amount, LocalDate expiryDate) {
         Loan.addToItem(this.item, this.save.getIds().get(4713).incrementId(2), interest, true, amount, expiryDate);
-        refreshAttributes();
     }
 
     public void removeLoan(int id) {
@@ -2914,7 +2834,6 @@ public class SaveCountry {
 
         if (index != null) {
             this.item.removeChild("loan", index);
-            refreshAttributes();
         }
     }
 
@@ -3270,43 +3189,52 @@ public class SaveCountry {
     }
 
     public Church getChurch() {
-        return church;
+        ClausewitzItem churchItem = this.item.getChild("church");
+        return churchItem != null ? new Church(churchItem, this.save.getGame()) : null;
     }
 
     public IdeaGroups getIdeaGroups() {
-        return ideaGroups;
+        ClausewitzItem activeIdeaGroupsItem = this.item.getChild("active_idea_groups");
+        return activeIdeaGroupsItem != null ? new IdeaGroups(activeIdeaGroupsItem, this.save) : null;
     }
 
     public SaveReligiousReforms getReligiousReforms() {
-        return religiousReforms;
+        ClausewitzItem activeReligiousReformsItem = this.item.getChild("active_religious_reform");
+        return activeReligiousReformsItem != null ? new SaveReligiousReforms(activeReligiousReformsItem, this.save.getGame()) : null;
     }
 
     public SaveNativeAdvancements getNativeAdvancements() {
-        return nativeAdvancements;
+        ClausewitzItem activeNativeAdvancementItem = this.item.getChild("active_native_advancement");
+        return activeNativeAdvancementItem != null ? new SaveNativeAdvancements(activeNativeAdvancementItem) : null;
     }
 
     public SaveGovernment getGovernment() {
-        return government;
+        ClausewitzItem governmentItem = this.item.getChild("government");
+        return governmentItem != null ? new SaveGovernment(governmentItem, this.save.getGame(), this) : null;
     }
 
     public List<Envoy> getColonists() {
-        return this.colonists == null ? new ArrayList<>() : this.colonists;
+        ClausewitzItem colonistsItem = this.item.getChild("colonists");
+        return colonistsItem != null ? colonistsItem.getChildren("envoy").stream().map(Envoy::new).toList() : new ArrayList<>();
     }
 
     public List<Envoy> getMerchants() {
-        return this.merchants == null ? new ArrayList<>() : this.merchants;
+        ClausewitzItem merchantsItem = this.item.getChild("merchants");
+        return merchantsItem != null ? merchantsItem.getChildren("envoy").stream().map(Envoy::new).toList() : new ArrayList<>();
     }
 
     public List<Envoy> getMissionaries() {
-        return this.missionaries == null ? new ArrayList<>() : this.missionaries;
+        ClausewitzItem missionariesItem = this.item.getChild("missionaries");
+        return missionariesItem != null ? missionariesItem.getChildren("envoy").stream().map(Envoy::new).toList() : new ArrayList<>();
     }
 
     public List<Envoy> getDiplomats() {
-        return this.diplomats == null ? new ArrayList<>() : this.diplomats;
+        ClausewitzItem diplomatsItem = this.item.getChild("diplomats");
+        return diplomatsItem != null ? diplomatsItem.getChildren("envoy").stream().map(Envoy::new).toList() : new ArrayList<>();
     }
 
     public List<SaveModifier> getModifiers() {
-        return this.modifiers == null ? new ArrayList<>() : this.modifiers;
+        return this.item.getChildren("modifier").stream().map(child -> new SaveModifier(child, this.save.getGame())).toList();
     }
 
     public void addModifier(String modifier, LocalDate date) {
@@ -3315,12 +3243,10 @@ public class SaveCountry {
 
     public void addModifier(String modifier, LocalDate date, Boolean hidden) {
         SaveModifier.addToItem(this.item, modifier, date, hidden);
-        refreshAttributes();
     }
 
     public void removeModifier(int index) {
         this.item.removeChild("modifier", index);
-        refreshAttributes();
     }
 
     public void removeModifier(GameModifier modifier) {
@@ -3331,8 +3257,9 @@ public class SaveCountry {
         Integer index = null;
         modifier = ClausewitzUtils.addQuotes(modifier);
 
-        for (int i = 0; i < this.modifiers.size(); i++) {
-            if (this.modifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
+        List<SaveModifier> modifiers = getModifiers();
+        for (int i = 0; i < modifiers.size(); i++) {
+            if (modifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
                 index = i;
                 break;
             }
@@ -3340,7 +3267,6 @@ public class SaveCountry {
 
         if (index != null) {
             this.item.removeChild("modifier", index);
-            refreshAttributes();
         }
     }
 
@@ -3369,7 +3295,8 @@ public class SaveCountry {
     }
 
     public SubUnit getSubUnit() {
-        return subUnit;
+        ClausewitzItem subUnitItem = this.item.getChild("sub_unit");
+        return subUnitItem != null ? new SubUnit(subUnitItem) : null;
     }
 
     public Integer getNumOfCapturedShipsWithBoardingDoctrine() {
@@ -3385,83 +3312,89 @@ public class SaveCountry {
     }
 
     public Map<Integer, MercenaryCompany> getMercenaryCompanies() {
-        return mercenaryCompanies;
+        return this.item.getChildren("mercenary_company")
+                        .stream()
+                        .map(armyItem -> new MercenaryCompany(armyItem, this))
+                        .collect(Collectors.toMap(army -> army.getId().getId(), Function.identity()));
     }
 
     public Army getArmy(Id id) {
-        return this.armies.get(id);
+        return getArmies().get(id);
     }
 
     public Map<Id, Army> getArmies() {
-        return armies;
+        return this.item.getChildren("army")
+                        .stream()
+                        .map(armyItem -> new Army(armyItem, this))
+                        .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
     }
 
     public int getArmySize() {
-        return this.armies.values().stream().mapToInt(army -> army.getRegiments().size()).sum();
+        return getArmies().values().stream().mapToInt(army -> army.getRegiments().size()).sum();
     }
 
     public int getNavySize() {
-        return this.navies.values().stream().mapToInt(army -> army.getRegiments().size()).sum();
+        return getNavies().values().stream().mapToInt(army -> army.getRegiments().size()).sum();
     }
 
     public long getNbInfantry() {
-        return this.armies.values()
+        return getArmies().values()
                           .stream()
                           .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbCavalry() {
-        return this.armies.values()
+        return getArmies().values()
                           .stream()
                           .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbArtillery() {
-        return this.armies.values()
+        return getArmies().values()
                           .stream()
                           .mapToLong(army -> army.getRegiments().stream().filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbHeavyShips() {
-        return this.navies.values()
+        return getNavies().values()
                           .stream()
                           .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbLightShips() {
-        return this.navies.values()
+        return getNavies().values()
                           .stream()
                           .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbGalleys() {
-        return this.navies.values()
+        return getNavies().values()
                           .stream()
                           .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbTransports() {
-        return this.navies.values()
+        return getNavies().values()
                           .stream()
                           .mapToLong(army -> army.getShips().stream().filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType())).count())
                           .sum();
     }
 
     public long getNbRegimentOf(String type) {
-        return this.armies.values()
+        return getArmies().values()
                           .stream()
                           .mapToLong(army -> army.getRegiments().stream().filter(regiment -> type.equals(regiment.getTypeName())).count())
                           .sum();
     }
 
     public long getNbRegimentOfCategory(int category) {
-        return this.armies.values()
+        return getArmies().values()
                           .stream()
                           .mapToLong(army -> army.getRegiments()
                                                  .stream()
@@ -3479,15 +3412,17 @@ public class SaveCountry {
         Army.addToItem(this.item, this.save.getAndIncrementUnitIdCounter(), name, location, graphicalCulture,
                        this.save.getAndIncrementUnitIdCounter(), regimentName, location, regimentType, regimentMorale,
                        regimentDrill);
-        refreshAttributes();
     }
 
     public Navy getNavy(Id id) {
-        return this.navies.get(id);
+        return getNavies().get(id);
     }
 
     public Map<Id, Navy> getNavies() {
-        return navies;
+        return this.item.getChildren("navy")
+                        .stream()
+                        .map(navyItem -> new Navy(navyItem, this))
+                        .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
     }
 
     public void addNavy(String name, int location, String graphicalCulture, String shipName, String shipType, double shipMorale) {
@@ -3497,7 +3432,6 @@ public class SaveCountry {
         //    //		}
         Navy.addToItem(this.item, this.save.getAndIncrementUnitIdCounter(), name, location, graphicalCulture,
                        this.save.getAndIncrementUnitIdCounter(), shipName, location, shipType, shipMorale);
-        refreshAttributes();
     }
 
     public void removeAeFor(String tag) {
@@ -3518,34 +3452,52 @@ public class SaveCountry {
     }
 
     public Map<String, ActiveRelation> getActiveRelations() {
-        return activeRelations;
+        ClausewitzItem activeRelationsItem = this.item.getChild("active_relations");
+        return activeRelationsItem != null ? activeRelationsItem.getChildren()
+                                                                .stream()
+                                                                .map(child -> new ActiveRelation(child, this.save))
+                                                                .collect(Collectors.toMap(ActiveRelation::getCountryTag, Function.identity())) : null;
     }
 
     public ActiveRelation getActiveRelation(SaveCountry country) {
-        return this.activeRelations.get(country.getTag());
+        return getActiveRelations().get(country.getTag());
     }
 
     public Map<Integer, Leader> getLeaders() {
+        Map<Integer, Leader> leaders = new HashMap<>();
+        SaveCountryHistory history = getHistory();
+        if (history.getLeaders() != null) {
+            List<ClausewitzItem> leadersItems = this.item.getChildren("leader");
+            if (!leadersItems.isEmpty()) {
+                leadersItems.forEach(leaderItem -> {
+                    Id leaderId = new Id(leaderItem);
+                    Leader leader = history.getLeader(leaderId.getId());
+                    if (leader != null) {
+                        leaders.put(leaderId.getId(), leader);
+                    }
+                });
+            }
+        }
+
         return leaders;
     }
 
     public List<Leader> getLeadersOfType(LeaderType leaderType) {
-        return this.leaders.values().stream().filter(leader -> leaderType.equals(leader.getType())).toList();
+        return getLeaders().values().stream().filter(leader -> leaderType.equals(leader.getType())).toList();
     }
 
     public void addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege,
                           LeaderPersonality personality) {
         int leaderId = this.save.getIdCounters().getAndIncrement(Counter.LEADER);
         Id.addToItem(this.item, "leader", leaderId, 49, this.item.getChild("active_relations").getOrder() + 1);
-        this.history.addLeader(date, birthDate, name, type, manuever, fire, shock, siege, personality, leaderId);
-        refreshAttributes();
+        getHistory().addLeader(date, birthDate, name, type, manuever, fire, shock, siege, personality, leaderId);
     }
 
     public void removeLeader(int id) {
-        Leader leader = this.leaders.get(id);
+        Leader leader = getLeaders().get(id);
 
         if (leader != null) {
-            this.armies.values()
+            getArmies().values()
                        .stream()
                        .filter(army -> army.getLeader().getId().equals(id))
                        .findFirst()
@@ -3567,19 +3519,53 @@ public class SaveCountry {
     }
 
     public Monarch getMonarch() {
-        return monarch;
+        SaveCountryHistory history = getHistory();
+
+        if (history != null && history.getMonarchs() != null) {
+            ClausewitzItem monarchItem = this.item.getChild("monarch");
+
+            if (monarchItem != null) {
+                Id monarchId = new Id(monarchItem);
+                return history.getMonarch(monarchId.getId());
+            }
+        }
+
+        return null;
     }
 
     public Heir getHeir() {
-        return heir;
+        SaveCountryHistory history = getHistory();
+
+        if (history != null && history.getMonarchs() != null) {
+            ClausewitzItem monarchItem = this.item.getChild("heir");
+
+            if (monarchItem != null) {
+                Id monarchId = new Id(monarchItem);
+                return history.getHeir(monarchId.getId());
+            }
+        }
+
+        return null;
     }
 
     public Queen getQueen() {
-        return queen;
+        SaveCountryHistory history = getHistory();
+
+        if (history != null && history.getMonarchs() != null) {
+            ClausewitzItem monarchItem = this.item.getChild("queen");
+
+            if (monarchItem != null) {
+                Id monarchId = new Id(monarchItem);
+                return history.getQueen(monarchId.getId());
+            }
+        }
+
+        return null;
     }
 
     public Monarch getConsort() {
-        return this.queen == null ? null : BooleanUtils.toBoolean(this.queen.getConsort()) ? this.queen : this.monarch;
+        Queen queen = getQueen();
+        return queen == null ? null : BooleanUtils.toBoolean(queen.getConsort()) ? queen : getMonarch();
     }
 
     public String getOriginalDynasty() {
@@ -3625,47 +3611,23 @@ public class SaveCountry {
     }
 
     public List<Id> getPreviousMonarchs() {
-        return previousMonarchs;
-    }
-
-    public List<Id> getAdvisorsIds() {
-        return advisorsIds;
-    }
-
-    public Map<Integer, SaveAdvisor> getInternalAdvisors() {
-        if (this.advisors == null) {
-            this.advisors = new HashMap<>();
-        }
-
-        return this.advisors;
+        return this.item.getChildren("previous_monarch").stream().map(Id::new).toList();
     }
 
     public Map<Integer, SaveAdvisor> getAdvisors() {
-        return this.advisors == null ? new HashMap<>() : this.advisors;
+        return this.advisors;
     }
 
     public void addAdvisor(SaveAdvisor advisor) {
-        getInternalAdvisors().put(advisor.getId().getId(), advisor);
+        this.advisors.put(advisor.getId().getId(), advisor);
     }
 
-    public Map<Integer, SaveAdvisor> getInternalActiveAdvisors() {
-        if (this.activeAdvisors == null) {
-            this.activeAdvisors = new HashMap<>();
-        }
-
-        return this.activeAdvisors;
+    public SaveAdvisor getAdvisor(int id) {
+        return this.advisors.get(id);
     }
 
-    public Map<Integer, SaveAdvisor> getActiveAdvisors() {
-        return this.activeAdvisors == null ? new HashMap<>() : this.activeAdvisors;
-    }
-
-    public void addActiveAdvisor(SaveAdvisor advisor) {
-        getInternalActiveAdvisors().put(advisor.getId().getId(), advisor);
-    }
-
-    public void setActiveAdvisors(Map<Integer, SaveAdvisor> activeAdvisors) {
-        this.activeAdvisors = activeAdvisors;
+    public List<SaveAdvisor> getActiveAdvisors() {
+        return this.save.getActiveAdvisors(this).stream().map(Id::getId).map(this::getAdvisor).filter(Objects::nonNull).toList();
     }
 
     public boolean getAssignedEstates() {
@@ -3681,7 +3643,6 @@ public class SaveCountry {
 
         return new ArrayList<>();
     }
-
 
     public Map<Power, Integer> getPowers() {
         ClausewitzList list = this.item.getList("powers");
@@ -3778,7 +3739,7 @@ public class SaveCountry {
         if (CollectionUtils.isEmpty(getPreviousCountryTags())) {
             return new TreeMap<>();
         } else {
-            return this.history.getEvents()
+            return getHistory().getEvents()
                                .stream()
                                .filter(h -> StringUtils.isNotBlank(h.getChangedTagFrom()))
                                .collect(Collectors.toMap(SaveCountryHistoryEvent::getDate, SaveCountryHistoryEvent::getChangedTagFrom, (a, b) -> a,
@@ -3826,7 +3787,8 @@ public class SaveCountry {
     }
 
     public List<CustomNationalIdea> getCustomNationalIdeas() {
-        return customNationalIdeas;
+        ClausewitzItem customNationalIdeasItem = this.item.getChild("custom_national_ideas");
+        return customNationalIdeasItem != null ? customNationalIdeasItem.getChildren().stream().map(CustomNationalIdea::new).toList() : null;
     }
 
     public Integer getCustomNationalIdeasLevel() {
@@ -3854,15 +3816,18 @@ public class SaveCountry {
     }
 
     public PowerSpentIndexed getAdmPowerSpent() {
-        return admPowerSpent;
+        ClausewitzItem admPowerSpentItem = this.item.getChild("adm_spent_indexed");
+        return admPowerSpentItem != null ? new PowerSpentIndexed(admPowerSpentItem) : null;
     }
 
     public PowerSpentIndexed getDipPowerSpent() {
-        return dipPowerSpent;
+        ClausewitzItem dipPowerSpentItem = this.item.getChild("dip_spent_indexed");
+        return dipPowerSpentItem != null ? new PowerSpentIndexed(dipPowerSpentItem) : null;
     }
 
     public PowerSpentIndexed getMilPowerSpent() {
-        return milPowerSpent;
+        ClausewitzItem milPowerSpentItem = this.item.getChild("mil_spent_indexed");
+        return milPowerSpentItem != null ? new PowerSpentIndexed(milPowerSpentItem) : null;
     }
 
     public List<Integer> getMothballedForts() {
@@ -3942,7 +3907,8 @@ public class SaveCountry {
     }
 
     public HistoryStatsCache getHistoryStatsCache() {
-        return historyStatsCache;
+        ClausewitzItem historicStatsCacheItem = this.item.getChild("historic_stats_cache");
+        return historicStatsCacheItem != null ? new HistoryStatsCache(historicStatsCacheItem) : null;
     }
 
     public NavalDoctrine getNavalDoctrine() {
@@ -3954,7 +3920,9 @@ public class SaveCountry {
     }
 
     public Missions getCountryMissions() {
-        return countryMissions;
+        ClausewitzItem countryMissionsItem = this.item.getChild("country_missions");
+
+        return countryMissionsItem != null ? new Missions(countryMissionsItem, this.save.getGame()) : null;
     }
 
     public Double getGovernmentReformProgress() {
@@ -3966,94 +3934,42 @@ public class SaveCountry {
     }
 
     public Map<SaveArea, CountryState> getStates() {
-        return this.states;
+        return this.save.getAreasStream()
+                        .map(area -> Pair.of(area, area.getCountriesStates().get(this)))
+                        .filter(p -> p.getValue() != null)
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public SortedMap<Integer, Integer> getIncomeStatistics() {
-        return incomeStatistics == null ? new TreeMap<>() : this.incomeStatistics;
-    }
-
-    public void putAllIncomeStatistics(Map<Integer, Integer> incomeStatistics) {
-        if (this.incomeStatistics == null) {
-            this.incomeStatistics = new TreeMap<>();
-        }
-
-        this.incomeStatistics.putAll(incomeStatistics);
+        return this.save.getIncomeStatistics(this);
     }
 
     public SortedMap<Integer, Integer> getNationSizeStatistics() {
-        return nationSizeStatistics == null ? new TreeMap<>() : this.nationSizeStatistics;
-    }
-
-    public void putAllNationSizeStatistics(Map<Integer, Integer> nationSizeStatistics) {
-        if (this.nationSizeStatistics == null) {
-            this.nationSizeStatistics = new TreeMap<>();
-        }
-
-        this.nationSizeStatistics.putAll(nationSizeStatistics);
+        return this.save.getNationSizeStatistics(this);
     }
 
     public SortedMap<Integer, Integer> getScoreStatistics() {
-        return scoreStatistics == null ? new TreeMap<>() : this.scoreStatistics;
-    }
-
-    public void putAllScoreStatistics(Map<Integer, Integer> scoreStatistics) {
-        if (this.scoreStatistics == null) {
-            this.scoreStatistics = new TreeMap<>();
-        }
-
-        this.scoreStatistics.putAll(scoreStatistics);
+        return this.save.getScoreStatistics(this);
     }
 
     public SortedMap<Integer, Integer> getInflationStatistics() {
-        return inflationStatistics == null ? new TreeMap<>() : this.inflationStatistics;
-    }
-
-    public void putAllInflationStatistics(Map<Integer, Integer> inflationStatistics) {
-        if (this.inflationStatistics == null) {
-            this.inflationStatistics = new TreeMap<>();
-        }
-
-        this.inflationStatistics.putAll(inflationStatistics);
+        return this.save.getInflationStatistics(this);
     }
 
     public List<SaveTradeCompany> getTradeCompanies() {
-        return tradeCompanies == null ? new ArrayList<>() : this.tradeCompanies;
-    }
-
-    public void addTradeCompany(SaveTradeCompany tradeCompany) {
-        if (this.tradeCompanies == null) {
-            this.tradeCompanies = new ArrayList<>(0);
-        }
-
-        this.tradeCompanies.add(tradeCompany);
+        return this.save.getTradeCompagnies(this);
     }
 
     public TradeLeague getTradeLeague() {
-        return tradeLeague;
-    }
-
-    /* Don't use only for game !!
-       Use tradeLeague addMember to add
-     */
-    public void setTradeLeague(TradeLeague tradeLeague) {
-        this.tradeLeague = tradeLeague;
-    }
-
-    public SortedSet<ActiveWar> getWars() {
-        return wars;
+        return this.save.getTradeLeague(this);
     }
 
     public SortedSet<ActiveWar> getActiveWars() {
-        return this.wars.stream().filter(Predicate.not(ActiveWar::isFinished)).collect(Collectors.toCollection(TreeSet::new));
+        return this.save.getActiveWars().stream().filter(war -> war.participate(this)).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public SortedSet<ActiveWar> getFinishedWars() {
-        return this.wars.stream().filter(ActiveWar::isFinished).collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    public void addWar(ActiveWar war) {
-        this.wars.add(war);
+        return this.save.getPreviousWars().stream().filter(war -> war.participate(this)).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public boolean isFreeCity() {
@@ -4241,76 +4157,80 @@ public class SaveCountry {
         List<Double> list = new ArrayList<>();
         list.add(StaticModifiers.applyToModifiersCountry(this, modifier));
 
-        if (CollectionUtils.isNotEmpty(getModifiers())) {
-            list.addAll(getModifiers().stream()
-                                      .filter(m -> m.getModifier() != null)
-                                      .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
-                                      .map(m -> m.getModifiers(this, modifier))
-                                      .toList());
+        List<SaveModifier> modifiers = getModifiers();
+
+        if (CollectionUtils.isNotEmpty(modifiers)) {
+            list.addAll(modifiers.stream()
+                                 .filter(m -> m.getModifier() != null)
+                                 .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
+                                 .map(m -> m.getModifiers(this, modifier))
+                                 .toList());
         }
 
-        if (getIdeaGroups() != null) {
-            getIdeaGroups().getIdeaGroups().forEach((key, value) -> list.add(key.getModifier(value, modifier)));
+        IdeaGroups ideaGroups = getIdeaGroups();
+        if (ideaGroups != null) {
+            ideaGroups.getIdeaGroups().forEach((key, value) -> list.add(key.getModifier(value, modifier)));
         }
 
         //Todo neighbours
 
+        CountryTechnology tech = getTech();
+        List<SaveCountry> ourSpyNetwork = getOurSpyNetwork();
         if ("ADM_TECH_COST_MODIFIER".equalsIgnoreCase(modifier.getName())) {
-            if (getIdeaGroups() != null) {
-                list.add(getIdeaGroups().getIdeaGroups()
-                                        .entrySet()
-                                        .stream()
-                                        .filter(entry -> Power.ADM.equals(entry.getKey().getCategory()))
-                                        .mapToInt(Map.Entry::getValue)
-                                        .sum()
+            if (ideaGroups != null) {
+                list.add(ideaGroups.getIdeaGroups()
+                                   .entrySet()
+                                   .stream()
+                                   .filter(entry -> Power.ADM.equals(entry.getKey().getCategory()))
+                                   .mapToInt(Map.Entry::getValue)
+                                   .sum()
                          * this.save.getGame().getIdeaToTech());
             }
-
-            if (CollectionUtils.isNotEmpty(getOurSpyNetwork())) {
-                getOurSpyNetwork().stream().max(Comparator.comparing(o -> o.getTech().getAdm())).ifPresent(country -> {
-                    if (country.getTech().getAdm() > getTech().getAdm()) {
+            if (CollectionUtils.isNotEmpty(ourSpyNetwork)) {
+                ourSpyNetwork.stream().max(Comparator.comparing(o -> o.getTech().getAdm())).ifPresent(country -> {
+                    if (country.getTech().getAdm() > tech.getAdm()) {
                         double mult = Math.max(this.save.getGame().getSpyNetworkTechEffectMax(),
-                                               (country.getTech().getAdm() - getTech().getAdm()) * this.save.getGame().getSpyNetworkTechEffect());
+                                               (country.getTech().getAdm() - tech.getAdm()) * this.save.getGame().getSpyNetworkTechEffect());
                         list.add(mult * NumbersUtils.intOrDefault(getActiveRelation(country).getSpyNetwork()));
                     }
                 });
             }
         } else if ("DIP_TECH_COST_MODIFIER".equalsIgnoreCase(modifier.getName())) {
-            if (getIdeaGroups() != null) {
-                list.add(getIdeaGroups().getIdeaGroups()
-                                        .entrySet()
-                                        .stream()
-                                        .filter(entry -> Power.DIP.equals(entry.getKey().getCategory()))
-                                        .mapToInt(Map.Entry::getValue)
-                                        .sum()
+            if (ideaGroups != null) {
+                list.add(ideaGroups.getIdeaGroups()
+                                   .entrySet()
+                                   .stream()
+                                   .filter(entry -> Power.DIP.equals(entry.getKey().getCategory()))
+                                   .mapToInt(Map.Entry::getValue)
+                                   .sum()
                          * this.save.getGame().getIdeaToTech());
             }
 
-            if (CollectionUtils.isNotEmpty(getOurSpyNetwork())) {
-                getOurSpyNetwork().stream().max(Comparator.comparing(o -> o.getTech().getDip())).ifPresent(country -> {
-                    if (country.getTech().getDip() > getTech().getDip()) {
+            if (CollectionUtils.isNotEmpty(ourSpyNetwork)) {
+                ourSpyNetwork.stream().max(Comparator.comparing(o -> o.getTech().getDip())).ifPresent(country -> {
+                    if (country.getTech().getDip() > tech.getDip()) {
                         double mult = Math.max(this.save.getGame().getSpyNetworkTechEffectMax(),
-                                               (country.getTech().getDip() - getTech().getDip()) * this.save.getGame().getSpyNetworkTechEffect());
+                                               (country.getTech().getDip() - tech.getDip()) * this.save.getGame().getSpyNetworkTechEffect());
                         list.add(mult * NumbersUtils.intOrDefault(getActiveRelation(country).getSpyNetwork()));
                     }
                 });
             }
         } else if ("MIL_TECH_COST_MODIFIER".equalsIgnoreCase(modifier.getName())) {
-            if (getIdeaGroups() != null) {
-                list.add(getIdeaGroups().getIdeaGroups()
-                                        .entrySet()
-                                        .stream()
-                                        .filter(entry -> Power.MIL.equals(entry.getKey().getCategory()))
-                                        .mapToInt(Map.Entry::getValue)
-                                        .sum()
+            if (ideaGroups != null) {
+                list.add(ideaGroups.getIdeaGroups()
+                                   .entrySet()
+                                   .stream()
+                                   .filter(entry -> Power.MIL.equals(entry.getKey().getCategory()))
+                                   .mapToInt(Map.Entry::getValue)
+                                   .sum()
                          * this.save.getGame().getIdeaToTech());
             }
 
-            if (CollectionUtils.isNotEmpty(getOurSpyNetwork())) {
-                getOurSpyNetwork().stream().max(Comparator.comparing(o -> o.getTech().getMil())).ifPresent(country -> {
-                    if (country.getTech().getMil() > getTech().getMil()) {
+            if (CollectionUtils.isNotEmpty(ourSpyNetwork)) {
+                ourSpyNetwork.stream().max(Comparator.comparing(o -> o.getTech().getMil())).ifPresent(country -> {
+                    if (country.getTech().getMil() > tech.getMil()) {
                         double mult = Math.max(this.save.getGame().getSpyNetworkTechEffectMax(),
-                                               (country.getTech().getMil() - getTech().getMil()) * this.save.getGame().getSpyNetworkTechEffect());
+                                               (country.getTech().getMil() - tech.getMil()) * this.save.getGame().getSpyNetworkTechEffect());
                         list.add(mult * NumbersUtils.intOrDefault(getActiveRelation(country).getSpyNetwork()));
                     }
                 });
@@ -4326,17 +4246,18 @@ public class SaveCountry {
                      * (1 + getModifier(ModifiersUtils.getModifier("naval_tradition_from_trade"))));
         }
 
-        if (getChurch() != null && CollectionUtils.isNotEmpty(getChurch().getAspects())) {
-            list.addAll(getChurch().getAspects()
-                                   .stream()
-                                   .filter(churchAspect -> churchAspect.getModifiers().hasModifier(modifier))
-                                   .map(churchAspect -> churchAspect.getModifiers().getModifier(modifier))
-                                   .toList());
+        Church church = getChurch();
+        if (church != null && CollectionUtils.isNotEmpty(church.getAspects())) {
+            list.addAll(church.getAspects()
+                              .stream()
+                              .filter(churchAspect -> churchAspect.getModifiers().hasModifier(modifier))
+                              .map(churchAspect -> churchAspect.getModifiers().getModifier(modifier))
+                              .toList());
         }
 
-        list.add(getTech().getModifier(Power.ADM, getTech().getAdm(), modifier));
-        list.add(getTech().getModifier(Power.DIP, getTech().getDip(), modifier));
-        list.add(getTech().getModifier(Power.MIL, getTech().getMil(), modifier));
+        list.add(tech.getModifier(Power.ADM, tech.getAdm(), modifier));
+        list.add(tech.getModifier(Power.DIP, tech.getDip(), modifier));
+        list.add(tech.getModifier(Power.MIL, tech.getMil(), modifier));
 
         Monarch mon;
         if ((mon = getMonarch()) != null && mon.getPersonalities() != null
@@ -4394,7 +4315,8 @@ public class SaveCountry {
                                              .map(m -> m.getModifier(modifier))
                                              .toList());
 
-        if (getCapital() != null && getCapital().inHre() && !this.save.getHre().dismantled()) {
+        SaveProvince capital = getCapital();
+        if (capital != null && capital.inHre() && !this.save.getHre().dismantled()) {
             list.addAll(this.save.getHre()
                                  .getPassedReforms()
                                  .stream()
@@ -4463,14 +4385,15 @@ public class SaveCountry {
                                  .toList());
         }
 
-        if (getFervor() != null) {
-            list.addAll(getFervor().getActives()
-                                   .stream()
-                                   .map(Fervor::getModifiers)
-                                   .filter(Objects::nonNull)
-                                   .filter(m -> m.hasModifier(modifier))
-                                   .map(m -> m.getModifier(modifier))
-                                   .toList());
+        SaveFervor fervor = getFervor();
+        if (fervor != null) {
+            list.addAll(fervor.getActives()
+                              .stream()
+                              .map(Fervor::getModifiers)
+                              .filter(Objects::nonNull)
+                              .filter(m -> m.hasModifier(modifier))
+                              .map(m -> m.getModifier(modifier))
+                              .toList());
 
             if (modifier.getName().equalsIgnoreCase("MONTHLY_FERVOR_INCREASE")) {
                 list.add(ModifiersUtils.scaleWithActivesFervor(this, new Modifiers(new HashSet<>(),
@@ -4480,41 +4403,43 @@ public class SaveCountry {
             }
         }
 
-        if (getNativeAdvancements() != null) {
-            list.addAll(getNativeAdvancements().getNativeAdvancements()
-                                               .values()
-                                               .stream()
-                                               .map(SaveNativeAdvancement::getEmbracedNativeAdvancements)
-                                               .flatMap(Collection::stream)
-                                               .filter(Objects::nonNull)
-                                               .map(NativeAdvancement::getModifiers)
-                                               .filter(Objects::nonNull)
-                                               .filter(m -> m.hasModifier(modifier))
-                                               .map(m -> m.getModifier(modifier))
-                                               .toList());
+        SaveNativeAdvancements nativeAdvancements = getNativeAdvancements();
+        if (nativeAdvancements != null) {
+            list.addAll(nativeAdvancements.getNativeAdvancements()
+                                          .values()
+                                          .stream()
+                                          .map(a -> a.getEmbracedNativeAdvancements(this.save.getGame()))
+                                          .flatMap(Collection::stream)
+                                          .filter(Objects::nonNull)
+                                          .map(NativeAdvancement::getModifiers)
+                                          .filter(Objects::nonNull)
+                                          .filter(m -> m.hasModifier(modifier))
+                                          .map(m -> m.getModifier(modifier))
+                                          .toList());
         }
 
-        if (getNavalDoctrine() != null && getNavalDoctrine().getModifiers().hasModifier(modifier)) {
-            list.add(getNavalDoctrine().getModifiers().getModifier(modifier));
+        NavalDoctrine navalDoctrine = getNavalDoctrine();
+        if (navalDoctrine != null && navalDoctrine.getModifiers().hasModifier(modifier)) {
+            list.add(navalDoctrine.getModifiers().getModifier(modifier));
         }
 
-        if (getPersonalDeity() != null && getPersonalDeity().getModifiers().hasModifier(modifier)) {
-            list.add(getPersonalDeity().getModifiers().getModifier(modifier));
+        PersonalDeity personalDeity = getPersonalDeity();
+        if (personalDeity != null && personalDeity.getModifiers().hasModifier(modifier)) {
+            list.add(personalDeity.getModifiers().getModifier(modifier));
         }
 
-        if (getReligiousReforms() != null) {
-            list.addAll(getReligiousReforms().getAdoptedReforms()
-                                             .stream()
-                                             .map(ReligiousReform::getModifiers)
-                                             .filter(Objects::nonNull)
-                                             .filter(m -> m.hasModifier(modifier))
-                                             .map(m -> m.getModifier(modifier))
-                                             .toList());
+        SaveReligiousReforms religiousReforms = getReligiousReforms();
+        if (religiousReforms != null) {
+            list.addAll(religiousReforms.getAdoptedReforms()
+                                        .stream()
+                                        .map(ReligiousReform::getModifiers)
+                                        .filter(Objects::nonNull)
+                                        .filter(m -> m.hasModifier(modifier))
+                                        .map(m -> m.getModifier(modifier))
+                                        .toList());
         }
 
-        list.addAll(this.save.getTradeNodes()
-                             .values()
-                             .stream()
+        list.addAll(this.save.getTradeNodesStream()
                              .map(tradeNode -> tradeNode.getCountry(this))
                              .filter(Objects::nonNull)
                              .filter(TradeNodeCountry::hasTrader)
@@ -4526,14 +4451,15 @@ public class SaveCountry {
                              .map(m -> m.getModifier(modifier))
                              .toList());
 
-        if (MapUtils.isNotEmpty(getAdvisors())) {
-            list.addAll(getAdvisors().values()
-                                     .stream()
-                                     .map(SaveAdvisor::getModifiers)
-                                     .filter(Objects::nonNull)
-                                     .filter(m -> m.hasModifier(modifier))
-                                     .map(m -> m.getModifier(modifier))
-                                     .toList());
+        Map<Integer, SaveAdvisor> advisors = getAdvisors();
+        if (MapUtils.isNotEmpty(advisors)) {
+            list.addAll(advisors.values()
+                                .stream()
+                                .map(SaveAdvisor::getModifiers)
+                                .filter(Objects::nonNull)
+                                .filter(m -> m.hasModifier(modifier))
+                                .map(m -> m.getModifier(modifier))
+                                .toList());
         }
 
         list.addAll(getOwnedProvinces().stream()
@@ -4577,75 +4503,79 @@ public class SaveCountry {
                                        .map(m -> m.getModifier(modifier))
                                        .toList());
 
-        if (getFactions() != null) {
-            getFactions().stream()
-                         .max(Comparator.comparing(SaveFaction::getInfluence))
-                         .ifPresent(faction -> {
-                             if (faction.getType().getModifiers().hasModifier(modifier)) {
-                                 list.add(faction.getType().getModifiers().getModifier(modifier));
-                             }
-                         });
+        List<SaveFaction> factions = getFactions();
+        if (factions != null) {
+            factions.stream()
+                    .max(Comparator.comparing(SaveFaction::getInfluence))
+                    .ifPresent(faction -> {
+                        if (faction.getType().getModifiers().hasModifier(modifier)) {
+                            list.add(faction.getType().getModifiers().getModifier(modifier));
+                        }
+                    });
         }
 
-        if (getGovernment() != null) {
-            list.addAll(getGovernment().getReforms()
-                                       .stream()
-                                       .map(GovernmentReform::getModifiers)
-                                       .filter(Objects::nonNull)
-                                       .filter(m -> m.hasModifier(modifier))
-                                       .map(m -> m.getModifier(modifier))
-                                       .toList());
+        SaveGovernment government = getGovernment();
+        if (government != null) {
+            list.addAll(government.getReforms()
+                                  .stream()
+                                  .map(GovernmentReform::getModifiers)
+                                  .filter(Objects::nonNull)
+                                  .filter(m -> m.hasModifier(modifier))
+                                  .map(m -> m.getModifier(modifier))
+                                  .toList());
         }
 
         if (isStatistsInPower()) {
-            list.addAll(getGovernment().getReforms()
-                                       .stream()
-                                       .filter(reform -> reform.getStatesGeneralMechanic() != null
-                                                         && (reform.getStatesGeneralMechanic().getValue() == null
-                                                             || reform.getStatesGeneralMechanic().getValue().apply(this, this)))
-                                       .map(GovernmentReform::getStatesGeneralMechanic)
-                                       .map(Pair::getKey)
-                                       .filter(Objects::nonNull)
-                                       .map(m -> m.get(0))
-                                       .filter(m -> m.hasModifier(modifier))
-                                       .map(m -> m.getModifier(modifier))
-                                       .toList());
+            list.addAll(government.getReforms()
+                                  .stream()
+                                  .filter(reform -> reform.getStatesGeneralMechanic() != null
+                                                    && (reform.getStatesGeneralMechanic().getValue() == null
+                                                        || reform.getStatesGeneralMechanic().getValue().apply(this, this)))
+                                  .map(GovernmentReform::getStatesGeneralMechanic)
+                                  .map(Pair::getKey)
+                                  .filter(Objects::nonNull)
+                                  .map(List::getFirst)
+                                  .filter(m -> m.hasModifier(modifier))
+                                  .map(m -> m.getModifier(modifier))
+                                  .toList());
         } else if (isMonarchistsInPower()) {
-            list.addAll(getGovernment().getReforms()
-                                       .stream()
-                                       .filter(reform -> reform.getStatesGeneralMechanic() != null
-                                                         && (reform.getStatesGeneralMechanic().getValue() == null
-                                                             || reform.getStatesGeneralMechanic().getValue().apply(this, this)))
-                                       .map(GovernmentReform::getStatesGeneralMechanic)
-                                       .map(Pair::getKey)
-                                       .filter(Objects::nonNull)
-                                       .map(m -> m.get(1))
-                                       .filter(m -> m.hasModifier(modifier))
-                                       .map(m -> m.getModifier(modifier))
-                                       .toList());
+            list.addAll(government.getReforms()
+                                  .stream()
+                                  .filter(reform -> reform.getStatesGeneralMechanic() != null
+                                                    && (reform.getStatesGeneralMechanic().getValue() == null
+                                                        || reform.getStatesGeneralMechanic().getValue().apply(this, this)))
+                                  .map(GovernmentReform::getStatesGeneralMechanic)
+                                  .map(Pair::getKey)
+                                  .filter(Objects::nonNull)
+                                  .map(m -> m.get(1))
+                                  .filter(m -> m.hasModifier(modifier))
+                                  .map(m -> m.getModifier(modifier))
+                                  .toList());
         }
 
-        if (getGovernmentRank() != null && getGovernmentRank().getModifiers().hasModifier(modifier)) {
-            list.add(getGovernmentRank().getModifiers().getModifier(modifier));
+        GovernmentRank governmentRank = getGovernmentRank();
+        if (governmentRank != null && governmentRank.getModifiers().hasModifier(modifier)) {
+            list.add(governmentRank.getModifiers().getModifier(modifier));
         }
 
-        if (getHegemon() != null && getHegemon().getModifiers().hasModifier(modifier)) {
-            list.add(getHegemon().getModifiers().getModifier(modifier));
+        SaveHegemon hegemon = getHegemon();
+        if (hegemon != null && hegemon.getModifiers().hasModifier(modifier)) {
+            list.add(hegemon.getModifiers().getModifier(modifier));
         }
 
-        if (getReligion() != null && getReligion().getGameReligion().getCountry() != null && getReligion().getGameReligion()
-                                                                                                          .getCountry()
-                                                                                                          .hasModifier(modifier)) {
-            list.add(getReligion().getGameReligion().getCountry().getModifier(modifier));
+        SaveReligion religion = getReligion();
+        if (religion != null && religion.getGameReligion().getCountry() != null && religion.getGameReligion().getCountry().hasModifier(modifier)) {
+            list.add(religion.getGameReligion().getCountry().getModifier(modifier));
         }
 
-        if (getSecondaryReligion() != null && getSecondaryReligion().getGameReligion().getCountryAsSecondary() != null
-            && getSecondaryReligion().getGameReligion().getCountryAsSecondary().hasModifier(modifier)) {
-            list.add(getReligion().getGameReligion().getCountryAsSecondary().getModifier(modifier));
+        SaveReligion secondaryReligion = getSecondaryReligion();
+        if (secondaryReligion != null && secondaryReligion.getGameReligion().getCountryAsSecondary() != null
+            && secondaryReligion.getGameReligion().getCountryAsSecondary().hasModifier(modifier)) {
+            list.add(secondaryReligion.getGameReligion().getCountryAsSecondary().getModifier(modifier));
         }
 
         SavePapacy papacy;
-        if (getReligion() != null && (papacy = getReligion().getPapacy()) != null && BooleanUtils.toBoolean(papacy.getPapacyActive())) {
+        if (religion != null && (papacy = religion.getPapacy()) != null && BooleanUtils.toBoolean(papacy.getPapacyActive())) {
             if (papacy.getGoldenBull() != null && papacy.getGoldenBull().getModifiers().hasModifier(modifier)) {
                 list.add(papacy.getGoldenBull().getModifiers().getModifier(modifier));
             }
@@ -4671,390 +4601,53 @@ public class SaveCountry {
             }
         }
 
-        if (CollectionUtils.isNotEmpty(getSubjects())) {
-            getSubjects().stream()
-                         .map(subject -> this.save.getDiplomacy()
-                                                  .getDependencies()
-                                                  .stream()
-                                                  .filter(dependency -> this.equals(dependency.getFirst()) && subject.equals(dependency.getSecond()))
-                                                  .findFirst())
-                         .filter(Optional::isPresent)
-                         .map(Optional::get)
-                         .map(Dependency::getSubjectTypeUpgrades)
-                         .filter(Objects::nonNull)
-                         .flatMap(Collection::stream)
-                         .forEach(upgrade -> list.add(upgrade.getModifiersOverlord().getModifier(modifier)));
-
+        List<SaveCountry> subjects = getSubjects();
+        if (CollectionUtils.isNotEmpty(subjects)) {
+            subjects.stream()
+                    .map(subject -> this.save.getDiplomacy()
+                                             .getDependencies()
+                                             .stream()
+                                             .filter(dependency -> this.equals(dependency.getFirst()) && subject.equals(dependency.getSecond()))
+                                             .findFirst())
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .map(Dependency::getSubjectTypeUpgrades)
+                    .filter(Objects::nonNull)
+                    .flatMap(Collection::stream)
+                    .forEach(upgrade -> list.add(upgrade.getModifiersOverlord().getModifier(modifier)));
 
             if (modifier.getName().equalsIgnoreCase("LAND_FORCELIMIT")) {
-                list.add(getSubjects().stream()
-                                      .filter(subject -> subject.getSubjectType().getForcelimitToOverlord() != 0)
-                                      .filter(subject -> !subject.isColony() || subject.getOwnedProvinces().stream().filter(SaveProvince::isCity).count() >= 10)
-                                      .mapToDouble(subject -> ((int) subject.getLandForceLimit()) * subject.getSubjectType().getForcelimitToOverlord())
-                                      .sum());
+                list.add(subjects.stream()
+                                 .filter(subject -> subject.getSubjectType().getForcelimitToOverlord() != 0)
+                                 .filter(subject -> !subject.isColony() || subject.getOwnedProvinces().stream().filter(SaveProvince::isCity).count() >= 10)
+                                 .mapToDouble(subject -> ((int) subject.getLandForceLimit()) * subject.getSubjectType().getForcelimitToOverlord())
+                                 .sum());
             }
         }
 
-        if (CollectionUtils.isNotEmpty(getEstates())) {
-            list.addAll(getEstates().stream()
-                                    .map(estate -> estate.getModifiers(modifier))
-                                    .toList());
+        List<SaveEstate> estates = getEstates();
+        if (CollectionUtils.isNotEmpty(estates)) {
+            list.addAll(estates.stream().map(estate -> estate.getModifiers(modifier)).toList());
         }
 
-        if (getOverlord() != null) {
+        SaveCountry overlord = getOverlord();
+        if (overlord != null) {
             this.save.getDiplomacy()
                      .getDependencies()
                      .stream()
-                     .filter(dependency -> this.equals(dependency.getSecond()) && getOverlord().equals(dependency.getSecond()))
+                     .filter(dependency -> this.equals(dependency.getSecond()) && overlord.equals(dependency.getSecond()))
                      .map(Dependency::getSubjectTypeUpgrades)
                      .filter(Objects::nonNull)
                      .flatMap(Collection::stream)
                      .forEach(upgrade -> list.add(upgrade.getModifiersSubject().getModifier(modifier)));
         }
 
-        if (getCrownLandBonus() != null && getCrownLandBonus().getModifiers().hasModifier(modifier)) {
-            list.add(getCrownLandBonus().getModifiers().getModifier(modifier));
+        CrownLandBonus crownLandBonus = getCrownLandBonus();
+        if (crownLandBonus != null && crownLandBonus.getModifiers().hasModifier(modifier)) {
+            list.add(crownLandBonus.getModifiers().getModifier(modifier));
         }
 
         return ModifiersUtils.sumModifiers(modifier, list);
-    }
-
-    private void refreshAttributes() {
-        String governmentNameVar = this.item.getVarAsString("government_name");
-        if (StringUtils.isNotBlank(governmentNameVar)) {
-            this.governmentName = this.save.getGame().getGovernmentName(ClausewitzUtils.removeQuotes(governmentNameVar));
-        }
-
-        ClausewitzItem fervorItem = this.item.getChild("fervor");
-
-        if (fervorItem != null) {
-            this.fervor = new SaveFervor(fervorItem, this.save.getGame());
-        }
-
-        ClausewitzItem playerAiPrefsCommandItem = this.item.getChild("player_ai_prefs_command");
-
-        if (playerAiPrefsCommandItem != null) {
-            this.playerAiPrefsCommand = new PlayerAiPrefsCommand(playerAiPrefsCommandItem);
-        }
-
-        ClausewitzItem cooldownsItem = this.item.getChild("cooldowns");
-
-        if (cooldownsItem != null) {
-            this.cooldowns = new ListOfDates(cooldownsItem);
-        }
-
-        ClausewitzItem historyItem = this.item.getChild("history");
-
-        if (historyItem != null) {
-            this.history = new SaveCountryHistory(historyItem, this);
-        }
-
-        ClausewitzItem flagsItem = this.item.getChild("flags");
-
-        if (flagsItem != null) {
-            this.flags = new ListOfDates(flagsItem);
-        }
-
-        ClausewitzItem hiddenFlagsItem = this.item.getChild("hidden_flags");
-
-        if (hiddenFlagsItem != null) {
-            this.hiddenFlags = new ListOfDates(hiddenFlagsItem);
-        }
-
-        ClausewitzItem variablesItem = this.item.getChild("variables");
-
-        if (variablesItem != null) {
-            this.variables = new ListOfDoubles(variablesItem);
-        }
-
-        ClausewitzItem colorsItem = this.item.getChild("colors");
-
-        if (colorsItem != null) {
-            this.colors = new Colors(colorsItem);
-        }
-
-        ClausewitzItem techItem = this.item.getChild("technology");
-
-        if (techItem != null) {
-            this.tech = new CountryTechnology(this.save, techItem);
-        }
-
-        List<ClausewitzItem> estateItems = this.item.getChildren("estate");
-        this.estates = estateItems.stream()
-                                  .map(i -> new SaveEstate(i, this))
-                                  .toList();
-
-        ClausewitzItem activeAgendaItem = this.item.getChild("active_agenda");
-        if (activeAgendaItem != null) {
-            this.activeAgenda = new ActiveAgenda(activeAgendaItem, this);
-        }
-
-        ClausewitzItem interactionsLastUsedItem = this.item.getChild("interactions_last_used");
-
-        if (interactionsLastUsedItem != null) {
-            this.interactionsLastUsed = interactionsLastUsedItem.getLists().stream()
-                                                                .map(list -> new EstateInteraction(this.save.getGame(), list))
-                                                                .toList();
-        }
-
-        List<ClausewitzItem> factionItems = this.item.getChildren("faction");
-        this.factions = factionItems.stream()
-                                    .map(child -> new SaveFaction(child, this.save.getGame()))
-                                    .toList();
-
-        List<ClausewitzItem> rivalItems = this.item.getChildren("rival");
-        this.rivals = rivalItems.stream()
-                                .map(child -> new Rival(child, this.save))
-                                .collect(Collectors.toMap(rival -> ClausewitzUtils.removeQuotes(rival.getRivalTag()), Function.identity()));
-
-        List<ClausewitzItem> victoryCardItems = this.item.getChildren("victory_card");
-        this.victoryCards = victoryCardItems.stream()
-                                            .map(VictoryCard::new)
-                                            .toList();
-
-        List<ClausewitzItem> activePolicyItems = this.item.getChildren("active_policy");
-        this.activePolicies = activePolicyItems.stream()
-                                               .map(child -> new ActivePolicy(child, this.save.getGame()))
-                                               .toList();
-
-        List<ClausewitzItem> powerProjectionItems = this.item.getChildren("power_projection");
-        this.powerProjections = powerProjectionItems.stream()
-                                                    .map(PowerProjection::new)
-                                                    .toList();
-
-        Double powerProjection = null;
-
-        for (PowerProjection projection : this.powerProjections) {
-            if (projection.getCurrent() != null && !projection.getCurrent().equals(0d)) {
-                double value = BigDecimal.valueOf(projection.getCurrent())
-                                         .setScale(0, RoundingMode.HALF_UP)
-                                         .doubleValue();
-                if (powerProjection == null) {
-                    powerProjection = value;
-                } else {
-                    powerProjection += value;
-                }
-            }
-        }
-
-        if (powerProjection != null) {
-            if (powerProjection <= 0d) {
-                powerProjection = null;
-            } else if (powerProjection >= 100d) {
-                powerProjection = 100d;
-            }
-        }
-
-        if (!Objects.equals(powerProjection, getCurrentPowerProjection())) {
-            setCurrentPowerProjection(powerProjection);
-        }
-
-        ClausewitzItem parliamentItem = this.item.getChild("parliament");
-
-        if (parliamentItem != null && parliamentItem.getNbChildren() > 0) {
-            this.parliament = new Parliament(parliamentItem, this.save.getGame());
-        }
-
-        ClausewitzItem ledgerItem = this.item.getChild("ledger");
-
-        if (ledgerItem != null) {
-            this.ledger = new Ledger(ledgerItem);
-        }
-
-        this.loans = this.item.getChildren("loan").stream()
-                              .map(Loan::new)
-                              .toList();
-
-        ClausewitzItem churchItem = this.item.getChild("church");
-
-        if (churchItem != null) {
-            this.church = new Church(churchItem, this.save.getGame());
-        }
-
-        ClausewitzItem activeIdeaGroupsItem = this.item.getChild("active_idea_groups");
-
-        if (activeIdeaGroupsItem != null) {
-            this.ideaGroups = new IdeaGroups(activeIdeaGroupsItem, this.save);
-        }
-
-        ClausewitzItem activeReligiousReformsItem = this.item.getChild("active_religious_reform");
-
-        if (activeReligiousReformsItem != null) {
-            this.religiousReforms = new SaveReligiousReforms(activeReligiousReformsItem, this.save.getGame());
-        }
-
-        ClausewitzItem activeNativeAdvancementItem = this.item.getChild("active_native_advancement");
-
-        if (activeNativeAdvancementItem != null) {
-            this.nativeAdvancements = new SaveNativeAdvancements(activeNativeAdvancementItem, this.save.getGame());
-        }
-
-        ClausewitzItem governmentItem = this.item.getChild("government");
-
-        if (governmentItem != null) {
-            this.government = new SaveGovernment(governmentItem, this.save.getGame(), this);
-        }
-
-        ClausewitzItem colonistsItem = this.item.getChild("colonists");
-
-        if (colonistsItem != null) {
-            this.colonists = colonistsItem.getChildren("envoy")
-                                          .stream()
-                                          .map(Envoy::new)
-                                          .toList();
-        }
-
-        ClausewitzItem merchantsItem = this.item.getChild("merchants");
-
-        if (merchantsItem != null) {
-            this.merchants = merchantsItem.getChildren("envoy")
-                                          .stream()
-                                          .map(Envoy::new)
-                                          .toList();
-        }
-
-        ClausewitzItem missionariesItem = this.item.getChild("missionaries");
-
-        if (missionariesItem != null) {
-            this.missionaries = missionariesItem.getChildren("envoy")
-                                                .stream()
-                                                .map(Envoy::new)
-                                                .toList();
-        }
-
-        ClausewitzItem diplomatsItem = this.item.getChild("diplomats");
-
-        if (diplomatsItem != null) {
-            this.diplomats = diplomatsItem.getChildren("envoy")
-                                          .stream()
-                                          .map(Envoy::new)
-                                          .toList();
-        }
-
-        List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
-        this.modifiers = modifierItems.stream()
-                                      .map(child -> new SaveModifier(child, this.save.getGame()))
-                                      .toList();
-
-        ClausewitzItem subUnitItem = this.item.getChild("sub_unit");
-
-        if (subUnitItem != null) {
-            this.subUnit = new SubUnit(subUnitItem);
-        }
-
-        List<ClausewitzItem> armiesItems = this.item.getChildren("army");
-        this.armies = armiesItems.stream()
-                                 .map(armyItem -> new Army(armyItem, this))
-                                 .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
-
-        List<ClausewitzItem> mercenaryItems = this.item.getChildren("mercenary_company");
-        this.mercenaryCompanies = mercenaryItems.stream()
-                                                .map(armyItem -> new MercenaryCompany(armyItem, this))
-                                                .collect(Collectors.toMap(army -> army.getId().getId(), Function.identity()));
-
-        List<ClausewitzItem> naviesItems = this.item.getChildren("navy");
-        this.navies = naviesItems.stream()
-                                 .map(navyItem -> new Navy(navyItem, this))
-                                 .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
-
-        ClausewitzItem activeRelationsItem = this.item.getChild("active_relations");
-
-        if (activeRelationsItem != null) {
-            this.activeRelations = activeRelationsItem.getChildren()
-                                                      .stream()
-                                                      .map(child -> new ActiveRelation(child, this.save))
-                                                      .collect(Collectors.toMap(ActiveRelation::getCountryTag, Function.identity()));
-        }
-
-        List<ClausewitzItem> previousMonarchsItems = this.item.getChildren("previous_monarch");
-        this.previousMonarchs = previousMonarchsItems.stream()
-                                                     .map(Id::new)
-                                                     .toList();
-
-        List<ClausewitzItem> advisorsItems = this.item.getChildren("advisor");
-        this.advisorsIds = advisorsItems.stream()
-                                        .map(Id::new)
-                                        .toList();
-
-        if (this.history != null) {
-            if (this.history.getMonarchs() != null) {
-                ClausewitzItem monarchItem = this.item.getChild("monarch");
-
-                if (monarchItem != null) {
-                    Id monarchId = new Id(monarchItem);
-                    this.monarch = this.history.getMonarch(monarchId.getId());
-                }
-            }
-
-            if (this.history.getHeirs() != null) {
-                ClausewitzItem heirItem = this.item.getChild("heir");
-
-                if (heirItem != null) {
-                    Id heirId = new Id(heirItem);
-                    this.heir = this.history.getHeir(heirId.getId());
-                }
-            }
-
-            if (this.history.getQueens() != null) {
-                ClausewitzItem queenItem = this.item.getChild("queen");
-
-                if (queenItem != null) {
-                    Id queenId = new Id(queenItem);
-                    this.queen = this.history.getQueen(queenId.getId());
-                }
-            }
-
-
-            if (this.history.getLeaders() != null) {
-                this.leaders = new HashMap<>();
-                List<ClausewitzItem> leadersItems = this.item.getChildren("leader");
-                if (!leadersItems.isEmpty()) {
-                    leadersItems.forEach(leaderItem -> {
-                        Id leaderId = new Id(leaderItem);
-
-                        if (this.history.getLeader(leaderId.getId()) != null) {
-                            this.leaders.put(leaderId.getId(), this.history.getLeader(leaderId.getId()));
-                        }
-                    });
-                }
-            }
-        }
-
-        ClausewitzItem admPowerSpentItem = this.item.getChild("adm_spent_indexed");
-
-        if (admPowerSpentItem != null) {
-            this.admPowerSpent = new PowerSpentIndexed(admPowerSpentItem);
-        }
-
-        ClausewitzItem dipPowerSpentItem = this.item.getChild("dip_spent_indexed");
-
-        if (dipPowerSpentItem != null) {
-            this.dipPowerSpent = new PowerSpentIndexed(dipPowerSpentItem);
-        }
-
-        ClausewitzItem milPowerSpentItem = this.item.getChild("mil_spent_indexed");
-
-        if (milPowerSpentItem != null) {
-            this.milPowerSpent = new PowerSpentIndexed(milPowerSpentItem);
-        }
-
-        ClausewitzItem historicStatsCacheItem = this.item.getChild("historic_stats_cache");
-
-        if (historicStatsCacheItem != null) {
-            this.historyStatsCache = new HistoryStatsCache(historicStatsCacheItem);
-        }
-
-        ClausewitzItem customNationalIdeasItem = this.item.getChild("custom_national_ideas");
-
-        if (customNationalIdeasItem != null) {
-            this.customNationalIdeas = customNationalIdeasItem.getChildren().stream().map(CustomNationalIdea::new).toList();
-        }
-
-        ClausewitzItem countryMissionsItem = this.item.getChild("country_missions");
-
-        if (countryMissionsItem != null) {
-            this.countryMissions = new Missions(countryMissionsItem, this.save.getGame());
-        }
     }
 
     @Override

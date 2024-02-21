@@ -19,19 +19,8 @@ import java.util.stream.Collectors;
 
 public class SaveCountryHistory extends SaveCountryHistoryEvent {
 
-    private Map<Integer, Monarch> monarchs;
-
-    private Map<Integer, Leader> leaders;
-
-    private Map<Integer, Heir> heirs;
-
-    private Map<Integer, Queen> queens;
-
-    private SortedMap<LocalDate, List<String>> changedTagFrom;
-
     public SaveCountryHistory(ClausewitzItem item, SaveCountry country) {
         super(item, country);
-        refreshAttributes();
     }
 
     @Override
@@ -63,43 +52,107 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
     }
 
     public Monarch getMonarch(int id) {
-        return this.monarchs.get(id);
+        return getMonarchs().get(id);
     }
 
     public Map<Integer, Monarch> getMonarchs() {
-        return monarchs;
+        return this.item.getChildren()
+                        .stream()
+                        .map(child -> {
+                            ClausewitzItem monarchItem = child.getChild("monarch");
+
+                            if (monarchItem == null) {
+                                monarchItem = child.getChild("monarch_heir");
+                            }
+
+                            if (monarchItem == null) {
+                                monarchItem = child.getChild("monarch_consort");
+                            }
+
+                            if (monarchItem == null) {
+                                monarchItem = child.getChild("monarch_foreign_heir");
+                            }
+
+                            return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
+                        })
+                        .filter(Objects::nonNull)
+                        .map(child -> new Monarch(child.getKey(), this.country, child.getValue()))
+                        .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity(), (monarch, monarch2) -> monarch2));
     }
 
     public Leader getLeader(int id) {
-        return this.leaders.get(id);
+        return getLeaders().get(id);
     }
 
     public Map<Integer, Leader> getLeaders() {
+        Map<Integer, Leader> leaders = this.item.getChildren()
+                                                .stream()
+                                                .map(child -> child.getChildren("leader"))
+                                                .flatMap(Collection::stream)
+                                                .filter(Objects::nonNull)
+                                                .map(item1 -> new Leader(item1, this.country))
+                                                .collect(Collectors.toMap(leader -> leader.getId().getId(), Function.identity(), (leader, leader2) -> leader2));
+
+        leaders.putAll(getMonarchs().values()
+                                    .stream()
+                                    .filter(monarch -> monarch.getLeader() != null)
+                                    .collect(Collectors.toMap(monarch -> monarch.getLeader().getId().getId(), Monarch::getLeader)));
+
+        leaders.putAll(getHeirs().values()
+                                 .stream()
+                                 .filter(heir -> heir.getLeader() != null)
+                                 .collect(Collectors.toMap(heir -> heir.getLeader().getId().getId(), Heir::getLeader)));
+
         return leaders;
     }
 
     public Heir getHeir(int id) {
-        return this.heirs.get(id);
+        return getHeirs().get(id);
     }
 
     public Map<Integer, Heir> getHeirs() {
-        return heirs;
+        return this.item.getChildren()
+                        .stream()
+                        .map(child -> {
+                            ClausewitzItem monarchItem = child.getChild("heir");
+
+                            if (monarchItem == null) {
+                                monarchItem = child.getChild("foreign_heir");
+                            }
+
+                            return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
+                        })
+                        .filter(Objects::nonNull)
+                        .map(child -> new Heir(child.getKey(), this.country, child.getValue()))
+                        .collect(Collectors.toMap(heir -> heir.getId().getId(), Function.identity(), (heir, heir2) -> heir2));
     }
 
     public Queen getQueen(int id) {
-        return this.queens.get(id);
+        return getQueens().get(id);
     }
 
     public Map<Integer, Queen> getQueens() {
-        return queens;
+        return this.item.getChildren()
+                        .stream()
+                        .map(child -> {
+                            ClausewitzItem monarchItem = child.getChild("queen");
+
+                            return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
+                        })
+                        .filter(Objects::nonNull)
+                        .map(child -> new Queen(child.getKey(), this.country, child.getValue()))
+                        .collect(Collectors.toMap(queen -> queen.getId().getId(), Function.identity(), (queen, queen2) -> queen2));
     }
 
     public SortedMap<LocalDate, List<String>> getChangedTagsFrom() {
-        return changedTagFrom;
-    }
-
-    public void setChangedTagFrom(SortedMap<LocalDate, List<String>> changedTagFrom) {
-        this.changedTagFrom = changedTagFrom;
+        return this.item.getChildren()
+                        .stream()
+                        .filter(child -> child.hasVar("changed_tag_from"))
+                        .collect(Collectors.groupingBy(child -> Eu4Utils.stringToDate(child.getName()),
+                                                       TreeMap::new,
+                                                       Collectors.mapping(
+                                                               child -> ClausewitzUtils.removeQuotes(child.getVarAsString("changed_tag_from")),
+                                                               Collectors.toList())));
     }
 
     public void addEvent(LocalDate date, String name, String value) {
@@ -115,7 +168,6 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
                           LeaderPersonality personality, int id) {
         ClausewitzItem child = this.item.addChild(ClausewitzUtils.dateToString(date));
         Leader.addToItem(child, name, type, manuever, fire, shock, siege, personality, date, birthDate, id, this.country);
-        refreshAttributes();
     }
 
     public void removeLeader(Leader leader) {
@@ -125,85 +177,5 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
                  .filter(child -> new Leader(child.getChild("leader"), this.country).getId().equals(leader.getId()))
                  .findFirst()
                  .ifPresent(this.item::removeChild);
-    }
-
-    private void refreshAttributes() {
-        this.monarchs = this.item.getChildren()
-                                 .stream()
-                                 .map(child -> {
-                                     ClausewitzItem monarchItem = child.getChild("monarch");
-
-                                     if (monarchItem == null) {
-                                         monarchItem = child.getChild("monarch_heir");
-                                     }
-
-                                     if (monarchItem == null) {
-                                         monarchItem = child.getChild("monarch_consort");
-                                     }
-
-                                     if (monarchItem == null) {
-                                         monarchItem = child.getChild("monarch_foreign_heir");
-                                     }
-
-                                     return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
-                                 })
-                                 .filter(Objects::nonNull)
-                                 .map(child -> new Monarch(child.getKey(), this.country, child.getValue()))
-                                 .collect(Collectors.toMap(monarch -> monarch.getId().getId(), Function.identity(), (monarch, monarch2) -> monarch2));
-
-        this.leaders = this.item.getChildren()
-                                .stream()
-                                .map(child -> child.getChildren("leader"))
-                                .flatMap(Collection::stream)
-                                .filter(Objects::nonNull)
-                                .map(item1 -> new Leader(item1, this.country))
-                                .collect(Collectors.toMap(leader -> leader.getId().getId(), Function.identity(), (leader, leader2) -> leader2));
-
-        this.heirs = this.item.getChildren()
-                              .stream()
-                              .map(child -> {
-                                  ClausewitzItem monarchItem = child.getChild("heir");
-
-                                  if (monarchItem == null) {
-                                      monarchItem = child.getChild("foreign_heir");
-                                  }
-
-                                  return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
-                              })
-                              .filter(Objects::nonNull)
-                              .map(child -> new Heir(child.getKey(), this.country, child.getValue()))
-                              .collect(Collectors.toMap(heir -> heir.getId().getId(), Function.identity(), (heir, heir2) -> heir2));
-
-        this.queens = this.item.getChildren()
-                               .stream()
-                               .map(child -> {
-                                   ClausewitzItem monarchItem = child.getChild("queen");
-
-                                   return monarchItem == null ? null : Pair.of(monarchItem, Eu4Utils.stringToDate(child.getName()));
-                               })
-                               .filter(Objects::nonNull)
-                               .map(child -> new Queen(child.getKey(), this.country, child.getValue()))
-                               .collect(Collectors.toMap(queen -> queen.getId().getId(), Function.identity(), (queen, queen2) -> queen2));
-
-        this.leaders.putAll(this.monarchs.values()
-                                         .stream()
-                                         .filter(monarch -> monarch.getLeader() != null)
-                                         .collect(Collectors.toMap(monarch -> monarch.getLeader().getId().getId(),
-                                                                   Monarch::getLeader)));
-
-        this.leaders.putAll(this.heirs.values()
-                                      .stream()
-                                      .filter(heir -> heir.getLeader() != null)
-                                      .collect(Collectors.toMap(heir -> heir.getLeader().getId().getId(),
-                                                                Heir::getLeader)));
-
-        this.changedTagFrom = this.item.getChildren()
-                                       .stream()
-                                       .filter(child -> child.hasVar("changed_tag_from"))
-                                       .collect(Collectors.groupingBy(child -> Eu4Utils.stringToDate(child.getName()),
-                                                                      TreeMap::new,
-                                                                      Collectors.mapping(
-                                                                              child -> ClausewitzUtils.removeQuotes(child.getVarAsString("changed_tag_from")),
-                                                                              Collectors.toList())));
     }
 }

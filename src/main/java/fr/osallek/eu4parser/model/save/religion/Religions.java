@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.save.SaveReligion;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,34 +18,30 @@ public class Religions {
 
     private final Save save;
 
-    private Map<String, SaveReligion> religions;
-
     public Religions(ClausewitzItem religionsItem, ClausewitzItem religionInstanceDataItem, Save save) {
         this.religionsItem = religionsItem;
         this.religionInstanceDataItem = religionInstanceDataItem;
         this.save = save;
-
-        refreshAttributes();
     }
 
     public SaveReligion getReligion(String name) {
-        return this.religions.get(name);
+        return getReligions().get(name);
     }
 
     public Map<String, SaveReligion> getReligions() {
-        return religions;
-    }
-
-    private void refreshAttributes() {
-        this.religions = this.religionsItem.getChildren()
-                                           .stream()
-                                           .map(item -> new SaveReligion(item, religionInstanceDataItem.getChild(item.getName()), this.save))
-                                           .collect(Collectors.toMap(SaveReligion::getName, Function.identity(), (e1, e2) -> e1, LinkedHashMap::new));
+        Map<String, SaveReligion> religions = this.religionsItem.getChildren()
+                                                                .stream()
+                                                                .map(item -> new SaveReligion(item, religionInstanceDataItem.getChild(item.getName()),
+                                                                                              this.save))
+                                                                .collect(Collectors.toMap(SaveReligion::getName, Function.identity(), (e1, e2) -> e1,
+                                                                                          LinkedHashMap::new));
 
         this.religionInstanceDataItem.getChildren().forEach(religion -> {
-            if (!this.religions.containsKey(religion.getName())) {
-                this.religions.put(religion.getName(), new SaveReligion(null, religion, this.save));
+            if (!religions.containsKey(religion.getName())) {
+                religions.put(religion.getName(), new SaveReligion(null, religion, this.save));
             }
         });
+
+        return religions;
     }
 }

@@ -13,14 +13,9 @@ public class Battle {
 
     private final LocalDate date;
 
-    private Combatant attacker;
-
-    private Combatant defender;
-
     public Battle(LocalDate date, ClausewitzItem item) {
         this.item = item;
         this.date = date;
-        refreshAttributes();
     }
 
     public LocalDate getDate() {
@@ -40,11 +35,15 @@ public class Battle {
     }
 
     public Combatant getAttacker() {
-        return attacker;
+        ClausewitzItem child = this.item.getChild("attacker");
+
+        return child == null ? null : new Combatant(child);
     }
 
     public Combatant getDefender() {
-        return defender;
+        ClausewitzItem child = this.item.getChild("defender");
+
+        return child == null ? null : new Combatant(child);
     }
 
     public boolean getResult() {
@@ -57,19 +56,5 @@ public class Battle {
 
     public Double getLoserAlliance() {
         return this.item.getVarAsDouble("loser_alliance");
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem attackerItem = this.item.getChild("attacker");
-
-        if (attackerItem != null) {
-            this.attacker = new Combatant(attackerItem);
-        }
-
-        ClausewitzItem defenderItem = this.item.getChild("defender");
-
-        if (defenderItem != null) {
-            this.defender = new Combatant(defenderItem);
-        }
     }
 }

@@ -3,7 +3,9 @@ package fr.osallek.eu4parser.model.save.war;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.country.Losses;
+import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.EnumMap;
@@ -21,6 +23,10 @@ public record WarParticipant(ClausewitzItem item) {
 
     public String getTag() {
         return ClausewitzUtils.removeQuotes(this.item.getVarAsString("tag"));
+    }
+
+    public SaveCountry getCountry(Save save) {
+        return save.getCountry(getTag());
     }
 
     public boolean getPromisedLand() {

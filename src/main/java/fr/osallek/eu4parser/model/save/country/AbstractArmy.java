@@ -15,18 +15,14 @@ public abstract class AbstractArmy {
 
     protected final SaveCountry country;
 
-    protected Id id;
-
-    protected Id leader;
-
     protected AbstractArmy(ClausewitzItem item, SaveCountry country) {
         this.item = item;
         this.country = country;
-        refreshAttributes();
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem idItem = this.item.getChild("id");
+        return idItem == null ? null : new Id(idItem);
     }
 
     public SaveCountry getCountry() {
@@ -42,7 +38,9 @@ public abstract class AbstractArmy {
     }
 
     public Id getLeader() {
-        return leader;
+        ClausewitzItem leaderItem = this.item.getChild("leader");
+
+        return leaderItem != null ? new Id(leaderItem) : null;
     }
 
     public void removeLeader() {
@@ -138,19 +136,5 @@ public abstract class AbstractArmy {
         parent.addChild(toItem);
 
         return toItem;
-    }
-
-    protected void refreshAttributes() {
-        ClausewitzItem idItem = this.item.getChild("id");
-
-        if (idItem != null) {
-            this.id = new Id(idItem);
-        }
-
-        ClausewitzItem leaderItem = this.item.getChild("leader");
-
-        if (leaderItem != null) {
-            this.leader = new Id(leaderItem);
-        }
     }
 }

@@ -9,23 +9,22 @@ import java.util.List;
 
 public class Navy extends Army {
 
-    private List<Ship> ships;
-
     public Navy(ClausewitzItem item, SaveCountry country) {
         super(item, country);
     }
 
     public List<Ship> getShips() {
-        return ships;
+        return this.item.getChildren("ship").stream().map(child -> new Ship(child, this.country.getSave(), this)).toList();
     }
 
     public void addShip(String name, String type) {
         Integer home = 1;
         Double morale = 0.5d;
 
-        if (this.ships != null && !this.ships.isEmpty()) {
-            home = this.ships.get(0).getHome();
-            morale = this.ships.get(0).getMorale();
+        List<Ship> ships = getShips();
+        if (ships != null && !ships.isEmpty()) {
+            home = ships.getFirst().getHome();
+            morale = ships.getFirst().getMorale();
         }
 
         addShip(name, home, type, morale);
@@ -33,12 +32,10 @@ public class Navy extends Army {
 
     public void addShip(String name, Integer home, String type, Double morale) {
         AbstractRegiment.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale);
-        refreshAttributes();
     }
 
     public void removeShip(int index) {
         this.item.removeVariable("ship", index);
-        refreshAttributes();
     }
 
     //Todo mission details
@@ -102,22 +99,11 @@ public class Navy extends Army {
         return false;
     }
 
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location,
-                                              String graphicalCulture, int shipId, String shipName,
+    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location, String graphicalCulture, int shipId, String shipName,
                                               int shipHome, String shipType, double shipMorale) {
         ClausewitzItem toItem = AbstractArmy.addToItem(parent, "navy", name, location, graphicalCulture, id);
         AbstractRegiment.addToItem(toItem, shipId, shipName, shipHome, shipType, shipMorale);
 
         return toItem;
-    }
-
-    @Override
-    protected void refreshAttributes() {
-        super.refreshAttributes();
-
-        List<ClausewitzItem> shipsItems = this.item.getChildren("ship");
-        this.ships = shipsItems.stream()
-                               .map(child -> new Ship(child, this.country.getSave(), this))
-                               .toList();
     }
 }

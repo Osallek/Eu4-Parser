@@ -15,21 +15,20 @@ public abstract class Combat<C extends Combatant> {
 
     private final BiFunction<ClausewitzItem, Save, C> supplier;
 
-    protected Id id;
-
-    protected C attacker;
-
-    protected C defender;
-
     protected Combat(ClausewitzItem item, Save save, BiFunction<ClausewitzItem, Save, C> supplier) {
         this.save = save;
         this.item = item;
         this.supplier = supplier;
-        refreshAttributes();
     }
 
     public Id getId() {
-        return id;
+        ClausewitzItem idChild = this.item.getChild("id");
+
+        if (idChild != null) {
+            return new Id(idChild);
+        }
+
+        return null;
     }
 
     public SaveProvince getLocation() {
@@ -57,30 +56,22 @@ public abstract class Combat<C extends Combatant> {
     }
 
     public C getAttacker() {
-        return attacker;
-    }
-
-    public C getDefender() {
-        return defender;
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem idChild = this.item.getChild("id");
-
-        if (idChild != null) {
-            this.id = new Id(idChild);
-        }
-
         ClausewitzItem attackerItem = this.item.getChild("attacker");
 
         if (attackerItem != null) {
-            this.attacker = supplier.apply(attackerItem, this.save);
+            return supplier.apply(attackerItem, this.save);
         }
 
+        return null;
+    }
+
+    public C getDefender() {
         ClausewitzItem defenderItem = this.item.getChild("defender");
 
         if (defenderItem != null) {
-            this.defender = supplier.apply(defenderItem, this.save);
+            return supplier.apply(defenderItem, this.save);
         }
+
+        return null;
     }
 }

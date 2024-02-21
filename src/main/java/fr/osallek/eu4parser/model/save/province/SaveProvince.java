@@ -72,48 +72,15 @@ public class SaveProvince extends Province {
 
     private SaveCountry country;
 
-    private SaveArea area;
+    private SaveArea saveArea;
 
-    private ListOfDates flags;
-
-    private Id occupyingRebelFaction;
-
-    private SeatInParliament seatInParliament;
-
-    private List<ProvinceBuilding> buildings;
-
-    private boolean buildingsUpdated;
-
-    private SaveProvinceHistory history;
-
-    private List<Army> armies;
-
-    private List<Navy> navies;
-
-    private ListOfDates discoveryDates;
-
-    private ListOfDates discoveryReligionDates;
-
-    private Map<String, Integer> improveCount;
-
-    private Map<String, SaveModifier> modifiers;
-
-    private Id rebelFaction;
-
-    private ProvinceConstruction buildingConstruction;
-
-    private ProvinceConstruction colonyConstruction;
-
-    private ProvinceConstruction missionaryConstruction;
-
-    private Double localAutonomy;
+    private Double localAutonomy = null; //Kept because heavy to compute
 
     public SaveProvince(ClausewitzItem item, Province province, Save save) {
         super(province);
         this.item = item;
         this.save = save;
         this.country = this.save.getCountry(ClausewitzUtils.removeQuotes(getOwnerTag()));
-        refreshAttributes();
     }
 
     public Save getSave() {
@@ -130,11 +97,11 @@ public class SaveProvince extends Province {
     }
 
     public SaveArea getSaveArea() {
-        return area;
-    }
+        if (this.saveArea == null) {
+            this.saveArea = this.save.getAreasStream().filter(a -> a.getName().equals(this.area.getName())).findFirst().orElse(null);
+        }
 
-    public void setSaveArea(SaveArea area) {
-        this.area = area;
+        return this.saveArea;
     }
 
     @Override
@@ -147,7 +114,8 @@ public class SaveProvince extends Province {
     }
 
     public ListOfDates getFlags() {
-        return flags;
+        ClausewitzItem flagsItem = this.item.getChild("flags");
+        return flagsItem != null ? new ListOfDates(flagsItem) : null;
     }
 
     public Map<String, Double> getVariables() {
@@ -173,7 +141,7 @@ public class SaveProvince extends Province {
             this.item.setVariable("owner", ClausewitzUtils.addQuotes(owner.getTag()));
             this.country = owner;
             this.country.addOwnedProvince(this);
-            this.history.addEvent(this.save.getDate(), "owner", ClausewitzUtils.addQuotes(owner.getTag()));
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "owner", ClausewitzUtils.addQuotes(owner.getTag()));
         }
     }
 
@@ -193,7 +161,7 @@ public class SaveProvince extends Province {
 
         this.item.setVariable("controller", ClausewitzUtils.addQuotes(controller.getTag()));
         controller.addControlledProvince(this);
-        this.history.addEvent(this.save.getDate(), "controller", "tag", ClausewitzUtils.addQuotes(controller.getTag()));
+        SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "controller", "tag", ClausewitzUtils.addQuotes(controller.getTag()));
     }
 
     public String getPreviousControllerTag() {
@@ -221,21 +189,25 @@ public class SaveProvince extends Province {
     }
 
     public Id getOccupyingRebelFaction() {
-        return occupyingRebelFaction;
+        ClausewitzItem occupyingRebelFactionItem = this.item.getChild("occupying_rebel_faction");
+
+        return occupyingRebelFactionItem != null ? new Id(occupyingRebelFactionItem) : null;
     }
 
     public SeatInParliament getSeatInParliament() {
-        return this.seatInParliament;
+        ClausewitzItem seatInParliamentItem = this.item.getChild("seat_in_parliament");
+
+        return seatInParliamentItem != null ? new SeatInParliament(seatInParliamentItem, this.save) : null;
     }
 
     public void addSeatInParliament(ParliamentBribe bribe) {
         SeatInParliament.addToItem(this.item, bribe.getName());
-        refreshAttributes();
+        this.localAutonomy = getLocalAutonomy();
     }
 
     public void removeSeatInParliament() {
         this.item.removeChild("seat_in_parliament");
-        refreshAttributes();
+        this.localAutonomy = getLocalAutonomy();
     }
 
     public List<Double> getInstitutionsProgress() {
@@ -309,7 +281,7 @@ public class SaveProvince extends Province {
         if (!list.contains(country.getTag())) {
             list.add(country.getTag());
             country.addCoreProvince(this);
-            this.history.addEvent(this.save.getDate(), "add_core", ClausewitzUtils.addQuotes(country.getTag()));
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "add_core", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
@@ -319,7 +291,7 @@ public class SaveProvince extends Province {
         if (list != null) {
             list.remove(country.getTag());
             country.removeCoreProvince(this);
-            this.history.addEvent(this.save.getDate(), "remove_core", ClausewitzUtils.addQuotes(country.getTag()));
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "remove_core", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
@@ -350,7 +322,7 @@ public class SaveProvince extends Province {
         if (!list.contains(country.getTag())) {
             list.add(country.getTag());
             country.addClaimProvince(this);
-            this.history.addEvent(this.save.getDate(), "add_claim", ClausewitzUtils.addQuotes(country.getTag()));
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "add_claim", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
@@ -360,7 +332,7 @@ public class SaveProvince extends Province {
         if (list != null) {
             list.remove(country.getTag());
             country.removeClaimProvince(this);
-            this.history.addEvent(this.save.getDate(), "remove_claim", ClausewitzUtils.addQuotes(country.getTag()));
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "remove_claim", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
@@ -377,106 +349,128 @@ public class SaveProvince extends Province {
     }
 
     public List<Army> getArmies() {
+        List<ClausewitzItem> unitsItems = this.item.getChildren("unit");
+        List<Army> armies = new ArrayList<>(0);
+
+        if (!unitsItems.isEmpty()) {
+            unitsItems.stream()
+                      .map(Id::new)
+                      .forEach(unitId -> this.save.getCountries()
+                                                  .values()
+                                                  .stream()
+                                                  .map(c -> c.getArmy(unitId))
+                                                  .filter(Objects::nonNull)
+                                                  .findFirst()
+                                                  .ifPresent(armies::add));
+        }
+
         return armies;
     }
 
     public List<Navy> getNavies() {
+        List<ClausewitzItem> unitsItems = this.item.getChildren("unit");
+        List<Navy> navies = new ArrayList<>(0);
+
+        if (!unitsItems.isEmpty()) {
+            unitsItems.stream()
+                      .map(Id::new)
+                      .forEach(unitId -> this.save.getCountries()
+                                                  .values()
+                                                  .stream()
+                                                  .map(c -> c.getNavy(unitId))
+                                                  .filter(Objects::nonNull)
+                                                  .findFirst()
+                                                  .ifPresent(navies::add));
+        }
+
         return navies;
     }
 
     public int getArmySize() {
-        return this.armies == null ? 0 : this.armies.stream().mapToInt(army -> army.getRegiments().size()).sum();
+        return getArmies().stream().mapToInt(army -> army.getRegiments().size()).sum();
     }
 
     public int getNavySize() {
-        return this.navies == null ? 0 : this.navies.stream().mapToInt(army -> army.getRegiments().size()).sum();
+        return getNavies().stream().mapToInt(army -> army.getRegiments().size()).sum();
     }
 
     public List<Regiment> getInfantry() {
-        return this.armies == null ? new ArrayList<>() : this.armies.stream()
-                                                                    .map(Army::getRegiments)
-                                                                    .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType()))
-                                                                    .toList();
+        return getArmies().stream()
+                          .map(Army::getRegiments)
+                          .flatMap(Collection::stream)
+                          .filter(regiment -> UnitType.INFANTRY.equals(regiment.getUnitType()))
+                          .toList();
     }
 
     public List<Regiment> getCavalry() {
-        return this.armies == null ? new ArrayList<>() : this.armies.stream()
-                                                                    .map(Army::getRegiments)
-                                                                    .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType()))
-                                                                    .toList();
+        return getArmies().stream()
+                          .map(Army::getRegiments)
+                          .flatMap(Collection::stream)
+                          .filter(regiment -> UnitType.CAVALRY.equals(regiment.getUnitType()))
+                          .toList();
     }
 
     public List<Regiment> getArtillery() {
-        return this.armies == null ? new ArrayList<>() : this.armies.stream()
-                                                                    .map(Army::getRegiments)
-                                                                    .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType()))
-                                                                    .toList();
+        return getArmies().stream()
+                          .map(Army::getRegiments)
+                          .flatMap(Collection::stream)
+                          .filter(regiment -> UnitType.ARTILLERY.equals(regiment.getUnitType()))
+                          .toList();
     }
 
     public List<Ship> getHeavyShips() {
-        return this.navies == null ? new ArrayList<>() : this.navies.stream()
-                                                                    .map(Navy::getShips)
-                                                                    .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType()))
-                                                                    .toList();
+        return getNavies().stream()
+                          .map(Navy::getShips)
+                          .flatMap(Collection::stream)
+                          .filter(regiment -> UnitType.HEAVY_SHIP.equals(regiment.getUnitType()))
+                          .toList();
     }
 
     public List<Ship> getLightShips() {
-        return this.navies == null ? new ArrayList<>() : this.navies.stream()
-                                                                    .map(Navy::getShips)
-                                                                    .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType()))
-                                                                    .toList();
+        return getNavies().stream()
+                          .map(Navy::getShips)
+                          .flatMap(Collection::stream)
+                          .filter(regiment -> UnitType.LIGHT_SHIP.equals(regiment.getUnitType()))
+                          .toList();
     }
 
     public List<Ship> getGalleys() {
-        return this.navies == null ? new ArrayList<>() : this.navies.stream()
-                                                                    .map(Navy::getShips)
-                                                                    .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType()))
-                                                                    .toList();
+        return getNavies().stream()
+                          .map(Navy::getShips)
+                          .flatMap(Collection::stream)
+                          .filter(regiment -> UnitType.GALLEY.equals(regiment.getUnitType()))
+                          .toList();
     }
 
     public List<Ship> getTransports() {
-        return this.navies == null ? new ArrayList<>() : this.navies.stream()
-                                                                    .map(Navy::getShips)
-                                                                    .flatMap(Collection::stream)
-                                                                    .filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType()))
-                                                                    .toList();
+        return getNavies().stream()
+                          .map(Navy::getShips)
+                          .flatMap(Collection::stream)
+                          .filter(regiment -> UnitType.TRANSPORT.equals(regiment.getUnitType()))
+                          .toList();
     }
 
     public List<AbstractRegiment> getUnits() {
-        if (this.navies == null && this.armies == null) {
-            return new ArrayList<>();
-        } else if (this.navies == null) {
-            return this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream).collect(Collectors.toList());
-        } else if (this.armies == null) {
-            return this.navies.stream().map(Navy::getShips).flatMap(Collection::stream).collect(Collectors.toList());
-        } else {
-            return Stream.concat(this.navies.stream().map(Navy::getShips).flatMap(Collection::stream),
-                                 this.armies.stream().map(Army::getRegiments).flatMap(Collection::stream)).toList();
-        }
+        return Stream.concat(getNavies().stream().map(Navy::getShips).flatMap(Collection::stream),
+                             getArmies().stream().map(Army::getRegiments).flatMap(Collection::stream)).toList();
     }
 
     public long getNbRegimentOf(String type) {
-        return this.armies == null ? 0 : this.armies.stream()
-                                                    .mapToLong(army -> army.getRegiments()
-                                                                           .stream()
-                                                                           .filter(regiment -> type.equals(regiment.getTypeName()))
-                                                                           .count())
-                                                    .sum();
+        return getArmies().stream()
+                          .mapToLong(army -> army.getRegiments()
+                                                 .stream()
+                                                 .filter(regiment -> type.equals(regiment.getTypeName()))
+                                                 .count())
+                          .sum();
     }
 
     public long getNbRegimentOfCategory(int category) {
-        return this.armies == null ? 0 : this.armies.stream()
-                                                    .mapToLong(army -> army.getRegiments()
-                                                                           .stream()
-                                                                           .filter(regiment -> Objects.equals(regiment.getCategory(), category))
-                                                                           .count())
-                                                    .sum();
+        return getArmies().stream()
+                          .mapToLong(army -> army.getRegiments()
+                                                 .stream()
+                                                 .filter(regiment -> Objects.equals(regiment.getCategory(), category))
+                                                 .count())
+                          .sum();
     }
 
     public Boolean activeTradeCompany() {
@@ -626,9 +620,9 @@ public class SaveProvince extends Province {
             setCulture(country.getPrimaryCulture());
             setReligion(country.getReligion());
             setColonySize(1);
-            this.history.addEvent(this.save.getDate(), "owner", country.getTag());
-            this.history.addEvent(this.save.getDate(), "culture", country.getPrimaryCulture().getName());
-            this.history.addEvent(this.save.getDate(), "religion", country.getReligion().getName());
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "owner", country.getTag());
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "culture", country.getPrimaryCulture().getName());
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "religion", country.getReligion().getName());
         }
     }
 
@@ -833,14 +827,40 @@ public class SaveProvince extends Province {
     }
 
     public List<ProvinceBuilding> getBuildings() {
-        if (!this.buildingsUpdated) {
-            this.buildings = this.buildings.stream()
-                                           .map(building -> new ProvinceBuilding(building, this.save.getGame().getBuilding(building.getName())))
-                                           .collect(Collectors.toList()); //Mutable list
-            this.buildingsUpdated = true;
+        ClausewitzItem buildersItem = this.item.getChild("building_builders");
+        List<ProvinceBuilding> buildings = new ArrayList<>(0);
+
+        if (buildersItem != null) {
+            for (ClausewitzVariable variable : buildersItem.getVariables()) {
+                ClausewitzItem historyItem = getHistoryItem();
+                if (historyItem == null) {
+                    buildings.add(new ProvinceBuilding(variable.getName(), variable.getValue(), null, this.save.getGame().getBuilding(variable.getName())));
+                } else {
+                    Optional<ClausewitzItem> child = historyItem.getChildren()
+                                                                .stream()
+                                                                .filter(c -> c.hasVar(variable.getName()))
+                                                                .findFirst();
+                    if (child.isPresent()) {
+                        buildings.add(new ProvinceBuilding(variable.getName(),
+                                                           variable.getValue(),
+                                                           Eu4Utils.stringToDate(child.get().getName()),
+                                                           this.save.getGame().getBuilding(variable.getName())));
+                    } else {
+                        buildings.add(new ProvinceBuilding(variable.getName(),
+                                                           variable.getValue(),
+                                                           null,
+                                                           this.save.getGame().getBuilding(variable.getName())));
+                    }
+                }
+            }
+
+            buildings = buildings.stream()
+                                 .map(building -> new ProvinceBuilding(building, this.save.getGame().getBuilding(building.getName())))
+                                 .collect(Collectors.toList());
+            buildings.sort(ProvinceBuilding::compareTo);
         }
 
-        return this.buildings;
+        return buildings;
     }
 
     public List<Building> getAvailableBuildings() {
@@ -874,7 +894,7 @@ public class SaveProvince extends Province {
     }
 
     public void setBuildings(List<Building> newBuildings) {
-        Iterator<ProvinceBuilding> iterator = this.buildings.iterator();
+        Iterator<ProvinceBuilding> iterator = getBuildings().iterator();
 
         while (iterator.hasNext()) {
             ProvinceBuilding provinceBuilding = iterator.next();
@@ -906,10 +926,10 @@ public class SaveProvince extends Province {
             if (!buildingsItem.hasVar(name)) {
                 buildingsItem.addVariable(name, true);
                 buildingsBuildersItem.addVariable(name, ClausewitzUtils.addQuotes(builder));
-                this.history.addEvent(this.save.getDate(), name, true);
+                SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), name, true);
             }
 
-            refreshAttributes();
+            this.localAutonomy = getLocalAutonomy();
         }
     }
 
@@ -928,7 +948,7 @@ public class SaveProvince extends Province {
 
     public void removeBuilding(String name) {
         removeBuildingNoRefresh(name);
-        refreshAttributes();
+        this.localAutonomy = getLocalAutonomy();
     }
 
     public List<SaveGreatProject> getGreatProjects() {
@@ -941,8 +961,14 @@ public class SaveProvince extends Province {
         }
     }
 
+    private ClausewitzItem getHistoryItem() {
+        return this.item.getChild("history");
+    }
+
     public SaveProvinceHistory getHistory() {
-        return history;
+        ClausewitzItem historyItem = getHistoryItem();
+
+        return historyItem != null ? new SaveProvinceHistory(historyItem, this) : null;
     }
 
     public Integer getPatrol() {
@@ -950,11 +976,15 @@ public class SaveProvince extends Province {
     }
 
     public ListOfDates getDiscoveryDates() {
-        return discoveryDates;
+        ClausewitzItem discoveryDatesItem = this.item.getChild("discovery_dates2");
+
+        return discoveryDatesItem != null ? new ListOfDates(discoveryDatesItem) : null;
     }
 
     public ListOfDates getDiscoveryReligionDates() {
-        return discoveryReligionDates;
+        ClausewitzItem discoveryReligionDatesItem = this.item.getChild("discovery_religion_dates2");
+
+        return discoveryReligionDatesItem != null ? new ListOfDates(discoveryReligionDatesItem) : null;
     }
 
     public List<SaveCountry> getDiscoveredBy() {
@@ -979,7 +1009,7 @@ public class SaveProvince extends Province {
 
         if (!list.contains(country.getTag())) {
             list.add(country.getTag());
-            this.history.addEvent(this.save.getDate(), "discovered_by", ClausewitzUtils.addQuotes(country.getTag()));
+            SaveProvinceHistory.addEvent(getHistoryItem(), this.save.getDate(), "discovered_by", ClausewitzUtils.addQuotes(country.getTag()));
         }
     }
 
@@ -992,11 +1022,21 @@ public class SaveProvince extends Province {
     }
 
     public Map<String, Integer> getImproveCount() {
-        return this.improveCount;
+        ClausewitzItem improveCountItem = this.item.getChild("country_improve_count");
+        Map<String, Integer> improveCount = new HashMap<>();
+
+        if (improveCountItem != null) {
+            for (int i = 0; i < improveCountItem.getVariables().size() - 1; i += 2) {
+                improveCount.put(ClausewitzUtils.removeQuotes(improveCountItem.getVariables().get(i).getValue()),
+                                 improveCountItem.getVariables().get(i + 1).getAsInt());
+            }
+        }
+
+        return improveCount;
     }
 
     public int getTotalImproveCount() {
-        return this.improveCount == null ? 0 : this.improveCount.values().stream().mapToInt(Integer::intValue).sum();
+        return getImproveCount().values().stream().mapToInt(Integer::intValue).sum();
     }
 
     public List<String> getTriggeredModifiers() {
@@ -1112,7 +1152,10 @@ public class SaveProvince extends Province {
     }
 
     public Map<String, SaveModifier> getModifiers() {
-        return modifiers;
+        return this.item.getChildren("modifier")
+                        .stream()
+                        .map(child -> new SaveModifier(child, this.save.getGame()))
+                        .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifierName()), Function.identity()));
     }
 
     public void addModifier(String modifier, LocalDate date) {
@@ -1121,12 +1164,12 @@ public class SaveProvince extends Province {
 
     public void addModifier(String modifier, LocalDate date, Boolean hidden) {
         SaveModifier.addToItem(this.item, modifier, date, hidden);
-        refreshAttributes();
+        this.localAutonomy = getLocalAutonomy();
     }
 
     public void removeModifier(int index) {
         this.item.removeChild("modifier", index);
-        refreshAttributes();
+        this.localAutonomy = getLocalAutonomy();
     }
 
     public void removeModifier(GameModifier modifier) {
@@ -1136,7 +1179,7 @@ public class SaveProvince extends Province {
     public void removeModifier(String modifier) {
         Integer index = null;
         modifier = ClausewitzUtils.addQuotes(modifier);
-        List<SaveModifier> saveModifiers = new ArrayList<>(this.modifiers.values());
+        List<SaveModifier> saveModifiers = new ArrayList<>(getModifiers().values());
 
         for (int i = 0; i < saveModifiers.size(); i++) {
             if (saveModifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
@@ -1147,7 +1190,7 @@ public class SaveProvince extends Province {
 
         if (index != null) {
             this.item.removeChild("modifier", index);
-            refreshAttributes();
+            this.localAutonomy = getLocalAutonomy();
         }
     }
 
@@ -1186,7 +1229,9 @@ public class SaveProvince extends Province {
     }
 
     public Id getRebelFaction() {
-        return rebelFaction;
+        ClausewitzItem rebelFactionItem = this.item.getChild("rebel_faction");
+
+        return rebelFactionItem != null ? new Id(rebelFactionItem) : null;
     }
 
     public boolean userChangedName() {
@@ -1312,15 +1357,21 @@ public class SaveProvince extends Province {
     }
 
     public ProvinceConstruction getBuildingConstruction() {
-        return buildingConstruction;
+        ClausewitzItem child = this.item.getChild("building_construction");
+
+        return child != null ? new ProvinceConstruction(child, this) : null;
     }
 
     public ProvinceConstruction getColonyConstruction() {
-        return colonyConstruction;
+        ClausewitzItem child = this.item.getChild("colony_construction");
+
+        return child != null ? new ProvinceConstruction(child, this) : null;
     }
 
     public ProvinceConstruction getMissionaryConstruction() {
-        return missionaryConstruction;
+        ClausewitzItem child = this.item.getChild("missionary_construction");
+
+        return child != null ? new ProvinceConstruction(child, this) : null;
     }
 
     public double getTolerance() {
@@ -1508,133 +1559,6 @@ public class SaveProvince extends Province {
         }
 
         return ModifiersUtils.sumModifiers(modifier, list);
-    }
-
-    private void refreshAttributes() {
-        ClausewitzItem flagsItem = this.item.getChild("flags");
-
-        if (flagsItem != null) {
-            this.flags = new ListOfDates(flagsItem);
-        }
-
-        ClausewitzItem occupyingRebelFactionItem = this.item.getChild("occupying_rebel_faction");
-
-        if (occupyingRebelFactionItem != null) {
-            this.occupyingRebelFaction = new Id(occupyingRebelFactionItem);
-        }
-
-        ClausewitzItem seatInParliamentItem = this.item.getChild("seat_in_parliament");
-
-        if (seatInParliamentItem != null) {
-            this.seatInParliament = new SeatInParliament(seatInParliamentItem, this.save);
-        }
-
-        ClausewitzItem historyItem = this.item.getChild("history");
-
-        if (historyItem != null) {
-            this.history = new SaveProvinceHistory(historyItem, this);
-        }
-
-        ClausewitzItem buildersItem = this.item.getChild("building_builders");
-        this.buildings = new ArrayList<>(0);
-
-        if (buildersItem != null) {
-            buildersItem.getVariables().forEach(var -> {
-                if (historyItem == null) {
-                    this.buildings.add(new ProvinceBuilding(var.getName(), var.getValue(), null, this.save.getGame().getBuilding(var.getName())));
-                } else {
-                    historyItem.getChildren()
-                               .stream()
-                               .filter(child -> child.hasVar(var.getName()))
-                               .findFirst()
-                               .ifPresentOrElse(child -> this.buildings.add(new ProvinceBuilding(var.getName(),
-                                                                                                 var.getValue(),
-                                                                                                 Eu4Utils.stringToDate(child.getName()),
-                                                                                                 this.save.getGame().getBuilding(var.getName()))),
-                                                () -> this.buildings.add(new ProvinceBuilding(var.getName(),
-                                                                                              var.getValue(),
-                                                                                              null,
-                                                                                              this.save.getGame().getBuilding(var.getName()))));
-                }
-            });
-            this.buildings.sort(ProvinceBuilding::compareTo);
-        }
-
-        ClausewitzItem discoveryDatesItem = this.item.getChild("discovery_dates2");
-
-        if (discoveryDatesItem != null) {
-            this.discoveryDates = new ListOfDates(discoveryDatesItem);
-        }
-
-        ClausewitzItem discoveryReligionDatesItem = this.item.getChild("discovery_religion_dates2");
-
-        if (discoveryReligionDatesItem != null) {
-            this.discoveryReligionDates = new ListOfDates(discoveryReligionDatesItem);
-        }
-
-        ClausewitzItem improveCountItem = this.item.getChild("country_improve_count");
-
-        if (improveCountItem != null) {
-            this.improveCount = new HashMap<>();
-            for (int i = 0; i < improveCountItem.getVariables().size() - 1; i += 2) {
-                this.improveCount.put(ClausewitzUtils.removeQuotes(improveCountItem.getVariables().get(i).getValue()),
-                                      improveCountItem.getVariables().get(i + 1).getAsInt());
-            }
-        }
-
-        List<ClausewitzItem> modifierItems = this.item.getChildren("modifier");
-        this.modifiers = modifierItems.stream()
-                                      .map(child -> new SaveModifier(child, this.save.getGame()))
-                                      .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifierName()), Function.identity()));
-
-        ClausewitzItem rebelFactionItem = this.item.getChild("rebel_faction");
-
-        if (rebelFactionItem != null) {
-            this.rebelFaction = new Id(rebelFactionItem);
-        }
-
-        ClausewitzItem child = this.item.getChild("building_construction");
-
-        if (child != null) {
-            this.buildingConstruction = new ProvinceConstruction(child, this);
-        }
-
-        child = this.item.getChild("colony_construction");
-
-        if (child != null) {
-            this.colonyConstruction = new ProvinceConstruction(child, this);
-        }
-
-        child = this.item.getChild("missionary_construction");
-
-        if (child != null) {
-            this.missionaryConstruction = new ProvinceConstruction(child, this);
-        }
-
-        List<ClausewitzItem> unitsItems = this.item.getChildren("unit");
-
-        if (!unitsItems.isEmpty()) {
-            this.armies = new ArrayList<>(0);
-            this.navies = new ArrayList<>(0);
-            unitsItems.stream().map(Id::new).forEach(unitId -> {
-                this.save.getCountries()
-                         .values()
-                         .stream()
-                         .map(c -> c.getArmy(unitId))
-                         .filter(Objects::nonNull)
-                         .findFirst()
-                         .ifPresent(this.armies::add);
-                this.save.getCountries()
-                         .values()
-                         .stream()
-                         .map(c -> c.getNavy(unitId))
-                         .filter(Objects::nonNull)
-                         .findFirst()
-                         .ifPresent(this.navies::add);
-            });
-        }
-
-        this.localAutonomy = null;
     }
 
     @Override
