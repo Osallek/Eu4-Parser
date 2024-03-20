@@ -1,7 +1,5 @@
 package fr.osallek.eu4parser;
 
-import fr.osallek.clausewitzparser.parser.ClausewitzParser;
-import fr.osallek.clausewitzparser.parser.LuaParser;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveTeam;
@@ -92,6 +90,5 @@ class Eu4ParserTest {
         for (SaveCountry value : countries.values()) {
             Assertions.assertTrue(value.getLandForceLimit() >= 0);
         }
-
     }
 }

@@ -718,6 +718,8 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("local_has_qizilbash", ModifierType.BOOLEAN, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("monthly_egyptian_westernization", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("monthly_asha_vahishta", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("ship_trade_power_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("amount_of_hussars", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
     }
 
     public static void addModifier(String name, ModifierType type, ModifierScope scopes) {

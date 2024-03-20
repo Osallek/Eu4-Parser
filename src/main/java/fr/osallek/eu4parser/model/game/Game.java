@@ -3750,18 +3750,30 @@ public class Game {
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estates_preload", this::isRegularTxtFile)
                 .forEach(path -> {
                     ClausewitzItem estatePreloadItem = ClausewitzParser.parse(path.toFile(), 0);
-                    estatePreloadItem.getChildren().forEach(item -> modifierDefinitions.put(StringUtils.appendIfMissing(item.getName(), "_modifier"),
-                                                                                            item.getChildren("modifier_definition")
-                                                                                                .stream()
-                                                                                                .map(ModifierDefinition::new)
-                                                                                                .toList()));
+                    estatePreloadItem.getChildren().forEach(item -> {
+                        modifierDefinitions.putIfAbsent(StringUtils.appendIfMissing(item.getName(), "_modifier"), new ArrayList<>());
+                        modifierDefinitions.get(StringUtils.appendIfMissing(item.getName(), "_modifier"))
+                                           .addAll(item.getChildren("modifier_definition").stream().map(ModifierDefinition::new).toList());
+                    });
                 });
 
         modifierDefinitions.values()
                            .stream()
                            .flatMap(Collection::stream)
-                           .forEach(modifierDefinition -> ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE,
-                                                                                     ModifierScope.COUNTRY));
+                           .filter(modifierDefinition -> StringUtils.isNotBlank(modifierDefinition.getType()))
+                           .forEach(modifierDefinition -> {
+                               switch (modifierDefinition.getType()) {
+                                   case "influence", "loyalty": {
+                                       ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.MULTIPLICATIVE,
+                                                                  ModifierScope.COUNTRY);
+                                       break;
+                                   }
+                                   case "privileges": {
+                                       ModifiersUtils.addModifier(modifierDefinition.getKey(), ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+                                       break;
+                                   }
+                               }
+                           });
 
         this.estatePrivileges = new HashMap<>();
         getPaths(Eu4Utils.COMMON_FOLDER_PATH + File.separator + "estate_privileges", this::isRegularTxtFile)
