@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 class Eu4ParserTest {
 
@@ -90,5 +91,21 @@ class Eu4ParserTest {
         for (SaveCountry value : countries.values()) {
             Assertions.assertTrue(value.getLandForceLimit() >= 0);
         }
+    }
+
+    @Test
+    void testGetDateFlat() throws IOException {
+        Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.toPath().resolve("flat.eu4"), null);
+
+        Assertions.assertTrue(date.isPresent());
+        Assertions.assertEquals(LocalDate.of(1645, 8, 2), date.get());
+    }
+
+    @Test
+    void testGetDateCompressed() throws IOException {
+        Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.toPath().resolve("compressed.eu4"), null);
+
+        Assertions.assertTrue(date.isPresent());
+        Assertions.assertEquals(LocalDate.of(2087, 7, 1), date.get());
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.clausewitzparser.parser.ClausewitzParser;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.LauncherSettings;
@@ -29,6 +30,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -433,6 +435,37 @@ public class Eu4Parser {
         }
 
         return new ArrayList<>();
+    }
+
+    public static Optional<LocalDate> getDate(Path path, Map<Integer, String> tokens) throws IOException {
+        ClausewitzObject object;
+
+        if (!isValid(path)) {
+            return Optional.empty();
+        }
+
+        if (path.toFile().canRead()) {
+            if (isIronman(path)) {
+                try (ZipFile zipFile = new ZipFile(path.toFile())) {
+                    object = ClausewitzParser.readSingleObjectBinary(zipFile, Eu4Utils.META_FILE, 6, List.of("date", "save_game"),
+                                                                     StandardCharsets.ISO_8859_1, tokens);
+                }
+            } else if (isValidCompressed(path)) {
+                try (ZipFile zipFile = new ZipFile(path.toFile())) {
+                    object = ClausewitzParser.findFirstSingleObject(zipFile, Eu4Utils.META_FILE, 1, List.of("date", "save_game"));
+                }
+            } else if (isValidUncompressed(path)) {
+                object = ClausewitzParser.findFirstSingleObject(path.toFile(), 1, List.of("date", "save_game"));
+            } else {
+                return Optional.empty();
+            }
+
+            if (object instanceof ClausewitzVariable variable) {
+                return Optional.ofNullable(variable.getAsDate());
+            }
+        }
+
+        return Optional.empty();
     }
 
     public static Game parseGame(Path gameFolderPath) throws IOException {
