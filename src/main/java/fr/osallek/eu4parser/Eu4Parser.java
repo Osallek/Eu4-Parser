@@ -163,6 +163,28 @@ public class Eu4Parser {
         return new ArrayList<>();
     }
 
+    public static Optional<List<Path>> detectCloudSaveFolder() throws IOException, InterruptedException {
+        Optional<Path> path = detectSteamFolder().map(p -> p.resolve("userdata"));
+
+        if (path.isEmpty()) {
+            return Optional.empty();
+        }
+
+        try (Stream<Path> stream = Files.list(path.get())) {
+            return Optional.of(stream.map(p -> p.resolve("236850"))
+                                     .filter(Files::exists)
+                                     .filter(Files::isDirectory)
+                                     .map(p -> p.resolve("remote"))
+                                     .filter(Files::exists)
+                                     .filter(Files::isDirectory)
+                                     .map(p -> p.resolve("save games"))
+                                     .filter(Files::exists)
+                                     .filter(Files::isDirectory)
+                                     .toList())
+                           .filter(CollectionUtils::isNotEmpty);
+        }
+    }
+
     public static boolean isIronman(Path path) {
         File file = path.toFile();
 

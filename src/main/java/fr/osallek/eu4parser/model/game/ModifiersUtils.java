@@ -740,7 +740,7 @@ public class ModifiersUtils {
         Modifier modifier = MODIFIERS_MAP.get(ClausewitzUtils.removeQuotes(name.toLowerCase()));
 
         if (modifier == null) {
-            LOGGER.warn("Could not find modifier: {} !", name);
+            LOGGER.debug("Could not find modifier: {} !", name);
         }
 
         return modifier;

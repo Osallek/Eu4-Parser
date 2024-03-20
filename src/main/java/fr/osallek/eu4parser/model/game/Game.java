@@ -66,6 +66,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -80,6 +82,8 @@ public class Game {
     public static final int NB_PARTS = 78;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Game.class);
+
+    private final ThreadPoolExecutor poolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     private final LauncherSettings launcherSettings;
 
@@ -331,11 +335,11 @@ public class Game {
 
         CountDownLatch countDownLatch = new CountDownLatch(NB_PARTS);
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readProvincesDefinition();
 
-                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                poolExecutor.submit(() -> {
                     try {
                         readProvinces();
                     } catch (Exception e) {
@@ -346,7 +350,7 @@ public class Game {
                     }
                 });
 
-                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                poolExecutor.submit(() -> {
                     try {
                         readDefaultMap();
                     } catch (Exception e) {
@@ -357,7 +361,7 @@ public class Game {
                     }
                 });
 
-                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                poolExecutor.submit(() -> {
                     try {
                         readClimate();
                     } catch (Exception e) {
@@ -368,7 +372,7 @@ public class Game {
                     }
                 });
 
-                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                poolExecutor.submit(() -> {
                     try {
                         readContinents();
                     } catch (Exception e) {
@@ -379,7 +383,7 @@ public class Game {
                     }
                 });
 
-                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                poolExecutor.submit(() -> {
                     try {
                         readPositions();
                     } catch (Exception e) {
@@ -390,7 +394,7 @@ public class Game {
                     }
                 });
 
-                Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                poolExecutor.submit(() -> {
                     try {
                         readProvinceHistory();
                     } catch (Exception e) {
@@ -408,7 +412,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 loadDefines();
             } catch (Exception e) {
@@ -419,7 +423,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 loadNativeLocalisations();
             } catch (Exception e) {
@@ -430,7 +434,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 loadLocalisations(language);
             } catch (Exception e) {
@@ -441,7 +445,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readCustomisableLocalisations();
             } catch (Exception e) {
@@ -452,7 +456,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readGraphicalCultures();
             } catch (Exception e) {
@@ -463,7 +467,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readSpriteTypes();
             } catch (Exception e) {
@@ -474,7 +478,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readEstates();
             } catch (Exception e) {
@@ -485,7 +489,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readFactions();
             } catch (Exception e) {
@@ -496,7 +500,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readTradeGoods();
             } catch (Exception e) {
@@ -507,7 +511,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readBuildings();
             } catch (Exception e) {
@@ -518,7 +522,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readAreas();
             } catch (Exception e) {
@@ -529,7 +533,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readRegions();
             } catch (Exception e) {
@@ -540,7 +544,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readSuperRegions();
             } catch (Exception e) {
@@ -551,7 +555,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readCultures();
             } catch (Exception e) {
@@ -562,7 +566,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readReligion();
             } catch (Exception e) {
@@ -573,7 +577,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readInstitutions();
             } catch (Exception e) {
@@ -584,7 +588,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readTradeNodes();
             } catch (Exception e) {
@@ -595,7 +599,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readImperialReforms();
             } catch (Exception e) {
@@ -606,7 +610,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readDecrees();
             } catch (Exception e) {
@@ -617,7 +621,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readGoldenBulls();
             } catch (Exception e) {
@@ -628,7 +632,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readEvents();
             } catch (Exception e) {
@@ -639,7 +643,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readGovernmentRanks();
             } catch (Exception e) {
@@ -650,7 +654,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readGovernmentNames();
             } catch (Exception e) {
@@ -661,7 +665,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readGovernmentReforms();
             } catch (Exception e) {
@@ -672,7 +676,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readGovernments();
             } catch (Exception e) {
@@ -683,7 +687,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readUnits();
             } catch (Exception e) {
@@ -694,7 +698,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readTechnologies();
             } catch (Exception e) {
@@ -705,7 +709,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readAdvisors();
             } catch (Exception e) {
@@ -716,7 +720,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readIdeaGroups();
             } catch (Exception e) {
@@ -727,7 +731,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readCasusBelli();
             } catch (Exception e) {
@@ -738,7 +742,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readTradeCompanies();
             } catch (Exception e) {
@@ -749,7 +753,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readSubjectTypes();
             } catch (Exception e) {
@@ -760,7 +764,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readSubjectTypeUpgrades();
             } catch (Exception e) {
@@ -771,7 +775,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readFetishistCults();
             } catch (Exception e) {
@@ -782,7 +786,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readChurchAspects();
             } catch (Exception e) {
@@ -793,7 +797,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readMissionsTrees();
             } catch (Exception e) {
@@ -804,7 +808,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readRulerPersonalities();
             } catch (Exception e) {
@@ -815,7 +819,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readLeaderPersonalities();
             } catch (Exception e) {
@@ -826,7 +830,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readProfessionalismModifiers();
             } catch (Exception e) {
@@ -837,7 +841,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readStaticModifiers();
             } catch (Exception e) {
@@ -848,7 +852,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readInvestments();
             } catch (Exception e) {
@@ -859,7 +863,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readPolicies();
             } catch (Exception e) {
@@ -870,7 +874,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readHegemons();
             } catch (Exception e) {
@@ -881,7 +885,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readAges();
             } catch (Exception e) {
@@ -892,7 +896,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readDefenderOfFaith();
             } catch (Exception e) {
@@ -903,7 +907,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readCentersOfTrade();
             } catch (Exception e) {
@@ -914,7 +918,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readFervors();
             } catch (Exception e) {
@@ -925,7 +929,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readGreatProjects();
             } catch (Exception e) {
@@ -936,7 +940,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readHolyOrders();
             } catch (Exception e) {
@@ -947,7 +951,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readIsolationism();
             } catch (Exception e) {
@@ -958,7 +962,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readNativeAdvancements();
             } catch (Exception e) {
@@ -969,7 +973,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readNavalDoctrine();
             } catch (Exception e) {
@@ -980,7 +984,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readParliamentIssue();
             } catch (Exception e) {
@@ -991,7 +995,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readParliamentBribe();
             } catch (Exception e) {
@@ -1002,7 +1006,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readPersonalDeities();
             } catch (Exception e) {
@@ -1013,7 +1017,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readReligiousReforms();
             } catch (Exception e) {
@@ -1024,7 +1028,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readCrownLandBonuses();
             } catch (Exception e) {
@@ -1035,7 +1039,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readStateEdicts();
             } catch (Exception e) {
@@ -1046,7 +1050,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readTradePolicies();
             } catch (Exception e) {
@@ -1057,7 +1061,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readEventModifiers();
             } catch (Exception e) {
@@ -1068,7 +1072,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readProvinceTriggeredModifiers();
             } catch (Exception e) {
@@ -1079,7 +1083,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readTriggeredModifiers();
             } catch (Exception e) {
@@ -1090,7 +1094,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readScriptedTriggers();
             } catch (Exception e) {
@@ -1101,7 +1105,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readCountry();
             } catch (Exception e) {
@@ -1112,7 +1116,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readColonialRegions();
             } catch (Exception e) {
@@ -1123,7 +1127,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readDiplomacy();
             } catch (Exception e) {
@@ -1134,7 +1138,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readBookmarks();
             } catch (Exception e) {
@@ -1145,7 +1149,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readWars();
             } catch (Exception e) {
@@ -1156,7 +1160,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readDecisions();
             } catch (Exception e) {
@@ -1167,7 +1171,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readDisasters();
             } catch (Exception e) {
@@ -1178,7 +1182,7 @@ public class Game {
             }
         });
 
-        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        poolExecutor.submit(() -> {
             try {
                 readDlcs();
             } catch (Exception e) {
@@ -1193,8 +1197,9 @@ public class Game {
             countDownLatch.await();
         } catch (InterruptedException e) {
             LOGGER.info("Interrupted while waiting for game files reading");
-            Eu4Utils.POOL_EXECUTOR.shutdownNow();
             Thread.currentThread().interrupt();
+        } finally {
+            poolExecutor.shutdownNow();
         }
 
         this.continents.values().forEach(continent -> continent.getProvinces().forEach(provinceId -> getProvince(provinceId).setContinent(continent)));
@@ -1220,9 +1225,10 @@ public class Game {
         }
 
         CountDownLatch countDownLatch = new CountDownLatch(paths.size());
+        ThreadPoolExecutor threadPoolExecutor = Eu4Utils.getThreadPool();
 
         for (FileNode fileNode : paths) {
-            Eu4Utils.POOL_EXECUTOR.submit(() -> {
+            threadPoolExecutor.submit(() -> {
                 try {
                     convertImage(destFolder, fileNode.getRelativePath().getParent(), fileNode.getPath());
                 } finally {
@@ -1236,6 +1242,8 @@ public class Game {
         } catch (InterruptedException e) {
             LOGGER.error("An error occurred while waiting for image conversion : {}", e.getMessage(), e);
             Thread.currentThread().interrupt();
+        } finally {
+            threadPoolExecutor.shutdownNow();
         }
     }
 
@@ -1265,7 +1273,7 @@ public class Game {
                 finalPath = destFolder.resolve(destPath).resolve(destFileName + "." + FilenameUtils.getExtension(fileName));
                 FileUtils.copyFile(file.toFile(), finalPath.toFile());
             } else {
-                LOGGER.warn("Unknown: {}", fileName);
+                LOGGER.info("Unknown: {}", fileName);
             }
 
             return finalPath == null ? null : destFolder.relativize(finalPath);
@@ -3084,11 +3092,10 @@ public class Game {
     }
 
     private void readProvinceHistory() {
-
         List<FileNode> fileNodes = getFileNodesList(Eu4Utils.HISTORY_FOLDER_PATH + File.separator + "provinces", this::isRegularTxtFile);
         CountDownLatch countDownLatch = new CountDownLatch(fileNodes.size());
 
-        fileNodes.forEach(fileNode -> Eu4Utils.POOL_EXECUTOR.submit(() -> {
+        fileNodes.forEach(fileNode -> poolExecutor.submit(() -> {
             try {
                 String[] fileNameSplit = fileNode.getPath().getFileName().toString().split("[ -]");
                 if (fileNameSplit.length >= 1) {
@@ -4196,7 +4203,7 @@ public class Game {
                     List<ClausewitzVariable> variables = countryTagsItem.getVariables();
                     CountDownLatch countDownLatch = new CountDownLatch(variables.size());
                     for (ClausewitzVariable variable : variables) {
-                        Eu4Utils.POOL_EXECUTOR.submit(() -> {
+                        poolExecutor.submit(() -> {
                             try {
                                 FileNode commonFileNode = getFileNode(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator
                                                                               + ClausewitzUtils.removeQuotes(variable.getValue())).toString());

@@ -120,7 +120,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in country", key);
+                            LOGGER.debug("Could not find scope {} in country", key);
                         }
                     }
                 }
@@ -164,7 +164,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in province", key);
+                            LOGGER.debug("Could not find scope {} in province", key);
                         }
                     }
                 }
@@ -191,7 +191,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in advisor", key);
+                            LOGGER.debug("Could not find scope {} in advisor", key);
                         }
                     }
                 }
@@ -230,7 +230,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in monarch", key);
+                            LOGGER.debug("Could not find scope {} in monarch", key);
                         }
                     }
                 }
@@ -257,7 +257,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in religion", key);
+                            LOGGER.debug("Could not find scope {} in religion", key);
                         }
                     }
                 }
@@ -284,7 +284,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in culture", key);
+                            LOGGER.debug("Could not find scope {} in culture", key);
                         }
                     }
                 }
@@ -310,7 +310,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in culture", key);
+                            LOGGER.debug("Could not find scope {} in culture", key);
                         }
                     }
                 }
@@ -384,7 +384,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in country", key);
+                            LOGGER.debug("Could not find scope {} in country", key);
                         }
                     }
                 }
@@ -424,7 +424,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in province", key);
+                            LOGGER.debug("Could not find scope {} in province", key);
                         }
                     }
                 }
@@ -463,7 +463,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in monarch", key);
+                            LOGGER.debug("Could not find scope {} in monarch", key);
                         }
                     }
                 }
@@ -490,7 +490,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in religion", key);
+                            LOGGER.debug("Could not find scope {} in religion", key);
                         }
                     }
                 }
@@ -517,7 +517,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in culture", key);
+                            LOGGER.debug("Could not find scope {} in culture", key);
                         }
                     }
                 }
@@ -543,7 +543,7 @@ public final class LocalisationUtils {
                         }
 
                         if (current.isEmpty()) {
-                            LOGGER.warn("Could not find scope {} in culture", key);
+                            LOGGER.debug("Could not find scope {} in culture", key);
                         }
                     }
                 }

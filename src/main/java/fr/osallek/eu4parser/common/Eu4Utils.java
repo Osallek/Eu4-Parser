@@ -47,8 +47,6 @@ public final class Eu4Utils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Eu4Utils.class);
 
-    public static final ThreadPoolExecutor POOL_EXECUTOR = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
     public static final Collator COLLATOR = Collator.getInstance();
 
     public static final String DESCRIPTOR_FILE = "descriptor.mod";
@@ -207,6 +205,10 @@ public final class Eu4Utils {
 
         DOCUMENTS_FOLDER = documentsFolder1;
         OSALLEK_DOCUMENTS_FOLDER = DOCUMENTS_FOLDER.resolve("Osallek");
+    }
+
+    public static ThreadPoolExecutor getThreadPool() {
+        return (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     public static synchronized void optimizePng(Path file, Path dest) throws IOException {
