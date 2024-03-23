@@ -16,6 +16,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SaveCountryHistory extends SaveCountryHistoryEvent {
 
@@ -41,6 +42,15 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
                                        .map(child -> Eu4Utils.stringToDate(child.getName()))
                                        .filter(Objects::nonNull)
                                        .anyMatch(date::isBefore);
+    }
+
+    public Stream<SaveCountryHistoryEvent> getEventsAfter(LocalDate date) {
+        return this.item.getChildren()
+                        .reversed()
+                        .stream()
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .map(child -> new SaveCountryHistoryEvent(child, this.country))
+                        .filter(event -> event.getDate().isAfter(date));
     }
 
     public List<SaveCountryHistoryEvent> getEvents() {

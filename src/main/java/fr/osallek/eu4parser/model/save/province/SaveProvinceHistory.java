@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.common.NumbersUtils;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
+import fr.osallek.eu4parser.model.save.country.SaveCountryHistoryEvent;
 import org.apache.commons.collections4.MapUtils;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
 
@@ -53,6 +55,15 @@ public class SaveProvinceHistory extends SaveProvinceHistoryEvent {
                         .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches())
                         .map(child -> new SaveProvinceHistoryEvent(child, this.province))
                         .collect(Collectors.toList());
+    }
+
+    public Stream<SaveProvinceHistoryEvent> getEventsAfter(LocalDate date) {
+        return this.item.getChildren()
+                        .reversed()
+                        .stream()
+                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
+                        .map(child -> new SaveProvinceHistoryEvent(child, this.province))
+                        .filter(event -> event.getDate().isAfter(date));
     }
 
     public SortedMap<LocalDate, SaveCountry> getOwners() {
