@@ -2464,14 +2464,18 @@ public class SaveCountry {
         return list.getValuesAsInt();
     }
 
-    public List<SaveProvince> getOwnedProvinces() {
+    public List<Integer> getOwnedProvincesIds() {
         ClausewitzList list = this.item.getList("owned_provinces");
 
         if (list == null) {
             return new ArrayList<>();
         }
 
-        return list.getValuesAsInt().stream().map(this.save::getProvince).toList();
+        return list.getValuesAsInt();
+    }
+
+    public List<SaveProvince> getOwnedProvinces() {
+        return getOwnedProvincesIds().stream().map(this.save::getProvince).toList();
     }
 
     public void addOwnedProvince(SaveProvince province) {
