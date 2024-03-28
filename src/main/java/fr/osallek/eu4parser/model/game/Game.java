@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -306,7 +307,7 @@ public class Game {
     private Map<Province, Map<Polygon, Boolean>> borders = null;
 
     public Game(Path gameFolderPath) throws IOException {
-        this(gameFolderPath, (LauncherSettings) null);
+        this(gameFolderPath, Eu4Parser.loadSettings(gameFolderPath));
     }
 
     public Game(Path gameFolderPath, LauncherSettings launcherSettings) throws IOException {
@@ -2190,6 +2191,14 @@ public class Game {
 
     public Set<String> getIdeas() {
         return Collections.unmodifiableSet(this.ideas);
+    }
+
+    public Pair<IdeaGroup, Integer> getIdeaLevel(String idea) {
+        return this.ideaGroups.values().stream().map(group -> Pair.of(group, group.getLevel(idea))).filter(p -> p.getValue() > 0).findFirst().orElse(null);
+    }
+
+    public int computeFreeGroupLevel(Map<String, Integer> ideaGroups) {
+        return ideaGroups.entrySet().stream().filter(entry -> !getIdeaGroup(entry.getKey()).isFree()).mapToInt(Map.Entry::getValue).sum() / getFreeIdeaGroupCost();
     }
 
     public List<CasusBelli> getCasusBelli() {

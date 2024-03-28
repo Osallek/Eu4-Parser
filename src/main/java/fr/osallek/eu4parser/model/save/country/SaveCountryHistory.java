@@ -7,6 +7,7 @@ import fr.osallek.eu4parser.model.game.LeaderPersonality;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,13 +45,26 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
                                        .anyMatch(date::isBefore);
     }
 
-    public Stream<SaveCountryHistoryEvent> getEventsAfter(LocalDate date) {
-        return this.item.getChildren()
-                        .reversed()
-                        .stream()
-                        .filter(child -> ClausewitzUtils.DATE_PATTERN.matcher(child.getName()).matches())
-                        .map(child -> new SaveCountryHistoryEvent(child, this.country))
-                        .filter(event -> event.getDate().isAfter(date));
+    public List<SaveCountryHistoryEvent> getEventsAfter(LocalDate date) {
+        if (this.item.getNbChildren() == 0) {
+            return new ArrayList<>();
+        }
+
+        List<SaveCountryHistoryEvent> events = new ArrayList<>();
+
+        for (ClausewitzItem child : this.item.getChildren().reversed()) {
+            if (ClausewitzUtils.DATE_PATTERN.matcher(ClausewitzUtils.removeQuotes(child.getName())).matches()) {
+                SaveCountryHistoryEvent event = new SaveCountryHistoryEvent(child, this.country);
+
+                if (event.getDate().isAfter(date)) {
+                    events.add(event);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        return events;
     }
 
     public List<SaveCountryHistoryEvent> getEvents() {

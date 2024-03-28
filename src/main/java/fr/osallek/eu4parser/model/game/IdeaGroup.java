@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class IdeaGroup {
@@ -83,13 +84,14 @@ public class IdeaGroup {
 
     public Double getModifier(int level, Modifier modifier) {
         List<Double> modifiers = new ArrayList<>();
-        level = Math.min(level, getIdeas().size());
+        Map<String, Modifiers> ideas = getIdeas();
+        level = Math.min(level, ideas.size());
 
         if (level >= 0 && getStart().hasModifier(modifier)) {
             modifiers.add(getStart().getModifier(modifier));
         }
 
-        Iterator<Modifiers> modifiersIterator = getIdeas().values().iterator();
+        Iterator<Modifiers> modifiersIterator = ideas.values().iterator();
         for (int i = level; i > 0; i--) {
             Modifiers m = modifiersIterator.next();
 
@@ -98,11 +100,23 @@ public class IdeaGroup {
             }
         }
 
-        if (level >= getIdeas().size() && getBonus().hasModifier(modifier)) {
+        if (level >= ideas.size() && getBonus().hasModifier(modifier)) {
             modifiers.add(getBonus().getModifier(modifier));
         }
 
         return ModifiersUtils.sumModifiers(modifier, modifiers);
+    }
+
+    public int getLevel(String idea) {
+        List<String> ideas = new ArrayList<>(getIdeas().keySet());
+
+        for (int i = 0; i < ideas.size(); i++) {
+            if (ideas.get(i).equals(idea)) {
+                return i + 1;
+            }
+        }
+
+        return 0;
     }
 
     public File getImage() {

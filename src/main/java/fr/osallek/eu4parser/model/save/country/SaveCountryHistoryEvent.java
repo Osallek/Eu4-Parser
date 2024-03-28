@@ -3,11 +3,13 @@ package fr.osallek.eu4parser.model.save.country;
 import fr.osallek.clausewitzparser.common.ClausewitzUtils;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.Color;
 import fr.osallek.eu4parser.model.Power;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,12 +46,17 @@ public class SaveCountryHistoryEvent {
     }
 
     public Map<String, Boolean> getIdeasLevel() {
+        if (this.item.getNbVariables() == 0) {
+            return new HashMap<>();
+        }
+
         return this.country.getSave()
                            .getGame()
                            .getIdeas()
                            .stream()
-                           .filter(this.item::hasVar)
-                           .collect(Collectors.toMap(Function.identity(), this.item::getVarAsBool));
+                           .map(this.item::getVar)
+                           .filter(Objects::nonNull)
+                           .collect(Collectors.toMap(ClausewitzVariable::getName, ClausewitzVariable::getAsBool));
     }
 
     public List<String> getAddAcceptedCultures() {

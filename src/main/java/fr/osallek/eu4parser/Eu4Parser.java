@@ -468,6 +468,10 @@ public class Eu4Parser {
         return Optional.empty();
     }
 
+    public static Game parseGame() throws IOException {
+        return parseGame(Eu4Parser.detectInstallationFolder().orElseThrow(RuntimeException::new));
+    }
+
     public static Game parseGame(Path gameFolderPath) throws IOException {
         return new Game(gameFolderPath);
     }
