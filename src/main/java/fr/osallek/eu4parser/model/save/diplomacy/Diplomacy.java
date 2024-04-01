@@ -62,6 +62,12 @@ public class Diplomacy {
         return this.item.getChildren("alliance").stream().map(child -> new DatableRelation(child, this.save)).toList();
     }
 
+    public Stream<DatableRelation> getAlliancesStream() {
+        return this.item.getChildren("alliance")
+                        .stream()
+                        .map(child -> new DatableRelation(child, this.save));
+    }
+
     public void addAlliance(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "alliance", first.getTag(), second.getTag(), startDate);
         first.addAlly(second);
@@ -86,6 +92,12 @@ public class Diplomacy {
         return this.item.getChildren("guarantee").stream().map(child -> new DatableRelation(child, this.save)).toList();
     }
 
+    public Stream<DatableRelation> getGuaranteesStream() {
+        return this.item.getChildren("guarantee")
+                        .stream()
+                        .map(child -> new DatableRelation(child, this.save));
+    }
+
     public void addGuarantee(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "guarantee", first.getTag(), second.getTag(), startDate);
         first.addGuarantee(second);
@@ -107,6 +119,12 @@ public class Diplomacy {
         return this.item.getChildren("knowledge_sharing").stream().map(child -> new KnowledgeSharing(child, this.save)).toList();
     }
 
+    public Stream<KnowledgeSharing> getKnowledgeSharingStream() {
+        return this.item.getChildren("knowledge_sharing")
+                        .stream()
+                        .map(child -> new KnowledgeSharing(child, this.save));
+    }
+
     public void addKnowledgeSharing(SaveCountry first, SaveCountry second, LocalDate startDate) {
         KnowledgeSharing.addToItem(this.item, first.getTag(), second.getTag(), startDate, startDate.plusYears(10), false);
     }
@@ -126,6 +144,12 @@ public class Diplomacy {
         return this.item.getChildren("subsidies").stream().map(child -> new Subsidies(child, this.save)).toList();
     }
 
+    public Stream<Subsidies> getSubsidiesStream() {
+        return this.item.getChildren("subsidies")
+                        .stream()
+                        .map(child -> new Subsidies(child, this.save));
+    }
+
     public void addSubsidies(SaveCountry first, SaveCountry second, LocalDate startDate, double amount, int duration) {
         Subsidies.addToItem(this.item, first.getTag(), second.getTag(), startDate, amount, duration);
     }
@@ -143,6 +167,12 @@ public class Diplomacy {
 
     public List<DatableRelation> getRoyalMarriage() {
         return this.item.getChildren("royal_marriage").stream().map(child -> new DatableRelation(child, this.save)).toList();
+    }
+
+    public Stream<DatableRelation> getRoyalMarriageStream() {
+        return this.item.getChildren("royal_marriage")
+                        .stream()
+                        .map(child -> new DatableRelation(child, this.save));
     }
 
     public void addRoyalMarriage(SaveCountry first, SaveCountry second, LocalDate startDate) {
@@ -169,6 +199,12 @@ public class Diplomacy {
         return this.item.getChildren("military_access").stream().map(child -> new MilitaryAccess(child, this.save)).toList();
     }
 
+    public Stream<MilitaryAccess> getMilitaryAccessesStream() {
+        return this.item.getChildren("military_access")
+                        .stream()
+                        .map(child -> new MilitaryAccess(child, this.save));
+    }
+
     public void addMilitaryAccess(SaveCountry first, SaveCountry second, LocalDate startDate, boolean enforcePeace) {
         MilitaryAccess.addToItem(this.item, "military_access", first.getTag(), second.getTag(), startDate, enforcePeace);
     }
@@ -186,6 +222,12 @@ public class Diplomacy {
 
     public List<MilitaryAccess> getFleetAccesses() {
         return this.item.getChildren("fleet_access").stream().map(child -> new MilitaryAccess(child, this.save)).toList();
+    }
+
+    public Stream<MilitaryAccess> getFleetAccessesStream() {
+        return this.item.getChildren("fleet_access")
+                        .stream()
+                        .map(child -> new MilitaryAccess(child, this.save));
     }
 
     public void addFleetAccess(SaveCountry first, SaveCountry second, LocalDate startDate, boolean enforcePeace) {
@@ -207,6 +249,12 @@ public class Diplomacy {
         return this.item.getChildren("casus_belli").stream().map(child -> new CasusBelli(child, this.save)).toList();
     }
 
+    public Stream<CasusBelli> getCasusBellisStream() {
+        return this.item.getChildren("casus_belli")
+                        .stream()
+                        .map(child -> new CasusBelli(child, this.save));
+    }
+
     public void addCasusBelli(SaveCountry first, SaveCountry second, LocalDate startDate, LocalDate endDate, fr.osallek.eu4parser.model.game.CasusBelli type) {
         CasusBelli.addToItem(this.item, first.getTag(), second.getTag(), startDate, endDate, type);
     }
@@ -224,6 +272,12 @@ public class Diplomacy {
 
     public List<DatableRelation> getSupportIndependence() {
         return this.item.getChildren("support_independence").stream().map(child -> new DatableRelation(child, save)).toList();
+    }
+
+    public Stream<DatableRelation> getSupportIndependenceStream() {
+        return this.item.getChildren("support_independence")
+                        .stream()
+                        .map(child -> new DatableRelation(child, this.save));
     }
 
     public void addSupportIndependence(SaveCountry first, SaveCountry second, LocalDate startDate) {
@@ -245,6 +299,12 @@ public class Diplomacy {
 
     public List<TransferTradePower> getTransferTradePowers() {
         return this.item.getChildren("transfer_trade_power").stream().map(child -> new TransferTradePower(child, save)).toList();
+    }
+
+    public Stream<TransferTradePower> getTransferTradePowersStream() {
+        return this.item.getChildren("transfer_trade_power")
+                        .stream()
+                        .map(child -> new TransferTradePower(child, this.save));
     }
 
     public void addTransferTradePower(SaveCountry first, SaveCountry second, LocalDate startDate, double amount, boolean isEnforced) {
@@ -272,6 +332,12 @@ public class Diplomacy {
         return this.item.getChildren("war_reparations").stream().map(child -> new EndDatableRelation(child, save)).toList();
     }
 
+    public Stream<EndDatableRelation> getWarReparationsStream() {
+        return this.item.getChildren("war_reparations")
+                        .stream()
+                        .map(child -> new EndDatableRelation(child, this.save));
+    }
+
     public void addWarReparations(SaveCountry first, SaveCountry second, LocalDate startDate, LocalDate endDate) {
         EndDatableRelation.addToItem(this.item, "war_reparations", first.getTag(), second.getTag(), startDate, endDate);
         first.addWarReparations(second);
@@ -293,6 +359,12 @@ public class Diplomacy {
         return this.item.getChildren("warning").stream().map(child -> new DatableRelation(child, save)).toList();
     }
 
+    public Stream<DatableRelation> getWarningsStream() {
+        return this.item.getChildren("warning")
+                        .stream()
+                        .map(child -> new DatableRelation(child, this.save));
+    }
+
     public void addWarning(SaveCountry first, SaveCountry second, LocalDate startDate) {
         DatableRelation.addToItem(this.item, "warning", first.getTag(), second.getTag(), startDate);
         first.addWarning(second);
@@ -312,6 +384,12 @@ public class Diplomacy {
 
     public List<Integration> getIntegrations() {
         return this.item.getChildren("integration").stream().map(child -> new Integration(child, save)).toList();
+    }
+
+    public Stream<Integration> getIntegrationsStream() {
+        return this.item.getChildren("integration")
+                        .stream()
+                        .map(child -> new Integration(child, this.save));
     }
 
     public void addIntegration(SaveCountry first, SaveCountry second, LocalDate startDate, Double progress) {

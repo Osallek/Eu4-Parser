@@ -12,6 +12,10 @@ public class CasusBelli extends EndDatableRelation {
         super(item, save);
     }
 
+    public String getTypeName() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("type"));
+    }
+
     public fr.osallek.eu4parser.model.game.CasusBelli getType() {
         return this.save.getGame().getCasusBelli(this.item.getVarAsString("type"));
     }

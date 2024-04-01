@@ -897,8 +897,12 @@ public class SaveCountry {
         return BooleanUtils.toBoolean(this.item.getVarAsBool("dirty_colony"));
     }
 
+    public String getPrimaryCultureName() {
+        return this.item.getVarAsString("primary_culture");
+    }
+
     public Culture getPrimaryCulture() {
-        return this.save.getGame().getCulture(this.item.getVarAsString("primary_culture"));
+        return this.save.getGame().getCulture(getPrimaryCultureName());
     }
 
     public void setPrimaryCulture(Culture primaryCulture) {

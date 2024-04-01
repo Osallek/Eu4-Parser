@@ -2198,7 +2198,9 @@ public class Game {
     }
 
     public int computeFreeGroupLevel(Map<String, Integer> ideaGroups) {
-        return ideaGroups.entrySet().stream().filter(entry -> !getIdeaGroup(entry.getKey()).isFree()).mapToInt(Map.Entry::getValue).sum() / getFreeIdeaGroupCost();
+        int max = this.ideaGroups.values().iterator().next().getIdeas().size();
+        return Math.min(max, ideaGroups.entrySet().stream().filter(entry -> !getIdeaGroup(entry.getKey()).isFree()).mapToInt(Map.Entry::getValue).sum()
+                             / getFreeIdeaGroupCost());
     }
 
     public List<CasusBelli> getCasusBelli() {

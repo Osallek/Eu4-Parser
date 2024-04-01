@@ -20,6 +20,10 @@ public class Dependency extends DatableRelation {
         super(item, save);
     }
 
+    public String getSubjectTypeName() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("subject_type"));
+    }
+
     public SubjectType getSubjectType() {
         return this.save.getGame().getSubjectType(this.item.getVarAsString("subject_type"));
     }

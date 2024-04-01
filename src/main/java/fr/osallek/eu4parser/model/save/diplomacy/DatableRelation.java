@@ -18,16 +18,24 @@ public class DatableRelation {
         this.item = item;
     }
 
+    public String getFirstTag() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("first"));
+    }
+
     public SaveCountry getFirst() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("first")));
+        return this.save.getCountry(getFirstTag());
     }
 
     public void setFirst(SaveCountry country) {
         this.item.setVariable("first", ClausewitzUtils.addQuotes(country.getTag()));
     }
 
+    public String getSecondTag() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("second"));
+    }
+
     public SaveCountry getSecond() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(this.item.getVarAsString("second")));
+        return this.save.getCountry(getSecondTag());
     }
 
     public void setSecond(SaveCountry country) {

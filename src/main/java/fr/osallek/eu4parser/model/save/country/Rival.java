@@ -9,11 +9,11 @@ import java.time.LocalDate;
 public record Rival(ClausewitzItem item, Save save) {
 
     public String getRivalTag() {
-        return this.item.getVarAsString("country");
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("country"));
     }
 
     public SaveCountry getRival() {
-        return this.save.getCountry(ClausewitzUtils.removeQuotes(getRivalTag()));
+        return this.save.getCountry(getRivalTag());
     }
 
     public LocalDate getDate() {
