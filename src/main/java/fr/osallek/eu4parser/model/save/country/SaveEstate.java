@@ -109,7 +109,7 @@ public class SaveEstate {
                 }
                 modifiers.addAll(privilege.getConditionalModifiers()
                                           .stream()
-                                          .filter(m -> m.getTrigger().apply(this.country, this.country))
+                                          .filter(m -> m.getTrigger() != null && m.getTrigger().apply(this.country, this.country))
                                           .map(EstatePrivilegeModifier::getModifiers)
                                           .filter(m -> m.hasModifier(modifier))
                                           .map(m -> m.getModifier(modifier))

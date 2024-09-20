@@ -1978,13 +1978,11 @@ public class SaveCountry {
     }
 
     public List<SaveCountry> getAllies() {
-        ClausewitzList list = this.item.getList("allies");
+        return getAlliesTags().stream().map(this.save::getCountry).toList();
+    }
 
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        return list.getValues().stream().map(this.save::getCountry).toList();
+    public List<String> getAlliesTags() {
+        return Optional.ofNullable(this.item.getList("allies")).map(ClausewitzList::getValues).orElse(new ArrayList<>());
     }
 
     public void addAlly(SaveCountry ally) {

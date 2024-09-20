@@ -21,9 +21,9 @@ class Eu4ParserTest {
     static final File RESOURCE_FOLDER = new File("src/test/resources");
 
     @Test
-    void testParseCompressed() throws IOException {
+    void testParseModded() throws IOException {
         Configurator.setLevel("fr.osallek", Level.DEBUG);
-        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("compressed.eu4"));
+        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("modded.eu4"));
 
         Assertions.assertNotNull(save);
         Assertions.assertEquals(LocalDate.of(2087, 7, 1), save.getDate());
@@ -94,6 +94,48 @@ class Eu4ParserTest {
     }
 
     @Test
+    void testParseCompressed() throws IOException {
+        Configurator.setLevel("fr.osallek", Level.DEBUG);
+        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("compressed.eu4"));
+
+        Assertions.assertNotNull(save);
+        Assertions.assertEquals(LocalDate.of(1515, 9, 8), save.getDate());
+
+        String player = save.getPlayer();
+        Assertions.assertNotNull(player);
+        Assertions.assertEquals("\"TUN\"", player);
+
+        Assertions.assertEquals("\"1e8dfdda7ef327f0a7a4bf3a0a39a391\"", save.getChecksum());
+
+        List<String> dlcs = save.getDlcEnabled();
+        Assertions.assertNotNull(dlcs);
+        Assertions.assertEquals(22, dlcs.size());
+        Assertions.assertTrue(dlcs.contains("\"Conquest of Paradise\""));
+        Assertions.assertFalse(dlcs.contains("\"Mare Nostrummm\""));
+
+        ListOfDates flags = save.getFlags();
+        Assertions.assertNotNull(flags);
+
+        Map<String, LocalDate> all = flags.getAll();
+        Assertions.assertNotNull(all);
+        Assertions.assertTrue(all.containsKey("wih_barbaracilli_flag"));
+
+        Map<String, SaveCountry> countries = save.getCountries();
+        Assertions.assertNotNull(countries);
+        Assertions.assertEquals(1380, countries.size());
+
+        SaveCountry country = countries.get("TUN");
+        Assertions.assertNotNull(countries);
+        Assertions.assertTrue(country.isHuman());
+        Assertions.assertEquals("muslim_monarchy", country.getGovernmentName().getName());
+        Assertions.assertNotNull(country.getLastFocusMove());
+
+        for (SaveCountry value : countries.values()) {
+            Assertions.assertTrue(value.getLandForceLimit() >= 0);
+        }
+    }
+
+    @Test
     void testGetDateFlat() throws IOException {
         Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.toPath().resolve("flat.eu4"), null);
 
@@ -106,6 +148,6 @@ class Eu4ParserTest {
         Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.toPath().resolve("compressed.eu4"), null);
 
         Assertions.assertTrue(date.isPresent());
-        Assertions.assertEquals(LocalDate.of(2087, 7, 1), date.get());
+        Assertions.assertEquals(LocalDate.of(1515, 9, 8), date.get());
     }
 }
