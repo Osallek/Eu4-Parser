@@ -91,8 +91,7 @@ public class ConditionsUtils {
         }
 
         if (country.getSave().getGame().getAdvisor(condition) != null) {
-            return country.getAdvisors()
-                          .values()
+            return country.getActiveAdvisors()
                           .stream()
                           .anyMatch(advisor -> condition.equals(advisor.getName()) && advisor.getSkill() >= NumbersUtils.toInt(value));
         }
@@ -157,7 +156,7 @@ public class ConditionsUtils {
             case "adm_tech":
                 return country.getTech().getAdm() >= Integer.parseInt(value);
             case "advisor":
-                return country.getAdvisors().values().stream().anyMatch(advisor -> advisor.getType().equals(value));
+                return country.getActiveAdvisors().stream().anyMatch(advisor -> advisor.getType().equals(value));
             case "advisor_exists":
                 return country.getSave().getAdvisor(Integer.parseInt(value)) != null;
             case "ai":
@@ -432,7 +431,7 @@ public class ConditionsUtils {
             case "has_adopted_cult":
                 return country.getFetishistCult() != null && country.getFetishistCult().getName().equalsIgnoreCase(value);
             case "has_advisor":
-                return !country.getAdvisors().isEmpty();
+                return !country.getActiveAdvisors().isEmpty();
             case "has_age_ability":
                 return country.getActiveAgeAbility().stream().anyMatch(ageAbility -> ageAbility.getName().equalsIgnoreCase(ClausewitzUtils.addQuotes(value)));
             case "has_any_disaster":
@@ -2848,7 +2847,7 @@ public class ConditionsUtils {
                 Culture culture = "root".equalsIgnoreCase(cultures) ? root.getPrimaryCulture() : root.getSave().getGame().getCulture(cultures);
                 String religions = condition.getCondition("religion");
 
-                return root.getAdvisors().values().stream().anyMatch(advisor -> {
+                return root.getActiveAdvisors().stream().anyMatch(advisor -> {
                     if (power != null && power != advisor.getGameAdvisor().getPower()) {
                         return false;
                     }

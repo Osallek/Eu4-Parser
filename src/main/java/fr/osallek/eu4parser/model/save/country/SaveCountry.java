@@ -4457,10 +4457,9 @@ public class SaveCountry {
                              .map(m -> m.getModifier(modifier))
                              .toList());
 
-        Map<Integer, SaveAdvisor> advisors = getAdvisors();
-        if (MapUtils.isNotEmpty(advisors)) {
-            list.addAll(advisors.values()
-                                .stream()
+        List<SaveAdvisor> advisors = getActiveAdvisors();
+        if (CollectionUtils.isNotEmpty(advisors)) {
+            list.addAll(advisors.stream()
                                 .map(SaveAdvisor::getModifiers)
                                 .filter(Objects::nonNull)
                                 .filter(m -> m.hasModifier(modifier))

@@ -163,5 +163,6 @@ class Eu4ParserTest {
         Assertions.assertEquals("\"FRA\"", player);
 
         Assertions.assertEquals(149, (int) save.getCountry("FRA").getLandForceLimit());
+        Assertions.assertEquals(165, (int) save.getCountry("SPA").getLandForceLimit());
     }
 }
