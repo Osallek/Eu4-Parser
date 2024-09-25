@@ -8,6 +8,7 @@ import fr.osallek.eu4parser.model.save.gameplayoptions.Difficulty;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -302,9 +303,9 @@ public enum StaticModifiers {
 
     private static final Map<String, StaticModifiers> STATIC_MODIFIERS_MAP;
 
-    public static final List<StaticModifiers> APPLIED_TO_COUNTRY;
+    public static final List<StaticModifiers> APPLIED_TO_COUNTRY = new ArrayList<>();
 
-    public static final List<StaticModifiers> APPLIED_TO_PROVINCE;
+    public static final List<StaticModifiers> APPLIED_TO_PROVINCE = new ArrayList<>();
 
     static {
         STATIC_MODIFIERS_MAP = Arrays.stream(StaticModifiers.values()).collect(Collectors.toMap(Enum::name, Function.identity()));
@@ -538,7 +539,8 @@ public enum StaticModifiers {
         EXPAND_ADMINISTATION_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithNumExpandedAdministration(country, modif.modifiers);
         OVER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithOverGoverningCapacity(country, modif.modifiers);
         UNDER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithUnderGoverningCapacity(country, modif.modifiers);
-        REVERSE_UNDER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithUnderGoverningCapacityReverse(country, modif.modifiers);
+        REVERSE_UNDER_GOVERNING_CAPACITY_MODIFIER.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithUnderGoverningCapacityReverse(country,
+                                                                                                                                             modif.modifiers);
         MANDATE.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithMandate(country, modif.modifiers);
         IMPERIAL_AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithImperialAuthority(country, modif.modifiers);
         POSITIVE_IMPERIAL_AUTHORITY.applyToCountry = (country, modif) -> ModifiersUtils.scaleWithPositiveImperialAuthority(country, modif.modifiers);
@@ -605,17 +607,6 @@ public enum StaticModifiers {
 
             return ModifiersUtils.scaleDev(province, m);
         };
-
-        APPLIED_TO_COUNTRY = Arrays.stream(StaticModifiers.values())
-                                   .filter(staticModifiers -> staticModifiers.modifiers != null
-                                                              && !staticModifiers.modifiers.isEmpty())
-                                   .filter(staticModifiers -> staticModifiers.applyToCountry != null)
-                                   .toList();
-        APPLIED_TO_PROVINCE = Arrays.stream(StaticModifiers.values())
-                                    .filter(staticModifiers -> staticModifiers.modifiers != null
-                                                               && !staticModifiers.modifiers.isEmpty())
-                                    .filter(staticModifiers -> staticModifiers.applyToProvince != null)
-                                    .toList();
     }
 
     StaticModifiers(ConditionAbstract trigger, BiFunction<SaveCountry, StaticModifiers, Modifiers> applyToCountry,
@@ -623,6 +614,21 @@ public enum StaticModifiers {
         this.trigger = trigger;
         this.applyToCountry = applyToCountry;
         this.applyToProvince = applyToProvince;
+    }
+
+    public static void compute() {
+        APPLIED_TO_COUNTRY.clear();
+        APPLIED_TO_COUNTRY.addAll(Arrays.stream(StaticModifiers.values())
+                                        .filter(staticModifiers -> staticModifiers.modifiers != null
+                                                                   && !staticModifiers.modifiers.isEmpty())
+                                        .filter(staticModifiers -> staticModifiers.applyToCountry != null)
+                                        .toList());
+        APPLIED_TO_PROVINCE.clear();
+        APPLIED_TO_PROVINCE.addAll(Arrays.stream(StaticModifiers.values())
+                                         .filter(staticModifiers -> staticModifiers.modifiers != null
+                                                                    && !staticModifiers.modifiers.isEmpty())
+                                         .filter(staticModifiers -> staticModifiers.applyToProvince != null)
+                                         .toList());
     }
 
     public void setModifiers(Modifiers modifiers) {

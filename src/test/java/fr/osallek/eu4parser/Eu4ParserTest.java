@@ -150,4 +150,18 @@ class Eu4ParserTest {
         Assertions.assertTrue(date.isPresent());
         Assertions.assertEquals(LocalDate.of(1515, 9, 8), date.get());
     }
+
+    @Test
+    void testParseCompressedFrance() throws IOException {
+        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("mp_France.eu4"));
+
+        Assertions.assertNotNull(save);
+        Assertions.assertEquals(LocalDate.of(1540, 4, 29), save.getDate());
+
+        String player = save.getPlayer();
+        Assertions.assertNotNull(player);
+        Assertions.assertEquals("\"FRA\"", player);
+
+        Assertions.assertEquals(149, (int) save.getCountry("FRA").getLandForceLimit());
+    }
 }

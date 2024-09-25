@@ -3873,6 +3873,8 @@ public class Game {
                             this.staticModifiers.put(staticModifier.getName().toLowerCase(), staticModifier);
                         }
                     });
+
+                    StaticModifiers.compute();
                 });
     }
 
