@@ -10,8 +10,14 @@ import fr.osallek.eu4parser.model.game.RulerPersonality;
 import fr.osallek.eu4parser.model.save.Id;
 import fr.osallek.eu4parser.model.save.ListOfDates;
 import fr.osallek.eu4parser.model.save.SaveReligion;
+import fr.osallek.eu4parser.model.save.counters.Counter;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Monarch {
 
@@ -36,7 +42,7 @@ public class Monarch {
         this.monarchDate = date;
     }
 
-        public Id getId() {
+    public Id getId() {
         ClausewitzItem idItem = this.item.getChild("id");
 
         return idItem != null ? new Id(idItem) : null;
@@ -313,5 +319,30 @@ public class Monarch {
 
     public Boolean getHistory() {
         return this.item.getVarAsBool("history");
+    }
+
+    public static ClausewitzItem addToItem(ClausewitzItem parent, SaveCountry country) {
+        ClausewitzItem toItem = new ClausewitzItem(parent, "monarch", parent.getOrder() + 1);
+        toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
+        toItem.addVariable("culture", ClausewitzUtils.removeQuotes(country.getPrimaryCultureName()));
+        toItem.addVariable("religion", ClausewitzUtils.removeQuotes(country.getReligionName()));
+        toItem.addVariable("birth_date", country.getSave().getDate().minusYears(16));
+        toItem.addVariable("DIP", RandomUtils.insecure().randomInt(0, 7));
+        toItem.addVariable("ADM", RandomUtils.insecure().randomInt(0, 7));
+        toItem.addVariable("MIL", RandomUtils.insecure().randomInt(0, 7));
+
+        List<String> names = new ArrayList<>(country.getSave().getGame().getCountry(country.getTag()).getMonarchNames().keySet());
+        Collections.shuffle(names);
+        toItem.addVariable("name", ClausewitzUtils.addQuotes(StringUtils.substringBefore(names.getFirst(), "#") + " I"));
+
+        List<String> dynasties = new ArrayList<>(country.getPrimaryCulture().getDynastyNames());
+        Collections.shuffle(dynasties);
+        toItem.addVariable("dynasty", ClausewitzUtils.addQuotes(dynasties.getFirst()));
+
+        Id.addToItem(toItem, country.getSave().getIdCounters().getAndIncrement(Counter.MONARCH), 48);
+
+        parent.addChild(toItem);
+
+        return toItem;
     }
 }

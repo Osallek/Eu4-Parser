@@ -8,16 +8,15 @@ import fr.osallek.clausewitzparser.model.ClausewitzVariable;
 import fr.osallek.eu4parser.common.Eu4Utils;
 import fr.osallek.eu4parser.model.LauncherSettings;
 import fr.osallek.eu4parser.model.game.Age;
-import fr.osallek.eu4parser.model.game.Area;
 import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.Game;
 import fr.osallek.eu4parser.model.game.Hegemon;
 import fr.osallek.eu4parser.model.game.Province;
-import fr.osallek.eu4parser.model.game.ProvinceHistoryItem;
 import fr.osallek.eu4parser.model.game.TradeGood;
 import fr.osallek.eu4parser.model.save.changeprices.ChangePrices;
 import fr.osallek.eu4parser.model.save.combat.Combats;
 import fr.osallek.eu4parser.model.save.counters.IdCounters;
+import fr.osallek.eu4parser.model.save.country.ActiveRelation;
 import fr.osallek.eu4parser.model.save.country.SaveArea;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveHegemon;
@@ -48,7 +47,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -97,8 +95,8 @@ public class Save {
         this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true, launcherSettings);
     }
 
-    private Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
-                 boolean compressed, LauncherSettings launcherSettings) throws IOException {
+    private Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed,
+                 LauncherSettings launcherSettings) throws IOException {
         this.name = name;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
@@ -288,10 +286,7 @@ public class Save {
 
         if (mapAreaDataItem != null) {
             Collection<String> names = this.game.getAreasNames();
-            return mapAreaDataItem.getChildren()
-                                  .stream()
-                                  .filter(child -> names.contains(child.getName()))
-                                  .map(child -> new SaveArea(child, this));
+            return mapAreaDataItem.getChildren().stream().filter(child -> names.contains(child.getName())).map(child -> new SaveArea(child, this));
         }
 
         return Stream.empty();
@@ -344,9 +339,7 @@ public class Save {
         ClausewitzItem tradeItem = this.gamestateItem.getChild("trade");
 
         if (tradeItem != null) {
-            return tradeItem.getChildren("node")
-                            .stream()
-                            .map(item -> new SaveTradeNode(item, this, i.getAndIncrement()));
+            return tradeItem.getChildren("node").stream().map(item -> new SaveTradeNode(item, this, i.getAndIncrement()));
         }
 
         return Stream.empty();
@@ -401,7 +394,8 @@ public class Save {
     }
 
     public Map<Id, RebelFaction> getRebelFactions() {
-        return this.gamestateItem.getChildren("rebel_faction").stream()
+        return this.gamestateItem.getChildren("rebel_faction")
+                                 .stream()
                                  .map(child -> new RebelFaction(child, this))
                                  .collect(Collectors.toMap(RebelFaction::getId, Function.identity(), (a, b) -> b));
     }
@@ -698,11 +692,12 @@ public class Save {
             return incomeStatisticsItem.getChildren("ledger_data").stream().map(child -> {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
-                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))),
-                                   dataItem.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()), ClausewitzVariable::getAsInt, (a, b) -> a,
-                                                                     TreeMap::new)));
+                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), dataItem.getVariables()
+                                                                                                                   .stream()
+                                                                                                                   .collect(Collectors.toMap(
+                                                                                                                           v -> Integer.valueOf(v.getName()),
+                                                                                                                           ClausewitzVariable::getAsInt,
+                                                                                                                           (a, b) -> a, TreeMap::new)));
                 }
                 return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), new TreeMap<>());
             });
@@ -722,11 +717,12 @@ public class Save {
             return scoreStatisticsItem.getChildren("ledger_data").stream().map(child -> {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
-                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))),
-                                   dataItem.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()), ClausewitzVariable::getAsInt, (a, b) -> a,
-                                                                     TreeMap::new)));
+                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), dataItem.getVariables()
+                                                                                                                   .stream()
+                                                                                                                   .collect(Collectors.toMap(
+                                                                                                                           v -> Integer.valueOf(v.getName()),
+                                                                                                                           ClausewitzVariable::getAsInt,
+                                                                                                                           (a, b) -> a, TreeMap::new)));
                 }
                 return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), new TreeMap<>());
             });
@@ -746,11 +742,12 @@ public class Save {
             return inflationStatisticsItem.getChildren("ledger_data").stream().map(child -> {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
-                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))),
-                                   dataItem.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()), ClausewitzVariable::getAsInt, (a, b) -> a,
-                                                                     TreeMap::new)));
+                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), dataItem.getVariables()
+                                                                                                                   .stream()
+                                                                                                                   .collect(Collectors.toMap(
+                                                                                                                           v -> Integer.valueOf(v.getName()),
+                                                                                                                           ClausewitzVariable::getAsInt,
+                                                                                                                           (a, b) -> a, TreeMap::new)));
                 }
                 return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), new TreeMap<>());
             });
@@ -770,11 +767,12 @@ public class Save {
             return incomeStatisticsItem.getChildren("ledger_data").stream().map(child -> {
                 ClausewitzItem dataItem = child.getChild("data");
                 if (dataItem != null) {
-                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))),
-                                   dataItem.getVariables()
-                                           .stream()
-                                           .collect(Collectors.toMap(v -> Integer.valueOf(v.getName()), ClausewitzVariable::getAsInt, (a, b) -> a,
-                                                                     TreeMap::new)));
+                    return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), dataItem.getVariables()
+                                                                                                                   .stream()
+                                                                                                                   .collect(Collectors.toMap(
+                                                                                                                           v -> Integer.valueOf(v.getName()),
+                                                                                                                           ClausewitzVariable::getAsInt,
+                                                                                                                           (a, b) -> a, TreeMap::new)));
                 }
                 return Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getVarAsString("name"))), new TreeMap<>());
             });
@@ -865,6 +863,33 @@ public class Save {
 
     public SaveGreatProject getGreatProject(String name) {
         return getGreatProjects().stream().filter(project -> ClausewitzUtils.removeQuotes(name).equals(project.getName())).findFirst().orElse(null);
+    }
+
+    public void breakUnion(SaveCountry junior) {
+        if (junior == null || getCountry(junior.getTag()) == null || junior.getOverlord() == null || junior.getSubjectType() == null ||
+            !"personal_union".equals(junior.getSubjectType().getName())) {
+            return;
+        }
+
+        SaveCountry senior = junior.getOverlord();
+
+        getDiplomacy().removeDependency(senior, junior);
+        junior.removeOverlord();
+
+        ActiveRelation juniorRelation = junior.getActiveRelation(senior);
+        if (juniorRelation != null) {
+            juniorRelation.setAttitude("attitude_neutral");
+        }
+
+        ActiveRelation seniorRelation = senior.getActiveRelation(junior);
+        if (seniorRelation != null) {
+            seniorRelation.setAttitude("attitude_neutral");
+        }
+
+        senior.removeSubject(junior);
+        senior.removeFriend(junior);
+        senior.removeNumOfSubjectCountIndexed(4, 1);
+        junior.addMonarch();
     }
 
     public void writeAi(BufferedWriter bufferedWriter, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {

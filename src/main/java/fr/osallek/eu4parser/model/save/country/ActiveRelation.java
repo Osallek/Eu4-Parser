@@ -100,6 +100,10 @@ public class ActiveRelation {
         return this.item.getVarAsString("attitude");
     }
 
+    public void setAttitude(String attitude) {
+        this.item.setVariable("attitude", attitude);
+    }
+
     public Boolean isEmbargoing() {
         return this.item.getVarAsBool("is_embargoing");
     }

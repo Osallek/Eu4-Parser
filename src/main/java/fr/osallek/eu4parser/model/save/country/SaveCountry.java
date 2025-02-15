@@ -1317,6 +1317,7 @@ public class SaveCountry {
 
     public void removeOverlord() {
         this.item.removeVariable("overlord");
+        this.item.removeVariable("cached_liberty_desire");
         this.subjectType = null;
         this.subjectStartDate = null;
     }
@@ -1748,6 +1749,16 @@ public class SaveCountry {
         return list.getValues();
     }
 
+    public void removeFriend(SaveCountry country) {
+        ClausewitzList list = this.item.getList("friend_tags");
+
+        if (list == null) {
+            return;
+        }
+
+        list.remove(country.getTag());
+    }
+
     public Map<Integer, Integer> getNumOfBuildingsIndexed() {
         ClausewitzItem child = this.item.getChild("num_of_buildings_indexed");
 
@@ -1883,6 +1894,18 @@ public class SaveCountry {
                     .collect(Collectors.toMap(var -> Integer.parseInt(var.getName()), ClausewitzVariable::getAsInt));
     }
 
+    public void removeNumOfSubjectCountIndexed(int id, int quantity) {
+        ClausewitzItem child = this.item.getChild("num_of_subject_count_indexed");
+
+        if (child == null) {
+            return;
+        }
+
+        for (ClausewitzVariable variable : child.getVariables(Integer.toString(id))) {
+            variable.setValue(variable.getAsInt() - quantity);
+        }
+    }
+
     public Map<Integer, Double> getBorderPct() {
         ClausewitzItem child = this.item.getChild("border_pct");
 
@@ -1975,6 +1998,16 @@ public class SaveCountry {
         }
 
         return list.getValues().stream().map(this.save::getCountry).toList();
+    }
+
+    public void removeCallToArmsFriend(SaveCountry country) {
+        ClausewitzList list = this.item.getList("call_to_arms_friends");
+
+        if (list == null) {
+            return;
+        }
+
+        list.remove(country.getTag());
     }
 
     public List<SaveCountry> getAllies() {
@@ -3537,6 +3570,19 @@ public class SaveCountry {
         }
 
         return null;
+    }
+
+    public void addMonarch() {
+        Monarch monarch = getHistory().addMonarch(this.save.getDate());
+        ClausewitzItem monarchItem = this.item.getChild("monarch");
+
+        if (monarchItem != null) {
+            Id id = new Id(monarchItem);
+            Id.addToItem(this.item, "previous_monarch", id.getId(), id.getType());
+            this.item.removeChild("monarch");
+        }
+
+        Id.addToItem(this.item, "monarch", monarch.getId().getId(), monarch.getId().getType());
     }
 
     public Heir getHeir() {

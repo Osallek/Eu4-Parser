@@ -188,10 +188,15 @@ public class SaveCountryHistory extends SaveCountryHistoryEvent {
         variables.forEach(child::addVariable);
     }
 
-    public void addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege,
+    public Leader addLeader(LocalDate date, LocalDate birthDate, String name, LeaderType type, int manuever, int fire, int shock, int siege,
                           LeaderPersonality personality, int id) {
         ClausewitzItem child = this.item.addChild(ClausewitzUtils.dateToString(date));
-        Leader.addToItem(child, name, type, manuever, fire, shock, siege, personality, date, birthDate, id, this.country);
+        return new Leader(Leader.addToItem(child, name, type, manuever, fire, shock, siege, personality, date, birthDate, id, this.country), this.country);
+    }
+
+    public Monarch addMonarch(LocalDate date) {
+        ClausewitzItem child = this.item.addChild(ClausewitzUtils.dateToString(date));
+        return new Monarch(Monarch.addToItem(child, this.country), this.country);
     }
 
     public void removeLeader(Leader leader) {
