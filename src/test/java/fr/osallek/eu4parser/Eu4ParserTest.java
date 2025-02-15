@@ -9,8 +9,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +18,12 @@ import java.util.Optional;
 
 class Eu4ParserTest {
 
-    static final File RESOURCE_FOLDER = new File("src/test/resources");
+    static final Path RESOURCE_FOLDER = Path.of("src", "test", "resources");
 
     @Test
     void testParseModded() throws IOException {
         Configurator.setLevel("fr.osallek", Level.DEBUG);
-        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("modded.eu4"));
+        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.resolve("modded.eu4"));
 
         Assertions.assertNotNull(save);
         Assertions.assertEquals(LocalDate.of(2087, 7, 1), save.getDate());
@@ -54,7 +54,7 @@ class Eu4ParserTest {
     @Test
     void testParseFlat() throws IOException {
         Configurator.setLevel("fr.osallek", Level.DEBUG);
-        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("flat.eu4"));
+        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.resolve("flat.eu4"));
 
         Assertions.assertNotNull(save);
         Assertions.assertEquals(LocalDate.of(1645, 8, 2), save.getDate());
@@ -96,7 +96,7 @@ class Eu4ParserTest {
     @Test
     void testParseCompressed() throws IOException {
         Configurator.setLevel("fr.osallek", Level.DEBUG);
-        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("compressed.eu4"));
+        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.resolve("compressed.eu4"));
 
         Assertions.assertNotNull(save);
         Assertions.assertEquals(LocalDate.of(1515, 9, 8), save.getDate());
@@ -137,7 +137,7 @@ class Eu4ParserTest {
 
     @Test
     void testGetDateFlat() throws IOException {
-        Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.toPath().resolve("flat.eu4"), null);
+        Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.resolve("flat.eu4"), null);
 
         Assertions.assertTrue(date.isPresent());
         Assertions.assertEquals(LocalDate.of(1645, 8, 2), date.get());
@@ -145,7 +145,7 @@ class Eu4ParserTest {
 
     @Test
     void testGetDateCompressed() throws IOException {
-        Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.toPath().resolve("compressed.eu4"), null);
+        Optional<LocalDate> date = Eu4Parser.getDate(RESOURCE_FOLDER.resolve("compressed.eu4"), null);
 
         Assertions.assertTrue(date.isPresent());
         Assertions.assertEquals(LocalDate.of(1515, 9, 8), date.get());
@@ -153,7 +153,7 @@ class Eu4ParserTest {
 
     @Test
     void testParseCompressedFrance() throws IOException {
-        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.toPath().resolve("mp_France.eu4"));
+        Save save = Eu4Parser.loadSave(RESOURCE_FOLDER.resolve("mp_France.eu4"));
 
         Assertions.assertNotNull(save);
         Assertions.assertEquals(LocalDate.of(1540, 4, 29), save.getDate());

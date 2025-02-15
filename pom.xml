@@ -6,34 +6,47 @@
 
   <groupId>fr.osallek</groupId>
   <artifactId>eu4-parser</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.2</version>
 
   <name>Eu4 Parser</name>
 
   <properties>
+    <!-- Global config -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>21</java.version>
-
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.release>${java.version}</maven.compiler.release>
-    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-    <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+    <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
 
-    <commons-lang3.version>3.14.0</commons-lang3.version>
-    <commons-collections4.version>4.4</commons-collections4.version>
-    <commons-io.version>2.15.1</commons-io.version>
-    <jackson.version>2.17.0</jackson.version>
-    <pngtastic.version>1.7</pngtastic.version>
+    <!-- Dependencies versions -->
+    <commons-lang3.version>3.17.0</commons-lang3.version>
+    <commons-collections4.version>4.5.0-M3</commons-collections4.version>
+    <commons-io.version>2.18.0</commons-io.version>
+    <jackson.version>2.18.2</jackson.version>
+    <pngtastic.version>1.8</pngtastic.version>
     <imageio-tga.version>3.8.2</imageio-tga.version> <!--Don't upgrade to 3.8.3 because error can't read some tga -->
 
-    <clausewitz-parser.version>1.1.6</clausewitz-parser.version>
+    <clausewitz-parser.version>1.1.7</clausewitz-parser.version>
 
     <!-- Test Dependencies versions -->
-    <log4j.version>2.22.1</log4j.version>
-    <junit.version>5.10.2</junit.version>
+    <log4j.version>2.24.3</log4j.version>
+    <junit.version>5.11.4</junit.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -82,7 +95,6 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -508,27 +508,27 @@ public class Eu4Parser {
     public static void writeSave(Save save, Path path, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (save.isCompressed()) {
             try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(path)),
-                                                                    StandardCharsets.ISO_8859_1)) {
+                                                                    SAVE_CHARSET)) {
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.AI_FILE));
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1));
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, SAVE_CHARSET));
                 save.writeAi(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.GAMESTATE_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, SAVE_CHARSET));
                 save.writeGamestate(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.META_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, SAVE_CHARSET));
                 save.writeMeta(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
             }
         } else {
-            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardCharsets.ISO_8859_1)) {
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, SAVE_CHARSET)) {
                 save.writeAll(bufferedWriter, listeners);
             }
         }
