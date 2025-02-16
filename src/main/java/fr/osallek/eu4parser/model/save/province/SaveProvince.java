@@ -367,6 +367,10 @@ public class SaveProvince extends Province {
         return armies;
     }
 
+    public void addArmy(Army army) {
+        Id.addToItem(this.item, "unit", army.getId().getId(), army.getId().getType());
+    }
+
     public List<Navy> getNavies() {
         List<ClausewitzItem> unitsItems = this.item.getChildren("unit");
         List<Navy> navies = new ArrayList<>(0);

@@ -327,9 +327,15 @@ public class Monarch {
         toItem.addVariable("culture", ClausewitzUtils.removeQuotes(country.getPrimaryCultureName()));
         toItem.addVariable("religion", ClausewitzUtils.removeQuotes(country.getReligionName()));
         toItem.addVariable("birth_date", country.getSave().getDate().minusYears(16));
-        toItem.addVariable("DIP", RandomUtils.insecure().randomInt(0, 7));
-        toItem.addVariable("ADM", RandomUtils.insecure().randomInt(0, 7));
-        toItem.addVariable("MIL", RandomUtils.insecure().randomInt(0, 7));
+        toItem.addVariable("DIP", RandomUtils.insecure()
+                                             .randomInt(country.getSave().getGame().getMonarchMinSkill(),
+                                                        country.getSave().getGame().getMonarchMaxSkill() + 1));
+        toItem.addVariable("ADM", RandomUtils.insecure()
+                                             .randomInt(country.getSave().getGame().getMonarchMinSkill(),
+                                                        country.getSave().getGame().getMonarchMaxSkill() + 1));
+        toItem.addVariable("MIL", RandomUtils.insecure()
+                                             .randomInt(country.getSave().getGame().getMonarchMinSkill(),
+                                                        country.getSave().getGame().getMonarchMaxSkill() + 1));
 
         List<String> names = new ArrayList<>(country.getSave().getGame().getCountry(country.getTag()).getMonarchNames().keySet());
         Collections.shuffle(names);

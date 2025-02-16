@@ -945,6 +945,10 @@ public class SaveCountry {
         }
     }
 
+    public String getGraphicalCulture() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("graphical_culture"));
+    }
+
     public String getReligionName() {
         return this.item.getVarAsString("religion");
     }
@@ -3442,15 +3446,9 @@ public class SaveCountry {
                           .sum();
     }
 
-    public void addArmy(String name, int location, String graphicalCulture, String regimentName, String regimentType,
-                        double regimentMorale, double regimentDrill) {
-        //Todo location -> 		unit={
-        //    //			id=6520
-        //    //			type=54
-        //    //		}
-        Army.addToItem(this.item, this.save.getAndIncrementUnitIdCounter(), name, location, graphicalCulture,
-                       this.save.getAndIncrementUnitIdCounter(), regimentName, location, regimentType, regimentMorale,
-                       regimentDrill);
+    public void addArmy(String name, int location) {
+        Army army = new Army(Army.addToItem(this.item, "army", name, location, getGraphicalCulture(), this.save.getAndIncrementUnitIdCounter()), this);
+        this.save.getProvince(location).addArmy(army);
     }
 
     public Navy getNavy(Id id) {
@@ -3464,13 +3462,9 @@ public class SaveCountry {
                         .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
     }
 
-    public void addNavy(String name, int location, String graphicalCulture, String shipName, String shipType, double shipMorale) {
-        //Todo location -> 		unit={
-        //    //			id=6520
-        //    //			type=54
-        //    //		}
-        Navy.addToItem(this.item, this.save.getAndIncrementUnitIdCounter(), name, location, graphicalCulture,
-                       this.save.getAndIncrementUnitIdCounter(), shipName, location, shipType, shipMorale);
+    public void addNavy(String name, int location, String graphicalCulture) {
+        Navy navy = new Navy(Navy.addToItem(this.item, "navy", name, location, graphicalCulture, this.save.getAndIncrementUnitIdCounter()), this);
+        this.save.getProvince(location).addArmy(navy);
     }
 
     public void removeAeFor(String tag) {

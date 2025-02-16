@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
+import fr.osallek.eu4parser.model.game.Unit;
 import fr.osallek.eu4parser.model.save.Id;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class Army extends AbstractArmy {
         return this.item.getChildren("regiment").stream().map(regimentItem -> new Regiment(regimentItem, this.country.getSave(), this)).toList();
     }
 
-    public void addRegiment(String name, String type) {
+    public void addRegiment(Unit type) {
         Integer home = 1;
         Double morale = 0.5d;
         Double drill = 0d;
@@ -33,11 +34,11 @@ public class Army extends AbstractArmy {
             drill = regiments.getFirst().getDrill();
         }
 
-        addRegiment(name, home, type, morale, drill);
+        addRegiment("Regiment", home, type, morale, drill);
     }
 
-    public void addRegiment(String name, int home, String type, double morale, double drill) {
-        Regiment.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale, drill);
+    public void addRegiment(String name, int home, Unit type, double morale, double drill) {
+        Regiment.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type.getUnitType(), morale, drill);
     }
 
     public void removeRegiment(int index) {
@@ -75,13 +76,5 @@ public class Army extends AbstractArmy {
             }
 
         }
-    }
-
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location, String graphicalCulture, int regimentId,
-                                              String regimentName, int regimentHome, String regimentType, double regimentMorale, double regimentDrill) {
-        ClausewitzItem toItem = AbstractArmy.addToItem(parent, "army", name, location, graphicalCulture, id);
-        Regiment.addToItem(toItem, regimentId, regimentName, regimentHome, regimentType, regimentMorale, regimentDrill);
-
-        return toItem;
     }
 }

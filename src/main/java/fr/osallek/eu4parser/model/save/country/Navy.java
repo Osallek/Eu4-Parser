@@ -98,12 +98,4 @@ public class Navy extends Army {
 
         return false;
     }
-
-    protected static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int location, String graphicalCulture, int shipId, String shipName,
-                                              int shipHome, String shipType, double shipMorale) {
-        ClausewitzItem toItem = AbstractArmy.addToItem(parent, "navy", name, location, graphicalCulture, id);
-        AbstractRegiment.addToItem(toItem, shipId, shipName, shipHome, shipType, shipMorale);
-
-        return toItem;
-    }
 }
