@@ -35,7 +35,6 @@ public class Cardinal {
         toItem.addVariable("location", location);
         Id.addToItem(toItem, id, 4713);
 
-        parent.addChild(toItem);
 
         return toItem;
     }

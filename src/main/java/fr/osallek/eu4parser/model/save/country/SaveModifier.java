@@ -82,8 +82,6 @@ public class SaveModifier {
             toItem.addVariable("date", date);
         }
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

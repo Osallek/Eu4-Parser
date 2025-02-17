@@ -44,8 +44,6 @@ public record VictoryCard(ClausewitzItem item) {
         toItem.addVariable("score", score);
         toItem.addVariable("was_fulfilled", wasFulfilled);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

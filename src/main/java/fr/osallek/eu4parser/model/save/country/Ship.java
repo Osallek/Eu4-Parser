@@ -49,8 +49,6 @@ public class Ship extends AbstractRegiment {
         toItem.addVariable("morale", morale);
         toItem.addVariable("has_disengaged", hasDisengaged);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

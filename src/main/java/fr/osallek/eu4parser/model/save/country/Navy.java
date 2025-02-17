@@ -2,10 +2,13 @@ package fr.osallek.eu4parser.model.save.country;
 
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzList;
+import fr.osallek.eu4parser.model.game.Unit;
+import fr.osallek.eu4parser.model.save.counters.Counter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class Navy extends Army {
 
@@ -17,7 +20,7 @@ public class Navy extends Army {
         return this.item.getChildren("ship").stream().map(child -> new Ship(child, this.country.getSave(), this)).toList();
     }
 
-    public void addShip(String name, String type) {
+    public void addShip(String name, Unit type) {
         Integer home = 1;
         Double morale = 0.5d;
 
@@ -30,12 +33,16 @@ public class Navy extends Army {
         addShip(name, home, type, morale);
     }
 
-    public void addShip(String name, Integer home, String type, Double morale) {
-        AbstractRegiment.addToItem(this.item, this.country.getSave().getAndIncrementUnitIdCounter(), name, home, type, morale);
+    public void addShip(String name, Integer home, Unit type, Double morale) {
+        AbstractRegiment.addToItem(this.item, this.country.getSave().getIdCounters().getAndIncrement(Counter.REGIMENT), name, home, type.getName(), morale);
     }
 
-    public void removeShip(int index) {
-        this.item.removeVariable("ship", index);
+    public void removeShip(int id) {
+        List<Ship> ships = getShips();
+        IntStream.range(0, ships.size())
+                 .filter(i -> id == ships.get(i).getId().getId())
+                 .findFirst()
+                 .ifPresent(index -> this.item.removeChild("ship", index));
     }
 
     //Todo mission details

@@ -64,7 +64,6 @@ public class SaveDecree {
         toItem.addVariable("decree_name", name);
         toItem.addVariable("decree_date", date);
 
-        parent.addChild(toItem);
         return toItem;
     }
 }

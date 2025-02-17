@@ -28,7 +28,6 @@ public record TradeNodeModifier(ClausewitzItem item) {
         toItem.addVariable("power", power);
         toItem.addVariable("power_modifier", powerModifier);
 
-        parent.addChild(toItem);
 
         return toItem;
     }

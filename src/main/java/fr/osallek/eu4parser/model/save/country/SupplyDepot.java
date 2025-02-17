@@ -30,8 +30,6 @@ public record SupplyDepot(ClausewitzItem item, Save save) {
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addVariable("date", date);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

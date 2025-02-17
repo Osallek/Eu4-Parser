@@ -234,33 +234,12 @@ public class Save {
         return idCountersList != null ? new IdCounters(idCountersList) : null;
     }
 
-    public Integer getUnitIdCounter() {
-        return this.gamestateItem.getVarAsInt("unit");
-    }
-
     public Age getCurrentAge() {
         return this.game.getAge(ClausewitzUtils.removeQuotes(this.gamestateItem.getVarAsString("current_age")));
     }
 
     public Double getNextAgeProgress() {
         return this.gamestateItem.getVarAsDouble("next_age_progress");
-    }
-
-    /**
-     * Used for units and armies
-     */
-    public int getAndIncrementUnitIdCounter() {
-        Integer var = this.gamestateItem.getVarAsInt("unit");
-
-        if (var == null) {
-            this.gamestateItem.addVariable("unit", 2);
-
-            return 1;
-        } else {
-            this.gamestateItem.setVariable("unit", var + 1);
-
-            return var;
-        }
     }
 
     public ListOfDates getFlags() {

@@ -58,8 +58,6 @@ public class DiplomacyRelation {
             toItem.addVariable("end_date", endDate);
         }
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

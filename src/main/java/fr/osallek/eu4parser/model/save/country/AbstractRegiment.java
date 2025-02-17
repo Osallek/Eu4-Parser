@@ -101,12 +101,10 @@ public abstract class AbstractRegiment {
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "ship", parent.getOrder() + 1);
         Id.addToItem(toItem, id, 54);
-        toItem.addVariable("name", name);
+        toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
         toItem.addVariable("home", home);
         toItem.addVariable("type", ClausewitzUtils.addQuotes(type));
         toItem.addVariable("morale", morale);
-
-        parent.addChild(toItem);
 
         return toItem;
     }

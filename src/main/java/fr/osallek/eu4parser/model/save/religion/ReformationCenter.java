@@ -50,7 +50,6 @@ public record ReformationCenter(Save save, ClausewitzItem item) {
         toItem.addVariable("religion", religion.getName());
         toItem.addVariable("type", ClausewitzUtils.addQuotes(religion.getName() + "_center_of_reformation"));
 
-        parent.addChild(toItem);
 
         return toItem;
     }

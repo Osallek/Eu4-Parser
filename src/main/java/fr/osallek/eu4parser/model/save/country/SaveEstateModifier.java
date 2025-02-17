@@ -28,8 +28,6 @@ public record SaveEstateModifier(ClausewitzItem item) {
         toItem.addVariable("date", date);
         toItem.addVariable("desc", desc);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

@@ -169,8 +169,6 @@ public class Leader {
         toItem.addVariable("birth_date", birthDate);
         Id.addToItem(toItem, id, 49);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 

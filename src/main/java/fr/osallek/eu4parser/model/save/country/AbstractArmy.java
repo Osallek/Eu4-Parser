@@ -133,7 +133,6 @@ public abstract class AbstractArmy {
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
         toItem.addVariable("location", location);
         toItem.addVariable("graphical_culture", ClausewitzUtils.addQuotes(graphicalCulture));
-        parent.addChild(toItem);
 
         return toItem;
     }

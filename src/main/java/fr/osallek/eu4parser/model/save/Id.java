@@ -34,11 +34,9 @@ public record Id(ClausewitzItem item) {
     }
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, String name, int id, int type, int order) {
-        ClausewitzItem toItem = new ClausewitzItem(parent, name, order);
+        ClausewitzItem toItem = new ClausewitzItem(parent, name, order, true, true);
         toItem.addVariable("id", id);
         toItem.addVariable("type", type);
-
-        parent.addChild(toItem, true);
 
         return toItem;
     }

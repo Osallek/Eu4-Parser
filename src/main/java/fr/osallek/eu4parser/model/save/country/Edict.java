@@ -30,8 +30,6 @@ public record Edict(ClausewitzItem item, Game game) {
         toItem.addVariable("which", ClausewitzUtils.addQuotes(which.getName()));
         toItem.addVariable("date", date);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

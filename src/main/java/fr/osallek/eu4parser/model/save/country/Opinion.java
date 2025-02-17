@@ -40,8 +40,6 @@ public record Opinion(ClausewitzItem item) {
             toItem.addVariable("expiry_date", true);
         }
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

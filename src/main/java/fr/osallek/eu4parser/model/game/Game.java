@@ -2864,6 +2864,7 @@ public class Game {
                         reader.readLine(); //Skip first line language (and BOM)
                         AtomicInteger i = new AtomicInteger(1);
 
+                        loop:
                         while ((line = reader.readLine()) != null) {
                             try {
                                 if (StringUtils.isBlank(line)) {
@@ -2889,6 +2890,12 @@ public class Game {
 
                                 if ((eu4Language.fileEndWith + ":").equals(line.replace(" ", ""))) {
                                     continue;
+                                }
+
+                                for (Eu4Language language : Eu4Language.values()) {
+                                    if ((language.fileEndWith + ":").equals(line.replace(" ", ""))) {
+                                        continue loop;
+                                    }
                                 }
 
                                 String[] keys = line.split(":", 2);

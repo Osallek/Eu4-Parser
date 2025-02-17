@@ -43,10 +43,6 @@ public class ChangePrice {
         toItem.addVariable("value", (double) percent / 100);
         toItem.addVariable("expiry_date", expiryDate);
 
-        if (parent != null) {
-            parent.addChild(toItem);
-        }
-
         return toItem;
     }
 

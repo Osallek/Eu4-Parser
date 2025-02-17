@@ -26,8 +26,6 @@ public record PowerProjection(ClausewitzItem item) {
         toItem.addVariable("modifier", modifier);
         toItem.addVariable("current", current);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

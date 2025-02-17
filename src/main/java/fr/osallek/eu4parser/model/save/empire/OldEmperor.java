@@ -33,7 +33,6 @@ public record OldEmperor(ClausewitzItem item) {
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country));
         toItem.addVariable("date", date);
 
-        parent.addChild(toItem);
 
         return toItem;
     }

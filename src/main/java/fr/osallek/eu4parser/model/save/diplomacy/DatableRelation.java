@@ -56,7 +56,6 @@ public class DatableRelation {
         toItem.addVariable("second", ClausewitzUtils.addQuotes(second));
         toItem.addVariable("start_date", startDate);
 
-        parent.addChild(toItem);
 
         return toItem;
     }

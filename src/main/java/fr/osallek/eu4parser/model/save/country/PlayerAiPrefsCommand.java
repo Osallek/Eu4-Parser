@@ -152,8 +152,6 @@ public record PlayerAiPrefsCommand(ClausewitzItem item) {
         playerAiPrefsCommand.setBraindead(braindead);
         playerAiPrefsCommand.setTimeout(timeout);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

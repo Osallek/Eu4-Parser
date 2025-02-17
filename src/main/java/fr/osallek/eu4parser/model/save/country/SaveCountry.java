@@ -3369,7 +3369,7 @@ public class SaveCountry {
         return this.item.getChildren("army")
                         .stream()
                         .map(armyItem -> new Army(armyItem, this))
-                        .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
+                        .collect(Collectors.toMap(AbstractArmy::getId, Function.identity(), (a, b) -> a, LinkedHashMap::new));
     }
 
     public int getArmySize() {
@@ -3446,9 +3446,22 @@ public class SaveCountry {
                           .sum();
     }
 
-    public void addArmy(String name, int location) {
-        Army army = new Army(Army.addToItem(this.item, "army", name, location, getGraphicalCulture(), this.save.getAndIncrementUnitIdCounter()), this);
+    public Army addArmy(String name, int location) {
+        Army army = new Army(Army.addToItem(this.item, "army", name, location, getGraphicalCulture(), this.save.getIdCounters().getAndIncrement(Counter.ARMY)), this);
         this.save.getProvince(location).addArmy(army);
+
+        return army;
+    }
+
+    public void removeArmy(int id) {
+        List<Army> armies = new ArrayList<>(getArmies().values());
+
+        for (int i = 0; i < armies.size(); i++) {
+            if (armies.get(i).getId().getId().equals(id)) {
+                this.item.removeChild("army", i);
+                break;
+            }
+        }
     }
 
     public Navy getNavy(Id id) {
@@ -3459,12 +3472,25 @@ public class SaveCountry {
         return this.item.getChildren("navy")
                         .stream()
                         .map(navyItem -> new Navy(navyItem, this))
-                        .collect(Collectors.toMap(AbstractArmy::getId, Function.identity()));
+                        .collect(Collectors.toMap(AbstractArmy::getId, Function.identity(), (a, b) -> a, LinkedHashMap::new));
     }
 
-    public void addNavy(String name, int location, String graphicalCulture) {
-        Navy navy = new Navy(Navy.addToItem(this.item, "navy", name, location, graphicalCulture, this.save.getAndIncrementUnitIdCounter()), this);
+    public Navy addNavy(String name, int location) {
+        Navy navy = new Navy(Navy.addToItem(this.item, "navy", name, location, getGraphicalCulture(), this.save.getIdCounters().getAndIncrement(Counter.ARMY)), this);
         this.save.getProvince(location).addArmy(navy);
+
+        return navy;
+    }
+
+    public void removeNavy(int id) {
+        List<Navy> armies = new ArrayList<>(getNavies().values());
+
+        for (int i = 0; i < armies.size(); i++) {
+            if (armies.get(i).getId().getId().equals(id)) {
+                this.item.removeChild("navy", i);
+                break;
+            }
+        }
     }
 
     public void removeAeFor(String tag) {

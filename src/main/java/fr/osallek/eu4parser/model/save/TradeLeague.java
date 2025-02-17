@@ -55,8 +55,6 @@ public record TradeLeague(ClausewitzItem item, Save save) {
                                         .map(ClausewitzUtils::addQuotes)
                                         .filter(s -> s.length() == 5)
                                         .toList());
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

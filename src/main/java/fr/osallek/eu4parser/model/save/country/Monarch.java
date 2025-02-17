@@ -347,8 +347,6 @@ public class Monarch {
 
         Id.addToItem(toItem, country.getSave().getIdCounters().getAndIncrement(Counter.MONARCH), 48);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

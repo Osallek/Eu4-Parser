@@ -52,8 +52,6 @@ public record SaveInvestment(ClausewitzItem item, Save save) {
         toItem.addVariable("tag", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addList("investments", Arrays.stream(investments).map(Investment::getName).toList());
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

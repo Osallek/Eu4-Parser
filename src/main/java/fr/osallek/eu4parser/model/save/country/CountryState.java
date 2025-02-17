@@ -84,8 +84,6 @@ public class CountryState {
         toItem.addVariable("country", ClausewitzUtils.addQuotes(country.getTag()));
         toItem.addVariable("prosperity", 0d);
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 }

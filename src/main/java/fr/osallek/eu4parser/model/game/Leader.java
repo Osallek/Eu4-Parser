@@ -150,8 +150,6 @@ public class Leader {
             toItem.addVariable("personality", personality.getName().toLowerCase());
         }
 
-        parent.addChild(toItem);
-
         return toItem;
     }
 

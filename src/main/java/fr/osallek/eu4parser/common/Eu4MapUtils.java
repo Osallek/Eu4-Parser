@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -143,21 +146,34 @@ public class Eu4MapUtils {
 
         List<Polygon> listBorders = borders.values().stream().flatMap(Collection::stream).toList();
 
+        ForkJoinPool forkJoinPool = (ForkJoinPool) Executors.newWorkStealingPool();
+        ConcurrentHashMap<Province, Map<Polygon, Boolean>> bordersMap = new ConcurrentHashMap<>();
+
+        try {
+            forkJoinPool.submit(() -> borders.entrySet().parallelStream().forEach(entry -> {
+                bordersMap.put(entry.getKey(),
+                               entry.getValue()
+                                    .stream()
+                                    .collect(Collectors.toMap(Function.identity(),
+                                                              polygon -> listBorders.stream()
+                                                                                    .anyMatch(p -> p.contains(polygon.getBounds())
+                                                                                                   || isInsidePolygon(p, polygon)))));
+            })).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            forkJoinPool.close();
+        }
+
         //Sort to have "classic" provinces last for drawing purposes
-        return borders.entrySet()
-                      .stream()
-                      .sorted((o1, o2) -> Comparator.comparing(Province::isOcean, Comparator.reverseOrder())
-                                                    .thenComparing(Province::isImpassable)
-                                                    .thenComparing(Province::isLake)
-                                                    .compare(o1.getKey(), o2.getKey()))
-                      .collect(Collectors.toMap(Map.Entry::getKey,
-                                                entry -> entry.getValue()
-                                                              .stream()
-                                                              .collect(Collectors.toMap(Function.identity(),
-                                                                                        polygon -> listBorders.stream()
-                                                                                                              .anyMatch(p -> p.contains(polygon.getBounds())
-                                                                                                                             || isInsidePolygon(p, polygon)))),
-                                                (a, b) -> a, LinkedHashMap::new));
+        return bordersMap.entrySet()
+                         .stream()
+                         .sorted((o1, o2) -> Comparator.comparing(Province::isOcean, Comparator.reverseOrder())
+                                                       .thenComparing(Province::isImpassable)
+                                                       .thenComparing(Province::isLake)
+                                                       .compare(o1.getKey(), o2.getKey()))
+                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                                   (a, b) -> a, LinkedHashMap::new));
     }
 
     private static boolean sameColor(int rgb, int[] colors, int x, int y, int width, int height) {
@@ -375,7 +391,6 @@ public class Eu4MapUtils {
                 return true;
             }
         }
-
 
         for (int i = 0; i < polygon.npoints; i++) {
             int startX = polygon.xpoints[i];
