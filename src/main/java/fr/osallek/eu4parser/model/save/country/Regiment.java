@@ -35,7 +35,7 @@ public class Regiment extends AbstractRegiment {
 
     public static ClausewitzItem addToItem(ClausewitzItem parent, int id, String name, int home, String type, double morale, double drill) {
         ClausewitzItem toItem = new ClausewitzItem(parent, "regiment", parent.getOrder() + 1);
-        Id.addToItem(toItem, id, 54);
+        Id.addToItem(toItem, id, 55);
         toItem.addVariable("name", ClausewitzUtils.addQuotes(name));
         toItem.addVariable("home", home);
         toItem.addVariable("type", ClausewitzUtils.addQuotes(type));
