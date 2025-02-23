@@ -119,6 +119,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         Map<String, WarParticipant> participants = getParticipantsStream().collect(Collectors.toMap(WarParticipant::getTag, Function.identity()));
 
         return getAttackersStream().map(tag -> Pair.of(tag, participants.get(tag)))
+                                   .filter(p -> p.getValue() != null)
                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
     }
 
@@ -145,6 +146,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         Map<String, WarParticipant> participants = getParticipantsStream().collect(Collectors.toMap(WarParticipant::getTag, Function.identity()));
 
         return getDefendersStream().map(tag -> Pair.of(tag, participants.get(tag)))
+                                   .filter(p -> p.getValue() != null)
                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
     }
 
@@ -183,6 +185,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         Map<String, WarParticipant> participants = getParticipantsStream().collect(Collectors.toMap(WarParticipant::getTag, Function.identity()));
 
         return getPersistentAttackersStream().map(tag -> Pair.of(tag, participants.get(tag)))
+                                             .filter(p -> p.getValue() != null)
                                              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
     }
 
@@ -200,6 +203,7 @@ public class ActiveWar implements Comparable<ActiveWar> {
         Map<String, WarParticipant> participants = getParticipantsStream().collect(Collectors.toMap(WarParticipant::getTag, Function.identity()));
 
         return getPersistentDefendersStream().map(tag -> Pair.of(tag, participants.get(tag)))
+                                             .filter(p -> p.getValue() != null)
                                              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
     }
 
