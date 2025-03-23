@@ -519,7 +519,7 @@ public class Save {
             return null;
         }
 
-        return getCountries().get(ClausewitzUtils.removeQuotes(tag));
+        return getCountries().get(ClausewitzUtils.removeQuotes(tag.toUpperCase()));
     }
 
     public Map<String, SaveCountry> getCountries() {

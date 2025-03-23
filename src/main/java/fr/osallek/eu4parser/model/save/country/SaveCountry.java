@@ -130,7 +130,7 @@ public class SaveCountry {
     }
 
     public String getTag() {
-        return ClausewitzUtils.removeQuotes(this.item.getName());
+        return ClausewitzUtils.removeQuotes(this.item.getName()).toUpperCase();
     }
 
     public String getLocalizedName() {

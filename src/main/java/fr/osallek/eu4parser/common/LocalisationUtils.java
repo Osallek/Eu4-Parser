@@ -19,15 +19,21 @@ import fr.osallek.eu4parser.model.game.Religion;
 import fr.osallek.eu4parser.model.game.ReligionGroup;
 import fr.osallek.eu4parser.model.game.SuperRegion;
 import fr.osallek.eu4parser.model.game.TradeCompany;
+import fr.osallek.eu4parser.model.game.Unit;
 import fr.osallek.eu4parser.model.game.localisation.Eu4Language;
 import fr.osallek.eu4parser.model.game.localisation.Localisation;
 import fr.osallek.eu4parser.model.save.Save;
 import fr.osallek.eu4parser.model.save.SaveReligion;
+import fr.osallek.eu4parser.model.save.country.AbstractArmy;
+import fr.osallek.eu4parser.model.save.country.AbstractRegiment;
+import fr.osallek.eu4parser.model.save.country.Army;
 import fr.osallek.eu4parser.model.save.country.FlagShip;
 import fr.osallek.eu4parser.model.save.country.Heir;
+import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.Monarch;
 import fr.osallek.eu4parser.model.save.country.Navy;
 import fr.osallek.eu4parser.model.save.country.Queen;
+import fr.osallek.eu4parser.model.save.country.Regiment;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveTradeCompany;
 import fr.osallek.eu4parser.model.save.country.Ship;
@@ -198,6 +204,8 @@ public final class LocalisationUtils {
             } else if (current.get() instanceof Monarch monarch) {
                 switch (key) {
                     case "Dynasty" -> current = getDynasty(monarch);
+                    case "Culture" -> current = getCulture(monarch);
+                    case "Religion" -> current = getReligion(monarch);
                     //Commands
                     case "GetDate" -> current = getDate(save, language);
                     case "GetMonth" -> current = getMonth(save, language);
@@ -313,6 +321,68 @@ public final class LocalisationUtils {
                             LOGGER.debug("Could not find scope {} in culture", key);
                         }
                     }
+                }
+            } else if (current.get() instanceof AbstractArmy army) {
+                switch (key) {
+                    case "Location" -> current = getLocation(save, army);
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
+                    case "GetName" -> current = getName(army);
+                    case "GetYear" -> current = getYear(save);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
+                        } else {
+                            current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.debug("Could not find scope {} in culture", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof AbstractRegiment regiment) {
+                switch (key) {
+                    case "Location" -> current = getLocation(save, regiment.getArmy());
+                    //Commands
+                    case "GetDate" -> current = getDate(save, language);
+                    case "GetMonth" -> current = getMonth(save, language);
+                    case "Emperor" -> current = getEmperor(save);
+                    case "GetName" -> current = getName(regiment);
+                    case "GetYear" -> current = getYear(save);
+                    default -> {
+                        CustomizableLocalization localization = save.getGame().getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(save.getGame(), current.orElse(null), localization, language);
+                        } else {
+                            current = getTag(save, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(save, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.debug("Could not find scope {} in culture", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof Integer provinceId) {
+                if (save.getProvince(provinceId) != null) {
+                    current = getProvince(save, provinceId);
+                }
+            } else if (current.get() instanceof String tag) {
+                if (save.getCountry(tag) != null) {
+                    current = getTag(save, tag);
                 }
             }
 
@@ -431,6 +501,8 @@ public final class LocalisationUtils {
             } else if (current.get() instanceof fr.osallek.eu4parser.model.game.Monarch monarch) {
                 switch (key) {
                     case "Dynasty" -> current = getDynasty(monarch);
+                    case "Culture" -> current = getCulture(monarch);
+                    case "Religion" -> current = getReligion(monarch);
                     case "GetTitle" -> current = getTitle(monarch, language);
                     case "GetWomanMan" -> current = getTitle(monarch, language);
                     case "GetAdm" -> current = getAdm(monarch);
@@ -547,6 +619,68 @@ public final class LocalisationUtils {
                         }
                     }
                 }
+            } else if (current.get() instanceof AbstractArmy army) {
+                switch (key) {
+                    case "Location" -> current = getLocation(game, army);
+                    //Commands
+                    case "GetDate" -> current = getDate(game, language);
+                    case "GetMonth" -> current = getMonth(game, language);
+                    case "Emperor" -> current = getEmperor(game);
+                    case "GetName" -> current = getName(army);
+                    case "GetYear" -> current = getYear(game);
+                    default -> {
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
+                        } else {
+                            current = getTag(game, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.debug("Could not find scope {} in culture", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof AbstractRegiment regiment) {
+                switch (key) {
+                    case "Location" -> current = getLocation(game, regiment.getArmy());
+                    //Commands
+                    case "GetDate" -> current = getDate(game, language);
+                    case "GetMonth" -> current = getMonth(game, language);
+                    case "Emperor" -> current = getEmperor(game);
+                    case "GetName" -> current = getName(regiment);
+                    case "GetYear" -> current = getYear(game);
+                    default -> {
+                        CustomizableLocalization localization = game.getCustomizableLocalization(key);
+
+                        if (localization != null) {
+                            current = getCustomisableLocalisation(game, current.orElse(null), localization, language);
+                        } else {
+                            current = getTag(game, key);
+
+                            if (current.isEmpty()) {
+                                current = NumbersUtils.parseInt(key).flatMap(id -> getProvince(game, id));
+                            }
+                        }
+
+                        if (current.isEmpty()) {
+                            LOGGER.debug("Could not find scope {} in culture", key);
+                        }
+                    }
+                }
+            } else if (current.get() instanceof Integer provinceId) {
+                if (game.getProvince(provinceId) != null) {
+                    current = getProvince(game, provinceId);
+                }
+            } else if (current.get() instanceof String tag) {
+                if (game.getCountry(tag) != null) {
+                    current = getTag(game, tag);
+                }
             }
 
             if (current.isEmpty()) {
@@ -659,14 +793,16 @@ public final class LocalisationUtils {
     public static Optional<String> getCustomisableLocalisation(Game game, Object root, CustomizableLocalization localization, Eu4Language language) {
         return Optional.ofNullable(localization)
                        .filter(l -> CollectionUtils.isNotEmpty(l.getTexts()))
-                       .flatMap(l -> {
-                           if (root instanceof Country country) {
-                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(country, country)).findFirst();
-                           } else if (root instanceof Province province) {
-                               return l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(province)).findFirst();
-                           } else {
-                               return Optional.empty();
-                           }
+                       .flatMap(l -> switch (root) {
+                           case Country country ->
+                                   l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(country, country)).findFirst();
+                           case SaveCountry country ->
+                                   l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(country, country)).findFirst();
+                           case SaveProvince province ->
+                                   l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(province)).findFirst();
+                           case Province province -> l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(province)).findFirst();
+                           case Leader leader -> l.getTexts().stream().filter(t -> t.getTrigger() == null || t.getTrigger().apply(leader)).findFirst();
+                           case null, default -> Optional.empty();
                        })
                        .map(CustomizableLocalizationText::getLocalisationKey)
                        .map(key -> game.getComputedLocalisation(root, key, language));
@@ -678,6 +814,14 @@ public final class LocalisationUtils {
 
     public static Optional<Province> getCapital(Country country) {
         return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getCapital);
+    }
+
+    public static Optional<Province> getLocation(Save save, AbstractArmy army) {
+        return Optional.ofNullable(army).map(c -> save.getProvince(c.getLocation()));
+    }
+
+    public static Optional<Province> getLocation(Game game, AbstractArmy army) {
+        return Optional.ofNullable(army).map(c -> game.getProvince(c.getLocation()));
     }
 
     public static Optional<SaveCountry> getColonialParent(SaveCountry country) {
@@ -702,6 +846,14 @@ public final class LocalisationUtils {
 
     public static Optional<Culture> getCulture(Province province) {
         return Optional.ofNullable(province).map(p -> p.getHistoryItemAt(p.getGame().getStartDate())).map(ProvinceHistoryItemI::getCulture);
+    }
+
+    public static Optional<Culture> getCulture(fr.osallek.eu4parser.model.game.Monarch monarch) {
+        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getCulture);
+    }
+
+    public static Optional<Culture> getCulture(Monarch monarch) {
+        return Optional.ofNullable(monarch).map(Monarch::getCulture);
     }
 
     public static Optional<SaveCountry> getFrom(SaveCountry country) {
@@ -806,6 +958,14 @@ public final class LocalisationUtils {
 
     public static Optional<Religion> getReligion(Country country) {
         return Optional.ofNullable(country).map(c -> c.getHistoryItemAt(c.getGame().getStartDate())).map(CountryHistoryItemI::getReligion);
+    }
+
+    public static Optional<Religion> getReligion(fr.osallek.eu4parser.model.game.Monarch monarch) {
+        return Optional.ofNullable(monarch).map(fr.osallek.eu4parser.model.game.Monarch::getReligion);
+    }
+
+    public static Optional<Religion> getReligion(Monarch monarch) {
+        return Optional.ofNullable(monarch).map(Monarch::getReligion);
     }
 
     public static Optional<SaveTradeCompany> getTradeCompany(SaveProvince province) {
@@ -1169,6 +1329,14 @@ public final class LocalisationUtils {
                        .map(game -> game.getLocalisation(tradeCompany.getName(), language))
                        .map(Localisation::getValue)
                        .map(StringUtils::capitalize);
+    }
+
+    public static Optional<String> getName(AbstractArmy army) {
+        return Optional.ofNullable(army).map(AbstractArmy::getName);
+    }
+
+    public static Optional<String> getName(AbstractRegiment regiment) {
+        return Optional.ofNullable(regiment).map(AbstractRegiment::getName);
     }
 
     public static Optional<String> getTag(SaveCountry country) {
