@@ -9,6 +9,9 @@ import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.province.SaveProvince;
 
+import java.util.List;
+import java.util.Map;
+
 public class ConditionOr extends ConditionAbstract {
 
     public ConditionOr(ConditionAbstract other) {
@@ -23,82 +26,104 @@ public class ConditionOr extends ConditionAbstract {
     }
 
     public boolean apply(SaveCountry root, SaveCountry from) {
-        if (this.conditions != null &&
-            this.conditions.entrySet()
-                           .stream()
-                           .filter(e -> this.filter.test(e.getKey()))
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
-            return true;
+        if (this.conditions != null) {
+            for (Map.Entry<String, List<String>> e : this.conditions.entrySet()) {
+                if (this.filter.test(e.getKey())) {
+                    for (String s : e.getValue()) {
+                        if (ConditionsUtils.applyConditionToCountry(root, root, from, e.getKey(), s)) {
+                            return true;
+                        }
+                    }
+                }
+            }
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToCountry(root, from, scope))) {
-            return true;
+        if (getScopes() != null) {
+            for (ConditionAbstract scope : getScopes()) {
+                if (ConditionsUtils.applyScopeToCountry(root, from, scope)) {
+                    return true;
+                }
+            }
         }
 
         return false;
     }
 
     public boolean apply(Country root, Country from) {
-        if (this.conditions != null &&
-            this.conditions.entrySet()
-                           .stream()
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)))) {
-            return true;
+        if (this.conditions != null) {
+            for (Map.Entry<String, List<String>> entry : this.conditions.entrySet()) {
+                for (String s : entry.getValue()) {
+                    if (ConditionsUtils.applyConditionToCountry(root, root, from, entry.getKey(), s)) {
+                        return true;
+                    }
+                }
+            }
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToCountry(root, from, scope))) {
-            return true;
+        if (getScopes() != null) {
+            for (ConditionAbstract scope : getScopes()) {
+                if (ConditionsUtils.applyScopeToCountry(root, from, scope)) {
+                    return true;
+                }
+            }
         }
 
         return false;
     }
 
     public boolean apply(SaveProvince province) {
-        if (this.conditions != null &&
-            this.conditions.entrySet()
-                           .stream()
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
-            return true;
+        if (this.conditions != null) {
+            for (Map.Entry<String, List<String>> entry : this.conditions.entrySet()) {
+                for (String s : entry.getValue()) {
+                    if (ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)) {
+                        return true;
+                    }
+                }
+            }
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToProvince(province, scope))) {
-            return true;
+        if (getScopes() != null) {
+            for (ConditionAbstract scope : getScopes()) {
+                if (ConditionsUtils.applyScopeToProvince(province, scope)) {
+                    return true;
+                }
+            }
         }
 
         return false;
     }
 
     public boolean apply(Province province) {
-        if (this.conditions != null &&
-            this.conditions.entrySet()
-                           .stream()
-                           .anyMatch(entry -> entry.getValue()
-                                                   .stream()
-                                                   .anyMatch(s -> ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)))) {
-            return true;
+        if (this.conditions != null) {
+            for (Map.Entry<String, List<String>> entry : this.conditions.entrySet()) {
+                for (String s : entry.getValue()) {
+                    if (ConditionsUtils.applyConditionToProvince(province, entry.getKey(), s)) {
+                        return true;
+                    }
+                }
+            }
         }
 
-        if (getScopes() != null && getScopes().stream().anyMatch(scope -> ConditionsUtils.applyScopeToProvince(province, scope))) {
-            return true;
+        if (getScopes() != null) {
+            for (ConditionAbstract scope : getScopes()) {
+                if (ConditionsUtils.applyScopeToProvince(province, scope)) {
+                    return true;
+                }
+            }
         }
 
         return false;
     }
 
     public boolean apply(SaveCountry country, SaveProvince from) {
-        if (this.conditions != null
-            && this.conditions.entrySet()
-                              .stream()
-                              .anyMatch(entry -> entry.getValue()
-                                                      .stream()
-                                                      .anyMatch(s -> ConditionsUtils.applyConditionToCountry(country, country, country, entry.getKey(), s)))) {
-            return true;
+        if (this.conditions != null) {
+            for (Map.Entry<String, List<String>> entry : this.conditions.entrySet()) {
+                for (String s : entry.getValue()) {
+                    if (ConditionsUtils.applyConditionToCountry(country, country, country, entry.getKey(), s)) {
+                        return true;
+                    }
+                }
+            }
         }
 
         if (getScopes() != null && getScopes().stream().anyMatch(scope -> {

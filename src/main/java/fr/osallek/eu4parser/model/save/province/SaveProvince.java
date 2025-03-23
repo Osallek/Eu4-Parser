@@ -969,6 +969,10 @@ public class SaveProvince extends Province {
         return this.item.getChild("history");
     }
 
+    public boolean hasHistory() {
+        return getHistoryItem() != null;
+    }
+
     public SaveProvinceHistory getHistory() {
         ClausewitzItem historyItem = getHistoryItem();
 

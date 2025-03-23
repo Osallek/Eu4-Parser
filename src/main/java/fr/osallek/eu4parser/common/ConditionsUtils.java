@@ -28,6 +28,7 @@ import fr.osallek.eu4parser.model.save.country.Income;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
 import fr.osallek.eu4parser.model.save.country.Queen;
+import fr.osallek.eu4parser.model.save.country.SaveArea;
 import fr.osallek.eu4parser.model.save.country.SaveCountry;
 import fr.osallek.eu4parser.model.save.country.SaveEstate;
 import fr.osallek.eu4parser.model.save.country.SaveEstateModifier;
@@ -88,42 +89,6 @@ public class ConditionsUtils {
             value = from.getTag().toUpperCase();
         } else {
             value = rawValue;
-        }
-
-        if (country.getSave().getGame().getAdvisor(condition) != null) {
-            return country.getActiveAdvisors()
-                          .stream()
-                          .anyMatch(advisor -> condition.equals(advisor.getName()) && advisor.getSkill() >= NumbersUtils.toInt(value));
-        }
-
-        if (country.getSave().getGame().getBuilding(condition) != null) {
-            return country.getOwnedProvinces()
-                          .stream()
-                          .filter(province -> province.getBuildings().stream().anyMatch(b -> b.getName().equals(value)))
-                          .count() >= NumbersUtils.toInt(value);
-        }
-
-        if (country.getSave().getGame().getIdeaGroup(condition) != null) {
-            return country.getIdeaGroups().getIdeaGroupsNames().getOrDefault(condition, -1) >= NumbersUtils.toInt(value);
-        }
-
-        if ((subjectType = country.getSave().getGame().getSubjectType(condition)) != null) {
-            return country.getSubjects().stream().map(SaveCountry::getSubjectType).filter(subjectType::equals).count() >= NumbersUtils.toInt(value);
-        }
-
-        if ((religion = country.getSave().getGame().getReligion(condition)) != null) {
-            return country.getTolerance(religion) >= NumbersUtils.toDouble(value);
-        }
-
-        if ((tradeGood = country.getSave().getGame().getTradeGood(condition)) != null) {
-            return country.getOwnedProvinces()
-                          .stream()
-                          .filter(province -> tradeGood.equals(province.getTradeGood()))
-                          .count() >= NumbersUtils.toInt(value);
-        }
-
-        if ((scriptedTrigger = country.getSave().getGame().getScriptedTrigger(condition)) != null) {
-            return scriptedTrigger.apply(country, from);
         }
 
         switch (condition.toLowerCase()) {
@@ -1948,6 +1913,43 @@ public class ConditionsUtils {
                 }
         }
 
+        if (country.getSave().getGame().getAdvisor(condition) != null) {
+            return country.getActiveAdvisors()
+                          .stream()
+                          .anyMatch(advisor -> condition.equals(advisor.getName()) && advisor.getSkill() >= NumbersUtils.toInt(value));
+        }
+
+        if (country.getSave().getGame().getBuilding(condition) != null) {
+            return country.getOwnedProvinces()
+                          .stream()
+                          .filter(province -> province.getBuildings().stream().anyMatch(b -> b.getName().equals(value)))
+                          .count() >= NumbersUtils.toInt(value);
+        }
+
+        if (country.getSave().getGame().getIdeaGroup(condition) != null) {
+            return country.getIdeaGroups().getIdeaGroupsNames().getOrDefault(condition, -1) >= NumbersUtils.toInt(value);
+        }
+
+        if ((subjectType = country.getSave().getGame().getSubjectType(condition)) != null) {
+            return country.getSubjects().stream().map(SaveCountry::getSubjectType).filter(subjectType::equals).count() >= NumbersUtils.toInt(value);
+        }
+
+        if ((religion = country.getSave().getGame().getReligion(condition)) != null) {
+            return country.getTolerance(religion) >= NumbersUtils.toDouble(value);
+        }
+
+        if ((tradeGood = country.getSave().getGame().getTradeGood(condition)) != null) {
+            return country.getOwnedProvinces()
+                          .stream()
+                          .filter(province -> tradeGood.equals(province.getTradeGood()))
+                          .count() >= NumbersUtils.toInt(value);
+        }
+
+        if ((scriptedTrigger = country.getSave().getGame().getScriptedTrigger(condition)) != null) {
+            return scriptedTrigger.apply(country, from);
+        }
+
+
         LOGGER.debug("Don't know how to manage country condition: {} = {}", condition, value);
         return false;
     }
@@ -2780,14 +2782,6 @@ public class ConditionsUtils {
         SaveTradeNode tradeNode;
         SaveReligion religion;
 
-        if ((country = root.getSave().getCountry(condition.getName())) != null) {
-            return condition.apply(country, from);
-        }
-
-        if ((saveProvince = root.getSave().getProvince(NumbersUtils.toInt(condition.getName()))) != null) {
-            return condition.apply(saveProvince);
-        }
-
         switch (condition.getName().toLowerCase()) {
             case "or":
                 return condition.or().apply(root, from);
@@ -3190,6 +3184,14 @@ public class ConditionsUtils {
                        && country.getSubjectStartDate().plusYears(NumbersUtils.toInt(condition.getCondition("value"))).isBefore(root.getSave().getDate());
         }
 
+        if ((country = root.getSave().getCountry(condition.getName())) != null) {
+            return condition.apply(country, from);
+        }
+
+        if ((saveProvince = root.getSave().getProvince(NumbersUtils.toInt(condition.getName()))) != null) {
+            return condition.apply(saveProvince);
+        }
+
         LOGGER.debug("Don't know how to manage country scope: {} !", condition);
         return false;
     }
@@ -3201,14 +3203,6 @@ public class ConditionsUtils {
         Double aDouble;
         Integer integer;
         Religion religion;
-
-        if ((country = root.getGame().getCountry(condition.getName())) != null) {
-            return condition.apply(country, from);
-        }
-
-        if ((province = Optional.ofNullable(NumbersUtils.toInt(condition.getName())).map(i -> root.getGame().getProvince(i)).orElse(null)) != null) {
-            return condition.apply(province);
-        }
 
         switch (condition.getName().toLowerCase()) {
             case "or":
@@ -3367,6 +3361,14 @@ public class ConditionsUtils {
                               .isBefore(root.getGame().getStartDate());
         }
 
+        if ((country = root.getGame().getCountry(condition.getName())) != null) {
+            return condition.apply(country, from);
+        }
+
+        if ((province = Optional.ofNullable(NumbersUtils.toInt(condition.getName())).map(i -> root.getGame().getProvince(i)).orElse(null)) != null) {
+            return condition.apply(province);
+        }
+
         LOGGER.debug("Don't know how to manage country scope: {} !", condition);
         return false;
     }
@@ -3385,14 +3387,6 @@ public class ConditionsUtils {
             value = province.getOwnerTag();
         } else {
             value = rawValue;
-        }
-
-        if ((institution = province.getSave().getGame().getInstitution(condition)) != null) {
-            return province.getInstitutionsProgress().get(institution.getIndex()) >= NumbersUtils.toDouble(value);
-        }
-
-        if ((scriptedTrigger = province.getSave().getGame().getScriptedTrigger(condition)) != null) {
-            return scriptedTrigger.apply(province);
         }
 
         switch (condition.toLowerCase()) {
@@ -3572,22 +3566,24 @@ public class ConditionsUtils {
             case "has_siege":
                 return "yes".equalsIgnoreCase(value) == (province.getSiege() != null);
             case "has_state_patriach":
+                SaveArea saveArea = province.getSaveArea();
                 return "yes".equalsIgnoreCase(value) ==
-                       (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
-                        && province.getSaveArea().getCountryState(province.getOwner()) != null
-                        && BooleanUtils.toBoolean(province.getSaveArea().getCountryState(province.getOwner()).hasStatePatriarch()));
+                       (saveArea != null && saveArea.getCountriesStates() != null
+                        && saveArea.getCountryState(province.getOwner()) != null
+                        && BooleanUtils.toBoolean(saveArea.getCountryState(province.getOwner()).hasStatePatriarch()));
             case "has_state_pasha":
+                saveArea = province.getSaveArea();
                 return "yes".equalsIgnoreCase(value) ==
-                       (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
-                        && province.getSaveArea().getCountryState(province.getOwner()) != null
-                        && BooleanUtils.toBoolean(province.getSaveArea().getCountryState(province.getOwner()).hasStatePasha()));
+                       (saveArea != null && saveArea.getCountriesStates() != null
+                        && saveArea.getCountryState(province.getOwner()) != null
+                        && BooleanUtils.toBoolean(saveArea.getCountryState(province.getOwner()).hasStatePasha()));
             case "has_terrain": //Don't do
                 break;
             case "has_supply_depot":
+                saveArea = province.getSaveArea();
                 return "yes".equalsIgnoreCase(value) ==
-                       (province.getOwner() != null && province.getSaveArea() != null && province.getSaveArea().getSupplyDepots() != null
-                        && province.getSaveArea()
-                                   .getSupplyDepots()
+                       (province.getOwner() != null && saveArea != null && saveArea.getSupplyDepots() != null
+                        && saveArea.getSupplyDepots()
                                    .stream()
                                    .anyMatch(supplyDepot -> province.getOwner().equals(supplyDepot.getBuilder())
                                                             || province.getOwner().getSubjects().contains(supplyDepot.getBuilder())
@@ -3717,10 +3713,11 @@ public class ConditionsUtils {
                 return province.getClaimsTags().contains(value.toUpperCase())
                        && province.getHistory().getClaims().getOrDefault(Eu4Utils.DEFAULT_DATE, new ArrayList<>()).contains(other);
             case "is_prosperous":
+                saveArea = province.getSaveArea();
                 return "yes".equalsIgnoreCase(value) ==
-                       (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
-                        && province.getSaveArea().getCountryState(province.getController()) != null
-                        && NumbersUtils.doubleOrDefault(province.getSaveArea().getCountryState(province.getController()).getProsperity()) >= 100d);
+                       (saveArea != null && saveArea.getCountriesStates() != null
+                        && saveArea.getCountryState(province.getController()) != null
+                        && NumbersUtils.doubleOrDefault(saveArea.getCountryState(province.getController()).getProsperity()) >= 100d);
             case "is_random_new_world":
                 return "yes".equalsIgnoreCase(value) == province.getSave().isRandomNewWorld();
             case "is_reformation_center":
@@ -3785,22 +3782,26 @@ public class ConditionsUtils {
             case "is_sea":
                 return "yes".equalsIgnoreCase(value) == province.isOcean();
             case "is_state":
-                return "yes".equalsIgnoreCase(value) == (province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
-                                                         && province.getSaveArea().getCountryState(province.getOwner()) != null);
+                saveArea = province.getSaveArea();
+                return "yes".equalsIgnoreCase(value) == (saveArea != null && saveArea.getCountriesStates() != null
+                                                         && saveArea.getCountryState(province.getOwner()) != null);
             case "is_state_core":
                 other = province.getSave().getCountry(value);
-                return province.getCores().contains(other) && province.getSaveArea() != null && province.getSaveArea().getCountriesStates() != null
-                       && province.getSaveArea().getCountryState(other) != null;
+                saveArea = province.getSaveArea();
+                return province.getCores().contains(other) && saveArea != null && saveArea.getCountriesStates() != null
+                       && saveArea.getCountryState(other) != null;
             case "is_strongest_trade_power":
                 other = province.getSave().getCountry(value);
                 return other.equals(province.getSave().getTradeNodes().get(province.getTrade()).getTopPower().entrySet().iterator().next().getKey());
             case "is_territory":
-                return "yes".equalsIgnoreCase(value) == (province.getSaveArea() == null || province.getSaveArea().getCountriesStates() == null
-                                                         || province.getSaveArea().getCountryState(province.getOwner()) == null);
+                saveArea = province.getSaveArea();
+                return "yes".equalsIgnoreCase(value) == (saveArea == null || saveArea.getCountriesStates() == null
+                                                         || saveArea.getCountryState(province.getOwner()) == null);
             case "is_territorial_core":
                 other = province.getSave().getCountry(value);
-                return (province.getSaveArea() == null || province.getSaveArea().getCountriesStates() == null
-                        || province.getSaveArea().getCountryState(other) == null)
+                saveArea = province.getSaveArea();
+                return (saveArea == null || saveArea.getCountriesStates() == null
+                        || saveArea.getCountryState(other) == null)
                        && province.getCores().contains(other);
             case "is_wasteland":
                 return "yes".equalsIgnoreCase(value) == (province.isImpassable());
@@ -3983,6 +3984,14 @@ public class ConditionsUtils {
                 return NumbersUtils.doubleOrDefault(province.getUnrest()) >= NumbersUtils.toDouble(value);
         }
 
+        if ((institution = province.getSave().getGame().getInstitution(condition)) != null) {
+            return province.getInstitutionsProgress().get(institution.getIndex()) >= NumbersUtils.toDouble(value);
+        }
+
+        if ((scriptedTrigger = province.getSave().getGame().getScriptedTrigger(condition)) != null) {
+            return scriptedTrigger.apply(province);
+        }
+
         LOGGER.debug("Don't know how to manage province condition: {} !", condition);
         return false;
     }
@@ -3998,10 +4007,6 @@ public class ConditionsUtils {
             value = Optional.ofNullable(province.getHistoryItemAt(province.getGame().getStartDate()).getOwner()).map(Country::getTag).orElse(null);
         } else {
             value = rawValue;
-        }
-
-        if ((scriptedTrigger = province.getGame().getScriptedTrigger(condition)) != null) {
-            return scriptedTrigger.apply(province);
         }
 
         switch (condition.toLowerCase()) {
@@ -4241,6 +4246,10 @@ public class ConditionsUtils {
                 return value != null && value.equalsIgnoreCase(province.getHistoryItemAt(province.getGame().getStartDate()).getTradeGoods().getName());
         }
 
+        if ((scriptedTrigger = province.getGame().getScriptedTrigger(condition)) != null) {
+            return scriptedTrigger.apply(province);
+        }
+
         LOGGER.debug("Don't know how to manage province condition: {} !", condition);
         return false;
     }
@@ -4248,14 +4257,6 @@ public class ConditionsUtils {
     public static boolean applyScopeToProvince(SaveProvince province, ConditionAbstract condition) {
         SaveCountry country;
         SaveTradeNode tradeNode;
-
-        if ((country = province.getSave().getCountry(condition.getName())) != null) {
-            return condition.apply(country, country);
-        }
-
-        if (province.getSave().getProvince(NumbersUtils.toInt(condition.getName())) != null) {
-            return condition.apply(province.getSave().getProvince(NumbersUtils.toInt(condition.getName())));
-        }
 
         switch (condition.getName().toLowerCase()) {
             case "or":
@@ -4301,9 +4302,10 @@ public class ConditionsUtils {
                 return condition.apply(country, country);
             case "num_investments_in_trade_company_region":
                 String investment = condition.getCondition("investment");
+                SaveArea saveArea = province.getSaveArea();
                 return province.getOwner() != null && BooleanUtils.toBoolean(province.activeTradeCompany())
-                       && province.getSaveArea() != null &&
-                       province.getSaveArea()
+                       && saveArea != null &&
+                       saveArea
                                .getInvestment(province.getOwner())
                                .getInvestments()
                                .stream()
@@ -4342,6 +4344,14 @@ public class ConditionsUtils {
                 return condition.apply(country, country);
         }
 
+        if ((country = province.getSave().getCountry(condition.getName())) != null) {
+            return condition.apply(country, country);
+        }
+
+        if (province.getSave().getProvince(NumbersUtils.toInt(condition.getName())) != null) {
+            return condition.apply(province.getSave().getProvince(NumbersUtils.toInt(condition.getName())));
+        }
+
         LOGGER.debug("Don't know how to manage province scope: {} !", condition);
         return false;
     }
@@ -4349,14 +4359,6 @@ public class ConditionsUtils {
     public static boolean applyScopeToProvince(Province province, ConditionAbstract condition) {
         Country country;
         ProvinceHistoryItemI historyItem;
-
-        if ((country = province.getGame().getCountry(condition.getName())) != null) {
-            return condition.apply(country, country);
-        }
-
-        if (Optional.ofNullable(NumbersUtils.toInt(condition.getName())).map(i -> province.getGame().getProvince(i)).isPresent()) {
-            return condition.apply(province.getGame().getProvince(NumbersUtils.toInt(condition.getName())));
-        }
 
         switch (condition.getName().toLowerCase()) {
             case "or":
@@ -4377,6 +4379,14 @@ public class ConditionsUtils {
                        condition.apply(historyItem.getOwner(), historyItem.getOwner());
             case "sea_zone": //Todo Refers to the sea province on which the current land province scope has a port.
                 break;
+        }
+
+        if ((country = province.getGame().getCountry(condition.getName())) != null) {
+            return condition.apply(country, country);
+        }
+
+        if (Optional.ofNullable(NumbersUtils.toInt(condition.getName())).map(i -> province.getGame().getProvince(i)).isPresent()) {
+            return condition.apply(province.getGame().getProvince(NumbersUtils.toInt(condition.getName())));
         }
 
         LOGGER.debug("Don't know how to manage province scope: {} !", condition);

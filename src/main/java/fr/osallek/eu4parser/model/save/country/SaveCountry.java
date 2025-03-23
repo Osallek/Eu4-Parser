@@ -112,7 +112,7 @@ public class SaveCountry {
 
     private LocalDate subjectStartDate; //Keep event after clean
 
-    private Map<Integer, SaveAdvisor> advisors = new HashMap<>(); //In memory because heavy to compute
+    private final Map<Integer, SaveAdvisor> advisors = new HashMap<>(); //In memory because heavy to compute
 
     private Path writenTo;
 
