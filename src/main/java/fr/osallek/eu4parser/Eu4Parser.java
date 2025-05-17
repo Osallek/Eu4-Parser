@@ -1,6 +1,7 @@
 package fr.osallek.eu4parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.osallek.clausewitzparser.common.ClausewitzParseException;
 import fr.osallek.clausewitzparser.model.ClausewitzItem;
 import fr.osallek.clausewitzparser.model.ClausewitzObject;
 import fr.osallek.clausewitzparser.model.ClausewitzPObject;
@@ -28,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnmappableCharacterException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -331,43 +333,7 @@ public class Eu4Parser {
 
     public static Save loadSave(Path gameFolderPath, Path path, LauncherSettings launcherSettings, Map<Integer, String> tokens,
                                 Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
-        File file = path.toFile();
-        Game game;
-        ClausewitzItem gameStateItem;
-        ClausewitzItem aiItem;
-        ClausewitzItem metaItem;
-        boolean compressed = false;
-
-        if (file.canRead() && isValid(path)) {
-            if (isIronman(path)) {
-                try (ZipFile zipFile = new ZipFile(file)) {
-                    compressed = true;
-                    gameStateItem = ClausewitzParser.convertBinary(zipFile, Eu4Utils.GAMESTATE_FILE, 6, tokens, listeners, SAVE_CHARSET);
-                    aiItem = ClausewitzParser.convertBinary(zipFile, Eu4Utils.AI_FILE, 6, tokens, listeners, SAVE_CHARSET);
-                    metaItem = ClausewitzParser.convertBinary(zipFile, Eu4Utils.META_FILE, 6, tokens, listeners, SAVE_CHARSET);
-                    game = new Game(gameFolderPath, launcherSettings, Eu4Parser.getMods(path, tokens));
-                }
-            } else if (isValidCompressed(path)) {
-                try (ZipFile zipFile = new ZipFile(file)) {
-                    compressed = true;
-                    gameStateItem = ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET);
-                    aiItem = ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET);
-                    metaItem = ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET);
-                    game = new Game(gameFolderPath, launcherSettings, Eu4Parser.getMods(path, tokens));
-                }
-            } else if (isValidUncompressed(path)) {
-                gameStateItem = ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET);
-                metaItem = gameStateItem;
-                aiItem = gameStateItem;
-                game = new Game(gameFolderPath, launcherSettings, Eu4Parser.getMods(path, tokens));
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
-
-        return new Save(file.getName(), gameStateItem, aiItem, metaItem, compressed, game);
+        return loadSave(path, new Game(gameFolderPath, launcherSettings, Eu4Parser.getMods(path, tokens)), tokens, listeners);
     }
 
     public static Save loadSave(Path path, Game game) throws IOException {
@@ -383,6 +349,7 @@ public class Eu4Parser {
             if (isIronman(path)) {
                 try (ZipFile zipFile = new ZipFile(file)) {
                     save = new Save(file.getName(),
+                                    StandardCharsets.ISO_8859_1,
                                     ClausewitzParser.convertBinary(zipFile, Eu4Utils.GAMESTATE_FILE, 6, tokens, listeners, StandardCharsets.ISO_8859_1),
                                     ClausewitzParser.convertBinary(zipFile, Eu4Utils.AI_FILE, 6, tokens, listeners, StandardCharsets.ISO_8859_1),
                                     ClausewitzParser.convertBinary(zipFile, Eu4Utils.META_FILE, 6, tokens, listeners, StandardCharsets.ISO_8859_1),
@@ -391,15 +358,39 @@ public class Eu4Parser {
                 }
             } else if (isValidCompressed(path)) {
                 try (ZipFile zipFile = new ZipFile(file)) {
-                    save = new Save(file.getName(),
-                                    ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
-                                    ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
-                                    ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
-                                    true,
-                                    game);
+                    try {
+                        save = new Save(file.getName(),
+                                        SAVE_CHARSET,
+                                        ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, SAVE_CHARSET),
+                                        ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, SAVE_CHARSET),
+                                        ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, SAVE_CHARSET),
+                                        true,
+                                        game);
+                    } catch (ClausewitzParseException e) {
+                        if (e.getCause() instanceof UnmappableCharacterException) {
+                            save = new Save(file.getName(),
+                                            StandardCharsets.ISO_8859_1,
+                                            ClausewitzParser.parse(zipFile, Eu4Utils.GAMESTATE_FILE, 1, listeners, StandardCharsets.ISO_8859_1),
+                                            ClausewitzParser.parse(zipFile, Eu4Utils.AI_FILE, 1, listeners, StandardCharsets.ISO_8859_1),
+                                            ClausewitzParser.parse(zipFile, Eu4Utils.META_FILE, 1, listeners, StandardCharsets.ISO_8859_1),
+                                            true,
+                                            game);
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
             } else if (isValidUncompressed(path)) {
-                save = new Save(file.getName(), ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET), game);
+                try {
+                    save = new Save(file.getName(), ClausewitzParser.parse(file, 1, listeners, SAVE_CHARSET), game, SAVE_CHARSET);
+                } catch (ClausewitzParseException e) {
+                    if (e.getCause() instanceof UnmappableCharacterException) {
+                        save = new Save(file.getName(), ClausewitzParser.parse(file, 1, listeners, StandardCharsets.ISO_8859_1), game,
+                                        StandardCharsets.ISO_8859_1);
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
 
@@ -416,8 +407,17 @@ public class Eu4Parser {
         if (path.toFile().canRead()) {
             if (isIronman(path)) {
                 try (ZipFile zipFile = new ZipFile(path.toFile())) {
-                    object = ClausewitzParser.readSingleObjectBinary(zipFile, Eu4Utils.META_FILE, 6, List.of("mods_enabled_names", "multi_player"),
-                                                                     StandardCharsets.ISO_8859_1, tokens);
+                    try {
+                        object = ClausewitzParser.readSingleObjectBinary(zipFile, Eu4Utils.META_FILE, 6, List.of("mods_enabled_names", "multi_player"),
+                                                                         StandardCharsets.ISO_8859_1, tokens);
+                    } catch (ClausewitzParseException e) {
+                        if (e.getCause() instanceof UnmappableCharacterException) {
+                            object = ClausewitzParser.readSingleObjectBinary(zipFile, Eu4Utils.META_FILE, 6, List.of("mods_enabled_names", "multi_player"),
+                                                                             SAVE_CHARSET, tokens);
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
             } else if (isValidCompressed(path)) {
                 try (ZipFile zipFile = new ZipFile(path.toFile())) {
@@ -508,27 +508,27 @@ public class Eu4Parser {
     public static void writeSave(Save save, Path path, Map<Predicate<ClausewitzPObject>, Consumer<String>> listeners) throws IOException {
         if (save.isCompressed()) {
             try (ZipOutputStream outputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(path)),
-                                                                    SAVE_CHARSET)) {
+                                                                    save.getCharset())) {
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.AI_FILE));
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, SAVE_CHARSET));
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
                 save.writeAi(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.GAMESTATE_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, SAVE_CHARSET));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
                 save.writeGamestate(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
 
                 outputStream.putNextEntry(new ZipEntry(Eu4Utils.META_FILE));
-                writer = new BufferedWriter(new OutputStreamWriter(outputStream, SAVE_CHARSET));
+                writer = new BufferedWriter(new OutputStreamWriter(outputStream, save.getCharset()));
                 save.writeMeta(writer, listeners);
                 writer.flush();
                 outputStream.closeEntry();
             }
         } else {
-            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, SAVE_CHARSET)) {
+            try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path, save.getCharset())) {
                 save.writeAll(bufferedWriter, listeners);
             }
         }

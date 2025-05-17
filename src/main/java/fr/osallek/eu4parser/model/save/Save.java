@@ -43,6 +43,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -66,6 +67,8 @@ public class Save {
 
     private final String name;
 
+    private final Charset charset;
+
     private final Game game;
 
     public final ClausewitzItem aiItem;
@@ -86,18 +89,19 @@ public class Save {
 
     private List<SaveCountry> playableCountries;
 
-    public Save(String name, Path gameFolderPath, ClausewitzItem item, LauncherSettings launcherSettings) throws IOException {
-        this(name, gameFolderPath, item, item, item, false, launcherSettings);
+    public Save(String name, Path gameFolderPath, ClausewitzItem item, LauncherSettings launcherSettings, Charset charset) throws IOException {
+        this(name, charset, gameFolderPath, item, item, item, false, launcherSettings);
     }
 
     public Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
-                LauncherSettings launcherSettings) throws IOException {
-        this(name, gameFolderPath, gamestateItem, aiItem, metaItem, true, launcherSettings);
+                LauncherSettings launcherSettings, Charset charset) throws IOException {
+        this(name, charset, gameFolderPath, gamestateItem, aiItem, metaItem, true, launcherSettings);
     }
 
-    private Save(String name, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed,
+    private Save(String name, Charset charset, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed,
                  LauncherSettings launcherSettings) throws IOException {
         this.name = name;
+        this.charset = charset;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
@@ -107,12 +111,13 @@ public class Save {
         computeAdvisors();
     }
 
-    public Save(String name, ClausewitzItem item, Game game) {
-        this(name, item, item, item, false, game);
+    public Save(String name, ClausewitzItem item, Game game, Charset charset) {
+        this(name, charset, item, item, item, false, game);
     }
 
-    public Save(String name, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed, Game game) {
+    public Save(String name, Charset charset, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed, Game game) {
         this.name = name;
+        this.charset = charset;
         this.gamestateItem = gamestateItem;
         this.aiItem = aiItem;
         this.metaItem = metaItem;
@@ -128,6 +133,10 @@ public class Save {
 
     public boolean isCompressed() {
         return compressed;
+    }
+
+    public Charset getCharset() {
+        return charset;
     }
 
     public Game getGame() {
