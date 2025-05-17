@@ -6,6 +6,7 @@ import fr.osallek.eu4parser.model.Localised;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -57,10 +58,14 @@ public class Modifier implements Localised {
     }
 
     public void writeImageTo(Path dest, Game game) throws IOException {
-        FileUtils.forceMkdirParent(dest.toFile());
-        ImageIO.write(ImageIO.read(getImage(game)), "png", dest.toFile());
-        Eu4Utils.optimizePng(dest, dest);
-        this.writenTo = dest;
+        BufferedImage image = ImageIO.read(getImage(game));
+
+        if (image != null) {
+            FileUtils.forceMkdirParent(dest.toFile());
+            ImageIO.write(ImageIO.read(getImage(game)), "png", dest.toFile());
+            Eu4Utils.optimizePng(dest, dest);
+            this.writenTo = dest;
+        }
     }
 
     public Path getWritenTo() {
