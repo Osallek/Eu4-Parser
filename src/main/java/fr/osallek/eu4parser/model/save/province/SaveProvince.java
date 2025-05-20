@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1159,11 +1158,11 @@ public class SaveProvince extends Province {
         return this.item.getVarAsInt("previous_winter");
     }
 
-    public Map<String, SaveModifier> getModifiers() {
+    public Map<String, List<SaveModifier>> getModifiers() {
         return this.item.getChildren("modifier")
                         .stream()
                         .map(child -> new SaveModifier(child, this.save.getGame()))
-                        .collect(Collectors.toMap(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifierName()), Function.identity()));
+                        .collect(Collectors.groupingBy(modifier -> ClausewitzUtils.removeQuotes(modifier.getModifierName())));
     }
 
     public void addModifier(String modifier, LocalDate date) {
@@ -1185,21 +1184,9 @@ public class SaveProvince extends Province {
     }
 
     public void removeModifier(String modifier) {
-        Integer index = null;
-        modifier = ClausewitzUtils.addQuotes(modifier);
-        List<SaveModifier> saveModifiers = new ArrayList<>(getModifiers().values());
-
-        for (int i = 0; i < saveModifiers.size(); i++) {
-            if (saveModifiers.get(i).getModifierName().equalsIgnoreCase(modifier)) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index != null) {
-            this.item.removeChild("modifier", index);
-            this.localAutonomy = getLocalAutonomy();
-        }
+        String quotedModifier = ClausewitzUtils.addQuotes(modifier);
+        this.item.removeChildIf(i -> quotedModifier.equals(this.item.getVarAsString("modifier")));
+        this.localAutonomy = getLocalAutonomy();
     }
 
     public Integer getFortInfluencing() {
@@ -1293,20 +1280,20 @@ public class SaveProvince extends Province {
     }
 
     public boolean isRazed() {
-        SaveModifier modifier = getModifiers().get("province_razed");
+        List<SaveModifier> modifier = getModifiers().get("province_razed");
 
         if (modifier != null) {
-            return modifier.getDate().isAfter(this.save.getDate());
+            return modifier.stream().anyMatch(m -> m.getDate().isAfter(this.save.getDate()));
         }
 
         return false;
     }
 
     public boolean isSlavesRaided() {
-        SaveModifier modifier = getModifiers().get("slaves_raided");
+        List<SaveModifier> modifier = getModifiers().get("slaves_raided");
 
         if (modifier != null) {
-            return modifier.getDate().isAfter(this.save.getDate());
+            return modifier.stream().anyMatch(m -> m.getDate().isAfter(this.save.getDate()));
         }
 
         return false;
@@ -1430,6 +1417,7 @@ public class SaveProvince extends Province {
         if (MapUtils.isNotEmpty(getModifiers())) {
             list.addAll(getModifiers().values()
                                       .stream()
+                                      .flatMap(Collection::stream)
                                       .filter(m -> !StaticModifier.class.equals(m.getModifier().getClass()))
                                       .map(m -> m.getModifiers(this, modifier))
                                       .filter(Objects::nonNull)
