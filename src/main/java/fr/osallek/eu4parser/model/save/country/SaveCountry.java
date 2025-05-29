@@ -4674,25 +4674,27 @@ public class SaveCountry {
 
         List<SaveCountry> subjects = getSubjects();
         if (CollectionUtils.isNotEmpty(subjects)) {
-            subjects.stream()
-                    .map(subject -> this.save.getDiplomacy()
-                                             .getDependencies()
-                                             .stream()
-                                             .filter(dependency -> this.equals(dependency.getFirst()) && subject.equals(dependency.getSecond()))
-                                             .findFirst())
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(Dependency::getSubjectTypeUpgrades)
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .forEach(upgrade -> list.add(upgrade.getModifiersOverlord().getModifier(modifier)));
+            list.add(subjects.stream()
+                             .map(subject -> this.save.getDiplomacy()
+                                                      .getDependencies()
+                                                      .stream()
+                                                      .filter(dependency -> this.equals(dependency.getFirst()) && subject.equals(dependency.getSecond()))
+                                                      .findFirst())
+                             .filter(Optional::isPresent)
+                             .map(Optional::get)
+                             .map(Dependency::getSubjectTypeUpgrades)
+                             .filter(Objects::nonNull)
+                             .flatMap(Collection::stream)
+                             .mapToDouble(upgrade -> upgrade.getModifiersOverlord().getModifier(modifier))
+                             .sum());
 
             if (modifier.getName().equalsIgnoreCase("LAND_FORCELIMIT")) {
+                double multiplier = 1 + Optional.ofNullable(getModifier(ModifiersUtils.getModifier("vassal_forcelimit_bonus"))).orElse(0.0);
                 list.add(subjects.stream()
                                  .filter(subject -> subject.getSubjectType().getForcelimitToOverlord() != 0)
                                  .filter(subject -> !subject.isColony() || subject.getOwnedProvinces().stream().filter(SaveProvince::isCity).count() >= 10)
                                  .mapToDouble(subject -> ((int) subject.getLandForceLimit()) * subject.getSubjectType().getForcelimitToOverlord())
-                                 .sum());
+                                 .sum() * multiplier);
             }
         }
 

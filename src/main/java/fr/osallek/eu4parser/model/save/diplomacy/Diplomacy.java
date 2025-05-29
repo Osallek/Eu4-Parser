@@ -27,11 +27,9 @@ public class Diplomacy {
     }
 
     public List<Dependency> getDependencies() {
-        return getDependenciesStream().map(dependency -> {
+        return getDependenciesStream().peek(dependency -> {
             dependency.getSecond().setSubjectType(dependency.getSubjectType());
             dependency.getSecond().setSubjectStartDate(dependency.getStartDate());
-
-            return dependency;
         }).toList();
     }
 
