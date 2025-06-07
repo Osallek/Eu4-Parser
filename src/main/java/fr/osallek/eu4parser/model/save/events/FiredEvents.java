@@ -55,7 +55,7 @@ public record FiredEvents(ClausewitzItem item, Game game) {
     public void setEvents(List<Event> events) {
         List<String> eventIds = events.stream().map(Event::getId).toList();
 
-        this.item.removeVariableIf(variable -> !eventIds.contains(variable.getValue()));
+        this.item.removeVariablesIf(variable -> !eventIds.contains(variable.getValue()));
         events.removeIf(event -> this.item.hasVar(event.getId()));
         events.forEach(this::addFiredEvent);
     }

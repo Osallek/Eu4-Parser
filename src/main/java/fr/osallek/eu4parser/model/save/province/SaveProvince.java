@@ -1185,7 +1185,7 @@ public class SaveProvince extends Province {
 
     public void removeModifier(String modifier) {
         String quotedModifier = ClausewitzUtils.addQuotes(modifier);
-        this.item.removeChildIf(i -> quotedModifier.equals(this.item.getVarAsString("modifier")));
+        this.item.removeChildrenIf(i -> quotedModifier.equals(this.item.getVarAsString("modifier")));
         this.localAutonomy = getLocalAutonomy();
     }
 

@@ -64,8 +64,11 @@ public record IdeaGroups(ClausewitzItem item, Save save) {
         return this.getIdeaGroups()
                    .entrySet()
                    .stream()
-                   .anyMatch(entry -> entry.getKey().getIdeas().containsKey(name)
-                                      && entry.getKey().getIdeas().keySet().stream().limit(entry.getValue()).anyMatch(name::equals));
+                   .anyMatch(entry -> {
+                       int index = entry.getKey().getIdeaIndex(name);
+
+                       return index >= 0 && entry.getValue() >= index;
+                   });
     }
 
     private void computeFreeGroupLevel() {

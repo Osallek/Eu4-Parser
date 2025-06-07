@@ -18,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class IdeaGroup {
@@ -28,6 +27,8 @@ public class IdeaGroup {
     private final Game game;
 
     private Path writenTo;
+
+    private Map<String, Modifiers> ideas;
 
     public IdeaGroup(ClausewitzItem item, Game game) {
         this.item = item;
@@ -77,9 +78,17 @@ public class IdeaGroup {
     }
 
     public Map<String, Modifiers> getIdeas() {
-        return this.item.getChildrenNot("start", "bonus", "trigger", "ai_will_do")
-                        .stream()
-                        .collect(Collectors.toMap(ClausewitzItem::getName, Modifiers::new, (a, b) -> b, LinkedHashMap::new));
+        if (this.ideas == null) {
+            this.ideas = this.item.getChildrenNot("start", "bonus", "trigger", "ai_will_do")
+                                  .stream()
+                                  .collect(Collectors.toMap(ClausewitzItem::getName, Modifiers::new, (a, b) -> b, LinkedHashMap::new));
+        }
+
+        return this.ideas;
+    }
+
+    public int getIdeaIndex(String name) {
+        return new ArrayList<>(getIdeas().keySet()).indexOf(name);
     }
 
     public Double getModifier(int level, Modifier modifier) {

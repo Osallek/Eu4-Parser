@@ -101,7 +101,7 @@ public class Region extends Nodded {
 
     public void setMonsoon(Map<MonthDay, MonthDay> monsoon) {
         if (MapUtils.isEmpty(monsoon)) {
-            this.item.removeListIf(list -> "monsoon".equals(list.getName()));
+            this.item.removeListsIf(list -> "monsoon".equals(list.getName()));
             return;
         }
 

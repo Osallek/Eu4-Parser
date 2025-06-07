@@ -2731,9 +2731,9 @@ public class Game {
                 }
             });
 
-            replaces.forEach((mod, replacePaths) -> { //This technique replace only folders, so don't check for files
-                this.filesNode.removeChildrenIf(fileNode -> fileNode.getPath().toFile().isDirectory()
-                                                            && replacePaths.contains(fileNode.getRelativePath().toString()));
+            replaces.forEach((mod, replacePaths) -> { //This technique replaces only folders, so don't check for files
+                this.filesNode.removeChildrenIf(fileNode -> replacePaths.contains(fileNode.getRelativePath().toString()) &&
+                                                            fileNode.getPath().toFile().isDirectory());
                 this.filesNode.merge(new TreeNode<>(null, new FileNode(mod), FileNode::getChildren));
             });
         }
@@ -4223,10 +4223,10 @@ public class Game {
                     List<ClausewitzVariable> variables = countryTagsItem.getVariables();
                     CountDownLatch countDownLatch = new CountDownLatch(variables.size());
                     for (ClausewitzVariable variable : variables) {
-                        poolExecutor.submit(() -> {
+                        this.poolExecutor.submit(() -> {
                             try {
-                                FileNode commonFileNode = getFileNode(Path.of(Eu4Utils.COMMON_FOLDER_PATH + File.separator
-                                                                              + ClausewitzUtils.removeQuotes(variable.getValue())).toString());
+                                FileNode commonFileNode = getFileNode(Path.of(Eu4Utils.COMMON_FOLDER_PATH)
+                                                                          .resolve(ClausewitzUtils.removeQuotes(variable.getValue())));
                                 Country country = new Country(variable.getName().toUpperCase(), commonFileNode,
                                                               ClausewitzParser.parse(commonFileNode.getPath().toFile(), 0), this);
                                 FileNode historyFileNode = countriesHistory.get(country.getTag());

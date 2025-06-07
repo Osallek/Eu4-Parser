@@ -9,6 +9,7 @@ import fr.osallek.eu4parser.model.game.Country;
 import fr.osallek.eu4parser.model.game.CountryHistoryItemI;
 import fr.osallek.eu4parser.model.game.Culture;
 import fr.osallek.eu4parser.model.game.CultureGroup;
+import fr.osallek.eu4parser.model.game.EstatePrivilege;
 import fr.osallek.eu4parser.model.game.Government;
 import fr.osallek.eu4parser.model.game.Institution;
 import fr.osallek.eu4parser.model.game.ModifiersUtils;
@@ -24,6 +25,7 @@ import fr.osallek.eu4parser.model.game.condition.ConditionAnd;
 import fr.osallek.eu4parser.model.save.SaveReligion;
 import fr.osallek.eu4parser.model.save.TradeLeague;
 import fr.osallek.eu4parser.model.save.country.ActivePolicy;
+import fr.osallek.eu4parser.model.save.country.EstateInteraction;
 import fr.osallek.eu4parser.model.save.country.Income;
 import fr.osallek.eu4parser.model.save.country.Leader;
 import fr.osallek.eu4parser.model.save.country.LeaderType;
@@ -448,6 +450,15 @@ public class ConditionsUtils {
                 return CollectionUtils.isNotEmpty(country.getSubjectInteractions()) && BooleanUtils.toBoolean(country.getSubjectInteractions().get(1));
             case "has_estate":
                 return country.getEstates().stream().map(SaveEstate::getType).map(ClausewitzUtils::removeQuotes).anyMatch(value::equals);
+            case "has_estate_privilege":
+                return country.getEstates()
+                              .stream()
+                              .map(SaveEstate::getGrantedPrivileges)
+                              .flatMap(Collection::stream)
+                              .map(EstateInteraction::getPrivilege)
+                              .map(EstatePrivilege::getName)
+                              .map(ClausewitzUtils::removeQuotes)
+                              .anyMatch(value::equals);
             case "has_faction":
                 return CollectionUtils.isNotEmpty(country.getFactions()) && country.getFactions()
                                                                                    .stream()
@@ -842,14 +853,11 @@ public class ConditionsUtils {
                 return "yes".equalsIgnoreCase(value) == (!country.getSave().getHre().dismantled()
                                                          && BooleanUtils.toBoolean(country.getSave().getHre().getImperialBanAllowed()));
             case "is_incident_active":
-                switch (value) {
-                    case "any":
-                        return !country.getActiveIncidents().isEmpty();
-                    case "none":
-                        return country.getActiveIncidents().isEmpty();
-                    default:
-                        return country.getActiveIncidents().contains(ClausewitzUtils.addQuotes(value));
-                }
+                return switch (value) {
+                    case "any" -> !country.getActiveIncidents().isEmpty();
+                    case "none" -> country.getActiveIncidents().isEmpty();
+                    default -> country.getActiveIncidents().contains(ClausewitzUtils.addQuotes(value));
+                };
             case "is_incident_happened":
                 return country.getPastIncidents().contains(ClausewitzUtils.addQuotes(value));
             case "is_incident_possible": //Fixme ???
@@ -889,7 +897,7 @@ public class ConditionsUtils {
                                                                                    || CollectionUtils.isNotEmpty(country.getReligion().getInLeague()) && country
                         .getReligion()
                         .getInLeague()
-                        .get(0)
+                        .getFirst()
                         .equals(country))));
             case "is_lesser_in_union":
                 return "yes".equalsIgnoreCase(value) == (country.getOverlord() != null
@@ -1009,7 +1017,7 @@ public class ConditionsUtils {
                 other = country.getSave().getCountry(value);
                 return "attitude_threatened".equals(other.getActiveRelation(country).getAttitude());
             case "is_trade_league_leader":
-                return "yes".equalsIgnoreCase(value) == (country.getTradeLeague() != null && country.getTradeLeague().getMembers().get(0).equals(country));
+                return "yes".equalsIgnoreCase(value) == (country.getTradeLeague() != null && country.getTradeLeague().getMembers().getFirst().equals(country));
             case "is_tribal":
                 return "yes".equalsIgnoreCase(value) == (country.getGovernment() != null &&
                                                          country.getGovernment().getReforms().stream().anyMatch(reform -> reform.isTribal().getKey()
@@ -1562,7 +1570,9 @@ public class ConditionsUtils {
                           >= NumbersUtils.toInt(value);
             case "offensive_war_with":
                 other = country.getSave().getCountry(value);
-                return country.getActiveWars().stream().anyMatch(war -> war.getAttackers().containsKey(country) && war.getDefenders().containsKey(other));
+                return country.getActiveWars()
+                              .stream()
+                              .anyMatch(war -> war.getAttackers().containsKey(country.getTag()) && war.getDefenders().containsKey(other.getTag()));
             case "overextension_percentage":
                 return NumbersUtils.doubleOrDefault(country.getOverextensionPercentage()) >= NumbersUtils.toDouble(value);
             case "overlord_of":
@@ -1886,8 +1896,9 @@ public class ConditionsUtils {
             case "war_score":
                 return country.getActiveWars()
                               .stream()
-                              .anyMatch(war -> (war.getDefenderScore() >= NumbersUtils.toDouble(value) && war.getDefenders().containsKey(country))
-                                               || (war.getDefenderScore() <= -NumbersUtils.toDouble(value) && war.getAttackers().containsKey(country)));
+                              .anyMatch(war -> (war.getDefenderScore() >= NumbersUtils.toDouble(value) && war.getDefenders().containsKey(country.getTag()))
+                                               || (war.getDefenderScore() <= -NumbersUtils.toDouble(value) && war.getAttackers()
+                                                                                                                 .containsKey(country.getTag())));
             case "war_with":
                 other = country.getSave().getCountry(value);
                 return country.getActiveWars()
@@ -3251,12 +3262,12 @@ public class ConditionsUtils {
                         return false;
                     }
 
-                    if (attackerLeader != null && !Objects.equals(activeWar.getAttackersAt(root.getGame().getStartDate()).get(0),
+                    if (attackerLeader != null && !Objects.equals(activeWar.getAttackersAt(root.getGame().getStartDate()).getFirst(),
                                                                   root.getGame().getCountry(attackerLeader).getTag())) {
                         return false;
                     }
 
-                    if (defenderLeader != null && !Objects.equals(activeWar.getDefendersAt(root.getGame().getStartDate()).get(0),
+                    if (defenderLeader != null && !Objects.equals(activeWar.getDefendersAt(root.getGame().getStartDate()).getFirst(),
                                                                   root.getGame().getCountry(defenderLeader).getTag())) {
                         return false;
                     }
@@ -3336,7 +3347,7 @@ public class ConditionsUtils {
                            .filter(condition::apply)
                            .allMatch(p -> countries.contains(p.getHistoryItemAt(root.getGame().getStartDate()).getOwner()));
             case "religion_years":
-                religion = root.getGame().getReligion(condition.getConditions().entrySet().iterator().next().getValue().get(0));
+                religion = root.getGame().getReligion(condition.getConditions().entrySet().iterator().next().getValue().getFirst());
                 if (religion.getDate() == null) {
                     return NumbersUtils.toInt(condition.getCondition(religion.getName())) <= 0;
                 } else {
@@ -3728,12 +3739,12 @@ public class ConditionsUtils {
                                                 || (saveReligion.getEnable() != null && province.getSave().getDate().isAfter(saveReligion.getEnable())));
             case "is_religion_grant_colonial_claim":
                 if (province.getSave().getCountry(value) != null) {
-                    return !province.getSave()
-                                    .getReligions()
-                                    .getReligions()
-                                    .values()
-                                    .stream()
-                                    .anyMatch(religion -> {
+                    return province.getSave()
+                                   .getReligions()
+                                   .getReligions()
+                                   .values()
+                                   .stream()
+                                   .noneMatch(religion -> {
                                         if (religion.getPapacy() == null) {
                                             return false;
                                         }
@@ -3753,12 +3764,12 @@ public class ConditionsUtils {
                                         return value.equalsIgnoreCase(religion.getPapacy().getColonyClaim(colonialRegionIndex));
                                     });
                 } else {
-                    return !province.getSave()
-                                    .getReligions()
-                                    .getReligions()
-                                    .values()
-                                    .stream()
-                                    .anyMatch(religion -> {
+                    return province.getSave()
+                                   .getReligions()
+                                   .getReligions()
+                                   .values()
+                                   .stream()
+                                   .noneMatch(religion -> {
                                         if (religion.getPapacy() == null) {
                                             return false;
                                         }

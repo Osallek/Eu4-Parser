@@ -18,6 +18,8 @@ public class Religions {
 
     private final Save save;
 
+    private Map<String, SaveReligion> religions;
+
     public Religions(ClausewitzItem religionsItem, ClausewitzItem religionInstanceDataItem, Save save) {
         this.religionsItem = religionsItem;
         this.religionInstanceDataItem = religionInstanceDataItem;
@@ -29,19 +31,21 @@ public class Religions {
     }
 
     public Map<String, SaveReligion> getReligions() {
-        Map<String, SaveReligion> religions = this.religionsItem.getChildren()
-                                                                .stream()
-                                                                .map(item -> new SaveReligion(item, religionInstanceDataItem.getChild(item.getName()),
-                                                                                              this.save))
-                                                                .collect(Collectors.toMap(SaveReligion::getName, Function.identity(), (e1, e2) -> e1,
-                                                                                          LinkedHashMap::new));
+        if (this.religions == null) {
+            this.religions = this.religionsItem.getChildren()
+                                               .stream()
+                                               .map(item -> new SaveReligion(item, this.religionInstanceDataItem.getChild(item.getName()),
+                                                                             this.save))
+                                               .collect(Collectors.toMap(SaveReligion::getName, Function.identity(), (e1, e2) -> e1,
+                                                                         LinkedHashMap::new));
 
-        this.religionInstanceDataItem.getChildren().forEach(religion -> {
-            if (!religions.containsKey(religion.getName())) {
-                religions.put(religion.getName(), new SaveReligion(null, religion, this.save));
-            }
-        });
+            this.religionInstanceDataItem.getChildren().forEach(religion -> {
+                if (!this.religions.containsKey(religion.getName())) {
+                    this.religions.put(religion.getName(), new SaveReligion(null, religion, this.save));
+                }
+            });
+        }
 
-        return religions;
+        return this.religions;
     }
 }

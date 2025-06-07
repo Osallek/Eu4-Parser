@@ -598,6 +598,8 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("yearly_innovativeness", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("enable_forced_march", ModifierType.BOOLEAN, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("reverse_relation_with_same_religion", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("reverse_relation_with_heretic_religion", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("reverse_relation_with_heathen_religion", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("janissary_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("yearly_government_power", ModifierType.ADDITIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("number_of_cannons_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
@@ -634,6 +636,7 @@ public class ModifiersUtils {
         ModifiersUtils.addModifier("development_cost_in_primary_culture", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("reduced_trade_penalty_on_non_main_tradenode", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("colony_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
+        ModifiersUtils.addModifier("settle_cost", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("local_colony_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.PROVINCE);
         ModifiersUtils.addModifier("spy_action_cost_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);
         ModifiersUtils.addModifier("placed_merchant_power_modifier", ModifierType.MULTIPLICATIVE, ModifierScope.COUNTRY);

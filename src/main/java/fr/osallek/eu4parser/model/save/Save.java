@@ -83,6 +83,8 @@ public class Save {
 
     private Map<Integer, SaveProvince> provinces; //Kept here because heavy to compute and used a lot
 
+    private Map<String, SaveTradeNode> tradeNodes; //Kept here because heavy to compute and used a lot
+
     private List<SaveProvince> cities;
 
     private Map<String, SaveCountry> countries;
@@ -98,7 +100,8 @@ public class Save {
         this(name, charset, gameFolderPath, gamestateItem, aiItem, metaItem, true, launcherSettings);
     }
 
-    private Save(String name, Charset charset, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem, boolean compressed,
+    private Save(String name, Charset charset, Path gameFolderPath, ClausewitzItem gamestateItem, ClausewitzItem aiItem, ClausewitzItem metaItem,
+                 boolean compressed,
                  LauncherSettings launcherSettings) throws IOException {
         this.name = name;
         this.charset = charset;
@@ -322,27 +325,30 @@ public class Save {
         }
     }
 
-    public Stream<SaveTradeNode> getTradeNodesStream() {
-        AtomicInteger i = new AtomicInteger(1);
-        ClausewitzItem tradeItem = this.gamestateItem.getChild("trade");
+    public Map<String, SaveTradeNode> getTradeNodes() {
+        if (this.tradeNodes == null) {
+            AtomicInteger i = new AtomicInteger(1);
+            ClausewitzItem tradeItem = this.gamestateItem.getChild("trade");
 
-        if (tradeItem != null) {
-            return tradeItem.getChildren("node").stream().map(item -> new SaveTradeNode(item, this, i.getAndIncrement()));
+            if (tradeItem != null) {
+                this.tradeNodes = tradeItem.getChildren("node")
+                                           .stream()
+                                           .map(item -> new SaveTradeNode(item, this, i.getAndIncrement()))
+                                           .collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()), Function.identity()));
+            } else {
+                this.tradeNodes = Map.of();
+            }
         }
 
-        return Stream.empty();
-    }
-
-    public Map<String, SaveTradeNode> getTradeNodes() {
-        return getTradeNodesStream().collect(Collectors.toMap(tradeNode -> ClausewitzUtils.removeQuotes(tradeNode.getName()), Function.identity()));
+        return this.tradeNodes;
     }
 
     public SaveTradeNode getTradeNode(String name) {
-        return getTradeNodesStream().filter(node -> node.getName().equals(name)).findFirst().orElse(null);
+        return getTradeNodes().get(ClausewitzUtils.removeQuotes(name));
     }
 
     public SaveTradeNode getTradeNode(int index) {
-        return getTradeNodesStream().filter(node -> node.getIndex() == index).findFirst().orElse(null);
+        return getTradeNodes().values().stream().filter(node -> node.getIndex() == index).findFirst().orElse(null);
     }
 
     public Map<TradeGood, SaveCountry> getProductionLeaders() {
@@ -649,24 +655,24 @@ public class Save {
         return getAdvisorsStream().filter(saveAdvisor -> saveAdvisor.getId().getId().equals(id)).findFirst().orElse(null);
     }
 
-    public Stream<Map.Entry<SaveCountry, Stream<Id>>> getActiveAdvisorsStream() {
+    public Stream<Map.Entry<String, Stream<Id>>> getActiveAdvisorsStream() {
         ClausewitzItem activeAdvisorsItem = this.gamestateItem.getChild("active_advisors");
 
         if (activeAdvisorsItem != null) {
             return activeAdvisorsItem.getChildren()
                                      .stream()
-                                     .map(child -> Pair.of(getCountry(ClausewitzUtils.removeQuotes(child.getName())),
-                                                           child.getChildren("advisor").stream().map(Id::new)));
+                                     .map(child -> Pair.of(ClausewitzUtils.removeQuotes(child.getName()), child.getChildren("advisor").stream().map(Id::new)));
         }
+
         return Stream.empty();
     }
 
-    public Map<SaveCountry, List<Id>> getActiveAdvisors() {
+    public Map<String, List<Id>> getActiveAdvisors() {
         return getActiveAdvisorsStream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toList()));
     }
 
     public List<Id> getActiveAdvisors(SaveCountry country) {
-        return getActiveAdvisorsStream().filter(e -> e.getKey().equals(country))
+        return getActiveAdvisorsStream().filter(e -> e.getKey().equals(country.getTag()))
                                         .findFirst()
                                         .map(Map.Entry::getValue)
                                         .map(Stream::toList)

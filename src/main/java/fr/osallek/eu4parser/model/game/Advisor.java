@@ -95,7 +95,7 @@ public class Advisor extends Nodded {
     }
 
     public void setModifiers(Map<String, Double> modifiers) {
-        this.item.removeVariableIf(variable -> !Set.of("monarch_power", "allow_only_male", "allow_only_female").contains(variable.getName()));
+        this.item.removeVariablesIf(variable -> !Set.of("monarch_power", "allow_only_male", "allow_only_female").contains(variable.getName()));
 
         if (MapUtils.isNotEmpty(modifiers)) {
             modifiers.forEach((name, value) -> this.item.addVariable(name, value, this.item.getVar("monarch_power").getOrder() + 1));

@@ -25,6 +25,8 @@ public class SaveTradeNode {
 
     private final int index;
 
+    private Map<SaveCountry, TradeNodeCountry> countries;
+
     public SaveTradeNode(ClausewitzItem item, Save save, int index) {
         this.item = item;
         this.save = save;
@@ -155,15 +157,19 @@ public class SaveTradeNode {
     }
 
     public Map<SaveCountry, TradeNodeCountry> getCountries() {
-        return this.item.getChildren()
-                        .stream()
-                        .filter(child -> child.hasVar("max_demand"))
-                        .map(child -> new TradeNodeCountry(this.save.getGame(), child))
-                        .collect(Collectors.toMap(tnc -> this.save.getCountry(ClausewitzUtils.removeQuotes(tnc.getCountry())), Function.identity()));
+        if (this.countries == null) {
+            this.countries = this.item.getChildren()
+                                      .stream()
+                                      .filter(child -> child.hasVar("max_demand"))
+                                      .map(child -> new TradeNodeCountry(this.save.getGame(), child))
+                                      .collect(Collectors.toMap(tnc -> this.save.getCountry(ClausewitzUtils.removeQuotes(tnc.getCountry())), Function.identity()));
+        }
+
+        return this.countries;
     }
 
     public TradeNodeCountry getCountry(SaveCountry country) {
-        return Optional.ofNullable(this.item.getChild(country.getTag())).map(child -> new TradeNodeCountry(this.save.getGame(), child)).orElse(null);
+        return getCountries().get(country);
     }
 
     public List<TradeNodeIncoming> getIncoming() {

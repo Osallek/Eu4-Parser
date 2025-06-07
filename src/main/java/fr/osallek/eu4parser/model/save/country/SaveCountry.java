@@ -69,6 +69,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
@@ -102,6 +103,8 @@ import java.util.stream.Collectors;
 
 public class SaveCountry {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaveCountry.class);
+
     private final ClausewitzItem item;
 
     private Save save;
@@ -133,6 +136,11 @@ public class SaveCountry {
         return ClausewitzUtils.removeQuotes(this.item.getName()).toUpperCase();
     }
 
+    public String getNameLocalizationKey() {
+        String key = getNameOverrideKey();
+        return StringUtils.isNotBlank(key) && this.save.getGame().getLocalisation(key) != null ? key : getTag();
+    }
+
     public String getLocalizedName() {
         return localizedName;
     }
@@ -159,6 +167,10 @@ public class SaveCountry {
 
     public String getName() {
         return this.item.getVarAsString("name");
+    }
+
+    public String getNameOverrideKey() {
+        return ClausewitzUtils.removeQuotes(this.item.getVarAsString("name_override_key"));
     }
 
     public String getFlagPath(String extension) {
@@ -1104,7 +1116,7 @@ public class SaveCountry {
     }
 
     public void removeRival(SaveCountry rival) {
-        this.item.removeChildIf(child -> "rival".equalsIgnoreCase(child.getName())
+        this.item.removeChildrenIf(child -> "rival".equalsIgnoreCase(child.getName())
                                          && ClausewitzUtils.addQuotes(rival.getTag()).equalsIgnoreCase(child.getVarAsString("country")));
     }
 
@@ -3447,7 +3459,8 @@ public class SaveCountry {
     }
 
     public Army addArmy(String name, int location) {
-        Army army = new Army(Army.addToItem(this.item, "army", name, location, getGraphicalCulture(), this.save.getIdCounters().getAndIncrement(Counter.ARMY)), this);
+        Army army = new Army(Army.addToItem(this.item, "army", name, location, getGraphicalCulture(), this.save.getIdCounters().getAndIncrement(Counter.ARMY)),
+                             this);
         this.save.getProvince(location).addArmy(army);
 
         return army;
@@ -3476,7 +3489,8 @@ public class SaveCountry {
     }
 
     public Navy addNavy(String name, int location) {
-        Navy navy = new Navy(Navy.addToItem(this.item, "navy", name, location, getGraphicalCulture(), this.save.getIdCounters().getAndIncrement(Counter.ARMY)), this);
+        Navy navy = new Navy(Navy.addToItem(this.item, "navy", name, location, getGraphicalCulture(), this.save.getIdCounters().getAndIncrement(Counter.ARMY)),
+                             this);
         this.save.getProvince(location).addArmy(navy);
 
         return navy;
@@ -3505,7 +3519,7 @@ public class SaveCountry {
             child = child.getChild(tag);
 
             if (child != null && child.getNbChildren() > 0) {
-                child.removeChildIf(item -> "opinion".equals(item.getName()) && item.hasVar("modifier", modifier));
+                child.removeChildrenIf(item -> "opinion".equals(item.getName()) && item.hasVar("modifier", modifier));
             }
         }
     }
@@ -3580,12 +3594,16 @@ public class SaveCountry {
     public Monarch getMonarch() {
         SaveCountryHistory history = getHistory();
 
-        if (history != null && history.getMonarchs() != null) {
-            ClausewitzItem monarchItem = this.item.getChild("monarch");
+        if (history != null) {
+            Map<Integer, Monarch> monarchs = history.getMonarchs();
 
-            if (monarchItem != null) {
-                Id monarchId = new Id(monarchItem);
-                return history.getMonarch(monarchId.getId());
+            if (monarchs != null) {
+                ClausewitzItem monarchItem = this.item.getChild("monarch");
+
+                if (monarchItem != null) {
+                    Id monarchId = new Id(monarchItem);
+                    return monarchs.get(monarchId.getId());
+                }
             }
         }
 
@@ -4344,7 +4362,7 @@ public class SaveCountry {
                                .map(m -> m.getModifier(modifier))
                                .toList());
             } catch (Exception e) {
-                LoggerFactory.getLogger(SaveCountry.class).error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
 
@@ -4511,7 +4529,9 @@ public class SaveCountry {
                                         .toList());
         }
 
-        list.addAll(this.save.getTradeNodesStream()
+        list.addAll(this.save.getTradeNodes()
+                             .values()
+                             .stream()
                              .map(tradeNode -> tradeNode.getCountry(this))
                              .filter(Objects::nonNull)
                              .filter(TradeNodeCountry::hasTrader)
