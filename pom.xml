@@ -22,7 +22,7 @@
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
 
     <!-- Dependencies versions -->
-    <commons-lang3.version>3.17.0</commons-lang3.version>
+    <commons-lang3.version>3.18.0</commons-lang3.version>
     <commons-collections4.version>4.5.0</commons-collections4.version>
     <commons-io.version>2.19.0</commons-io.version>
     <jackson.version>2.19.0</jackson.version>
